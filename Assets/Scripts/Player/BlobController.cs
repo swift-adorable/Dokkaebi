@@ -37,6 +37,9 @@ public class BlobController : MonoBehaviour
     [Tooltip("Core 1개 흡수 시 획득하는 경험치")]
     [SerializeField] private int xpPerCore = 1;
 
+    /// <summary>현재 흡수 가능한 시체. 없으면 null. (흡수 프롬프트 UI가 참조한다)</summary>
+    public CorpseController NearbyCorpse => nearbyCorpse;
+
     private Rigidbody rb;
     private PlayerInputHandler inputHandler;
     private GameManager gameManager;

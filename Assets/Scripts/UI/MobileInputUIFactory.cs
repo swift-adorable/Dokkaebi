@@ -17,10 +17,16 @@ public static class MobileInputUIFactory
     private const float BackgroundSize = 300f;
     private const float HandleSize = 130f;
     private const float HandleRange = 110f;
-    private const float ButtonSize = 190f;
+
+    private const float DashButtonSize = 190f;
+    private const float AbsorbPromptSize = 150f;
     private const float EdgeMargin = 140f;
 
+    /// <summary>조이스틱 영역 상단 여백. 노치와 기존 UI를 피한다.</summary>
+    private const float JoystickAreaTop = 0.85f;
+
     private static Sprite circleSprite;
+    private static Font uiFont;
 
     /// <summary>모바일 입력 UI 전체를 생성하고 TouchInputSource를 반환한다.</summary>
     public static TouchInputSource Create()
@@ -47,25 +53,19 @@ public static class MobileInputUIFactory
 
         canvasObject.AddComponent<GraphicRaycaster>();
 
-        // 상단 15%는 비워둔다. 노치 영역과 기존 UI(DEBUG 버튼 등)를 가리지 않기 위함이다.
-        const float areaTop = 0.85f;
-
         VirtualJoystick moveJoystick = CreateJoystick(
-            canvasObject.transform, "MoveJoystickArea", new Vector2(0f, 0f), new Vector2(0.5f, areaTop));
+            canvasObject.transform, "MoveJoystickArea",
+            new Vector2(0f, 0f), new Vector2(0.5f, JoystickAreaTop));
 
         VirtualJoystick aimJoystick = CreateJoystick(
-            canvasObject.transform, "AimJoystickArea", new Vector2(0.5f, 0f), new Vector2(1f, areaTop));
+            canvasObject.transform, "AimJoystickArea",
+            new Vector2(0.5f, 0f), new Vector2(1f, JoystickAreaTop));
 
-        // 버튼은 조이스틱 영역보다 나중에 생성해야 위에 그려지고 터치를 먼저 받는다.
-        VirtualButton dashButton = CreateButton(
-            canvasObject.transform, "DashButton",
-            new Vector2(-EdgeMargin, EdgeMargin + ButtonSize + 40f),
-            new Color(0.25f, 0.6f, 1f, 0.5f));
+        // 버튼류는 조이스틱 영역보다 나중에 만들어야 위에 그려지고 터치를 먼저 받는다.
+        VirtualButton dashButton = CreateDashButton(canvasObject.transform);
 
-        VirtualButton absorbButton = CreateButton(
-            canvasObject.transform, "AbsorbButton",
-            new Vector2(-EdgeMargin - ButtonSize - 40f, EdgeMargin),
-            new Color(0.35f, 0.85f, 0.4f, 0.5f));
+        // 흡수는 화면 구석 고정이 아니라, 대상 시체 위에 떠오르는 컨텍스트 버튼이다.
+        VirtualButton absorbButton = CreateAbsorbPrompt(canvasObject.transform);
 
         var touchSource = canvasObject.AddComponent<TouchInputSource>();
         touchSource.Initialize(moveJoystick, aimJoystick, dashButton, absorbButton);
@@ -123,6 +123,55 @@ public static class MobileInputUIFactory
         return joystick;
     }
 
+    private static VirtualButton CreateDashButton(Transform parent)
+    {
+        GameObject buttonObject = CreateUIObject("DashButton", parent);
+
+        var rect = buttonObject.GetComponent<RectTransform>();
+        rect.anchorMin = new Vector2(1f, 0f);
+        rect.anchorMax = new Vector2(1f, 0f);
+        rect.pivot = new Vector2(1f, 0f);
+        rect.sizeDelta = new Vector2(DashButtonSize, DashButtonSize);
+        rect.anchoredPosition = new Vector2(-EdgeMargin, EdgeMargin);
+
+        var image = buttonObject.AddComponent<Image>();
+        image.sprite = GetCircleSprite();
+        image.color = new Color(0.25f, 0.6f, 1f, 0.5f);
+        image.raycastTarget = true;
+
+        CreateLabel(buttonObject.transform, "DASH", 34);
+
+        return buttonObject.AddComponent<VirtualButton>();
+    }
+
+    /// <summary>시체 위에 떠오르는 흡수 프롬프트. 평소에는 투명하고 터치도 받지 않는다.</summary>
+    private static VirtualButton CreateAbsorbPrompt(Transform parent)
+    {
+        GameObject promptObject = CreateUIObject("AbsorbPrompt", parent);
+
+        var rect = promptObject.GetComponent<RectTransform>();
+        // 월드 좌표를 캔버스 로컬 좌표로 변환해 배치하므로 중앙 앵커를 사용한다.
+        rect.anchorMin = new Vector2(0.5f, 0.5f);
+        rect.anchorMax = new Vector2(0.5f, 0.5f);
+        rect.pivot = new Vector2(0.5f, 0.5f);
+        rect.sizeDelta = new Vector2(AbsorbPromptSize, AbsorbPromptSize);
+
+        var image = promptObject.AddComponent<Image>();
+        image.sprite = GetCircleSprite();
+        image.color = new Color(0.35f, 0.9f, 0.45f, 0.8f);
+        image.raycastTarget = true;
+
+        CreateLabel(promptObject.transform, "ABSORB", 26);
+
+        promptObject.AddComponent<CanvasGroup>();
+
+        var button = promptObject.AddComponent<VirtualButton>();
+
+        promptObject.AddComponent<AbsorbPrompt>();
+
+        return button;
+    }
+
     private static RectTransform CreateCircle(Transform parent, string name, float size, Color color)
     {
         GameObject circleObject = CreateUIObject(name, parent);
@@ -142,24 +191,29 @@ public static class MobileInputUIFactory
         return rect;
     }
 
-    private static VirtualButton CreateButton(
-        Transform parent, string name, Vector2 anchoredPosition, Color color)
+    private static void CreateLabel(Transform parent, string text, int fontSize)
     {
-        GameObject buttonObject = CreateUIObject(name, parent);
+        Font font = GetUIFont();
 
-        var rect = buttonObject.GetComponent<RectTransform>();
-        rect.anchorMin = new Vector2(1f, 0f);
-        rect.anchorMax = new Vector2(1f, 0f);
-        rect.pivot = new Vector2(1f, 0f);
-        rect.sizeDelta = new Vector2(ButtonSize, ButtonSize);
-        rect.anchoredPosition = anchoredPosition;
+        if (font == null)
+            return;
 
-        var image = buttonObject.AddComponent<Image>();
-        image.sprite = GetCircleSprite();
-        image.color = color;
-        image.raycastTarget = true;
+        GameObject labelObject = CreateUIObject("Label", parent);
 
-        return buttonObject.AddComponent<VirtualButton>();
+        var rect = labelObject.GetComponent<RectTransform>();
+        rect.anchorMin = Vector2.zero;
+        rect.anchorMax = Vector2.one;
+        rect.offsetMin = Vector2.zero;
+        rect.offsetMax = Vector2.zero;
+
+        var label = labelObject.AddComponent<Text>();
+        label.font = font;
+        label.text = text;
+        label.fontSize = fontSize;
+        label.fontStyle = FontStyle.Bold;
+        label.alignment = TextAnchor.MiddleCenter;
+        label.color = Color.white;
+        label.raycastTarget = false;
     }
 
     private static GameObject CreateUIObject(string name, Transform parent)
@@ -169,6 +223,23 @@ public static class MobileInputUIFactory
         uiObject.transform.SetParent(parent, false);
 
         return uiObject;
+    }
+
+    private static Font GetUIFont()
+    {
+        if (uiFont != null)
+            return uiFont;
+
+        // Unity 2022 이후 내장 폰트 이름. 구버전 대비로 Arial도 시도한다.
+        uiFont = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+
+        if (uiFont == null)
+            uiFont = Resources.GetBuiltinResource<Font>("Arial.ttf");
+
+        if (uiFont == null)
+            GameLogger.Warning("[MobileInputUIFactory] 내장 폰트를 찾지 못해 버튼 라벨을 생략합니다.");
+
+        return uiFont;
     }
 
     /// <summary>원형 스프라이트를 절차적으로 생성한다. (외부 에셋 의존 제거)</summary>
