@@ -2,8 +2,9 @@ using UnityEngine;
 
 /// <summary>
 /// 투사체. 전방으로 직진하며 적에게 피해를 준다.
+/// 오브젝트 풀에서 재사용되므로 상태 초기화를 OnSpawned에서 수행한다.
 /// </summary>
-public class BulletController : MonoBehaviour
+public class BulletController : MonoBehaviour, IPoolable
 {
     [Header("Movement")]
     [SerializeField] private float speed = 20f;
@@ -15,16 +16,39 @@ public class BulletController : MonoBehaviour
     [Tooltip("자동 소멸까지의 시간(초)")]
     [SerializeField] private float lifetime = 3f;
 
+    private PooledObject pooledObject;
+    private float despawnTime;
     private bool isConsumed;
 
-    private void Start()
+    private void Awake()
     {
-        // TODO(로드맵 2단계) — Object Pooling 전환 시 Destroy 대신 풀 반납으로 교체
-        Destroy(gameObject, lifetime);
+        // 풀 인스턴스는 최초 1회만 Awake가 호출된다.
+        pooledObject = GetComponent<PooledObject>();
+    }
+
+    public void OnSpawned()
+    {
+        // 재사용 시 이전 상태가 남지 않도록 반드시 초기화한다.
+        isConsumed = false;
+        despawnTime = Time.time + lifetime;
+    }
+
+    public void OnDespawned()
+    {
+        isConsumed = true;
     }
 
     private void Update()
     {
+        if (isConsumed)
+            return;
+
+        if (Time.time >= despawnTime)
+        {
+            ReturnToPool();
+            return;
+        }
+
         transform.position += transform.forward * (speed * Time.deltaTime);
     }
 
@@ -40,6 +64,15 @@ public class BulletController : MonoBehaviour
         isConsumed = true;
 
         enemy.TakeDamage(damage);
+
+        ReturnToPool();
+    }
+
+    /// <summary>풀 소속이면 반납하고, 아니면 파괴한다. (씬에 직접 배치된 경우 대비)</summary>
+    private void ReturnToPool()
+    {
+        if (pooledObject != null && pooledObject.Despawn())
+            return;
 
         Destroy(gameObject);
     }

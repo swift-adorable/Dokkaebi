@@ -28,6 +28,9 @@ public class BlobController : MonoBehaviour
     [SerializeField] private Transform firePoint;
     [SerializeField] private float fireRate = 0.15f;
 
+    [Tooltip("시작 시 미리 생성해둘 총알 개수. 연사 속도 x 수명 이상이면 충분하다.")]
+    [SerializeField] private int bulletPrewarmCount = 32;
+
     [Header("Dash")]
     [SerializeField] private float dashDistance = 5f;
     [SerializeField] private float dashDuration = 0.15f;
@@ -43,6 +46,7 @@ public class BlobController : MonoBehaviour
     private Rigidbody rb;
     private PlayerInputHandler inputHandler;
     private GameManager gameManager;
+    private PoolManager poolManager;
 
     private CorpseController nearbyCorpse;
     private Vector3 moveDirection;
@@ -61,6 +65,10 @@ public class BlobController : MonoBehaviour
         // Unity는 모든 Awake() 이후에 Start()를 실행하므로,
         // 여기서 싱글턴을 캐싱하면 초기화 순서 문제가 원천 차단된다.
         gameManager = GameManager.Instance;
+        poolManager = PoolManager.EnsureInstance();
+
+        if (bulletPrefab != null)
+            poolManager.Prewarm(bulletPrefab, bulletPrewarmCount);
 
         if (bulletPrefab == null)
             GameLogger.Error("[BlobController] bulletPrefab이 할당되지 않았습니다.", this);
@@ -140,8 +148,7 @@ public class BlobController : MonoBehaviour
         if (bulletPrefab == null || firePoint == null)
             return;
 
-        // TODO(로드맵 2단계) — Object Pooling으로 교체
-        Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
+        poolManager.Spawn(bulletPrefab, firePoint.position, firePoint.rotation);
     }
 
     private void TryDash()
@@ -190,9 +197,11 @@ public class BlobController : MonoBehaviour
 
         int gainedXP = xpPerCore * nearbyCorpse.ValueMultiplier;
 
-        // TODO(로드맵 2단계) — Object Pooling으로 교체
-        Destroy(nearbyCorpse.gameObject);
+        GameObject corpseObject = nearbyCorpse.gameObject;
         nearbyCorpse = null;
+
+        if (poolManager == null || !poolManager.Despawn(corpseObject))
+            Destroy(corpseObject);
 
         PlayerStats.Instance.AddXP(gainedXP);
 

@@ -27,7 +27,7 @@ public static class MobileInputUIFactory
     /// 코너에 딱 붙이면 엄지가 화면 모서리에 걸리므로 살짝 안쪽으로 들여 배치한다.
     /// </summary>
     private static readonly Vector2 DashButtonPosition =
-        new Vector2(-(EdgeMargin + 60f), EdgeMargin + 60f);
+        new Vector2(-(EdgeMargin + 20f), EdgeMargin + 20f);
 
     /// <summary>조이스틱 영역 상단 여백. 노치와 기존 UI를 피한다.</summary>
     private const float JoystickAreaTop = 0.85f;
