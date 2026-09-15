@@ -4,84 +4,81 @@ using UnityEngine;
 public class BlobController : MonoBehaviour
 {
     [Header("Movement")]
-
-    private Vector3 moveDirection;
-    private Rigidbody rb;
-
     [SerializeField] private float moveSpeed = 5f;
 
+    [Header("Weapon")]
     [SerializeField] private GameObject bulletPrefab;
     [SerializeField] private Transform firePoint;
     [SerializeField] private float fireRate = 0.15f;
-    private float nextFireTime;
 
+    [Header("Dash")]
     [SerializeField] private float dashDistance = 5f;
     [SerializeField] private float dashCooldown = 1f;
 
+    private Rigidbody rb;
+    private PlayerInputHandler inputHandler;
     private CorpseController nearbyCorpse;
 
+    private Vector3 moveDirection;
+
+    private float nextFireTime;
     private bool canDash = true;
+
+    private void Awake()
+    {
+        rb = GetComponent<Rigidbody>();
+        inputHandler = GetComponent<PlayerInputHandler>();
+    }
 
     private void Update()
     {
+        if (!GameManager.Instance.IsPlaying())
+            return;
+
         Move();
         RotateToMouse();
 
-        if (Input.GetMouseButton(0))
+        if (inputHandler.ShootHeld)
         {
             TryShoot();
         }
 
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (inputHandler.DashPressed)
         {
             Dash();
         }
 
-        if (Input.GetKeyDown(KeyCode.E))
+        if (inputHandler.AbsorbPressed)
         {
             TryAbsorb();
         }
     }
 
-    private void Start()
-    {
-        rb = GetComponent<Rigidbody>();
-    }
-
     private void Move()
     {
-        float horizontal = Input.GetAxisRaw("Horizontal");
-        float vertical = Input.GetAxisRaw("Vertical");
+        moveDirection = new Vector3(
+            inputHandler.MoveInput.x,
+            0f,
+            inputHandler.MoveInput.y
+        );
 
-        moveDirection =
-            new Vector3(horizontal, 0f, vertical).normalized;
-
-        rb.linearVelocity =
-            new Vector3(
-                moveDirection.x * moveSpeed,
-                rb.linearVelocity.y,
-                moveDirection.z * moveSpeed
-            );
+        rb.linearVelocity = new Vector3(
+            moveDirection.x * moveSpeed,
+            rb.linearVelocity.y,
+            moveDirection.z * moveSpeed
+        );
     }
 
     private void RotateToMouse()
     {
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        Vector3 lookDirection =
+            inputHandler.LookPoint - transform.position;
 
-        Plane groundPlane = new Plane(Vector3.up, Vector3.zero);
+        lookDirection.y = 0f;
 
-        if (groundPlane.Raycast(ray, out float distance))
+        if (lookDirection.sqrMagnitude > 0.001f)
         {
-            Vector3 point = ray.GetPoint(distance);
-
-            Vector3 lookDirection = point - transform.position;
-
-            lookDirection.y = 0f;
-
-            if (lookDirection != Vector3.zero)
-            {
-                transform.rotation = Quaternion.LookRotation(lookDirection);
-            }
+            transform.rotation = Quaternion.LookRotation(lookDirection);
         }
     }
 
@@ -97,7 +94,11 @@ public class BlobController : MonoBehaviour
 
     private void Shoot()
     {
-        Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
+        Instantiate(
+            bulletPrefab,
+            firePoint.position,
+            firePoint.rotation
+        );
     }
 
     private void Dash()
@@ -118,24 +119,20 @@ public class BlobController : MonoBehaviour
         float duration = 0.15f;
         float elapsed = 0f;
 
-        Vector3 dashDirection = moveDirection; // 방향 고정
+        Vector3 dashDirection = moveDirection.normalized;
 
         Vector3 startPos = transform.position;
-
-        Vector3 targetPos =
-            startPos +
-            dashDirection * dashDistance;
+        Vector3 targetPos = startPos + dashDirection * dashDistance;
 
         while (elapsed < duration)
         {
             elapsed += Time.deltaTime;
 
-            transform.position =
-                Vector3.Lerp(
-                    startPos,
-                    targetPos,
-                    elapsed / duration
-                );
+            transform.position = Vector3.Lerp(
+                startPos,
+                targetPos,
+                elapsed / duration
+            );
 
             yield return null;
         }
@@ -152,26 +149,26 @@ public class BlobController : MonoBehaviour
 
         Destroy(nearbyCorpse.gameObject);
 
+        PlayerStats.Instance.AddXP(1);
+
         Debug.Log("Core Absorbed");
     }
+
     private void OnTriggerEnter(Collider other)
     {
-        Debug.Log("Trigger Enter : " + other.name);
-
-        CorpseController corpse = other.GetComponent<CorpseController>();
+        CorpseController corpse =
+            other.GetComponent<CorpseController>();
 
         if (corpse != null)
         {
-            Debug.Log("Corpse Nearby");
             nearbyCorpse = corpse;
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
-        Debug.Log("Trigger Exit: " + other.name);
-
-        CorpseController corpse = other.GetComponent<CorpseController>();
+        CorpseController corpse =
+            other.GetComponent<CorpseController>();
 
         if (corpse != null && nearbyCorpse == corpse)
         {
