@@ -18,9 +18,19 @@ public static class MobileInputUIFactory
     private const float HandleSize = 130f;
     private const float HandleRange = 110f;
 
-    private const float DashButtonSize = 190f;
+    private const float DashButtonSize = 170f;
+    private const float FireButtonSize = 210f;
     private const float AbsorbPromptSize = 150f;
     private const float EdgeMargin = 140f;
+
+    // ── 버튼 배치 (우하단 앵커 기준, x는 왼쪽으로 / y는 위로 갈수록 커짐) ──
+    // FIRE: 엄지가 가장 편하게 닿는 코너
+    private static readonly Vector2 FireButtonPosition = new Vector2(-EdgeMargin, EdgeMargin);
+    // DASH: FIRE 기준 좌상단으로 비켜 배치
+    private static readonly Vector2 DashButtonPosition = new Vector2(-EdgeMargin - 200f, EdgeMargin + 150f);
+
+    /// <summary>사격 버튼의 조준 방식. FacingDirection 권장.</summary>
+    private const FireButtonAimMode FireAimMode = FireButtonAimMode.FacingDirection;
 
     /// <summary>조이스틱 영역 상단 여백. 노치와 기존 UI를 피한다.</summary>
     private const float JoystickAreaTop = 0.85f;
@@ -62,13 +72,20 @@ public static class MobileInputUIFactory
             new Vector2(0.5f, 0f), new Vector2(1f, JoystickAreaTop));
 
         // 버튼류는 조이스틱 영역보다 나중에 만들어야 위에 그려지고 터치를 먼저 받는다.
-        VirtualButton dashButton = CreateDashButton(canvasObject.transform);
+        VirtualButton fireButton = CreateActionButton(
+            canvasObject.transform, "FireButton", "FIRE", FireButtonSize,
+            FireButtonPosition, new Color(1f, 0.45f, 0.35f, 0.45f), 36);
+
+        VirtualButton dashButton = CreateActionButton(
+            canvasObject.transform, "DashButton", "DASH", DashButtonSize,
+            DashButtonPosition, new Color(0.25f, 0.6f, 1f, 0.5f), 32);
 
         // 흡수는 화면 구석 고정이 아니라, 대상 시체 위에 떠오르는 컨텍스트 버튼이다.
         VirtualButton absorbButton = CreateAbsorbPrompt(canvasObject.transform);
 
         var touchSource = canvasObject.AddComponent<TouchInputSource>();
-        touchSource.Initialize(moveJoystick, aimJoystick, dashButton, absorbButton);
+        touchSource.Initialize(
+            moveJoystick, aimJoystick, dashButton, absorbButton, fireButton, FireAimMode);
 
         // 모든 참조 주입이 끝난 뒤 활성화한다.
         canvasObject.SetActive(true);
@@ -123,23 +140,25 @@ public static class MobileInputUIFactory
         return joystick;
     }
 
-    private static VirtualButton CreateDashButton(Transform parent)
+    private static VirtualButton CreateActionButton(
+        Transform parent, string name, string label, float size,
+        Vector2 anchoredPosition, Color color, int fontSize)
     {
-        GameObject buttonObject = CreateUIObject("DashButton", parent);
+        GameObject buttonObject = CreateUIObject(name, parent);
 
         var rect = buttonObject.GetComponent<RectTransform>();
         rect.anchorMin = new Vector2(1f, 0f);
         rect.anchorMax = new Vector2(1f, 0f);
         rect.pivot = new Vector2(1f, 0f);
-        rect.sizeDelta = new Vector2(DashButtonSize, DashButtonSize);
-        rect.anchoredPosition = new Vector2(-EdgeMargin, EdgeMargin);
+        rect.sizeDelta = new Vector2(size, size);
+        rect.anchoredPosition = anchoredPosition;
 
         var image = buttonObject.AddComponent<Image>();
         image.sprite = GetCircleSprite();
-        image.color = new Color(0.25f, 0.6f, 1f, 0.5f);
+        image.color = color;
         image.raycastTarget = true;
 
-        CreateLabel(buttonObject.transform, "DASH", 34);
+        CreateLabel(buttonObject.transform, label, fontSize);
 
         return buttonObject.AddComponent<VirtualButton>();
     }
