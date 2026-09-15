@@ -6,7 +6,7 @@ using UnityEngine;
 ///
 /// 주의: 현재 이동/회전/사격/대시/흡수를 모두 담당하는 God Class 상태다.
 /// 로드맵 3단계에서 PlayerMovement / PlayerAiming / PlayerWeapon / PlayerDash /
-/// PlayerAbsorber로 분리 예정. 0단계에서는 구조를 바꾸지 않고 안정성만 확보한다.
+/// PlayerAbsorber로 분리 예정.
 /// </summary>
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(PlayerInputHandler))]
@@ -14,6 +14,14 @@ public class BlobController : MonoBehaviour
 {
     [Header("Movement")]
     [SerializeField] private float moveSpeed = 5f;
+
+    [Header("Aiming")]
+    [Tooltip("조준 스틱이 이 값 미만으로 기울면 회전하지 않는다.")]
+    [Range(0f, 1f)]
+    [SerializeField] private float aimDeadzone = 0.1f;
+
+    [Tooltip("초당 회전 각도. 0이면 즉시 회전. 조이스틱 미세 떨림 완화용.")]
+    [SerializeField] private float rotationSpeed = 900f;
 
     [Header("Weapon")]
     [SerializeField] private GameObject bulletPrefab;
@@ -28,10 +36,6 @@ public class BlobController : MonoBehaviour
     [Header("Absorb")]
     [Tooltip("Core 1개 흡수 시 획득하는 경험치")]
     [SerializeField] private int xpPerCore = 1;
-
-    [Header("Rotation")]
-    [Tooltip("최소 조준 거리. 이보다 가까우면 회전하지 않는다. (떨림 방지)")]
-    [SerializeField] private float minLookDistanceSqr = 0.001f;
 
     private Rigidbody rb;
     private PlayerInputHandler inputHandler;
@@ -68,7 +72,7 @@ public class BlobController : MonoBehaviour
             return;
 
         Move();
-        RotateToLookPoint();
+        RotateToAim();
 
         if (inputHandler.ShootHeld)
             TryShoot();
@@ -82,11 +86,9 @@ public class BlobController : MonoBehaviour
 
     private void Move()
     {
-        moveDirection = new Vector3(
-            inputHandler.MoveInput.x,
-            0f,
-            inputHandler.MoveInput.y
-        );
+        Vector2 input = inputHandler.MoveInput;
+
+        moveDirection = new Vector3(input.x, 0f, input.y);
 
         rb.linearVelocity = new Vector3(
             moveDirection.x * moveSpeed,
@@ -95,16 +97,29 @@ public class BlobController : MonoBehaviour
         );
     }
 
-    private void RotateToLookPoint()
+    /// <summary>
+    /// 조준 스틱이 가리키는 '방향'으로 회전한다.
+    /// 이동 방향과 조준 방향은 완전히 분리되어 있다. (듀얼 스틱의 핵심)
+    /// </summary>
+    private void RotateToAim()
     {
-        Vector3 lookDirection = inputHandler.LookPoint - transform.position;
+        Vector2 aim = inputHandler.AimInput;
 
-        lookDirection.y = 0f;
+        if (aim.sqrMagnitude < aimDeadzone * aimDeadzone)
+            return;
 
-        if (lookDirection.sqrMagnitude > minLookDistanceSqr)
+        Quaternion targetRotation = Quaternion.LookRotation(new Vector3(aim.x, 0f, aim.y));
+
+        if (rotationSpeed <= 0f)
         {
-            transform.rotation = Quaternion.LookRotation(lookDirection);
+            transform.rotation = targetRotation;
+            return;
         }
+
+        transform.rotation = Quaternion.RotateTowards(
+            transform.rotation,
+            targetRotation,
+            rotationSpeed * Time.deltaTime);
     }
 
     private void TryShoot()
@@ -131,6 +146,7 @@ public class BlobController : MonoBehaviour
         if (!canDash)
             return;
 
+        // 확정 기획: 대시는 '조준 방향'이 아니라 '이동 중인 방향'으로 수행한다.
         if (moveDirection == Vector3.zero)
             return;
 
@@ -159,7 +175,6 @@ public class BlobController : MonoBehaviour
         }
 
         // WaitForSeconds는 timeScale의 영향을 받아 일시정지 중 쿨다운이 멈춘다.
-        // Realtime 버전을 사용해 실제 경과 시간 기준으로 쿨다운을 진행시킨다.
         yield return new WaitForSecondsRealtime(dashCooldown);
 
         canDash = true;
@@ -170,28 +185,26 @@ public class BlobController : MonoBehaviour
         if (nearbyCorpse == null)
             return;
 
+        int gainedXP = xpPerCore * nearbyCorpse.ValueMultiplier;
+
         // TODO(로드맵 2단계) — Object Pooling으로 교체
         Destroy(nearbyCorpse.gameObject);
         nearbyCorpse = null;
 
-        PlayerStats.Instance.AddXP(xpPerCore);
+        PlayerStats.Instance.AddXP(gainedXP);
 
-        GameLogger.Log("[BlobController] Core Absorbed");
+        GameLogger.Log($"[BlobController] Core Absorbed (+{gainedXP} XP)");
     }
 
     private void OnTriggerEnter(Collider other)
     {
         if (other.TryGetComponent(out CorpseController corpse))
-        {
             nearbyCorpse = corpse;
-        }
     }
 
     private void OnTriggerExit(Collider other)
     {
         if (other.TryGetComponent(out CorpseController corpse) && nearbyCorpse == corpse)
-        {
             nearbyCorpse = null;
-        }
     }
 }

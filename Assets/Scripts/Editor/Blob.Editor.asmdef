@@ -1,12 +1,14 @@
 {
-    "name": "Blob.Runtime",
+    "name": "Blob.Editor",
     "rootNamespace": "",
     "references": [
+        "Blob.Runtime",
         "UnityEngine.UI",
-        "Unity.TextMeshPro",
-        "Unity.InputSystem"
+        "UnityEditor.UI"
     ],
-    "includePlatforms": [],
+    "includePlatforms": [
+        "Editor"
+    ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,

@@ -1,80 +1,97 @@
 using UnityEngine;
 
+/// <summary>입력 소스 선택 방식.</summary>
+public enum InputSourceMode
+{
+    /// <summary>플랫폼에 따라 자동 선택. (에디터/PC: Desktop, 실기기: Touch)</summary>
+    Auto,
+
+    /// <summary>강제로 키보드/마우스 사용.</summary>
+    ForceDesktop,
+
+    /// <summary>강제로 터치 사용. (에디터에서 마우스로 조이스틱 테스트 시 유용)</summary>
+    ForceTouch
+}
+
 /// <summary>
-/// 입력 수집 전담 컴포넌트. BlobController는 이 값만 읽는다.
+/// 입력 파사드(Facade). BlobController는 오직 이 클래스만 바라본다.
 ///
-/// 주의: 현재 레거시 Input(마우스/키보드) 기반이다.
-/// iOS/Android에서는 단일 터치가 마우스 버튼0으로 자동 매핑되어
-/// '사격'과 '조준'만 우연히 동작하고, 이동/대시/흡수는 동작하지 않는다.
-/// 로드맵 1단계에서 Input System + 가상 조이스틱으로 전면 교체 예정.
+/// 실제 입력 수집은 IPlayerInputSource 구현체(Desktop / Touch)가 담당하며,
+/// 이 클래스는 활성 소스를 고르고 값을 중계할 뿐이다.
 /// </summary>
+[DefaultExecutionOrder(-100)]
+[RequireComponent(typeof(DesktopInputSource))]
 public class PlayerInputHandler : MonoBehaviour
 {
+    [Header("Source")]
+    [SerializeField] private InputSourceMode mode = InputSourceMode.Auto;
+
+    [Header("References")]
+    [SerializeField] private DesktopInputSource desktopSource;
+    [Tooltip("모바일 입력 Canvas에 붙은 컴포넌트. 비워두면 런타임에 자동 탐색한다.")]
+    [SerializeField] private TouchInputSource touchSource;
+
     public Vector2 MoveInput { get; private set; }
-
-    public Vector3 LookPoint { get; private set; }
-
+    public Vector2 AimInput { get; private set; }
     public bool ShootHeld { get; private set; }
-
     public bool DashPressed { get; private set; }
-
     public bool AbsorbPressed { get; private set; }
 
-    private Camera mainCamera;
+    /// <summary>현재 사용 중인 입력 소스가 터치인지.</summary>
+    public bool IsUsingTouch { get; private set; }
 
-    private readonly Plane groundPlane = new Plane(Vector3.up, Vector3.zero);
+    private IPlayerInputSource activeSource;
 
     private void Awake()
     {
-        // Camera.main은 태그 기반 조회이므로 매 프레임 호출하지 않고 1회 캐싱한다.
-        mainCamera = Camera.main;
+        if (desktopSource == null)
+            desktopSource = GetComponent<DesktopInputSource>();
 
-        if (mainCamera == null)
-            GameLogger.Error("[PlayerInputHandler] MainCamera 태그를 가진 카메라가 없습니다.", this);
+        if (touchSource == null)
+            touchSource = FindAnyObjectByType<TouchInputSource>(FindObjectsInactive.Include);
+
+        ResolveActiveSource();
+    }
+
+    private void ResolveActiveSource()
+    {
+        IsUsingTouch = mode switch
+        {
+            InputSourceMode.ForceDesktop => false,
+            InputSourceMode.ForceTouch => true,
+            _ => Application.isMobilePlatform
+        };
+
+        // 사용하지 않는 소스는 꺼서 불필요한 Update와 UI 렌더링을 막는다.
+        if (desktopSource != null)
+            desktopSource.SetActive(!IsUsingTouch);
+
+        if (touchSource != null)
+            touchSource.SetActive(IsUsingTouch);
+
+        activeSource = IsUsingTouch ? (IPlayerInputSource)touchSource : desktopSource;
+
+        if (activeSource == null)
+        {
+            GameLogger.Error(
+                $"[PlayerInputHandler] 활성 입력 소스를 찾을 수 없습니다. (터치 모드: {IsUsingTouch})", this);
+            return;
+        }
+
+        GameLogger.Log($"[PlayerInputHandler] 입력 소스 -> {(IsUsingTouch ? "Touch" : "Desktop")}");
     }
 
     private void Update()
     {
-        ReadMoveInput();
-        ReadLookInput();
-        ReadShootInput();
-        ReadDashInput();
-        ReadAbsorbInput();
-    }
-
-    private void ReadMoveInput()
-    {
-        MoveInput = new Vector2(
-            Input.GetAxisRaw("Horizontal"),
-            Input.GetAxisRaw("Vertical")
-        ).normalized;
-    }
-
-    private void ReadLookInput()
-    {
-        if (mainCamera == null)
+        if (activeSource == null)
             return;
 
-        Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
+        MoveInput = activeSource.MoveInput;
+        AimInput = activeSource.AimInput;
+        ShootHeld = activeSource.ShootHeld;
 
-        if (groundPlane.Raycast(ray, out float distance))
-        {
-            LookPoint = ray.GetPoint(distance);
-        }
-    }
-
-    private void ReadShootInput()
-    {
-        ShootHeld = Input.GetMouseButton(0);
-    }
-
-    private void ReadDashInput()
-    {
-        DashPressed = Input.GetKeyDown(KeyCode.Space);
-    }
-
-    private void ReadAbsorbInput()
-    {
-        AbsorbPressed = Input.GetKeyDown(KeyCode.E);
+        // 아래 두 값은 '1회 소비' 방식이므로 프레임당 정확히 한 번만 읽어야 한다.
+        DashPressed = activeSource.DashPressed;
+        AbsorbPressed = activeSource.AbsorbPressed;
     }
 }
