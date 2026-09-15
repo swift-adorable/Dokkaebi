@@ -24,18 +24,28 @@ public static class MobileInputUIBuilder
     [MenuItem("Tools/Blob/1. Create Mobile Input UI (모바일 입력 UI 생성)", false, 10)]
     public static void Build()
     {
-        if (Object.FindAnyObjectByType<TouchInputSource>(FindObjectsInactive.Include) != null)
+        BuildInternal(false);
+    }
+
+    /// <summary>UI를 생성한다. silent=true면 대화상자를 띄우지 않는다. (자동 설정용)</summary>
+    public static GameObject BuildInternal(bool silent)
+    {
+        var existingSource = Object.FindAnyObjectByType<TouchInputSource>(FindObjectsInactive.Include);
+
+        if (existingSource != null)
         {
+            if (silent)
+                return existingSource.gameObject;
+
             bool replace = EditorUtility.DisplayDialog(
                 "모바일 입력 UI",
                 "이미 TouchInputSource가 씬에 존재합니다.\n기존 오브젝트를 삭제하고 새로 만들까요?",
                 "새로 만들기", "취소");
 
             if (!replace)
-                return;
+                return existingSource.gameObject;
 
-            var existing = Object.FindAnyObjectByType<TouchInputSource>(FindObjectsInactive.Include);
-            Undo.DestroyObjectImmediate(existing.gameObject);
+            Undo.DestroyObjectImmediate(existingSource.gameObject);
         }
 
         EnsureEventSystem();
@@ -72,18 +82,24 @@ public static class MobileInputUIBuilder
         LinkPlayerInputHandler(touchSource);
 
         Undo.RegisterCreatedObjectUndo(canvasObject, "Create Mobile Input UI");
-        Selection.activeGameObject = canvasObject;
 
-        EditorUtility.DisplayDialog(
-            "모바일 입력 UI",
-            "생성 완료.\n\n" +
-            "· 좌측 절반: 이동 스틱\n" +
-            "· 우측 절반: 조준 스틱 (기울이면 자동 사격)\n" +
-            "· DASH / ABSORB 버튼\n\n" +
-            "씬을 저장하세요 (Cmd+S).",
-            "확인");
+        if (!silent)
+        {
+            Selection.activeGameObject = canvasObject;
 
-        Debug.Log("[MobileInputUIBuilder] 모바일 입력 UI 생성 완료. 씬을 저장하세요.");
+            EditorUtility.DisplayDialog(
+                "모바일 입력 UI",
+                "생성 완료.\n\n" +
+                "· 좌측 절반: 이동 스틱\n" +
+                "· 우측 절반: 조준 스틱 (기울이면 자동 사격)\n" +
+                "· DASH / ABSORB 버튼\n\n" +
+                "씬을 저장하세요 (Cmd+S).",
+                "확인");
+        }
+
+        Debug.Log("[MobileInputUIBuilder] 모바일 입력 UI 생성 완료.");
+
+        return canvasObject;
     }
 
 
