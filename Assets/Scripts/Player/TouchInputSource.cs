@@ -32,7 +32,17 @@ public class TouchInputSource : MonoBehaviour, IPlayerInputSource
 
     public bool AbsorbPressed => absorbButton != null && absorbButton.ConsumePressed();
 
-    private void Awake()
+    /// <summary>런타임 생성 시 참조를 주입한다.</summary>
+    public void Initialize(
+        VirtualJoystick move, VirtualJoystick aim, VirtualButton dash, VirtualButton absorb)
+    {
+        moveJoystick = move;
+        aimJoystick = aim;
+        dashButton = dash;
+        absorbButton = absorb;
+    }
+
+    private void Start()
     {
         if (moveJoystick == null || aimJoystick == null)
             GameLogger.Error("[TouchInputSource] 조이스틱 참조가 비어 있습니다.", this);

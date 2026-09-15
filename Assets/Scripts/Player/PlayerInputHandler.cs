@@ -18,6 +18,8 @@ public enum InputSourceMode
 ///
 /// 실제 입력 수집은 IPlayerInputSource 구현체(Desktop / Touch)가 담당하며,
 /// 이 클래스는 활성 소스를 고르고 값을 중계할 뿐이다.
+///
+/// 터치 UI가 씬에 없으면 런타임에 직접 생성하므로, 씬 구성 상태와 무관하게 항상 동작한다.
 /// </summary>
 [DefaultExecutionOrder(-100)]
 [RequireComponent(typeof(DesktopInputSource))]
@@ -28,7 +30,8 @@ public class PlayerInputHandler : MonoBehaviour
 
     [Header("References")]
     [SerializeField] private DesktopInputSource desktopSource;
-    [Tooltip("모바일 입력 Canvas에 붙은 컴포넌트. 비워두면 런타임에 자동 탐색한다.")]
+
+    [Tooltip("비워두면 씬에서 탐색하고, 그래도 없으면 런타임에 생성한다.")]
     [SerializeField] private TouchInputSource touchSource;
 
     public Vector2 MoveInput { get; private set; }
@@ -47,9 +50,6 @@ public class PlayerInputHandler : MonoBehaviour
         if (desktopSource == null)
             desktopSource = GetComponent<DesktopInputSource>();
 
-        if (touchSource == null)
-            touchSource = FindAnyObjectByType<TouchInputSource>(FindObjectsInactive.Include);
-
         ResolveActiveSource();
     }
 
@@ -62,7 +62,9 @@ public class PlayerInputHandler : MonoBehaviour
             _ => Application.isMobilePlatform
         };
 
-        // 사용하지 않는 소스는 꺼서 불필요한 Update와 UI 렌더링을 막는다.
+        if (IsUsingTouch)
+            EnsureTouchSource();
+
         if (desktopSource != null)
             desktopSource.SetActive(!IsUsingTouch);
 
@@ -71,14 +73,40 @@ public class PlayerInputHandler : MonoBehaviour
 
         activeSource = IsUsingTouch ? (IPlayerInputSource)touchSource : desktopSource;
 
+        // 최후 방어: 터치 UI 구성에 실패해도 입력이 완전히 죽지 않도록 되돌린다.
+        if (activeSource == null && desktopSource != null)
+        {
+            GameLogger.Error("[PlayerInputHandler] 터치 입력 소스를 만들지 못해 Desktop으로 대체합니다.", this);
+
+            IsUsingTouch = false;
+            desktopSource.SetActive(true);
+            activeSource = desktopSource;
+        }
+
         if (activeSource == null)
         {
-            GameLogger.Error(
-                $"[PlayerInputHandler] 활성 입력 소스를 찾을 수 없습니다. (터치 모드: {IsUsingTouch})", this);
+            GameLogger.Error("[PlayerInputHandler] 사용 가능한 입력 소스가 없습니다.", this);
             return;
         }
 
         GameLogger.Log($"[PlayerInputHandler] 입력 소스 -> {(IsUsingTouch ? "Touch" : "Desktop")}");
+    }
+
+    private void EnsureTouchSource()
+    {
+        if (touchSource != null)
+            return;
+
+        touchSource = FindAnyObjectByType<TouchInputSource>(FindObjectsInactive.Include);
+
+        if (touchSource != null)
+        {
+            GameLogger.Log("[PlayerInputHandler] 씬에서 TouchInputSource를 찾았습니다.");
+            return;
+        }
+
+        // 씬에 없으면 코드로 만든다. 씬 저장 여부와 무관하게 항상 동작한다.
+        touchSource = MobileInputUIFactory.Create();
     }
 
     private void Update()

@@ -39,6 +39,14 @@ public class VirtualJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler,
 
     private const int InvalidPointerId = -999;
 
+    /// <summary>런타임 생성 시 참조를 주입한다. (Awake 이전에 호출해야 한다)</summary>
+    public void Initialize(RectTransform backgroundRect, RectTransform handleRect, float range)
+    {
+        background = backgroundRect;
+        handle = handleRect;
+        handleRange = range;
+    }
+
     private void Awake()
     {
         areaRect = GetComponent<RectTransform>();
