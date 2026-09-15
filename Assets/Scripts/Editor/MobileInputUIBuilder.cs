@@ -21,7 +21,7 @@ public static class MobileInputUIBuilder
     private const float ButtonSize = 170f;
     private const float EdgeMargin = 120f;
 
-    [MenuItem("Tools/Blob/모바일 입력 UI 생성", false, 10)]
+    [MenuItem("Tools/Blob/1. Create Mobile Input UI (모바일 입력 UI 생성)", false, 10)]
     public static void Build()
     {
         if (Object.FindAnyObjectByType<TouchInputSource>(FindObjectsInactive.Include) != null)
@@ -84,6 +84,57 @@ public static class MobileInputUIBuilder
             "확인");
 
         Debug.Log("[MobileInputUIBuilder] 모바일 입력 UI 생성 완료. 씬을 저장하세요.");
+    }
+
+
+    [MenuItem("Tools/Blob/2. Validate Input Setup (입력 설정 진단)", false, 11)]
+    public static void Validate()
+    {
+        var report = new System.Text.StringBuilder();
+        report.AppendLine("=== Blob 입력 설정 진단 ===\n");
+
+        var eventSystem = Object.FindAnyObjectByType<EventSystem>(FindObjectsInactive.Include);
+        report.AppendLine(eventSystem != null
+            ? "[OK] EventSystem 존재"
+            : "[실패] EventSystem 없음 -> UI 터치가 전혀 동작하지 않습니다.");
+
+        var touchSource = Object.FindAnyObjectByType<TouchInputSource>(FindObjectsInactive.Include);
+        report.AppendLine(touchSource != null
+            ? $"[OK] TouchInputSource 존재 ({touchSource.gameObject.name}, 활성={touchSource.gameObject.activeInHierarchy})"
+            : "[실패] TouchInputSource 없음 -> 메뉴 1번을 먼저 실행하세요.");
+
+        var joysticks = Object.FindObjectsByType<VirtualJoystick>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        report.AppendLine(joysticks.Length >= 2
+            ? $"[OK] VirtualJoystick {joysticks.Length}개"
+            : $"[실패] VirtualJoystick {joysticks.Length}개 (2개 필요)");
+
+        var handler = Object.FindAnyObjectByType<PlayerInputHandler>(FindObjectsInactive.Include);
+        if (handler == null)
+        {
+            report.AppendLine("[실패] PlayerInputHandler 없음 -> Player 오브젝트를 확인하세요.");
+        }
+        else
+        {
+            var serialized = new SerializedObject(handler);
+            var modeProperty = serialized.FindProperty("mode");
+            var touchProperty = serialized.FindProperty("touchSource");
+
+            report.AppendLine($"[정보] PlayerInputHandler.Mode = {(InputSourceMode)modeProperty.enumValueIndex}");
+            report.AppendLine(touchProperty.objectReferenceValue != null
+                ? "[OK] Touch Source 연결됨"
+                : "[실패] Touch Source 미연결 -> 메뉴 1번을 다시 실행하세요.");
+
+            if ((InputSourceMode)modeProperty.enumValueIndex == InputSourceMode.Auto)
+            {
+                report.AppendLine("\n[주의] Mode가 Auto입니다.");
+                report.AppendLine("       에디터에서는 Desktop(키보드/마우스)으로 동작하며");
+                report.AppendLine("       조이스틱 Canvas가 자동으로 꺼집니다.");
+                report.AppendLine("       에디터에서 조이스틱을 테스트하려면 ForceTouch로 바꾸세요.");
+            }
+        }
+
+        Debug.Log(report.ToString());
+        EditorUtility.DisplayDialog("Blob 입력 설정 진단", report.ToString(), "확인");
     }
 
     private static void EnsureEventSystem()
