@@ -1,21 +1,18 @@
+using System;
 using UnityEngine;
 
-public class GameManager : MonoBehaviour
+/// <summary>
+/// 게임 전역 상태 관리자. 상태 전환과 timeScale 제어를 단독으로 책임진다.
+/// </summary>
+public class GameManager : Singleton<GameManager>
 {
-    public static GameManager Instance { get; private set; }
+    public GameState CurrentState { get; private set; } = GameState.None;
 
-    public GameState CurrentState { get; private set; }
+    /// <summary>상태가 실제로 바뀌었을 때만 발행된다.</summary>
+    public event Action<GameState> OnStateChanged;
 
-    private void Awake()
-    {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-
-        Instance = this;
-    }
+    /// <summary>플레이 가능 상태 여부. (기존 IsPlaying() 메서드 -> 프로퍼티로 변경)</summary>
+    public bool IsPlaying => CurrentState == GameState.Playing;
 
     private void Start()
     {
@@ -24,57 +21,26 @@ public class GameManager : MonoBehaviour
 
     public void SetState(GameState newState)
     {
+        if (CurrentState == newState)
+            return;
+
         CurrentState = newState;
 
-        switch (CurrentState)
-        {
-            case GameState.Playing:
-                Time.timeScale = 1f;
-                break;
+        // Playing 외의 모든 상태는 게임 시간을 정지시킨다.
+        Time.timeScale = newState == GameState.Playing ? 1f : 0f;
 
-            case GameState.Pause:
-                Time.timeScale = 0f;
-                break;
+        GameLogger.Log($"[GameManager] State -> {CurrentState} (timeScale: {Time.timeScale})");
 
-            case GameState.Mutation:
-                Time.timeScale = 0f;
-                break;
-
-            case GameState.GameOver:
-                Time.timeScale = 0f;
-                break;
-        }
-
-        Debug.Log($"Game State : {CurrentState}");
+        OnStateChanged?.Invoke(CurrentState);
     }
 
-    public void Pause()
-    {
-        SetState(GameState.Pause);
-    }
+    public void Pause() => SetState(GameState.Pause);
 
-    public void Resume()
-    {
-        SetState(GameState.Playing);
-    }
+    public void Resume() => SetState(GameState.Playing);
 
-    public void OpenMutation()
-    {
-        SetState(GameState.Mutation);
-    }
+    public void OpenMutation() => SetState(GameState.Mutation);
 
-    public void CloseMutation()
-    {
-        SetState(GameState.Playing);
-    }
+    public void CloseMutation() => SetState(GameState.Playing);
 
-    public void GameOver()
-    {
-        SetState(GameState.GameOver);
-    }
-
-    public bool IsPlaying()
-    {
-        return CurrentState == GameState.Playing;
-    }
+    public void GameOver() => SetState(GameState.GameOver);
 }
