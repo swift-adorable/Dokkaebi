@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -37,9 +38,33 @@ public class WeaponModifiers
     /// <summary>총 동시 발사 수. 최소 1발은 보장한다.</summary>
     public int TotalProjectiles => 1 + Mathf.Max(0, ExtraProjectiles);
 
+    /// <summary>
+    /// 합성 발사로 탄에 실리는 적재 속성 목록. (확정 기획 — 합성 발사)
+    ///
+    /// 적재 계열 Core가 생성하는 상태만 들어간다.
+    /// 기능 배타(번제 등)로 유발이 차단된 상태는 여기에 들어오지 않는다.
+    /// 2개가 되면 탄마다 번갈아 부여된다. CompositeFireState가 순번을 관리한다.
+    /// </summary>
+    public IReadOnlyList<StatusEffectType> Ailments => ailments;
+
+    private readonly List<StatusEffectType> ailments = new(2);
+
+    /// <summary>적재 속성을 추가한다. None과 중복은 무시한다.</summary>
+    public void AddAilment(StatusEffectType status)
+    {
+        if (status == StatusEffectType.None)
+            return;
+
+        if (ailments.Contains(status))
+            return;
+
+        ailments.Add(status);
+    }
+
     public void Reset()
     {
         Behaviours.Clear();
+        ailments.Clear();
 
         RicochetBounces = 0;
         ExtraProjectiles = 0;

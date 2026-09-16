@@ -78,6 +78,8 @@ public class BulletController : MonoBehaviour, IPoolable
 
         behaviourState.Clear();
         ricochetState.Clear();
+
+        AppliedStatus = StatusEffectType.None;
     }
 
     public void OnDespawned()
@@ -86,13 +88,22 @@ public class BulletController : MonoBehaviour, IPoolable
         hitTargets.Clear();
     }
 
+    /// <summary>
+    /// 합성 발사로 이 탄이 부여하는 적재 속성. (확정 기획 — 합성 발사)
+    ///
+    /// 전달 계열 Core가 준 행동과 적재 계열 Core가 준 상태가 한 발에 합쳐진다.
+    /// ※ 실제 상태 부여는 상태이상 시스템과 함께 5-D에서 구현한다. 현재는 운반만 한다.
+    /// </summary>
+    public StatusEffectType AppliedStatus { get; private set; }
+
     /// <summary>발사 직후 Mutation 보정치를 주입한다. PlayerWeapon이 호출한다.</summary>
     public void Configure(
         ProjectileBehaviourState state,
         int ricochetBounces,
         float speedMultiplier,
         float lifetimeMultiplier,
-        Vector3 origin)
+        Vector3 origin,
+        StatusEffectType appliedStatus = StatusEffectType.None)
     {
         behaviourState = state;
         ricochetState.Set(ricochetBounces);
@@ -100,6 +111,8 @@ public class BulletController : MonoBehaviour, IPoolable
         currentSpeed = speed * Mathf.Max(0.1f, speedMultiplier);
         despawnTime = Time.time + lifetime * Mathf.Max(0.1f, lifetimeMultiplier);
         originPoint = origin;
+
+        AppliedStatus = appliedStatus;
     }
 
     private void Update()
@@ -261,7 +274,8 @@ public class BulletController : MonoBehaviour, IPoolable
                 ricochetState.Remaining,
                 currentSpeed / Mathf.Max(0.0001f, speed),
                 Mathf.Max(0.1f, (despawnTime - Time.time) / Mathf.Max(0.0001f, lifetime)),
-                originPoint);
+                originPoint,
+                AppliedStatus);
         }
     }
 

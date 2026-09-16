@@ -269,6 +269,16 @@ public class RunMutationState
                 continue;
 
             modifiers.Apply(definition);
+
+            // 합성 발사: 적재 계열 Core가 생성하는 상태를 탄에 싣는다. (확정 기획)
+            // 기폭 계열은 투사체가 아니므로 합성 대상이 아니고,
+            // 기능 배타로 차단된 상태(번제 → 점화)는 애초에 실리지 않는다.
+            if (definition.Category == MutationCategory.Core &&
+                definition.Family == CoreFamily.Ailment &&
+                !IsStatusBlocked(definition.CreatesStatus))
+            {
+                modifiers.AddAilment(definition.CreatesStatus);
+            }
         }
 
         isDirty = false;

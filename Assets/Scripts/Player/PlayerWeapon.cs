@@ -24,6 +24,9 @@ public class PlayerWeapon : MonoBehaviour
 
     private readonly WeaponModifiers defaultModifiers = new();
 
+    /// <summary>합성 발사의 적재 속성 순번. 적재 Core 2개일 때 번갈아 부여한다.</summary>
+    private CompositeFireState compositeFire;
+
     private PoolManager poolManager;
     private CooldownTimer cooldown;
 
@@ -82,6 +85,10 @@ public class PlayerWeapon : MonoBehaviour
 
         WeaponModifiers modifiers = GetModifiers();
 
+        // 합성 발사: 적재 계열 Core가 2개면 발사마다 번갈아 부여한다. (확정 기획)
+        // 투사체마다가 아니라 '발사마다'이므로 루프 밖에서 한 번만 고른다.
+        StatusEffectType ailment = SelectAilment(modifiers);
+
         int count = modifiers.TotalProjectiles;
 
         // 여러 발이면 정면을 중심으로 좌우 대칭이 되도록 각도를 배분한다.
@@ -106,9 +113,18 @@ public class PlayerWeapon : MonoBehaviour
                     modifiers.RicochetBounces,
                     modifiers.SpeedMultiplier,
                     modifiers.LifetimeMultiplier,
-                    firePoint.position);
+                    firePoint.position,
+                    ailment);
             }
         }
+    }
+
+    /// <summary>이번 발사에 실을 적재 속성을 고른다. 적재 계열 Core가 없으면 None.</summary>
+    private StatusEffectType SelectAilment(WeaponModifiers modifiers)
+    {
+        int index = compositeFire.NextAilmentIndex(modifiers.Ailments.Count);
+
+        return index < 0 ? StatusEffectType.None : modifiers.Ailments[index];
     }
 
     /// <summary>현재 보유 Mutation의 합산 결과. 없으면 기본값을 돌려준다.</summary>
