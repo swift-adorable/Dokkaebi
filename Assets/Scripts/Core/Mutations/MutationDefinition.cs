@@ -99,6 +99,11 @@ public class MutationDefinition : ScriptableObject
     [Min(0)]
     [SerializeField] private int behaviourCharges = 0;
 
+    [Tooltip("지형 충돌 튕김 횟수. 「튕겨 쏘기」 3회 / 「추가 튕김」 +3. " +
+             "충돌 우선순위 큐와 별개로 동작한다. (v5 §10)")]
+    [Min(0)]
+    [SerializeField] private int ricochetBounces = 0;
+
     [Header("효과 — 발사 형태")]
     [Tooltip("기본 1발에 더해지는 동시 발사 수.")]
     [Min(0)]
@@ -149,6 +154,7 @@ public class MutationDefinition : ScriptableObject
 
     public ProjectileBehaviourType GrantedBehaviour => grantedBehaviour;
     public int BehaviourCharges => Mathf.Max(0, behaviourCharges);
+    public int RicochetBounces => Mathf.Max(0, ricochetBounces);
     public int ExtraProjectiles => Mathf.Max(0, extraProjectiles);
     public float SpreadAngle => spreadAngle;
 

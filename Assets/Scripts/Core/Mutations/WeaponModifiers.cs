@@ -13,6 +13,12 @@ public class WeaponModifiers
     /// <summary>충돌 행동별 총 횟수. Split → Pierce → Fork → Chain → Return</summary>
     public ProjectileBehaviourState Behaviours;
 
+    /// <summary>
+    /// 지형 충돌 튕김 횟수. 「튕겨 쏘기」 계열.
+    /// 충돌 우선순위 큐와 별개이므로 Behaviours에 넣지 않는다. (v5 §10)
+    /// </summary>
+    public int RicochetBounces { get; private set; }
+
     /// <summary>기본 1발에 더해지는 동시 발사 수.</summary>
     public int ExtraProjectiles { get; private set; }
 
@@ -35,6 +41,7 @@ public class WeaponModifiers
     {
         Behaviours.Clear();
 
+        RicochetBounces = 0;
         ExtraProjectiles = 0;
         SpreadAngle = 0f;
         FireIntervalMultiplier = 1f;
@@ -57,6 +64,8 @@ public class WeaponModifiers
                 definition.GrantedBehaviour,
                 current + definition.BehaviourCharges);
         }
+
+        RicochetBounces += definition.RicochetBounces;
 
         ExtraProjectiles += definition.ExtraProjectiles;
 

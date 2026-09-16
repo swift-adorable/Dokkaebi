@@ -103,6 +103,7 @@ public class PlayerWeapon : MonoBehaviour
             {
                 controller.Configure(
                     modifiers.Behaviours,
+                    modifiers.RicochetBounces,
                     modifiers.SpeedMultiplier,
                     modifiers.LifetimeMultiplier,
                     firePoint.position);
