@@ -31,9 +31,11 @@ public class PooledObject : MonoBehaviour
     /// <summary>자기 자신을 풀로 반납한다.</summary>
     public bool Despawn()
     {
-        if (!PoolManager.HasInstance)
-            return false;
+        // HasInstance는 Awake가 실행된 뒤에만 true가 된다.
+        // 에디트 모드(단위 테스트)나 Awake 이전 호출에서도 동작하도록
+        // 씬 탐색까지 수행하는 EnsureInstance를 사용한다.
+        PoolManager manager = PoolManager.EnsureInstance();
 
-        return PoolManager.Instance.Despawn(gameObject);
+        return manager != null && manager.Despawn(gameObject);
     }
 }

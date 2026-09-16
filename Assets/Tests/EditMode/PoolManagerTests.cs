@@ -89,13 +89,12 @@ namespace Blob.Tests
         public void Despawn_후_Spawn하면_같은_인스턴스가_재사용된다()
         {
             GameObject first = manager.Spawn(prefab, Vector3.zero, Quaternion.identity);
-            int firstId = first.GetInstanceID();
 
             manager.Despawn(first);
 
             GameObject second = manager.Spawn(prefab, Vector3.one, Quaternion.identity);
 
-            Assert.AreEqual(firstId, second.GetInstanceID());
+            Assert.AreSame(first, second);
         }
 
         [Test]
@@ -158,6 +157,10 @@ namespace Blob.Tests
         [Test]
         public void 엣지_null_프리팹_Spawn은_null을_반환하고_풀을_만들지_않는다()
         {
+            // ignoreFailingMessages만으로는 에러 로그가 테스트를 실패시키는 것을 막지 못한다.
+            // 예상되는 로그를 명시적으로 선언한다.
+            LogAssert.Expect(LogType.Error, "[PoolManager] Spawn에 null 프리팹이 전달되었습니다.");
+
             GameObject result = manager.Spawn(null, Vector3.zero, Quaternion.identity);
 
             Assert.IsNull(result);

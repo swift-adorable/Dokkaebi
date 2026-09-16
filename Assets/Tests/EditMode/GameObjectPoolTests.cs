@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -67,13 +68,12 @@ namespace Blob.Tests
             GameObjectPool pool = CreatePool();
 
             GameObject first = pool.Get(Vector3.zero, Quaternion.identity);
-            int firstId = first.GetInstanceID();
 
             pool.Release(first);
 
             GameObject second = pool.Get(Vector3.one, Quaternion.identity);
 
-            Assert.AreEqual(firstId, second.GetInstanceID(), "풀링의 핵심은 재사용입니다.");
+            Assert.AreSame(first, second, "풀링의 핵심은 재사용입니다.");
             Assert.AreEqual(1, pool.CountAll, "새로 Instantiate되지 않아야 합니다.");
         }
 
@@ -93,10 +93,17 @@ namespace Blob.Tests
         [Test]
         public void IPoolable_생명주기가_정확히_한_번씩_통지된다()
         {
+            Assert.IsNotNull(prefab.GetComponent<PoolableProbe>(),
+                "SetUp에서 프리팹에 프로브가 붙지 않았습니다.");
+
             GameObjectPool pool = CreatePool();
 
             GameObject instance = pool.Get(Vector3.zero, Quaternion.identity);
             var probe = instance.GetComponent<PoolableProbe>();
+
+            Assert.IsNotNull(probe,
+                $"인스턴스 '{instance.name}'에 프로브가 복제되지 않았습니다. " +
+                $"실제 컴포넌트: {string.Join(", ", instance.GetComponents<Component>().Select(c => c.GetType().Name))}");
 
             Assert.AreEqual(1, probe.SpawnedCount);
             Assert.AreEqual(0, probe.DespawnedCount);

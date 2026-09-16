@@ -4,7 +4,8 @@
     "references": [
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
-        "Blob.Runtime"
+        "Blob.Runtime",
+        "Blob.Tests.Fixtures"
     ],
     "includePlatforms": [
         "Editor"
