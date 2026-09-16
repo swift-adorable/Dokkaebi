@@ -30,7 +30,7 @@ public class AbsorbPrompt : MonoBehaviour
     private RectTransform canvasRect;
     private CanvasGroup canvasGroup;
     private Camera mainCamera;
-    private BlobController player;
+    private PlayerAbsorber absorber;
 
     private bool isVisible;
 
@@ -52,15 +52,15 @@ public class AbsorbPrompt : MonoBehaviour
         if (canvas != null)
             canvasRect = canvas.GetComponent<RectTransform>();
 
-        player = FindAnyObjectByType<BlobController>(FindObjectsInactive.Exclude);
+        absorber = FindAnyObjectByType<PlayerAbsorber>(FindObjectsInactive.Exclude);
 
-        if (player == null)
-            GameLogger.Error("[AbsorbPrompt] 씬에서 BlobController를 찾지 못했습니다.", this);
+        if (absorber == null)
+            GameLogger.Error("[AbsorbPrompt] 씬에서 PlayerAbsorber를 찾지 못했습니다.", this);
     }
 
     private void LateUpdate()
     {
-        CorpseController target = player != null ? player.NearbyCorpse : null;
+        CorpseController target = absorber != null ? absorber.NearbyCorpse : null;
 
         bool shouldShow = target != null && mainCamera != null && canvasRect != null;
 

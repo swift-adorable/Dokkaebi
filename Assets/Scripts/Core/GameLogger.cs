@@ -34,6 +34,12 @@ public static class GameLogger
         Debug.LogWarning(message);
     }
 
+    [Conditional(SymbolEditor), Conditional(SymbolDevelopmentBuild)]
+    public static void Warning(string message, UnityEngine.Object context)
+    {
+        Debug.LogWarning(message, context);
+    }
+
     /// <summary>에러는 릴리즈 빌드에서도 유지한다. (실기기 크래시 원인 추적용)</summary>
     public static void Error(string message)
     {

@@ -346,6 +346,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraFollow
   target: {fileID: 659170785}
+  smoothTime: 0.12
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0
@@ -625,6 +626,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b7093a4d5fc644c8ba7a2cc31e4b5af4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerStats
+  baseRequiredXP: 10
+  requiredXPGrowth: 5
 --- !u!114 &614111513
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -637,6 +640,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7331627224f5342b7a41bfcf8a8cbd7f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MutationManager
+  pauseGameDuringSelection: 0
 --- !u!4 &614111514
 Transform:
   m_ObjectHideFlags: 0
@@ -665,6 +669,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DebugManager
   enableDebug: 1
+  addXPKey: 49
+  giveAllMutationsKey: 50
+  spawnEnemyKey: 51
+  healKey: 52
+  xpPerCheat: 10
 --- !u!1 &637843113
 GameObject:
   m_ObjectHideFlags: 0
@@ -717,6 +726,12 @@ GameObject:
   - component: {fileID: 659170787}
   - component: {fileID: 659170788}
   - component: {fileID: 659170789}
+  - component: {fileID: 659170795}
+  - component: {fileID: 659170794}
+  - component: {fileID: 659170793}
+  - component: {fileID: 659170792}
+  - component: {fileID: 659170791}
+  - component: {fileID: 659170790}
   m_Layer: 0
   m_Name: Blob
   m_TagString: Untagged
@@ -832,12 +847,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eb77803238f50421bafbb1ac7f94864a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BlobController
-  moveSpeed: 5
-  bulletPrefab: {fileID: 9100672181249319323, guid: 070cefa67d75149e69ecff42b023fe67, type: 3}
-  firePoint: {fileID: 919060853}
-  fireRate: 0.15
-  dashDistance: 5
-  dashCooldown: 1
 --- !u!135 &659170787
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -883,9 +892,9 @@ Rigidbody:
   m_ImplicitTensor: 1
   m_UseGravity: 0
   m_IsKinematic: 0
-  m_Interpolate: 0
+  m_Interpolate: 1
   m_Constraints: 112
-  m_CollisionDetection: 0
+  m_CollisionDetection: 2
 --- !u!114 &659170789
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -898,6 +907,95 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 295bfc82a16e449bcb0c6b041bad16d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerInputHandler
+  mode: 0
+  desktopSource: {fileID: 0}
+  touchSource: {fileID: 0}
+--- !u!114 &659170790
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 659170781}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d762bcec594e34f10bc489469d3a6eda, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Blob.Runtime::PlayerWeapon
+  bulletPrefab: {fileID: 9100672181249319323, guid: 070cefa67d75149e69ecff42b023fe67, type: 3}
+  firePoint: {fileID: 0}
+  firePointChildName: FirePoint
+  fireRate: 0.15
+  prewarmCount: 32
+--- !u!114 &659170791
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 659170781}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c8048b112a2bc4667bee723bc27caf9f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Blob.Runtime::PlayerAbsorber
+  xpPerCore: 1
+--- !u!114 &659170792
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 659170781}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 56d5819098f5b42ab80cadfdd90b62d0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Blob.Runtime::PlayerDash
+  dashDistance: 5
+  dashDuration: 0.15
+  dashCooldown: 1
+--- !u!114 &659170793
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 659170781}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 55080e72294dd4309b3bddf8d2cf982a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Blob.Runtime::PlayerAiming
+  aimDeadzone: 0.1
+  rotationSpeed: 900
+--- !u!114 &659170794
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 659170781}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b48eb3ce85c94309b448f35049e24e3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Blob.Runtime::PlayerMovement
+  moveSpeed: 5
+--- !u!114 &659170795
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 659170781}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6eb54cb3e7e8a4b4cac83c0d0bcbc4ca, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Blob.Runtime::DesktopInputSource
+  dashKey: 32
+  absorbKey: 101
 --- !u!1 &671507352
 GameObject:
   m_ObjectHideFlags: 0
