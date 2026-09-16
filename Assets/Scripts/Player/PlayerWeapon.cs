@@ -114,7 +114,7 @@ public class PlayerWeapon : MonoBehaviour
     private WeaponModifiers GetModifiers()
     {
         if (MutationManager.HasInstance)
-            return MutationManager.Instance.Inventory.GetModifiers();
+            return MutationManager.Instance.RunState.GetModifiers();
 
         return defaultModifiers;
     }

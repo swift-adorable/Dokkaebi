@@ -3,29 +3,38 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Mutation 획득 관리자.
+/// Mutation 획득 관리자 — Mutation System v5 구조.
+///
+/// 흐름: 도감 → 적재(Loadout) → 레벨업 시 적재한 것 중 3장 → 선택 → RunMutationState
 ///
 /// 한 번에 여러 레벨이 올라가도 선택창이 중복으로 열리지 않도록
 /// 대기 건수를 누적한 뒤 한 번에 하나씩 순차 처리한다.
 /// </summary>
 public class MutationManager : Singleton<MutationManager>
 {
-    /// <summary>Resources 하위의 Mutation 폴더 경로. 이 아래 에셋은 자동으로 카탈로그에 들어간다.</summary>
-    public const string CatalogResourcePath = "Mutations";
-
     [Header("Catalog")]
-    [Tooltip("비워두면 Resources/Mutations 폴더의 모든 MutationDefinition을 자동으로 불러온다.")]
-    [SerializeField] private List<MutationDefinition> catalog = new();
+    [Tooltip("비워두면 Resources/MutationCatalog 에셋을 자동으로 불러온다.")]
+    [SerializeField] private MutationCatalog catalog;
+
+    [Header("Loadout (6단계 도감/적재 UI 구현 전 임시)")]
+    [Tooltip("※ 임시 — 6단계에서 벙커 적재 UI로 대체된다. " +
+             "켜 두면 카탈로그에서 슬롯 수만큼 자동으로 적재를 채워 테스트할 수 있다.")]
+    [SerializeField] private bool autoFillLoadout = true;
+
+    [Tooltip("적재 슬롯 수. 영구 성장으로 8 → 14까지 늘어난다.")]
+    [Range(MutationLoadout.MinSlotCapacity, MutationLoadout.MaxSlotCapacity)]
+    [SerializeField] private int loadoutSlots = MutationLoadout.MinSlotCapacity;
 
     [Header("Selection")]
-    [Tooltip("레벨업 시 제시할 선택지 개수")]
+    [Tooltip("레벨업 시 제시할 선택지 개수. v5 확정값은 3이다.")]
     [Min(1)]
     [SerializeField] private int choiceCount = 3;
 
-    [Tooltip("선택창이 열려 있는 동안 게임을 정지할지")]
+    [Tooltip("선택창이 열려 있는 동안 게임을 정지할지. v5 확정: 일시정지 O, 제한시간 없음.")]
     [SerializeField] private bool pauseGameDuringSelection = true;
 
-    private readonly MutationInventory inventory = new();
+    private readonly MutationLoadout loadout = new();
+    private readonly RunMutationState runState = new();
     private readonly List<MutationDefinition> currentChoices = new();
 
     private System.Random random;
@@ -36,8 +45,14 @@ public class MutationManager : Singleton<MutationManager>
     /// <summary>처리 대기 중인 선택 건수.</summary>
     public int PendingSelectionCount { get; private set; }
 
-    /// <summary>플레이어가 보유한 Mutation.</summary>
-    public MutationInventory Inventory => inventory;
+    /// <summary>이번 레이드에 가져온 적재 구성.</summary>
+    public MutationLoadout Loadout => loadout;
+
+    /// <summary>이번 런에서 실제로 획득·장착된 상태.</summary>
+    public RunMutationState RunState => runState;
+
+    /// <summary>전체 정의 카탈로그. 로드 실패 시 null일 수 있다.</summary>
+    public MutationCatalog Catalog => catalog;
 
     /// <summary>현재 제시된 선택지. 선택창이 닫혀 있으면 비어 있다.</summary>
     public IReadOnlyList<MutationDefinition> CurrentChoices => currentChoices;
@@ -72,40 +87,62 @@ public class MutationManager : Singleton<MutationManager>
 
     private void Start()
     {
-        LoadCatalogIfEmpty();
+        LoadCatalogIfNeeded();
+        BuildLoadout();
 
         // 선택 UI가 씬에 없으면 런타임에 생성한다.
         if (FindAnyObjectByType<MutationSelectionUI>(FindObjectsInactive.Include) == null)
             MutationSelectionUI.Create();
     }
 
-    /// <summary>
-    /// 카탈로그가 비어 있으면 Resources에서 자동으로 채운다.
-    ///
-    /// Inspector에 일일이 드래그하는 방식은 Mutation을 추가할 때마다 연결을 잊는
-    /// 실패 지점을 만든다. 폴더에 에셋을 넣으면 자동으로 선택지에 포함되게 한다.
-    /// </summary>
-    private void LoadCatalogIfEmpty()
+    private void LoadCatalogIfNeeded()
     {
-        // null 항목만 정리하고, 수동 지정이 하나라도 있으면 그대로 존중한다.
-        catalog.RemoveAll(definition => definition == null);
-
-        if (catalog.Count > 0)
+        if (catalog != null)
             return;
 
-        MutationDefinition[] loaded = Resources.LoadAll<MutationDefinition>(CatalogResourcePath);
+        catalog = MutationCatalog.Load();
 
-        if (loaded == null || loaded.Length == 0)
+        if (catalog == null)
         {
             GameLogger.Error(
-                $"[MutationManager] Resources/{CatalogResourcePath} 에 MutationDefinition이 없습니다. " +
-                "레벨업을 해도 선택지가 나오지 않습니다.", this);
+                $"[MutationManager] Resources/{MutationCatalog.ResourcePath} 에셋이 없습니다. " +
+                "메뉴 Blob > Mutation > 카탈로그 다시 만들기 를 실행하십시오.", this);
             return;
         }
 
-        catalog.AddRange(loaded);
+        GameLogger.Log($"[MutationManager] 카탈로그 로드: {catalog.Count}종");
+    }
 
-        GameLogger.Log($"[MutationManager] 카탈로그 자동 로드: {catalog.Count}종");
+    /// <summary>
+    /// 적재를 구성한다.
+    ///
+    /// ※ 임시 구현이다. 6단계에서 벙커의 도감/적재 UI가 세이브 데이터로 채운다.
+    ///    v5 §11-1의 "Core 최소 1개 포함" 제약은 지금부터 지킨다.
+    /// </summary>
+    private void BuildLoadout()
+    {
+        loadout.SlotCapacity = loadoutSlots;
+
+        if (!autoFillLoadout || catalog == null || loadout.Count > 0)
+            return;
+
+        // Core를 먼저 채워 "Core 최소 1개" 제약을 구조적으로 보장한다.
+        FillFrom(catalog.GetByCategory(MutationCategory.Core), 2);
+        FillFrom(catalog.Definitions, loadout.SlotCapacity);
+
+        if (!loadout.IsValid)
+        {
+            GameLogger.Error($"[MutationManager] 적재 구성 실패: {loadout.ValidationMessage}", this);
+            return;
+        }
+
+        GameLogger.Log($"[MutationManager] 적재 자동 구성: {loadout.Count}/{loadout.SlotCapacity}칸");
+    }
+
+    private void FillFrom(IReadOnlyList<MutationDefinition> source, int limit)
+    {
+        for (int i = 0; i < source.Count && loadout.Count < limit; i++)
+            loadout.TryAdd(source[i]);
     }
 
     /// <summary>레벨업 횟수를 누적한다. PlayerStats가 레벨업 시 호출한다.</summary>
@@ -139,7 +176,9 @@ public class MutationManager : Singleton<MutationManager>
             return;
         }
 
-        MutationDraft.Draw(catalog, inventory, choiceCount, random, currentChoices);
+        int playerLevel = PlayerStats.HasInstance ? PlayerStats.Instance.Level : 1;
+
+        MutationDraft.Draw(loadout.Entries, runState, playerLevel, choiceCount, random, currentChoices);
 
         // 더 이상 얻을 수 있는 Mutation이 없으면 대기 건을 소진하고 조용히 넘어간다.
         if (currentChoices.Count == 0)
@@ -157,7 +196,7 @@ public class MutationManager : Singleton<MutationManager>
         if (pauseGameDuringSelection && GameManager.HasInstance)
             GameManager.Instance.OpenMutation();
 
-        GameLogger.Log($"[MutationManager] 선택지 {currentChoices.Count}개 제시");
+        GameLogger.Log($"[MutationManager] 선택지 {currentChoices.Count}개 제시 (Lv.{playerLevel})");
 
         OnSelectionOpened?.Invoke(currentChoices);
     }
@@ -174,14 +213,14 @@ public class MutationManager : Singleton<MutationManager>
             return false;
         }
 
-        if (!inventory.Add(definition))
+        if (!runState.TryAcquire(definition))
         {
-            GameLogger.Warning($"[MutationManager] 중첩 상한에 도달했습니다: {definition.DisplayName}");
+            GameLogger.Warning($"[MutationManager] 획득할 수 없습니다: {definition.DisplayName}");
             return false;
         }
 
         GameLogger.Log($"[MutationManager] 획득: {definition.DisplayName} " +
-                       $"({inventory.GetStacks(definition)}/{definition.MaxStacks})");
+                       $"(누적 {runState.AcquiredCount}종)");
 
         OnMutationGained?.Invoke(definition);
 
@@ -215,12 +254,12 @@ public class MutationManager : Singleton<MutationManager>
             GameManager.Instance.CloseMutation();
     }
 
-    /// <summary>런 종료 시 보유 Mutation을 초기화한다.</summary>
+    /// <summary>런 종료 시 획득한 Mutation을 전부 초기화한다. 적재 구성은 남는다. (v5 §1-5)</summary>
     public void ResetRun()
     {
         PendingSelectionCount = 0;
         IsSelecting = false;
         currentChoices.Clear();
-        inventory.Clear();
+        runState.Clear();
     }
 }

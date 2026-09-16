@@ -16,11 +16,18 @@ public class MutationSelectionUI : MonoBehaviour
     private const float CardHeight = 560f;
     private const float CardGap = 40f;
 
-    private static readonly Color[] RarityColors =
+    /// <summary>카테고리별 카드 색. v5에는 등급(Rarity) 개념이 없으므로 분류로 구분한다.</summary>
+    private static readonly Color[] CategoryColors =
     {
-        new Color(0.45f, 0.48f, 0.52f, 0.95f),   // Common
-        new Color(0.20f, 0.45f, 0.80f, 0.95f),   // Rare
-        new Color(0.55f, 0.25f, 0.75f, 0.95f)    // Epic
+        new Color(0.72f, 0.26f, 0.22f, 0.95f),   // Core       — 붉은색
+        new Color(0.20f, 0.45f, 0.80f, 0.95f),   // Support    — 푸른색
+        new Color(0.60f, 0.42f, 0.14f, 0.95f),   // Meta       — 황금색
+        new Color(0.26f, 0.52f, 0.34f, 0.95f)    // Persistent — 초록색
+    };
+
+    private static readonly string[] CategoryNames =
+    {
+        "핵심", "보조", "발동", "유지형"
     };
 
     private MutationManager manager;
@@ -138,7 +145,7 @@ public class MutationSelectionUI : MonoBehaviour
         rect.anchoredPosition = new Vector2(x, 0f);
 
         var image = card.AddComponent<Image>();
-        image.color = GetRarityColor(definition.Rarity);
+        image.color = GetCategoryColor(definition.Category);
         image.raycastTarget = true;
 
         var button = card.AddComponent<Button>();
@@ -153,10 +160,17 @@ public class MutationSelectionUI : MonoBehaviour
         CreateLabel(card.transform, definition.Description, 30, FontStyle.Normal,
             new Vector2(0.06f, 0.18f), new Vector2(0.94f, 0.68f), TextAnchor.UpperLeft);
 
-        int owned = manager != null ? manager.Inventory.GetStacks(definition) : 0;
+        // 대가는 카드에서 반드시 보여야 한다. 메커니즘과 대가가 한 쌍이기 때문이다.
+        string footer = GetCategoryName(definition.Category);
 
-        CreateLabel(card.transform, $"{definition.Rarity}   {owned}/{definition.MaxStacks}", 26,
-            FontStyle.Normal, new Vector2(0f, 0.04f), new Vector2(1f, 0.15f), TextAnchor.MiddleCenter);
+        if (definition.Category == MutationCategory.Persistent)
+            footer += $"   Nucleus {definition.NucleusCost}";
+
+        if (!string.IsNullOrEmpty(definition.CostDescription))
+            footer += $"   대가: {definition.CostDescription}";
+
+        CreateLabel(card.transform, footer, 26,
+            FontStyle.Normal, new Vector2(0.04f, 0.04f), new Vector2(0.96f, 0.15f), TextAnchor.MiddleCenter);
 
         return card;
     }
@@ -211,11 +225,18 @@ public class MutationSelectionUI : MonoBehaviour
         return child;
     }
 
-    private static Color GetRarityColor(MutationRarity rarity)
+    private static Color GetCategoryColor(MutationCategory category)
     {
-        int index = Mathf.Clamp((int)rarity, 0, RarityColors.Length - 1);
+        int index = Mathf.Clamp((int)category, 0, CategoryColors.Length - 1);
 
-        return RarityColors[index];
+        return CategoryColors[index];
+    }
+
+    private static string GetCategoryName(MutationCategory category)
+    {
+        int index = Mathf.Clamp((int)category, 0, CategoryNames.Length - 1);
+
+        return CategoryNames[index];
     }
 
     private void ClearCards()
