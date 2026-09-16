@@ -53,6 +53,6 @@ public class PlayerStats : Singleton<PlayerStats>
 
         GameLogger.Log($"[PlayerStats] LEVEL UP x{levelUpCount} -> Lv.{Level}");
 
-        MutationManager.Instance.EnqueueLevelUp(levelUpCount);
+        MutationManager.EnsureInstance().EnqueueLevelUp(levelUpCount);
     }
 }

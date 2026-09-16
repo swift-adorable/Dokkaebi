@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f1826eda630a40a7b8b37017e52d7bc, type: 3}
+  m_Name: Mutation_Fork
+  m_EditorClassIdentifier: 
+  id: fork
+  displayName: 분열
+  description: 적을 맞히면 투사체가 좌우 60도로 갈라진다. 대신 사거리가 짧아진다.
+  rarity: 0
+  maxStacks: 2
+  grantedBehaviour: 3
+  chargesPerStack: 1
+  extraProjectilesPerStack: 0
+  spreadAngle: 8
+  fireIntervalMultiplier: 1
+  lifetimeMultiplier: 0.85
+  speedMultiplier: 1

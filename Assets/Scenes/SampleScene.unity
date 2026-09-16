@@ -690,7 +690,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7331627224f5342b7a41bfcf8a8cbd7f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MutationManager
-  pauseGameDuringSelection: 0
+  catalog: []
+  choiceCount: 3
+  pauseGameDuringSelection: 1
 --- !u!4 &614111514
 Transform:
   m_ObjectHideFlags: 0

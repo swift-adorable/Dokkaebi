@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f1826eda630a40a7b8b37017e52d7bc, type: 3}
+  m_Name: Mutation_Split
+  m_EditorClassIdentifier: 
+  id: split
+  displayName: 쇄도
+  description: 가장 먼저 발동한다. 충돌 즉시 갈라져 주변을 휩쓴다. 대신 연사가 크게 느려진다.
+  rarity: 2
+  maxStacks: 1
+  grantedBehaviour: 1
+  chargesPerStack: 1
+  extraProjectilesPerStack: 0
+  spreadAngle: 8
+  fireIntervalMultiplier: 1.25
+  lifetimeMultiplier: 0.9
+  speedMultiplier: 1

@@ -22,8 +22,13 @@ public class PlayerWeapon : MonoBehaviour
     [Tooltip("시작 시 미리 생성할 총알 수. (연사속도 x 총알수명) 이상이면 충분하다.")]
     [SerializeField] private int prewarmCount = 32;
 
+    private readonly WeaponModifiers defaultModifiers = new();
+
     private PoolManager poolManager;
     private CooldownTimer cooldown;
+
+    /// <summary>Mutation 보정이 적용된 실제 발사 간격.</summary>
+    public float EffectiveFireInterval => fireRate * GetModifiers().FireIntervalMultiplier;
 
     /// <summary>발사 준비가 되었는지.</summary>
     public bool CanFire => cooldown.IsReady(Time.time);
@@ -62,7 +67,7 @@ public class PlayerWeapon : MonoBehaviour
         if (!IsConfigured)
             return false;
 
-        if (!cooldown.TryConsume(Time.time, fireRate))
+        if (!cooldown.TryConsume(Time.time, EffectiveFireInterval))
             return false;
 
         Fire();
@@ -75,6 +80,42 @@ public class PlayerWeapon : MonoBehaviour
         if (poolManager == null)
             poolManager = PoolManager.EnsureInstance();
 
-        poolManager.Spawn(bulletPrefab, firePoint.position, firePoint.rotation);
+        WeaponModifiers modifiers = GetModifiers();
+
+        int count = modifiers.TotalProjectiles;
+
+        // 여러 발이면 정면을 중심으로 좌우 대칭이 되도록 각도를 배분한다.
+        float spread = modifiers.SpreadAngle;
+        float startAngle = count > 1 ? -spread * (count - 1) * 0.5f : 0f;
+
+        for (int i = 0; i < count; i++)
+        {
+            float angle = startAngle + spread * i;
+
+            Quaternion rotation = firePoint.rotation * Quaternion.Euler(0f, angle, 0f);
+
+            GameObject bullet = poolManager.Spawn(bulletPrefab, firePoint.position, rotation);
+
+            if (bullet == null)
+                continue;
+
+            if (bullet.TryGetComponent(out BulletController controller))
+            {
+                controller.Configure(
+                    modifiers.Behaviours,
+                    modifiers.SpeedMultiplier,
+                    modifiers.LifetimeMultiplier,
+                    firePoint.position);
+            }
+        }
+    }
+
+    /// <summary>현재 보유 Mutation의 합산 결과. 없으면 기본값을 돌려준다.</summary>
+    private WeaponModifiers GetModifiers()
+    {
+        if (MutationManager.HasInstance)
+            return MutationManager.Instance.Inventory.GetModifiers();
+
+        return defaultModifiers;
     }
 }
