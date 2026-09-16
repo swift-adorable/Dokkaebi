@@ -15,6 +15,7 @@ using UnityEngine;
 [RequireComponent(typeof(PlayerDash))]
 [RequireComponent(typeof(PlayerWeapon))]
 [RequireComponent(typeof(PlayerAbsorber))]
+[RequireComponent(typeof(Health))]
 public class BlobController : MonoBehaviour
 {
     private PlayerInputHandler input;
@@ -23,6 +24,7 @@ public class BlobController : MonoBehaviour
     private PlayerDash dash;
     private PlayerWeapon weapon;
     private PlayerAbsorber absorber;
+    private Health health;
 
     private GameManager gameManager;
 
@@ -37,6 +39,29 @@ public class BlobController : MonoBehaviour
         dash = GetComponent<PlayerDash>();
         weapon = GetComponent<PlayerWeapon>();
         absorber = GetComponent<PlayerAbsorber>();
+        health = GetComponent<Health>();
+    }
+
+    private void OnEnable()
+    {
+        if (health != null)
+            health.OnDied += HandleDied;
+    }
+
+    private void OnDisable()
+    {
+        if (health != null)
+            health.OnDied -= HandleDied;
+    }
+
+    private void HandleDied()
+    {
+        GameLogger.Log("[BlobController] 플레이어 사망");
+
+        movement.SetInput(Vector2.zero);
+
+        if (gameManager != null)
+            gameManager.GameOver();
     }
 
     private void Start()

@@ -7,6 +7,8 @@ public class EnemySpawner : MonoBehaviour
 {
     [Header("Reference")]
     [SerializeField] private GameObject enemyPrefab;
+
+    [Tooltip("비워두면 씬에서 PlayerMovement를 가진 오브젝트를 자동으로 찾는다.")]
     [SerializeField] private Transform player;
 
     [Header("Spawn")]
@@ -25,12 +27,29 @@ public class EnemySpawner : MonoBehaviour
 
     private GameManager gameManager;
     private PoolManager poolManager;
+    private EnemyManager enemyManager;
     private float nextSpawnTime;
 
     private void Start()
     {
         gameManager = GameManager.Instance;
         poolManager = PoolManager.EnsureInstance();
+        enemyManager = EnemyManager.EnsureInstance();
+
+        if (player == null)
+        {
+            // 씬 참조를 수동으로 연결하지 않아도 동작하도록 자동 탐색한다.
+            var playerMovement = FindAnyObjectByType<PlayerMovement>(FindObjectsInactive.Exclude);
+
+            if (playerMovement != null)
+            {
+                player = playerMovement.transform;
+                GameLogger.Log("[EnemySpawner] player 자동 연결");
+            }
+        }
+
+        if (player != null)
+            enemyManager.SetPlayer(player);
 
         if (enemyPrefab == null)
             GameLogger.Error("[EnemySpawner] enemyPrefab이 할당되지 않았습니다.", this);
@@ -52,6 +71,13 @@ public class EnemySpawner : MonoBehaviour
 
         if (Time.time < nextSpawnTime)
             return;
+
+        // 동시 생존 수 상한을 넘으면 스폰을 건너뛴다. 모바일 프레임 방어선이다.
+        if (!enemyManager.CanSpawn)
+        {
+            nextSpawnTime = Time.time + spawnInterval;
+            return;
+        }
 
         SpawnEnemy();
 

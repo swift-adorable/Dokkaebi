@@ -474,6 +474,56 @@ MonoBehaviour:
   m_ShadowLayerMask: 1
   m_RenderingLayers: 1
   m_ShadowRenderingLayers: 1
+--- !u!1 &455094752
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 455094754}
+  - component: {fileID: 455094753}
+  m_Layer: 0
+  m_Name: Enemy Spawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &455094753
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 455094752}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a6435da1059d34f0ba0690f76a710d6b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Blob.Runtime::EnemySpawner
+  enemyPrefab: {fileID: 0}
+  player: {fileID: 0}
+  spawnInterval: 2
+  spawnRadius: 12
+  spawnOnRingOnly: 1
+  prewarmCount: 16
+--- !u!4 &455094754
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 455094752}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &518356863
 GameObject:
   m_ObjectHideFlags: 0
@@ -732,6 +782,7 @@ GameObject:
   - component: {fileID: 659170792}
   - component: {fileID: 659170791}
   - component: {fileID: 659170790}
+  - component: {fileID: 659170796}
   m_Layer: 0
   m_Name: Blob
   m_TagString: Untagged
@@ -996,6 +1047,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: Blob.Runtime::DesktopInputSource
   dashKey: 32
   absorbKey: 101
+--- !u!114 &659170796
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 659170781}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3addb66c72c6e4042b64a26ae3c2c16f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Blob.Runtime::Health
+  team: 0
+  maxHealth: 10
+  invulnerableDuration: 0.6
 --- !u!1 &671507352
 GameObject:
   m_ObjectHideFlags: 0
@@ -1536,6 +1602,10 @@ GameObject:
   - component: {fileID: 1089201460}
   - component: {fileID: 1089201459}
   - component: {fileID: 1089201458}
+  - component: {fileID: 1089201466}
+  - component: {fileID: 1089201465}
+  - component: {fileID: 1089201464}
+  - component: {fileID: 1089201463}
   m_Layer: 0
   m_Name: Enemy
   m_TagString: Untagged
@@ -1555,7 +1625,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cccd4be093daa42a0b1086febea8de97, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyController
-  maxHP: 3
   corpsePrefab: {fileID: 4554347442326328039, guid: bda0a4661fe6d45569efb04919334b28, type: 3}
 --- !u!65 &1089201459
 BoxCollider:
@@ -1650,6 +1719,83 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1089201463
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1089201457}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d681ecc493445441fb3f81fbcf09ca6a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Blob.Runtime::EnemyAttack
+  damage: 1
+  attackRange: 1.6
+  windupDuration: 0.35
+  attackCooldown: 1.2
+  windupIndicator: {fileID: 0}
+--- !u!114 &1089201464
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1089201457}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 352c47ce17ef0410a92731d536c71a4a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Blob.Runtime::EnemyMovement
+  moveSpeed: 2.5
+  stoppingDistance: 1.2
+  separationRadius: 1.1
+  separationWeight: 0.8
+  maxNeighborChecks: 8
+  rotationSpeed: 540
+--- !u!54 &1089201465
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1089201457}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 0
+  m_Interpolate: 1
+  m_Constraints: 112
+  m_CollisionDetection: 1
+--- !u!114 &1089201466
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1089201457}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3addb66c72c6e4042b64a26ae3c2c16f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Blob.Runtime::Health
+  team: 1
+  maxHealth: 3
+  invulnerableDuration: 0
 --- !u!1 &1160125661
 GameObject:
   m_ObjectHideFlags: 0
@@ -2693,3 +2839,4 @@ SceneRoots:
   - {fileID: 772465713}
   - {fileID: 671507355}
   - {fileID: 1358300966}
+  - {fileID: 455094754}

@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// 투사체. 전방으로 직진하며 적에게 피해를 준다.
+/// 투사체. 전방으로 직진하며 지정한 소속의 대상에게 피해를 준다.
 /// 오브젝트 풀에서 재사용되므로 상태 초기화를 OnSpawned에서 수행한다.
 /// </summary>
 public class BulletController : MonoBehaviour, IPoolable
@@ -11,6 +11,9 @@ public class BulletController : MonoBehaviour, IPoolable
 
     [Header("Combat")]
     [SerializeField] private int damage = 1;
+
+    [Tooltip("이 소속의 대상에게만 피해를 준다.")]
+    [SerializeField] private Team targetTeam = Team.Enemy;
 
     [Header("Lifetime")]
     [Tooltip("자동 소멸까지의 시간(초)")]
@@ -58,12 +61,16 @@ public class BulletController : MonoBehaviour, IPoolable
         if (isConsumed)
             return;
 
-        if (!other.TryGetComponent(out EnemyController enemy))
+        if (!other.TryGetComponent(out Health targetHealth))
+            return;
+
+        // 소속이 다르면 무시한다. 없으면 플레이어가 자기 총알에 맞는다.
+        if (targetHealth.Team != targetTeam)
             return;
 
         isConsumed = true;
 
-        enemy.TakeDamage(damage);
+        targetHealth.TakeDamage(damage);
 
         ReturnToPool();
     }

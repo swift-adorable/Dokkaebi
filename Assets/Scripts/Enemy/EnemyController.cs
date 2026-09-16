@@ -1,35 +1,48 @@
 using UnityEngine;
 
 /// <summary>
-/// 적 개체의 체력/사망 처리.
-/// 오브젝트 풀에서 재사용되므로 체력 초기화를 OnSpawned에서 수행한다.
+/// 적 개체의 생명주기 조율.
 ///
-/// 주의: 이동/추격 AI는 아직 미구현이다. (로드맵 4단계 예정)
+/// 체력 계산은 Health가, 이동은 EnemyMovement가, 공격은 EnemyAttack이 담당한다.
+/// 이 클래스는 사망 시 시체 생성과 풀 반납, 그리고 EnemyManager 등록만 맡는다.
 /// </summary>
+[RequireComponent(typeof(Health))]
 public class EnemyController : MonoBehaviour, IPoolable
 {
-    [Header("Stats")]
-    [SerializeField] private int maxHP = 3;
-
     [Header("Death")]
     [SerializeField] private GameObject corpsePrefab;
 
+    private Health health;
+    private EnemyAttack attack;
     private PooledObject pooledObject;
     private PoolManager poolManager;
-    private int currentHP;
-    private bool isDead;
+    private EnemyManager enemyManager;
 
-    public int CurrentHP => currentHP;
+    private bool isReturning;
+
+    public Health Health => health;
 
     private void Awake()
     {
+        health = GetComponent<Health>();
+        attack = GetComponent<EnemyAttack>();
         pooledObject = GetComponent<PooledObject>();
-        currentHP = maxHP;
+    }
+
+    private void OnEnable()
+    {
+        health.OnDied += HandleDied;
+    }
+
+    private void OnDisable()
+    {
+        health.OnDied -= HandleDied;
     }
 
     private void Start()
     {
         poolManager = PoolManager.EnsureInstance();
+        enemyManager = EnemyManager.EnsureInstance();
 
         if (corpsePrefab == null)
             GameLogger.Error("[EnemyController] corpsePrefab이 할당되지 않았습니다.", this);
@@ -37,36 +50,39 @@ public class EnemyController : MonoBehaviour, IPoolable
 
     public void OnSpawned()
     {
-        // 체력을 되돌리지 않으면 이전에 죽은 상태 그대로 재사용되어 즉사한다.
-        currentHP = maxHP;
-        isDead = false;
+        isReturning = false;
+
+        if (attack != null)
+            attack.ResetState();
+
+        // Health.OnSpawned는 IPoolable 통지로 별도 호출되므로 여기서 중복 처리하지 않는다.
+        EnemyManager.EnsureInstance().Register(this);
     }
 
     public void OnDespawned()
     {
-        isDead = true;
+        if (enemyManager != null)
+            enemyManager.Unregister(this);
+        else
+            EnemyManager.EnsureInstance().Unregister(this);
     }
 
-    public void TakeDamage(int damage)
+    /// <summary>외부(EnemyManager 등)에서 즉시 반납시킬 때 호출한다.</summary>
+    public void ReturnToPool()
     {
-        if (isDead || damage <= 0)
+        if (isReturning)
             return;
 
-        currentHP -= damage;
+        isReturning = true;
 
-        GameLogger.Log($"[EnemyController] HP {currentHP}/{maxHP}");
+        if (pooledObject != null && pooledObject.Despawn())
+            return;
 
-        if (currentHP <= 0)
-            Die();
+        Destroy(gameObject);
     }
 
-    private void Die()
+    private void HandleDied()
     {
-        if (isDead)
-            return;
-
-        isDead = true;
-
         GameLogger.Log("[EnemyController] Die");
 
         SpawnCorpse();
@@ -83,13 +99,5 @@ public class EnemyController : MonoBehaviour, IPoolable
             poolManager = PoolManager.EnsureInstance();
 
         poolManager.Spawn(corpsePrefab, transform.position, Quaternion.identity);
-    }
-
-    private void ReturnToPool()
-    {
-        if (pooledObject != null && pooledObject.Despawn())
-            return;
-
-        Destroy(gameObject);
     }
 }
