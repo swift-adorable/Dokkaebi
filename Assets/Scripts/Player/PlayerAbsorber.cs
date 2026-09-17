@@ -1,15 +1,15 @@
 using UnityEngine;
 
 /// <summary>
-/// 시체(Core) 근접 감지 및 흡수 전담.
+/// 시체 근접 감지 및 경험치 흡수 전담.
 ///
 /// 이 컴포넌트가 붙은 오브젝트에는 흡수 범위를 나타내는 트리거 콜라이더가 필요하다.
 /// </summary>
 public class PlayerAbsorber : MonoBehaviour
 {
     [Header("Absorb")]
-    [Tooltip("Core 1개 흡수 시 획득하는 기본 경험치")]
-    [SerializeField] private int xpPerCore = 1;
+    [Tooltip("시체 1구 흡수 시 획득하는 기본 경험치")]
+    [SerializeField] private int xpPerCorpse = 1;
 
     private PoolManager poolManager;
 
@@ -30,7 +30,7 @@ public class PlayerAbsorber : MonoBehaviour
         if (NearbyCorpse == null)
             return false;
 
-        int gainedXP = xpPerCore * NearbyCorpse.ValueMultiplier;
+        int gainedXP = xpPerCorpse * NearbyCorpse.ValueMultiplier;
 
         GameObject corpseObject = NearbyCorpse.gameObject;
         NearbyCorpse = null;
@@ -43,7 +43,7 @@ public class PlayerAbsorber : MonoBehaviour
         else
             GameLogger.Warning("[PlayerAbsorber] PlayerStats가 씬에 없어 경험치를 지급하지 못했습니다.");
 
-        GameLogger.Log($"[PlayerAbsorber] Biomass Absorbed (+{gainedXP} XP)");
+        GameLogger.Log($"[PlayerAbsorber] 경험치 흡수 +{gainedXP}");
 
         return true;
     }
