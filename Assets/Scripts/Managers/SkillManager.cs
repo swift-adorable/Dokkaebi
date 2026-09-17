@@ -3,18 +3,18 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Mutation 획득 관리자 — Mutation System v5 구조.
+/// Skill 획득 관리자 — Skill System v5 구조.
 ///
-/// 흐름: 도감 → 적재(Loadout) → 레벨업 시 적재한 것 중 3장 → 선택 → RunMutationState
+/// 흐름: 도감 → 적재(Loadout) → 레벨업 시 적재한 것 중 3장 → 선택 → RunSkillState
 ///
 /// 한 번에 여러 레벨이 올라가도 선택창이 중복으로 열리지 않도록
 /// 대기 건수를 누적한 뒤 한 번에 하나씩 순차 처리한다.
 /// </summary>
-public class MutationManager : Singleton<MutationManager>
+public class SkillManager : Singleton<SkillManager>
 {
     [Header("Catalog")]
-    [Tooltip("비워두면 Resources/MutationCatalog 에셋을 자동으로 불러온다.")]
-    [SerializeField] private MutationCatalog catalog;
+    [Tooltip("비워두면 Resources/SkillCatalog 에셋을 자동으로 불러온다.")]
+    [SerializeField] private SkillCatalog catalog;
 
     [Header("Loadout (6단계 도감/적재 UI 구현 전 임시)")]
     [Tooltip("※ 임시 — 6단계에서 벙커 적재 UI로 대체된다. " +
@@ -22,8 +22,8 @@ public class MutationManager : Singleton<MutationManager>
     [SerializeField] private bool autoFillLoadout = true;
 
     [Tooltip("적재 슬롯 수. 영구 성장으로 8 → 14까지 늘어난다.")]
-    [Range(MutationLoadout.MinSlotCapacity, MutationLoadout.MaxSlotCapacity)]
-    [SerializeField] private int loadoutSlots = MutationLoadout.MinSlotCapacity;
+    [Range(SkillLoadout.MinSlotCapacity, SkillLoadout.MaxSlotCapacity)]
+    [SerializeField] private int loadoutSlots = SkillLoadout.MinSlotCapacity;
 
     [Header("Selection")]
     [Tooltip("레벨업 시 제시할 선택지 개수. v5 확정값은 3이다.")]
@@ -33,9 +33,9 @@ public class MutationManager : Singleton<MutationManager>
     [Tooltip("선택창이 열려 있는 동안 게임을 정지할지. v5 확정: 일시정지 O, 제한시간 없음.")]
     [SerializeField] private bool pauseGameDuringSelection = true;
 
-    private readonly MutationLoadout loadout = new();
-    private readonly RunMutationState runState = new();
-    private readonly List<MutationDefinition> currentChoices = new();
+    private readonly SkillLoadout loadout = new();
+    private readonly RunSkillState runState = new();
+    private readonly List<SkillDefinition> currentChoices = new();
 
     private System.Random random;
 
@@ -46,38 +46,38 @@ public class MutationManager : Singleton<MutationManager>
     public int PendingSelectionCount { get; private set; }
 
     /// <summary>이번 레이드에 가져온 적재 구성.</summary>
-    public MutationLoadout Loadout => loadout;
+    public SkillLoadout Loadout => loadout;
 
     /// <summary>이번 런에서 실제로 획득·장착된 상태.</summary>
-    public RunMutationState RunState => runState;
+    public RunSkillState RunState => runState;
 
     /// <summary>전체 정의 카탈로그. 로드 실패 시 null일 수 있다.</summary>
-    public MutationCatalog Catalog => catalog;
+    public SkillCatalog Catalog => catalog;
 
     /// <summary>현재 제시된 선택지. 선택창이 닫혀 있으면 비어 있다.</summary>
-    public IReadOnlyList<MutationDefinition> CurrentChoices => currentChoices;
+    public IReadOnlyList<SkillDefinition> CurrentChoices => currentChoices;
 
     /// <summary>선택창을 열어야 할 때 발행된다. UI가 구독한다.</summary>
-    public event Action<IReadOnlyList<MutationDefinition>> OnSelectionOpened;
+    public event Action<IReadOnlyList<SkillDefinition>> OnSelectionOpened;
 
     /// <summary>선택창을 닫아야 할 때 발행된다.</summary>
     public event Action OnSelectionClosed;
 
-    /// <summary>Mutation을 획득했을 때 발행된다.</summary>
-    public event Action<MutationDefinition> OnMutationGained;
+    /// <summary>Skill을 획득했을 때 발행된다.</summary>
+    public event Action<SkillDefinition> OnSkillGained;
 
     /// <summary>인스턴스를 보장한다. 씬 배치를 강제하지 않는다.</summary>
-    public static MutationManager EnsureInstance()
+    public static SkillManager EnsureInstance()
     {
         if (HasInstance)
             return Instance;
 
-        var existing = FindAnyObjectByType<MutationManager>(FindObjectsInactive.Include);
+        var existing = FindAnyObjectByType<SkillManager>(FindObjectsInactive.Include);
 
         if (existing != null)
             return existing;
 
-        return new GameObject("MutationManager (Runtime)").AddComponent<MutationManager>();
+        return new GameObject("SkillManager (Runtime)").AddComponent<SkillManager>();
     }
 
     protected override void OnSingletonAwake()
@@ -91,8 +91,8 @@ public class MutationManager : Singleton<MutationManager>
         BuildLoadout();
 
         // 선택 UI가 씬에 없으면 런타임에 생성한다.
-        if (FindAnyObjectByType<MutationSelectionUI>(FindObjectsInactive.Include) == null)
-            MutationSelectionUI.Create();
+        if (FindAnyObjectByType<SkillSelectionUI>(FindObjectsInactive.Include) == null)
+            SkillSelectionUI.Create();
     }
 
     private void LoadCatalogIfNeeded()
@@ -100,17 +100,17 @@ public class MutationManager : Singleton<MutationManager>
         if (catalog != null)
             return;
 
-        catalog = MutationCatalog.Load();
+        catalog = SkillCatalog.Load();
 
         if (catalog == null)
         {
             GameLogger.Error(
-                $"[MutationManager] Resources/{MutationCatalog.ResourcePath} 에셋이 없습니다. " +
-                "메뉴 Blob > Mutation > 카탈로그 다시 만들기 를 실행하십시오.", this);
+                $"[SkillManager] Resources/{SkillCatalog.ResourcePath} 에셋이 없습니다. " +
+                "메뉴 Blob > Skill > 카탈로그 다시 만들기 를 실행하십시오.", this);
             return;
         }
 
-        GameLogger.Log($"[MutationManager] 카탈로그 로드: {catalog.Count}종");
+        GameLogger.Log($"[SkillManager] 카탈로그 로드: {catalog.Count}종");
     }
 
     /// <summary>
@@ -127,19 +127,19 @@ public class MutationManager : Singleton<MutationManager>
             return;
 
         // Core를 먼저 채워 "Core 최소 1개" 제약을 구조적으로 보장한다.
-        FillFrom(catalog.GetByCategory(MutationCategory.Core), 2);
+        FillFrom(catalog.GetByCategory(SkillCategory.Core), 2);
         FillFrom(catalog.Definitions, loadout.SlotCapacity);
 
         if (!loadout.IsValid)
         {
-            GameLogger.Error($"[MutationManager] 적재 구성 실패: {loadout.ValidationMessage}", this);
+            GameLogger.Error($"[SkillManager] 적재 구성 실패: {loadout.ValidationMessage}", this);
             return;
         }
 
-        GameLogger.Log($"[MutationManager] 적재 자동 구성: {loadout.Count}/{loadout.SlotCapacity}칸");
+        GameLogger.Log($"[SkillManager] 적재 자동 구성: {loadout.Count}/{loadout.SlotCapacity}칸");
     }
 
-    private void FillFrom(IReadOnlyList<MutationDefinition> source, int limit)
+    private void FillFrom(IReadOnlyList<SkillDefinition> source, int limit)
     {
         for (int i = 0; i < source.Count && loadout.Count < limit; i++)
             loadout.TryAdd(source[i]);
@@ -150,13 +150,13 @@ public class MutationManager : Singleton<MutationManager>
     {
         if (count <= 0)
         {
-            GameLogger.Warning($"[MutationManager] 유효하지 않은 레벨업 횟수: {count}");
+            GameLogger.Warning($"[SkillManager] 유효하지 않은 레벨업 횟수: {count}");
             return;
         }
 
         PendingSelectionCount += count;
 
-        GameLogger.Log($"[MutationManager] 선택 대기 {PendingSelectionCount}건");
+        GameLogger.Log($"[SkillManager] 선택 대기 {PendingSelectionCount}건");
 
         TryOpenNextSelection();
     }
@@ -178,12 +178,15 @@ public class MutationManager : Singleton<MutationManager>
 
         int playerLevel = PlayerStats.HasInstance ? PlayerStats.Instance.Level : 1;
 
-        MutationDraft.Draw(loadout.Entries, runState, playerLevel, choiceCount, random, currentChoices);
+        // 2번째 Core 슬롯은 Lv7에 열린다. 선택 풀 필터가 이 값을 그대로 쓴다.
+        runState.CoreCapacity = RunSkillState.GetCoreCapacity(playerLevel);
 
-        // 더 이상 얻을 수 있는 Mutation이 없으면 대기 건을 소진하고 조용히 넘어간다.
+        SkillDraft.Draw(loadout.Entries, runState, playerLevel, choiceCount, random, currentChoices);
+
+        // 더 이상 얻을 수 있는 Skill이 없으면 대기 건을 소진하고 조용히 넘어간다.
         if (currentChoices.Count == 0)
         {
-            GameLogger.Log("[MutationManager] 획득 가능한 Mutation이 없어 선택을 건너뜁니다.");
+            GameLogger.Log("[SkillManager] 획득 가능한 Skill이 없어 선택을 건너뜁니다.");
 
             PendingSelectionCount = 0;
             CloseSession();
@@ -194,35 +197,40 @@ public class MutationManager : Singleton<MutationManager>
         IsSelecting = true;
 
         if (pauseGameDuringSelection && GameManager.HasInstance)
-            GameManager.Instance.OpenMutation();
+            GameManager.Instance.OpenSkill();
 
-        GameLogger.Log($"[MutationManager] 선택지 {currentChoices.Count}개 제시 (Lv.{playerLevel})");
+        GameLogger.Log($"[SkillManager] 선택지 {currentChoices.Count}개 제시 (Lv.{playerLevel})");
 
         OnSelectionOpened?.Invoke(currentChoices);
     }
 
-    /// <summary>선택지 중 하나를 고른다. UI가 호출한다.</summary>
-    public bool Select(MutationDefinition definition)
+    /// <summary>
+    /// 선택지 중 하나를 고른다. UI가 호출한다.
+    ///
+    /// preferredCoreIndex는 Support를 어느 Core 소켓에 넣을지 지정한다.
+    /// 두 Core가 모두 조건을 만족할 때 UI가 유저에게 물어 넘긴다.
+    /// </summary>
+    public bool Select(SkillDefinition definition, int preferredCoreIndex = -1)
     {
         if (!IsSelecting)
             return false;
 
         if (definition == null || !currentChoices.Contains(definition))
         {
-            GameLogger.Warning("[MutationManager] 제시되지 않은 Mutation은 선택할 수 없습니다.");
+            GameLogger.Warning("[SkillManager] 제시되지 않은 Skill은 선택할 수 없습니다.");
             return false;
         }
 
-        if (!runState.TryAcquire(definition))
+        if (!runState.TryAcquire(definition, preferredCoreIndex))
         {
-            GameLogger.Warning($"[MutationManager] 획득할 수 없습니다: {definition.DisplayName}");
+            GameLogger.Warning($"[SkillManager] 획득할 수 없습니다: {definition.DisplayName}");
             return false;
         }
 
-        GameLogger.Log($"[MutationManager] 획득: {definition.DisplayName} " +
+        GameLogger.Log($"[SkillManager] 획득: {definition.DisplayName} " +
                        $"(누적 {runState.AcquiredCount}종)");
 
-        OnMutationGained?.Invoke(definition);
+        OnSkillGained?.Invoke(definition);
 
         IsSelecting = false;
         currentChoices.Clear();
@@ -251,10 +259,10 @@ public class MutationManager : Singleton<MutationManager>
     private void CloseSession()
     {
         if (pauseGameDuringSelection && GameManager.HasInstance)
-            GameManager.Instance.CloseMutation();
+            GameManager.Instance.CloseSkill();
     }
 
-    /// <summary>런 종료 시 획득한 Mutation을 전부 초기화한다. 적재 구성은 남는다. (v5 §1-5)</summary>
+    /// <summary>런 종료 시 획득한 Skill을 전부 초기화한다. 적재 구성은 남는다. (v5 §1-5)</summary>
     public void ResetRun()
     {
         PendingSelectionCount = 0;

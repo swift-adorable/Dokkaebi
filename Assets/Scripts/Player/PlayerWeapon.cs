@@ -30,7 +30,7 @@ public class PlayerWeapon : MonoBehaviour
     private PoolManager poolManager;
     private CooldownTimer cooldown;
 
-    /// <summary>Mutation 보정이 적용된 실제 발사 간격.</summary>
+    /// <summary>Skill 보정이 적용된 실제 발사 간격.</summary>
     public float EffectiveFireInterval => fireRate * GetModifiers().FireIntervalMultiplier;
 
     /// <summary>발사 준비가 되었는지.</summary>
@@ -127,11 +127,11 @@ public class PlayerWeapon : MonoBehaviour
         return index < 0 ? StatusEffectType.None : modifiers.Ailments[index];
     }
 
-    /// <summary>현재 보유 Mutation의 합산 결과. 없으면 기본값을 돌려준다.</summary>
+    /// <summary>현재 보유 Skill의 합산 결과. 없으면 기본값을 돌려준다.</summary>
     private WeaponModifiers GetModifiers()
     {
-        if (MutationManager.HasInstance)
-            return MutationManager.Instance.RunState.GetModifiers();
+        if (SkillManager.HasInstance)
+            return SkillManager.Instance.RunState.GetModifiers();
 
         return defaultModifiers;
     }

@@ -15,8 +15,8 @@ public class DebugManager : MonoBehaviour
     [Tooltip("경험치 획득")]
     [SerializeField] private KeyCode addXPKey = KeyCode.Alpha1;
 
-    [Tooltip("모든 Mutation 획득")]
-    [SerializeField] private KeyCode giveAllMutationsKey = KeyCode.Alpha2;
+    [Tooltip("모든 Skill 획득")]
+    [SerializeField] private KeyCode giveAllSkillsKey = KeyCode.Alpha2;
 
     [Tooltip("적 즉시 생성")]
     [SerializeField] private KeyCode spawnEnemyKey = KeyCode.Alpha3;
@@ -43,8 +43,8 @@ public class DebugManager : MonoBehaviour
         if (Input.GetKeyDown(addXPKey))
             CheatAddXP();
 
-        if (Input.GetKeyDown(giveAllMutationsKey))
-            CheatGiveAllMutations();
+        if (Input.GetKeyDown(giveAllSkillsKey))
+            CheatGiveAllSkills();
 
         if (Input.GetKeyDown(spawnEnemyKey))
             CheatSpawnEnemy();
@@ -65,9 +65,9 @@ public class DebugManager : MonoBehaviour
         PlayerStats.Instance.AddXP(xpPerCheat);
     }
 
-    public void CheatGiveAllMutations()
+    public void CheatGiveAllSkills()
     {
-        GameLogger.Log("[DebugManager] TODO : Give All Mutations");
+        GameLogger.Log("[DebugManager] TODO : Give All Skills");
     }
 
     public void CheatSpawnEnemy()

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 
 /// <summary>
-/// 적재(Loadout) — 도감에서 골라 이번 레이드에 가져가는 변이 목록. (v5 §1-2)
+/// 적재(Loadout) — 도감에서 골라 이번 레이드에 가져가는 스킬 목록. (v5 §1-2)
 ///
 /// MonoBehaviour에 의존하지 않는 순수 클래스다. EditMode 테스트 대상이다.
 ///
@@ -9,7 +9,7 @@ using System.Collections.Generic;
 /// 제한이 없으면 후반부에 60개 풀에서 3장을 뽑게 되어 원하는 빌드가 만들어지지 않는다.
 /// 도감을 채울수록 빌드 설계가 어려워지는 역설이 생긴다. 완화 금지. (10-7)
 /// </summary>
-public class MutationLoadout
+public class SkillLoadout
 {
     /// <summary>적재 슬롯 초기값.</summary>
     public const int MinSlotCapacity = 8;
@@ -17,11 +17,11 @@ public class MutationLoadout
     /// <summary>적재 슬롯 최대값. 추출 성공 누적으로 확장된다.</summary>
     public const int MaxSlotCapacity = 14;
 
-    private readonly List<MutationDefinition> entries = new();
+    private readonly List<SkillDefinition> entries = new();
 
     private int slotCapacity = MinSlotCapacity;
 
-    public MutationLoadout(int capacity = MinSlotCapacity)
+    public SkillLoadout(int capacity = MinSlotCapacity)
     {
         SlotCapacity = capacity;
     }
@@ -44,7 +44,7 @@ public class MutationLoadout
         }
     }
 
-    public IReadOnlyList<MutationDefinition> Entries => entries;
+    public IReadOnlyList<SkillDefinition> Entries => entries;
 
     public int Count => entries.Count;
 
@@ -57,7 +57,7 @@ public class MutationLoadout
         {
             for (int i = 0; i < entries.Count; i++)
             {
-                if (entries[i].Category == MutationCategory.Core)
+                if (entries[i].Category == SkillCategory.Core)
                     return true;
             }
 
@@ -77,19 +77,19 @@ public class MutationLoadout
                 return "적재가 비어 있습니다.";
 
             if (!HasCore)
-                return "핵심 변이(Core)를 최소 1개 포함해야 합니다.";
+                return "핵심 스킬(Core)를 최소 1개 포함해야 합니다.";
 
             return string.Empty;
         }
     }
 
-    public bool Contains(MutationDefinition definition)
+    public bool Contains(SkillDefinition definition)
     {
         return definition != null && entries.Contains(definition);
     }
 
     /// <summary>적재에 추가한다. 중복이거나 슬롯이 없으면 false.</summary>
-    public bool TryAdd(MutationDefinition definition)
+    public bool TryAdd(SkillDefinition definition)
     {
         if (definition == null)
             return false;
@@ -105,7 +105,7 @@ public class MutationLoadout
         return true;
     }
 
-    public bool Remove(MutationDefinition definition)
+    public bool Remove(SkillDefinition definition)
     {
         return definition != null && entries.Remove(definition);
     }

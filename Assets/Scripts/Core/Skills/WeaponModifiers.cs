@@ -2,12 +2,12 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// 획득한 Mutation을 모두 합산한 결과. 무기와 투사체가 이 값을 읽어 동작한다.
+/// 획득한 Skill을 모두 합산한 결과. 무기와 투사체가 이 값을 읽어 동작한다.
 ///
 /// 순수 클래스이므로 합산 규칙을 단위 테스트로 검증할 수 있다.
 ///
 /// ※ v5에는 중첩(stack)이 없으므로 중첩 배수 연산을 제거했다.
-///    같은 변이를 두 번 얻을 수 없다. (10-9)
+///    같은 스킬를 두 번 얻을 수 없다. (10-9)
 /// </summary>
 public class WeaponModifiers
 {
@@ -23,7 +23,7 @@ public class WeaponModifiers
     /// <summary>기본 1발에 더해지는 동시 발사 수.</summary>
     public int ExtraProjectiles { get; private set; }
 
-    /// <summary>추가 투사체 간 각도(도). 여러 Mutation이 있으면 가장 큰 값을 쓴다.</summary>
+    /// <summary>추가 투사체 간 각도(도). 여러 Skill이 있으면 가장 큰 값을 쓴다.</summary>
     public float SpreadAngle { get; private set; }
 
     /// <summary>발사 간격 배수. 1보다 크면 느려진다. (대가: 탄막 밀도)</summary>
@@ -74,8 +74,8 @@ public class WeaponModifiers
         SpeedMultiplier = 1f;
     }
 
-    /// <summary>Mutation 하나를 합산한다.</summary>
-    public void Apply(MutationDefinition definition)
+    /// <summary>Skill 하나를 합산한다.</summary>
+    public void Apply(SkillDefinition definition)
     {
         if (definition == null)
             return;

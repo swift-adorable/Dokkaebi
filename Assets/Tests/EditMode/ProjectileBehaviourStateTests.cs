@@ -5,7 +5,7 @@ namespace Blob.Tests
     /// <summary>
     /// 투사체 행동 우선순위 엔진 테스트.
     ///
-    /// 이 우선순위가 Mutation 조합 설계의 근간이다.
+    /// 이 우선순위가 Skill 조합 설계의 근간이다.
     /// 순서가 틀리거나 한 충돌에 둘 이상이 발동하면 수치 인플레가 발생한다.
     /// </summary>
     public class ProjectileBehaviourStateTests

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// 투사체. 충돌 시 Mutation이 부여한 행동을 우선순위에 따라 하나만 해결한다.
+/// 투사체. 충돌 시 Skill이 부여한 행동을 우선순위에 따라 하나만 해결한다.
 ///
 ///     적 충돌  : Split → Pierce → Fork → Chain → Return  (한 충돌에 단 하나)
 ///     지형 충돌: 튕겨 쏘기 — 위 큐와 별개로 동작하며 큐를 소모하지 않는다. (v5 §10)
@@ -96,7 +96,7 @@ public class BulletController : MonoBehaviour, IPoolable
     /// </summary>
     public StatusEffectType AppliedStatus { get; private set; }
 
-    /// <summary>발사 직후 Mutation 보정치를 주입한다. PlayerWeapon이 호출한다.</summary>
+    /// <summary>발사 직후 Skill 보정치를 주입한다. PlayerWeapon이 호출한다.</summary>
     public void Configure(
         ProjectileBehaviourState state,
         int ricochetBounces,

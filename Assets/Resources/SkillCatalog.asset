@@ -10,6 +10,6 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2ee04db315dea45c2b17a1d91bab13a8, type: 3}
-  m_Name: MutationCatalog
-  m_EditorClassIdentifier: Blob.Runtime::MutationCatalog
+  m_Name: SkillCatalog
+  m_EditorClassIdentifier: Blob.Runtime::SkillCatalog
   definitions: []

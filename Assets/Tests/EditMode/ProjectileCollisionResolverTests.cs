@@ -6,7 +6,7 @@ namespace Blob.Tests
     /// 충돌 우선순위 큐 테스트. (v5 §10)
     ///
     /// "한 번의 충돌에는 단 하나만 해결된다"가 깨지면 곱연산 인플레가 발생하고
-    /// Mutation 조합 설계 전체가 무너진다. 그 약속을 전수 검증한다.
+    /// Skill 조합 설계 전체가 무너진다. 그 약속을 전수 검증한다.
     /// </summary>
     public class ProjectileCollisionResolverTests
     {

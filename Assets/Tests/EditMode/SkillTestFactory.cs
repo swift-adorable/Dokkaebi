@@ -4,24 +4,24 @@ using UnityEngine;
 namespace Blob.Tests
 {
     /// <summary>
-    /// 테스트용 MutationDefinition을 코드로 만들어 주는 헬퍼. (v5 스키마)
+    /// 테스트용 SkillDefinition을 코드로 만들어 주는 헬퍼. (v5 스키마)
     ///
     /// SerializedObject를 쓰므로 에디터 전용이다. MonoBehaviour가 아니라
     /// ScriptableObject이므로 에디터 어셈블리에 있어도 문제가 없다.
     /// (MonoBehaviour는 에디터 어셈블리에 두면 AddComponent가 조용히 null을 반환한다)
     /// </summary>
-    public static class MutationTestFactory
+    public static class SkillTestFactory
     {
-        public static MutationDefinition CreateCore(
+        public static SkillDefinition CreateCore(
             string id,
-            MutationTag tags = MutationTag.Projectile,
+            SkillTag tags = SkillTag.Projectile,
             int requiredLevel = 1,
             CoreFamily family = CoreFamily.Delivery,
             StatusEffectType createsStatus = StatusEffectType.None,
             ProjectileBehaviourType behaviour = ProjectileBehaviourType.None,
             int behaviourCharges = 0)
         {
-            return Create(id, MutationCategory.Core, tags,
+            return Create(id, SkillCategory.Core, tags,
                 requiredLevel: requiredLevel,
                 family: family,
                 createsStatus: createsStatus,
@@ -29,9 +29,9 @@ namespace Blob.Tests
                 behaviourCharges: behaviourCharges);
         }
 
-        public static MutationDefinition CreateSupport(
+        public static SkillDefinition CreateSupport(
             string id,
-            MutationTag requiredTags = MutationTag.None,
+            SkillTag requiredTags = SkillTag.None,
             int requiredLevel = 1,
             CostType cost = CostType.None,
             ProjectileBehaviourType behaviour = ProjectileBehaviourType.None,
@@ -44,7 +44,7 @@ namespace Blob.Tests
             bool blocksStatusCreation = false,
             StatusEffectType blockedStatus = StatusEffectType.None)
         {
-            return Create(id, MutationCategory.Support, MutationTag.None,
+            return Create(id, SkillCategory.Support, SkillTag.None,
                 requiredTags: requiredTags,
                 requiredLevel: requiredLevel,
                 cost: cost,
@@ -59,31 +59,31 @@ namespace Blob.Tests
                 blockedStatus: blockedStatus);
         }
 
-        public static MutationDefinition CreateMeta(
+        public static SkillDefinition CreateMeta(
             string id,
             MetaTriggerKind kind = MetaTriggerKind.Automatic,
             int requiredLevel = 11)
         {
-            return Create(id, MutationCategory.Meta, MutationTag.Trigger,
+            return Create(id, SkillCategory.Meta, SkillTag.Trigger,
                 requiredLevel: requiredLevel,
                 metaKind: kind);
         }
 
-        public static MutationDefinition CreatePersistent(
+        public static SkillDefinition CreatePersistent(
             string id,
             int nucleusCost,
             int requiredLevel = 1)
         {
-            return Create(id, MutationCategory.Persistent, MutationTag.Persistent,
+            return Create(id, SkillCategory.Persistent, SkillTag.Persistent,
                 requiredLevel: requiredLevel,
                 nucleusCost: nucleusCost);
         }
 
-        public static MutationDefinition Create(
+        public static SkillDefinition Create(
             string id,
-            MutationCategory category = MutationCategory.Core,
-            MutationTag tags = MutationTag.None,
-            MutationTag requiredTags = MutationTag.None,
+            SkillCategory category = SkillCategory.Core,
+            SkillTag tags = SkillTag.None,
+            SkillTag requiredTags = SkillTag.None,
             int requiredLevel = 1,
             CoreFamily family = CoreFamily.None,
             MetaTriggerKind metaKind = MetaTriggerKind.None,
@@ -104,7 +104,7 @@ namespace Blob.Tests
             float lifetimeMultiplier = 1f,
             float speedMultiplier = 1f)
         {
-            var definition = ScriptableObject.CreateInstance<MutationDefinition>();
+            var definition = ScriptableObject.CreateInstance<SkillDefinition>();
             definition.name = id;
 
             var serialized = new SerializedObject(definition);

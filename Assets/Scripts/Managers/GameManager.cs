@@ -38,9 +38,9 @@ public class GameManager : Singleton<GameManager>
 
     public void Resume() => SetState(GameState.Playing);
 
-    public void OpenMutation() => SetState(GameState.Mutation);
+    public void OpenSkill() => SetState(GameState.Skill);
 
-    public void CloseMutation() => SetState(GameState.Playing);
+    public void CloseSkill() => SetState(GameState.Playing);
 
     public void GameOver() => SetState(GameState.GameOver);
 }

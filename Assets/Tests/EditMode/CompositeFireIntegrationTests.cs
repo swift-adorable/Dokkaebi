@@ -3,23 +3,23 @@ using NUnit.Framework;
 namespace Blob.Tests
 {
     /// <summary>
-    /// 합성 발사가 RunMutationState → WeaponModifiers 경로에서 실제로 성립하는지 검증한다.
+    /// 합성 발사가 RunSkillState → WeaponModifiers 경로에서 실제로 성립하는지 검증한다.
     ///
     /// 전달 Core의 행동과 적재 Core의 상태가 '한 발'에 합쳐져야 한다.
     /// </summary>
     public class CompositeFireIntegrationTests
     {
-        private static MutationDefinition DeliveryCore(
+        private static SkillDefinition DeliveryCore(
             string id, ProjectileBehaviourType behaviour, int charges)
         {
-            return MutationTestFactory.CreateCore(id, MutationTag.Projectile,
+            return SkillTestFactory.CreateCore(id, SkillTag.Projectile,
                 family: CoreFamily.Delivery, behaviour: behaviour, behaviourCharges: charges);
         }
 
-        private static MutationDefinition AilmentCore(
-            string id, MutationTag tags, StatusEffectType status)
+        private static SkillDefinition AilmentCore(
+            string id, SkillTag tags, StatusEffectType status)
         {
-            return MutationTestFactory.CreateCore(id, tags,
+            return SkillTestFactory.CreateCore(id, tags,
                 family: CoreFamily.Ailment, createsStatus: status);
         }
 
@@ -27,10 +27,10 @@ namespace Blob.Tests
         public void 전달_Core와_적재_Core가_한_발에_합쳐진다()
         {
             // 관통 + 화염 = "관통하면서 점화시키는 탄 1발"
-            var state = new RunMutationState();
+            var state = new RunSkillState();
 
             state.TryAcquire(DeliveryCore("core_pierce", ProjectileBehaviourType.Pierce, 3));
-            state.TryAcquire(AilmentCore("core_fire", MutationTag.Fire, StatusEffectType.Ignite));
+            state.TryAcquire(AilmentCore("core_fire", SkillTag.Fire, StatusEffectType.Ignite));
 
             WeaponModifiers modifiers = state.GetModifiers();
 
@@ -46,7 +46,7 @@ namespace Blob.Tests
         public void Core_2개여도_탄_수는_늘지_않는다()
         {
             // 동시 발사였다면 2배가 되었을 상황이다. 모바일 성능의 핵심 차이다.
-            var state = new RunMutationState();
+            var state = new RunSkillState();
 
             state.TryAcquire(DeliveryCore("core_pierce", ProjectileBehaviourType.Pierce, 3));
             state.TryAcquire(DeliveryCore("core_split", ProjectileBehaviourType.Split, 1));
@@ -57,12 +57,12 @@ namespace Blob.Tests
         [Test]
         public void 탄_수는_다중_사격_계열로만_늘어난다()
         {
-            var state = new RunMutationState();
+            var state = new RunSkillState();
 
             state.TryAcquire(DeliveryCore("core_pierce", ProjectileBehaviourType.Pierce, 3));
 
-            state.TryAcquire(MutationTestFactory.CreateSupport(
-                "sup_multishot", MutationTag.Projectile,
+            state.TryAcquire(SkillTestFactory.CreateSupport(
+                "sup_multishot", SkillTag.Projectile,
                 cost: CostType.BarrageDensity,
                 extraProjectiles: 2,
                 fireIntervalMultiplier: 1.3f));
@@ -76,10 +76,10 @@ namespace Blob.Tests
         [Test]
         public void 적재_Core_2개는_두_상태를_모두_싣는다()
         {
-            var state = new RunMutationState();
+            var state = new RunSkillState();
 
-            state.TryAcquire(AilmentCore("core_fire", MutationTag.Fire, StatusEffectType.Ignite));
-            state.TryAcquire(AilmentCore("core_frost", MutationTag.Cold, StatusEffectType.Freeze));
+            state.TryAcquire(AilmentCore("core_fire", SkillTag.Fire, StatusEffectType.Ignite));
+            state.TryAcquire(AilmentCore("core_frost", SkillTag.Cold, StatusEffectType.Freeze));
 
             WeaponModifiers modifiers = state.GetModifiers();
 
@@ -91,10 +91,10 @@ namespace Blob.Tests
         [Test]
         public void 적재_Core_2개는_발사마다_번갈아_부여된다()
         {
-            var state = new RunMutationState();
+            var state = new RunSkillState();
 
-            state.TryAcquire(AilmentCore("core_fire", MutationTag.Fire, StatusEffectType.Ignite));
-            state.TryAcquire(AilmentCore("core_frost", MutationTag.Cold, StatusEffectType.Freeze));
+            state.TryAcquire(AilmentCore("core_fire", SkillTag.Fire, StatusEffectType.Ignite));
+            state.TryAcquire(AilmentCore("core_frost", SkillTag.Cold, StatusEffectType.Freeze));
 
             WeaponModifiers modifiers = state.GetModifiers();
             var composite = new CompositeFireState();
@@ -111,11 +111,11 @@ namespace Blob.Tests
         public void 기폭_계열_Core는_합성_대상이_아니다()
         {
             // 원소 작렬·충격파는 투사체가 아니므로 탄에 상태를 싣지 않는다.
-            var state = new RunMutationState();
+            var state = new RunSkillState();
 
-            state.TryAcquire(MutationTestFactory.CreateCore(
+            state.TryAcquire(SkillTestFactory.CreateCore(
                 "core_shockwave",
-                MutationTag.AreaOfEffect | MutationTag.Detonator,
+                SkillTag.AreaOfEffect | SkillTag.Detonator,
                 family: CoreFamily.Detonation));
 
             Assert.AreEqual(0, state.GetModifiers().Ailments.Count);
@@ -125,14 +125,14 @@ namespace Blob.Tests
         public void 기능_배타로_차단된_상태는_탄에_실리지_않는다()
         {
             // 「번제」는 점화된 적에게 추가 피해를 주지만 점화를 유발할 수 없다.
-            var state = new RunMutationState();
+            var state = new RunSkillState();
 
-            state.TryAcquire(AilmentCore("core_fire", MutationTag.Fire, StatusEffectType.Ignite));
+            state.TryAcquire(AilmentCore("core_fire", SkillTag.Fire, StatusEffectType.Ignite));
 
             Assert.AreEqual(1, state.GetModifiers().Ailments.Count);
 
-            state.TryAcquire(MutationTestFactory.CreateSupport(
-                "sup_burnt_offering", MutationTag.Fire,
+            state.TryAcquire(SkillTestFactory.CreateSupport(
+                "sup_burnt_offering", SkillTag.Fire,
                 cost: CostType.FunctionalExclusion,
                 blocksStatusCreation: true,
                 blockedStatus: StatusEffectType.Ignite));
@@ -144,10 +144,10 @@ namespace Blob.Tests
         [Test]
         public void 같은_상태를_만드는_Core가_겹쳐도_중복_등록되지_않는다()
         {
-            var state = new RunMutationState();
+            var state = new RunSkillState();
 
-            state.TryAcquire(AilmentCore("core_fire_a", MutationTag.Fire, StatusEffectType.Ignite));
-            state.TryAcquire(AilmentCore("core_fire_b", MutationTag.Fire, StatusEffectType.Ignite));
+            state.TryAcquire(AilmentCore("core_fire_a", SkillTag.Fire, StatusEffectType.Ignite));
+            state.TryAcquire(AilmentCore("core_fire_b", SkillTag.Fire, StatusEffectType.Ignite));
 
             Assert.AreEqual(1, state.GetModifiers().Ailments.Count);
         }
@@ -155,7 +155,7 @@ namespace Blob.Tests
         [Test]
         public void Core가_없으면_상태도_행동도_없다()
         {
-            var state = new RunMutationState();
+            var state = new RunSkillState();
 
             WeaponModifiers modifiers = state.GetModifiers();
 

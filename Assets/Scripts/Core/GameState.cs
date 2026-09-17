@@ -8,7 +8,7 @@ public enum GameState
 
     Pause,
 
-    Mutation,
+    Skill,
 
     GameOver
 }

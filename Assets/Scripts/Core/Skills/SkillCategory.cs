@@ -1,19 +1,19 @@
 /// <summary>
-/// Mutation 대분류 — v5 §13 확정. 총 60종.
+/// Skill 대분류 — v5 §13 확정. 총 60종.
 /// Core 12 / Support 28 / Meta 7 / Persistent 13
 /// </summary>
-public enum MutationCategory
+public enum SkillCategory
 {
-    /// <summary>핵심 변이. 소켓 3개 보유, 동시 보유 상한 2개.</summary>
+    /// <summary>핵심 스킬. 소켓 3개 보유, 동시 보유 상한 2개.</summary>
     Core = 0,
 
-    /// <summary>보조 변이. 반드시 Core 소켓에 장착된다. 전역 버프가 아니다.</summary>
+    /// <summary>보조 스킬. 반드시 Core 소켓에 장착된다. 전역 버프가 아니다.</summary>
     Support = 1,
 
-    /// <summary>발동 변이. 에너지 축적 후 발동. 확률 발동 금지.</summary>
+    /// <summary>발동 스킬. 에너지 축적 후 발동. 확률 발동 금지.</summary>
     Meta = 2,
 
-    /// <summary>유지형 변이. Nucleus를 점유한다.</summary>
+    /// <summary>유지형 스킬. Nucleus를 점유한다.</summary>
     Persistent = 3
 }
 
@@ -40,7 +40,7 @@ public enum CoreFamily
     Detonation = 3
 }
 
-/// <summary>발동 변이(Meta)의 두 갈래 — v5 §8.</summary>
+/// <summary>발동 스킬(Meta)의 두 갈래 — v5 §8.</summary>
 public enum MetaTriggerKind
 {
     /// <summary>Meta가 아닌 정의의 기본값.</summary>

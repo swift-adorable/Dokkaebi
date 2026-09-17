@@ -82,7 +82,7 @@ public class Health : MonoBehaviour, IDamageable, IPoolable
         return pool.Heal(amount);
     }
 
-    /// <summary>최대 체력을 변경한다. Mutation으로 체력이 늘어나는 경우 등에 쓴다.</summary>
+    /// <summary>최대 체력을 변경한다. Skill으로 체력이 늘어나는 경우 등에 쓴다.</summary>
     public void SetMaxHealth(int newMax, bool refill = false)
     {
         maxHealth = Mathf.Max(1, newMax);

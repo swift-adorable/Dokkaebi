@@ -6,7 +6,7 @@ using System.Collections.Generic;
 /// MonoBehaviour 의존이 없으므로 EditMode에서 전수 검증한다.
 /// 필터 순서를 바꾸면 결과가 달라지므로 각 단계의 근거를 주석으로 고정한다.
 /// </summary>
-public static class MutationSelectionPool
+public static class SkillSelectionPool
 {
     /// <summary>
     /// 적재(Loadout)에서 이번 레벨업에 제시 가능한 후보를 모은다.
@@ -22,13 +22,13 @@ public static class MutationSelectionPool
     ///    v5 §7-4는 "획득은 자유롭되 동시 작동이 무의미하다"고 명시한다.
     ///    획득을 막으면 10-1-2(중복 금지로 다양성을 강제하지 않는다)를 위반한다.
     /// </summary>
-    public static List<MutationDefinition> Build(
-        IReadOnlyList<MutationDefinition> loadout,
-        RunMutationState state,
+    public static List<SkillDefinition> Build(
+        IReadOnlyList<SkillDefinition> loadout,
+        RunSkillState state,
         int playerLevel,
-        List<MutationDefinition> result = null)
+        List<SkillDefinition> result = null)
     {
-        result ??= new List<MutationDefinition>();
+        result ??= new List<SkillDefinition>();
         result.Clear();
 
         if (loadout == null)
@@ -36,7 +36,7 @@ public static class MutationSelectionPool
 
         for (int i = 0; i < loadout.Count; i++)
         {
-            MutationDefinition definition = loadout[i];
+            SkillDefinition definition = loadout[i];
 
             if (definition == null)
                 continue;

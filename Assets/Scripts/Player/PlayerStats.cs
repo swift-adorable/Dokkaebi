@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// 플레이어 레벨/경험치 관리. 레벨업 발생 시 MutationManager에 '횟수'를 전달한다.
+/// 플레이어 레벨/경험치 관리. 레벨업 발생 시 SkillManager에 '횟수'를 전달한다.
 /// </summary>
 public class PlayerStats : Singleton<PlayerStats>
 {
@@ -53,6 +53,6 @@ public class PlayerStats : Singleton<PlayerStats>
 
         GameLogger.Log($"[PlayerStats] LEVEL UP x{levelUpCount} -> Lv.{Level}");
 
-        MutationManager.EnsureInstance().EnqueueLevelUp(levelUpCount);
+        SkillManager.EnsureInstance().EnqueueLevelUp(levelUpCount);
     }
 }

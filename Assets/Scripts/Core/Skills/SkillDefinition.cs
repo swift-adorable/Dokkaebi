@@ -2,18 +2,18 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Mutation 한 종류의 정의 — Mutation System v5 확정 스키마.
+/// Skill 한 종류의 정의 — Skill System v5 확정 스키마.
 ///
-/// 저장 위치: Assets/Data/ScriptableObjects/Mutations/ (마스터 프롬프트 10-10)
+/// 저장 위치: Assets/Data/ScriptableObjects/Skills/ (마스터 프롬프트 10-10)
 ///
 /// 설계 원칙 (10-1 절대 금지 사항 7개를 스키마 수준에서 방어한다):
 /// - 단순 수치 증가만 주는 정의를 만들지 않는다. 메커니즘을 바꾼다.
 /// - 대가에 피해 감소를 쓸 수 없다. CostType enum에 Damage가 없다.
-/// - 티어(I/II/III)를 두지 않는다. 중첩 필드가 없다. 모든 Mutation은 단일 정의다.
+/// - 티어(I/II/III)를 두지 않는다. 중첩 필드가 없다. 모든 Skill은 단일 정의다.
 /// - 소환수 계열을 두지 않는다. 태그에 소환수가 없다.
 /// </summary>
-[CreateAssetMenu(fileName = "Mutation_", menuName = "Blob/Mutation Definition")]
-public class MutationDefinition : ScriptableObject
+[CreateAssetMenu(fileName = "Skill_", menuName = "Blob/Skill Definition")]
+public class SkillDefinition : ScriptableObject
 {
     // ────────────────────────────────── 식별
 
@@ -28,7 +28,7 @@ public class MutationDefinition : ScriptableObject
     [SerializeField] private string description = "설명 없음";
 
     [Header("분류")]
-    [SerializeField] private MutationCategory category = MutationCategory.Core;
+    [SerializeField] private SkillCategory category = SkillCategory.Core;
 
     [Tooltip("Core일 때만 의미가 있다. 전달 / 적재 / 기폭")]
     [SerializeField] private CoreFamily coreFamily = CoreFamily.None;
@@ -43,27 +43,27 @@ public class MutationDefinition : ScriptableObject
     // ────────────────────────────────── 태그
 
     [Header("태그 (10-2 [1] 태그 게이팅)")]
-    [Tooltip("이 Mutation이 보유한 태그.")]
-    [SerializeField] private MutationTag tags = MutationTag.None;
+    [Tooltip("이 Skill이 보유한 태그.")]
+    [SerializeField] private SkillTag tags = SkillTag.None;
 
     [Tooltip("Support 전용. 장착 대상 Core가 이 태그를 전부 가져야 장착 가능하다. " +
              "None이면 태그 제약이 없다.")]
-    [SerializeField] private MutationTag requiredTags = MutationTag.None;
+    [SerializeField] private SkillTag requiredTags = SkillTag.None;
 
     // ────────────────────────────────── 상태 어휘
 
     [Header("상태 어휘 (10-2 [2])")]
-    [Tooltip("이 Mutation이 적에게 생성하는 상태.")]
+    [Tooltip("이 Skill이 적에게 생성하는 상태.")]
     [SerializeField] private StatusEffectType createsStatus = StatusEffectType.None;
 
-    [Tooltip("이 Mutation이 소모하는 상태. 원소 작렬처럼 소모 대상이 가변이면 None으로 두고 런타임에 판정한다.")]
+    [Tooltip("이 Skill이 소모하는 상태. 원소 작렬처럼 소모 대상이 가스킬면 None으로 두고 런타임에 판정한다.")]
     [SerializeField] private StatusEffectType consumesStatus = StatusEffectType.None;
 
-    [Tooltip("이 Mutation이 바닥에 남기는 지형 상태.")]
+    [Tooltip("이 Skill이 바닥에 남기는 지형 상태.")]
     [SerializeField] private GroundEffectType createsGroundEffect = GroundEffectType.None;
 
     [Header("기능 배타 (10-2 [3])")]
-    [Tooltip("켜면 이 Mutation을 보유하는 동안 blockedStatus를 유발할 수 없게 된다. " +
+    [Tooltip("켜면 이 Skill을 보유하는 동안 blockedStatus를 유발할 수 없게 된다. " +
              "번제 / 감전 전도 / 독성 축적 / 유혈 충동 패턴.")]
     [SerializeField] private bool blocksStatusCreation = false;
 
@@ -131,13 +131,13 @@ public class MutationDefinition : ScriptableObject
     public string DisplayName => displayName;
     public string Description => description;
 
-    public MutationCategory Category => category;
+    public SkillCategory Category => category;
     public CoreFamily Family => coreFamily;
     public MetaTriggerKind MetaKind => metaKind;
     public int RequiredLevel => Mathf.Max(1, requiredLevel);
 
-    public MutationTag Tags => tags;
-    public MutationTag RequiredTags => requiredTags;
+    public SkillTag Tags => tags;
+    public SkillTag RequiredTags => requiredTags;
 
     public StatusEffectType CreatesStatus => createsStatus;
     public StatusEffectType ConsumesStatus => consumesStatus;
@@ -163,11 +163,11 @@ public class MutationDefinition : ScriptableObject
     public float SpeedMultiplier => Mathf.Max(0.1f, speedMultiplier);
 
     /// <summary>기원형인지. 기원형은 동시에 1개만 장착 가능하다. (v5 §8-2)</summary>
-    public bool IsInvocation => category == MutationCategory.Meta &&
+    public bool IsInvocation => category == SkillCategory.Meta &&
                                 metaKind == MetaTriggerKind.Invocation;
 
     /// <summary>이 정의가 다른 정의와 상호 배타 관계인지.</summary>
-    public bool IsMutuallyExclusiveWith(MutationDefinition other)
+    public bool IsMutuallyExclusiveWith(SkillDefinition other)
     {
         if (other == null || other == this)
             return false;
@@ -191,26 +191,26 @@ public class MutationDefinition : ScriptableObject
         if (string.IsNullOrWhiteSpace(id))
             id = name;
 
-        if (category != MutationCategory.Core)
+        if (category != SkillCategory.Core)
             coreFamily = CoreFamily.None;
 
-        if (category != MutationCategory.Meta)
+        if (category != SkillCategory.Meta)
             metaKind = MetaTriggerKind.None;
 
         // Persistent만 Nucleus를 점유한다. (v5 §9)
-        if (category != MutationCategory.Persistent)
+        if (category != SkillCategory.Persistent)
         {
             nucleusCost = 0;
         }
         else
         {
             // 유지형 태그는 Persistent의 정의상 필수다.
-            tags |= MutationTag.Persistent;
+            tags |= SkillTag.Persistent;
         }
 
         // requiredTags는 Support 전용 개념이다. (10-2 [1])
-        if (category != MutationCategory.Support)
-            requiredTags = MutationTag.None;
+        if (category != SkillCategory.Support)
+            requiredTags = SkillTag.None;
 
         if (!blocksStatusCreation)
             blockedStatus = StatusEffectType.None;
