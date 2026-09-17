@@ -120,6 +120,32 @@ public class BulletController : MonoBehaviour, IPoolable
         }
     }
 
+    /// <summary>
+    /// 적이 쏘는 탄으로 설정한다. EnemyAttack이 호출한다.
+    ///
+    /// 플레이어 탄과 같은 BulletController를 쓰는 이유 —
+    /// 사거리 보정·방어도·속성 상성이 양쪽에 똑같이 적용되어야
+    /// "적 피해가 반감되는 거리에서 교전한다"가 플레이어의 방어 기술이 된다.
+    /// (docs/Blob_Combat_Baseline.md 4절)
+    /// </summary>
+    public void ConfigureAsEnemyShot(
+        int shotDamage, float range, int penetration, StatusEffectType status, Vector3 origin)
+    {
+        damage = Mathf.Max(1, shotDamage);
+        effectiveRange = Mathf.Max(0f, range);
+        armourPenetration = Mathf.Max(0, penetration);
+
+        AppliedStatus = status;
+        originPoint = origin;
+
+        // 적 탄은 행동(관통·갈래 등)을 갖지 않는다. 그것은 스킬의 몫이다.
+        behaviourState.Clear();
+        ricochetState.Clear();
+
+        currentSpeed = speed;
+        despawnTime = Time.time + lifetime;
+    }
+
     /// <summary>발사 직후 Skill 보정치를 주입한다. PlayerWeapon이 호출한다.</summary>
     public void Configure(
         ProjectileBehaviourState state,

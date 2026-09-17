@@ -39,6 +39,18 @@ public class EnemyMovement : MonoBehaviour
     /// <summary>플레이어까지의 거리. 대상이 없으면 무한대.</summary>
     public float DistanceToTarget { get; private set; } = float.PositiveInfinity;
 
+    /// <summary>
+    /// 정지 거리를 바꾼다. 원거리 적이 사거리 밖에서 멈추게 할 때 쓴다.
+    ///
+    /// Inspector 값을 직접 바꾸지 않고 함수를 두는 이유 —
+    /// 원형별 프리팹을 따로 만들지 않아도 EnemyAttack이 자기 방식에 맞게
+    /// 이동을 조정할 수 있다.
+    /// </summary>
+    public void SetStoppingDistance(float distance)
+    {
+        stoppingDistance = Mathf.Max(0.1f, distance);
+    }
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();

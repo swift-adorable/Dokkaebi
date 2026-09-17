@@ -22,12 +22,25 @@ public static class MobileInputUIFactory
     private const float AbsorbPromptSize = 150f;
     private const float EdgeMargin = 140f;
 
+    /// <summary>DASH 버튼과 ABSORB 버튼 사이 간격. 엄지로 오폭하지 않을 거리.</summary>
+    private const float ButtonGap = 40f;
+
     /// <summary>
     /// DASH 버튼 위치. 우하단 앵커 기준이며 x는 왼쪽으로, y는 위로 갈수록 값이 커진다.
     /// 코너에 딱 붙이면 엄지가 화면 모서리에 걸리므로 살짝 안쪽으로 들여 배치한다.
     /// </summary>
     private static readonly Vector2 DashButtonPosition =
         new Vector2(-(EdgeMargin + 20f), EdgeMargin + 20f);
+
+    /// <summary>
+    /// ABSORB 버튼 위치. DASH 버튼 바로 위에 둔다.
+    ///
+    /// 왼쪽이 아니라 위인 이유 — 왼쪽은 우측 조이스틱(조준) 영역과 겹친다.
+    /// 조준 중에 흡수 버튼을 잘못 누르면 조준이 끊긴다.
+    /// </summary>
+    private static readonly Vector2 AbsorbButtonPosition = new Vector2(
+        DashButtonPosition.x,
+        DashButtonPosition.y + DashButtonSize * 0.5f + AbsorbPromptSize * 0.5f + ButtonGap);
 
     /// <summary>조이스틱 영역 상단 여백. 노치와 기존 UI를 피한다.</summary>
     private const float JoystickAreaTop = 0.85f;
@@ -151,17 +164,21 @@ public static class MobileInputUIFactory
         return buttonObject.AddComponent<VirtualButton>();
     }
 
-    /// <summary>시체 위에 떠오르는 흡수 프롬프트. 평소에는 투명하고 터치도 받지 않는다.</summary>
+    /// <summary>
+    /// 흡수 버튼. DASH 버튼 바로 위 고정 위치에 있고, 대상이 있을 때만 나타난다.
+    /// 조작 버튼은 항상 같은 자리에 있어야 손이 기억한다. (AbsorbPrompt 주석 참조)
+    /// </summary>
     private static VirtualButton CreateAbsorbPrompt(Transform parent)
     {
         GameObject promptObject = CreateUIObject("AbsorbPrompt", parent);
 
         var rect = promptObject.GetComponent<RectTransform>();
-        // 월드 좌표를 캔버스 로컬 좌표로 변환해 배치하므로 중앙 앵커를 사용한다.
-        rect.anchorMin = new Vector2(0.5f, 0.5f);
-        rect.anchorMax = new Vector2(0.5f, 0.5f);
+        // DASH와 같은 우하단 앵커를 쓴다. 해상도가 바뀌어도 둘의 상대 위치가 유지된다.
+        rect.anchorMin = new Vector2(1f, 0f);
+        rect.anchorMax = new Vector2(1f, 0f);
         rect.pivot = new Vector2(0.5f, 0.5f);
         rect.sizeDelta = new Vector2(AbsorbPromptSize, AbsorbPromptSize);
+        rect.anchoredPosition = AbsorbButtonPosition;
 
         var image = promptObject.AddComponent<Image>();
         image.sprite = GetCircleSprite();
