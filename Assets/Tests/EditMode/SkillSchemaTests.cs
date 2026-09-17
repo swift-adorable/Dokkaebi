@@ -44,19 +44,22 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 적재_슬롯은_6에서_11칸이다()
+        public void 동시_장착_상한은_11칸이다()
         {
             // 11 = Core 2 + Support 6 + 발동 2 + 전령 1
-            Assert.AreEqual(6, SkillLoadout.MinSlotCapacity);
-            Assert.AreEqual(11, SkillLoadout.MaxSlotCapacity);
+            // 적재(Loadout) 개념은 폐기되었으나 이 상한 자체는 그대로다.
+            // 가방 용량이 그 자리를 대신 맡는다. (Skill_System.md 11-1절)
+            Assert.AreEqual(
+                11,
+                SocketedBuild.MaxCores
+                + SocketedBuild.MaxCores * SocketedBuild.SocketsPerCore
+                + SocketedBuild.MaxMetas
+                + SocketedBuild.MaxHeralds);
 
             Assert.AreEqual(
-                SkillLoadout.MaxSlotCapacity,
-                RunSkillState.MaxCores
-                + RunSkillState.MaxCores * RunSkillState.SocketsPerCore
-                + RunSkillState.MaxMetas
-                + RunSkillState.MaxHeralds,
-                "적재 상한은 동시 장착 가능한 최대 구성과 일치해야 합니다.");
+                11,
+                SocketUnlockTable.Evaluate(SocketUnlockTable.FullyOpenLevel).TotalSlots,
+                "각성 최고 레벨에서 열리는 자리 수가 동시 장착 상한과 달라졌습니다.");
         }
 
         [Test]

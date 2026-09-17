@@ -131,7 +131,7 @@ public class PlayerWeapon : MonoBehaviour
     private WeaponModifiers GetModifiers()
     {
         if (SkillManager.HasInstance)
-            return SkillManager.Instance.RunState.GetModifiers();
+            return SkillManager.Instance.Build.GetModifiers();
 
         return defaultModifiers;
     }

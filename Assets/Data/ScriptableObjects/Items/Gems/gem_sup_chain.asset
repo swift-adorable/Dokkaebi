@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f9766db0f8594e349438cc979f7b6fe, type: 3}
+  m_Name: gem_sup_chain
+  m_EditorClassIdentifier: Blob.Runtime::ItemDefinition
+  id: gem_sup_chain
+  displayName: "\uC5F0\uC1C4"
+  description: "\uC801\uC911 \uD6C4 \uB2E4\uB978 \uC801\uC5D0\uAC8C \uC7AC\uC720\uB3C4\uB41C\uB2E4.
+    3\uD68C. \uAC19\uC740 \uC801\uC740 \uB2E4\uC2DC \uB54C\uB9AC\uC9C0 \uC54A\uB294\uB2E4."
+  kind: 5
+  tier: 0
+  weight: 0.4
+  slotSize: 1
+  stackMax: 1
+  maxDurability: 0
+  baseValue: 180
+  skill: {fileID: 11400000, guid: c12e32f2a22424784be162dbdacd57fa, type: 2}

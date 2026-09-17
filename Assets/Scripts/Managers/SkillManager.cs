@@ -3,12 +3,18 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Skill 획득 관리자 — Skill System v5 구조.
+/// 인자(因子) 관리자 — 파밍 · 도감 · 소켓 장착.
+/// (docs/Blob_Skill_System.md 0·11·12절)
 ///
-/// 흐름: 도감 → 적재(Loadout) → 레벨업 시 적재한 것 중 3장 → 선택 → RunSkillState
+/// 흐름:
+///   도감(해금 기록) → 드랍 풀 → 적을 흡수하면 인자가 가방에 들어온다
+///   → 유저가 직접 소켓에 끼운다 → 즉시 작동
+///   → 각성 레벨이 오르면 【선택창이 아니라 소켓이 열린다】
 ///
-/// 한 번에 여러 레벨이 올라가도 선택창이 중복으로 열리지 않도록
-/// 대기 건수를 누적한 뒤 한 번에 하나씩 순차 처리한다.
+/// 【이전 구조와의 차이】
+///   레벨업 시 3장을 제시하고 하나를 고르게 하던 경로를 전부 걷어냈다.
+///   SkillLoadout · SkillSelectionPool · SkillDraft · SkillSelectionUI · RunSkillState는
+///   더 이상 존재하지 않는다.
 /// </summary>
 public class SkillManager : Singleton<SkillManager>
 {
@@ -16,55 +22,59 @@ public class SkillManager : Singleton<SkillManager>
     [Tooltip("비워두면 Resources/SkillCatalog 에셋을 자동으로 불러온다.")]
     [SerializeField] private SkillCatalog catalog;
 
-    [Header("Loadout (6단계 도감/적재 UI 구현 전 임시)")]
-    [Tooltip("※ 임시 — 6단계에서 벙커 적재 UI로 대체된다. " +
-             "켜 두면 카탈로그에서 슬롯 수만큼 자동으로 적재를 채워 테스트할 수 있다.")]
-    [SerializeField] private bool autoFillLoadout = true;
+    [Tooltip("비워두면 Resources/SkillGemCatalog 에셋을 자동으로 불러온다.")]
+    [SerializeField] private SkillGemCatalog gemCatalog;
 
-    [Tooltip("적재 슬롯 수. 영구 성장으로 8 → 14까지 늘어난다.")]
-    [Range(SkillLoadout.MinSlotCapacity, SkillLoadout.MaxSlotCapacity)]
-    [SerializeField] private int loadoutSlots = SkillLoadout.MinSlotCapacity;
+    [Header("도감 (세이브 연결 전 임시)")]
+    [Tooltip("※ 임시 — 변이 샘플 해금과 세이브가 붙기 전까지 전 인자를 드랍 풀에 넣는다.")]
+    [SerializeField] private bool unlockAllOnStart = true;
 
-    [Header("Selection")]
-    [Tooltip("레벨업 시 제시할 선택지 개수. v5 확정값은 3이다.")]
-    [Min(1)]
-    [SerializeField] private int choiceCount = 3;
+    [Header("드랍")]
+    [Tooltip("시체 1구를 흡수했을 때 인자가 나올 확률.")]
+    [Range(0f, 1f)]
+    [SerializeField] private float gemDropChance = 0.18f;
 
-    [Tooltip("선택창이 열려 있는 동안 게임을 정지할지. v5 확정: 일시정지 O, 제한시간 없음.")]
-    [SerializeField] private bool pauseGameDuringSelection = true;
+    [Tooltip("레이드 시작 직후 부여 계열 Core 1개를 확정 지급한다. (11-3절) " +
+             "끄면 아무것도 쏘지 못하는 상태로 시작한다.")]
+    [SerializeField] private bool grantFirstCore = true;
 
-    private readonly SkillLoadout loadout = new();
-    private readonly RunSkillState runState = new();
-    private readonly List<SkillDefinition> currentChoices = new();
+    [Tooltip("첫 Core를 자동으로 1번 슬롯에 끼운다. 끄면 유저가 직접 끼운다.")]
+    [SerializeField] private bool autoEquipFirstCore = true;
+
+    private readonly SocketedBuild build = new();
+    private readonly SkillCodex codex = new();
+    private readonly List<SkillDefinition> dropPool = new();
+    private readonly List<SkillDefinition> returned = new();
+    private readonly List<ItemStack> gemStackBuffer = new();
 
     private System.Random random;
 
-    /// <summary>현재 선택창이 열려 있는지.</summary>
-    public bool IsSelecting { get; private set; }
+    /// <summary>지금 소켓에 끼워져 있는 구성.</summary>
+    public SocketedBuild Build => build;
 
-    /// <summary>처리 대기 중인 선택 건수.</summary>
-    public int PendingSelectionCount { get; private set; }
+    /// <summary>도감 — 무엇이 드랍 풀에 들어오는가.</summary>
+    public SkillCodex Codex => codex;
 
-    /// <summary>이번 레이드에 가져온 적재 구성.</summary>
-    public SkillLoadout Loadout => loadout;
-
-    /// <summary>이번 런에서 실제로 획득·장착된 상태.</summary>
-    public RunSkillState RunState => runState;
+    /// <summary>현재 드랍 풀. 도감에 해금된 것만 들어 있다.</summary>
+    public IReadOnlyList<SkillDefinition> DropPool => dropPool;
 
     /// <summary>전체 정의 카탈로그. 로드 실패 시 null일 수 있다.</summary>
     public SkillCatalog Catalog => catalog;
 
-    /// <summary>현재 제시된 선택지. 선택창이 닫혀 있으면 비어 있다.</summary>
-    public IReadOnlyList<SkillDefinition> CurrentChoices => currentChoices;
+    /// <summary>인자를 주웠을 때 발행된다. UI 토스트가 구독한다.</summary>
+    public event Action<SkillDefinition> OnGemGained;
 
-    /// <summary>선택창을 열어야 할 때 발행된다. UI가 구독한다.</summary>
-    public event Action<IReadOnlyList<SkillDefinition>> OnSelectionOpened;
+    /// <summary>
+    /// 각성 레벨이 올라 자리가 열렸을 때 발행된다. (레벨, "소켓 1" 같은 설명)
+    /// 선택창을 여는 이벤트가 아니다. 안내만 한다.
+    /// </summary>
+    public event Action<int, string> OnSocketsOpened;
 
-    /// <summary>선택창을 닫아야 할 때 발행된다.</summary>
-    public event Action OnSelectionClosed;
+    /// <summary>소켓 구성이 바뀌었을 때 발행된다.</summary>
+    public event Action OnBuildChanged;
 
-    /// <summary>Skill을 획득했을 때 발행된다.</summary>
-    public event Action<SkillDefinition> OnSkillGained;
+    /// <summary>인자를 끼우지 못했을 때 그 이유가 실린다. UI가 문구로 바꾼다.</summary>
+    public event Action<SkillDefinition, SocketError> OnEquipRejected;
 
     /// <summary>인스턴스를 보장한다. 씬 배치를 강제하지 않는다.</summary>
     public static SkillManager EnsureInstance()
@@ -83,69 +93,86 @@ public class SkillManager : Singleton<SkillManager>
     protected override void OnSingletonAwake()
     {
         random = new System.Random(Environment.TickCount);
+
+        build.OnChanged += HandleBuildChanged;
+    }
+
+    private void OnDestroy()
+    {
+        build.OnChanged -= HandleBuildChanged;
     }
 
     private void Start()
     {
-        LoadCatalogIfNeeded();
-        BuildLoadout();
+        LoadCatalogsIfNeeded();
 
-        // 선택 UI가 씬에 없으면 런타임에 생성한다.
-        if (FindAnyObjectByType<SkillSelectionUI>(FindObjectsInactive.Include) == null)
-            SkillSelectionUI.Create();
+        if (unlockAllOnStart && catalog != null)
+            codex.UnlockAll(catalog.Definitions);
+
+        RebuildDropPool();
+
+        SyncAwakeningLevel();
+
+        if (FindAnyObjectByType<SkillSocketUI>(FindObjectsInactive.Include) == null)
+            SkillSocketUI.Create();
+
+        if (grantFirstCore)
+            GrantFirstCore();
     }
 
-    private void LoadCatalogIfNeeded()
+    private void HandleBuildChanged() => OnBuildChanged?.Invoke();
+
+    // ────────────────────────────────── 카탈로그 · 도감
+
+    private void LoadCatalogsIfNeeded()
     {
-        if (catalog != null)
-            return;
-
-        catalog = SkillCatalog.Load();
-
         if (catalog == null)
         {
-            GameLogger.Error(
-                $"[SkillManager] Resources/{SkillCatalog.ResourcePath} 에셋이 없습니다. " +
-                "메뉴 Blob > Skill > 카탈로그 다시 만들기 를 실행하십시오.", this);
+            catalog = SkillCatalog.Load();
+
+            if (catalog == null)
+            {
+                GameLogger.Error(
+                    $"[SkillManager] Resources/{SkillCatalog.ResourcePath} 에셋이 없습니다. " +
+                    "메뉴 Blob > Skill > 카탈로그 다시 만들기 를 실행하십시오.", this);
+            }
+        }
+
+        if (gemCatalog == null)
+        {
+            gemCatalog = SkillGemCatalog.Load();
+
+            if (gemCatalog == null)
+            {
+                GameLogger.Error(
+                    $"[SkillManager] Resources/{SkillGemCatalog.ResourcePath} 에셋이 없습니다. " +
+                    "메뉴 Blob > Skill > 인자 아이템 에셋 생성 을 실행하십시오.", this);
+            }
+        }
+    }
+
+    /// <summary>도감이 바뀌었을 때 드랍 풀을 다시 만든다.</summary>
+    public void RebuildDropPool()
+    {
+        if (catalog == null)
+        {
+            dropPool.Clear();
             return;
         }
 
-        GameLogger.Log($"[SkillManager] 카탈로그 로드: {catalog.Count}종");
+        codex.BuildDropPool(catalog.Definitions, dropPool);
+
+        GameLogger.Log($"[SkillManager] 드랍 풀 {dropPool.Count}종 (도감 {codex.Count}종 해금)");
     }
+
+    // ────────────────────────────────── 각성 레벨 = 소켓 개방
 
     /// <summary>
-    /// 적재를 구성한다.
+    /// 레벨업을 반영한다. PlayerStats가 호출한다.
     ///
-    /// ※ 임시 구현이다. 6단계에서 벙커의 도감/적재 UI가 세이브 데이터로 채운다.
-    ///    v5 §11-1의 "Core 최소 1개 포함" 제약은 지금부터 지킨다.
+    /// 【선택창을 열지 않는다.】 자리가 열릴 뿐이다.
+    /// 무엇을 끼울지는 그때까지 무엇을 주웠는지가 정한다.
     /// </summary>
-    private void BuildLoadout()
-    {
-        loadout.SlotCapacity = loadoutSlots;
-
-        if (!autoFillLoadout || catalog == null || loadout.Count > 0)
-            return;
-
-        // Core를 먼저 채워 "Core 최소 1개" 제약을 구조적으로 보장한다.
-        FillFrom(catalog.GetByCategory(SkillCategory.Core), 2);
-        FillFrom(catalog.Definitions, loadout.SlotCapacity);
-
-        if (!loadout.IsValid)
-        {
-            GameLogger.Error($"[SkillManager] 적재 구성 실패: {loadout.ValidationMessage}", this);
-            return;
-        }
-
-        GameLogger.Log($"[SkillManager] 적재 자동 구성: {loadout.Count}/{loadout.SlotCapacity}칸");
-    }
-
-    private void FillFrom(IReadOnlyList<SkillDefinition> source, int limit)
-    {
-        for (int i = 0; i < source.Count && loadout.Count < limit; i++)
-            loadout.TryAdd(source[i]);
-    }
-
-    /// <summary>레벨업 횟수를 누적한다. PlayerStats가 레벨업 시 호출한다.</summary>
     public void EnqueueLevelUp(int count = 1)
     {
         if (count <= 0)
@@ -154,126 +181,359 @@ public class SkillManager : Singleton<SkillManager>
             return;
         }
 
-        PendingSelectionCount += count;
+        int before = build.AwakeningLevel;
 
-        GameLogger.Log($"[SkillManager] 선택 대기 {PendingSelectionCount}건");
+        SyncAwakeningLevel();
 
-        // 레벨이 올랐으므로 이전에 요구 레벨 미달로 보류된 대기 건도 여기서 다시 시도된다.
-        TryOpenNextSelection();
+        // 한 번에 여러 레벨이 올라도 각 레벨의 개방을 빠짐없이 알린다.
+        for (int level = before + 1; level <= build.AwakeningLevel; level++)
+        {
+            string opened = SocketUnlockTable.DescribeUnlock(level);
+
+            if (string.IsNullOrEmpty(opened))
+                continue;
+
+            GameLogger.Log($"[SkillManager] 각성 Lv.{level} — {opened} 개방");
+
+            OnSocketsOpened?.Invoke(level, opened);
+        }
     }
 
-    /// <summary>
-    /// 선택창이 닫혀 있고 대기 건이 남아 있을 때만 다음 선택을 연다.
-    /// IsSelecting 가드가 중복 오픈을 막는 핵심이다.
-    /// </summary>
-    private void TryOpenNextSelection()
+    private void SyncAwakeningLevel()
     {
-        if (IsSelecting)
-            return;
+        int level = PlayerStats.HasInstance ? PlayerStats.Instance.Level : 1;
 
-        if (PendingSelectionCount <= 0)
-        {
-            CloseSession();
-            return;
-        }
-
-        int playerLevel = PlayerStats.HasInstance ? PlayerStats.Instance.Level : 1;
-
-        // 2번째 Core 슬롯은 Lv7에 열린다. 선택 풀 필터가 이 값을 그대로 쓴다.
-        runState.CoreCapacity = RunSkillState.GetCoreCapacity(playerLevel);
-
-        SkillDraft.Draw(loadout.Entries, runState, playerLevel, choiceCount, random, currentChoices);
-
-        // 후보가 없으면 선택창을 닫되 【대기 건은 보존한다】.
-        //
-        // 적재에 고레벨 스킬만 남은 구간(예: 저레벨 7장을 다 뽑고 Lv11짜리만 남음)에서는
-        // 일시적으로 후보가 0이 된다. 여기서 대기 건을 버리면 그 레벨업이 영영 사라진다.
-        // 레벨이 올라 후보가 생기는 시점에 다시 열린다.
-        if (currentChoices.Count == 0)
-        {
-            GameLogger.Log(
-                $"[SkillManager] 지금 획득 가능한 Skill이 없습니다. " +
-                $"대기 {PendingSelectionCount}건을 보존하고 레벨업을 기다립니다.");
-
-            CloseSession();
-            return;
-        }
-
-        PendingSelectionCount--;
-        IsSelecting = true;
-
-        if (pauseGameDuringSelection && GameManager.HasInstance)
-            GameManager.Instance.OpenSkill();
-
-        GameLogger.Log($"[SkillManager] 선택지 {currentChoices.Count}개 제시 (Lv.{playerLevel})");
-
-        OnSelectionOpened?.Invoke(currentChoices);
+        build.SetAwakeningLevel(level);
     }
 
+    // ────────────────────────────────── 드랍 · 획득
+
     /// <summary>
-    /// 선택지 중 하나를 고른다. UI가 호출한다.
-    ///
-    /// preferredCoreIndex는 Support를 어느 Core 소켓에 넣을지 지정한다.
-    /// 두 Core가 모두 조건을 만족할 때 UI가 유저에게 물어 넘긴다.
+    /// 레이드 시작 직후의 확정 드랍. 부여 계열 Core 1개.
+    /// 이것이 없으면 인자가 하나도 없어 아무것도 쏘지 못한다. (11-3절)
     /// </summary>
-    public bool Select(SkillDefinition definition, int preferredCoreIndex = -1)
+    public bool GrantFirstCore()
     {
-        if (!IsSelecting)
+        if (build.HasCore)
             return false;
 
-        if (definition == null || !currentChoices.Contains(definition))
+        SkillDefinition core = SkillGemDropTable.DrawFirstCore(dropPool, random);
+
+        if (core == null)
         {
-            GameLogger.Warning("[SkillManager] 제시되지 않은 Skill은 선택할 수 없습니다.");
+            GameLogger.Error("[SkillManager] 드랍 풀에 부여 계열 Core가 없습니다. 도감을 확인하십시오.", this);
             return false;
         }
 
-        if (!runState.TryAcquire(definition, preferredCoreIndex))
-        {
-            GameLogger.Warning($"[SkillManager] 획득할 수 없습니다: {definition.DisplayName}");
+        if (!GrantGem(core))
             return false;
-        }
 
-        GameLogger.Log($"[SkillManager] 획득: {definition.DisplayName} " +
-                       $"(누적 {runState.AcquiredCount}종)");
-
-        OnSkillGained?.Invoke(definition);
-
-        IsSelecting = false;
-        currentChoices.Clear();
-
-        OnSelectionClosed?.Invoke();
-
-        TryOpenNextSelection();
+        if (autoEquipFirstCore)
+            TryEquipCore(core, 0);
 
         return true;
     }
 
-    /// <summary>선택을 건너뛴다. 대기 건은 소비된다.</summary>
-    public void Skip()
+    /// <summary>
+    /// 시체를 흡수했을 때 인자 드랍을 굴린다. PlayerAbsorber가 호출한다.
+    /// luckMultiplier는 시체의 가치 배수다. 희귀한 적일수록 잘 나온다.
+    /// </summary>
+    public bool RollGemDrop(int luckMultiplier = 1)
     {
-        if (!IsSelecting)
-            return;
+        if (dropPool.Count == 0)
+            return false;
 
-        IsSelecting = false;
-        currentChoices.Clear();
+        random ??= new System.Random(Environment.TickCount);
 
-        OnSelectionClosed?.Invoke();
+        float chance = Mathf.Clamp01(gemDropChance * Mathf.Max(1, luckMultiplier));
 
-        TryOpenNextSelection();
+        if (random.NextDouble() >= chance)
+            return false;
+
+        SkillDefinition drawn = SkillGemDropTable.Draw(dropPool, random);
+
+        return GrantGem(drawn);
     }
 
-    private void CloseSession()
+    /// <summary>
+    /// 인자를 가방에 넣는다. 자리가 없으면 false.
+    ///
+    /// 요구 레벨 미달이어도 넣는다. 【주울 수는 있으나 끼울 수 없다】가 규칙이다. (11-3절)
+    /// </summary>
+    public bool GrantGem(SkillDefinition skill)
     {
-        if (pauseGameDuringSelection && GameManager.HasInstance)
-            GameManager.Instance.CloseSkill();
+        ItemDefinition gem = FindGemItem(skill);
+
+        if (gem == null)
+            return false;
+
+        Inventory bag = PlayerInventory.EnsureInstance().Bag;
+
+        if (bag.TryAdd(gem) <= 0)
+        {
+            GameLogger.Log($"[SkillManager] 가방이 가득 차 인자를 줍지 못했습니다: {skill.DisplayName}");
+            return false;
+        }
+
+        GameLogger.Log($"[SkillManager] 인자 획득: {skill.DisplayName}");
+
+        OnGemGained?.Invoke(skill);
+
+        return true;
     }
 
-    /// <summary>런 종료 시 획득한 Skill을 전부 초기화한다. 적재 구성은 남는다. (v5 §1-5)</summary>
+    /// <summary>스킬 정의에 대응하는 인자 아이템. 없으면 null.</summary>
+    public ItemDefinition FindGemItem(SkillDefinition skill)
+    {
+        if (skill == null)
+            return null;
+
+        if (gemCatalog == null)
+        {
+            GameLogger.Error("[SkillManager] 인자 아이템 카탈로그가 없습니다.", this);
+            return null;
+        }
+
+        ItemDefinition gem = gemCatalog.Find(skill);
+
+        if (gem == null)
+            GameLogger.Error($"[SkillManager] '{skill.DisplayName}'의 인자 아이템이 없습니다.", this);
+
+        return gem;
+    }
+
+    /// <summary>가방에 든 인자 목록. 소켓 UI가 이 목록을 그린다.</summary>
+    public List<ItemStack> GetGemsInBag(List<ItemStack> result = null)
+    {
+        result ??= new List<ItemStack>();
+        result.Clear();
+
+        if (!PlayerInventory.HasInstance)
+            return result;
+
+        IReadOnlyList<ItemStack> stacks = PlayerInventory.Instance.Bag.Stacks;
+
+        for (int i = 0; i < stacks.Count; i++)
+        {
+            if (stacks[i].Definition != null && stacks[i].Definition.IsSkillGem)
+                result.Add(stacks[i]);
+        }
+
+        return result;
+    }
+
+    // ────────────────────────────────── 장착 · 탈착
+
+    public bool TryEquipCore(SkillDefinition skill, int coreIndex)
+    {
+        // Core 교체는 빠져나오는 인자가 최대 4개(기존 Core + 소켓 3)다.
+        // 끼울 인자 1개가 가방에서 빠지므로 실제로 필요한 여유는 그보다 1 적다.
+        int returning = CountReturnsForCore(skill, coreIndex);
+
+        if (returning > 1 &&
+            PlayerInventory.EnsureInstance().Bag.FreeSlots + 1 < returning)
+        {
+            GameLogger.Log("[SkillManager] 가방에 자리가 없어 핵심 스킬을 교체할 수 없습니다.");
+            OnEquipRejected?.Invoke(skill, SocketError.None);
+            return false;
+        }
+
+        return Equip(skill, () => build.TryEquipCore(skill, coreIndex, returned),
+                     build.CanEquipCore(skill, coreIndex));
+    }
+
+    /// <summary>이 Core를 저 자리에 끼우면 가방으로 돌아올 인자가 몇 개인지.</summary>
+    private int CountReturnsForCore(SkillDefinition skill, int coreIndex)
+    {
+        if (skill == null)
+            return 0;
+
+        int count = build.GetCore(coreIndex) == null ? 0 : 1;
+
+        for (int s = 0; s < SocketedBuild.SocketsPerCore; s++)
+        {
+            SkillDefinition support = build.GetSocket(coreIndex, s);
+
+            if (support != null && !skill.Tags.ContainsAll(support.RequiredTags))
+                count++;
+        }
+
+        return count;
+    }
+
+    public bool TryEquipSupport(SkillDefinition skill, int coreIndex, int socketIndex)
+    {
+        return Equip(skill, () => build.TryEquipSupport(skill, coreIndex, socketIndex, returned),
+                     build.CanEquipSupport(skill, coreIndex, socketIndex));
+    }
+
+    public bool TryEquipMeta(SkillDefinition skill, int slot)
+    {
+        return Equip(skill, () => build.TryEquipMeta(skill, slot, returned),
+                     build.CanEquipMeta(skill, slot));
+    }
+
+    public bool TryEquipHerald(SkillDefinition skill)
+    {
+        return Equip(skill, () => build.TryEquipHerald(skill, returned),
+                     build.CanEquipHerald(skill));
+    }
+
+    /// <summary>분류를 보고 비어 있는 첫 자리에 끼운다. UI의 「빠른 장착」.</summary>
+    public bool TryEquipAuto(SkillDefinition skill)
+    {
+        return Equip(skill, () => build.TryEquipAuto(skill, returned),
+                     build.CanEquipAnywhere(skill));
+    }
+
+    /// <summary>
+    /// 가방에서 인자를 꺼내 소켓에 끼운다.
+    ///
+    /// 빠져나온 인자(교체된 것, 태그를 잃은 Support)는 가방으로 돌아간다.
+    /// 조작 도중에 아이템이 사라지지 않게 하는 것이 이 함수의 핵심 책임이다.
+    /// </summary>
+    private bool Equip(SkillDefinition skill, Func<bool> equipAction, SocketError precheck)
+    {
+        if (precheck != SocketError.None)
+        {
+            OnEquipRejected?.Invoke(skill, precheck);
+            return false;
+        }
+
+        ItemDefinition gem = FindGemItem(skill);
+
+        if (gem == null)
+            return false;
+
+        Inventory bag = PlayerInventory.EnsureInstance().Bag;
+
+        if (!bag.Contains(gem))
+        {
+            GameLogger.Warning($"[SkillManager] 가방에 없는 인자입니다: {skill.DisplayName}");
+            return false;
+        }
+
+        returned.Clear();
+
+        if (!equipAction())
+            return false;
+
+        // 끼울 인자를 먼저 빼서 자리를 만든 뒤 되돌린다. 순서를 바꾸면
+        // 1:1 교체조차 가방이 꽉 찼을 때 실패한다.
+        bag.Remove(gem);
+
+        ReturnToBag(bag);
+
+        GameLogger.Log($"[SkillManager] 장착: {skill.DisplayName}");
+
+        return true;
+    }
+
+    public bool TryUnequipCore(int coreIndex)
+    {
+        Inventory bag = PlayerInventory.EnsureInstance().Bag;
+
+        // 뺄 것이 가방에 다 들어가는지 먼저 본다. 들어가지 못하면 빼지 않는다.
+        // 인자를 바닥에 버리는 처리를 만들지 않는 한, 이것이 아이템을 지키는 유일한 방법이다.
+        int needed = build.GetCore(coreIndex) == null ? 0 : 1;
+
+        for (int s = 0; s < SocketedBuild.SocketsPerCore; s++)
+        {
+            if (build.GetSocket(coreIndex, s) != null)
+                needed++;
+        }
+
+        if (needed == 0)
+            return false;
+
+        if (bag.FreeSlots < needed)
+        {
+            GameLogger.Log("[SkillManager] 가방에 자리가 없어 인자를 뺄 수 없습니다.");
+            return false;
+        }
+
+        returned.Clear();
+        build.UnequipCore(coreIndex, returned);
+        ReturnToBag(bag);
+
+        return true;
+    }
+
+    public bool TryUnequipSupport(int coreIndex, int socketIndex)
+    {
+        return Unequip(() => build.UnequipSupport(coreIndex, socketIndex));
+    }
+
+    public bool TryUnequipMeta(int slot)
+    {
+        return Unequip(() => build.UnequipMeta(slot));
+    }
+
+    public bool TryUnequipHerald()
+    {
+        return Unequip(() => build.UnequipHerald());
+    }
+
+    private bool Unequip(Func<SkillDefinition> unequipAction)
+    {
+        Inventory bag = PlayerInventory.EnsureInstance().Bag;
+
+        if (bag.FreeSlots < 1)
+        {
+            GameLogger.Log("[SkillManager] 가방에 자리가 없어 인자를 뺄 수 없습니다.");
+            return false;
+        }
+
+        SkillDefinition removed = unequipAction();
+
+        if (removed == null)
+            return false;
+
+        returned.Clear();
+        returned.Add(removed);
+
+        ReturnToBag(bag);
+
+        return true;
+    }
+
+    private void ReturnToBag(Inventory bag)
+    {
+        for (int i = 0; i < returned.Count; i++)
+        {
+            ItemDefinition gem = FindGemItem(returned[i]);
+
+            if (gem == null)
+                continue;
+
+            if (bag.TryAdd(gem) <= 0)
+            {
+                GameLogger.Error(
+                    $"[SkillManager] 가방이 가득 차 '{returned[i].DisplayName}'을 되돌리지 못했습니다. " +
+                    "탈착 전 자리 검사가 빠진 경로가 있습니다.", this);
+            }
+        }
+
+        returned.Clear();
+    }
+
+    // ────────────────────────────────── 런 종료
+
+    /// <summary>
+    /// 런 종료 시 소켓을 비운다.
+    ///
+    /// 【인자를 여기서 없애지 않는다.】 추출 성공이면 그대로 창고로 가고,
+    /// 사망이면 PlayerInventory.DropOnDeath가 규칙 하나로 처리한다.
+    /// </summary>
     public void ResetRun()
     {
-        PendingSelectionCount = 0;
-        IsSelecting = false;
-        currentChoices.Clear();
-        runState.Clear();
+        if (PlayerInventory.HasInstance)
+        {
+            returned.Clear();
+            build.UnequipAll(returned);
+            ReturnToBag(PlayerInventory.Instance.Bag);
+        }
+
+        build.Clear();
     }
 }

@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f9766db0f8594e349438cc979f7b6fe, type: 3}
+  m_Name: gem_core_gravity_collapse
+  m_EditorClassIdentifier: Blob.Runtime::ItemDefinition
+  id: gem_core_gravity_collapse
+  displayName: "\uC911\uB825 \uBD95\uAD34"
+  description: "\uC911\uB825 \uC6B0\uBB3C\uC744 \uB9CC\uB4E4\uC5B4 \uC801\uC744 \uB04C\uC5B4\uBAA8\uC73C\uACE0
+    \uC751\uC9D1\uC744 \uBD80\uC5EC\uD55C\uB2E4."
+  kind: 5
+  tier: 0
+  weight: 0.8
+  slotSize: 1
+  stackMax: 1
+  maxDurability: 0
+  baseValue: 420
+  skill: {fileID: 11400000, guid: 71728eee788894118932b8a541622838, type: 2}

@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f9766db0f8594e349438cc979f7b6fe, type: 3}
+  m_Name: gem_sup_cadence
+  m_EditorClassIdentifier: Blob.Runtime::ItemDefinition
+  id: gem_sup_cadence
+  displayName: "\uC6B4\uC728"
+  description: "\uC5F0\uC0AC\uD560\uC218\uB85D \uBC1C\uC0AC \uC18D\uB3C4\uAC00 \uC99D\uD3ED\uB41C\uB2E4."
+  kind: 5
+  tier: 0
+  weight: 0.4
+  slotSize: 1
+  stackMax: 1
+  maxDurability: 0
+  baseValue: 180
+  skill: {fileID: 11400000, guid: 23a63c393c87f41d7ace8a86e8f37793, type: 2}

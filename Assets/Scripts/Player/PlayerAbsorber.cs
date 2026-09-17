@@ -30,7 +30,8 @@ public class PlayerAbsorber : MonoBehaviour
         if (NearbyCorpse == null)
             return false;
 
-        int gainedXP = xpPerCorpse * NearbyCorpse.ValueMultiplier;
+        int valueMultiplier = NearbyCorpse.ValueMultiplier;
+        int gainedXP = xpPerCorpse * valueMultiplier;
 
         GameObject corpseObject = NearbyCorpse.gameObject;
         NearbyCorpse = null;
@@ -44,6 +45,10 @@ public class PlayerAbsorber : MonoBehaviour
             GameLogger.Warning("[PlayerAbsorber] PlayerStats가 씬에 없어 경험치를 지급하지 못했습니다.");
 
         GameLogger.Log($"[PlayerAbsorber] 경험치 흡수 +{gainedXP}");
+
+        // 흡수가 곧 파밍이다. 인자 드랍을 여기서 굴린다.
+        // (docs/Blob_Skill_System.md 11-3절 — 스킬은 드랍으로 줍는 실물 아이템이다)
+        SkillManager.EnsureInstance().RollGemDrop(valueMultiplier);
 
         return true;
     }

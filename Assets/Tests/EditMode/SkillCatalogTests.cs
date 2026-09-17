@@ -147,7 +147,7 @@ namespace Blob.Tests
                 int count = supports.Count(s =>
                     s.RequiredTags == SkillTag.None || (c.Tags & s.RequiredTags) == s.RequiredTags);
 
-                Assert.GreaterOrEqual(count, RunSkillState.SocketsPerCore,
+                Assert.GreaterOrEqual(count, SocketedBuild.SocketsPerCore,
                     $"{c.Id}({c.DisplayName})에 붙일 Support가 소켓 수보다 적습니다.");
             }
         }
@@ -330,14 +330,17 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 적재_상한만큼의_스킬을_레벨_제한_없이_고를_수_있다()
+        public void 초반_각성_레벨에서_끼울_수_있는_인자가_충분하다()
         {
-            // 엣지 케이스 — 요구 레벨이 전부 높으면 초반에 선택지가 0이 되어
-            // 레벨업이 낭비된다. 낮은 레벨 구간에도 충분한 후보가 있어야 한다.
+            // 엣지 케이스 — 요구 레벨이 전부 높으면 초반에 주운 인자를 하나도
+            // 끼우지 못한다. Lv3 시점에 열리는 자리는 Core 1 + 소켓 2 = 3개이므로
+            // 그보다 넉넉한 후보가 있어야 파밍이 의미를 가진다.
             int earlyCount = All.Count(d => d.RequiredLevel <= 3);
 
-            Assert.GreaterOrEqual(earlyCount, SkillLoadout.MinSlotCapacity,
-                "Lv3 이하 후보가 최소 적재 칸 수보다 적습니다.");
+            SocketCapacity atThree = SocketUnlockTable.Evaluate(3);
+
+            Assert.Greater(earlyCount, atThree.TotalSlots,
+                "Lv3 이하 인자가 그 시점에 열리는 자리 수보다 적습니다.");
         }
     }
 }

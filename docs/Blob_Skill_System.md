@@ -510,7 +510,11 @@ Core를 2개 보유해도 따로 발사하지 않는다. 한 발에 합쳐진다
 - Skill은 반드시 ScriptableObject로 정의한다. 코드 하드코딩 금지.
   위치: Assets/Data/ScriptableObjects/Skills/
 - SkillTag는 [System.Flags] enum. 비트 연산 1회로 끝나야 한다.
-- 선택 풀 필터는 MonoBehaviour 의존 없는 순수 클래스로 분리한다.
+- 소켓 규칙(`SocketedBuild`) · 개방 표(`SocketUnlockTable`) · 도감(`SkillCodex`) ·
+  드랍 추첨(`SkillGemDropTable`)은 전부 MonoBehaviour 의존 없는 순수 클래스다.
+- 인자 실물은 `ItemDefinition`(kind = SkillGem)이며 `SkillDefinition`을 참조한다.
+  위치: Assets/Data/ScriptableObjects/Items/Gems/ — 목록은 Resources/SkillGemCatalog.asset.
+  둘 다 에디터 메뉴 `Blob > Skill > 인자 아이템 에셋 생성`이 53종을 한 번에 만든다.
 - 정의 에셋은 Resources 밖에 두고, Resources/SkillCatalog.asset 하나가
   목록을 들고 있다. SkillCatalogBuilder가 임포트 시점에 폴더를 스캔해
   자동 갱신하므로 Inspector 드래그를 잊는 실패 지점이 없다.

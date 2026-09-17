@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f9766db0f8594e349438cc979f7b6fe, type: 3}
+  m_Name: gem_sup_ricochet
+  m_EditorClassIdentifier: Blob.Runtime::ItemDefinition
+  id: gem_sup_ricochet
+  displayName: "\uD295\uACA8 \uC3D8\uAE30"
+  description: "\uC9C0\uD615\uC5D0 \uBD80\uB52A\uD788\uBA74 \uD295\uAE34\uB2E4. 3\uD68C.
+    \uB9E4 \uD295\uAE40\uB9C8\uB2E4 \uBD80\uC5EC \uD310\uC815\uC774 \uB2E4\uC2DC
+    \uC77C\uC5B4\uB09C\uB2E4."
+  kind: 5
+  tier: 0
+  weight: 0.4
+  slotSize: 1
+  stackMax: 1
+  maxDurability: 0
+  baseValue: 180
+  skill: {fileID: 11400000, guid: e4c92736369d7437db96c5f9fe334262, type: 2}

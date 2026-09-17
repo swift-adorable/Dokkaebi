@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f9766db0f8594e349438cc979f7b6fe, type: 3}
+  m_Name: gem_meta_cast_on_freeze
+  m_EditorClassIdentifier: Blob.Runtime::ItemDefinition
+  id: gem_meta_cast_on_freeze
+  displayName: "\uB3D9\uACB0 \uC2DC \uC2DC\uC804"
+  description: "\uB3D9\uACB0\uC744 \uC720\uBC1C\uD560 \uB54C\uB9C8\uB2E4 7% \uCDA9\uC804\uB41C\uB2E4.
+    \uBC1C\uB3D9 \uC2DC \uBC94\uC704 \uB0B4 \uC804\uCCB4\uB97C \uB3D9\uACB0\uC2DC\uD0A4\uACE0
+    5\uCD08\uAC04 \uB3D9\uACB0\uC774 \uC804\uC774\uB41C\uB2E4."
+  kind: 5
+  tier: 0
+  weight: 0.6
+  slotSize: 1
+  stackMax: 1
+  maxDurability: 0
+  baseValue: 300
+  skill: {fileID: 11400000, guid: 076a9fb0efc624a8bb0357d1886520c4, type: 2}
