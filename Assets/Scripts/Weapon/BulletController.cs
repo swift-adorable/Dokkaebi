@@ -15,7 +15,15 @@ public class BulletController : MonoBehaviour, IPoolable
 {
     [Header("Base Stats")]
     [SerializeField] private float speed = 20f;
-    [SerializeField] private int damage = 1;
+
+    [Tooltip("무기가 정하는 기본 피해. 기준값은 CombatConstants.BaseWeaponDamage(10)이다.")]
+    [SerializeField] private int damage = CombatConstants.BaseWeaponDamage;
+
+    [Tooltip("유효 사거리(m). 절반을 넘으면 피해가 절반이 된다.")]
+    [SerializeField] private float effectiveRange = CombatConstants.BaseEffectiveRange;
+
+    [Tooltip("무기가 제공하는 방어 관통 레벨. Pierce(관통)와 다른 개념이다.")]
+    [SerializeField] private int armourPenetration = 0;
 
     [Tooltip("자동 소멸까지의 시간(초)")]
     [SerializeField] private float lifetime = 3f;
@@ -89,12 +97,28 @@ public class BulletController : MonoBehaviour, IPoolable
     }
 
     /// <summary>
-    /// 합성 발사로 이 탄이 부여하는 적재 속성. (확정 기획 — 합성 발사)
+    /// 합성 발사로 이 탄이 부여하는 상태. (확정 기획 — 합성 발사)
     ///
-    /// 전달 계열 Core가 준 행동과 적재 계열 Core가 준 상태가 한 발에 합쳐진다.
-    /// ※ 실제 상태 부여는 상태이상 시스템과 함께 5-D에서 구현한다. 현재는 운반만 한다.
+    /// 부여 계열 Core가 준 상태와 Support가 준 행동이 한 발에 합쳐진다.
+    /// 부여 Core가 2개면 발사마다 번갈아 실린다. (각 50% 빈도)
     /// </summary>
     public StatusEffectType AppliedStatus { get; private set; }
+
+    /// <summary>이 탄의 피해 속성. 실린 상태에서 자동으로 따라온다.</summary>
+    public DamageElement Element
+    {
+        get
+        {
+            switch (AppliedStatus)
+            {
+                case StatusEffectType.Ignite: return DamageElement.Fire;
+                case StatusEffectType.Poison: return DamageElement.Chaos;
+                case StatusEffectType.Freeze: return DamageElement.Cold;
+                case StatusEffectType.Shock: return DamageElement.Lightning;
+                default: return DamageElement.Physical;
+            }
+        }
+    }
 
     /// <summary>발사 직후 Skill 보정치를 주입한다. PlayerWeapon이 호출한다.</summary>
     public void Configure(
@@ -205,9 +229,40 @@ public class BulletController : MonoBehaviour, IPoolable
         if (!isReturning)
             hitTargets.Add(other.transform);
 
-        targetHealth.TakeDamage(damage);
+        ApplyHit(targetHealth);
 
         ResolveBehaviour(other.transform);
+    }
+
+    /// <summary>
+    /// 피해와 상태를 한 번에 적용한다.
+    ///
+    /// 순서가 중요하다 — 상태를 먼저 걸고 피해를 준다.
+    /// 반대로 하면 이 탄으로 죽는 적에게 상태가 남지 않아
+    /// 전령(처치 시 연쇄)과 잔류물이 발동하지 않는다.
+    /// </summary>
+    private void ApplyHit(Health target)
+    {
+        if (AppliedStatus != StatusEffectType.None)
+            target.ApplyStatus(AppliedStatus, damage);
+
+        float distance = Vector3.Distance(originPoint, transform.position);
+
+        var request = new DamageRequest
+        {
+            baseDamage = damage,
+            increasedPercent = 0f,
+            element = Element,
+            hitKind = HitKind.Ranged,
+            armourPenetration = armourPenetration,
+            distance = distance,
+            effectiveRange = effectiveRange,
+            isCritical = false,
+            criticalMultiplier = 1f,
+            bypassArmour = false
+        };
+
+        target.TakeDamage(request);
     }
 
     /// <summary>충돌 1회당 행동 하나만 해결한다. 이 배타성이 조합 설계의 핵심이다.</summary>

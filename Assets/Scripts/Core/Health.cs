@@ -65,6 +65,75 @@ public class Health : MonoBehaviour, IDamageable, IPoolable
         resistances = resist;
     }
 
+    /// <summary>
+    /// 상태이상을 건다. 도트 처리를 위해 StatusEffectSystem에 자동 등록된다.
+    ///
+    /// 호출자가 등록을 잊는 실패 지점을 만들지 않으려고 여기서 함께 처리한다.
+    /// </summary>
+    /// <param name="type">거는 상태</param>
+    /// <param name="sourceDamage">부여 시점의 기본 피해. 초당 피해의 기준이 된다.</param>
+    public void ApplyStatus(StatusEffectType type, float sourceDamage)
+    {
+        if (IsDead || type == StatusEffectType.None || sourceDamage <= 0f)
+            return;
+
+        // 저항 장비가 면역을 주면 아예 걸리지 않는다. (막는 것은 장비의 몫)
+        if (IsImmuneTo(type))
+            return;
+
+        Status.Apply(type, sourceDamage);
+
+        StatusEffectSystem.EnsureInstance().Track(this);
+
+        OnStatusChanged?.Invoke(type);
+    }
+
+    /// <summary>
+    /// 이 상태에 면역인지. 장비(각인 저항형 II 이상)가 면역을 준다.
+    ///
+    /// ※ 장비 시스템은 6단계에서 착수한다. 지금은 항상 false이며,
+    ///    판정 지점만 미리 만들어 두어 나중에 한 곳만 고치면 되게 한다.
+    /// </summary>
+    public bool IsImmuneTo(StatusEffectType type)
+    {
+        return false;
+    }
+
+    /// <summary>
+    /// 상태이상 도트를 한 프레임 진행시킨다. StatusEffectSystem이 호출한다.
+    /// 직접 호출하지 않는다. 두 번 돌면 도트가 두 배가 된다.
+    /// </summary>
+    /// <param name="deltaTime">경과 시간</param>
+    /// <param name="buffer">호출자가 재사용하는 버퍼. GC Alloc을 막는다.</param>
+    public void TickStatus(float deltaTime, System.Collections.Generic.List<DamageRequest> buffer)
+    {
+        if (IsDead || buffer == null)
+            return;
+
+        bool moving = IsMoving != null && IsMoving();
+
+        Status.Tick(deltaTime, moving, buffer);
+
+        for (int i = 0; i < buffer.Count; i++)
+        {
+            TakeDamage(buffer[i]);
+
+            if (IsDead)
+                return;
+        }
+    }
+
+    /// <summary>
+    /// 이 대상이 이동 중인지 판정하는 함수. 출혈 배증에 쓴다.
+    ///
+    /// 컴포넌트 참조 대신 델리게이트를 쓰는 이유 — 플레이어와 적의
+    /// 이동 컴포넌트가 다르고, 테스트에서는 둘 다 없기 때문이다.
+    /// </summary>
+    public System.Func<bool> IsMoving { get; set; }
+
+    /// <summary>상태이상이 새로 걸렸을 때. 외형·UI가 구독한다.</summary>
+    public event Action<StatusEffectType> OnStatusChanged;
+
     private void Awake()
     {
         pool = new HealthPool(maxHealth);
@@ -79,6 +148,9 @@ public class Health : MonoBehaviour, IDamageable, IPoolable
         // 상태이상도 반드시 함께 초기화한다.
         // 남겨 두면 재사용된 개체가 이전 런의 점화를 그대로 들고 나온다.
         Status.ClearAll();
+
+        if (StatusEffectSystem.HasInstance)
+            StatusEffectSystem.Instance.Untrack(this);
     }
 
     public void OnDespawned()
@@ -154,6 +226,18 @@ public class Health : MonoBehaviour, IDamageable, IPoolable
             return 0;
 
         return pool.Heal(amount);
+    }
+
+    /// <summary>
+    /// 테스트에서 무적 시간을 조정한다.
+    ///
+    /// 프리팹 없이 코드로 만든 Health는 Inspector 값을 쓸 수 없고,
+    /// 무적이 켜져 있으면 도트 검증이 흔들린다. PlayMode 테스트 전용이다.
+    /// </summary>
+    public void ConfigureForTest(float invulnerableSeconds)
+    {
+        invulnerableDuration = Mathf.Max(0f, invulnerableSeconds);
+        invulnerability.Reset();
     }
 
     /// <summary>최대 체력을 변경한다. Skill으로 체력이 늘어나는 경우 등에 쓴다.</summary>
