@@ -1,6 +1,6 @@
 # BLOB PROJECT MASTER PROMPT
 # Unity 6 Mobile (Android / iOS) Top-Down Shooter + Roguelite Project
-# 최종 갱신: 2026-09-16 (Skill System v5 확정 반영)
+# 최종 갱신: 2026-09-17 (Skill System v6 확정 반영 — poe2db 명명 / 전달 계열 재배치)
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 0. AI 기본 페르소나 및 응답 태도 (Critical)
@@ -416,9 +416,9 @@ Assets/
 - Unity 에디터가 실행 중이어야 동작한다.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-10. Skill 시스템 — 확정 사양 (v5)
+10. Skill 시스템 — 확정 사양 (v6)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-※ 상세 설명은 별도 문서 [Project_Blob_Skill_System_v5.md] 참조.
+※ 상세 설명은 별도 문서 [Project_Blob_Skill_System_v6.md] 참조.
    본 절은 구현 시 반드시 지켜야 할 확정 규칙만 요약한다.
 
 ──────────────────────────────────────
