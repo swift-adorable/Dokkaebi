@@ -69,5 +69,5 @@ Assets/
 
 ### 마지막 전체 검증
 
-**EditMode 223/223 통과 (커밋 `5-G`)** — `Assets/Refresh` → `recompile` 0 warning → 18개 테스트 클래스를 개별 필터로 전부 실행해 확인.
+**EditMode 245/245 통과 (커밋 `5-E`)** — `Assets/Refresh` → `recompile` 0 warning → 19개 테스트 클래스를 개별 필터로 전부 실행해 확인.
 전체 일괄 실행은 MCP 타임아웃으로 불가하다 (위 함정 참조).

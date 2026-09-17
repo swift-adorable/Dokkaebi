@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f1826eda630a40a7b8b37017e52d7bc, type: 3}
+  m_Name: sup_escalating_poison
+  m_EditorClassIdentifier: Blob.Runtime::SkillDefinition
+  id: sup_escalating_poison
+  displayName: "\uACA9\uD654\uB418\uB294 \uC911\uB3C5"
+  description: "\uC911\uB3C5 \uC911\uCCA9 \uC218\uC5D0 \uBE44\uB840\uD574 \uD53C\uD574\uAC00
+    \uC99D\uAC00\uD55C\uB2E4."
+  category: 1
+  coreFamily: 0
+  requiredLevel: 7
+  tags: 0
+  requiredTags: 16
+  createsStatus: 0
+  consumesStatus: 0
+  createsGroundEffect: 0
+  blocksStatusCreation: 1
+  blockedStatus: 2
+  mutuallyExclusiveIds: []
+  costType: 4
+  costDescription: "\uC911\uB3C5\uC744 \uC720\uBC1C\uD560 \uC218 \uC5C6\uB2E4"
+  grantedBehaviour: 0
+  behaviourCharges: 0
+  ricochetBounces: 0
+  extraProjectiles: 0
+  spreadAngle: 8
+  fireIntervalMultiplier: 1
+  lifetimeMultiplier: 1
+  speedMultiplier: 1

@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f1826eda630a40a7b8b37017e52d7bc, type: 3}
+  m_Name: her_thunder
+  m_EditorClassIdentifier: Blob.Runtime::SkillDefinition
+  id: her_thunder
+  displayName: "\uCC9C\uB465\uC758 \uC804\uB839"
+  description: "\uAC10\uC804\uB41C \uC801\uC744 \uCC98\uCE58\uD558\uBA74 \uC8FC\uBCC0
+    \uC804\uCCB4\uC5D0 \uBC88\uAC1C\uB97C \uBC29\uCD9C\uD55C\uB2E4."
+  category: 3
+  coreFamily: 0
+  requiredLevel: 11
+  tags: 1032
+  requiredTags: 0
+  createsStatus: 0
+  consumesStatus: 4
+  createsGroundEffect: 0
+  blocksStatusCreation: 0
+  blockedStatus: 0
+  mutuallyExclusiveIds: []
+  costType: 0
+  costDescription: 
+  grantedBehaviour: 0
+  behaviourCharges: 0
+  ricochetBounces: 0
+  extraProjectiles: 0
+  spreadAngle: 8
+  fireIntervalMultiplier: 1
+  lifetimeMultiplier: 1
+  speedMultiplier: 1

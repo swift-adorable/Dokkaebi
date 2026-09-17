@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f1826eda630a40a7b8b37017e52d7bc, type: 3}
+  m_Name: sup_chain_detonation
+  m_EditorClassIdentifier: Blob.Runtime::SkillDefinition
+  id: sup_chain_detonation
+  displayName: "\uC5F0\uC1C4 \uAE30\uD3ED"
+  description: "\uD3ED\uBC1C\uC774 1\uD68C \uC5F0\uC1C4\uB41C\uB2E4."
+  category: 1
+  coreFamily: 0
+  requiredLevel: 7
+  tags: 0
+  requiredTags: 256
+  createsStatus: 0
+  consumesStatus: 0
+  createsGroundEffect: 0
+  blocksStatusCreation: 0
+  blockedStatus: 0
+  mutuallyExclusiveIds: []
+  costType: 7
+  costDescription: "\uAE30\uD3ED \uCFE8\uB2E4\uC6B4 +0.4\uCD08"
+  grantedBehaviour: 0
+  behaviourCharges: 0
+  ricochetBounces: 0
+  extraProjectiles: 0
+  spreadAngle: 8
+  fireIntervalMultiplier: 1
+  lifetimeMultiplier: 1
+  speedMultiplier: 1

@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f1826eda630a40a7b8b37017e52d7bc, type: 3}
+  m_Name: her_blood
+  m_EditorClassIdentifier: Blob.Runtime::SkillDefinition
+  id: her_blood
+  displayName: "\uD53C\uC758 \uC804\uB839"
+  description: "\uCD9C\uD608 \uC911\uC778 \uC801\uC744 \uCC98\uCE58\uD558\uBA74 \uCD95\uC801\uB41C
+    \uCD9C\uD608\uB7C9\uC5D0 \uBE44\uB840\uD574 \uD608\uC561\uC774 \uD3ED\uBC1C\uD55C\uB2E4."
+  category: 3
+  coreFamily: 0
+  requiredLevel: 11
+  tags: 1056
+  requiredTags: 0
+  createsStatus: 0
+  consumesStatus: 5
+  createsGroundEffect: 0
+  blocksStatusCreation: 0
+  blockedStatus: 0
+  mutuallyExclusiveIds: []
+  costType: 0
+  costDescription: 
+  grantedBehaviour: 0
+  behaviourCharges: 0
+  ricochetBounces: 0
+  extraProjectiles: 0
+  spreadAngle: 8
+  fireIntervalMultiplier: 1
+  lifetimeMultiplier: 1
+  speedMultiplier: 1

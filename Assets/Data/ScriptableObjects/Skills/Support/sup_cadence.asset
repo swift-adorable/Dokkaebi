@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f1826eda630a40a7b8b37017e52d7bc, type: 3}
+  m_Name: sup_cadence
+  m_EditorClassIdentifier: Blob.Runtime::SkillDefinition
+  id: sup_cadence
+  displayName: "\uC6B4\uC728"
+  description: "\uC5F0\uC0AC\uD560\uC218\uB85D \uBC1C\uC0AC \uC18D\uB3C4\uAC00 \uC99D\uD3ED\uB41C\uB2E4."
+  category: 1
+  coreFamily: 0
+  requiredLevel: 9
+  tags: 0
+  requiredTags: 0
+  createsStatus: 0
+  consumesStatus: 0
+  createsGroundEffect: 0
+  blocksStatusCreation: 0
+  blockedStatus: 0
+  mutuallyExclusiveIds: []
+  costType: 3
+  costDescription: "\uC0C1\uD55C\uC5D0 \uB3C4\uB2EC\uD558\uBA74 1\uCD08\uAC04 \uAC15\uC81C\uB85C
+    \uACFC\uC5F4 \uC815\uC9C0\uD55C\uB2E4"
+  grantedBehaviour: 0
+  behaviourCharges: 0
+  ricochetBounces: 0
+  extraProjectiles: 0
+  spreadAngle: 8
+  fireIntervalMultiplier: 1
+  lifetimeMultiplier: 1
+  speedMultiplier: 1

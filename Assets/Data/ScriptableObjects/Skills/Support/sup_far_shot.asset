@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f1826eda630a40a7b8b37017e52d7bc, type: 3}
+  m_Name: sup_far_shot
+  m_EditorClassIdentifier: Blob.Runtime::SkillDefinition
+  id: sup_far_shot
+  displayName: "\uC6D0\uAC70\uB9AC \uC0AC\uACA9"
+  description: "\uBA40\uB9AC \uC788\uB294 \uC801\uC77C\uC218\uB85D \uD6A8\uACFC\uAC00
+    \uCEE4\uC9C4\uB2E4."
+  category: 1
+  coreFamily: 0
+  requiredLevel: 7
+  tags: 0
+  requiredTags: 1
+  createsStatus: 0
+  consumesStatus: 0
+  createsGroundEffect: 0
+  blocksStatusCreation: 0
+  blockedStatus: 0
+  mutuallyExclusiveIds:
+  - sup_melee_combat
+  costType: 3
+  costDescription: "\uAC00\uAE4C\uC6B8\uC218\uB85D \uD6A8\uACFC\uAC00 \uC18C\uBA78\uD55C\uB2E4"
+  grantedBehaviour: 0
+  behaviourCharges: 0
+  ricochetBounces: 0
+  extraProjectiles: 0
+  spreadAngle: 8
+  fireIntervalMultiplier: 1
+  lifetimeMultiplier: 1
+  speedMultiplier: 1
