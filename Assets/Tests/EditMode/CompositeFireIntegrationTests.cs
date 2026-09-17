@@ -5,32 +5,34 @@ namespace Blob.Tests
     /// <summary>
     /// 합성 발사가 RunSkillState → WeaponModifiers 경로에서 실제로 성립하는지 검증한다.
     ///
-    /// 전달 Core의 행동과 적재 Core의 상태가 '한 발'에 합쳐져야 한다.
+    /// v8부터 투사체 행동(관통·갈래·사슬 등)은 전부 Support가 부여한다.
+    /// 부여 Core의 상태와 Support의 행동이 '한 발'에 합쳐져야 한다.
     /// </summary>
     public class CompositeFireIntegrationTests
     {
-        private static SkillDefinition DeliveryCore(
+        /// <summary>투사체 행동을 부여하는 Support. (v8 — 행동은 Core가 아니라 Support의 몫)</summary>
+        private static SkillDefinition BehaviourSupport(
             string id, ProjectileBehaviourType behaviour, int charges)
         {
-            return SkillTestFactory.CreateCore(id, SkillTag.Projectile,
-                family: CoreFamily.Delivery, behaviour: behaviour, behaviourCharges: charges);
+            return SkillTestFactory.CreateSupport(id, SkillTag.Projectile,
+                behaviour: behaviour, behaviourCharges: charges);
         }
 
         private static SkillDefinition AilmentCore(
             string id, SkillTag tags, StatusEffectType status)
         {
-            return SkillTestFactory.CreateCore(id, tags,
+            return SkillTestFactory.CreateCore(id, SkillTag.Projectile | tags,
                 family: CoreFamily.Ailment, createsStatus: status);
         }
 
         [Test]
-        public void 전달_Core와_적재_Core가_한_발에_합쳐진다()
+        public void 행동_Support와_부여_Core가_한_발에_합쳐진다()
         {
             // 관통 + 화염 = "관통하면서 점화시키는 탄 1발"
             var state = new RunSkillState();
 
-            state.TryAcquire(DeliveryCore("core_pierce", ProjectileBehaviourType.Pierce, 3));
             state.TryAcquire(AilmentCore("core_fire", SkillTag.Fire, StatusEffectType.Ignite));
+            state.TryAcquire(BehaviourSupport("sup_pierce", ProjectileBehaviourType.Pierce, 3));
 
             WeaponModifiers modifiers = state.GetModifiers();
 
@@ -48,8 +50,11 @@ namespace Blob.Tests
             // 동시 발사였다면 2배가 되었을 상황이다. 모바일 성능의 핵심 차이다.
             var state = new RunSkillState();
 
-            state.TryAcquire(DeliveryCore("core_pierce", ProjectileBehaviourType.Pierce, 3));
-            state.TryAcquire(DeliveryCore("core_split", ProjectileBehaviourType.Split, 1));
+            state.TryAcquire(AilmentCore("core_fire", SkillTag.Fire, StatusEffectType.Ignite));
+            state.TryAcquire(AilmentCore("core_frost", SkillTag.Cold, StatusEffectType.Freeze));
+
+            state.TryAcquire(BehaviourSupport("sup_pierce", ProjectileBehaviourType.Pierce, 3));
+            state.TryAcquire(BehaviourSupport("sup_split", ProjectileBehaviourType.Split, 1));
 
             Assert.AreEqual(1, state.GetModifiers().TotalProjectiles);
         }
@@ -59,7 +64,7 @@ namespace Blob.Tests
         {
             var state = new RunSkillState();
 
-            state.TryAcquire(DeliveryCore("core_pierce", ProjectileBehaviourType.Pierce, 3));
+            state.TryAcquire(AilmentCore("core_fire", SkillTag.Fire, StatusEffectType.Ignite));
 
             state.TryAcquire(SkillTestFactory.CreateSupport(
                 "sup_multishot", SkillTag.Projectile,

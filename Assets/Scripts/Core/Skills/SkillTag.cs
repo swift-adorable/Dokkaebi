@@ -44,7 +44,7 @@ public enum SkillTag
     /// <summary>지속시간 — 시간 개념이 있다</summary>
     Duration = 1 << 9,
 
-    /// <summary>유지형 — Nucleus를 점유한다</summary>
+    /// <summary>유지형 — 전령 계열이 가진다. 동시 장착 1개 제한을 받는다</summary>
     Persistent = 1 << 10,
 
     /// <summary>발동 — 다른 것을 트리거한다</summary>

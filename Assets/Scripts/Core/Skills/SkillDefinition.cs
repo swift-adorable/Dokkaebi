@@ -33,9 +33,6 @@ public class SkillDefinition : ScriptableObject
     [Tooltip("Core일 때만 의미가 있다. 전달 / 적재 / 기폭")]
     [SerializeField] private CoreFamily coreFamily = CoreFamily.None;
 
-    [Tooltip("Meta일 때만 의미가 있다. 자동 발동형 / 기원형")]
-    [SerializeField] private MetaTriggerKind metaKind = MetaTriggerKind.None;
-
     [Tooltip("이 레벨 미만에서는 선택지에 등장하지 않는다. v5 목록의 Lv 값.")]
     [Min(1)]
     [SerializeField] private int requiredLevel = 1;
@@ -75,11 +72,6 @@ public class SkillDefinition : ScriptableObject
     [SerializeField] private string[] mutuallyExclusiveIds = new string[0];
 
     // ────────────────────────────────── 자원
-
-    [Header("자원")]
-    [Tooltip("Persistent 전용. 점유하는 Nucleus. 기본 Nucleus는 100이다.")]
-    [Min(0)]
-    [SerializeField] private int nucleusCost = 0;
 
     // ────────────────────────────────── 대가
 
@@ -133,7 +125,6 @@ public class SkillDefinition : ScriptableObject
 
     public SkillCategory Category => category;
     public CoreFamily Family => coreFamily;
-    public MetaTriggerKind MetaKind => metaKind;
     public int RequiredLevel => Mathf.Max(1, requiredLevel);
 
     public SkillTag Tags => tags;
@@ -147,7 +138,6 @@ public class SkillDefinition : ScriptableObject
     public StatusEffectType BlockedStatus => blockedStatus;
     public IReadOnlyList<string> MutuallyExclusiveIds => mutuallyExclusiveIds;
 
-    public int NucleusCost => Mathf.Max(0, nucleusCost);
 
     public CostType Cost => costType;
     public string CostDescription => costDescription;
@@ -162,9 +152,8 @@ public class SkillDefinition : ScriptableObject
     public float LifetimeMultiplier => Mathf.Max(0.1f, lifetimeMultiplier);
     public float SpeedMultiplier => Mathf.Max(0.1f, speedMultiplier);
 
-    /// <summary>기원형인지. 기원형은 동시에 1개만 장착 가능하다. (v5 §8-2)</summary>
-    public bool IsInvocation => category == SkillCategory.Meta &&
-                                metaKind == MetaTriggerKind.Invocation;
+    /// <summary>전령인지. 전령은 동시에 1개만 장착 가능하다. (v8 §8-1)</summary>
+    public bool IsHerald => category == SkillCategory.Persistent;
 
     /// <summary>이 정의가 다른 정의와 상호 배타 관계인지.</summary>
     public bool IsMutuallyExclusiveWith(SkillDefinition other)
@@ -194,19 +183,9 @@ public class SkillDefinition : ScriptableObject
         if (category != SkillCategory.Core)
             coreFamily = CoreFamily.None;
 
-        if (category != SkillCategory.Meta)
-            metaKind = MetaTriggerKind.None;
-
-        // Persistent만 Nucleus를 점유한다. (v5 §9)
-        if (category != SkillCategory.Persistent)
-        {
-            nucleusCost = 0;
-        }
-        else
-        {
-            // 유지형 태그는 Persistent의 정의상 필수다.
+        // 유지형 태그는 Persistent(전령)의 정의상 필수다.
+        if (category == SkillCategory.Persistent)
             tags |= SkillTag.Persistent;
-        }
 
         // requiredTags는 Support 전용 개념이다. (10-2 [1])
         if (category != SkillCategory.Support)

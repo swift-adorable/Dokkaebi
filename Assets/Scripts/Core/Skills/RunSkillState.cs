@@ -27,11 +27,18 @@ public class RunSkillState
     /// <summary>Core 1개당 소켓 수.</summary>
     public const int SocketsPerCore = 3;
 
-    /// <summary>기원형 Meta 동시 장착 상한.</summary>
-    public const int MaxInvocations = 1;
+    /// <summary>발동 스킬(Meta) 동시 장착 상한. (v8 §7)</summary>
+    public const int MaxMetas = 2;
 
-    /// <summary>기본 Nucleus 상한. 추출 성공 누적으로 증가한다.</summary>
-    public const int BaseNucleus = 100;
+    /// <summary>
+    /// 전령(Persistent) 동시 장착 상한. (v8 §8-1)
+    ///
+    /// 전령은 전부 "특정 상태의 적을 처치했을 때" 발동한다.
+    /// 한 런의 빌드는 보통 한 속성으로 수렴하므로 2개를 들어도 실제로는
+    /// 하나만 작동한다. Nucleus 같은 자원 시스템을 두는 대신
+    /// "5종 중 하나를 고른다"로 단순화했다.
+    /// </summary>
+    public const int MaxHeralds = 1;
 
     private readonly List<SkillDefinition> acquired = new();
     private readonly List<SkillDefinition> cores = new();
@@ -41,7 +48,6 @@ public class RunSkillState
 
     private readonly WeaponModifiers modifiers = new();
 
-    private int nucleusCapacity = BaseNucleus;
     private int coreCapacity = MaxCores;
     private bool isDirty = true;
 
@@ -74,42 +80,8 @@ public class RunSkillState
     /// <summary>2번째 Core 슬롯이 아직 잠겨 있는지. UI가 안내 문구를 띄우는 데 쓴다.</summary>
     public bool IsSecondCoreLocked => coreCapacity < MaxCores;
 
-    /// <summary>Nucleus 상한. 영구 성장 3축 중 하나다.</summary>
-    public int NucleusCapacity
-    {
-        get => nucleusCapacity;
-        set => nucleusCapacity = value < 0 ? 0 : value;
-    }
-
-    public int NucleusSpent
-    {
-        get
-        {
-            int total = 0;
-
-            for (int i = 0; i < persistents.Count; i++)
-                total += persistents[i].NucleusCost;
-
-            return total;
-        }
-    }
-
-    public int NucleusRemaining => nucleusCapacity - NucleusSpent;
-
-    /// <summary>장착된 기원형. 없으면 null.</summary>
-    public SkillDefinition Invocation
-    {
-        get
-        {
-            for (int i = 0; i < metas.Count; i++)
-            {
-                if (metas[i].IsInvocation)
-                    return metas[i];
-            }
-
-            return null;
-        }
-    }
+    /// <summary>장착된 전령. 없으면 null.</summary>
+    public SkillDefinition Herald => persistents.Count > 0 ? persistents[0] : null;
 
     /// <summary>비어 있는 소켓의 총 개수.</summary>
     public int FreeSocketCount
@@ -211,11 +183,11 @@ public class RunSkillState
                 return FindSocketFor(definition) >= 0;
 
             case SkillCategory.Meta:
-                // 기원형은 동시에 1개만. 자동 발동형은 제한이 없다.
-                return !definition.IsInvocation || Invocation == null;
+                return metas.Count < MaxMetas;
 
             case SkillCategory.Persistent:
-                return definition.NucleusCost <= NucleusRemaining;
+                // 전령은 동시에 1개만 장착할 수 있다.
+                return persistents.Count < MaxHeralds;
 
             default:
                 return false;

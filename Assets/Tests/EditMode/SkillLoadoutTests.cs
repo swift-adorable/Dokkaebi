@@ -11,24 +11,26 @@ namespace Blob.Tests
     public class SkillLoadoutTests
     {
         [Test]
-        public void 기본_슬롯은_8칸이다()
+        public void 기본_슬롯은_6칸이다()
         {
             var loadout = new SkillLoadout();
 
-            Assert.AreEqual(8, loadout.SlotCapacity);
+            Assert.AreEqual(6, loadout.SlotCapacity);
             Assert.AreEqual(SkillLoadout.MinSlotCapacity, loadout.SlotCapacity);
         }
 
         [Test]
-        public void 슬롯은_8_미만이나_14_초과로_설정할_수_없다()
+        public void 슬롯은_6_미만이나_11_초과로_설정할_수_없다()
         {
+            // v8: 상한 11 = Core 2 + Support 6 + 발동 2 + 전령 1
             var loadout = new SkillLoadout();
 
             loadout.SlotCapacity = 3;
-            Assert.AreEqual(8, loadout.SlotCapacity);
+            Assert.AreEqual(SkillLoadout.MinSlotCapacity, loadout.SlotCapacity);
 
             loadout.SlotCapacity = 99;
-            Assert.AreEqual(14, loadout.SlotCapacity);
+            Assert.AreEqual(SkillLoadout.MaxSlotCapacity, loadout.SlotCapacity);
+            Assert.AreEqual(11, loadout.SlotCapacity);
         }
 
         [Test]
@@ -36,12 +38,12 @@ namespace Blob.Tests
         {
             var loadout = new SkillLoadout();
 
-            for (int i = 0; i < 8; i++)
+            for (int i = 0; i < 6; i++)
                 Assert.IsTrue(loadout.TryAdd(SkillTestFactory.CreateCore($"core_{i}")));
 
             Assert.AreEqual(0, loadout.FreeSlots);
             Assert.IsFalse(loadout.TryAdd(SkillTestFactory.CreateCore("core_overflow")));
-            Assert.AreEqual(8, loadout.Count);
+            Assert.AreEqual(6, loadout.Count);
         }
 
         [Test]
@@ -61,7 +63,7 @@ namespace Blob.Tests
             var loadout = new SkillLoadout();
 
             loadout.TryAdd(SkillTestFactory.CreateSupport("sup_a"));
-            loadout.TryAdd(SkillTestFactory.CreatePersistent("per_a", 10));
+            loadout.TryAdd(SkillTestFactory.CreatePersistent("per_a"));
 
             Assert.IsFalse(loadout.IsValid);
             Assert.IsFalse(loadout.HasCore);
@@ -93,18 +95,18 @@ namespace Blob.Tests
         public void 슬롯을_줄이면_초과분이_뒤에서부터_제거된다()
         {
             // 엣지 케이스: 세이브 데이터 롤백 등으로 슬롯이 줄어들 수 있다.
-            var loadout = new SkillLoadout(14);
+            var loadout = new SkillLoadout(11);
 
-            for (int i = 0; i < 14; i++)
+            for (int i = 0; i < 11; i++)
                 loadout.TryAdd(SkillTestFactory.CreateCore($"core_{i}"));
 
-            Assert.AreEqual(14, loadout.Count);
+            Assert.AreEqual(11, loadout.Count);
 
-            loadout.SlotCapacity = 8;
+            loadout.SlotCapacity = 6;
 
-            Assert.AreEqual(8, loadout.Count);
+            Assert.AreEqual(6, loadout.Count);
             Assert.AreEqual("core_0", loadout.Entries[0].Id);
-            Assert.AreEqual("core_7", loadout.Entries[7].Id);
+            Assert.AreEqual("core_5", loadout.Entries[5].Id);
         }
 
         [Test]

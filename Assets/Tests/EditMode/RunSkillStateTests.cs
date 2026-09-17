@@ -5,8 +5,8 @@ namespace Blob.Tests
     /// <summary>
     /// 런 중 상태(RunSkillState) 테스트.
     ///
-    /// v5 §10-9의 확정 규칙을 그대로 검증한다.
-    /// Core 2개 / 소켓 3개 / 기원형 1개 / Nucleus 100 / 중복 등장 없음.
+    /// v8의 확정 규칙을 그대로 검증한다.
+    /// Core 2개 / 소켓 3개 / 발동 2개 / 전령 1개 / 중복 등장 없음.
     /// </summary>
     public class RunSkillStateTests
     {
@@ -118,65 +118,38 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 기원형은_동시에_1개만_장착된다()
+        public void 발동_스킬은_동시에_2개까지만_장착된다()
         {
             var state = new RunSkillState();
 
-            SkillDefinition first =
-                SkillTestFactory.CreateMeta("meta_origin_1", MetaTriggerKind.Invocation);
-            SkillDefinition second =
-                SkillTestFactory.CreateMeta("meta_origin_2", MetaTriggerKind.Invocation);
+            Assert.IsTrue(state.TryAcquire(SkillTestFactory.CreateMeta("meta_1")));
+            Assert.IsTrue(state.TryAcquire(SkillTestFactory.CreateMeta("meta_2")));
+            Assert.IsFalse(state.TryAcquire(SkillTestFactory.CreateMeta("meta_3")));
+
+            Assert.AreEqual(RunSkillState.MaxMetas, state.Metas.Count);
+        }
+
+        [Test]
+        public void 전령은_동시에_1개만_장착된다()
+        {
+            var state = new RunSkillState();
+
+            SkillDefinition first = SkillTestFactory.CreatePersistent("herald_ash");
+            SkillDefinition second = SkillTestFactory.CreatePersistent("herald_ice");
 
             Assert.IsTrue(state.TryAcquire(first));
             Assert.IsFalse(state.TryAcquire(second));
-            Assert.AreSame(first, state.Invocation);
+
+            Assert.AreEqual(RunSkillState.MaxHeralds, state.Persistents.Count);
+            Assert.AreSame(first, state.Herald);
         }
 
         [Test]
-        public void 자동_발동형은_개수_제한이_없다()
+        public void 전령이_없으면_Herald는_null이다()
         {
             var state = new RunSkillState();
 
-            for (int i = 0; i < 4; i++)
-            {
-                Assert.IsTrue(state.TryAcquire(
-                    SkillTestFactory.CreateMeta($"meta_auto_{i}", MetaTriggerKind.Automatic)));
-            }
-
-            Assert.AreEqual(4, state.Metas.Count);
-            Assert.IsNull(state.Invocation);
-        }
-
-        [Test]
-        public void Nucleus_한도를_넘는_유지형은_획득할_수_없다()
-        {
-            var state = new RunSkillState();
-
-            // 전령 45 × 2 = 90, 남은 10
-            Assert.IsTrue(state.TryAcquire(SkillTestFactory.CreatePersistent("herald_1", 45)));
-            Assert.IsTrue(state.TryAcquire(SkillTestFactory.CreatePersistent("herald_2", 45)));
-
-            Assert.AreEqual(90, state.NucleusSpent);
-            Assert.AreEqual(10, state.NucleusRemaining);
-
-            // 기동 20은 들어갈 자리가 없다
-            Assert.IsFalse(state.TryAcquire(SkillTestFactory.CreatePersistent("mobility", 20)));
-
-            // 감각 확장 10은 정확히 들어간다 (경계값)
-            Assert.IsTrue(state.TryAcquire(SkillTestFactory.CreatePersistent("sense", 10)));
-            Assert.AreEqual(0, state.NucleusRemaining);
-        }
-
-        [Test]
-        public void Nucleus_상한을_올리면_더_담을_수_있다()
-        {
-            var state = new RunSkillState { NucleusCapacity = 120 };
-
-            Assert.IsTrue(state.TryAcquire(SkillTestFactory.CreatePersistent("herald_1", 45)));
-            Assert.IsTrue(state.TryAcquire(SkillTestFactory.CreatePersistent("herald_2", 45)));
-            Assert.IsTrue(state.TryAcquire(SkillTestFactory.CreatePersistent("mobility", 20)));
-
-            Assert.AreEqual(110, state.NucleusSpent);
+            Assert.IsNull(state.Herald);
         }
 
         [Test]
@@ -310,14 +283,14 @@ namespace Blob.Tests
             var state = new RunSkillState();
 
             state.TryAcquire(ProjectileCore("core_1"));
-            state.TryAcquire(SkillTestFactory.CreatePersistent("per_1", 30));
+            state.TryAcquire(SkillTestFactory.CreatePersistent("per_1"));
 
             state.Clear();
 
             Assert.AreEqual(0, state.AcquiredCount);
             Assert.AreEqual(0, state.Cores.Count);
-            Assert.AreEqual(0, state.NucleusSpent);
-            Assert.AreEqual(RunSkillState.BaseNucleus, state.NucleusRemaining);
+            Assert.AreEqual(0, state.Persistents.Count);
+            Assert.IsNull(state.Herald);
         }
 
         [Test]

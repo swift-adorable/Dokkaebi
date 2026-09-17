@@ -9,7 +9,7 @@ using UnityEngine.UI;
 /// 씬 배치를 잊어 빌드에 빠지는 실패 지점을 만들지 않는다. (마스터 프롬프트 5-4)
 ///
 /// 화면 구성
-///   상단 상태 바 : Lv / 핵심 보유 / 소켓 / Nucleus  — 선택의 근거가 되는 자원을 항상 보여준다
+///   상단 상태 바 : Lv / 핵심 / 소켓 / 발동 / 전령  — 선택의 근거가 되는 자원을 항상 보여준다
 ///   카드 3장     : 분류 · 이름 · 설명 · 태그 · 대가
 ///   소켓 선택    : Support를 두 Core가 모두 받을 수 있을 때만 나타난다
 ///
@@ -36,7 +36,7 @@ public class SkillSelectionUI : MonoBehaviour
     };
 
     private static readonly string[] CategoryNames = { "핵심", "보조", "발동", "유지형" };
-    private static readonly string[] FamilyNames = { "", "전달", "부여", "기폭" };
+    private static readonly string[] FamilyNames = { "", "부여", "기폭" };
 
     private SkillManager manager;
 
@@ -184,7 +184,8 @@ public class SkillSelectionUI : MonoBehaviour
 
         statusLabel.text =
             $"Lv.{level}    {coreText}    소켓 {usedSockets}/{totalSockets}    " +
-            $"Nucleus {state.NucleusSpent}/{state.NucleusCapacity}";
+            $"발동 {state.Metas.Count}/{RunSkillState.MaxMetas}    " +
+            $"전령 {state.Persistents.Count}/{RunSkillState.MaxHeralds}";
     }
 
     private GameObject CreateCard(SkillDefinition definition, float x)
@@ -243,8 +244,8 @@ public class SkillSelectionUI : MonoBehaviour
         if (definition.Category == SkillCategory.Core && definition.Family != CoreFamily.None)
             badge += " · " + FamilyNames[Mathf.Clamp((int)definition.Family, 0, FamilyNames.Length - 1)];
 
-        if (definition.IsInvocation)
-            badge += " · 기원형";
+        if (definition.IsHerald)
+            badge += " · 전령";
 
         return $"{badge}    Lv{definition.RequiredLevel}";
     }
@@ -261,7 +262,7 @@ public class SkillSelectionUI : MonoBehaviour
         }
 
         if (definition.Category == SkillCategory.Persistent)
-            lines.Add($"Nucleus {definition.NucleusCost} 점유");
+            lines.Add("전령 — 동시 1개만 장착 가능");
 
         if (!string.IsNullOrEmpty(definition.CostDescription))
             lines.Add($"대가: {definition.CostDescription}");

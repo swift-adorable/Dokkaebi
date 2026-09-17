@@ -109,20 +109,34 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void Nucleus가_모자란_유지형은_등장하지_않는다()
+        public void 전령을_이미_장착했으면_다른_전령은_등장하지_않는다()
         {
-            SkillDefinition heavy = SkillTestFactory.CreatePersistent("per_heavy", 45);
-            SkillDefinition light = SkillTestFactory.CreatePersistent("per_light", 10);
+            // v8 §8-1: 전령은 동시에 1개. 자리가 없으면 후보로 올리지 않는다.
+            SkillDefinition ice = SkillTestFactory.CreatePersistent("herald_ice");
+            SkillDefinition ash = SkillTestFactory.CreatePersistent("herald_ash");
 
             var state = new RunSkillState();
-            state.TryAcquire(SkillTestFactory.CreatePersistent("per_a", 45));
-            state.TryAcquire(SkillTestFactory.CreatePersistent("per_b", 45));
+            state.TryAcquire(SkillTestFactory.CreatePersistent("herald_thunder"));
 
             List<SkillDefinition> candidates =
-                SkillSelectionPool.Build(Loadout(heavy, light), state, 13);
+                SkillSelectionPool.Build(Loadout(ice, ash), state, 13);
 
-            Assert.AreEqual(1, candidates.Count);
-            Assert.AreSame(light, candidates[0]);
+            Assert.AreEqual(0, candidates.Count);
+        }
+
+        [Test]
+        public void 발동_스킬_2개를_채우면_더_등장하지_않는다()
+        {
+            SkillDefinition third = SkillTestFactory.CreateMeta("meta_3");
+
+            var state = new RunSkillState();
+            state.TryAcquire(SkillTestFactory.CreateMeta("meta_1"));
+            state.TryAcquire(SkillTestFactory.CreateMeta("meta_2"));
+
+            List<SkillDefinition> candidates =
+                SkillSelectionPool.Build(Loadout(third), state, 13);
+
+            Assert.AreEqual(0, candidates.Count);
         }
 
         [Test]

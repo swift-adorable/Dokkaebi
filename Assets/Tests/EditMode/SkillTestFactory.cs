@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Blob.Tests
 {
     /// <summary>
-    /// 테스트용 SkillDefinition을 코드로 만들어 주는 헬퍼. (v5 스키마)
+    /// 테스트용 SkillDefinition을 코드로 만들어 주는 헬퍼. (v8 스키마)
     ///
     /// SerializedObject를 쓰므로 에디터 전용이다. MonoBehaviour가 아니라
     /// ScriptableObject이므로 에디터 어셈블리에 있어도 문제가 없다.
@@ -16,7 +16,7 @@ namespace Blob.Tests
             string id,
             SkillTag tags = SkillTag.Projectile,
             int requiredLevel = 1,
-            CoreFamily family = CoreFamily.Delivery,
+            CoreFamily family = CoreFamily.Ailment,
             StatusEffectType createsStatus = StatusEffectType.None,
             ProjectileBehaviourType behaviour = ProjectileBehaviourType.None,
             int behaviourCharges = 0)
@@ -61,22 +61,19 @@ namespace Blob.Tests
 
         public static SkillDefinition CreateMeta(
             string id,
-            MetaTriggerKind kind = MetaTriggerKind.Automatic,
             int requiredLevel = 11)
         {
             return Create(id, SkillCategory.Meta, SkillTag.Trigger,
-                requiredLevel: requiredLevel,
-                metaKind: kind);
+                requiredLevel: requiredLevel);
         }
 
+        /// <summary>전령(Persistent). v8부터 Nucleus 비용이 없고 동시 1개만 장착된다.</summary>
         public static SkillDefinition CreatePersistent(
             string id,
-            int nucleusCost,
             int requiredLevel = 1)
         {
             return Create(id, SkillCategory.Persistent, SkillTag.Persistent,
-                requiredLevel: requiredLevel,
-                nucleusCost: nucleusCost);
+                requiredLevel: requiredLevel);
         }
 
         public static SkillDefinition Create(
@@ -86,14 +83,12 @@ namespace Blob.Tests
             SkillTag requiredTags = SkillTag.None,
             int requiredLevel = 1,
             CoreFamily family = CoreFamily.None,
-            MetaTriggerKind metaKind = MetaTriggerKind.None,
             StatusEffectType createsStatus = StatusEffectType.None,
             StatusEffectType consumesStatus = StatusEffectType.None,
             GroundEffectType createsGroundEffect = GroundEffectType.None,
             bool blocksStatusCreation = false,
             StatusEffectType blockedStatus = StatusEffectType.None,
             string[] mutuallyExclusiveIds = null,
-            int nucleusCost = 0,
             CostType cost = CostType.None,
             string costDescription = "",
             ProjectileBehaviourType behaviour = ProjectileBehaviourType.None,
@@ -115,7 +110,6 @@ namespace Blob.Tests
 
             serialized.FindProperty("category").intValue = (int)category;
             serialized.FindProperty("coreFamily").intValue = (int)family;
-            serialized.FindProperty("metaKind").intValue = (int)metaKind;
             serialized.FindProperty("requiredLevel").intValue = requiredLevel;
 
             serialized.FindProperty("tags").intValue = (int)tags;
@@ -134,8 +128,6 @@ namespace Blob.Tests
 
             for (int i = 0; i < exclusiveCount; i++)
                 exclusive.GetArrayElementAtIndex(i).stringValue = mutuallyExclusiveIds[i];
-
-            serialized.FindProperty("nucleusCost").intValue = nucleusCost;
 
             serialized.FindProperty("costType").intValue = (int)cost;
             serialized.FindProperty("costDescription").stringValue = costDescription;

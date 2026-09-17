@@ -11,11 +11,17 @@ using System.Collections.Generic;
 /// </summary>
 public class SkillLoadout
 {
-    /// <summary>적재 슬롯 초기값.</summary>
-    public const int MinSlotCapacity = 8;
+    /// <summary>적재 슬롯 초기값. (v8 §11)</summary>
+    public const int MinSlotCapacity = 6;
 
-    /// <summary>적재 슬롯 최대값. 추출 성공 누적으로 확장된다.</summary>
-    public const int MaxSlotCapacity = 14;
+    /// <summary>
+    /// 적재 슬롯 최대값. 추출 성공 누적으로 확장된다.
+    ///
+    /// 11의 근거 — 한 런에서 실제 작동 가능한 최대치가
+    /// Core 2 + Support 6(소켓 3×2) + Meta 2 + 전령 1 = 11이다.
+    /// 11을 넘으면 가져가도 쓸 수 없는 스킬이 생겨 슬롯 확장이 무의미해진다.
+    /// </summary>
+    public const int MaxSlotCapacity = 11;
 
     private readonly List<SkillDefinition> entries = new();
 
