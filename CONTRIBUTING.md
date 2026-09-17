@@ -51,7 +51,7 @@ Assets/
 - 셸에서 파일을 옮긴 뒤에는 Unity에서 `Assets/Refresh`를 실행해야 `CS2001`이 나지 않는다.
 - **문서를 스크립트로 치환할 때** 앵커 문자열이 문서 앞쪽에도 있으면 구간이 복제된다. 절 헤더처럼 유일한 문자열을 앵커로 쓰고 `end > start`를 단언한다.
 - `git`이 `.git/index.lock`을 지우지 못하면 커밋이 막힌다. (셸에 삭제 권한이 없는 환경)
-- **Unity MCP의 `run_tests`는 첫 호출이 타임아웃될 수 있다.** 30초 대기 후 재호출한다.
+- **Unity MCP의 `run_tests`는 전체 실행이 타임아웃된다.** 테스트가 200개를 넘으면서 MCP 응답 한도를 넘었다. `testFilter`에 클래스 전체 이름(`Blob.Tests.XxxTests`)을 넣어 클래스 단위로 나눠 돌린다. 부분 일치 필터(`Blob.Tests.Projectile`)는 0건을 반환하므로 쓰지 않는다.
 
 ## MCP Unity 연동
 
@@ -69,4 +69,5 @@ Assets/
 
 ### 마지막 전체 검증
 
-**EditMode 183/183 통과 (커밋 `908ad2a`)** — `Assets/Refresh` → `recompile` 0 warning → `run_tests` 실행 확인.
+**EditMode 223/223 통과 (커밋 `5-G`)** — `Assets/Refresh` → `recompile` 0 warning → 18개 테스트 클래스를 개별 필터로 전부 실행해 확인.
+전체 일괄 실행은 MCP 타임아웃으로 불가하다 (위 함정 참조).
