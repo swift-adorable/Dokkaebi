@@ -158,6 +158,7 @@ public class SkillManager : Singleton<SkillManager>
 
         GameLogger.Log($"[SkillManager] 선택 대기 {PendingSelectionCount}건");
 
+        // 레벨이 올랐으므로 이전에 요구 레벨 미달로 보류된 대기 건도 여기서 다시 시도된다.
         TryOpenNextSelection();
     }
 
@@ -183,12 +184,17 @@ public class SkillManager : Singleton<SkillManager>
 
         SkillDraft.Draw(loadout.Entries, runState, playerLevel, choiceCount, random, currentChoices);
 
-        // 더 이상 얻을 수 있는 Skill이 없으면 대기 건을 소진하고 조용히 넘어간다.
+        // 후보가 없으면 선택창을 닫되 【대기 건은 보존한다】.
+        //
+        // 적재에 고레벨 스킬만 남은 구간(예: 저레벨 7장을 다 뽑고 Lv11짜리만 남음)에서는
+        // 일시적으로 후보가 0이 된다. 여기서 대기 건을 버리면 그 레벨업이 영영 사라진다.
+        // 레벨이 올라 후보가 생기는 시점에 다시 열린다.
         if (currentChoices.Count == 0)
         {
-            GameLogger.Log("[SkillManager] 획득 가능한 Skill이 없어 선택을 건너뜁니다.");
+            GameLogger.Log(
+                $"[SkillManager] 지금 획득 가능한 Skill이 없습니다. " +
+                $"대기 {PendingSelectionCount}건을 보존하고 레벨업을 기다립니다.");
 
-            PendingSelectionCount = 0;
             CloseSession();
             return;
         }

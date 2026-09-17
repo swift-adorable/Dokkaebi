@@ -36,7 +36,7 @@ public class SkillSelectionUI : MonoBehaviour
     };
 
     private static readonly string[] CategoryNames = { "핵심", "보조", "발동", "유지형" };
-    private static readonly string[] FamilyNames = { "", "전달", "적재", "기폭" };
+    private static readonly string[] FamilyNames = { "", "전달", "부여", "기폭" };
 
     private SkillManager manager;
 

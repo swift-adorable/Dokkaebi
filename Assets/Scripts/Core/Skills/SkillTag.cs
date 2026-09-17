@@ -32,13 +32,13 @@ public enum SkillTag
     /// <summary>물리 — 피해 유형</summary>
     Physical = 1 << 5,
 
-    /// <summary>효과범위 — 범위 피해를 준다</summary>
+    /// <summary>효과 범위 — 범위 피해를 준다</summary>
     AreaOfEffect = 1 << 6,
 
-    /// <summary>지대 — 바닥에 장판을 남긴다</summary>
+    /// <summary>잔류물 — 바닥에 장판을 남긴다 (poe2db 실제 태그명)</summary>
     Zone = 1 << 7,
 
-    /// <summary>기폭장치 — 다른 것을 터뜨릴 수 있다</summary>
+    /// <summary>기폭 장치 — 다른 것을 터뜨릴 수 있다</summary>
     Detonator = 1 << 8,
 
     /// <summary>지속시간 — 시간 개념이 있다</summary>
@@ -87,7 +87,7 @@ public static class SkillTagExtensions
     private static readonly string[] KoreanNames =
     {
         "투사체", "화염", "냉기", "번개", "카오스", "물리",
-        "효과범위", "지대", "기폭장치", "지속시간", "유지형", "발동", "조건부", "청산"
+        "효과 범위", "잔류물", "기폭 장치", "지속시간", "유지형", "발동", "조건부", "청산"
     };
 
     /// <summary>

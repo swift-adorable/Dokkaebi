@@ -43,7 +43,7 @@ public class PlayerAbsorber : MonoBehaviour
         else
             GameLogger.Warning("[PlayerAbsorber] PlayerStats가 씬에 없어 경험치를 지급하지 못했습니다.");
 
-        GameLogger.Log($"[PlayerAbsorber] Core Absorbed (+{gainedXP} XP)");
+        GameLogger.Log($"[PlayerAbsorber] Biomass Absorbed (+{gainedXP} XP)");
 
         return true;
     }
