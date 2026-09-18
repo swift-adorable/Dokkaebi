@@ -11,7 +11,7 @@
 | **A. 끊긴 배선** | ~~10~~ **6** | 코드가 있고 테스트도 통과하는데 **아무도 부르지 않는다** |
 | **B. 문서 간 모순** | ~~4~~ **2** | 문서끼리 다른 말을 한다. 결정이 필요하다 |
 | **C. 수치 불일치** | 9 | 문서와 코드의 숫자가 다르다 |
-| **D. 데이터 모델 공백** | 6 | 문서가 요구하는 것을 담을 필드가 없다 |
+| **D. 데이터 모델 공백** | ~~6~~ **4** | 문서가 요구하는 것을 담을 필드가 없다 |
 | **E. 문서 TBD인데 코드가 확정** | 13 | 코드가 먼저 값을 정했다. 문서를 맞춰야 한다 |
 
 **가장 큰 발견** — 순수 로직 + EditMode 테스트 전략이 **정확성은 검증했지만 연결은 검증하지 못했다.**
@@ -34,6 +34,7 @@
 | **A6** | **잔류물 5종** | `Core/Combat/GroundEffectTable.cs` | **없음.** 「마름쇠」·「유지되는 대지」·「잔류물 효력」 3종이 기댈 대상이 없다 |
 | **A7** | **난이도 배율 6단** | `Core/Combat/DifficultyLevel.cs:26-51` | **테스트뿐.** `Health.TakeDamage`의 배율 인자를 아무도 넘기지 않는다 |
 | **A8** | **내성 「가장 낮은 것 하나만」** | `ElementalResistances.TakeLowest:78-88` | **테스트뿐.** 몬스터 속성을 내성에 합성하는 경로 자체가 없다 |
+| ~~A+~~ | ~~상태이상 면역~~ | **해결 (6-I)** — `Health.IsImmuneTo`가 항상 false였다. 역치 각인 3종 + 얼굴 마스크 15종이 이제 작동한다 | `Player/PlayerLoadout.cs` |
 | **A9** | **패시브 효과 17종 중 13종** | `Core/Progression/PassiveEffectType.cs` | 실제로 읽히는 것은 `CarrySlots` · `CarryWeight` · `AbsorbAmount` · `LootRolls` **4종뿐** |
 | ~~A10~~ | ~~장비 에셋 82종~~ | **해결 (6-H)** — `PlayerWeapon.ApplyProfile` → 탄에 `SetWeaponBase` | `Player/PlayerLoadout.cs` |
 
@@ -125,7 +126,7 @@
 
 ## D. 데이터 모델 공백 — 담을 자리가 없다
 
-### D1. 스킬에 「증가%」 축이 없다 ★ 가장 큰 공백
+### ~~D1. 스킬에 「증가%」 축이 없다~~ — 해결 (6-I)
 
 `Combat_Baseline` 2절의 피해 공식에 `× (1 + Σ 증가%)` 항이 있는데,
 `SkillDefinition`에 **피해 증가율 · 상태이상 위력 · 치명타 필드가 하나도 없다.**
@@ -134,14 +135,22 @@
 결과: **Support 35종 중 21종이 대가만 적용되고 효과가 적용되지 않는다.**
 「불난 집 부채질」 「치명적인 중독」 「기세」 등을 끼우면 **손해만 본다.**
 
-> 6-C에서 장비 쪽에는 `DamageIncrease` · `AilmentPower` · `CriticalChance`를 추가했다.
-> **스킬 쪽에 같은 축이 필요하다.**
+> **해결** — `SkillDefinition`에 `damageIncrease` · `ailmentPower` ·
+> `ailmentDurationMultiplier` · `rangeMultiplier` · 조건부 3필드를 추가했다.
+> `WeaponModifiers`가 합산하고 `BulletController`가 명중 시점에 적용한다.
+> Support 21종에 값을 채웠고 `SkillEffectTests`가 「효과 없는 Support」를 막는다.
+>
+> **남은 공백 2종** — 「화염 조율」·「원소 융합」은 속성 전환 축이 없어
+> 여전히 효과가 없다. 테스트의 `KnownGaps`에 남겨 계속 보이게 했다.
 
-### D2. `lifetimeMultiplier` 하나가 두 의미를 겸한다
+### ~~D2. `lifetimeMultiplier` 하나가 두 의미를 겸한다~~ — 해결 (6-I)
 
 문서의 대가 「지속시간」(상태이상·잔류물)과 「유효 사거리」가 같은 필드를 쓴다.
-그래서 「유지되는 대지」(잔류물 +100%)가 **투사체 사거리를 2배로 만든다** (`SkillAssetGenerator.cs:391`).
-그리고 「유효 사거리」 대가를 쓰는 Support 6종은 **전부 `lifetime = 1f`** — 대가가 적용되지 않는다.
+그래서 「유지되는 대지」(잔류물 +100%)가 **투사체 사거리를 2배로 만들었다.**
+
+> **해결** — `ailmentDurationMultiplier`(상태이상·잔류물)와 `lifetimeMultiplier`(투사체 수명)를
+> 분리하고, 「유효 사거리」 대가는 `rangeMultiplier`로 옮겼다.
+> `지속시간_Support가_투사체_수명을_건드리지_않는다` 테스트가 재발을 막는다.
 
 ### D3. 차단형 Support 4종이 구조적으로 영구 무효
 

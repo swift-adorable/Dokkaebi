@@ -42,6 +42,16 @@ public static class SkillAssetGenerator
         public float fireInterval;
         public float lifetime;
         public float speed;
+
+        // ── 효과 ──────────────────────────────────────────────────────
+        public float dmg;          // 기본 피해 증가율
+        public float ailPower;     // 상태이상 위력 증가율
+        public float ailDuration;  // 상태이상·잔류물 지속시간 배수
+        public float range;        // 유효 사거리 배수
+        public float spread;       // 추가 투사체 간 각도(도)
+        public SkillConditionKind condition;
+        public StatusEffectType conditionStatus;
+        public float conditionalDmg;
     }
 
     private static Row New(string id, string name, string desc, SkillCategory category, int level)
@@ -57,7 +67,10 @@ public static class SkillAssetGenerator
             exclusive = null,
             cost = CostType.None, costDesc = string.Empty,
             behaviour = ProjectileBehaviourType.None, charges = 0, ricochet = 0,
-            extraProjectiles = 0, fireInterval = 1f, lifetime = 1f, speed = 1f
+            extraProjectiles = 0, fireInterval = 1f, lifetime = 1f, speed = 1f,
+            dmg = 0f, ailPower = 0f, ailDuration = 1f, range = 1f, spread = 8f,
+            condition = SkillConditionKind.None,
+            conditionStatus = StatusEffectType.None, conditionalDmg = 0f
         };
     }
 
@@ -149,6 +162,15 @@ public static class SkillAssetGenerator
         so.FindProperty("lifetimeMultiplier").floatValue = row.lifetime;
         so.FindProperty("speedMultiplier").floatValue = row.speed;
 
+        so.FindProperty("damageIncrease").floatValue = row.dmg;
+        so.FindProperty("ailmentPower").floatValue = row.ailPower;
+        so.FindProperty("ailmentDurationMultiplier").floatValue = row.ailDuration;
+        so.FindProperty("rangeMultiplier").floatValue = row.range;
+        so.FindProperty("spreadAngle").floatValue = row.spread;
+        so.FindProperty("conditionKind").intValue = (int)row.condition;
+        so.FindProperty("conditionStatus").intValue = (int)row.conditionStatus;
+        so.FindProperty("conditionalDamageIncrease").floatValue = row.conditionalDmg;
+
         so.ApplyModifiedPropertiesWithoutUndo();
 
         EditorUtility.SetDirty(definition);
@@ -239,6 +261,9 @@ public static class SkillAssetGenerator
             "탄속이 40% 느려진다. 체류가 길어져 적중 판정이 늘어난다.", SkillCategory.Support, 1);
         r.requiredTags = SkillTag.Projectile;
         r.cost = CostType.Immediacy; r.costDesc = "즉시성 상실"; r.speed = 0.6f;
+        // 느려진 만큼 수명을 늘려 사거리를 보존한다. 그래야 「체류가 길어진다」가
+        // 실제로 성립한다 — 수명을 그대로 두면 그냥 사거리가 짧아질 뿐이다.
+        r.lifetime = 1.67f;
         t.Add(r);
 
         r = New("sup_ricochet", "튕겨 쏘기",
@@ -280,6 +305,7 @@ public static class SkillAssetGenerator
             "탄환이 적을 추적한다. 상태이상에 걸린 적을 우선한다.", SkillCategory.Support, 5);
         r.requiredTags = SkillTag.Projectile;
         r.cost = CostType.ProjectileSpeed; r.costDesc = "탄속 -25%"; r.speed = 0.75f;
+        r.dmg = 0.10f;
         t.Add(r);
 
         r = New("sup_boomerang", "부메랑",
@@ -294,6 +320,7 @@ public static class SkillAssetGenerator
             "적중 지점에서 투사체가 사방으로 퍼져 나간다.", SkillCategory.Support, 7);
         r.requiredTags = SkillTag.Projectile;
         r.cost = CostType.BarrageDensity; r.costDesc = "발사 간격 +25%"; r.fireInterval = 1.25f;
+        r.extraProjectiles = 3; r.spread = 40f;
         t.Add(r);
 
         r = New("sup_far_shot", "원거리 사격", "멀리 있는 적일수록 효과가 커진다.", SkillCategory.Support, 7);
@@ -301,6 +328,7 @@ public static class SkillAssetGenerator
         r.cost = CostType.ControlConstraint; r.costDesc = "가까울수록 효과가 소멸한다";
         // 「근접 전투」와 정반대 조건이라 서로를 상쇄한다.
         r.exclusive = new[] { "sup_melee_combat" };
+        r.condition = SkillConditionKind.FarTarget; r.conditionalDmg = 0.40f;
         t.Add(r);
 
         // ── Support 속성 계열 10 ──────────────────────────────────────────
@@ -311,6 +339,7 @@ public static class SkillAssetGenerator
             "점화가 잠시 후 주변으로 퍼진다.", SkillCategory.Support, 5);
         r.requiredTags = SkillTag.Fire;
         r.cost = CostType.Duration; r.costDesc = "점화 지속시간 -40%"; r.lifetime = 0.6f;
+        r.ailPower = 0.25f; r.ailDuration = 0.6f; r.lifetime = 1f;
         t.Add(r);
 
         r = New("sup_burnt_offering", "번제",
@@ -318,11 +347,14 @@ public static class SkillAssetGenerator
         r.requiredTags = SkillTag.Fire;
         r.blocks = true; r.blocked = StatusEffectType.Ignite;
         r.cost = CostType.FunctionalExclusion; r.costDesc = "점화를 유발할 수 없다";
+        r.condition = SkillConditionKind.TargetHasStatus;
+        r.conditionStatus = StatusEffectType.Ignite; r.conditionalDmg = 0.80f;
         t.Add(r);
 
         r = New("sup_frozen_malice", "얼어붙은 악의", "동결 임계치가 30% 낮아진다.", SkillCategory.Support, 5);
         r.requiredTags = SkillTag.Cold;
         r.cost = CostType.Duration; r.costDesc = "냉기 직접 피해가 지속 피해로 전환된다";
+        r.ailPower = 0.30f;
         t.Add(r);
 
         r = New("sup_bitter_frost", "살을 에는 서리",
@@ -330,23 +362,29 @@ public static class SkillAssetGenerator
         r.requiredTags = SkillTag.Cold;
         r.consumes = StatusEffectType.Freeze;
         r.cost = CostType.FunctionalExclusion; r.costDesc = "적의 동결을 소모해 버린다";
+        r.condition = SkillConditionKind.TargetHasStatus;
+        r.conditionStatus = StatusEffectType.Freeze; r.conditionalDmg = 1.00f;
         t.Add(r);
 
         r = New("sup_overflowing_charge", "넘치는 충전",
             "감전 증폭률이 15%p 오른다. (총 35%)", SkillCategory.Support, 5);
         r.requiredTags = SkillTag.Lightning;
         r.cost = CostType.Duration; r.costDesc = "감전 지속시간 -40%"; r.lifetime = 0.6f;
+        r.ailPower = 0.15f; r.ailDuration = 0.6f; r.lifetime = 1f;
         t.Add(r);
 
         r = New("sup_shock_leap", "감전 도약", "감전이 인접한 적에게 전도된다.", SkillCategory.Support, 7);
         r.requiredTags = SkillTag.Lightning;
         r.blocks = true; r.blocked = StatusEffectType.Shock;
         r.cost = CostType.FunctionalExclusion; r.costDesc = "직접 감전을 유발하지 않는다";
+        r.condition = SkillConditionKind.TargetHasStatus;
+        r.conditionStatus = StatusEffectType.Shock; r.conditionalDmg = 0.50f;
         t.Add(r);
 
         r = New("sup_deadly_poison", "치명적인 중독", "중독 지속시간이 80% 늘어난다.", SkillCategory.Support, 5);
         r.requiredTags = SkillTag.Chaos;
         r.cost = CostType.Duration; r.costDesc = "초기 피해가 지연 피해로 전환된다"; r.lifetime = 1.8f;
+        r.ailDuration = 1.8f; r.lifetime = 1f; r.dmg = -0.15f;
         t.Add(r);
 
         r = New("sup_escalating_poison", "격화되는 중독",
@@ -354,11 +392,14 @@ public static class SkillAssetGenerator
         r.requiredTags = SkillTag.Chaos;
         r.blocks = true; r.blocked = StatusEffectType.Poison;
         r.cost = CostType.FunctionalExclusion; r.costDesc = "중독을 유발할 수 없다";
+        r.condition = SkillConditionKind.TargetHasStatus;
+        r.conditionStatus = StatusEffectType.Poison; r.conditionalDmg = 0.70f;
         t.Add(r);
 
         r = New("sup_deep_cuts", "깊은 상처", "출혈 피해가 60% 증가한다.", SkillCategory.Support, 5);
         r.requiredTags = SkillTag.Physical;
         r.cost = CostType.Duration; r.costDesc = "출혈 지속시간 -50%"; r.lifetime = 0.5f;
+        r.ailPower = 0.60f; r.ailDuration = 0.5f; r.lifetime = 1f;
         t.Add(r);
 
         r = New("sup_bloodlust", "유혈 충동",
@@ -366,6 +407,8 @@ public static class SkillAssetGenerator
         r.requiredTags = SkillTag.Physical;
         r.blocks = true; r.blocked = StatusEffectType.Bleed;
         r.cost = CostType.FunctionalExclusion; r.costDesc = "출혈을 유발할 수 없다";
+        r.condition = SkillConditionKind.TargetHasStatus;
+        r.conditionStatus = StatusEffectType.Bleed; r.conditionalDmg = 0.80f;
         t.Add(r);
 
         // ── Support 기폭 장치 · 잔류물 계열 6 ─────────────────────────────
@@ -374,21 +417,25 @@ public static class SkillAssetGenerator
         r.requiredTags = SkillTag.Detonator;
         r.cost = CostType.EffectiveRange; r.costDesc = "기폭 범위 -30%";
         r.exclusive = new[] { "sup_long_fuse" };
+        r.range = 0.7f;
         t.Add(r);
 
         r = New("sup_caltrops", "마름쇠", "적중 지점에 잔류물을 남긴다.", SkillCategory.Support, 5);
         r.requiredTags = SkillTag.Zone;
         r.cost = CostType.BarrageDensity; r.costDesc = "발사 간격 +25%"; r.fireInterval = 1.25f;
+        r.ground = GroundEffectType.FireZone;
         t.Add(r);
 
         r = New("sup_chain_detonation", "연쇄 기폭", "폭발이 1회 연쇄된다.", SkillCategory.Support, 7);
         r.requiredTags = SkillTag.Detonator;
         r.cost = CostType.Immediacy; r.costDesc = "기폭 쿨다운 +0.4초";
+        r.dmg = 0.20f;
         t.Add(r);
 
         r = New("sup_lasting_ground", "유지되는 대지", "잔류물 지속시간이 100% 늘어난다.", SkillCategory.Support, 7);
         r.requiredTags = SkillTag.Zone;
         r.cost = CostType.EffectiveRange; r.costDesc = "잔류물 범위 -25%"; r.lifetime = 2f;
+        r.ailDuration = 2f; r.lifetime = 1f; r.range = 0.75f;
         t.Add(r);
 
         r = New("sup_long_fuse", "긴 퓨즈",
@@ -396,11 +443,13 @@ public static class SkillAssetGenerator
         r.requiredTags = SkillTag.Detonator;
         r.cost = CostType.Immediacy; r.costDesc = "즉시성 상실";
         r.exclusive = new[] { "sup_short_fuse" };
+        r.dmg = 0.35f;
         t.Add(r);
 
         r = New("sup_zone_potency", "잔류물 효력", "잔류물 범위가 한도까지 커진다.", SkillCategory.Support, 9);
         r.requiredTags = SkillTag.Zone;
         r.cost = CostType.Duration; r.costDesc = "잔류물 지속시간 -30%"; r.lifetime = 0.7f;
+        r.ailDuration = 0.7f; r.lifetime = 1f; r.ailPower = 0.35f;
         t.Add(r);
 
         // ── Support 조건부 계열 3 ─────────────────────────────────────────
@@ -408,15 +457,19 @@ public static class SkillAssetGenerator
 
         r = New("sup_momentum", "기세", "일정 거리 이상 이동하면 피해가 증가한다.", SkillCategory.Support, 5);
         r.cost = CostType.ControlConstraint; r.costDesc = "정지하면 보너스가 즉시 소멸한다";
+        r.dmg = 0.20f;
         t.Add(r);
 
         r = New("sup_melee_combat", "근접 전투", "적과 가까울수록 피해가 증가한다.", SkillCategory.Support, 7);
         r.cost = CostType.EffectiveRange; r.costDesc = "유효 사거리 -50%";
         r.exclusive = new[] { "sup_far_shot" };
+        r.condition = SkillConditionKind.NearTarget; r.conditionalDmg = 0.45f;
+        r.range = 0.5f;
         t.Add(r);
 
         r = New("sup_cadence", "운율", "연사할수록 발사 속도가 증폭된다.", SkillCategory.Support, 9);
         r.cost = CostType.ControlConstraint; r.costDesc = "상한에 도달하면 1초간 강제로 과열 정지한다";
+        r.fireInterval = 0.85f;
         t.Add(r);
 
         // ── Support 지속시간 계열 2 ───────────────────────────────────────
@@ -426,6 +479,7 @@ public static class SkillAssetGenerator
         r.requiredTags = SkillTag.Duration;
         r.cost = CostType.Immediacy; r.costDesc = "초기 피해가 지연 피해로 전환된다"; r.lifetime = 1.5f;
         r.exclusive = new[] { "sup_duration_compress" };
+        r.ailDuration = 1.5f; r.lifetime = 1f;
         t.Add(r);
 
         r = New("sup_duration_compress", "지속시간 압축",
@@ -433,6 +487,7 @@ public static class SkillAssetGenerator
         r.requiredTags = SkillTag.Duration;
         r.cost = CostType.Duration; r.costDesc = "잔류물 지속시간도 함께 감소한다"; r.lifetime = 0.5f;
         r.exclusive = new[] { "sup_duration_extend" };
+        r.ailDuration = 0.5f; r.lifetime = 1f; r.ailPower = 0.60f;
         t.Add(r);
 
         // ── Support 속성 전환 2 ───────────────────────────────────────────

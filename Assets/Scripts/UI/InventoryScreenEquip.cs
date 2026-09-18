@@ -121,7 +121,7 @@ public partial class InventoryScreenUI
 
         // 가방을 바꾸면 적재 한도가 달라지고, 무기를 바꾸면 사격 성능이 달라진다.
         // 다음 주기를 기다리면 유저가 화면을 닫을 때까지 반영되지 않는다.
-        PlayerLoadout binder = Object.FindFirstObjectByType<PlayerLoadout>();
+        PlayerLoadout binder = Object.FindAnyObjectByType<PlayerLoadout>();
 
         if (binder != null)
             binder.Refresh();

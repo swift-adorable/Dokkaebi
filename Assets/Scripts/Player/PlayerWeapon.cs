@@ -14,10 +14,6 @@ public class PlayerWeapon : MonoBehaviour
     [Tooltip("firePoint가 비어 있을 때 찾을 자식 오브젝트 이름")]
     [SerializeField] private string firePointChildName = "FirePoint";
 
-    [Header("Fire Rate")]
-    [Tooltip("무기를 착용하지 않았을 때의 발사 간격(초). 착용 중에는 무기 값이 이긴다.")]
-    [SerializeField] private float fireRate = CombatConstants.BaseFireInterval;
-
     [Header("Pooling")]
     [Tooltip("시작 시 미리 생성할 총알 수. (연사속도 x 총알수명) 이상이면 충분하다.")]
     [SerializeField] private int prewarmCount = 32;
@@ -41,8 +37,8 @@ public class PlayerWeapon : MonoBehaviour
     /// <summary>
     /// 실제 발사 간격. 무기가 정한 값에 Skill 보정이 곱해진다.
     ///
-    /// 인스펙터의 fireRate는 무기를 들지 않았을 때만 쓰인다 —
-    /// 프리팹 값이 착용 무기를 이기면 6종을 만든 의미가 없다.
+    /// 무기를 들지 않았을 때는 WeaponProfile.Unarmed의 값을 쓴다.
+    /// 프리팹 값이 착용 무기를 이기면 무기 6종을 만든 의미가 없다.
     /// </summary>
     public float EffectiveFireInterval => profile.FireInterval * GetModifiers().FireIntervalMultiplier;
 
@@ -138,8 +134,10 @@ public class PlayerWeapon : MonoBehaviour
                 // 장비 6종을 만들어 놓고 프리팹 하드코딩 값으로 쏘게 된다.
                 controller.SetWeaponBase(
                     Mathf.Max(1, Mathf.RoundToInt(profile.Damage)),
-                    profile.EffectiveRange,
+                    profile.EffectiveRange * modifiers.RangeMultiplier,
                     profile.ArmourPenetration);
+
+                controller.SetSkillEffects(modifiers);
 
                 controller.Configure(
                     modifiers.Behaviours,

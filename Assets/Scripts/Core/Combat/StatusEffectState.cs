@@ -1,3 +1,4 @@
+using UnityEngine;
 using System;
 
 /// <summary>
@@ -62,7 +63,11 @@ public sealed class StatusEffectState
     /// </summary>
     /// <param name="type">거는 상태</param>
     /// <param name="baseDamage">부여 시점의 기본 피해. 초당 피해의 기준이 된다.</param>
-    public void Apply(StatusEffectType type, float baseDamage)
+    /// <param name="durationScale">
+    /// 지속시간 배수. Support 「치명적인 중독」·「깊은 상처」 같은 것이 여기를 건드린다.
+    /// 【투사체 수명과 다른 축이다.】 (docs/Blob_Audit.md D2)
+    /// </param>
+    public void Apply(StatusEffectType type, float baseDamage, float durationScale = 1f)
     {
         if (!IsValid(type))
             return;
@@ -75,7 +80,7 @@ public sealed class StatusEffectState
         int i = (int)type;
 
         // 지속시간은 항상 갱신된다. 중첩형이든 아니든 "다시 걸면 처음부터"다.
-        remaining[i] = spec.Duration;
+        remaining[i] = spec.Duration * Mathf.Max(0.1f, durationScale);
 
         if (stacks[i] < spec.MaxStacks)
             stacks[i]++;

@@ -25,6 +25,9 @@ public class BulletController : MonoBehaviour, IPoolable
     [Tooltip("무기가 제공하는 방어 관통 레벨. Pierce(관통)와 다른 개념이다.")]
     [SerializeField] private int armourPenetration = 0;
 
+    /// <summary>스킬 합산 결과. 참조만 든다. null이면 보정이 없다(적 탄 등).</summary>
+    private WeaponModifiers skillEffects;
+
     [Tooltip("자동 소멸까지의 시간(초)")]
     [SerializeField] private float lifetime = 3f;
 
@@ -147,7 +150,8 @@ public class BulletController : MonoBehaviour, IPoolable
         AppliedStatus = status;
         originPoint = origin;
 
-        // 적 탄은 행동(관통·갈래 등)을 갖지 않는다. 그것은 스킬의 몫이다.
+        // 적 탄은 행동(관통·갈래 등)도 스킬 보정도 갖지 않는다. 그것은 스킬의 몫이다.
+        skillEffects = null;
         behaviourState.Clear();
         ricochetState.Clear();
 
@@ -166,6 +170,18 @@ public class BulletController : MonoBehaviour, IPoolable
         damage = Mathf.Max(1, shotDamage);
         effectiveRange = Mathf.Max(0f, range);
         armourPenetration = Mathf.Clamp(penetration, 0, CombatConstants.MaxArmour);
+    }
+
+    /// <summary>
+    /// 스킬 합산 결과를 연결한다. 피해 증가·상태이상 위력·조건부 효과가 여기서 온다.
+    ///
+    /// 값을 복사하지 않고 참조를 드는 이유 — 탄마다 배열을 복사하면
+    /// 매 발사가 GC Alloc이 된다. 소켓은 가방 화면에서만 바뀌므로
+    /// 비행 중 바뀌어도 문제가 되지 않는다.
+    /// </summary>
+    public void SetSkillEffects(WeaponModifiers source)
+    {
+        skillEffects = source;
     }
 
     /// <summary>발사 직후 Skill 보정치를 주입한다. PlayerWeapon이 호출한다.</summary>
@@ -342,15 +358,31 @@ public class BulletController : MonoBehaviour, IPoolable
     /// </summary>
     private void ApplyHit(Health target)
     {
-        if (AppliedStatus != StatusEffectType.None)
-            target.ApplyStatus(AppliedStatus, damage);
-
         float distance = Vector3.Distance(originPoint, transform.position);
+
+        // 「증가%」는 전부 가산이다. 조건부는 지금 이 명중에만 적용된다.
+        float increased = 0f;
+
+        if (skillEffects != null)
+        {
+            increased = skillEffects.DamageIncrease
+                + skillEffects.ConditionalDamageIncrease(distance, effectiveRange, target.Status);
+        }
+
+        if (AppliedStatus != StatusEffectType.None)
+        {
+            // 상태이상 위력은 직접 피해와 분리된 축이다.
+            // 「연소」 각인과 속성 Support가 여기만 키운다.
+            float ailmentBase = damage * Mathf.Max(0f, 1f + (skillEffects?.AilmentPower ?? 0f));
+
+            target.ApplyStatus(
+                AppliedStatus, ailmentBase, skillEffects?.AilmentDurationMultiplier ?? 1f);
+        }
 
         var request = new DamageRequest
         {
             baseDamage = damage,
-            increasedPercent = 0f,
+            increasedPercent = increased,
             element = Element,
             hitKind = HitKind.Ranged,
             armourPenetration = armourPenetration,
@@ -426,6 +458,7 @@ public class BulletController : MonoBehaviour, IPoolable
             // 무기 기본값을 먼저 물려준다. 이것이 없으면 분열된 탄만
             // 프리팹 기본 피해(10)로 때려 티어 6 무기가 갈래마다 약해진다.
             bullet.SetWeaponBase(damage, effectiveRange, armourPenetration);
+            bullet.SetSkillEffects(skillEffects);
 
             bullet.Configure(
                 behaviourState.CreateChildState(),

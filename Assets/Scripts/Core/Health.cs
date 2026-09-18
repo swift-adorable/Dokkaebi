@@ -72,7 +72,7 @@ public class Health : MonoBehaviour, IDamageable, IPoolable
     /// </summary>
     /// <param name="type">거는 상태</param>
     /// <param name="sourceDamage">부여 시점의 기본 피해. 초당 피해의 기준이 된다.</param>
-    public void ApplyStatus(StatusEffectType type, float sourceDamage)
+    public void ApplyStatus(StatusEffectType type, float sourceDamage, float durationScale = 1f)
     {
         if (IsDead || type == StatusEffectType.None || sourceDamage <= 0f)
             return;
@@ -81,7 +81,7 @@ public class Health : MonoBehaviour, IDamageable, IPoolable
         if (IsImmuneTo(type))
             return;
 
-        Status.Apply(type, sourceDamage);
+        Status.Apply(type, sourceDamage, durationScale);
 
         StatusEffectSystem.EnsureInstance().Track(this);
 
@@ -89,14 +89,26 @@ public class Health : MonoBehaviour, IDamageable, IPoolable
     }
 
     /// <summary>
-    /// 이 상태에 면역인지. 장비(각인 저항형 II 이상)가 면역을 준다.
+    /// 면역을 주는 장비 합산 결과. PlayerLoadout이 착용이 바뀔 때마다 넣어준다.
+    /// null이면 면역이 없다 — 적은 장비를 입지 않으므로 계속 null이다.
+    /// </summary>
+    private EquipmentModifiers immunitySource;
+
+    /// <summary>면역 출처를 연결한다. 참조만 들고 있으므로 장비가 바뀌면 즉시 반영된다.</summary>
+    public void SetImmunitySource(EquipmentModifiers source)
+    {
+        immunitySource = source;
+    }
+
+    /// <summary>
+    /// 이 상태에 면역인지. 각인 「역치」와 얼굴 방어구 티어 4 이상이 면역을 준다.
     ///
-    /// ※ 장비 시스템은 6단계에서 착수한다. 지금은 항상 false이며,
-    ///    판정 지점만 미리 만들어 두어 나중에 한 곳만 고치면 되게 한다.
+    /// 이 판정이 항상 false였던 동안 역치 각인 3종과 얼굴 마스크 15종이
+    /// 아무 일도 하지 않았다. (docs/Blob_Audit.md A절)
     /// </summary>
     public bool IsImmuneTo(StatusEffectType type)
     {
-        return false;
+        return immunitySource != null && immunitySource.IsImmuneTo(type);
     }
 
     /// <summary>
