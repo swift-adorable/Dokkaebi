@@ -22,6 +22,9 @@ MonoBehaviour:
   stackMax: 1
   maxDurability: 0
   baseValue: 3500
+  noExtract: 0
+  noRegister: 0
+  noTrade: 1
   skill: {fileID: 0}
   slot: 6
   stats:

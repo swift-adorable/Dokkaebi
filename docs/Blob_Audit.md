@@ -8,10 +8,10 @@
 
 | 등급 | 수 | 뜻 |
 |---|---|---|
-| **A. 끊긴 배선** | ~~10~~ **6** | 코드가 있고 테스트도 통과하는데 **아무도 부르지 않는다** |
+| **A. 끊긴 배선** | ~~10~~ **4** | 코드가 있고 테스트도 통과하는데 **아무도 부르지 않는다** |
 | **B. 문서 간 모순** | ~~4~~ **0** | 문서끼리 다른 말을 한다. 결정이 필요하다 |
-| **C. 수치 불일치** | ~~9~~ **4** | 문서와 코드의 숫자가 다르다 |
-| **D. 데이터 모델 공백** | ~~6~~ **3** | 문서가 요구하는 것을 담을 필드가 없다 |
+| **C. 수치 불일치** | ~~9~~ **0** | 문서와 코드의 숫자가 다르다 |
+| **D. 데이터 모델 공백** | ~~6~~ **1** | 문서가 요구하는 것을 담을 필드가 없다 |
 | **E. 문서 TBD인데 코드가 확정** | 13 | 코드가 먼저 값을 정했다. 문서를 맞춰야 한다 |
 
 **가장 큰 발견** — 순수 로직 + EditMode 테스트 전략이 **정확성은 검증했지만 연결은 검증하지 못했다.**
@@ -32,7 +32,7 @@
 | ~~A4~~ | ~~과중량 페널티~~ | **해결 (6-H)** — `PlayerMovement.SpeedScale` · `PlayerDash.DistanceScale` | `Core/Equipment/LoadoutSnapshot.cs` |
 | **A5** | **기폭(원소 작렬)** | `Core/Combat/DetonationResolver.cs` | **테스트뿐.** 기폭 Core 3종이 아무 효과도 내지 않는다 |
 | **A6** | **잔류물 5종** | `Core/Combat/GroundEffectTable.cs` | **없음.** 「마름쇠」·「유지되는 대지」·「잔류물 효력」 3종이 기댈 대상이 없다 |
-| **A7** | **난이도 배율 6단** | `Core/Combat/DifficultyLevel.cs:26-51` | **테스트뿐.** `Health.TakeDamage`의 배율 인자를 아무도 넘기지 않는다 |
+| ~~A7~~ | ~~난이도 배율 6단~~ — **해결 (6-L)** `GameManager.Difficulty` → 적 피해·체력 | `Core/Combat/DifficultyLevel.cs:26-51` | **테스트뿐.** `Health.TakeDamage`의 배율 인자를 아무도 넘기지 않는다 |
 | **A8** | **내성 「가장 낮은 것 하나만」** | `ElementalResistances.TakeLowest:78-88` | **테스트뿐.** 몬스터 속성을 내성에 합성하는 경로 자체가 없다 |
 | ~~A+~~ | ~~상태이상 면역~~ | **해결 (6-I)** — `Health.IsImmuneTo`가 항상 false였다. 역치 각인 3종 + 얼굴 마스크 15종이 이제 작동한다 | `Player/PlayerLoadout.cs` |
 | **A9** | **패시브 효과 17종 중 13종** | `Core/Progression/PassiveEffectType.cs` | 실제로 읽히는 것은 `CarrySlots` · `CarryWeight` · `AbsorbAmount` · `LootRolls` **4종뿐** |
@@ -108,24 +108,25 @@
 | ~~C2~~ | ~~점화 최대 중첩~~ — **해결 (갱신형으로 확정)** | 3 | **1** (갱신형) | `StatusEffectTable.cs:53` |
 | ~~C3~~ | ~~감전 최대 중첩~~ — **해결 (6)** | 6 | **1** | `StatusEffectTable.cs:66` |
 | ~~C4~~ | ~~냉각 최대 중첩~~ — **해결 (6)** | 6 | **1** | `StatusEffectTable.cs:70` |
-| C5 | 시체 회수 해금 | 계정 Lv10 | Lv **9** + 선행 `rec_safe_1` | `Editor/PassiveAssetGenerator.cs:136-140` |
-| C6 | 흡수 범위 단위 | +20% | **미터** (+1.5m) | `PassiveEffectType.cs:32`, `PassiveAssetGenerator.cs:104` |
-| C7 | 얼굴 방어구 티어 | 1~6 전 티어 | **1 · 2 · 4 · 6만.** 3 · 5가 없다 | `Editor/ArmourAssetGenerator.cs:293-314` |
-| C8 | 몸통 일반 적재 | +2~3 | 3,3,2,2,**1,0** — 티어 5·6이 범위 밖 | `ArmourAssetGenerator.cs:44-52` |
-| C9 | 지혈 붕대 | 0.05kg / 스택 3 | **0.2kg / 스택 5** | `Editor/LootAssetGenerator.cs:58` |
+| ~~C5~~ | ~~시체 회수 해금~~ — **해소.** Lv10을 주장하던 Progression 2절이 B1에서 삭제됐다 | 계정 Lv10 | Lv **9** + 선행 `rec_safe_1` | `Editor/PassiveAssetGenerator.cs:136-140` |
+| ~~C6~~ | ~~흡수 범위 단위~~ — **해소.** 같은 이유 | +20% | **미터** (+1.5m) | `PassiveEffectType.cs:32`, `PassiveAssetGenerator.cs:104` |
+| ~~C7~~ | ~~얼굴 방어구 티어~~ — **해결 (6-L)** 문서를 4단계(1·2·4·6)로 확정 | 1~6 전 티어 | **1 · 2 · 4 · 6만.** 3 · 5가 없다 | `Editor/ArmourAssetGenerator.cs:293-314` |
+| ~~C8~~ | ~~몸통 일반 적재~~ — **해결 (6-L)** 문서를 실제 값으로 | +2~3 | 3,3,2,2,**1,0** — 티어 5·6이 범위 밖 | `ArmourAssetGenerator.cs:44-52` |
+| ~~C9~~ | ~~지혈 붕대~~ — **해결 (6-L)** 코드를 문서 값으로 | 0.05kg / 스택 3 | **0.2kg / 스택 5** | `Editor/LootAssetGenerator.cs:58` |
 
 **C1~C4는 6-K에서 한꺼번에 해결했다.** 냉각·마비·부식 enum을 추가하고,
 동결을 행동 불능으로 바꾸고, 「최대 중첩 = 임계」 전이를 구현했다.
 코드 쪽을 고정하던 테스트 4건도 새 설계로 교체했다.
 
-### C10. 수리 규칙이 반대로 구현되어 있다
+### ~~C10. 수리 규칙이 반대로 구현되어 있다~~ — 해결 (6-L)
 
 문서: 「수리해도 최대 내구도까지 돌아오지 않는다. 장비가 자연 소멸하는 경제 싱크다」
 코드: `ItemStack.Repair()`가 최대치까지 **완전 회복**시킨다 (`Core/Items/ItemStack.cs:102-118`).
 테스트가 이것을 계약으로 고정했다 (`InventoryTests.cs:237`).
 
-> 구조적 문제: `MaxDurability`가 `ItemDefinition`(공유 에셋)에만 있어
-> **개체별 상한 감소를 표현할 자리가 없다.** `ItemStack`에 필드 추가가 필요하다.
+> **해결** — `ItemStack.MaxDurability`를 개체별로 두고 `Repair`가 상한을 깎는 경로를 만들었다.
+> **현재 `RepairLossRatio = 0`이다.** 수리 비용과 경제가 8단계에 오므로 그때 값을 정한다.
+> 지금 필드를 만든 이유는 나중에 세이브 포맷을 깨지 않기 위함이다.
 
 ---
 
@@ -171,18 +172,27 @@
 >
 > 이 작업으로 **KnownGaps 2종(화염 조율·원소 융합)도 함께 비었다.**
 
-### D4. 소모품 분류를 담을 필드가 없다
+### D4. 소모품 분류를 담을 필드가 없다 — **8단계로 이월 (결정)**
 
 `ItemKind.Consumable` 하나뿐이라 「같은 분류는 덮어쓴다」를 판정할 수 없다.
 
-### D5. 부착물의 옵션 축이 없다
+### ~~D5. 부착물의 옵션 축이 없다~~ — 조사 완료 · 구현은 이월 (6-L)
 
 `EquipmentStatType`에 반동 · 소음 · 장탄 · 조준 · 탄퍼짐이 없다.
-`WeaponDefinition.attachmentSlots`만 있고 부착물 자체가 없다.
 
-### D6. 아이템 태그 「반출 불가」 「등록 불가」 「거래 불가」가 없다
+> **결정: 구현하지 않는다.** 반동·조준·장탄이 전부 없는 시스템이라
+> 축만 만들면 「아무도 읽지 않는 데이터」가 하나 더 생긴다 — 이번 감사가 찾아낸 바로 그 문제다.
+>
+> 대신 **덕코프 부착물 262종을 전수 조사해 축 43종을 정리했다** →
+> [`research/duckov/07_부착물.md`](research/duckov/07_부착물.md)
+> 구현 시점에 이 문서만 보면 된다.
 
-`ItemDefinition`에 플래그가 없다. `SurvivesDeath`(각인)만 있다.
+### ~~D6. 아이템 태그 3종~~ — 해결 (6-L)
+
+> **해결** — `noExtract` · `noRegister` · `noTrade` 추가.
+> 각인은 `OnValidate`에서 거래 불가로 강제한다 — 사망에도 남는 것을 사고팔 수 있으면
+> 「교환으로만 얻는다」는 각인의 설계가 돈으로 풀린다.
+> 「반출 불가」를 쓰는 아이템은 7단계 이후에 만든다.
 
 ---
 

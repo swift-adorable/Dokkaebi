@@ -15,6 +15,19 @@ public class ItemStack
     /// <summary>현재 내구도. 내구도가 없는 아이템은 0이다.</summary>
     public int Durability { get; private set; }
 
+    /// <summary>
+    /// 이 개체의 현재 최대 내구도. 수리할수록 깎인다.
+    ///
+    /// ItemDefinition이 아니라 여기에 두는 이유 — 정의는 모든 개체가 공유하는
+    /// 에셋이라 「이 개체는 상한이 깎였다」를 담을 자리가 없다.
+    ///
+    /// ※ 현재 감소량은 0이다. 수리 비용과 경제가 8단계에 오므로
+    ///   그때 RepairLossRatio를 정한다. 지금 필드를 만들어 두는 이유는
+    ///   나중에 세이브 포맷을 깨지 않기 위함이다.
+    /// (docs/Blob_Equipment_System.md 「내구도」)
+    /// </summary>
+    public int MaxDurability { get; private set; }
+
     public ItemStack(ItemDefinition definition, int count = 1, int durability = -1)
     {
         Definition = definition;
@@ -22,9 +35,17 @@ public class ItemStack
         Count = definition == null ? 0 : Mathf.Clamp(count, 1, definition.StackMax);
 
         if (definition != null && definition.HasDurability)
-            Durability = durability < 0 ? definition.MaxDurability : Mathf.Clamp(durability, 0, definition.MaxDurability);
+        {
+            MaxDurability = definition.MaxDurability;
+            Durability = durability < 0
+                ? MaxDurability
+                : Mathf.Clamp(durability, 0, MaxDurability);
+        }
         else
+        {
+            MaxDurability = 0;
             Durability = 0;
+        }
     }
 
     public bool IsEmpty => Definition == null || Count <= 0;
@@ -44,7 +65,7 @@ public class ItemStack
     /// </summary>
     public bool IsWorn
         => Definition != null && Definition.HasDurability
-           && Durability <= Mathf.CeilToInt(Definition.MaxDurability * WornThreshold);
+           && Durability <= Mathf.CeilToInt(MaxDurability * WornThreshold);
 
     /// <summary>방어 옵션이 정지했는지. 탐지·수집·적재 옵션은 계속 작동한다.</summary>
     public bool IsBroken => Definition != null && Definition.HasDurability && Durability <= 0;
@@ -100,20 +121,48 @@ public class ItemStack
     }
 
     /// <summary>
-    /// 수리한다. 최대 내구도까지 회복되지 않는 것이 핵심이다.
+    /// 수리할 때 최대 내구도가 깎이는 비율. 티어 4 이상에만 적용한다.
     ///
-    /// 수리할수록 상한이 깎여 결국 폐기된다. 장비가 자연 소멸하는 경제 싱크다. [확인됨]
-    /// ※ 상한 감소는 티어 4 이상에만 적용한다. (완화안 — 장비 문서 4절)
+    /// 【현재 0이다.】 수리 비용과 경제가 8단계에 오므로 그때 값을 정한다.
+    /// 0이어도 경로는 살아 있으므로, 값 하나만 바꾸면 경제 싱크가 켜진다.
+    /// </summary>
+    public const float RepairLossRatio = 0f;
+
+    /// <summary>상한 감소가 적용되기 시작하는 티어. 하위 장비는 부담 없이 수리한다.</summary>
+    public const int RepairLossMinTier = 4;
+
+    /// <summary>
+    /// 수리한다. 【최대 내구도까지 회복되지만, 그 상한 자체가 깎인다.】
+    ///
+    /// 수리할수록 상한이 줄어 결국 폐기된다 — 장비가 자연 소멸하는 경제 싱크다.
+    /// 덕코프에서 불만이 큰 축이라 완화한다: 티어 4 이상에만, 감소량을 작게.
+    /// (docs/Blob_Equipment_System.md 「내구도」)
     /// </summary>
     public int Repair(int amount)
     {
         if (amount <= 0 || Definition == null || !Definition.HasDurability)
             return 0;
 
+        ReduceMaxDurability();
+
         int before = Durability;
 
-        Durability = Mathf.Min(Definition.MaxDurability, Durability + amount);
+        Durability = Mathf.Min(MaxDurability, Durability + amount);
 
         return Durability - before;
+    }
+
+    /// <summary>수리에 따른 상한 감소. 최소 1은 남겨 아이템이 즉시 소멸하지 않게 한다.</summary>
+    private void ReduceMaxDurability()
+    {
+        if (RepairLossRatio <= 0f || Definition.Tier < RepairLossMinTier)
+            return;
+
+        int loss = Mathf.Max(1, Mathf.RoundToInt(Definition.MaxDurability * RepairLossRatio));
+
+        MaxDurability = Mathf.Max(1, MaxDurability - loss);
+
+        if (Durability > MaxDurability)
+            Durability = MaxDurability;
     }
 }

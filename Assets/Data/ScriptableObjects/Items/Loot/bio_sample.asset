@@ -23,4 +23,7 @@ MonoBehaviour:
   stackMax: 10
   maxDurability: 0
   baseValue: 110
+  noExtract: 0
+  noRegister: 0
+  noTrade: 0
   skill: {fileID: 0}

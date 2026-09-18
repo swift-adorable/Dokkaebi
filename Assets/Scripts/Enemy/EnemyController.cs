@@ -13,6 +13,9 @@ public class EnemyController : MonoBehaviour, IPoolable
     [SerializeField] private GameObject corpsePrefab;
 
     private Health health;
+
+    /// <summary>난이도 배율을 곱하기 전의 최대 체력. 재사용 시 누적을 막는다.</summary>
+    private int baseMaxHealth;
     private EnemyAttack attack;
     private EnemyBrain brain;
     private PooledObject pooledObject;
@@ -62,8 +65,34 @@ public class EnemyController : MonoBehaviour, IPoolable
         if (brain != null)
             brain.ResetState();
 
+        // 난이도에 따라 최대 체력을 조정한다. 【스폰 시점에 한 번만】 건다.
+        // 장(Stage)이 아니라 난이도만 적 수치에 배율을 곱한다 —
+        // 구역이 올라가면 바뀌는 것은 구성비와 무장 티어다.
+        ApplyDifficultyHealth();
+
         // Health.OnSpawned는 IPoolable 통지로 별도 호출되므로 여기서 중복 처리하지 않는다.
         EnemyManager.EnsureInstance().Register(this);
+    }
+
+    /// <summary>
+    /// 난이도 배율을 최대 체력에 적용한다.
+    ///
+    /// 원본 최대 체력을 따로 기억하는 이유 — 풀에서 재사용될 때마다
+    /// 배율을 다시 곱하면 체력이 계속 줄어든다.
+    /// </summary>
+    private void ApplyDifficultyHealth()
+    {
+        if (health == null)
+            return;
+
+        if (baseMaxHealth <= 0)
+            baseMaxHealth = health.Max;
+
+        int scaled = Mathf.Max(1,
+            Mathf.RoundToInt(baseMaxHealth * GameManager.EnemyHealthMultiplier));
+
+        if (health.Max != scaled)
+            health.SetMaxHealth(scaled, refill: true);
     }
 
     public void OnDespawned()
