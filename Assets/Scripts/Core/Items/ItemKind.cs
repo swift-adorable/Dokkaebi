@@ -1,5 +1,5 @@
 /// <summary>
-/// 아이템의 종류. 장비·인자·전리품이 같은 인벤토리를 공유하므로
+/// 아이템의 종류. 장비·젬·전리품이 같은 인벤토리를 공유하므로
 /// "어디에 낄 수 있는가"를 이 축으로 구분한다.
 /// (docs/Blob_Equipment_System.md / Blob_Skill_System.md 11-1절)
 /// </summary>
@@ -20,7 +20,7 @@ public enum ItemKind
     /// <summary>각인. 2슬롯. 추출에 실패해도 잃지 않는다.</summary>
     Imprint = 4,
 
-    /// <summary>인자 — 실물이 된 스킬. 소켓에 끼운다.</summary>
+    /// <summary>젬 — 실물이 된 스킬. 소켓에 끼운다.</summary>
     SkillGem = 5,
 
     /// <summary>소모품. 회복 · 주사 · 음식.</summary>

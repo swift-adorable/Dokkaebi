@@ -2,10 +2,10 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// 가방 화면의 「인자」 탭 — 소켓 배치.
+/// 가방 화면의 「젬」 탭 — 소켓 배치.
 ///
-/// 조작은 한 가지다 — 왼쪽 가방에서 인자를 누르고, 오른쪽 자리를 누른다.
-/// 고른 것이 없는 상태로 자리를 누르면 그 자리가 비고 인자는 가방으로 돌아간다.
+/// 조작은 한 가지다 — 왼쪽 가방에서 젬을 누르고, 오른쪽 자리를 누른다.
+/// 고른 것이 없는 상태로 자리를 누르면 그 자리가 비고 젬은 가방으로 돌아간다.
 ///
 /// 【SkillSelectionUI(레벨업 3장 선택)를 대체한 화면이다.】
 /// 레벨업은 선택창을 열지 않는다. 자리가 하나 열릴 뿐이다.
@@ -95,7 +95,7 @@ public partial class InventoryScreenUI
             new Vector2(0.63f, y), new Vector2(0.91f, y + rowHeight));
 
         UIFactory.CreateLabel(rightPanel,
-            "가방에서 인자를 고른 뒤 자리를 누르십시오. 끼워진 자리를 그냥 누르면 빠집니다.",
+            "가방에서 젬을 고른 뒤 자리를 누르십시오. 끼워진 자리를 그냥 누르면 빠집니다.",
             22, FontStyle.Normal,
             new Vector2(0.03f, 0.02f), new Vector2(0.97f, 0.10f),
             TextAnchor.MiddleLeft, UIPalette.TextDim);
@@ -106,7 +106,7 @@ public partial class InventoryScreenUI
     {
         SkillDefinition picked = PickedSkill();
 
-        // 고른 인자를 여기에 끼울 수 있으면 테두리 색으로 알린다.
+        // 고른 젬을 여기에 끼울 수 있으면 테두리 색으로 알린다.
         // "어디에 들어가는지"를 눌러 보기 전에 알 수 있어야 한다.
         bool isCandidate = unlocked && picked != null && CanPlace(slot, picked);
 
@@ -134,7 +134,7 @@ public partial class InventoryScreenUI
             unlocked ? UIPalette.Text : UIPalette.TextDim);
     }
 
-    /// <summary>가방에서 고른 것이 인자면 그 스킬. 아니면 null.</summary>
+    /// <summary>가방에서 고른 것이 젬이면 그 스킬. 아니면 null.</summary>
     private SkillDefinition PickedSkill()
     {
         return selected?.Definition != null && selected.Definition.IsSkillGem
@@ -167,7 +167,7 @@ public partial class InventoryScreenUI
         SkillManager manager = SkillManager.EnsureInstance();
         SkillDefinition picked = PickedSkill();
 
-        // 고른 인자가 없으면 그 자리를 비운다.
+        // 고른 젬이 없으면 그 자리를 비운다.
         if (picked == null)
         {
             UnequipSlot(manager, slot);
@@ -228,7 +228,7 @@ public partial class InventoryScreenUI
         }
 
         if (removed)
-            SetHint("인자를 가방으로 되돌렸습니다.");
+            SetHint("젬을 가방으로 되돌렸습니다.");
 
         Refresh();
     }

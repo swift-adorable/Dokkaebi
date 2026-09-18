@@ -1,11 +1,11 @@
 using UnityEngine;
 
 /// <summary>
-/// 모든 아이템의 공통 정의. 장비·인자·전리품이 이것을 공유한다.
+/// 모든 아이템의 공통 정의. 장비·젬·전리품이 이것을 공유한다.
 ///
 /// 무게와 적재 공간을 여기에 두는 이유 —
-/// 인자가 실물 아이템이 되면서 장비·전리품과 같은 인벤토리를 쓰게 되었다.
-/// "인자를 많이 챙겨 화력을 확보할까, 가방을 비워 전리품 공간을 남길까"라는
+/// 젬이 실물 아이템이 되면서 장비·전리품과 같은 인벤토리를 쓰게 되었다.
+/// "젬을 많이 챙겨 화력을 확보할까, 가방을 비워 전리품 공간을 남길까"라는
 /// 결정이 성립하려면 셋이 같은 자원을 두고 경쟁해야 한다.
 /// </summary>
 [CreateAssetMenu(fileName = "Item", menuName = "Blob/Item Definition")]
@@ -51,7 +51,7 @@ public class ItemDefinition : ScriptableObject
     [SerializeField] private int baseValue = 0;
 
     [Header("Skill Gem")]
-    [Tooltip("인자일 때 어떤 스킬인지. 다른 종류에서는 비워 둔다.")]
+    [Tooltip("젬일 때 어떤 스킬인지. 다른 종류에서는 비워 둔다.")]
     [SerializeField] private SkillDefinition skill;
 
     public string Id => id;
@@ -65,13 +65,13 @@ public class ItemDefinition : ScriptableObject
     public int MaxDurability => Mathf.Max(0, maxDurability);
     public int BaseValue => baseValue;
 
-    /// <summary>인자가 가리키는 스킬 정의. 인자가 아니면 null.</summary>
+    /// <summary>젬이 가리키는 스킬 정의. 젬이 아니면 null.</summary>
     public SkillDefinition Skill => skill;
 
     public bool HasDurability => MaxDurability > 0;
     public bool IsStackable => StackMax > 1;
 
-    /// <summary>인자인지. 스킬 참조가 있어야 인자로 인정한다.</summary>
+    /// <summary>젬인지. 스킬 참조가 있어야 젬으로 인정한다.</summary>
     public bool IsSkillGem => kind == ItemKind.SkillGem && skill != null;
 
     /// <summary>
@@ -88,7 +88,7 @@ public class ItemDefinition : ScriptableObject
         if (IsStackable && maxDurability > 0)
             maxDurability = 0;
 
-        // 인자·장비는 개별 상태를 가지므로 겹치지 않는다.
+        // 젬·장비는 개별 상태를 가지므로 겹치지 않는다.
         if (kind == ItemKind.Weapon || kind == ItemKind.Armour
             || kind == ItemKind.Backpack || kind == ItemKind.Imprint
             || kind == ItemKind.SkillGem)

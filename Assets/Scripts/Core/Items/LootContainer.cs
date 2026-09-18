@@ -11,7 +11,7 @@ using UnityEngine;
 ///
 /// 【절대 규칙】 가방에 자리가 없으면 아이템은 전리품 칸에 그대로 남는다.
 /// 이 클래스는 아이템을 만들지도 없애지도 않는다. 옮길 뿐이다.
-/// 인자 소켓(SocketedBuild)과 같은 원칙이다.
+/// 젬 소켓(SocketedBuild)과 같은 원칙이다.
 ///
 /// MonoBehaviour 의존이 없는 순수 클래스다. EditMode 테스트 대상.
 /// </summary>

@@ -8,7 +8,7 @@ namespace Blob.Tests
     ///
     /// 여기서 지켜야 할 것 세 가지 —
     ///  1. 열리지 않은 자리에는 끼울 수 없다.
-    ///  2. 뺄 수 있고, 뺀 인자는 【사라지지 않는다】.
+    ///  2. 뺄 수 있고, 뺀 젬은 【사라지지 않는다】.
     ///  3. 태그 게이팅과 상호 배타는 이전과 똑같이 작동한다.
     /// </summary>
     public class SocketedBuildTests
@@ -78,7 +78,7 @@ namespace Blob.Tests
         // ── 요구 레벨 ─────────────────────────────────────────────────────
 
         [Test]
-        public void 요구_레벨이_높은_인자는_끼울_수_없다()
+        public void 요구_레벨이_높은_젬은_끼울_수_없다()
         {
             SocketedBuild build = At(5);
 
@@ -121,7 +121,7 @@ namespace Blob.Tests
         // ── 교체 · 탈착 ───────────────────────────────────────────────────
 
         [Test]
-        public void 이미_낀_인자를_빼서_다른_것으로_갈아끼울_수_있다()
+        public void 이미_낀_젬을_빼서_다른_것으로_갈아끼울_수_있다()
         {
             // 확정 기획 — "레이드 중에 이미 끼운 젬을 빼서 바꿔 끼울 수 있는가" → 된다.
             SocketedBuild build = At(SocketUnlockTable.FullyOpenLevel);
@@ -139,7 +139,7 @@ namespace Blob.Tests
 
             Assert.AreSame(second, build.GetSocket(0, 0));
             CollectionAssert.AreEqual(new[] { first }, returned,
-                "밀려난 인자는 사라지지 않고 호출부로 돌아와야 합니다.");
+                "밀려난 젬은 사라지지 않고 호출부로 돌아와야 합니다.");
         }
 
         [Test]
@@ -299,7 +299,7 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void Clear는_인자를_없애지_않고_자리만_비운다()
+        public void Clear는_젬을_없애지_않고_자리만_비운다()
         {
             // 사망 시의 소멸은 Inventory.DropOnDeath의 몫이다. 규칙을 한 곳에만 둔다.
             SocketedBuild build = At(SocketUnlockTable.FullyOpenLevel);

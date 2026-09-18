@@ -30,7 +30,7 @@ public struct SocketCapacity
 
     public int TotalSockets => SocketsInCore0 + SocketsInCore1;
 
-    /// <summary>인자를 끼울 수 있는 자리의 총 개수. UI 상단 표시에 쓴다.</summary>
+    /// <summary>젬을 끼울 수 있는 자리의 총 개수. UI 상단 표시에 쓴다.</summary>
     public int TotalSlots => CoreSlots + TotalSockets + MetaSlots + HeraldSlots;
 }
 

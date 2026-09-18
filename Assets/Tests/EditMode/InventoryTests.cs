@@ -7,8 +7,8 @@ namespace Blob.Tests
     /// <summary>
     /// 인벤토리 테스트. (docs/Blob_Equipment_System.md 5-1절)
     ///
-    /// 장비 · 인자 · 전리품이 같은 인벤토리를 쓴다는 것이 이 게임의 핵심 결정이다.
-    /// "인자를 챙길까, 전리품 공간을 남길까"가 성립하려면 셋이 같은 자원을 두고 경쟁해야 한다.
+    /// 장비 · 젬 · 전리품이 같은 인벤토리를 쓴다는 것이 이 게임의 핵심 결정이다.
+    /// "젬을 챙길까, 전리품 공간을 남길까"가 성립하려면 셋이 같은 자원을 두고 경쟁해야 한다.
     /// </summary>
     public class InventoryTests
     {
@@ -151,10 +151,10 @@ namespace Blob.Tests
             Assert.Less(WeightCalculator.DashMultiplier(EncumbranceLevel.Overloaded), 1f);
         }
 
-        // ── 인자 · 장비 · 전리품이 같은 자원을 두고 경쟁한다 ──────────────
+        // ── 젬 · 장비 · 전리품이 같은 자원을 두고 경쟁한다 ──────────────
 
         [Test]
-        public void 인자와_전리품이_같은_칸을_두고_경쟁한다()
+        public void 젬과_전리품이_같은_칸을_두고_경쟁한다()
         {
             // 이 게임의 핵심 결정 — "화력을 챙길까, 전리품 공간을 남길까"
             var inv = new Inventory(slots: 4, weight: 100f);
@@ -164,7 +164,7 @@ namespace Blob.Tests
 
             inv.TryAdd(gem, 3);
 
-            Assert.AreEqual(1, inv.FreeSlots, "인자를 3개 챙기면 전리품 칸이 1개만 남습니다.");
+            Assert.AreEqual(1, inv.FreeSlots, "젬을 3개 챙기면 전리품 칸이 1개만 남습니다.");
             Assert.AreEqual(1, inv.TryAdd(loot, 3), "남은 1칸에만 들어갑니다.");
         }
 
@@ -188,7 +188,7 @@ namespace Blob.Tests
 
             inv.DropOnDeath();
 
-            Assert.AreEqual(0, inv.CountOf(gem), "인자도 장비와 똑같이 잃습니다.");
+            Assert.AreEqual(0, inv.CountOf(gem), "젬도 장비와 똑같이 잃습니다.");
             Assert.AreEqual(0, inv.CountOf(weapon));
             Assert.AreEqual(0, inv.CountOf(loot));
             Assert.AreEqual(1, inv.CountOf(imprint), "각인만 남습니다.");

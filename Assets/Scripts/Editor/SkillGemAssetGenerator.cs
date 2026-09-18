@@ -3,7 +3,7 @@ using UnityEditor;
 using UnityEngine;
 
 /// <summary>
-/// 스킬 정의 53종에 대응하는 「인자」 아이템 에셋을 만든다. (로드맵 6-D)
+/// 스킬 정의 53종에 대응하는 「젬」 아이템 에셋을 만든다. (로드맵 6-D)
 ///
 /// 왜 필요한가 —
 /// 스킬이 실물 아이템이 되면서 SkillDefinition 하나당 ItemDefinition 하나가 필요해졌다.
@@ -27,7 +27,7 @@ public static class SkillGemAssetGenerator
 
     private static readonly int[] ValueByCategory = { 420, 180, 300, 360 };
 
-    [MenuItem("Blob/Skill/인자 아이템 에셋 생성")]
+    [MenuItem("Blob/Skill/젬 아이템 에셋 생성")]
     public static void Generate()
     {
         SkillCatalog catalog = SkillCatalog.Load();
@@ -79,7 +79,7 @@ public static class SkillGemAssetGenerator
 
         RebuildCatalog(gems);
 
-        Debug.Log($"[SkillGemAssetGenerator] 인자 아이템 {gems.Count}종 " +
+        Debug.Log($"[SkillGemAssetGenerator] 젬 아이템 {gems.Count}종 " +
                   $"(신규 {created} / 갱신 {updated})");
     }
 
@@ -95,14 +95,14 @@ public static class SkillGemAssetGenerator
 
         so.FindProperty("kind").intValue = (int)ItemKind.SkillGem;
 
-        // 인자에는 티어가 없다. 스킬은 단일 정의이며 티어 체계를 두지 않는다. (14절 5번)
+        // 젬에는 티어가 없다. 스킬은 단일 정의이며 티어 체계를 두지 않는다. (14절 5번)
         so.FindProperty("tier").intValue = 0;
 
         so.FindProperty("weight").floatValue = WeightByCategory[index];
         so.FindProperty("slotSize").intValue = 1;
         so.FindProperty("stackMax").intValue = 1;
 
-        // 인자는 닳지 않는다. 내구도는 장비의 축이다.
+        // 젬은 닳지 않는다. 내구도는 장비의 축이다.
         so.FindProperty("maxDurability").intValue = 0;
 
         so.FindProperty("baseValue").intValue = ValueByCategory[index];
@@ -115,7 +115,7 @@ public static class SkillGemAssetGenerator
     }
 
     /// <summary>Resources/SkillGemCatalog.asset을 만들거나 갱신한다.</summary>
-    [MenuItem("Blob/Skill/인자 카탈로그 다시 만들기")]
+    [MenuItem("Blob/Skill/젬 카탈로그 다시 만들기")]
     public static void RebuildCatalogFromFolder()
     {
         var gems = new List<ItemDefinition>();
@@ -155,7 +155,7 @@ public static class SkillGemAssetGenerator
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
 
-        Debug.Log($"[SkillGemAssetGenerator] 인자 카탈로그 갱신: {gems.Count}종");
+        Debug.Log($"[SkillGemAssetGenerator] 젬 카탈로그 갱신: {gems.Count}종");
     }
 
     private static void EnsureFolders()

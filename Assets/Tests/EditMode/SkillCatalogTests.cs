@@ -330,9 +330,9 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 초반_각성_레벨에서_끼울_수_있는_인자가_충분하다()
+        public void 초반_각성_레벨에서_끼울_수_있는_젬이_충분하다()
         {
-            // 엣지 케이스 — 요구 레벨이 전부 높으면 초반에 주운 인자를 하나도
+            // 엣지 케이스 — 요구 레벨이 전부 높으면 초반에 주운 젬을 하나도
             // 끼우지 못한다. Lv3 시점에 열리는 자리는 Core 1 + 소켓 2 = 3개이므로
             // 그보다 넉넉한 후보가 있어야 파밍이 의미를 가진다.
             int earlyCount = All.Count(d => d.RequiredLevel <= 3);
@@ -340,7 +340,7 @@ namespace Blob.Tests
             SocketCapacity atThree = SocketUnlockTable.Evaluate(3);
 
             Assert.Greater(earlyCount, atThree.TotalSlots,
-                "Lv3 이하 인자가 그 시점에 열리는 자리 수보다 적습니다.");
+                "Lv3 이하 젬이 그 시점에 열리는 자리 수보다 적습니다.");
         }
     }
 }
