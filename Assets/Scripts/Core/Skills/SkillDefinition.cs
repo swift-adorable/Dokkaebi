@@ -146,6 +146,20 @@ public class SkillDefinition : ScriptableObject
     [Tooltip("조건을 만족할 때 추가로 더해지는 피해 증가율.")]
     [SerializeField] private float conditionalDamageIncrease = 0f;
 
+    [Header("Effect — 속성 전환")]
+    // 속성 전환 Support가 자기가 꽂힌 Core의 부여 속성을 바꾼다.
+    //
+    // 이 축이 배타형 Support를 살린다 —
+    // 「번제」가 화염 Core의 점화를 끄면, 「화염 조율」을 낀 다른 Core가
+    // 점화를 대신 공급한다. 그래야 「점화된 적에게 큰 피해」가 성립한다.
+    // (docs/Blob_Audit.md D3)
+
+    [Tooltip("이 Support가 꽂힌 Core의 부여 속성을 이것으로 바꾼다. (전환)")]
+    [SerializeField] private StatusEffectType ailmentOverride = StatusEffectType.None;
+
+    [Tooltip("원래 속성을 유지한 채 이것을 추가로 부여한다. (융합)")]
+    [SerializeField] private StatusEffectType ailmentAddition = StatusEffectType.None;
+
     [Tooltip("투사체 속도 배수.")]
     [Min(0.1f)]
     [SerializeField] private float speedMultiplier = 1f;
@@ -191,6 +205,9 @@ public class SkillDefinition : ScriptableObject
     public float AilmentDurationMultiplier => Mathf.Max(0.1f, ailmentDurationMultiplier);
     public float RangeMultiplier => Mathf.Max(0.1f, rangeMultiplier);
 
+    public StatusEffectType AilmentOverride => ailmentOverride;
+    public StatusEffectType AilmentAddition => ailmentAddition;
+
     public SkillConditionKind ConditionKind => conditionKind;
     public StatusEffectType ConditionStatus => conditionStatus;
     public float ConditionalDamageIncrease => conditionalDamageIncrease;
@@ -217,6 +234,8 @@ public class SkillDefinition : ScriptableObject
         || createsStatus != StatusEffectType.None
         || consumesStatus != StatusEffectType.None
         || createsGroundEffect != GroundEffectType.None
+        || ailmentOverride != StatusEffectType.None
+        || ailmentAddition != StatusEffectType.None
         || blocksStatusCreation
         || speedMultiplier > 1f
         || lifetimeMultiplier > 1f

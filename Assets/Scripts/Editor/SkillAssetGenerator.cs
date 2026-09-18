@@ -49,6 +49,8 @@ public static class SkillAssetGenerator
         public float ailDuration;  // 상태이상·잔류물 지속시간 배수
         public float range;        // 유효 사거리 배수
         public float spread;       // 추가 투사체 간 각도(도)
+        public StatusEffectType ailOverride;
+        public StatusEffectType ailAddition;
         public SkillConditionKind condition;
         public StatusEffectType conditionStatus;
         public float conditionalDmg;
@@ -69,6 +71,7 @@ public static class SkillAssetGenerator
             behaviour = ProjectileBehaviourType.None, charges = 0, ricochet = 0,
             extraProjectiles = 0, fireInterval = 1f, lifetime = 1f, speed = 1f,
             dmg = 0f, ailPower = 0f, ailDuration = 1f, range = 1f, spread = 8f,
+            ailOverride = StatusEffectType.None, ailAddition = StatusEffectType.None,
             condition = SkillConditionKind.None,
             conditionStatus = StatusEffectType.None, conditionalDmg = 0f
         };
@@ -167,6 +170,8 @@ public static class SkillAssetGenerator
         so.FindProperty("ailmentDurationMultiplier").floatValue = row.ailDuration;
         so.FindProperty("rangeMultiplier").floatValue = row.range;
         so.FindProperty("spreadAngle").floatValue = row.spread;
+        so.FindProperty("ailmentOverride").intValue = (int)row.ailOverride;
+        so.FindProperty("ailmentAddition").intValue = (int)row.ailAddition;
         so.FindProperty("conditionKind").intValue = (int)row.condition;
         so.FindProperty("conditionStatus").intValue = (int)row.conditionStatus;
         so.FindProperty("conditionalDamageIncrease").floatValue = row.conditionalDmg;
@@ -497,6 +502,7 @@ public static class SkillAssetGenerator
         r.requiredTags = SkillTag.Projectile;
         r.cost = CostType.FunctionalExclusion; r.costDesc = "전환 전 속성 전용 Support가 무효화된다";
         r.exclusive = new[] { "sup_elemental_fusion" };
+        r.ailOverride = StatusEffectType.Ignite;
         t.Add(r);
 
         r = New("sup_elemental_fusion", "원소 융합",
@@ -504,6 +510,7 @@ public static class SkillAssetGenerator
         r.requiredTags = SkillTag.Projectile;
         r.cost = CostType.BarrageDensity; r.costDesc = "양쪽 속성의 적용 빈도가 절반이 된다";
         r.exclusive = new[] { "sup_fire_attunement" };
+        r.ailAddition = StatusEffectType.Shock; r.ailDuration = 0.5f;
         t.Add(r);
 
         // ── Meta 5 ────────────────────────────────────────────────────────

@@ -16,15 +16,10 @@ namespace Blob.Tests
         /// <summary>
         /// 아직 데이터로 표현할 축이 없는 스킬. 【늘어나면 안 된다.】
         ///
-        /// 속성 전환은 「이 탄의 속성을 무엇으로 바꾸는가」라는 축이 필요한데
-        /// SkillDefinition에 아직 없다. 가짜 값으로 채우는 대신 여기에 남겨
-        /// 테스트 출력에 계속 보이게 한다.
+        /// 6-J에서 속성 전환 축을 만들어 비었다.
+        /// 다시 채워야 한다면 그것은 새 축이 필요하다는 뜻이다.
         /// </summary>
-        private static readonly string[] KnownGaps =
-        {
-            "sup_fire_attunement",   // 속성 전환 축 없음
-            "sup_elemental_fusion"   // 2차 속성 부여 축 없음
-        };
+        private static readonly string[] KnownGaps = new string[0];
 
         private static SkillCatalog catalog;
 
@@ -56,7 +51,7 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 알려진_공백은_두_개를_넘지_않는다()
+        public void 알려진_공백_목록이_비어_있다()
         {
             var gaps = All()
                 .Where(s => s.Category == SkillCategory.Support && !s.HasEffect)
@@ -247,6 +242,98 @@ namespace Blob.Tests
             Assert.Greater(doubled.RemainingOf(StatusEffectType.Bleed),
                 normal.RemainingOf(StatusEffectType.Bleed),
                 "지속시간 배수가 적용되지 않았습니다.");
+        }
+
+        // ── 배타형이 실제로 성립하는가 (D3) ───────────────────────────────
+
+        private static SkillDefinition Find(string id)
+        {
+            SkillDefinition d = All().FirstOrDefault(s => s.Id == id);
+            Assert.IsNotNull(d, $"{id} 에셋이 없습니다.");
+            return d;
+        }
+
+        /// <summary>
+        /// 【자기 Core는 못 걸고, 다른 발생원이 걸어 준 것을 이용한다.】
+        ///
+        /// 차단이 빌드 전역이던 동안 배타형 4종은 구조적으로 영구 무효였다 —
+        /// 「번제」는 화염 태그를 요구해 화염 Core에만 끼울 수 있는데,
+        /// 전역 차단이면 그 화염 Core의 점화까지 꺼져 조건이 영원히 성립하지 않았다.
+        /// </summary>
+        [Test]
+        public void 번제를_낀_Core는_점화를_걸_수_없다()
+        {
+            var build = new SocketedBuild();
+            build.SetAwakeningLevel(15);
+
+            Assert.IsTrue(build.TryEquipCore(Find("core_fire"), 0), "화염 Core 장착");
+            Assert.IsTrue(build.TryEquipSupport(Find("sup_burnt_offering"), 0, 0), "번제 장착");
+
+            Assert.AreEqual(StatusEffectType.None, build.EffectiveAilmentOf(0),
+                "번제를 낀 Core는 점화를 걸 수 없어야 합니다.");
+        }
+
+        /// <summary>
+        /// 다른 Core가 속성 전환으로 점화를 공급하면 배타형이 성립한다.
+        /// 이것이 「단독으로는 작동하지 않는다」의 정확한 뜻이다.
+        /// </summary>
+        [Test]
+        public void 다른_Core가_점화를_공급하면_번제가_성립한다()
+        {
+            var build = new SocketedBuild();
+            build.SetAwakeningLevel(15);
+
+            build.TryEquipCore(Find("core_fire"), 0);
+            build.TryEquipSupport(Find("sup_burnt_offering"), 0, 0);
+
+            // 2번째 Core에 화염 조율을 끼워 점화를 공급한다.
+            Assert.IsTrue(build.TryEquipCore(Find("core_thunder"), 1), "2번째 Core 장착");
+            Assert.IsTrue(build.TryEquipSupport(Find("sup_fire_attunement"), 1, 0), "화염 조율 장착");
+
+            Assert.AreEqual(StatusEffectType.Ignite, build.EffectiveAilmentOf(1),
+                "화염 조율이 2번째 Core의 속성을 점화로 바꾸지 못했습니다.");
+
+            Assert.IsFalse(build.IsStatusUnavailable(StatusEffectType.Ignite),
+                "빌드 어딘가에서 점화가 나와야 번제가 일을 합니다.");
+
+            Assert.Contains(StatusEffectType.Ignite,
+                build.GetModifiers().Ailments.ToList(),
+                "탄에 점화가 실리지 않았습니다.");
+        }
+
+        /// <summary>차단은 자기 Core에만 적용된다. 다른 Core는 영향을 받지 않는다.</summary>
+        [Test]
+        public void 차단은_다른_Core에_번지지_않는다()
+        {
+            var build = new SocketedBuild();
+            build.SetAwakeningLevel(15);
+
+            build.TryEquipCore(Find("core_fire"), 0);
+            build.TryEquipSupport(Find("sup_burnt_offering"), 0, 0);
+            build.TryEquipCore(Find("core_thunder"), 1);
+
+            Assert.IsTrue(build.IsStatusBlockedForCore(0, StatusEffectType.Ignite),
+                "번제를 낀 Core는 점화가 막혀야 합니다.");
+
+            Assert.IsFalse(build.IsStatusBlockedForCore(1, StatusEffectType.Ignite),
+                "다른 Core까지 막으면 배타형이 영원히 무효가 됩니다.");
+        }
+
+        /// <summary>「원소 융합」은 원래 속성을 유지한 채 2차 속성을 더한다.</summary>
+        [Test]
+        public void 원소_융합은_속성을_추가한다()
+        {
+            var build = new SocketedBuild();
+            build.SetAwakeningLevel(15);
+
+            build.TryEquipCore(Find("core_fire"), 0);
+            build.TryEquipSupport(Find("sup_elemental_fusion"), 0, 0);
+
+            Assert.AreEqual(StatusEffectType.Ignite, build.EffectiveAilmentOf(0),
+                "원래 속성이 유지되어야 합니다.");
+
+            Assert.AreNotEqual(StatusEffectType.None, build.AddedAilmentOf(0),
+                "2차 속성이 추가되지 않았습니다.");
         }
     }
 }
