@@ -95,6 +95,10 @@ public class PlayerWeapon : MonoBehaviour
         float spread = modifiers.SpreadAngle;
         float startAngle = count > 1 ? -spread * (count - 1) * 0.5f : 0f;
 
+        // 총구와 같은 높이의 발사자 중심. 캡슐 판정이 수평이 되도록 y를 맞춘다.
+        var shooterCenter = new Vector3(
+            transform.position.x, firePoint.position.y, transform.position.z);
+
         for (int i = 0; i < count; i++)
         {
             float angle = startAngle + spread * i;
@@ -115,6 +119,10 @@ public class PlayerWeapon : MonoBehaviour
                     modifiers.LifetimeMultiplier,
                     firePoint.position,
                     ailment);
+
+                // 적이 몸에 붙으면 총구가 이미 적 안이라 트리거 진입이 발생하지 않는다.
+                // 발사자 중심 → 총구 구간을 여기서 직접 판정한다.
+                controller.ResolveMuzzleOverlap(shooterCenter);
             }
         }
     }

@@ -97,8 +97,10 @@ public class SkillManager : Singleton<SkillManager>
         build.OnChanged += HandleBuildChanged;
     }
 
-    private void OnDestroy()
+    protected override void OnDestroy()
     {
+        base.OnDestroy();
+
         build.OnChanged -= HandleBuildChanged;
     }
 

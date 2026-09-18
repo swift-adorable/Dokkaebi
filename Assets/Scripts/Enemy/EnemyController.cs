@@ -14,6 +14,7 @@ public class EnemyController : MonoBehaviour, IPoolable
 
     private Health health;
     private EnemyAttack attack;
+    private EnemyBrain brain;
     private PooledObject pooledObject;
     private PoolManager poolManager;
     private EnemyManager enemyManager;
@@ -26,6 +27,7 @@ public class EnemyController : MonoBehaviour, IPoolable
     {
         health = GetComponent<Health>();
         attack = GetComponent<EnemyAttack>();
+        brain = GetComponent<EnemyBrain>();
         pooledObject = GetComponent<PooledObject>();
     }
 
@@ -54,6 +56,11 @@ public class EnemyController : MonoBehaviour, IPoolable
 
         if (attack != null)
             attack.ResetState();
+
+        // 두뇌도 초기화한다. 재장전 중이던 적이 그 상태로 재사용되면
+        // 스폰 직후 이유 없이 뒷걸음질한다.
+        if (brain != null)
+            brain.ResetState();
 
         // Health.OnSpawned는 IPoolable 통지로 별도 호출되므로 여기서 중복 처리하지 않는다.
         EnemyManager.EnsureInstance().Register(this);

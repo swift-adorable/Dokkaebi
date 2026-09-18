@@ -62,8 +62,16 @@ public class EnemyAttack : MonoBehaviour
     [Tooltip("예비동작 중 표시할 오브젝트(선택). 없으면 표시하지 않는다.")]
     [SerializeField] private GameObject windupIndicator;
 
+    [Tooltip("원거리 예비동작 중의 이동 속도 배수. 0이면 완전히 멈춘다.")]
+    [Range(0f, 1f)]
+    [SerializeField] private float rangedWindupSpeedScale = 0.45f;
+
     private EnemyMovement movement;
+    private EnemyBrain brain;
     private CooldownTimer cooldown;
+
+    /// <summary>공격 판정이 끝났을 때 발행된다. 두뇌가 탄창 소모를 센다.</summary>
+    public event System.Action OnAttackResolved;
 
     private float windupEndTime;
 
@@ -80,6 +88,7 @@ public class EnemyAttack : MonoBehaviour
     private void Awake()
     {
         movement = GetComponent<EnemyMovement>();
+        brain = GetComponent<EnemyBrain>();
 
         // 원거리 적은 사거리 안에서 멈춰 쏜다. 근접까지 붙으면 원거리의 의미가 없다.
         if (attackKind == EnemyAttackKind.Ranged && movement != null)
@@ -115,14 +124,22 @@ public class EnemyAttack : MonoBehaviour
         if (movement.DistanceToTarget > attackRange)
             return;
 
+        // 지금 내 차례가 아니면 쏘지 않는다. 동시에 달려드는 그림을 막는 핵심이다.
+        if (brain != null && !brain.MayAttack)
+            return;
+
         if (!cooldown.TryConsume(Time.time, attackCooldown + windupDuration))
             return;
 
         IsWindingUp = true;
         windupEndTime = Time.time + windupDuration;
 
-        // 예비동작 중에는 멈춰서 '공격이 온다'는 신호를 명확히 준다.
-        movement.IsHalted = true;
+        // 근접은 완전히 멈춰 '공격이 온다'는 신호를 명확히 준다.
+        // 원거리는 느려질 뿐이다. 멈춰 서면 과녁이 되어 사람처럼 보이지 않는다.
+        if (attackKind == EnemyAttackKind.Melee)
+            movement.IsHalted = true;
+        else
+            movement.SpeedScale = rangedWindupSpeedScale;
 
         SetIndicator(true);
     }
@@ -133,6 +150,10 @@ public class EnemyAttack : MonoBehaviour
             return;
 
         ResolveAttack();
+
+        // 빗나가도 한 발 쓴 것으로 센다. 그래야 재장전이 「명중 수」가 아니라
+        // 「쏜 횟수」에 걸려 플레이어의 회피가 적을 오히려 유리하게 만들지 않는다.
+        OnAttackResolved?.Invoke();
 
         CancelWindup();
     }
@@ -219,7 +240,13 @@ public class EnemyAttack : MonoBehaviour
 
         // 적의 탄은 플레이어를 향한다. 탄 프리팹의 targetTeam이 Player여야 한다.
         if (projectile.TryGetComponent(out BulletController bullet))
+        {
             bullet.ConfigureAsEnemyShot(damage, attackRange, armourPenetration, appliedStatus, origin);
+
+            // 플레이어와 겹친 상태로 쏠 때도 같은 문제가 생긴다. 같은 규칙을 적용한다.
+            bullet.ResolveMuzzleOverlap(
+                new Vector3(transform.position.x, origin.y, transform.position.z));
+        }
     }
 
     private static DamageElement ElementOf(StatusEffectType status)
@@ -239,7 +266,10 @@ public class EnemyAttack : MonoBehaviour
         IsWindingUp = false;
 
         if (movement != null)
+        {
             movement.IsHalted = false;
+            movement.SpeedScale = 1f;
+        }
 
         SetIndicator(false);
     }

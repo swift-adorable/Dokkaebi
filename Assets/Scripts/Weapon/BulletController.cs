@@ -41,6 +41,12 @@ public class BulletController : MonoBehaviour, IPoolable
     [Tooltip("Chain이 다음 대상을 찾는 반경(m)")]
     [SerializeField] private float chainRadius = 6f;
 
+    [Header("Point-Blank (근접 사격)")]
+    [Tooltip("총구와 발사자 사이 구간을 즉시 판정할 때 쓰는 반경(m). " +
+             "적이 몸에 붙었을 때 총알이 적 몸 안에서 태어나 판정이 통째로 사라지는 것을 막는다.")]
+    [Min(0f)]
+    [SerializeField] private float muzzleCheckRadius = 0.25f;
+
     [Header("Ricochet (튕겨 쏘기)")]
     [Tooltip("튕김 판정 대상 레이어. 지형/장애물 레이어를 지정한다.")]
     [SerializeField] private LayerMask terrainMask = 0;
@@ -52,6 +58,9 @@ public class BulletController : MonoBehaviour, IPoolable
     private static readonly List<Vector3> ChainPositions = new(64);
     private static readonly List<bool> ChainExcluded = new(64);
     private static readonly List<Transform> ChainTransforms = new(64);
+
+    /// <summary>근접 사격 판정용 공유 버퍼. 발사마다 배열을 만들지 않는다.</summary>
+    private static readonly Collider[] MuzzleOverlapBuffer = new Collider[16];
 
     private PooledObject pooledObject;
     private PoolManager poolManager;
@@ -239,18 +248,67 @@ public class BulletController : MonoBehaviour, IPoolable
 
     private void OnTriggerEnter(Collider other)
     {
-        if (isConsumed)
+        TryHit(other);
+    }
+
+    /// <summary>
+    /// 총구와 발사자 사이 구간을 발사 즉시 판정한다. PlayerWeapon / EnemyAttack이 호출한다.
+    ///
+    /// 【이것이 없으면 적이 몸에 붙었을 때 총알이 나가도 맞지 않는다.】
+    /// 총구(firePoint)는 발사자보다 앞에 있다. 적이 밀착하면 그 지점이 이미
+    /// 적 콜라이더 안이고, 총알은 적 몸 안에서 태어나 앞으로 빠져나간다.
+    /// OnTriggerEnter는 "밖에서 안으로 들어오는" 순간에만 발생하므로
+    /// 이 경우 판정 자체가 일어나지 않는다. 유저 눈에는 "총알이 안 나간다"로 보인다.
+    ///
+    /// 그래서 이동에 의존하지 않고 발사자 중심 → 총구 구간을 캡슐로 직접 훑는다.
+    /// OverlapCapsule은 이미 겹쳐 있는 콜라이더도 보고하므로 SphereCast와 달리
+    /// "처음부터 안에 있던" 경우를 놓치지 않는다.
+    /// </summary>
+    public void ResolveMuzzleOverlap(Vector3 shooterCenter)
+    {
+        if (isConsumed || muzzleCheckRadius <= 0f)
             return;
+
+        Vector3 muzzle = transform.position;
+        Vector3 forward = transform.forward;
+
+        int count = Physics.OverlapCapsuleNonAlloc(
+            shooterCenter, muzzle, muzzleCheckRadius, MuzzleOverlapBuffer,
+            ~0, QueryTriggerInteraction.Collide);
+
+        for (int i = 0; i < count && !isConsumed; i++)
+        {
+            Collider other = MuzzleOverlapBuffer[i];
+
+            if (other == null)
+                continue;
+
+            // 발사자 뒤에 있는 대상은 맞히지 않는다. 캡슐 반경이 뒤쪽까지 조금 물기 때문이다.
+            if (Vector3.Dot(other.bounds.center - shooterCenter, forward) < 0f)
+                continue;
+
+            TryHit(other);
+        }
+    }
+
+    /// <summary>
+    /// 한 콜라이더에 대한 명중 판정. 트리거 충돌과 근접 사격 판정이 이 경로를 공유한다.
+    /// 두 경로가 갈라지면 한쪽만 고치는 버그가 반드시 생긴다.
+    /// </summary>
+    private bool TryHit(Collider other)
+    {
+        if (isConsumed || other == null)
+            return false;
 
         if (!other.TryGetComponent(out Health targetHealth))
-            return;
+            return false;
 
         if (targetHealth.Team != targetTeam)
-            return;
+            return false;
 
         // 같은 대상을 다시 때리지 않는다. 귀환 중에만 재타격이 허용된다. (v5 §10)
         if (!isReturning && hitTargets.Contains(other.transform))
-            return;
+            return false;
 
         if (!isReturning)
             hitTargets.Add(other.transform);
@@ -258,6 +316,8 @@ public class BulletController : MonoBehaviour, IPoolable
         ApplyHit(targetHealth);
 
         ResolveBehaviour(other.transform);
+
+        return true;
     }
 
     /// <summary>

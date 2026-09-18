@@ -17,6 +17,7 @@ GameObject:
   - component: {fileID: 2202289866955090440}
   - component: {fileID: 8342161792583253049}
   - component: {fileID: 4547313273617054741}
+  - component: {fileID: 5512038840711992301}
   m_Layer: 0
   m_Name: Enemy
   m_TagString: Untagged
@@ -207,3 +208,28 @@ MonoBehaviour:
   windupDuration: 0.35
   attackCooldown: 1.2
   windupIndicator: {fileID: 0}
+--- !u!114 &5512038840711992301
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 372103695842319712}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e9bb1d60759445e3962db8a4e9f0937, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Blob.Runtime::EnemyBrain
+  detectDistance: 18
+  preferredDistance: 0
+  band: 0.5
+  reactionTime: 0.35
+  strafeFlipMin: 1.6
+  strafeFlipMax: 3.6
+  shotsPerBurst: 3
+  reloadDuration: 1.8
+  sightBlockMask:
+    serializedVersion: 2
+    m_Bits: 0
+  sightCheckInterval: 0.2
+  eyeHeight: 0.9

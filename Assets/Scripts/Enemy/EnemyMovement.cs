@@ -33,6 +33,12 @@ public class EnemyMovement : MonoBehaviour
     private Rigidbody rb;
     private EnemyManager enemyManager;
 
+    /// <summary>이동 방향을 대신 정해 주는 두뇌. 없으면 기존 직선 추격을 쓴다.</summary>
+    private IEnemySteering steering;
+
+    /// <summary>이동 속도 배수. 예비동작·과중량 같은 일시적 감속에 쓴다.</summary>
+    public float SpeedScale { get; set; } = 1f;
+
     /// <summary>이동을 멈춘다. 공격 예비동작 중에 사용한다.</summary>
     public bool IsHalted { get; set; }
 
@@ -54,6 +60,9 @@ public class EnemyMovement : MonoBehaviour
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
+
+        // 인터페이스로 받으므로 두뇌 구현이 바뀌어도 이동은 고치지 않는다.
+        steering = GetComponent<IEnemySteering>();
     }
 
     private void Start()
@@ -81,21 +90,48 @@ public class EnemyMovement : MonoBehaviour
 
         FaceTowards(toTarget);
 
-        if (IsHalted || DistanceToTarget <= stoppingDistance)
+        if (IsHalted)
         {
             StopHorizontal();
             return;
         }
 
-        Vector3 direction = toTarget.normalized;
+        float speed = moveSpeed * Mathf.Max(0f, SpeedScale);
+        Vector3 direction;
+
+        // 두뇌가 붙어 있으면 방향은 두뇌가 정한다. (EnemyBrain — 유지 거리·측면 이동·차례)
+        // 붙어 있지 않으면 기존 직선 추격 그대로다. 프리팹을 한꺼번에 고치지 않아도 된다.
+        if (steering != null &&
+            steering.TryGetSteering(toTarget.normalized, DistanceToTarget,
+                                    out Vector3 steered, out float steerScale))
+        {
+            if (steered.sqrMagnitude < 0.0001f)
+            {
+                StopHorizontal();
+                return;
+            }
+
+            direction = steered;
+            speed *= Mathf.Max(0f, steerScale);
+        }
+        else
+        {
+            if (DistanceToTarget <= stoppingDistance)
+            {
+                StopHorizontal();
+                return;
+            }
+
+            direction = toTarget.normalized;
+        }
 
         if (separationWeight > 0f)
             direction = (direction + CalculateSeparation() * separationWeight).normalized;
 
         rb.linearVelocity = new Vector3(
-            direction.x * moveSpeed,
+            direction.x * speed,
             rb.linearVelocity.y,
-            direction.z * moveSpeed);
+            direction.z * speed);
     }
 
     /// <summary>주변 적에게서 멀어지는 방향을 구한다. 적끼리 한 점에 뭉치는 것을 막는다.</summary>

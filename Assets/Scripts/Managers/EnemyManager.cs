@@ -17,13 +17,38 @@ public class EnemyManager : Singleton<EnemyManager>
     [Tooltip("플레이어로부터 이 거리를 넘으면 자동으로 풀에 반납한다.")]
     [SerializeField] private float despawnDistance = 40f;
 
+    [Header("Engagement")]
+    [Tooltip("동시에 공격할 수 있는 적의 수. 나머지는 쏘지 않고 자리를 잡는다. " +
+             "이 값이 높을수록 「숫자에 눌리는」 느낌이 강해진다.")]
+    [Min(1)]
+    [SerializeField] private int concurrentAttackers = AttackTokenPool.DefaultCapacity;
+
     [Header("Performance")]
     [Tooltip("거리 검사 주기(초). 매 프레임 검사할 필요가 없다.")]
     [SerializeField] private float cullInterval = 0.5f;
 
     private readonly List<EnemyController> activeEnemies = new();
+
+    /// <summary>
+    /// 공격 차례표. EnemyBrain이 여기서 차례를 얻어야 공격할 수 있다.
+    ///
+    /// 관리자가 들고 있는 이유 — 「동시에 몇이 덤비는가」는 개체가 아니라
+    /// 전투 전체의 성질이다. 개체마다 두면 조율이 불가능하다.
+    /// </summary>
+    public AttackTokenPool AttackTokens { get; } = new();
     private Transform playerTransform;
     private float nextCullTime;
+
+    /// <summary>동시 공격 허용 수. 난이도 슬라이더가 이 값을 조정한다.</summary>
+    public int ConcurrentAttackers
+    {
+        get => concurrentAttackers;
+        set
+        {
+            concurrentAttackers = Mathf.Max(1, value);
+            AttackTokens.Capacity = concurrentAttackers;
+        }
+    }
 
     /// <summary>현재 살아 있는 적 수.</summary>
     public int ActiveCount => activeEnemies.Count;
@@ -85,6 +110,11 @@ public class EnemyManager : Singleton<EnemyManager>
             return;
 
         activeEnemies.Remove(enemy);
+    }
+
+    protected override void OnSingletonAwake()
+    {
+        AttackTokens.Capacity = concurrentAttackers;
     }
 
     private void Update()
