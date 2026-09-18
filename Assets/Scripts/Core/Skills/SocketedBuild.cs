@@ -581,29 +581,139 @@ public class SocketedBuild
         return false;
     }
 
-    /// <summary>기능 배타로 이 상태를 유발할 수 없게 되었는지. (10-2 [3])</summary>
-    public bool IsStatusBlocked(StatusEffectType status)
+    /// <summary>
+    /// 【그 Core가】 이 상태를 유발할 수 없게 되었는지.
+    ///
+    /// 차단 범위를 Core 하나로 좁힌 이유 —
+    /// 빌드 전역으로 막으면 배타형 Support가 구조적으로 영구 무효가 된다.
+    /// 「번제」는 화염 태그를 요구하므로 화염 Core에만 끼울 수 있는데,
+    /// 전역 차단이면 그 화염 Core의 점화까지 꺼져 조건(점화된 적)이 영원히 성립하지 않는다.
+    /// 「점화를 유발할 수 없지만 점화된 적에게 큰 피해」라는 정체성 자체가 불가능해진다.
+    ///
+    /// Core 단위로 좁히면 설계가 성립한다 —
+    /// 【자기 Core는 못 걸고, 다른 발생원이 걸어 준 것을 이용한다.】
+    /// 다른 발생원은 2번째 Core(Lv7)이거나 「화염 조율」 같은 속성 전환이다.
+    /// 그래서 문서의 「단독으로는 전혀 작동하지 않는다」가 그대로 유지된다.
+    /// (docs/Blob_Audit.md D3)
+    /// </summary>
+    public bool IsStatusBlockedForCore(int coreIndex, StatusEffectType status)
     {
-        if (status == StatusEffectType.None)
+        if (status == StatusEffectType.None || !IsValidCoreIndex(coreIndex))
             return false;
 
-        IReadOnlyList<SkillDefinition> list = Equipped;
+        // Core 자신이 막는 경우.
+        SkillDefinition core = cores[coreIndex];
 
-        for (int i = 0; i < list.Count; i++)
+        if (core != null && core.BlocksStatusCreation
+            && core.BlockedStatus == status && !IsNullified(core))
         {
-            SkillDefinition definition = list[i];
+            return true;
+        }
 
-            if (!definition.BlocksStatusCreation)
+        // 그 Core의 소켓에 꽂힌 Support만 본다. 다른 Core의 소켓은 상관없다.
+        for (int s = 0; s < SocketsPerCore; s++)
+        {
+            SkillDefinition support = sockets[coreIndex, s];
+
+            if (support == null || !support.BlocksStatusCreation)
                 continue;
 
-            if (IsNullified(definition))
+            if (IsNullified(support))
                 continue;
 
-            if (definition.BlockedStatus == status)
+            if (support.BlockedStatus == status)
                 return true;
         }
 
         return false;
+    }
+
+    /// <summary>
+    /// 빌드 전체에서 이 상태를 만들 수 있는 Core가 하나도 없는지.
+    /// UI가 「이 젬은 지금 아무 일도 하지 않습니다」를 알릴 때 쓴다.
+    /// </summary>
+    public bool IsStatusUnavailable(StatusEffectType status)
+    {
+        if (status == StatusEffectType.None)
+            return false;
+
+        for (int c = 0; c < MaxCores; c++)
+        {
+            if (EffectiveAilmentOf(c) == status)
+                return false;
+
+            if (AddedAilmentOf(c) == status)
+                return false;
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// 그 Core가 실제로 부여하는 상태. 속성 전환 Support가 있으면 바뀐다.
+    /// 차단되었거나 부여 계열이 아니면 None.
+    /// </summary>
+    public StatusEffectType EffectiveAilmentOf(int coreIndex)
+    {
+        if (!IsValidCoreIndex(coreIndex))
+            return StatusEffectType.None;
+
+        SkillDefinition core = cores[coreIndex];
+
+        if (core == null || core.Category != SkillCategory.Core
+            || core.Family != CoreFamily.Ailment || IsNullified(core))
+        {
+            return StatusEffectType.None;
+        }
+
+        StatusEffectType status = core.CreatesStatus;
+
+        // 속성 전환 — 그 Core의 부여 속성 자체를 바꾼다.
+        for (int s = 0; s < SocketsPerCore; s++)
+        {
+            SkillDefinition support = sockets[coreIndex, s];
+
+            if (support == null || IsNullified(support))
+                continue;
+
+            if (support.AilmentOverride != StatusEffectType.None)
+                status = support.AilmentOverride;
+        }
+
+        return IsStatusBlockedForCore(coreIndex, status) ? StatusEffectType.None : status;
+    }
+
+    /// <summary>
+    /// 그 Core가 추가로 부여하는 2차 상태. 「원소 융합」이 만든다.
+    /// 없으면 None.
+    /// </summary>
+    public StatusEffectType AddedAilmentOf(int coreIndex)
+    {
+        if (!IsValidCoreIndex(coreIndex))
+            return StatusEffectType.None;
+
+        SkillDefinition core = cores[coreIndex];
+
+        if (core == null || core.Family != CoreFamily.Ailment || IsNullified(core))
+            return StatusEffectType.None;
+
+        for (int s = 0; s < SocketsPerCore; s++)
+        {
+            SkillDefinition support = sockets[coreIndex, s];
+
+            if (support == null || IsNullified(support))
+                continue;
+
+            StatusEffectType added = support.AilmentAddition;
+
+            if (added != StatusEffectType.None
+                && !IsStatusBlockedForCore(coreIndex, added))
+            {
+                return added;
+            }
+        }
+
+        return StatusEffectType.None;
     }
 
     /// <summary>
@@ -627,16 +737,14 @@ public class SocketedBuild
                 continue;
 
             modifiers.Apply(definition);
+        }
 
-            // 합성 발사: 부여 계열 Core가 생성하는 상태를 탄에 싣는다.
-            // 기폭 계열은 투사체가 아니므로 대상이 아니고,
-            // 기능 배타로 차단된 상태(번제 → 점화)는 애초에 실리지 않는다.
-            if (definition.Category == SkillCategory.Core &&
-                definition.Family == CoreFamily.Ailment &&
-                !IsStatusBlocked(definition.CreatesStatus))
-            {
-                modifiers.AddAilment(definition.CreatesStatus);
-            }
+        // 합성 발사: 부여 계열 Core가 생성하는 상태를 탄에 싣는다.
+        // Core 단위로 계산한다 — 속성 전환과 기능 배타가 둘 다 Core별이기 때문이다.
+        for (int c = 0; c < MaxCores; c++)
+        {
+            modifiers.AddAilment(EffectiveAilmentOf(c));
+            modifiers.AddAilment(AddedAilmentOf(c));
         }
 
         isDirty = false;

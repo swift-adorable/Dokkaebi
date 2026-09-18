@@ -43,4 +43,6 @@ MonoBehaviour:
   conditionKind: 0
   conditionStatus: 0
   conditionalDamageIncrease: 0
+  ailmentOverride: 0
+  ailmentAddition: 0
   speedMultiplier: 1
