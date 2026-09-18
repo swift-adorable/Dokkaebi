@@ -232,6 +232,62 @@ namespace Blob.Tests
                 "각인을 겹쳐도 즉사하는 체력이 되면 안 됩니다.");
         }
 
+        // ── 치명타 ────────────────────────────────────────────────────────
+
+        /// <summary>
+        /// 【치명타 기본 확률은 0이다.】
+        ///
+        /// 모든 무기가 조금씩 크리가 뜨면 전 구간에 무작위성이 깔려
+        /// 유저가 자기 실력을 판단하기 어려워진다.
+        /// 0으로 두면 크리는 「내가 정밀 각인을 골랐다」는 선택의 결과가 된다.
+        /// </summary>
+        [Test]
+        public void 정밀_각인이_없으면_치명타가_뜨지_않는다()
+        {
+            var loadout = new EquipmentLoadout();
+            loadout.TryEquip(Stack(Load("Weapons/wpn_t6_eraser.asset")), EquipmentSlot.Weapon, out _);
+
+            LoadoutSnapshot snapshot = LoadoutSnapshot.Create(loadout, EncumbranceLevel.Normal);
+
+            Assert.AreEqual(0f, snapshot.Weapon.CriticalChance, 0.0001f,
+                "최고 티어 무기만으로는 치명타가 뜨면 안 됩니다.");
+        }
+
+        [Test]
+        public void 정밀_각인이_치명타_확률과_배율을_올린다()
+        {
+            var loadout = new EquipmentLoadout();
+            loadout.TryEquip(Stack(Load("Weapons/wpn_t1_pipe.asset")), EquipmentSlot.Weapon, out _);
+            loadout.TryEquip(Stack(Load("Imprints/imp_precision_t3.asset")), EquipmentSlot.ImprintA, out _);
+
+            LoadoutSnapshot snapshot = LoadoutSnapshot.Create(loadout, EncumbranceLevel.Normal);
+
+            Assert.Greater(snapshot.Weapon.CriticalChance, 0f, "정밀 각인이 확률을 주지 않습니다.");
+
+            Assert.Greater(snapshot.Weapon.CriticalMultiplier,
+                CombatConstants.BaseCriticalMultiplier, "정밀 Ⅲ은 배율도 올립니다.");
+
+            // 정밀 Ⅲ의 대가 — 발사 간격이 크게 늘어난다.
+            Assert.Greater(snapshot.Weapon.FireInterval, CombatConstants.BaseFireInterval,
+                "정밀 Ⅲ의 대가(발사 간격)가 적용되지 않았습니다.");
+        }
+
+        /// <summary>상한이 없으면 나중에 부착물이 들어올 때 100%가 된다.</summary>
+        [Test]
+        public void 치명타_확률에는_상한이_있다()
+        {
+            var loadout = new EquipmentLoadout();
+
+            // 정밀 Ⅲ + Ⅱ = 0.35 + 0.18 = 0.53 → 상한 0.5에서 잘려야 한다.
+            loadout.TryEquip(Stack(Load("Imprints/imp_precision_t3.asset")), EquipmentSlot.ImprintA, out _);
+            loadout.TryEquip(Stack(Load("Imprints/imp_precision_t2.asset")), EquipmentSlot.ImprintB, out _);
+
+            LoadoutSnapshot snapshot = LoadoutSnapshot.Create(loadout, EncumbranceLevel.Normal);
+
+            Assert.LessOrEqual(snapshot.Weapon.CriticalChance, CombatConstants.MaxCriticalChance,
+                "치명타 확률이 상한을 넘었습니다.");
+        }
+
         [Test]
         public void 착용이_없으면_기본값이다()
         {

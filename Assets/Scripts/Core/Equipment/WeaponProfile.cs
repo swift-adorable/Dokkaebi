@@ -92,7 +92,9 @@ public readonly struct WeaponProfile
             Mathf.RoundToInt(m.Get(EquipmentStatType.ArmourPenetration)),
             0, CombatConstants.MaxArmour);
 
-        float critChance = Mathf.Clamp01(m.Get(EquipmentStatType.CriticalChance));
+        float critChance = Mathf.Clamp(
+            CombatConstants.BaseCriticalChance + m.Get(EquipmentStatType.CriticalChance),
+            0f, CombatConstants.MaxCriticalChance);
         float critMult = Mathf.Max(1f, b.CriticalMultiplier + m.Get(EquipmentStatType.CriticalMultiplier));
         float ailment = Mathf.Max(0f, 1f + m.Get(EquipmentStatType.AilmentPower));
 

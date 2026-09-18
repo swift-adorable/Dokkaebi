@@ -20,10 +20,10 @@ public class Health : MonoBehaviour, IDamageable, IPoolable
 
     [Header("Defence")]
     [Tooltip("원거리·투사체 피격에 적용되는 방어도.")]
-    [SerializeField] private int headArmour = 0;
+    [SerializeField] private float headArmour = 0f;
 
     [Tooltip("근접·접촉·폭발 피격에 적용되는 방어도.")]
-    [SerializeField] private int bodyArmour = 0;
+    [SerializeField] private float bodyArmour = 0f;
 
     private HealthPool pool;
     private CooldownTimer invulnerability;
@@ -55,10 +55,28 @@ public class Health : MonoBehaviour, IDamageable, IPoolable
     /// 방어도 수치의 소재는 장비다. 여기서는 합산된 결과만 들고 있는다.
     /// (경계 — 장비가 수치를 공급하고, 공식은 DamageResolver 한 곳에만 있다)
     /// </summary>
-    public DefenceProfile Defence => DefenceProfile.Create(headArmour, bodyArmour, resistances);
+    /// <summary>
+    /// 지금 이 순간의 방어 정보.
+    ///
+    /// 상태이상이 방어도를 바꾼다 — 점화는 깎고, 부식은 절반으로 만든다.
+    /// 장비 값을 그대로 주면 「점화가 다음 피해를 키운다」가 성립하지 않는다.
+    /// </summary>
+    public DefenceProfile Defence
+    {
+        get
+        {
+            float multiplier = Status.ArmourMultiplier;
+            float reduction = Status.ArmourReduction;
+
+            return DefenceProfile.Create(
+                Mathf.Max(0f, headArmour * multiplier - reduction),
+                Mathf.Max(0f, bodyArmour * multiplier - reduction),
+                resistances);
+        }
+    }
 
     /// <summary>장비·몬스터 속성이 합산한 방어 수치를 주입한다.</summary>
-    public void SetDefence(int head, int body, in ElementalResistances resist)
+    public void SetDefence(float head, float body, in ElementalResistances resist)
     {
         headArmour = head;
         bodyArmour = body;
@@ -232,12 +250,26 @@ public class Health : MonoBehaviour, IDamageable, IPoolable
         return applied;
     }
 
+    /// <summary>
+    /// 회복한다. 【부식 중이면 절반만 회복된다.】
+    ///
+    /// 소모품이 만능이 아니게 하는 유일한 장치다 —
+    /// 회복약 하나로 모든 상황이 풀리면 가방을 그것만으로 채우게 된다.
+    /// (docs/Blob_Combat_Baseline.md 「임계 상태」)
+    /// </summary>
     public int Heal(int amount)
     {
-        if (pool == null)
+        if (pool == null || amount <= 0)
             return 0;
 
-        return pool.Heal(amount);
+        float multiplier = Status.HealingMultiplier;
+
+        // 절반이 되어도 최소 1은 회복한다. 0이 되면 "약을 썼는데 아무 일도 없다"가 된다.
+        int scaled = multiplier < 1f
+            ? Mathf.Max(1, Mathf.FloorToInt(amount * multiplier))
+            : amount;
+
+        return pool.Heal(scaled);
     }
 
     /// <summary>

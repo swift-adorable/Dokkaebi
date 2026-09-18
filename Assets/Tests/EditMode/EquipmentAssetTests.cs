@@ -441,8 +441,10 @@ namespace Blob.Tests
             var modifiers = new EquipmentModifiers();
             modifiers.Add(imprint);
 
+            // 면역은 【걸리는 상태】를 막는다. 임계 상태(동결)가 아니라 원본(냉각)이다.
+            // 동결만 막으면 "내한 장비를 꼈는데 여전히 느려진다"가 되어 유저가 혼란스럽다.
             Assert.IsTrue(modifiers.IsImmuneTo(StatusEffectType.Ignite), "점화 면역");
-            Assert.IsTrue(modifiers.IsImmuneTo(StatusEffectType.Freeze), "동결 면역");
+            Assert.IsTrue(modifiers.IsImmuneTo(StatusEffectType.Chill), "냉각 면역");
             Assert.IsTrue(modifiers.IsImmuneTo(StatusEffectType.Shock), "감전 면역");
             Assert.IsFalse(modifiers.IsImmuneTo(StatusEffectType.Poison), "중독까지 막으면 대가가 없습니다.");
 

@@ -33,4 +33,4 @@ MonoBehaviour:
   setFamily: 
   imprintFamily: threshold
   immunity: 1
-  extraImmunities: 03000000
+  extraImmunities: 07000000

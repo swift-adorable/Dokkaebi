@@ -31,11 +31,17 @@ public readonly struct StatusEffectSpec
 
 public static class StatusEffectTable
 {
-    /// <summary>감전이 올려 주는 "받는 피해" 증가율.</summary>
+    /// <summary>감전이 최대 중첩에서 올려 주는 "받는 피해" 증가율.</summary>
     public const float ShockDamageTakenBonus = 0.2f;
 
-    /// <summary>동결이 깎는 이동·공격 속도 비율.</summary>
-    public const float FreezeSlowRatio = 0.4f;
+    /// <summary>냉각이 최대 중첩에서 깎는 이동·공격 속도 비율.</summary>
+    public const float ChillSlowRatio = 0.4f;
+
+    /// <summary>점화 중에 대상이 잃는 방어도. 「점화가 다음 피해를 키운다」의 구현이다.</summary>
+    public const float IgniteArmourReduction = 1f;
+
+    /// <summary>부식이 곱하는 방어도·회복량 배율.</summary>
+    public const float CorrodeHalfRatio = 0.5f;
 
     /// <summary>출혈이 이동 중인 대상에게 곱하는 배율.</summary>
     public const float BleedMovingMultiplier = 2f;
@@ -47,34 +53,94 @@ public static class StatusEffectTable
     {
         switch (type)
         {
+            // ── 피해형 ────────────────────────────────────────────────
+            // 【중첩이 피해를 늘리는 것은 중독뿐이다.】
+            // 점화·출혈은 갱신형이라 다시 걸면 지속시간만 처음으로 돌아간다.
+            // 셋 다 중첩하면 "쌓아서 녹인다"는 카오스의 정체성이 사라진다.
+
             // 점화 — "한 발을 더 쏜 것"과 같은 총량(100%)을 4초에 걸쳐 준다.
-            // 즉발과 도트의 총량을 맞추고, 차이는 방어도 무시와 지속 중 행동 가능으로 낸다.
+            // 차이는 방어도 무시와 지속 중 행동 가능, 그리고 방어도를 깎는다는 점이다.
             case StatusEffectType.Ignite:
                 return new StatusEffectSpec(0.25f, 4f, 1, DamageElement.Fire);
 
-            // 중독 — 유일하게 크게 중첩한다. 카오스가 "쌓아서 녹이는" 정체성을 갖는다.
-            case StatusEffectType.Poison:
-                return new StatusEffectSpec(0.15f, 6f, 10, DamageElement.Chaos);
-
-            // 출혈 — 이동 중인 대상에게 2배. 추격형에 강하고 고정형에 약하다.
-            // ※ 최대 중첩 5는 TBD. 문서에는 "중첩"이라고만 되어 있다.
+            // 출혈 — 정지한 적에게 기본 피해의 60%, 이동 중이면 120%.
             case StatusEffectType.Bleed:
-                return new StatusEffectSpec(0.20f, 3f, 5, DamageElement.Physical);
+                return new StatusEffectSpec(0.20f, 3f, 1, DamageElement.Physical);
 
-            // 감전 — 피해가 없다. 증폭만 담당한다. (PoE2 문법)
+            // 중독 — 유일하게 중첩한다. 10중첩 총량이 기본 피해의 3배다.
+            //
+            // 이전 계수 0.15는 10중첩에서 총 9배였다. 10번 맞히는 데 4초면 되고
+            // 지속이 6초라 실제로 도달하므로, 도트가 직접 피해의 두 배 가까이 됐다.
+            // 3배로 묶어 「쌓으면 세다」는 유지하되 직접 피해를 압도하지 않게 했다.
+            case StatusEffectType.Poison:
+                return new StatusEffectSpec(0.05f, 6f, 10, DamageElement.Chaos);
+
+            // ── 통제형 ────────────────────────────────────────────────
+            // 피해가 없다. 중첩은 효과의 세기이자 임계까지의 게이지다.
+            // 최대 중첩에서 문서 수치에 도달하고, 그 순간 임계 상태로 전이한다.
+
             case StatusEffectType.Shock:
-                return new StatusEffectSpec(0f, 6f, 1, DamageElement.Lightning);
+                return new StatusEffectSpec(0f, 6f, 6, DamageElement.Lightning);
 
-            // 동결 — 피해가 없다. 통제만 담당한다.
+            case StatusEffectType.Chill:
+                return new StatusEffectSpec(0f, 3f, 6, DamageElement.Cold);
+
+            // 응집 — 상태 전이 범위만 넓힌다.
+            case StatusEffectType.Congeal:
+                return new StatusEffectSpec(0f, 1.5f, 1, DamageElement.Physical);
+
+            // ── 임계 상태 ─────────────────────────────────────────────
+            // 직접 부여되지 않는다. 전이로만 생기고 중첩하지 않는다.
+
             case StatusEffectType.Freeze:
                 return new StatusEffectSpec(0f, 3f, 1, DamageElement.Cold);
 
-            // 응집 — 피해가 없다. 상태 전이 범위만 넓힌다.
-            case StatusEffectType.Congeal:
-                return new StatusEffectSpec(0f, 1.5f, 1, DamageElement.Physical);
+            case StatusEffectType.Paralyze:
+                return new StatusEffectSpec(0f, 2f, 1, DamageElement.Lightning);
+
+            case StatusEffectType.Corrode:
+                return new StatusEffectSpec(0f, 8f, 1, DamageElement.Chaos);
 
             default:
                 return new StatusEffectSpec(0f, 0f, 1, DamageElement.Physical);
         }
+    }
+
+    /// <summary>
+    /// 최대 중첩에 도달했을 때 전이하는 상태. 없으면 None.
+    ///
+    /// 【최대 중첩 = 임계】로 통일한 이유 — 규칙이 한 줄이 된다.
+    /// 전이 시 원본 중첩을 전부 소모하므로, 임계 상태가 끝나면
+    /// 처음부터 다시 쌓아야 한다. 무한 제압이 막힌다.
+    /// </summary>
+    public static StatusEffectType ThresholdOf(StatusEffectType type)
+    {
+        switch (type)
+        {
+            case StatusEffectType.Chill: return StatusEffectType.Freeze;
+            case StatusEffectType.Shock: return StatusEffectType.Paralyze;
+            case StatusEffectType.Poison: return StatusEffectType.Corrode;
+            default: return StatusEffectType.None;
+        }
+    }
+
+    /// <summary>행동 불능 상태인지. 이 상태에서는 이동도 공격도 하지 못한다.</summary>
+    public static bool IsIncapacitating(StatusEffectType type)
+        => type == StatusEffectType.Freeze || type == StatusEffectType.Paralyze;
+
+    /// <summary>
+    /// 통제형 상태의 세기 비율(0~1). 중첩에 비례하며 최대 중첩에서 1이 된다.
+    ///
+    /// 1중첩에 문서 수치를 전부 주면 한 발만 맞혀도 −40% 감속이 된다.
+    /// 비례시키면 쌓는 과정 자체가 의미를 갖고, 최대치는 문서대로 유지된다.
+    /// </summary>
+    public static float ControlRatio(StatusEffectType type, int stacks)
+    {
+        StatusEffectSpec spec = Get(type);
+
+        if (spec.MaxStacks <= 1)
+            return stacks > 0 ? 1f : 0f;
+
+        return UnityEngine.Mathf.Clamp01((float)stacks / spec.MaxStacks);
     }
 }

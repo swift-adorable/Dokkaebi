@@ -87,7 +87,7 @@ public static class ArmourAssetGenerator
     private static readonly FaceElement[] FaceElements =
     {
         new() { key = "fire",      label = "내화",  resist = EquipmentStatType.ResistFire,      status = StatusEffectType.Ignite },
-        new() { key = "cold",      label = "내한",  resist = EquipmentStatType.ResistCold,      status = StatusEffectType.Freeze },
+        new() { key = "cold",      label = "내한",  resist = EquipmentStatType.ResistCold,      status = StatusEffectType.Chill },
         new() { key = "lightning", label = "절연",  resist = EquipmentStatType.ResistLightning, status = StatusEffectType.Shock  },
         new() { key = "chaos",     label = "방독",  resist = EquipmentStatType.ResistChaos,     status = StatusEffectType.Poison },
         new() { key = "physical",  label = "방탄",  resist = EquipmentStatType.ResistPhysical,  status = StatusEffectType.Bleed  }
