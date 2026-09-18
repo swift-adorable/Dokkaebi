@@ -14,11 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Blob.Runtime::EquipmentDefinition
   id: bag_t2_vest
   displayName: "\uC218\uB0A9 \uC870\uB07C"
-  description: "\uBB34\uAC70\uC6B4 \uAC74 \uBABB \uB4E4\uC9C0\uB9CC \uC794 \uAC83\uC744
-    \uB9CE\uC774 \uB2F4\uB294\uB2E4."
+  description: "\uAC00\uC2B4\uD30D\uC5D0 \uC8FC\uBA38\uB2C8\uAC00 \uC5EC\uB7FF \uB2EC\uB824
+    \uC788\uB2E4."
   kind: 3
   tier: 2
-  weight: 0.8
+  weight: 1.1
   slotSize: 1
   stackMax: 1
   maxDurability: 0
@@ -30,9 +30,9 @@ MonoBehaviour:
   slot: 5
   stats:
   - type: 70
-    value: 6
-  - type: 71
     value: 10
+  - type: 71
+    value: 12
   setFamily: 
   imprintFamily: 
   immunity: 0

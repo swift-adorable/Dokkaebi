@@ -12,11 +12,19 @@ using UnityEngine;
 /// </summary>
 public class PlayerInventory : Singleton<PlayerInventory>
 {
-    /// <summary>가방을 착용하지 않았을 때의 기본 적재 칸.</summary>
-    public const int BaseSlots = 12;
+    /// <summary>
+    /// 가방을 착용하지 않았을 때의 기본 적재 칸.
+    ///
+    /// 【20이다.】 이전 12는 너무 작았다 —
+    /// 덕코프는 벙커에서 장비를 갖춰 출격하므로 맨몸 상태가 사실상 없지만,
+    /// Blob은 벙커가 8단계라 맨몸이 곧 초반 경험이다.
+    /// 가장 작은 가방(+8)을 끼기 전에도 한 판은 돌 수 있어야 한다.
+    /// (docs/research/duckov/08_전투_실측과_교전.md 6절)
+    /// </summary>
+    public const int BaseSlots = 20;
 
     /// <summary>가방을 착용하지 않았을 때의 기본 소지 중량(kg).</summary>
-    public const float BaseWeightLimit = 20f;
+    public const float BaseWeightLimit = 30f;
 
     [Header("기본 수용량 (가방 미착용 시)")]
     [Min(1)]
