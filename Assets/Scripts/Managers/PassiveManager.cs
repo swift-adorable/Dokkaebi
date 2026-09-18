@@ -26,6 +26,10 @@ public class PassiveManager : Singleton<PassiveManager>
     [Min(0)]
     [SerializeField] private int credits = 5000;
 
+    [Tooltip("역행 계열을 발견했는지. ※ 세이브가 붙기 전까지 인스펙터 값이다. " +
+             "본래는 4장 관측실에서 「역행자」를 만나야 켜진다.")]
+    [SerializeField] private bool discoveredRegression = false;
+
     private readonly PassiveState state = new();
 
     /// <summary>배운 패시브.</summary>
@@ -55,6 +59,36 @@ public class PassiveManager : Singleton<PassiveManager>
             OnChanged?.Invoke();
         }
     }
+
+    /// <summary>
+    /// 역행 계열을 발견했는지. 켜지기 전에는 계열이 화면에 보이지도 않는다.
+    ///
+    /// 레벨도 돈도 아닌 【거기까지 갔는가】가 조건인 갈래를 하나 둔 것은
+    /// 덕코프 「이상한 개조」의 구조를 가져온 것이다. [확인됨]
+    /// </summary>
+    public bool DiscoveredRegression
+    {
+        get => discoveredRegression;
+        set
+        {
+            if (discoveredRegression == value)
+                return;
+
+            discoveredRegression = value;
+
+            if (value)
+                GameLogger.Log("[PassiveManager] 역행 계열 발견");
+
+            OnChanged?.Invoke();
+        }
+    }
+
+    /// <summary>지금 상태로 만든 판단 재료. 재료는 가방에서 꺼낸다.</summary>
+    public PassiveContext Context => new(
+        accountLevel,
+        credits,
+        PlayerInventory.HasInstance ? PlayerInventory.Instance.Bag : null,
+        discoveredRegression);
 
     /// <summary>패시브나 계정 상태가 바뀌었을 때 발행된다.</summary>
     public event Action OnChanged;
@@ -95,7 +129,9 @@ public class PassiveManager : Singleton<PassiveManager>
     /// <summary>배운다. 크레딧이 차감된다.</summary>
     public bool TryLearn(PassiveNode node)
     {
-        PassiveError error = state.CanLearn(node, accountLevel, credits);
+        PassiveContext context = Context;
+
+        PassiveError error = state.CanLearn(node, in context);
 
         if (error != PassiveError.None)
         {
@@ -103,7 +139,9 @@ public class PassiveManager : Singleton<PassiveManager>
             return false;
         }
 
-        int spent = state.TryLearn(node, accountLevel, credits);
+        // 재료 소모가 TryLearn 안에서 함께 일어난다. 검사와 소모를 갈라 두면
+        // "검사는 통과했는데 재료가 안 빠지는" 상태가 조용히 생긴다.
+        int spent = state.TryLearn(node, in context);
 
         credits -= spent;
 
@@ -114,6 +152,14 @@ public class PassiveManager : Singleton<PassiveManager>
         OnChanged?.Invoke();
 
         return true;
+    }
+
+    /// <summary>배울 수 있는지. 이유까지 돌려준다. UI가 그대로 쓴다.</summary>
+    public PassiveError CanLearn(PassiveNode node)
+    {
+        PassiveContext context = Context;
+
+        return state.CanLearn(node, in context);
     }
 
     /// <summary>배운 패시브의 효과 합.</summary>

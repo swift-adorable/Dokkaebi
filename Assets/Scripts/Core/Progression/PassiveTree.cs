@@ -16,11 +16,11 @@ public class PassiveTree : ScriptableObject
 
     [SerializeField] private List<PassiveNode> nodes = new();
 
-    [Tooltip("트리 화면의 열 수.")]
+    [Tooltip("한 계열의 가로 칸 수. 계열마다 같은 격자를 쓴다.")]
     [Min(1)]
     [SerializeField] private int columns = 4;
 
-    [Tooltip("트리 화면의 행 수.")]
+    [Tooltip("한 계열의 세로 칸 수. 0행이 맨 아래다.")]
     [Min(1)]
     [SerializeField] private int rows = 4;
 
@@ -28,6 +28,35 @@ public class PassiveTree : ScriptableObject
     public int Count => nodes.Count;
     public int Columns => Mathf.Max(1, columns);
     public int Rows => Mathf.Max(1, rows);
+
+    /// <summary>그 계열의 칸만 골라 담는다.</summary>
+    public List<PassiveNode> GetBranch(PassiveBranch branch, List<PassiveNode> result = null)
+    {
+        result ??= new List<PassiveNode>();
+        result.Clear();
+
+        for (int i = 0; i < nodes.Count; i++)
+        {
+            if (nodes[i] != null && nodes[i].Branch == branch)
+                result.Add(nodes[i]);
+        }
+
+        return result;
+    }
+
+    /// <summary>그 계열의 칸 수.</summary>
+    public int CountIn(PassiveBranch branch)
+    {
+        int count = 0;
+
+        for (int i = 0; i < nodes.Count; i++)
+        {
+            if (nodes[i] != null && nodes[i].Branch == branch)
+                count++;
+        }
+
+        return count;
+    }
 
     public PassiveNode Find(string id)
     {
@@ -43,13 +72,16 @@ public class PassiveTree : ScriptableObject
         return null;
     }
 
-    /// <summary>그 자리에 있는 칸. 없으면 null.</summary>
-    public PassiveNode At(int column, int row)
+    /// <summary>그 계열의 그 자리에 있는 칸. 없으면 null.</summary>
+    public PassiveNode At(PassiveBranch branch, int column, int row)
     {
         for (int i = 0; i < nodes.Count; i++)
         {
-            if (nodes[i] != null && nodes[i].Column == column && nodes[i].Row == row)
-                return nodes[i];
+            PassiveNode node = nodes[i];
+
+            if (node != null && node.Branch == branch
+                && node.Column == column && node.Row == row)
+                return node;
         }
 
         return null;

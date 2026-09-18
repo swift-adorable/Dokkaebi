@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea17f4877b7bf48069bd560938e26492, type: 3}
+  m_Name: meta_scav_1
+  m_EditorClassIdentifier: Blob.Runtime::PassiveNode
+  id: meta_scav_1
+  displayName: "\uC218\uC0C9"
+  description: "\uB0A8\uC774 \uB193\uCE5C \uAC83\uC744 \uCC3E\uC544\uB0B8\uB2E4."
+  branch: 1
+  effect: 12
+  value: 1
+  requiredAccountLevel: 3
+  cost: 1700
+  materials:
+  - item: {fileID: 11400000, guid: 2cea37fa128934109856e90e89807614, type: 2}
+    count: 6
+  prerequisites:
+  - meta_absorb_1
+  column: 2
+  row: 1

@@ -14,6 +14,7 @@ Unity 6 Mobile · Top-Down Shooter + Roguelite + Extraction Looting
 | [Equipment_System](Blob_Equipment_System.md) | 장비 · 무기 | 무엇을 입고 가는가 |
 | [Hunting_System](Blob_Hunting_System.md) | 적 | 무엇을 상대하는가 |
 | [Progression_System](Blob_Progression_System.md) | 진행 | 왜 다시 들어가는가 |
+| [Passive_System](Blob_Passive_System.md) | 패시브 · 계정 5계열 | **런을 넘어 무엇이 남는가** |
 
 개발 환경 → [`../CONTRIBUTING.md`](../CONTRIBUTING.md)
 레퍼런스 조사 원문 → [`research/`](research/)

@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea17f4877b7bf48069bd560938e26492, type: 3}
+  m_Name: adapt_slots_3
+  m_EditorClassIdentifier: Blob.Runtime::PassiveNode
+  id: adapt_slots_3
+  displayName: "\uAC00\uBC29 \uC815\uB9AC 3"
+  description: "\uAC00\uBC29 \uACF5\uAC04 +3."
+  branch: 0
+  effect: 1
+  value: 3
+  requiredAccountLevel: 12
+  cost: 7500
+  materials:
+  - item: {fileID: 11400000, guid: abf245023c6dc4773a272254e9082cc0, type: 2}
+    count: 2
+  prerequisites:
+  - adapt_frame
+  column: 1
+  row: 3
