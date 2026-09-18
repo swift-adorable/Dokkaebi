@@ -64,6 +64,11 @@ public class PlayerLoadout : MonoBehaviour
         LoadoutSnapshot snapshot = LoadoutSnapshot.Create(
             inventory.Loadout, inventory.Encumbrance);
 
+        // 면역은 수치가 아니라 목록이라 스냅샷에 담지 않는다.
+        // 참조를 넘겨 두면 장비가 바뀌는 즉시 반영된다.
+        if (health != null)
+            health.SetImmunitySource(inventory.Loadout.Modifiers);
+
         Apply(snapshot);
     }
 

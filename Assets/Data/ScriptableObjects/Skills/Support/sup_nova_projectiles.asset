@@ -32,8 +32,15 @@ MonoBehaviour:
   grantedBehaviour: 0
   behaviourCharges: 0
   ricochetBounces: 0
-  extraProjectiles: 0
-  spreadAngle: 8
+  extraProjectiles: 3
+  spreadAngle: 40
   fireIntervalMultiplier: 1.25
   lifetimeMultiplier: 1
+  damageIncrease: 0
+  ailmentPower: 0
+  ailmentDurationMultiplier: 1
+  rangeMultiplier: 1
+  conditionKind: 0
+  conditionStatus: 0
+  conditionalDamageIncrease: 0
   speedMultiplier: 1

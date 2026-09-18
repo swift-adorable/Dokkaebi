@@ -113,6 +113,39 @@ public class SkillDefinition : ScriptableObject
     [Min(0.1f)]
     [SerializeField] private float lifetimeMultiplier = 1f;
 
+    [Header("Effect — 효과")]
+    // 여기부터가 「이 Support가 무엇을 해 주는가」다.
+    //
+    // 이 축이 없던 동안 Support 35종 중 21종은 대가만 적용되고 효과가 없었다.
+    // 끼우면 손해만 보는 젬이었다. (docs/Blob_Audit.md D1)
+    //
+    // 전부 가산 합산이다. PoE의 「증가 / 더 증가」 2단 구조를 쓰지 않는다 —
+    // 모바일에서 유저가 곱연산 폭발을 예측할 수 없다.
+
+    [Tooltip("기본 피해 증가율. 0.2 = +20%")]
+    [SerializeField] private float damageIncrease = 0f;
+
+    [Tooltip("상태이상 위력 증가율. 직접 피해와 분리된 축이다.")]
+    [SerializeField] private float ailmentPower = 0f;
+
+    [Tooltip("상태이상·잔류물 지속시간 배수. 【투사체 수명과 다른 축이다.】")]
+    [Min(0.1f)]
+    [SerializeField] private float ailmentDurationMultiplier = 1f;
+
+    [Tooltip("유효 사거리 배수. 대가 「유효 사거리」가 여기를 깎는다.")]
+    [Min(0.1f)]
+    [SerializeField] private float rangeMultiplier = 1f;
+
+    [Header("Effect — 조건부")]
+    [Tooltip("조건. 명중 시점에 판정한다.")]
+    [SerializeField] private SkillConditionKind conditionKind = SkillConditionKind.None;
+
+    [Tooltip("TargetHasStatus일 때 볼 상태이상.")]
+    [SerializeField] private StatusEffectType conditionStatus = StatusEffectType.None;
+
+    [Tooltip("조건을 만족할 때 추가로 더해지는 피해 증가율.")]
+    [SerializeField] private float conditionalDamageIncrease = 0f;
+
     [Tooltip("투사체 속도 배수.")]
     [Min(0.1f)]
     [SerializeField] private float speedMultiplier = 1f;
@@ -151,6 +184,43 @@ public class SkillDefinition : ScriptableObject
     public float FireIntervalMultiplier => Mathf.Max(0.1f, fireIntervalMultiplier);
     public float LifetimeMultiplier => Mathf.Max(0.1f, lifetimeMultiplier);
     public float SpeedMultiplier => Mathf.Max(0.1f, speedMultiplier);
+
+    // ── 효과 ──────────────────────────────────────────────────────────
+    public float DamageIncrease => damageIncrease;
+    public float AilmentPower => ailmentPower;
+    public float AilmentDurationMultiplier => Mathf.Max(0.1f, ailmentDurationMultiplier);
+    public float RangeMultiplier => Mathf.Max(0.1f, rangeMultiplier);
+
+    public SkillConditionKind ConditionKind => conditionKind;
+    public StatusEffectType ConditionStatus => conditionStatus;
+    public float ConditionalDamageIncrease => conditionalDamageIncrease;
+
+    /// <summary>조건부 효과. 조건이 없으면 IsValid가 false다.</summary>
+    public SkillCondition Condition =>
+        new(conditionKind, conditionStatus, conditionalDamageIncrease);
+
+    /// <summary>
+    /// 이 스킬이 무언가를 해 주는지.
+    ///
+    /// 「대가만 있고 효과가 없는 젬은 존재할 수 없다」를 테스트로 강제하는 데 쓴다.
+    /// 상태 생성·소모·차단·잔류물도 효과로 친다 — 수치만 효과인 것은 아니다.
+    /// </summary>
+    public bool HasEffect =>
+        grantedBehaviour != ProjectileBehaviourType.None
+        || ricochetBounces > 0
+        || extraProjectiles > 0
+        || damageIncrease != 0f
+        || ailmentPower != 0f
+        || ailmentDurationMultiplier != 1f
+        || rangeMultiplier != 1f
+        || conditionKind != SkillConditionKind.None
+        || createsStatus != StatusEffectType.None
+        || consumesStatus != StatusEffectType.None
+        || createsGroundEffect != GroundEffectType.None
+        || blocksStatusCreation
+        || speedMultiplier > 1f
+        || lifetimeMultiplier > 1f
+        || fireIntervalMultiplier < 1f;
 
     /// <summary>전령인지. 전령은 동시에 1개만 장착 가능하다. (v8 §8-1)</summary>
     public bool IsHerald => category == SkillCategory.Persistent;

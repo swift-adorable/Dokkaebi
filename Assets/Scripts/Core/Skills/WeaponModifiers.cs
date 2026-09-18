@@ -35,6 +35,36 @@ public class WeaponModifiers
     /// <summary>투사체 속도 배수.</summary>
     public float SpeedMultiplier { get; private set; } = 1f;
 
+    // ── 효과 축 ───────────────────────────────────────────────────────
+    // 전부 가산 합산이다. (docs/Blob_Combat_Baseline.md 「피해 계산」)
+
+    /// <summary>기본 피해 증가율의 합. 0.35 = +35%</summary>
+    public float DamageIncrease { get; private set; }
+
+    /// <summary>상태이상 위력 증가율의 합. 직접 피해와 분리된 축이다.</summary>
+    public float AilmentPower { get; private set; }
+
+    /// <summary>
+    /// 상태이상·잔류물 지속시간 배수. 【투사체 수명(LifetimeMultiplier)과 다른 축이다.】
+    ///
+    /// 두 축을 하나로 쓰던 동안 「유지되는 대지」(잔류물 +100%)가
+    /// 투사체 사거리를 2배로 만들었다. (docs/Blob_Audit.md D2)
+    /// </summary>
+    public float AilmentDurationMultiplier { get; private set; } = 1f;
+
+    /// <summary>유효 사거리 배수. 대가 「유효 사거리」가 이것을 깎는다.</summary>
+    public float RangeMultiplier { get; private set; } = 1f;
+
+    /// <summary>
+    /// 명중 시점에 판정할 조건부 효과.
+    ///
+    /// 「멀리 있는 적일수록」과 「출혈 중인 적에게」는 발사 시점에 알 수 없다.
+    /// 대상과 거리가 정해지는 순간에만 답이 나온다.
+    /// </summary>
+    public IReadOnlyList<SkillCondition> Conditions => conditions;
+
+    private readonly List<SkillCondition> conditions = new(2);
+
     /// <summary>총 동시 발사 수. 최소 1발은 보장한다.</summary>
     public int TotalProjectiles => 1 + Mathf.Max(0, ExtraProjectiles);
 
@@ -65,6 +95,7 @@ public class WeaponModifiers
     {
         Behaviours.Clear();
         ailments.Clear();
+        conditions.Clear();
 
         RicochetBounces = 0;
         ExtraProjectiles = 0;
@@ -72,6 +103,11 @@ public class WeaponModifiers
         FireIntervalMultiplier = 1f;
         LifetimeMultiplier = 1f;
         SpeedMultiplier = 1f;
+
+        DamageIncrease = 0f;
+        AilmentPower = 0f;
+        AilmentDurationMultiplier = 1f;
+        RangeMultiplier = 1f;
     }
 
     /// <summary>Skill 하나를 합산한다.</summary>
@@ -100,5 +136,54 @@ public class WeaponModifiers
         FireIntervalMultiplier *= definition.FireIntervalMultiplier;
         LifetimeMultiplier *= definition.LifetimeMultiplier;
         SpeedMultiplier *= definition.SpeedMultiplier;
+
+        // 증가율은 더하고, 배수는 곱한다.
+        DamageIncrease += definition.DamageIncrease;
+        AilmentPower += definition.AilmentPower;
+        AilmentDurationMultiplier *= definition.AilmentDurationMultiplier;
+        RangeMultiplier *= definition.RangeMultiplier;
+
+        SkillCondition condition = definition.Condition;
+
+        if (condition.IsValid)
+            conditions.Add(condition);
+    }
+
+    /// <summary>
+    /// 조건이 맞는 것들의 피해 증가율 합. 명중 시점에 탄이 호출한다.
+    ///
+    /// 거리 기준을 유효 사거리의 절반으로 둔 이유 —
+    /// 사거리 보정이 걸리는 경계와 같아야 유저가 선 하나만 외우면 된다.
+    /// (docs/Blob_Combat_Baseline.md 「사거리 보정」)
+    /// </summary>
+    public float ConditionalDamageIncrease(
+        float travelledDistance, float effectiveRange, StatusEffectState targetStatus)
+    {
+        if (conditions.Count == 0)
+            return 0f;
+
+        float half = effectiveRange * 0.5f;
+        bool isFar = travelledDistance > half;
+
+        float total = 0f;
+
+        for (int i = 0; i < conditions.Count; i++)
+        {
+            SkillCondition c = conditions[i];
+
+            bool met = c.Kind switch
+            {
+                SkillConditionKind.FarTarget => isFar,
+                SkillConditionKind.NearTarget => !isFar,
+                SkillConditionKind.TargetHasStatus =>
+                    targetStatus != null && targetStatus.StacksOf(c.Status) > 0,
+                _ => false
+            };
+
+            if (met)
+                total += c.DamageIncrease;
+        }
+
+        return total;
     }
 }

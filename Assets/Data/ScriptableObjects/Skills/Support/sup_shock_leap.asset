@@ -35,4 +35,11 @@ MonoBehaviour:
   spreadAngle: 8
   fireIntervalMultiplier: 1
   lifetimeMultiplier: 1
+  damageIncrease: 0
+  ailmentPower: 0
+  ailmentDurationMultiplier: 1
+  rangeMultiplier: 1
+  conditionKind: 3
+  conditionStatus: 4
+  conditionalDamageIncrease: 0.5
   speedMultiplier: 1
