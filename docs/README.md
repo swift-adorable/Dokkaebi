@@ -19,6 +19,7 @@ Unity 6 Mobile · Top-Down Shooter + Roguelite + Extraction Looting
 | [Consumable_System](Blob_Consumable_System.md) | 소모품 4분류 | 가방 한 칸을 무엇에 쓰는가 |
 | [Bunker_System](Blob_Bunker_System.md) | 벙커 · 제작 · 상점 · 의뢰 | **런과 런 사이에 무엇을 하는가** |
 | [Audit](Blob_Audit.md) | 문서 ↔ 코드 대조 | **지금 무엇이 어긋나 있는가** |
+| [Playtest_Checklist](Blob_Playtest_Checklist.md) | 플레이 검증 | **정말 되는가** |
 
 개발 환경 → [`../CONTRIBUTING.md`](../CONTRIBUTING.md)
 레퍼런스 조사 원문 → [`research/`](research/)
