@@ -15,8 +15,8 @@ public class PlayerWeapon : MonoBehaviour
     [SerializeField] private string firePointChildName = "FirePoint";
 
     [Header("Fire Rate")]
-    [Tooltip("발사 간격(초). 작을수록 연사가 빠르다.")]
-    [SerializeField] private float fireRate = 0.15f;
+    [Tooltip("무기를 착용하지 않았을 때의 발사 간격(초). 착용 중에는 무기 값이 이긴다.")]
+    [SerializeField] private float fireRate = CombatConstants.BaseFireInterval;
 
     [Header("Pooling")]
     [Tooltip("시작 시 미리 생성할 총알 수. (연사속도 x 총알수명) 이상이면 충분하다.")]
@@ -24,14 +24,36 @@ public class PlayerWeapon : MonoBehaviour
 
     private readonly WeaponModifiers defaultModifiers = new();
 
+    /// <summary>
+    /// 착용 무기가 정한 사격 성능. PlayerLoadout이 장비가 바뀔 때마다 넣어준다.
+    ///
+    /// 기본값을 맨몸으로 두는 이유 — 무기를 잃어도 조작이 죽지 않아야
+    /// 시체를 회수하러 갈 수 있다. (docs/Blob_Progression_System.md 6절)
+    /// </summary>
+    private WeaponProfile profile = WeaponProfile.Unarmed;
+
     /// <summary>합성 발사의 적재 속성 순번. 적재 Core 2개일 때 번갈아 부여한다.</summary>
     private CompositeFireState compositeFire;
 
     private PoolManager poolManager;
     private CooldownTimer cooldown;
 
-    /// <summary>Skill 보정이 적용된 실제 발사 간격.</summary>
-    public float EffectiveFireInterval => fireRate * GetModifiers().FireIntervalMultiplier;
+    /// <summary>
+    /// 실제 발사 간격. 무기가 정한 값에 Skill 보정이 곱해진다.
+    ///
+    /// 인스펙터의 fireRate는 무기를 들지 않았을 때만 쓰인다 —
+    /// 프리팹 값이 착용 무기를 이기면 6종을 만든 의미가 없다.
+    /// </summary>
+    public float EffectiveFireInterval => profile.FireInterval * GetModifiers().FireIntervalMultiplier;
+
+    /// <summary>현재 사격 성능. UI와 테스트가 읽는다.</summary>
+    public WeaponProfile Profile => profile;
+
+    /// <summary>착용 장비가 바뀌었을 때 불린다. PlayerLoadout이 호출한다.</summary>
+    public void ApplyProfile(in WeaponProfile value)
+    {
+        profile = value;
+    }
 
     /// <summary>발사 준비가 되었는지.</summary>
     public bool CanFire => cooldown.IsReady(Time.time);
@@ -112,6 +134,13 @@ public class PlayerWeapon : MonoBehaviour
 
             if (bullet.TryGetComponent(out BulletController controller))
             {
+                // 착용 무기의 기본값을 먼저 준다. 이 한 줄이 없으면
+                // 장비 6종을 만들어 놓고 프리팹 하드코딩 값으로 쏘게 된다.
+                controller.SetWeaponBase(
+                    Mathf.Max(1, Mathf.RoundToInt(profile.Damage)),
+                    profile.EffectiveRange,
+                    profile.ArmourPenetration);
+
                 controller.Configure(
                     modifiers.Behaviours,
                     modifiers.RicochetBounces,

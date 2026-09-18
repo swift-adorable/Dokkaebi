@@ -31,8 +31,23 @@ public class PlayerDash : MonoBehaviour
     /// <summary>현재 대시 중인지.</summary>
     public bool IsDashing { get; private set; }
 
+    /// <summary>
+    /// 대시 거리 배율. 과중량이 깎는다. PlayerLoadout이 넣어준다.
+    /// 「심한 과중량」부터 줄어든다 — 조금 무거운 정도로는 구르기를 뺏지 않는다.
+    /// </summary>
+    public float DistanceScale { get; set; } = 1f;
+
+    /// <summary>
+    /// 대시 쿨다운 배율. 각인 「중장 Ⅲ」이 여기를 크게 올려 사실상 대시를 막는다.
+    /// </summary>
+    public float CooldownScale { get; set; } = 1f;
+
     /// <summary>대시 속도(m/s). 거리와 지속시간에서 유도된다.</summary>
-    public float DashSpeed => dashDuration > 0f ? dashDistance / dashDuration : 0f;
+    public float DashSpeed =>
+        dashDuration > 0f ? dashDistance * Mathf.Max(0f, DistanceScale) / dashDuration : 0f;
+
+    /// <summary>배율이 적용된 실제 쿨다운(초).</summary>
+    public float EffectiveCooldown => dashCooldown * Mathf.Max(0f, CooldownScale);
 
     /// <summary>남은 쿨다운(초).</summary>
     public float RemainingCooldown => cooldown.RemainingTime(Time.unscaledTime);
@@ -56,7 +71,7 @@ public class PlayerDash : MonoBehaviour
 
         // 쿨다운은 Time.unscaledTime 기준이다.
         // Time.time을 쓰면 일시정지(timeScale 0) 동안 쿨다운이 흐르지 않는다.
-        if (!cooldown.TryConsume(Time.unscaledTime, dashCooldown + dashDuration))
+        if (!cooldown.TryConsume(Time.unscaledTime, EffectiveCooldown + dashDuration))
             return false;
 
         StartCoroutine(DashRoutine(direction.normalized));

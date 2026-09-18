@@ -8,8 +8,8 @@
 
 | 등급 | 수 | 뜻 |
 |---|---|---|
-| **A. 끊긴 배선** | 10 | 코드가 있고 테스트도 통과하는데 **아무도 부르지 않는다** |
-| **B. 문서 간 모순** | 4 | 문서끼리 다른 말을 한다. 결정이 필요하다 |
+| **A. 끊긴 배선** | ~~10~~ **6** | 코드가 있고 테스트도 통과하는데 **아무도 부르지 않는다** |
+| **B. 문서 간 모순** | ~~4~~ **2** | 문서끼리 다른 말을 한다. 결정이 필요하다 |
 | **C. 수치 불일치** | 9 | 문서와 코드의 숫자가 다르다 |
 | **D. 데이터 모델 공백** | 6 | 문서가 요구하는 것을 담을 필드가 없다 |
 | **E. 문서 TBD인데 코드가 확정** | 13 | 코드가 먼저 값을 정했다. 문서를 맞춰야 한다 |
@@ -26,35 +26,35 @@
 
 | # | 무엇이 | 어디에 있는데 | 호출부 |
 |---|---|---|---|
-| **A1** | **장비 착용** | `EquipmentLoadout.TryEquip` / `Unequip` | **EditMode 테스트뿐.** 가방 화면의 장비 8칸은 Button이 없는 표시 전용 (`UI/InventoryScreenUI.cs:365-397`) |
-| **A2** | **사망 시 소지품 소실** | `PlayerInventory.DropOnDeath` (`Player/PlayerInventory.cs:93-101`) | **없음.** 사망은 `GameManager.GameOver()`로 상태만 바꾼다 (`Player/BlobController.cs:57-65`) |
-| **A3** | **런 초기화** | `SkillManager.ResetRun` (`Managers/SkillManager.cs:533`) | **없음** |
-| **A4** | **과중량 페널티** | `WeightCalculator.MoveMultiplier` / `DashMultiplier` (`Core/Items/EncumbranceLevel.cs:34-54`) | **테스트뿐.** `PlayerMovement` · `PlayerDash`가 무게를 읽지 않는다. UI 문구만 바뀐다 |
+| ~~A1~~ | ~~장비 착용~~ | **해결 (6-H)** — 가방 화면에서 장비를 골라 8슬롯에 착용·해제한다 | `UI/InventoryScreenEquip.cs` |
+| ~~A2~~ | ~~사망 시 소지품 소실~~ | **해결 (6-H)** — `BlobController.HandleDied`가 호출한다 | `Player/BlobController.cs` |
+| ~~A3~~ | ~~런 초기화~~ | **해결 (6-H)** — 사망 처리에서 함께 호출한다 | `Player/BlobController.cs` |
+| ~~A4~~ | ~~과중량 페널티~~ | **해결 (6-H)** — `PlayerMovement.SpeedScale` · `PlayerDash.DistanceScale` | `Core/Equipment/LoadoutSnapshot.cs` |
 | **A5** | **기폭(원소 작렬)** | `Core/Combat/DetonationResolver.cs` | **테스트뿐.** 기폭 Core 3종이 아무 효과도 내지 않는다 |
 | **A6** | **잔류물 5종** | `Core/Combat/GroundEffectTable.cs` | **없음.** 「마름쇠」·「유지되는 대지」·「잔류물 효력」 3종이 기댈 대상이 없다 |
 | **A7** | **난이도 배율 6단** | `Core/Combat/DifficultyLevel.cs:26-51` | **테스트뿐.** `Health.TakeDamage`의 배율 인자를 아무도 넘기지 않는다 |
 | **A8** | **내성 「가장 낮은 것 하나만」** | `ElementalResistances.TakeLowest:78-88` | **테스트뿐.** 몬스터 속성을 내성에 합성하는 경로 자체가 없다 |
 | **A9** | **패시브 효과 17종 중 13종** | `Core/Progression/PassiveEffectType.cs` | 실제로 읽히는 것은 `CarrySlots` · `CarryWeight` · `AbsorbAmount` · `LootRolls` **4종뿐** |
-| **A10** | **장비 에셋 82종** | `Assets/Data/ScriptableObjects/Items/` | `PlayerWeapon`이 `WeaponDefinition`을 읽지 않는다. A1과 한 묶음 |
+| ~~A10~~ | ~~장비 에셋 82종~~ | **해결 (6-H)** — `PlayerWeapon.ApplyProfile` → 탄에 `SetWeaponBase` | `Player/PlayerLoadout.cs` |
 
-> **A1 · A2 · A10이 한 덩어리다.** 장비를 입을 수 없으니 82종이 죽어 있고,
-> 죽을 때 잃지 않으니 추출 루팅이 성립하지 않는다.
-> **다음 단계(무기 장착 연결)가 A1 · A10 · A4를 동시에 푼다.**
+> **A1 · A2 · A3 · A4 · A10은 6-H에서 해결했다.**
+> 이제 「입고 → 쏘고 → 무거우면 느리고 → 죽으면 잃는다」 한 바퀴가 돈다.
+> 남은 것은 **A5~A9** — 기폭 · 잔류물 · 난이도 · 내성 합성 · 패시브 효과 13종이다.
 
 ---
 
 ## B. 문서 간 모순 — 결정이 필요하다
 
-### B1. 해금 트리 vs 패시브 — 둘 다 존재할 수 없다
+### ~~B1. 해금 트리 vs 패시브~~ — 해결 (6-H)
 
 `Progression_System.md` 2절의 해금 트리 7계열과 `Passive_System.md` 5절의 17효과가
 **가방 · 소지 중량 · 흡수 범위 · 흡수 효율 · 시체 회수 5개 축에서 정면으로 겹친다.**
 
 코드는 패시브만 구현했다. 해금 트리는 존재하지 않는다.
 
-→ **제안: `Progression_System.md` 2절을 삭제하고 패시브로 일원화한다.** 코드가 이미 그렇게 되어 있다.
+→ **결정: `Progression_System.md` 2절의 해금 트리 표를 삭제하고 패시브로 일원화했다.**
 
-### B2. 체력과 시야는 누구의 것인가 — 세 문서가 다른 말을 한다
+### ~~B2. 체력과 시야는 누구의 것인가~~ — 해결 (6-H)
 
 | 문서 | 주장 |
 |---|---|
@@ -65,7 +65,16 @@
 코드는 `Passive` 편을 들었고(테스트가 `Health`를 막는다), 그 결과
 `CombatConstants.PlayerHealthCap = 180`의 **「계정 트리 30」이 근거 없는 30으로 남았다.**
 
-→ **결정 필요.** 패시브 금지를 유지하면 상한은 100 + 장비 50 = **150**이어야 한다.
+→ **결정: 체력 100 고정.** `PlayerHealthCap = PlayerBaseHealth = 100`.
+>
+> 근거 — 최대 체력을 주는 장비 에셋이 **0종**이고(각인 4종이 깎기만 한다),
+> `Equipment_System.md`는 방어구에 체력을 주지 않으며, 패시브는 금지한다.
+> 「장비 50」과 「계정 트리 30」 **둘 다 어디에도 근거가 없었다.**
+> 장비가 주는 생존은 방어도이며 피해 공식이 이미 그 역할을 한다.
+>
+> 되돌리려면 `CombatConstants.PlayerHealthCap` 한 줄과
+> `LoadoutSnapshotTests.장비는_최대_체력을_올리지_않는다`만 고치면 된다.
+> 각인이 깎고 난 최저치는 `PlayerMinHealth = 40`으로 막았다.
 
 ### B3. 내성 중첩 — 곱연산인가 최저값인가
 
