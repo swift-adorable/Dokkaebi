@@ -30,9 +30,9 @@ MonoBehaviour:
   slot: 5
   stats:
   - type: 70
-    value: 28
+    value: 30
   - type: 71
-    value: 8
+    value: 10
   setFamily: 
   imprintFamily: 
   immunity: 0

@@ -18,7 +18,7 @@ MonoBehaviour:
     \uB2F4\uC544\uB3C4 \uBB34\uB9AC\uAC00 \uC5C6\uB2E4."
   kind: 3
   tier: 3
-  weight: 1.4
+  weight: 2.2
   slotSize: 1
   stackMax: 1
   maxDurability: 0
@@ -30,9 +30,9 @@ MonoBehaviour:
   slot: 5
   stats:
   - type: 70
-    value: 16
+    value: 15
   - type: 71
-    value: 14
+    value: 17
   setFamily: 
   imprintFamily: 
   immunity: 0

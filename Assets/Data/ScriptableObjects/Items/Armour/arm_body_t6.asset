@@ -31,6 +31,8 @@ MonoBehaviour:
   stats:
   - type: 2
     value: 6.5
+  - type: 71
+    value: 1
   - type: 30
     value: -0.1
   setFamily: 

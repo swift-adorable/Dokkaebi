@@ -350,6 +350,48 @@ namespace Blob.Tests
         }
 
         /// <summary>
+        /// 가방이 주는 칸은 덕코프 곡선(+8 ~ +30)을 따른다.
+        /// 기본 20칸에 최상위 가방을 끼면 50칸이 된다 — 덕코프와 같은 대역이다.
+        /// (docs/research/duckov/08_전투_실측과_교전.md 6절)
+        /// </summary>
+        [Test]
+        public void 가방_곡선이_덕코프_대역_안에_있다()
+        {
+            List<EquipmentDefinition> bags = Load<EquipmentDefinition>("Backpacks")
+                .OrderBy(b => b.Tier).ToList();
+
+            Assert.AreEqual(6, bags.Count);
+
+            float first = bags.First().GetStat(EquipmentStatType.SlotCapacity);
+            float last = bags.Last().GetStat(EquipmentStatType.SlotCapacity);
+
+            Assert.AreEqual(8f, first, 0.001f, "가장 작은 가방은 +8칸입니다.");
+            Assert.AreEqual(30f, last, 0.001f, "가장 큰 가방은 +30칸입니다.");
+
+            // 맨몸으로도 한 판 돌 수 있어야 한다. 12칸은 너무 작았다.
+            Assert.GreaterOrEqual(PlayerInventory.BaseSlots, 20,
+                "기본 적재가 20칸 미만이면 가방을 찾기 전에 아무것도 못 줍습니다.");
+        }
+
+        /// <summary>
+        /// 【최고 티어일수록 적재가 준다.】 단 0까지는 가지 않는다 —
+        /// 0으로 만들면 「최고 방어구를 입으면 아예 못 줍는다」가 되어
+        /// 선택이 아니라 금지가 된다. 덕코프도 최상위에서 +2를 남긴다.
+        /// </summary>
+        [Test]
+        public void 몸통_일반_변형은_최상위에서도_적재가_0이_아니다()
+        {
+            EquipmentDefinition top = Load<EquipmentDefinition>("Armour")
+                .Where(a => a.Slot == EquipmentSlot.Body
+                            && !a.Id.Contains("_light") && !a.Id.Contains("_heavy"))
+                .OrderByDescending(a => a.Tier)
+                .First();
+
+            Assert.Greater(top.GetStat(EquipmentStatType.SlotCapacity), 0f,
+                "최고 티어 일반 몸통의 적재가 0입니다. 그것은 중갑 변형의 몫입니다.");
+        }
+
+        /// <summary>
         /// 「최대 소지 중량」과 「적재 공간」은 별도 자원이다.
         /// 가방마다 배분이 달라야 "초반 병목은 칸, 후반 병목은 무게"가 선택으로 나타난다.
         /// </summary>

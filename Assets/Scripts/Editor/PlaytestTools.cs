@@ -218,7 +218,7 @@ public static class PlaytestTools
             return;
         }
 
-        Health target = Object.FindObjectsByType<Health>(FindObjectsSortMode.None)
+        Health target = Object.FindObjectsByType<Health>(FindObjectsInactive.Exclude)
             .Where(h => h.Team == Team.Enemy && !h.IsDead)
             .OrderBy(h => (h.transform.position - player.transform.position).sqrMagnitude)
             .FirstOrDefault();
