@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6d5ed47cc3bec4828a0c77c2c18f1c47, type: 3}
+  m_Name: wpn_t6_eraser
+  m_EditorClassIdentifier: Blob.Runtime::WeaponDefinition
+  id: wpn_t6_eraser
+  displayName: "\uC885\uACB0 \uBCD1\uAE30 \u300C\uC18C\uAC70\u300D"
+  description: "\uC9C0\uC0C1 \uC9C4\uC555\uC6A9\uC73C\uB85C \uB9CC\uB4E4\uC5B4\uC84C\uB2E4.
+    \uC4F0\uB294 \uCABD\uB3C4 \uBB34\uC0AC\uD558\uC9C0 \uC54A\uB2E4."
+  kind: 1
+  tier: 6
+  weight: 7
+  slotSize: 1
+  stackMax: 1
+  maxDurability: 150
+  baseValue: 20000
+  skill: {fileID: 0}
+  slot: 0
+  stats:
+  - type: 3
+    value: 6
+  - type: 30
+    value: -0.12
+  - type: 44
+    value: 3
+  setFamily: 
+  imprintFamily: 
+  immunity: 0
+  extraImmunities: 
+  baseDamage: 34
+  fireInterval: 0.45
+  effectiveRange: 20
+  projectileSpeed: 30
+  attachmentSlots: 6
+  weaponFamily: "\uC885\uACB0"

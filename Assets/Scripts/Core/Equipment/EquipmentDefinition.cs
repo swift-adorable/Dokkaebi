@@ -43,11 +43,15 @@ public class EquipmentDefinition : ItemDefinition
     [Tooltip("각인이 주는 상태이상 면역. 저항형 II 이상에만 있다.")]
     [SerializeField] private StatusEffectType immunity = StatusEffectType.None;
 
+    [Tooltip("추가 면역. 각인 「역치」 Ⅱ·Ⅲ처럼 한 번에 여러 상태를 막을 때만 쓴다.")]
+    [SerializeField] private StatusEffectType[] extraImmunities = new StatusEffectType[0];
+
     public EquipmentSlot Slot => slot;
     public EquipmentStat[] Stats => stats;
     public string SetFamily => setFamily;
     public string ImprintFamily => imprintFamily;
     public StatusEffectType Immunity => immunity;
+    public StatusEffectType[] ExtraImmunities => extraImmunities;
 
     /// <summary>이 장비가 가진 옵션 값. 없으면 0.</summary>
     public float GetStat(EquipmentStatType type)
@@ -63,18 +67,47 @@ public class EquipmentDefinition : ItemDefinition
         return total;
     }
 
-    /// <summary>음수 옵션을 하나라도 가졌는지. 「강한 장비에는 대가가 붙는다」 검증에 쓴다.</summary>
+    /// <summary>
+    /// 대가 옵션을 하나라도 가졌는지. 「강한 장비에는 대가가 붙는다」 검증에 쓴다.
+    ///
+    /// 부호만 보지 않는 이유 — 「발사 간격 +150%」는 양수인데 페널티다.
+    /// 판정은 EquipmentStatMeta에 모아 둔다.
+    /// </summary>
     public bool HasDrawback
     {
         get
         {
             for (int i = 0; i < stats.Length; i++)
             {
-                if (stats[i].value < 0f)
+                if (EquipmentStatMeta.IsDrawback(stats[i]))
                     return true;
             }
 
             return false;
+        }
+    }
+
+    /// <summary>
+    /// 양수 옵션이나 면역을 하나라도 가졌는지.
+    ///
+    /// 각인 검증에 쓴다 — 각인은 「A를 깎아 B를 얻는다」이므로
+    /// 대가만 있고 이득이 없는 각인은 존재할 수 없다.
+    /// (docs/Blob_Imprint_System.md 0절)
+    /// </summary>
+    public bool HasGain
+    {
+        get
+        {
+            for (int i = 0; i < stats.Length; i++)
+            {
+                if (EquipmentStatMeta.IsGain(stats[i]))
+                    return true;
+            }
+
+            if (immunity != StatusEffectType.None)
+                return true;
+
+            return extraImmunities != null && extraImmunities.Length > 0;
         }
     }
 }

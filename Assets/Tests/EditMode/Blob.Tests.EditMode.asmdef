@@ -5,6 +5,7 @@
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
         "Blob.Runtime",
+        "Blob.Editor",
         "Blob.Tests.Fixtures"
     ],
     "includePlatforms": [

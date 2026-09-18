@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6d5ed47cc3bec4828a0c77c2c18f1c47, type: 3}
+  m_Name: wpn_t3_acid
+  m_EditorClassIdentifier: Blob.Runtime::WeaponDefinition
+  id: wpn_t3_acid
+  displayName: "\uC0B0\uC131 \uBD84\uC0AC\uAE30"
+  description: "\uC5F0\uAD6C\uB3D9 \uC57D\uD488\uC744 \uADF8\uB300\uB85C \uC3DC\uB2E4.
+    \uC7A5\uAC11\uC744 \uB179\uC774\uBA70 \uB4E4\uC5B4\uAC04\uB2E4."
+  kind: 1
+  tier: 3
+  weight: 3
+  slotSize: 1
+  stackMax: 1
+  maxDurability: 90
+  baseValue: 1600
+  skill: {fileID: 0}
+  slot: 0
+  stats:
+  - type: 3
+    value: 2
+  setFamily: 
+  imprintFamily: 
+  immunity: 0
+  extraImmunities: 
+  baseDamage: 16
+  fireInterval: 0.32
+  effectiveRange: 13
+  projectileSpeed: 22
+  attachmentSlots: 2
+  weaponFamily: "\uD654\uD559"

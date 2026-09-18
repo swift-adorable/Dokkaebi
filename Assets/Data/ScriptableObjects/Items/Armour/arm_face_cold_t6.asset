@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 680dd67e5b9a24d638effbb25e4da4c2, type: 3}
+  m_Name: arm_face_cold_t6
+  m_EditorClassIdentifier: Blob.Runtime::EquipmentDefinition
+  id: arm_face_cold_t6
+  displayName: "\uB0B4\uD55C \uC644\uC804 \uCC28\uB2E8\uBA74"
+  description: "\uB9C9\uACE0 \uB35C \uBC1B\uB294\uB2E4. \uB300\uC2E0 \uC55E\uC774
+    \uC798 \uBCF4\uC774\uC9C0 \uC54A\uB294\uB2E4."
+  kind: 2
+  tier: 6
+  weight: 0.8
+  slotSize: 1
+  stackMax: 1
+  maxDurability: 150
+  baseValue: 15000
+  skill: {fileID: 0}
+  slot: 3
+  stats:
+  - type: 12
+    value: 0.3
+  - type: 41
+    value: -12
+  - type: 40
+    value: -1.5
+  setFamily: 
+  imprintFamily: 
+  immunity: 3
+  extraImmunities: 

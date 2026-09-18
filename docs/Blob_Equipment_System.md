@@ -3,6 +3,9 @@
 > **담당** — 능력치를 준다 · 무엇을 입고 가는가
 > 수치는 [`Combat_Baseline.md`](Blob_Combat_Baseline.md). 각인은 [`Imprint_System.md`](Blob_Imprint_System.md).
 > 이 문서는 **구조와 규칙**만 정한다.
+> **에셋 82종의 실제 수치는 코드에 있다** →
+> `WeaponAssetGenerator.cs` · `ArmourAssetGenerator.cs` · `ImprintAssetGenerator.cs`
+> (메뉴: `Blob/Equipment/장비 에셋 전체 생성`)
 
 ## 1. 슬롯 — 무기 1 + 방어 5 + 각인 2
 

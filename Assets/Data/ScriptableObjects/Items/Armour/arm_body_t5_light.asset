@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 680dd67e5b9a24d638effbb25e4da4c2, type: 3}
+  m_Name: arm_body_t5_light
+  m_EditorClassIdentifier: Blob.Runtime::EquipmentDefinition
+  id: arm_body_t5_light
+  displayName: "\uBCF5\uD569 \uC7A5\uAC11\uBCF5 (\uACBD\uB7C9)"
+  description: "\uC8FC\uBA38\uB2C8\uB97C \uB298\uB9AC\uACE0 \uD310\uC744 \uB35C\uC5B4\uB0C8\uB2E4.
+    \uD138\uB7EC \uAC08 \uB54C \uC785\uB294\uB2E4."
+  kind: 2
+  tier: 5
+  weight: 5.1
+  slotSize: 1
+  stackMax: 1
+  maxDurability: 153
+  baseValue: 12650
+  skill: {fileID: 0}
+  slot: 2
+  stats:
+  - type: 2
+    value: 5.4
+  - type: 71
+    value: 5
+  - type: 30
+    value: -0.05
+  setFamily: 
+  imprintFamily: 
+  immunity: 0
+  extraImmunities: 

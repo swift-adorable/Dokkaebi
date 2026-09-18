@@ -42,4 +42,7 @@ public static class CombatConstants
 
     /// <summary>방어도·방어 관통의 상한. (장비 티어 6 기준)</summary>
     public const int MaxArmour = 7;
+
+    /// <summary>치명타 기본 배율. 각인 「정밀」이 이 값에 더한다.</summary>
+    public const float BaseCriticalMultiplier = 1.5f;
 }
