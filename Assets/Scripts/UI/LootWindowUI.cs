@@ -172,11 +172,16 @@ public class LootWindowUI : MonoBehaviour
     {
         UIFactory.ClearChildren(grid);
 
-        int cells = Mathf.Min(loot.Capacity, Columns * Rows);
+        // 【전부 그린다.】 잘라내면 그 칸의 물건은 보이지도 눌리지도 않는다.
+        // 컨테이너 기본 용량은 8이라 지금은 5×2에 들어가지만,
+        // 용량이 10을 넘는 컨테이너가 생기는 순간 조용히 사라진다. 그래서 행을 계산한다.
+        int cells = Mathf.Max(0, loot.Capacity);
+
+        int rows = Mathf.Max(Rows, Mathf.CeilToInt(cells / (float)Columns));
 
         for (int i = 0; i < cells; i++)
         {
-            UIFactory.GetCellAnchors(i, Columns, Rows, 0.008f,
+            UIFactory.GetCellAnchors(i, Columns, rows, 0.008f,
                 out Vector2 min, out Vector2 max);
 
             ItemStack stack = loot.Get(i);

@@ -26,7 +26,19 @@ public partial class InventoryScreenUI : MonoBehaviour
     private static readonly string[] TabNames = { "가방", "젬", "패시브" };
 
     private const int BagColumns = 6;
-    private const int BagRows = 6;
+
+    /// <summary>
+    /// 한 번에 보이는 행. 【칸 크기의 기준】이다.
+    ///
+    /// 용량이 늘면 칸이 작아지는 것이 아니라 내용물이 길어지고 스크롤이 생긴다.
+    /// 6-N 이후 실사용 상한이 65칸(기본 20 + 장비 37 + 패시브 8)이라
+    /// 고정 격자로는 29칸이 보이지도 눌리지도 않았다. (Blob_Audit.md F1)
+    /// 모바일에서 터치 목표 크기를 지키는 유일한 방법이 스크롤이다.
+    /// </summary>
+    private const int BagVisibleRows = 6;
+
+    /// <summary>칸 사이 여백. 부모 기준 정규화 값이다.</summary>
+    private const float BagCellPadding = 0.006f;
 
     private static InventoryScreenUI instance;
 
@@ -36,7 +48,9 @@ public partial class InventoryScreenUI : MonoBehaviour
 
     private RectTransform leftColumn;
     private RectTransform equipmentGrid;
+    private RectTransform bagViewport;
     private RectTransform bagGrid;
+    private ScrollRect bagScroll;
     private RectTransform rightPanel;
     private RectTransform quickSlots;
 
@@ -208,8 +222,33 @@ public partial class InventoryScreenUI : MonoBehaviour
         bagTitleLabel = UIFactory.CreateLabel(leftColumn, "가방", 30, FontStyle.Bold,
             new Vector2(0.03f, 0.55f), new Vector2(0.97f, 0.62f), TextAnchor.MiddleLeft);
 
-        bagGrid = UIFactory.CreateRegion("Bag", leftColumn,
+        bagViewport = UIFactory.CreateRegion("Bag", leftColumn,
             new Vector2(0.03f, 0.02f), new Vector2(0.97f, 0.54f));
+
+        // 마스크가 없으면 스크롤한 칸이 위쪽 장비 영역을 덮는다.
+        bagViewport.gameObject.AddComponent<RectMask2D>();
+
+        // 드래그를 받으려면 레이캐스트 대상이 필요하다. 빈 칸 사이나
+        // 마지막 줄 아래를 문질러도 스크롤되게 만드는 투명 판이다.
+        var bagCatcher = bagViewport.gameObject.AddComponent<Image>();
+        bagCatcher.color = new Color(0f, 0f, 0f, 0f);
+
+        // 내용물은 위를 기준으로 자란다 — 첫 칸의 자리가 용량과 무관하게 같다.
+        bagGrid = UIFactory.CreateRegion("BagContent", bagViewport,
+            new Vector2(0f, 1f), new Vector2(1f, 1f));
+        bagGrid.pivot = new Vector2(0.5f, 1f);
+        bagGrid.sizeDelta = Vector2.zero;
+
+        bagScroll = bagViewport.gameObject.AddComponent<ScrollRect>();
+        bagScroll.viewport = bagViewport;
+        bagScroll.content = bagGrid;
+        bagScroll.horizontal = false;
+        bagScroll.vertical = true;
+        bagScroll.movementType = ScrollRect.MovementType.Elastic;
+        bagScroll.elasticity = 0.1f;
+        bagScroll.inertia = true;
+        bagScroll.decelerationRate = 0.135f;
+        bagScroll.scrollSensitivity = 40f;
     }
 
     private void BuildBottomBar()
@@ -255,9 +294,14 @@ public partial class InventoryScreenUI : MonoBehaviour
 
         selected = null;
 
+        // 활성화가 먼저다 — 꺼진 상태에서는 뷰포트 높이를 읽을 수 없어
+        // 스크롤 내용물의 높이가 0으로 잡힌다.
+        panel.SetActive(true);
+
         Refresh();
 
-        panel.SetActive(true);
+        if (bagScroll != null)
+            bagScroll.verticalNormalizedPosition = 1f;
 
         if (GameManager.HasInstance)
             GameManager.Instance.OpenSkill();
@@ -433,11 +477,27 @@ public partial class InventoryScreenUI : MonoBehaviour
 
         bagTitleLabel.text = $"가방 ({bag.UsedSlots}/{bag.SlotCapacity})";
 
-        int cells = Mathf.Min(bag.SlotCapacity, BagColumns * BagRows);
+        // 【전부 그린다.】 잘라내면 그 칸의 물건은 보이지도 눌리지도 않는다.
+        int cells = Mathf.Max(0, bag.SlotCapacity);
+
+        int rows = Mathf.Max(BagVisibleRows,
+            Mathf.CeilToInt(cells / (float)BagColumns));
+
+        // 부모(=뷰포트)의 실제 높이를 읽기 전에 레이아웃을 확정시킨다.
+        Canvas.ForceUpdateCanvases();
+
+        float viewHeight = bagViewport.rect.height;
+
+        bagGrid.sizeDelta = viewHeight > 0f
+            ? new Vector2(0f, viewHeight * rows / BagVisibleRows)
+            : Vector2.zero;
+
+        // 세로 여백은 내용물이 길어진 만큼 줄여야 픽셀 간격이 그대로다.
+        float paddingY = BagCellPadding * BagVisibleRows / rows;
 
         for (int i = 0; i < cells; i++)
         {
-            UIFactory.GetCellAnchors(i, BagColumns, BagRows, 0.006f,
+            UIFactory.GetCellAnchors(i, BagColumns, rows, BagCellPadding, paddingY,
                 out Vector2 min, out Vector2 max);
 
             ItemStack stack = i < bagStacks.Count ? bagStacks[i] : null;
