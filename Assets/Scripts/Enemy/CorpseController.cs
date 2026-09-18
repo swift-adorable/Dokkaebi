@@ -86,6 +86,14 @@ public class CorpseController : MonoBehaviour, IPoolable
         if (lootTable != null)
             lootTable.Fill(Loot, random, ValueMultiplier);
 
+        // 패시브 「전리품 추첨 +n」. 표 자체는 그대로고 뽑는 횟수만 는다.
+        int extraRolls = PassiveManager.HasInstance
+            ? Mathf.RoundToInt(PassiveManager.Instance.Total(PassiveEffectType.LootRolls))
+            : 0;
+
+        if (lootTable != null && extraRolls > 0)
+            LootRoller.Roll(lootTable.Entries, extraRolls, random, Loot);
+
         if (!SkillManager.HasInstance)
             return;
 

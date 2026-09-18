@@ -63,8 +63,27 @@ public class PlayerInventory : Singleton<PlayerInventory>
     {
         EquipmentModifiers modifiers = Loadout.Modifiers;
 
-        Bag.SlotCapacity = baseSlots + Mathf.RoundToInt(modifiers.Get(EquipmentStatType.SlotCapacity));
-        Bag.WeightLimit = baseWeightLimit + modifiers.Get(EquipmentStatType.MaxCarryWeight);
+        // 장비(가방)와 패시브(계정)가 합산된다.
+        // 패시브 총합은 장비 최대치의 1/3을 넘지 않게 표에서 제한한다 —
+        // 그렇지 않으면 가방을 고르는 결정이 사라진다. (PassiveEffectType 주석)
+        int passiveSlots = 0;
+        float passiveWeight = 0f;
+
+        if (PassiveManager.HasInstance)
+        {
+            passiveSlots = Mathf.RoundToInt(
+                PassiveManager.Instance.Total(PassiveEffectType.CarrySlots));
+
+            passiveWeight = PassiveManager.Instance.Total(PassiveEffectType.CarryWeight);
+        }
+
+        Bag.SlotCapacity = baseSlots
+            + Mathf.RoundToInt(modifiers.Get(EquipmentStatType.SlotCapacity))
+            + passiveSlots;
+
+        Bag.WeightLimit = baseWeightLimit
+            + modifiers.Get(EquipmentStatType.MaxCarryWeight)
+            + passiveWeight;
     }
 
     /// <summary>

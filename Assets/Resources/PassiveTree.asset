@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7be04161c0944c85aa3408f3882ef0d, type: 3}
+  m_Name: PassiveTree
+  m_EditorClassIdentifier: Blob.Runtime::PassiveTree
+  nodes:
+  - {fileID: 11400000, guid: fca5dae8ecb464f54bd11fec9c53b10d, type: 2}
+  - {fileID: 11400000, guid: 7b0c3b697e2b349a3bd948b6d0a634fe, type: 2}
+  - {fileID: 11400000, guid: 9963539796aa74711a85422e76b7de2e, type: 2}
+  - {fileID: 11400000, guid: fb05fff9b9b8a4125b9ba6cb78ec3a87, type: 2}
+  - {fileID: 11400000, guid: 6795403defd864edfaf59b37690d2309, type: 2}
+  - {fileID: 11400000, guid: a1ed0e43e9b9f40b4a21e5c8891778d8, type: 2}
+  - {fileID: 11400000, guid: 597ff3a6cdd884cee98269e869b3e32f, type: 2}
+  - {fileID: 11400000, guid: 9af3c06bcb89746cbaf7858d9360af3a, type: 2}
+  - {fileID: 11400000, guid: 214afe3bc2df44147818745539e1267e, type: 2}
+  - {fileID: 11400000, guid: d7b2b777d984a47dbafba4762062e085, type: 2}
+  - {fileID: 11400000, guid: 29e03d82164cb4a2fb24290307026750, type: 2}
+  - {fileID: 11400000, guid: e9c60513a248e493492c2e8fb69dd869, type: 2}
+  columns: 4
+  rows: 4

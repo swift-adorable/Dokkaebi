@@ -43,7 +43,8 @@ public class PlayerAbsorber : MonoBehaviour
         // 경험치는 최초 1회만. 창을 여러 번 열어도 다시 들어오지 않는다.
         if (corpse.TryMarkAbsorbed())
         {
-            int gainedXP = xpPerCorpse * corpse.ValueMultiplier;
+            int gainedXP = Mathf.RoundToInt(
+                xpPerCorpse * corpse.ValueMultiplier * AbsorbMultiplier());
 
             if (PlayerStats.HasInstance)
                 PlayerStats.Instance.AddXP(gainedXP);
@@ -78,6 +79,15 @@ public class PlayerAbsorber : MonoBehaviour
 
         if (poolManager == null || !poolManager.Despawn(corpseObject))
             Destroy(corpseObject);
+    }
+
+    /// <summary>패시브 「경험치 획득 +n%」를 배수로 바꾼다.</summary>
+    private static float AbsorbMultiplier()
+    {
+        if (!PassiveManager.HasInstance)
+            return 1f;
+
+        return 1f + PassiveManager.Instance.Total(PassiveEffectType.AbsorbAmount) * 0.01f;
     }
 
     private void OnTriggerEnter(Collider other)

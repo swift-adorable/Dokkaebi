@@ -115,8 +115,8 @@ public class SkillManager : Singleton<SkillManager>
 
         SyncAwakeningLevel();
 
-        if (FindAnyObjectByType<SkillSocketUI>(FindObjectsInactive.Include) == null)
-            SkillSocketUI.Create();
+        // 가방 화면(장비 · 가방 · 인자 소켓 · 패시브)을 보장한다.
+        InventoryScreenUI.EnsureInstance();
 
         if (grantFirstCore)
             GrantFirstCore();
