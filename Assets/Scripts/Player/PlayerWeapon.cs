@@ -138,6 +138,7 @@ public class PlayerWeapon : MonoBehaviour
                     profile.ArmourPenetration);
 
                 controller.SetSkillEffects(modifiers);
+                controller.SetCritical(profile.CriticalChance, profile.CriticalMultiplier);
 
                 controller.Configure(
                     modifiers.Behaviours,

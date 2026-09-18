@@ -93,7 +93,7 @@ public static class DetonationResolver
             case StatusEffectType.Freeze:
                 return new DetonationResult(
                     Damage(baseDamage, effectiveStacks), radius, DamageElement.Cold,
-                    StatusEffectType.Freeze, GroundEffectType.None);
+                    StatusEffectType.Chill, GroundEffectType.None);
 
             // 감전 → 낙뢰 3회. 피해가 세 번 나뉘어 들어가므로 반경이 넓다.
             case StatusEffectType.Shock:

@@ -24,12 +24,12 @@ public static class DamageResolver
     ///  2. 관통 ≥ 방어도이면 배율이 1로 고정되어 초과 관통에 보상이 없다.
     ///  3. 선형이 아니라 쌍곡선이라 낮은 구간에서 한 등급 차이가 크게 벌어진다.
     /// </summary>
-    public static float ArmourMultiplier(int armour, int penetration)
+    public static float ArmourMultiplier(float armour, float penetration)
     {
-        int gap = armour - penetration;
+        float gap = armour - penetration;
 
-        if (gap < 0)
-            gap = 0;
+        if (gap < 0f)
+            gap = 0f;
 
         return CombatConstants.ArmourConstant / (gap + CombatConstants.ArmourConstant);
     }

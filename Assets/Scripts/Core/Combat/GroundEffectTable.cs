@@ -13,7 +13,7 @@ public static class GroundEffectTable
         {
             case StatusEffectType.Ignite: return GroundEffectType.FireZone;
             case StatusEffectType.Poison: return GroundEffectType.ToxicSwamp;
-            case StatusEffectType.Freeze: return GroundEffectType.FrostField;
+            case StatusEffectType.Chill: return GroundEffectType.FrostField;
             case StatusEffectType.Bleed: return GroundEffectType.BloodZone;
 
             // 감전은 잔류물을 남기지 않는다. 증폭 전용 상태이기 때문이다.

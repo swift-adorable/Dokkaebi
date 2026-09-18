@@ -100,8 +100,9 @@ public class EquipmentModifiers
         resist.lightning = Mathf.Max(0f, resist.lightning);
         resist.chaos = Mathf.Max(0f, resist.chaos);
 
-        int head = Mathf.Clamp(Mathf.RoundToInt(Get(EquipmentStatType.HeadArmour)), 0, CombatConstants.MaxArmour);
-        int body = Mathf.Clamp(Mathf.RoundToInt(Get(EquipmentStatType.BodyArmour)), 0, CombatConstants.MaxArmour);
+        // 반올림하지 않는다 — 각인 「경화」의 +0.2와 점화의 −1.0이 살아야 한다.
+        float head = Mathf.Clamp(Get(EquipmentStatType.HeadArmour), 0f, CombatConstants.MaxArmour);
+        float body = Mathf.Clamp(Get(EquipmentStatType.BodyArmour), 0f, CombatConstants.MaxArmour);
 
         return DefenceProfile.Create(head, body, resist);
     }

@@ -255,7 +255,8 @@ public class EnemyAttack : MonoBehaviour
         {
             case StatusEffectType.Ignite: return DamageElement.Fire;
             case StatusEffectType.Poison: return DamageElement.Chaos;
-            case StatusEffectType.Freeze: return DamageElement.Cold;
+            case StatusEffectType.Freeze:
+                case StatusEffectType.Chill: return DamageElement.Cold;
             case StatusEffectType.Shock: return DamageElement.Lightning;
             default: return DamageElement.Physical;
         }

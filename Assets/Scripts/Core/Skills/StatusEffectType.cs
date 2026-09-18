@@ -15,7 +15,7 @@ public enum StatusEffectType
     /// <summary>중독 — 역병이 부여. 중첩형 지속 피해(최대 10). 소비 시 독 구름 확산.</summary>
     Poison = 2,
 
-    /// <summary>동결 — 서리가 부여. 행동 불능. 소비 시 파편 폭발 + 인접 동결.</summary>
+    /// <summary>동결 — 【임계 상태】 냉각이 최대 중첩에 도달하면 전이한다. 행동 불능.</summary>
     Freeze = 3,
 
     /// <summary>감전 — 뇌전이 부여. 받는 모든 피해 +20%. 소비 시 낙뢰 3회.</summary>
@@ -25,7 +25,21 @@ public enum StatusEffectType
     Bleed = 5,
 
     /// <summary>응집 — 중력 붕괴가 부여. 상태 전이 범위 2배.</summary>
-    Congeal = 6
+    Congeal = 6,
+
+    /// <summary>냉각 — 서리가 부여. 이동·공격 속도 감소. 최대 중첩에서 동결로 전이한다.</summary>
+    Chill = 7,
+
+    // ── 임계 상태 ─────────────────────────────────────────────────────
+    // 중첩이 차면 질적으로 다른 것이 된다. 직접 부여되지 않고 전이로만 생긴다.
+    // 전이 시 원본 중첩을 전부 소모하므로 끝나면 처음부터 다시 쌓아야 한다 —
+    // 무한 제압을 막는 장치다. (docs/Blob_Combat_Baseline.md 「상태이상」)
+
+    /// <summary>마비 — 【임계 상태】 감전이 최대 중첩에 도달하면 전이한다. 행동 불능.</summary>
+    Paralyze = 8,
+
+    /// <summary>부식 — 【임계 상태】 중독이 최대 중첩에 도달하면 전이한다. 방어도·회복량 절반.</summary>
+    Corrode = 9
 }
 
 /// <summary>바닥에 남는 지형 상태 — v5 §5-2.</summary>

@@ -28,6 +28,12 @@ public class BulletController : MonoBehaviour, IPoolable
     /// <summary>스킬 합산 결과. 참조만 든다. null이면 보정이 없다(적 탄 등).</summary>
     private WeaponModifiers skillEffects;
 
+    /// <summary>치명타 확률(0~1). 각인 「정밀」만 이 값을 올린다. 기본은 0이다.</summary>
+    private float criticalChance;
+
+    /// <summary>치명타 배율.</summary>
+    private float criticalMultiplier = CombatConstants.BaseCriticalMultiplier;
+
     [Tooltip("자동 소멸까지의 시간(초)")]
     [SerializeField] private float lifetime = 3f;
 
@@ -125,7 +131,8 @@ public class BulletController : MonoBehaviour, IPoolable
             {
                 case StatusEffectType.Ignite: return DamageElement.Fire;
                 case StatusEffectType.Poison: return DamageElement.Chaos;
-                case StatusEffectType.Freeze: return DamageElement.Cold;
+                case StatusEffectType.Freeze:
+                case StatusEffectType.Chill: return DamageElement.Cold;
                 case StatusEffectType.Shock: return DamageElement.Lightning;
                 default: return DamageElement.Physical;
             }
@@ -150,8 +157,10 @@ public class BulletController : MonoBehaviour, IPoolable
         AppliedStatus = status;
         originPoint = origin;
 
-        // 적 탄은 행동(관통·갈래 등)도 스킬 보정도 갖지 않는다. 그것은 스킬의 몫이다.
+        // 적 탄은 행동(관통·갈래 등)도 스킬 보정도 치명타도 갖지 않는다.
         skillEffects = null;
+        criticalChance = 0f;
+        criticalMultiplier = CombatConstants.BaseCriticalMultiplier;
         behaviourState.Clear();
         ricochetState.Clear();
 
@@ -170,6 +179,18 @@ public class BulletController : MonoBehaviour, IPoolable
         damage = Mathf.Max(1, shotDamage);
         effectiveRange = Mathf.Max(0f, range);
         armourPenetration = Mathf.Clamp(penetration, 0, CombatConstants.MaxArmour);
+    }
+
+    /// <summary>
+    /// 치명타 정보를 주입한다.
+    ///
+    /// 【기본 확률은 0이다.】 각인 「정밀」을 껴야만 크리가 뜬다.
+    /// 그래야 크리가 운이 아니라 빌드 선택의 결과가 된다.
+    /// </summary>
+    public void SetCritical(float chance, float multiplier)
+    {
+        criticalChance = Mathf.Clamp(chance, 0f, CombatConstants.MaxCriticalChance);
+        criticalMultiplier = Mathf.Max(1f, multiplier);
     }
 
     /// <summary>
@@ -379,6 +400,10 @@ public class BulletController : MonoBehaviour, IPoolable
                 AppliedStatus, ailmentBase, skillEffects?.AilmentDurationMultiplier ?? 1f);
         }
 
+        // 치명타는 명중마다 따로 굴린다. 발사 시점에 굴리면
+        // 관통·분열로 여러 대상을 때릴 때 전부 같은 결과가 나온다.
+        bool isCritical = criticalChance > 0f && Random.value < criticalChance;
+
         var request = new DamageRequest
         {
             baseDamage = damage,
@@ -388,8 +413,8 @@ public class BulletController : MonoBehaviour, IPoolable
             armourPenetration = armourPenetration,
             distance = distance,
             effectiveRange = effectiveRange,
-            isCritical = false,
-            criticalMultiplier = 1f,
+            isCritical = isCritical,
+            criticalMultiplier = criticalMultiplier,
             bypassArmour = false
         };
 
@@ -459,6 +484,7 @@ public class BulletController : MonoBehaviour, IPoolable
             // 프리팹 기본 피해(10)로 때려 티어 6 무기가 갈래마다 약해진다.
             bullet.SetWeaponBase(damage, effectiveRange, armourPenetration);
             bullet.SetSkillEffects(skillEffects);
+            bullet.SetCritical(criticalChance, criticalMultiplier);
 
             bullet.Configure(
                 behaviourState.CreateChildState(),

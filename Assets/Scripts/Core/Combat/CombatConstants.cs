@@ -61,6 +61,22 @@ public static class CombatConstants
     /// <summary>방어도·방어 관통의 상한. (장비 티어 6 기준)</summary>
     public const int MaxArmour = 7;
 
-    /// <summary>치명타 기본 배율. 각인 「정밀」이 이 값에 더한다.</summary>
+    /// <summary>
+    /// 치명타 기본 배율. 각인 「정밀」이 이 값에 더한다. (Ⅲ까지 끼면 2.3배)
+    /// </summary>
     public const float BaseCriticalMultiplier = 1.5f;
+
+    /// <summary>
+    /// 치명타 기본 확률. 【0이다.】
+    ///
+    /// 모든 무기가 조금씩 크리가 뜨면 전 구간에 무작위성이 깔려
+    /// 유저가 자기 실력을 판단하기 어려워진다.
+    /// 0으로 두면 크리는 「내가 정밀 각인을 골랐다」는 선택의 결과가 된다.
+    /// </summary>
+    public const float BaseCriticalChance = 0f;
+
+    /// <summary>
+    /// 치명타 확률 상한. 상한이 없으면 부착물이 들어올 때 100%가 된다.
+    /// </summary>
+    public const float MaxCriticalChance = 0.5f;
 }

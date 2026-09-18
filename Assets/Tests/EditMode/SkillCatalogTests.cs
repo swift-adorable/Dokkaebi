@@ -184,10 +184,15 @@ namespace Blob.Tests
             }
         }
 
+        /// <summary>
+        /// 만들 수단이 없는 상태는 죽은 어휘다.
+        ///
+        /// 【임계 상태는 제외한다.】 동결·마비·부식은 Core가 직접 걸지 않는다.
+        /// 원본(냉각·감전·중독)이 최대 중첩에 차면 전이로만 생긴다.
+        /// </summary>
         [Test]
-        public void 상태이상_6종이_전부_어떤_Core로든_만들어진다()
+        public void 부여_가능한_상태는_전부_어떤_Core로든_만들어진다()
         {
-            // 만들 수단이 없는 상태는 죽은 어휘다.
             var created = Of(SkillCategory.Core).Select(d => d.CreatesStatus).ToList();
 
             foreach (StatusEffectType s in System.Enum.GetValues(typeof(StatusEffectType)))
@@ -195,8 +200,37 @@ namespace Blob.Tests
                 if (s == StatusEffectType.None)
                     continue;
 
+                // 임계 상태는 전이로만 생긴다.
+                if (s == StatusEffectType.Freeze
+                    || s == StatusEffectType.Paralyze
+                    || s == StatusEffectType.Corrode)
+                {
+                    Assert.IsFalse(created.Contains(s),
+                        $"{s}는 임계 상태입니다. Core가 직접 걸면 안 됩니다.");
+
+                    continue;
+                }
+
                 Assert.Contains(s, created, $"{s}를 만드는 Core가 없습니다.");
             }
+        }
+
+        /// <summary>임계 상태 3종은 전부 전이 대상이 있어야 한다.</summary>
+        [Test]
+        public void 임계_상태는_전부_전이_원본이_있다()
+        {
+            Assert.AreEqual(StatusEffectType.Freeze,
+                StatusEffectTable.ThresholdOf(StatusEffectType.Chill));
+
+            Assert.AreEqual(StatusEffectType.Paralyze,
+                StatusEffectTable.ThresholdOf(StatusEffectType.Shock));
+
+            Assert.AreEqual(StatusEffectType.Corrode,
+                StatusEffectTable.ThresholdOf(StatusEffectType.Poison));
+
+            // 임계 상태는 다시 임계로 전이하지 않는다.
+            Assert.AreEqual(StatusEffectType.None,
+                StatusEffectTable.ThresholdOf(StatusEffectType.Freeze));
         }
 
         // ── 배타 구조 ─────────────────────────────────────────────────────

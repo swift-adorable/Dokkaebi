@@ -48,8 +48,9 @@ namespace Blob.Tests
             Assert.AreEqual(StatusEffectType.Poison,
                 DetonationResolver.Resolve(StatusEffectType.Poison, 3, 10).SpreadStatus);
 
-            // 동결도 인접 동결을 전이시킨다.
-            Assert.AreEqual(StatusEffectType.Freeze,
+            // 동결 기폭은 인접에 【냉각】을 전이시킨다.
+            // 동결을 통째로 퍼뜨리면 한 번의 기폭으로 화면 전체가 행동 불능이 된다.
+            Assert.AreEqual(StatusEffectType.Chill,
                 DetonationResolver.Resolve(StatusEffectType.Freeze, 1, 10).SpreadStatus);
 
             // 점화·출혈은 전이 대신 잔류물을 남긴다.
@@ -98,7 +99,8 @@ namespace Blob.Tests
         {
             Assert.AreEqual(GroundEffectType.FireZone, GroundEffectTable.FromStatus(StatusEffectType.Ignite));
             Assert.AreEqual(GroundEffectType.ToxicSwamp, GroundEffectTable.FromStatus(StatusEffectType.Poison));
-            Assert.AreEqual(GroundEffectType.FrostField, GroundEffectTable.FromStatus(StatusEffectType.Freeze));
+            // 서리 Core가 거는 것은 냉각이므로 잔류물도 냉각 기준이다.
+            Assert.AreEqual(GroundEffectType.FrostField, GroundEffectTable.FromStatus(StatusEffectType.Chill));
             Assert.AreEqual(GroundEffectType.BloodZone, GroundEffectTable.FromStatus(StatusEffectType.Bleed));
         }
 
@@ -132,7 +134,7 @@ namespace Blob.Tests
             {
                 GroundEffectTable.FromStatus(StatusEffectType.Ignite),
                 GroundEffectTable.FromStatus(StatusEffectType.Poison),
-                GroundEffectTable.FromStatus(StatusEffectType.Freeze),
+                GroundEffectTable.FromStatus(StatusEffectType.Chill),
                 GroundEffectTable.FromStatus(StatusEffectType.Bleed)
             };
 

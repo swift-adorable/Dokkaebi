@@ -249,6 +249,9 @@ public partial class InventoryScreenUI
             case StatusEffectType.Ignite:  return "점화";
             case StatusEffectType.Poison:  return "중독";
             case StatusEffectType.Freeze:  return "동결";
+            case StatusEffectType.Chill:   return "냉각";
+            case StatusEffectType.Paralyze: return "마비";
+            case StatusEffectType.Corrode: return "부식";
             case StatusEffectType.Shock:   return "감전";
             case StatusEffectType.Bleed:   return "출혈";
             case StatusEffectType.Congeal: return "응집";

@@ -50,6 +50,23 @@ namespace Blob.Tests
             return total;
         }
 
+        /// <summary>이미 상태가 걸린 state의 총 피해를 끝까지 뽑아낸다.</summary>
+        private int DrainTotal(StatusEffectState state, float duration, int tickCount)
+        {
+            float tick = duration / tickCount;
+            int total = 0;
+
+            for (int i = 0; i < tickCount; i++)
+            {
+                state.Tick(tick, false, buffer);
+
+                foreach (var r in buffer)
+                    total += r.baseDamage;
+            }
+
+            return total;
+        }
+
         [Test]
         public void 점화의_총_피해는_기본_피해_한_발과_같다()
         {
@@ -72,27 +89,64 @@ namespace Blob.Tests
         [Test]
         public void 중독_총량도_틱_간격과_무관하다()
         {
-            // 10 × 0.15 × 6초 = 9
-            Assert.AreEqual(9, TotalOver(StatusEffectType.Poison, 10f, 6f, 1));
-            Assert.AreEqual(9, TotalOver(StatusEffectType.Poison, 10f, 0.1f, 60));
-            Assert.AreEqual(9, TotalOver(StatusEffectType.Poison, 10f, 1f / 60f, 360));
+            // 1중첩 = 10 × 0.05 × 6초 = 3
+            Assert.AreEqual(3, TotalOver(StatusEffectType.Poison, 10f, 6f, 1));
+            Assert.AreEqual(3, TotalOver(StatusEffectType.Poison, 10f, 0.1f, 60));
+            Assert.AreEqual(3, TotalOver(StatusEffectType.Poison, 10f, 1f / 60f, 360));
         }
 
+        /// <summary>
+        /// 【중첩이 피해를 늘리는 것은 중독뿐이다.】
+        /// 셋 다 중첩하면 "쌓아서 녹인다"는 카오스의 정체성이 사라진다.
+        /// </summary>
         [Test]
-        public void 중독만_크게_중첩한다()
+        public void 중독만_중첩하고_점화와_출혈은_갱신형이다()
         {
-            var state = new StatusEffectState();
+            var poison = new StatusEffectState();
 
-            for (int i = 0; i < 15; i++)
-                state.Apply(StatusEffectType.Poison, 10f);
+            // 9번까지는 쌓인다. 10번째에 임계(부식)로 전이하며 원본이 비워진다.
+            for (int i = 0; i < 9; i++)
+                poison.Apply(StatusEffectType.Poison, 10f);
 
-            Assert.AreEqual(10, state.StacksOf(StatusEffectType.Poison), "최대 중첩은 10입니다.");
+            Assert.AreEqual(9, poison.StacksOf(StatusEffectType.Poison), "중독은 중첩합니다.");
 
             var ignite = new StatusEffectState();
             ignite.Apply(StatusEffectType.Ignite, 10f);
             ignite.Apply(StatusEffectType.Ignite, 10f);
 
             Assert.AreEqual(1, ignite.StacksOf(StatusEffectType.Ignite), "점화는 갱신형입니다.");
+
+            var bleed = new StatusEffectState();
+            bleed.Apply(StatusEffectType.Bleed, 10f);
+            bleed.Apply(StatusEffectType.Bleed, 10f);
+
+            Assert.AreEqual(1, bleed.StacksOf(StatusEffectType.Bleed), "출혈도 갱신형입니다.");
+        }
+
+        /// <summary>
+        /// 중독 10중첩의 총량이 기본 피해의 3배를 넘지 않아야 한다.
+        ///
+        /// 이전 계수 0.15는 10중첩에서 9배였다. 10번 맞히는 데 4초면 되고
+        /// 지속이 6초라 실제로 도달하므로, 도트가 직접 피해의 두 배 가까이 됐다.
+        /// </summary>
+        [Test]
+        public void 중독_최대_중첩의_총량이_기본_피해의_세_배다()
+        {
+            const float BaseDamage = 10f;
+
+            var state = new StatusEffectState();
+
+            // 임계 전이 직전(9중첩)에서 측정한다. 10번째는 부식으로 넘어간다.
+            for (int i = 0; i < 9; i++)
+                state.Apply(StatusEffectType.Poison, BaseDamage);
+
+            int total = DrainTotal(state, 6f, 60);
+
+            Assert.LessOrEqual(total, (int)(BaseDamage * 3f),
+                "중독 도트가 기본 피해의 3배를 넘습니다. 직접 피해를 압도합니다.");
+
+            Assert.Greater(total, (int)BaseDamage,
+                "쌓은 보람이 있어야 합니다. 한 발보다는 세야 합니다.");
         }
 
         [Test]
@@ -165,24 +219,134 @@ namespace Blob.Tests
             }
         }
 
+        /// <summary>
+        /// 통제형 상태의 세기는 중첩에 비례하고 최대 중첩에서 문서 수치가 된다.
+        /// 1중첩에 전부 주면 한 발만 맞혀도 −40% 감속이 되어 과하다.
+        /// </summary>
         [Test]
-        public void 감전은_받는_피해를_20퍼센트_올린다()
+        public void 감전은_중첩에_비례해_최대_20퍼센트를_올린다()
         {
             var state = new StatusEffectState();
             Assert.AreEqual(1f, state.DamageTakenMultiplier, 0.0001f);
 
             state.Apply(StatusEffectType.Shock, 10f);
-            Assert.AreEqual(1.2f, state.DamageTakenMultiplier, 0.0001f);
+
+            float one = state.DamageTakenMultiplier;
+
+            Assert.Greater(one, 1f, "1중첩에서도 효과는 있어야 합니다.");
+            Assert.Less(one, 1.2f, "1중첩에 전부 주면 안 됩니다.");
+
+            // 5번째까지 쌓는다. 6번째는 마비로 전이하며 원본이 비워진다.
+            for (int i = 1; i < 5; i++)
+                state.Apply(StatusEffectType.Shock, 10f);
+
+            Assert.Greater(state.DamageTakenMultiplier, one, "쌓을수록 세져야 합니다.");
         }
 
         [Test]
-        public void 동결은_속도를_40퍼센트_깎는다()
+        public void 냉각은_중첩에_비례해_최대_40퍼센트를_깎는다()
         {
             var state = new StatusEffectState();
             Assert.AreEqual(1f, state.SpeedMultiplier, 0.0001f);
 
-            state.Apply(StatusEffectType.Freeze, 10f);
-            Assert.AreEqual(0.6f, state.SpeedMultiplier, 0.0001f);
+            state.Apply(StatusEffectType.Chill, 10f);
+
+            float one = state.SpeedMultiplier;
+
+            Assert.Less(one, 1f, "냉각은 느리게 만듭니다.");
+            Assert.Greater(one, 0.6f, "1중첩에 −40%를 전부 주면 안 됩니다.");
+
+            for (int i = 1; i < 5; i++)
+                state.Apply(StatusEffectType.Chill, 10f);
+
+            Assert.Less(state.SpeedMultiplier, one, "쌓을수록 느려져야 합니다.");
+        }
+
+        // ── 임계 상태 ─────────────────────────────────────────────────
+
+        /// <summary>
+        /// 【최대 중첩 = 임계】 차는 순간 질적으로 다른 것이 된다.
+        /// 원본 중첩을 전부 소모하므로 임계가 끝나면 처음부터 다시 쌓아야 한다.
+        /// </summary>
+        [Test]
+        public void 냉각이_최대_중첩에_차면_동결로_전이한다()
+        {
+            var state = new StatusEffectState();
+
+            for (int i = 0; i < 6; i++)
+                state.Apply(StatusEffectType.Chill, 10f);
+
+            Assert.IsTrue(state.Has(StatusEffectType.Freeze), "동결로 전이해야 합니다.");
+
+            Assert.AreEqual(0, state.StacksOf(StatusEffectType.Chill),
+                "전이하면 원본 중첩이 전부 소모되어야 합니다.");
+
+            Assert.IsTrue(state.IsIncapacitated, "동결은 행동 불능입니다.");
+            Assert.AreEqual(0f, state.SpeedMultiplier, 0.0001f);
+        }
+
+        [Test]
+        public void 감전이_최대_중첩에_차면_마비로_전이한다()
+        {
+            var state = new StatusEffectState();
+
+            for (int i = 0; i < 6; i++)
+                state.Apply(StatusEffectType.Shock, 10f);
+
+            Assert.IsTrue(state.Has(StatusEffectType.Paralyze));
+            Assert.AreEqual(0, state.StacksOf(StatusEffectType.Shock));
+            Assert.IsTrue(state.IsIncapacitated, "마비도 행동 불능입니다.");
+        }
+
+        [Test]
+        public void 중독이_최대_중첩에_차면_부식으로_전이한다()
+        {
+            var state = new StatusEffectState();
+
+            for (int i = 0; i < 10; i++)
+                state.Apply(StatusEffectType.Poison, 10f);
+
+            Assert.IsTrue(state.Has(StatusEffectType.Corrode));
+            Assert.AreEqual(0, state.StacksOf(StatusEffectType.Poison));
+
+            Assert.AreEqual(0.5f, state.ArmourMultiplier, 0.0001f, "부식은 방어도를 절반으로 만듭니다.");
+            Assert.AreEqual(0.5f, state.HealingMultiplier, 0.0001f, "부식은 회복량도 절반으로 만듭니다.");
+
+            Assert.IsFalse(state.IsIncapacitated, "부식은 행동 불능이 아닙니다.");
+        }
+
+        /// <summary>
+        /// 임계 상태 중에는 원본을 다시 쌓지 못한다.
+        /// 그러지 않으면 행동 불능 중에 게이지가 다시 차 무한 제압이 된다.
+        /// </summary>
+        [Test]
+        public void 임계_상태_중에는_원본을_다시_쌓지_못한다()
+        {
+            var state = new StatusEffectState();
+
+            for (int i = 0; i < 6; i++)
+                state.Apply(StatusEffectType.Chill, 10f);
+
+            Assert.IsTrue(state.Has(StatusEffectType.Freeze));
+
+            for (int i = 0; i < 6; i++)
+                state.Apply(StatusEffectType.Chill, 10f);
+
+            Assert.AreEqual(0, state.StacksOf(StatusEffectType.Chill),
+                "동결 중에 냉각이 다시 쌓이면 무한 제압이 됩니다.");
+        }
+
+        [Test]
+        public void 점화는_방어도를_깎는다()
+        {
+            var state = new StatusEffectState();
+
+            Assert.AreEqual(0f, state.ArmourReduction, 0.0001f);
+
+            state.Apply(StatusEffectType.Ignite, 10f);
+
+            Assert.Greater(state.ArmourReduction, 0f,
+                "점화가 방어도를 깎지 않으면 「다음 피해를 키운다」가 성립하지 않습니다.");
         }
 
         [Test]

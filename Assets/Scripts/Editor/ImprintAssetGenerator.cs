@@ -164,12 +164,12 @@ public static class ImprintAssetGenerator
             S(EquipmentStatType.ResistFire, -0.5f)));
 
         list.Add(NewThreshold(2, "두 가지를 막는다. 그 두 가지가 더 아프다.",
-            StatusEffectType.Ignite, new[] { StatusEffectType.Freeze },
+            StatusEffectType.Ignite, new[] { StatusEffectType.Chill },
             S(EquipmentStatType.ResistFire, -0.5f),
             S(EquipmentStatType.ResistCold, -0.5f)));
 
         list.Add(NewThreshold(3, "상태는 전부 막는다. 피해는 두 배로 받는다.",
-            StatusEffectType.Ignite, new[] { StatusEffectType.Freeze, StatusEffectType.Shock },
+            StatusEffectType.Ignite, new[] { StatusEffectType.Chill, StatusEffectType.Shock },
             S(EquipmentStatType.ResistFire, -1.0f),
             S(EquipmentStatType.ResistCold, -1.0f),
             S(EquipmentStatType.ResistLightning, -1.0f)));

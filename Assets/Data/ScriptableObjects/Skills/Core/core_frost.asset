@@ -21,7 +21,7 @@ MonoBehaviour:
   requiredLevel: 3
   tags: 5
   requiredTags: 0
-  createsStatus: 3
+  createsStatus: 7
   consumesStatus: 0
   createsGroundEffect: 0
   blocksStatusCreation: 0

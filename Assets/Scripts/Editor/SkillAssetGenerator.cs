@@ -209,7 +209,8 @@ public static class SkillAssetGenerator
         r = New("core_frost", "서리", "냉기를 누적시키고 임계치를 넘으면 동결시킨다.", SkillCategory.Core, 3);
         r.family = CoreFamily.Ailment;
         r.tags = SkillTag.Projectile | SkillTag.Cold;
-        r.creates = StatusEffectType.Freeze;
+        // 부여하는 것은 냉각이다. 6중첩에서 동결로 전이한다.
+        r.creates = StatusEffectType.Chill;
         t.Add(r);
 
         r = New("core_thunder", "뇌전", "감전시켜 대상이 받는 모든 피해를 20% 증폭시킨다.", SkillCategory.Core, 5);

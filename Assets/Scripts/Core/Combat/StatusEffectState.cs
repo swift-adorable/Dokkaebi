@@ -9,7 +9,7 @@ using System;
 /// </summary>
 public sealed class StatusEffectState
 {
-    private const int TypeCount = 7; // None 포함
+    private const int TypeCount = 10; // None 포함. 냉각 · 마비 · 부식까지.
 
     private readonly double[] remaining = new double[TypeCount];
     private readonly int[] stacks = new int[TypeCount];
@@ -79,6 +79,13 @@ public sealed class StatusEffectState
 
         int i = (int)type;
 
+        // 이미 임계 상태에 걸려 있으면 원본을 다시 쌓지 않는다.
+        // 그러지 않으면 행동 불능 중에 게이지가 다시 차 무한 제압이 된다.
+        StatusEffectType threshold = StatusEffectTable.ThresholdOf(type);
+
+        if (threshold != StatusEffectType.None && Has(threshold))
+            return;
+
         // 지속시간은 항상 갱신된다. 중첩형이든 아니든 "다시 걸면 처음부터"다.
         remaining[i] = spec.Duration * Mathf.Max(0.1f, durationScale);
 
@@ -87,6 +94,31 @@ public sealed class StatusEffectState
 
         // 더 센 공격으로 다시 걸면 기준 피해도 올라간다.
         // 낮은 피해로 덮어써서 도트를 약화시킬 수 없게 한다.
+        if (baseDamage > sourceDamage[i])
+            sourceDamage[i] = baseDamage;
+
+        // 【최대 중첩 = 임계】 차는 순간 질적으로 다른 것이 된다.
+        // 원본 중첩을 전부 소모하므로 임계가 끝나면 처음부터 다시 쌓아야 한다.
+        if (threshold != StatusEffectType.None && stacks[i] >= spec.MaxStacks)
+        {
+            Clear(type);
+            ApplyThreshold(threshold, baseDamage);
+        }
+    }
+
+    /// <summary>
+    /// 임계 상태를 건다. 전이로만 호출되며 중첩하지 않는다.
+    /// Apply를 거치지 않는 이유 — 임계 상태는 다시 임계로 전이하지 않는다.
+    /// </summary>
+    private void ApplyThreshold(StatusEffectType type, float baseDamage)
+    {
+        StatusEffectSpec spec = StatusEffectTable.Get(type);
+
+        int i = (int)type;
+
+        remaining[i] = spec.Duration;
+        stacks[i] = 1;
+
         if (baseDamage > sourceDamage[i])
             sourceDamage[i] = baseDamage;
     }
@@ -210,13 +242,45 @@ public sealed class StatusEffectState
         }
     }
 
-    /// <summary>감전이 적용된 "받는 피해" 배율.</summary>
+    /// <summary>감전이 적용된 "받는 피해" 배율. 중첩에 비례하며 최대 중첩에서 +20%다.</summary>
     public float DamageTakenMultiplier
-        => Has(StatusEffectType.Shock) ? 1f + StatusEffectTable.ShockDamageTakenBonus : 1f;
+        => 1f + StatusEffectTable.ShockDamageTakenBonus
+             * StatusEffectTable.ControlRatio(
+                 StatusEffectType.Shock, StacksOf(StatusEffectType.Shock));
 
-    /// <summary>동결이 적용된 이동·공격 속도 배율.</summary>
+    /// <summary>
+    /// 이동·공격 속도 배율.
+    ///
+    /// 행동 불능(동결·마비)이면 0이다. 그 외에는 냉각 중첩에 비례해 최대 −40%.
+    /// </summary>
     public float SpeedMultiplier
-        => Has(StatusEffectType.Freeze) ? 1f - StatusEffectTable.FreezeSlowRatio : 1f;
+    {
+        get
+        {
+            if (IsIncapacitated)
+                return 0f;
+
+            return 1f - StatusEffectTable.ChillSlowRatio
+                      * StatusEffectTable.ControlRatio(
+                          StatusEffectType.Chill, StacksOf(StatusEffectType.Chill));
+        }
+    }
+
+    /// <summary>행동 불능인지. 동결 또는 마비. 이동도 공격도 하지 못한다.</summary>
+    public bool IsIncapacitated
+        => Has(StatusEffectType.Freeze) || Has(StatusEffectType.Paralyze);
+
+    /// <summary>부식이 적용된 방어도 배율. 부식 중이면 절반이다.</summary>
+    public float ArmourMultiplier
+        => Has(StatusEffectType.Corrode) ? StatusEffectTable.CorrodeHalfRatio : 1f;
+
+    /// <summary>부식이 적용된 회복량 배율. 소모품이 만능이 아니게 하는 장치다.</summary>
+    public float HealingMultiplier
+        => Has(StatusEffectType.Corrode) ? StatusEffectTable.CorrodeHalfRatio : 1f;
+
+    /// <summary>점화가 깎는 방어도. 「점화가 다음 피해를 키운다」의 구현이다.</summary>
+    public float ArmourReduction
+        => Has(StatusEffectType.Ignite) ? StatusEffectTable.IgniteArmourReduction : 0f;
 
     /// <summary>응집이 적용된 상태 전이 범위 배율.</summary>
     public float SpreadMultiplier
