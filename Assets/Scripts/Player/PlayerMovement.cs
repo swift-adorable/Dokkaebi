@@ -20,6 +20,15 @@ public class PlayerMovement : MonoBehaviour
 
     public float MoveSpeed => moveSpeed;
 
+    /// <summary>
+    /// 이동 속도 배율. 장비의 기동 옵션과 과중량이 곱해진 값이다.
+    /// PlayerLoadout이 넣어준다. (docs/Blob_Equipment_System.md 「무게와 적재」)
+    /// </summary>
+    public float SpeedScale { get; set; } = 1f;
+
+    /// <summary>배율이 적용된 실제 이동 속도.</summary>
+    public float EffectiveSpeed => moveSpeed * Mathf.Max(0f, SpeedScale);
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
@@ -38,11 +47,13 @@ public class PlayerMovement : MonoBehaviour
 
         Vector3 direction = MoveDirection;
 
+        float speed = EffectiveSpeed;
+
         // y축 속도는 보존한다. 중력이나 외력의 수직 성분을 덮어쓰지 않기 위함이다.
         rb.linearVelocity = new Vector3(
-            direction.x * moveSpeed,
+            direction.x * speed,
             rb.linearVelocity.y,
-            direction.z * moveSpeed);
+            direction.z * speed);
     }
 
     /// <summary>수평 속도를 즉시 0으로 만든다.</summary>

@@ -155,6 +155,19 @@ public class BulletController : MonoBehaviour, IPoolable
         despawnTime = Time.time + lifetime;
     }
 
+    /// <summary>
+    /// 착용 무기가 정한 기본값을 주입한다. PlayerWeapon이 Configure 직전에 호출한다.
+    ///
+    /// Configure와 나눠 둔 이유 — 분열된 자식 탄은 부모의 무기 기본값을 그대로
+    /// 물려받아야 하지만 Skill 보정(잔여 횟수 등)은 다르게 받는다. 축이 둘이다.
+    /// </summary>
+    public void SetWeaponBase(int shotDamage, float range, int penetration)
+    {
+        damage = Mathf.Max(1, shotDamage);
+        effectiveRange = Mathf.Max(0f, range);
+        armourPenetration = Mathf.Clamp(penetration, 0, CombatConstants.MaxArmour);
+    }
+
     /// <summary>발사 직후 Skill 보정치를 주입한다. PlayerWeapon이 호출한다.</summary>
     public void Configure(
         ProjectileBehaviourState state,
@@ -410,6 +423,10 @@ public class BulletController : MonoBehaviour, IPoolable
 
         if (child.TryGetComponent(out BulletController bullet))
         {
+            // 무기 기본값을 먼저 물려준다. 이것이 없으면 분열된 탄만
+            // 프리팹 기본 피해(10)로 때려 티어 6 무기가 갈래마다 약해진다.
+            bullet.SetWeaponBase(damage, effectiveRange, armourPenetration);
+
             bullet.Configure(
                 behaviourState.CreateChildState(),
                 ricochetState.Remaining,

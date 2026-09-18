@@ -383,6 +383,14 @@ public partial class InventoryScreenUI : MonoBehaviour
             Image cell = UIFactory.CreatePanel($"Equip_{slots[i]}", equipmentGrid,
                 color, min, max);
 
+            // 장비 슬롯도 누를 수 있어야 한다. 이것이 없던 동안에는
+            // 에셋 82종을 만들어 놓고 게임에서 입을 방법이 없었다. (docs/Blob_Audit.md A1)
+            var slotButton = cell.gameObject.AddComponent<Button>();
+            slotButton.targetGraphic = cell;
+
+            EquipmentSlot captured = slots[i];
+            slotButton.onClick.AddListener(() => OnEquipSlotClicked(captured));
+
             string label = stack?.Definition != null
                 ? stack.Definition.DisplayName
                 : EquipmentSlotName(slots[i]);
@@ -469,11 +477,7 @@ public partial class InventoryScreenUI : MonoBehaviour
     {
         selected = selected == stack ? null : stack;
 
-        SetHint(selected == null
-            ? string.Empty
-            : tab == Tab.Socket
-                ? $"「{selected.Definition.DisplayName}」 — 끼울 자리를 누르십시오."
-                : string.Empty);
+        SetHint(DescribeSelection());
 
         Refresh();
     }
@@ -568,6 +572,26 @@ public partial class InventoryScreenUI : MonoBehaviour
                 new Vector2(0.04f, 0.04f), new Vector2(0.50f, 0.12f),
                 UIPalette.Action, () => SelectTabKeepingSelection(Tab.Socket));
         }
+        else if (definition is EquipmentDefinition equipment)
+        {
+            DrawEquipmentInfo(equipment);
+        }
+    }
+
+    /// <summary>고른 것에 맞춰 다음에 무엇을 하라고 알려준다.</summary>
+    private string DescribeSelection()
+    {
+        if (selected?.Definition == null)
+            return string.Empty;
+
+        string name = selected.Definition.DisplayName;
+
+        if (tab == Tab.Socket)
+            return $"「{name}」 — 끼울 자리를 누르십시오.";
+
+        return selected.Definition is EquipmentDefinition
+            ? $"「{name}」 — 왼쪽 위 장비 자리를 누르십시오."
+            : string.Empty;
     }
 
     private void SelectTabKeepingSelection(Tab next)

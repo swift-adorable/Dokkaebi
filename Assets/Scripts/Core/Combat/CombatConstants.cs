@@ -9,8 +9,26 @@ public static class CombatConstants
     /// <summary>플레이어 기본 최대 체력.</summary>
     public const int PlayerBaseHealth = 100;
 
-    /// <summary>플레이어 최대 체력 상한. (기본 100 + 계정 트리 30 + 장비 50)</summary>
-    public const int PlayerHealthCap = 180;
+    /// <summary>
+    /// 플레이어 최대 체력 상한.
+    ///
+    /// 【체력은 늘어나지 않는다.】 각성 레벨도, 장비도, 패시브도 올리지 않는다.
+    /// 장비가 주는 생존은 【방어도】이고, 그것은 피해 공식이 이미 처리한다.
+    ///
+    /// 이전에는 180이었다(기본 100 + 계정 트리 30 + 장비 50).
+    /// 그러나 계정 트리는 코드에 존재한 적이 없고 패시브는 체력을 금지하며,
+    /// 최대 체력을 주는 장비 에셋도 0종이었다 — 근거가 없는 80이었다.
+    /// (docs/Blob_Audit.md B2)
+    /// </summary>
+    public const int PlayerHealthCap = PlayerBaseHealth;
+
+    /// <summary>
+    /// 각인이 깎고 난 뒤의 최저 체력.
+    ///
+    /// 「경량 Ⅱ + 포식 Ⅱ」처럼 깎는 각인을 두 개 끼우면 −36이다.
+    /// 0이 되어 즉사하는 조합이 생기지 않도록 바닥을 둔다.
+    /// </summary>
+    public const int PlayerMinHealth = 40;
 
     /// <summary>피격 후 무적 시간(초).</summary>
     public const float InvulnerableDuration = 0.6f;

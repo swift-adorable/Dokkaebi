@@ -15,6 +15,7 @@ using UnityEngine;
 [RequireComponent(typeof(PlayerDash))]
 [RequireComponent(typeof(PlayerWeapon))]
 [RequireComponent(typeof(PlayerAbsorber))]
+[RequireComponent(typeof(PlayerLoadout))]
 [RequireComponent(typeof(Health))]
 public class BlobController : MonoBehaviour
 {
@@ -24,6 +25,7 @@ public class BlobController : MonoBehaviour
     private PlayerDash dash;
     private PlayerWeapon weapon;
     private PlayerAbsorber absorber;
+    private PlayerLoadout loadout;
     private Health health;
 
     private GameManager gameManager;
@@ -40,6 +42,14 @@ public class BlobController : MonoBehaviour
         weapon = GetComponent<PlayerWeapon>();
         absorber = GetComponent<PlayerAbsorber>();
         health = GetComponent<Health>();
+
+        // 씬 배치 의존을 만들지 않는다. (Master_Prompt 「씬 배치 의존 최소화」)
+        // Player는 프리팹이 아니라 씬에 직접 놓여 있어 RequireComponent가
+        // 기존 오브젝트에 소급 적용되지 않는다. 없으면 여기서 만든다.
+        loadout = GetComponent<PlayerLoadout>();
+
+        if (loadout == null)
+            loadout = gameObject.AddComponent<PlayerLoadout>();
     }
 
     private void OnEnable()
@@ -54,11 +64,33 @@ public class BlobController : MonoBehaviour
             health.OnDied -= HandleDied;
     }
 
+    /// <summary>
+    /// 추출 실패(사망) 처리.
+    ///
+    /// 【죽으면 들고 있던 것 전부.】 각인만 남는다.
+    /// 규칙 자체는 PlayerInventory·EquipmentLoadout에 있고 여기서는 부르기만 한다.
+    /// (docs/Blob_Progression_System.md 6절)
+    ///
+    /// 이 호출이 없던 동안에는 죽어도 아무것도 잃지 않았다 —
+    /// 추출 루팅 게임의 뼈대가 실행 경로에서 빠져 있었다. (docs/Blob_Audit.md A2)
+    /// </summary>
     private void HandleDied()
     {
         GameLogger.Log("[BlobController] 플레이어 사망");
 
         movement.SetInput(Vector2.zero);
+
+        int lost = PlayerInventory.EnsureInstance().DropOnDeath();
+
+        // 각성 레벨과 소켓은 런 안의 것이다. 남은 젬은 이미 위에서 사라졌다.
+        if (SkillManager.HasInstance)
+            SkillManager.Instance.ResetRun();
+
+        // 장비를 잃었으므로 사격 성능·방어도·이동 배율을 즉시 다시 계산한다.
+        if (loadout != null)
+            loadout.Refresh();
+
+        GameLogger.Log($"[BlobController] 소지품 {lost}점을 잃었습니다. 각인은 남습니다.");
 
         if (gameManager != null)
             gameManager.GameOver();
