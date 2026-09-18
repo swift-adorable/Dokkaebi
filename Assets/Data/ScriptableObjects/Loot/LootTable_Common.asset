@@ -1,0 +1,53 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 56d4ae9b9644d4c7b865767c4bb3fb9a, type: 3}
+  m_Name: LootTable_Common
+  m_EditorClassIdentifier: Blob.Runtime::LootTable
+  minRolls: 1
+  maxRolls: 3
+  entries:
+  - item: {fileID: 11400000, guid: 2cea37fa128934109856e90e89807614, type: 2}
+    weight: 30
+    minCount: 1
+    maxCount: 4
+  - item: {fileID: 11400000, guid: 3c837c4d52bb94bde9bf049e5661eaa1, type: 2}
+    weight: 22
+    minCount: 1
+    maxCount: 3
+  - item: {fileID: 11400000, guid: b7d8f76632b14415590786fd22094645, type: 2}
+    weight: 14
+    minCount: 1
+    maxCount: 2
+  - item: {fileID: 11400000, guid: 69bb7210d5d424e1bb2ff19fd17aa70c, type: 2}
+    weight: 10
+    minCount: 1
+    maxCount: 2
+  - item: {fileID: 11400000, guid: abf245023c6dc4773a272254e9082cc0, type: 2}
+    weight: 4
+    minCount: 1
+    maxCount: 1
+  - item: {fileID: 11400000, guid: 073f0b2ddc0214420a46c8de6a221248, type: 2}
+    weight: 12
+    minCount: 1
+    maxCount: 2
+  - item: {fileID: 11400000, guid: c293863982b3e4516bbbbb970c437b85, type: 2}
+    weight: 8
+    minCount: 1
+    maxCount: 2
+  - item: {fileID: 11400000, guid: 3139cbbb43bcd4f0d9657cc111482330, type: 2}
+    weight: 10
+    minCount: 1
+    maxCount: 1
+  - item: {fileID: 0}
+    weight: 40
+    minCount: 1
+    maxCount: 1

@@ -24,33 +24,60 @@ public class PlayerAbsorber : MonoBehaviour
         poolManager = PoolManager.EnsureInstance();
     }
 
-    /// <summary>흡수를 시도한다. 대상이 없으면 false.</summary>
+    /// <summary>
+    /// 파밍을 시도한다. 【경험치 흡수 + 전리품 창】이 한 동작이다.
+    ///
+    /// 경험치는 한 번만 들어온다. 전리품은 유저가 원하는 것만 집는다.
+    /// 다 집지 않아도 시체는 남으므로 나중에 돌아와 마저 집을 수 있다.
+    ///
+    /// 【이전 동작】 흡수 즉시 시체가 사라지고 인자가 가방에 자동으로 들어갔다.
+    /// 「무엇을 들고 갈지 고른다」는 추출 루팅의 핵심 결정이 빠져 있었다.
+    /// </summary>
     public bool TryAbsorb()
     {
-        if (NearbyCorpse == null)
+        CorpseController corpse = NearbyCorpse;
+
+        if (corpse == null)
             return false;
 
-        int valueMultiplier = NearbyCorpse.ValueMultiplier;
-        int gainedXP = xpPerCorpse * valueMultiplier;
+        // 경험치는 최초 1회만. 창을 여러 번 열어도 다시 들어오지 않는다.
+        if (corpse.TryMarkAbsorbed())
+        {
+            int gainedXP = xpPerCorpse * corpse.ValueMultiplier;
 
-        GameObject corpseObject = NearbyCorpse.gameObject;
-        NearbyCorpse = null;
+            if (PlayerStats.HasInstance)
+                PlayerStats.Instance.AddXP(gainedXP);
+            else
+                GameLogger.Warning("[PlayerAbsorber] PlayerStats가 씬에 없어 경험치를 지급하지 못했습니다.");
+
+            GameLogger.Log($"[PlayerAbsorber] 경험치 흡수 +{gainedXP}");
+        }
+
+        // 집을 것이 없으면 창을 열지 않고 시체를 정리한다.
+        if (!corpse.HasLoot)
+        {
+            Despawn(corpse);
+            return true;
+        }
+
+        LootWindowUI.EnsureInstance().Open(corpse);
+
+        return true;
+    }
+
+    /// <summary>시체를 풀로 돌려보낸다. 전리품 창이 비었을 때도 호출된다.</summary>
+    public void Despawn(CorpseController corpse)
+    {
+        if (corpse == null)
+            return;
+
+        if (NearbyCorpse == corpse)
+            NearbyCorpse = null;
+
+        GameObject corpseObject = corpse.gameObject;
 
         if (poolManager == null || !poolManager.Despawn(corpseObject))
             Destroy(corpseObject);
-
-        if (PlayerStats.HasInstance)
-            PlayerStats.Instance.AddXP(gainedXP);
-        else
-            GameLogger.Warning("[PlayerAbsorber] PlayerStats가 씬에 없어 경험치를 지급하지 못했습니다.");
-
-        GameLogger.Log($"[PlayerAbsorber] 경험치 흡수 +{gainedXP}");
-
-        // 흡수가 곧 파밍이다. 인자 드랍을 여기서 굴린다.
-        // (docs/Blob_Skill_System.md 11-3절 — 스킬은 드랍으로 줍는 실물 아이템이다)
-        SkillManager.EnsureInstance().RollGemDrop(valueMultiplier);
-
-        return true;
     }
 
     private void OnTriggerEnter(Collider other)

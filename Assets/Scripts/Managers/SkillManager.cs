@@ -237,24 +237,27 @@ public class SkillManager : Singleton<SkillManager>
     }
 
     /// <summary>
-    /// 시체를 흡수했을 때 인자 드랍을 굴린다. PlayerAbsorber가 호출한다.
-    /// luckMultiplier는 시체의 가치 배수다. 희귀한 적일수록 잘 나온다.
+    /// 인자 드랍을 굴려 【아이템 정의만】 돌려준다. 시체가 자기 전리품 칸에 담는다.
+    /// luckMultiplier는 적 등급 배수다. 희귀한 적일수록 잘 나온다.
+    ///
+    /// 가방에 바로 넣지 않는 이유 — 「무엇을 들고 갈지 고른다」가 추출 루팅의 결정이다.
+    /// 자동으로 들어가면 그 결정이 사라진다. (전리품 창 도입, 확정 기획)
     /// </summary>
-    public bool RollGemDrop(int luckMultiplier = 1)
+    public ItemDefinition RollGemDropItem(int luckMultiplier = 1)
     {
         if (dropPool.Count == 0)
-            return false;
+            return null;
 
         random ??= new System.Random(Environment.TickCount);
 
         float chance = Mathf.Clamp01(gemDropChance * Mathf.Max(1, luckMultiplier));
 
         if (random.NextDouble() >= chance)
-            return false;
+            return null;
 
         SkillDefinition drawn = SkillGemDropTable.Draw(dropPool, random);
 
-        return GrantGem(drawn);
+        return FindGemItem(drawn);
     }
 
     /// <summary>

@@ -165,7 +165,8 @@ public static class MobileInputUIFactory
     }
 
     /// <summary>
-    /// 흡수 버튼. DASH 버튼 바로 위 고정 위치에 있고, 대상이 있을 때만 나타난다.
+    /// 파밍 버튼. DASH 버튼 바로 위 고정 위치에 있고, 대상이 있을 때만 나타난다.
+    /// 누르면 경험치를 흡수하고 전리품 창이 열린다.
     /// 조작 버튼은 항상 같은 자리에 있어야 손이 기억한다. (AbsorbPrompt 주석 참조)
     /// </summary>
     private static VirtualButton CreateAbsorbPrompt(Transform parent)
@@ -185,7 +186,7 @@ public static class MobileInputUIFactory
         image.color = new Color(0.35f, 0.9f, 0.45f, 0.8f);
         image.raycastTarget = true;
 
-        CreateLabel(promptObject.transform, "ABSORB", 26);
+        CreateLabel(promptObject.transform, "파밍", 28);
 
         promptObject.AddComponent<CanvasGroup>();
 

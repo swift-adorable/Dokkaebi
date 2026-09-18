@@ -99,7 +99,8 @@ public class EnemyBrain : MonoBehaviour, IEnemySteering
         movement = GetComponent<EnemyMovement>();
         attack = GetComponent<EnemyAttack>();
 
-        tokenId = GetInstanceID();
+        // 개체마다 고유한 정수. 차례표가 이 값으로 누가 쥐고 있는지 구분한다.
+        tokenId = GetEntityId().GetHashCode();
     }
 
     private void OnEnable()

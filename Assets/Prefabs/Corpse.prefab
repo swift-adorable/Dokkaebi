@@ -125,3 +125,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e8e688febdc543bca94ca93ca839494, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CorpseController
+  valueMultiplier: 1
+  lootTable: {fileID: 11400000, guid: 788f8d869e284440185356f165cd8aa4, type: 2}
+  lootSlots: 8
