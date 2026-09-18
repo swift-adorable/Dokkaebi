@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 680dd67e5b9a24d638effbb25e4da4c2, type: 3}
+  m_Name: arm_ears_t1
+  m_EditorClassIdentifier: Blob.Runtime::EquipmentDefinition
+  id: arm_ears_t1
+  displayName: "\uADC0\uB36E\uAC1C"
+  description: "\uC18C\uB9AC\uAC00 \uC5B4\uB514\uC11C \uC624\uB294\uC9C0 \uC54C\uB824\uC900\uB2E4.
+    \uBC29\uC5B4\uC5D0\uB294 \uC544\uBB34 \uB3C4\uC6C0\uC774 \uB418\uC9C0 \uC54A\uB294\uB2E4."
+  kind: 2
+  tier: 1
+  weight: 0.1
+  slotSize: 1
+  stackMax: 1
+  maxDurability: 0
+  baseValue: 90
+  skill: {fileID: 0}
+  slot: 4
+  stats:
+  - type: 50
+    value: 0.1
+  setFamily: 
+  imprintFamily: 
+  immunity: 0
+  extraImmunities: 

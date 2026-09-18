@@ -58,6 +58,17 @@ public class EquipmentModifiers
 
         if (definition.Immunity != StatusEffectType.None)
             immunities.Add(definition.Immunity);
+
+        StatusEffectType[] extra = definition.ExtraImmunities;
+
+        if (extra != null)
+        {
+            for (int i = 0; i < extra.Length; i++)
+            {
+                if (extra[i] != StatusEffectType.None)
+                    immunities.Add(extra[i]);
+            }
+        }
     }
 
     public float Get(EquipmentStatType type)

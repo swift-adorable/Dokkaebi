@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 680dd67e5b9a24d638effbb25e4da4c2, type: 3}
+  m_Name: arm_body_t1
+  m_EditorClassIdentifier: Blob.Runtime::EquipmentDefinition
+  id: arm_body_t1
+  displayName: "\uB204\uB354\uAE30 \uC870\uB07C"
+  description: "\uBAB8\uD1B5\uC744 \uAC00\uB9B0\uB2E4. \uC8FC\uBA38\uB2C8\uAC00 \uBA87
+    \uAC1C \uB2EC\uB824 \uC788\uB2E4."
+  kind: 2
+  tier: 1
+  weight: 1.5
+  slotSize: 1
+  stackMax: 1
+  maxDurability: 40
+  baseValue: 200
+  skill: {fileID: 0}
+  slot: 2
+  stats:
+  - type: 2
+    value: 1.5
+  - type: 71
+    value: 3
+  setFamily: 
+  imprintFamily: 
+  immunity: 0
+  extraImmunities: 

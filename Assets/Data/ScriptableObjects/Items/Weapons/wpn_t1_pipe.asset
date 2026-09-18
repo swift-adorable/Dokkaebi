@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6d5ed47cc3bec4828a0c77c2c18f1c47, type: 3}
+  m_Name: wpn_t1_pipe
+  m_EditorClassIdentifier: Blob.Runtime::WeaponDefinition
+  id: wpn_t1_pipe
+  displayName: "\uD30C\uC774\uD504 \uC0AC\uCD9C\uAE30"
+  description: "\uACE0\uCCA0 \uD30C\uC774\uD504\uC5D0 \uC2A4\uD504\uB9C1\uC744 \uBB3C\uB838\uB2E4.
+    \uB9DE\uC73C\uBA74 \uC544\uD504\uB2E4\uB294 \uAC83 \uB9D0\uACE0\uB294 \uC7A5\uC810\uC774
+    \uC5C6\uB2E4."
+  kind: 1
+  tier: 1
+  weight: 2
+  slotSize: 1
+  stackMax: 1
+  maxDurability: 40
+  baseValue: 180
+  skill: {fileID: 0}
+  slot: 0
+  stats:
+  - type: 3
+    value: 0
+  setFamily: 
+  imprintFamily: 
+  immunity: 0
+  extraImmunities: 
+  baseDamage: 10
+  fireInterval: 0.4
+  effectiveRange: 10
+  projectileSpeed: 18
+  attachmentSlots: 0
+  weaponFamily: "\uAE09\uC870"

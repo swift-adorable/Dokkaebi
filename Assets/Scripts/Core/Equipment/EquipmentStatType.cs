@@ -30,8 +30,14 @@ public enum EquipmentStatType
 
     // ── 생존 ──────────────────────────────────────────────────────────
     MaxHealth = 20,
+
+    /// <summary>초당 체력 회복. 【음수면 체력 지속 감소다】 — 각인 Ⅲ의 대가로 쓴다.</summary>
     HealthRegen = 21,
+
     InvulnerableTime = 22,
+
+    /// <summary>받는 회복량 증가율. −1.0이면 회복량 0. (각인 「포식 Ⅲ」)</summary>
+    HealingReceived = 23,
 
     // ── 기동 ──────────────────────────────────────────────────────────
     MoveAbility = 30,
@@ -56,5 +62,81 @@ public enum EquipmentStatType
 
     // ── 적재 ──────────────────────────────────────────────────────────
     MaxCarryWeight = 70,
-    SlotCapacity = 71
+    SlotCapacity = 71,
+
+    // ── 공격 ──────────────────────────────────────────────────────────
+    // 무기가 정한 기본값에 곱해지는 보정이다. 전부 가산 합산한다.
+    // (docs/Blob_Combat_Baseline.md 2절 — "모든 증가는 가산 합산")
+    //
+    // ※ 이 축은 각인과 무기 부착물만 건드린다.
+    //   방어구가 피해를 올리면 「무기 = 화력 / 방어구 = 생존」 경계가 무너진다.
+
+    /// <summary>기본 피해 증가율. 0.2 = +20%</summary>
+    DamageIncrease = 80,
+
+    /// <summary>유효 사거리 증가율. 음수면 줄어든다.</summary>
+    WeaponRangeIncrease = 81,
+
+    /// <summary>발사 간격 증가율. 【양수면 느려진다】.</summary>
+    FireIntervalIncrease = 82,
+
+    /// <summary>치명타 확률(절대값). 0.15 = 15%</summary>
+    CriticalChance = 83,
+
+    /// <summary>치명타 배율에 더해지는 값. 0.5면 배율 1.5 → 2.0</summary>
+    CriticalMultiplier = 84,
+
+    /// <summary>상태이상 위력 증가율. 직접 피해와 분리된 축이다.</summary>
+    AilmentPower = 85
+}
+
+/// <summary>
+/// 옵션의 부호 의미. 【대부분은 양수가 이득이지만 예외가 있다.】
+///
+/// 이 클래스가 필요한 이유 —
+/// 「발사 간격 +150%」와 「대시 쿨타임 +99초」는 양수인데 페널티다.
+/// 부호만 보고 대가를 판정하면 각인 「중장 Ⅲ」이 순증으로 통과한다.
+/// 실제로 EquipmentAssetTests가 그 버그를 잡았다.
+///
+/// 규약을 enum 이름에 맡기지 않고 여기에 명시한 이유는,
+/// 옵션을 추가할 때 "이건 어느 쪽이지"를 반드시 한 번 생각하게 만들기 위함이다.
+/// </summary>
+public static class EquipmentStatMeta
+{
+    /// <summary>값이 작을수록 이득인 옵션인지.</summary>
+    public static bool IsLowerBetter(EquipmentStatType type)
+    {
+        switch (type)
+        {
+            // 쿨타임 · 간격 — 짧아야 좋다
+            case EquipmentStatType.DashCooldown:
+            case EquipmentStatType.FireIntervalIncrease:
+
+            // 발각 · 소음 — 작아야 좋다
+            case EquipmentStatType.DetectedDistance:
+            case EquipmentStatType.MoveSoundRange:
+                return true;
+
+            default:
+                return false;
+        }
+    }
+
+    /// <summary>이 옵션이 대가(페널티)인지.</summary>
+    public static bool IsDrawback(EquipmentStat stat)
+    {
+        if (stat.type == EquipmentStatType.None || stat.value == 0f)
+            return false;
+
+        return IsLowerBetter(stat.type) ? stat.value > 0f : stat.value < 0f;
+    }
+
+    /// <summary>이 옵션이 이득인지.</summary>
+    public static bool IsGain(EquipmentStat stat)
+    {
+        if (stat.type == EquipmentStatType.None || stat.value == 0f)
+            return false;
+
+        return IsLowerBetter(stat.type) ? stat.value < 0f : stat.value > 0f;
+    }
 }

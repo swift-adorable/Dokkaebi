@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 680dd67e5b9a24d638effbb25e4da4c2, type: 3}
+  m_Name: arm_body_t6_heavy
+  m_EditorClassIdentifier: Blob.Runtime::EquipmentDefinition
+  id: arm_body_t6_heavy
+  displayName: "\uC9C4\uC555\uC6A9 \uC911\uC7A5\uAC11 (\uC911\uAC11)"
+  description: "\uD310\uC744 \uACB9\uCCD0 \uB367\uB314\uB2E4. \uC544\uBB34\uAC83\uB3C4
+    \uBABB \uB4E4\uACE0 \uC624\uC9C0\uB9CC \uC624\uB798 \uBC84\uD2F4\uB2E4."
+  kind: 2
+  tier: 6
+  weight: 12
+  slotSize: 1
+  stackMax: 1
+  maxDurability: 210
+  baseValue: 27600
+  skill: {fileID: 0}
+  slot: 2
+  stats:
+  - type: 2
+    value: 6.8
+  - type: 30
+    value: -0.18
+  setFamily: 
+  imprintFamily: 
+  immunity: 0
+  extraImmunities: 

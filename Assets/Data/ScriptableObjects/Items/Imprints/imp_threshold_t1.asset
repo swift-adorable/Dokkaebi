@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 680dd67e5b9a24d638effbb25e4da4c2, type: 3}
+  m_Name: imp_threshold_t1
+  m_EditorClassIdentifier: Blob.Runtime::EquipmentDefinition
+  id: imp_threshold_t1
+  displayName: "\uC5ED\uCE58 \u2160"
+  description: "\uBD88\uC774 \uBD99\uC9C0 \uC54A\uB294\uB2E4. \uB2E4\uB9CC \uB354
+    \uB728\uAC81\uB2E4."
+  kind: 4
+  tier: 1
+  weight: 0.3
+  slotSize: 1
+  stackMax: 1
+  maxDurability: 0
+  baseValue: 350
+  skill: {fileID: 0}
+  slot: 6
+  stats:
+  - type: 11
+    value: -0.5
+  setFamily: 
+  imprintFamily: threshold
+  immunity: 1
+  extraImmunities: 

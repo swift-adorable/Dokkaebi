@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 680dd67e5b9a24d638effbb25e4da4c2, type: 3}
+  m_Name: imp_charge_t3
+  m_EditorClassIdentifier: Blob.Runtime::EquipmentDefinition
+  id: imp_charge_t3
+  displayName: "\uC9C4\uACA9 \u2162"
+  description: "\uBAB8\uC774 \uACC4\uC18D \uB179\uB294\uB2E4. \uADF8\uB9CC\uD07C
+    \uC138\uAC8C \uB098\uAC04\uB2E4."
+  kind: 4
+  tier: 3
+  weight: 0.3
+  slotSize: 1
+  stackMax: 1
+  maxDurability: 0
+  baseValue: 3500
+  skill: {fileID: 0}
+  slot: 6
+  stats:
+  - type: 80
+    value: 0.45
+  - type: 21
+    value: -1.5
+  setFamily: 
+  imprintFamily: charge
+  immunity: 0
+  extraImmunities: 
