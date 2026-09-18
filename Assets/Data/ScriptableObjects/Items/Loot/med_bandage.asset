@@ -14,12 +14,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: Blob.Runtime::ItemDefinition
   id: med_bandage
   displayName: "\uC9C0\uD608 \uBD95\uB300"
-  description: "\uCD9C\uD608\uC744 \uBA48\uCD98\uB2E4."
+  description: "\uCD9C\uD608\uC744 \uBA48\uCD98\uB2E4. \uC7A0\uC2DC \uCD9C\uD608\uC5D0
+    \uAC78\uB9AC\uC9C0 \uC54A\uB294\uB2E4."
   kind: 6
   tier: 0
-  weight: 0.2
+  weight: 0.05
   slotSize: 1
-  stackMax: 5
+  stackMax: 3
   maxDurability: 0
   baseValue: 45
+  noExtract: 0
+  noRegister: 0
+  noTrade: 0
   skill: {fileID: 0}

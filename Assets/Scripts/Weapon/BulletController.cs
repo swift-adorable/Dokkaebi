@@ -418,7 +418,12 @@ public class BulletController : MonoBehaviour, IPoolable
             bypassArmour = false
         };
 
-        target.TakeDamage(request);
+        // 난이도 배율은 【적이 주는 피해】에만 곱한다.
+        // 플레이어 탄에 곱하면 "쉬운 난이도에서 내가 더 세진다"가 되어
+        // 난이도가 적을 약하게 만드는 축이 아니라 나를 강하게 만드는 축이 된다.
+        float difficulty = targetTeam == Team.Player ? GameManager.EnemyDamageMultiplier : 1f;
+
+        target.TakeDamage(request, difficulty);
     }
 
     /// <summary>충돌 1회당 행동 하나만 해결한다. 이 배타성이 조합 설계의 핵심이다.</summary>

@@ -210,7 +210,8 @@ public class EnemyAttack : MonoBehaviour
         if (appliedStatus != StatusEffectType.None)
             targetHealth.ApplyStatus(appliedStatus, damage);
 
-        int applied = targetHealth.TakeDamage(request);
+        // 난이도 배율은 여기서만 곱한다. 적이 주는 피해의 유일한 관문이다.
+        int applied = targetHealth.TakeDamage(request, GameManager.EnemyDamageMultiplier);
 
         if (applied > 0)
             GameLogger.Log($"[EnemyAttack] 명중 {applied}");

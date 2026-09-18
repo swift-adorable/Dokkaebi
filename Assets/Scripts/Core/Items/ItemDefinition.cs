@@ -50,6 +50,16 @@ public class ItemDefinition : ScriptableObject
     [Min(0)]
     [SerializeField] private int baseValue = 0;
 
+    [Header("Tags")]
+    [Tooltip("반출 불가. 런 안에서만 쓰이고 추출해도 남지 않는다.")]
+    [SerializeField] private bool noExtract = false;
+
+    [Tooltip("등록 불가. 등록대에 넣을 수 없어 매번 들고 가야 한다. (최고 등급 열쇠)")]
+    [SerializeField] private bool noRegister = false;
+
+    [Tooltip("거래 불가. 상인에게 팔 수 없다. (각인)")]
+    [SerializeField] private bool noTrade = false;
+
     [Header("Skill Gem")]
     [Tooltip("젬일 때 어떤 스킬인지. 다른 종류에서는 비워 둔다.")]
     [SerializeField] private SkillDefinition skill;
@@ -67,6 +77,26 @@ public class ItemDefinition : ScriptableObject
 
     /// <summary>젬이 가리키는 스킬 정의. 젬이 아니면 null.</summary>
     public SkillDefinition Skill => skill;
+
+    /// <summary>
+    /// 반출 불가.
+    ///
+    /// 「런 안에서만 사는 축」을 만드는 태그다. 덕코프의 「강화」가 그 자리인데
+    /// Blob의 젬은 추출 가능하므로 이 축이 비어 있었다.
+    /// 지금은 태그만 두고, 쓰는 아이템은 7단계 이후에 만든다.
+    /// </summary>
+    public bool NoExtract => noExtract;
+
+    /// <summary>등록대에 넣을 수 없는지. 최고 등급 문은 매번 열쇠를 들고 가야 한다.</summary>
+    public bool NoRegister => noRegister;
+
+    /// <summary>
+    /// 상인에게 팔 수 없는지.
+    ///
+    /// 각인은 거래 불가다 — 사망에도 남는 것을 사고팔 수 있으면
+    /// 「교환으로만 얻는다」는 각인의 설계가 돈으로 풀린다.
+    /// </summary>
+    public bool NoTrade => noTrade;
 
     public bool HasDurability => MaxDurability > 0;
     public bool IsStackable => StackMax > 1;
@@ -98,5 +128,9 @@ public class ItemDefinition : ScriptableObject
 
         if (kind != ItemKind.SkillGem)
             skill = null;
+
+        // 각인은 예외 없이 거래 불가다. 개별 에셋에서 실수로 켜지 못하게 여기서 강제한다.
+        if (kind == ItemKind.Imprint)
+            noTrade = true;
     }
 }

@@ -55,8 +55,9 @@ public static class LootAssetGenerator
             New("memory_core",   "메모리 코어",   "가볍고 비싸다. 보이면 담는다.",
                 ItemKind.Material, weight: 0.2f, stackMax: 5,  value: 420, tableWeight: 4,  1, 1),
 
-            New("med_bandage",   "지혈 붕대",     "출혈을 멈춘다.",
-                ItemKind.Consumable, weight: 0.2f, stackMax: 5, value: 45, tableWeight: 12, 1, 2),
+            // 가벼운 것은 여러 개, 무거운 것은 한 개. 스택 수가 곧 무게의 반대다.
+            New("med_bandage",   "지혈 붕대",     "출혈을 멈춘다. 잠시 출혈에 걸리지 않는다.",
+                ItemKind.Consumable, weight: 0.05f, stackMax: 3, value: 45, tableWeight: 12, 1, 2),
 
             New("med_stim",      "진통제",       "잠시 아픔을 잊는다.",
                 ItemKind.Consumable, weight: 0.1f, stackMax: 5, value: 60, tableWeight: 8, 1, 2),
