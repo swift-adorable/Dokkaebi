@@ -72,8 +72,9 @@ public class PlayerInventory : Singleton<PlayerInventory>
         EquipmentModifiers modifiers = Loadout.Modifiers;
 
         // 장비(가방)와 패시브(계정)가 합산된다.
-        // 패시브 총합은 장비 최대치의 1/3을 넘지 않게 표에서 제한한다 —
-        // 그렇지 않으면 가방을 고르는 결정이 사라진다. (PassiveEffectType 주석)
+        // 패시브 총합은 장비 최대치의 1/2을 넘지 않게 표에서 제한한다 —
+        // 그렇지 않으면 가방을 고르는 결정이 사라진다.
+        // 상한은 PassiveCapacityTests가 강제한다. (docs/Blob_Passive_System.md 5절)
         int passiveSlots = 0;
         float passiveWeight = 0f;
 

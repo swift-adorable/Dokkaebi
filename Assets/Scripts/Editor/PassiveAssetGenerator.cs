@@ -81,13 +81,13 @@ public static class PassiveAssetGenerator
             materials: new[] { ("scrap_metal", 8) }));
 
         rows.Add(N("adapt_weight_1", "등짐", "같은 무게를 덜 무겁게 진다.",
-            PassiveBranch.Adapt, PassiveEffectType.CarryWeight, 8, level: 4, cost: 1800,
+            PassiveBranch.Adapt, PassiveEffectType.CarryWeight, 6, level: 4, cost: 1800,
             column: 2, row: 1, prereq: new[] { "adapt_slots_1" },
             materials: new[] { ("wire_bundle", 6) }));
 
         rows.Add(N("adapt_frame", "외골격 프레임",
             "몸 밖에 뼈대를 하나 더 얹었다. 무게와 공간을 함께 번다.",
-            PassiveBranch.Adapt, PassiveEffectType.CarryWeight, 12, level: 8, cost: 4200,
+            PassiveBranch.Adapt, PassiveEffectType.CarryWeight, 9, level: 8, cost: 4200,
             column: 1, row: 2, prereq: new[] { "adapt_slots_2", "adapt_weight_1" },
             materials: new[] { ("cell_battery", 4), ("scrap_metal", 12) }));
 

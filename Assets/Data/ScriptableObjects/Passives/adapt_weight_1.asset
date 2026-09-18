@@ -17,7 +17,7 @@ MonoBehaviour:
   description: "\uAC19\uC740 \uBB34\uAC8C\uB97C \uB35C \uBB34\uAC81\uAC8C \uC9C4\uB2E4."
   branch: 0
   effect: 2
-  value: 8
+  value: 6
   requiredAccountLevel: 4
   cost: 1800
   materials:

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using UnityEditor;
 using UnityEngine;
 
@@ -133,7 +134,11 @@ public static class EquipmentAssetWriter
 
     public static void EnsureFolder(string path)
     {
-        if (AssetDatabase.IsValidFolder(path))
+        // AssetDatabase.IsValidFolder 는 StartAssetEditing 구간에서 방금 만든
+        // 폴더를 보지 못한다. 그 상태로 CreateFolder 를 부르면 Unity 가
+        // 충돌을 피해 「Armour 1」「Armour 2」… 를 계속 만든다.
+        // 그래서 디스크를 직접 확인한다. (2026-09-18 실제로 88개가 쌓였다)
+        if (AssetDatabase.IsValidFolder(path) || Directory.Exists(path))
             return;
 
         int split = path.LastIndexOf('/');
