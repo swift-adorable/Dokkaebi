@@ -136,6 +136,19 @@ public static class UIFactory
     public static void GetCellAnchors(
         int index, int columns, int rows, float padding,
         out Vector2 anchorMin, out Vector2 anchorMax)
+        => GetCellAnchors(index, columns, rows, padding, padding, out anchorMin, out anchorMax);
+
+    /// <summary>
+    /// 가로·세로 여백을 따로 준다.
+    ///
+    /// 여백은 【부모 기준 정규화】 값이다. 그래서 스크롤 내용물처럼 부모가
+    /// 길어지는 격자에서 같은 값을 쓰면 세로 간격만 픽셀로 벌어진다.
+    /// 부르는 쪽에서 행 수에 반비례하게 줄여 픽셀 간격을 고정한다.
+    /// (InventoryScreenUI.RefreshBag)
+    /// </summary>
+    public static void GetCellAnchors(
+        int index, int columns, int rows, float paddingX, float paddingY,
+        out Vector2 anchorMin, out Vector2 anchorMax)
     {
         columns = Mathf.Max(1, columns);
         rows = Mathf.Max(1, rows);
@@ -147,12 +160,12 @@ public static class UIFactory
         float cellHeight = 1f / rows;
 
         anchorMin = new Vector2(
-            column * cellWidth + padding,
-            1f - (row + 1) * cellHeight + padding);
+            column * cellWidth + paddingX,
+            1f - (row + 1) * cellHeight + paddingY);
 
         anchorMax = new Vector2(
-            (column + 1) * cellWidth - padding,
-            1f - row * cellHeight - padding);
+            (column + 1) * cellWidth - paddingX,
+            1f - row * cellHeight - paddingY);
     }
 
     /// <summary>자식을 전부 지운다. 격자를 다시 그릴 때 쓴다.</summary>
