@@ -2,11 +2,11 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// 플레이어의 가방과 장비 슬롯. 【하나의 가방】에 장비·인자·전리품이 전부 들어간다.
+/// 플레이어의 가방과 장비 슬롯. 【하나의 가방】에 장비·젬·전리품이 전부 들어간다.
 /// (docs/Blob_Skill_System.md 11-1절 / docs/Blob_Equipment_System.md 5-1절)
 ///
-/// 인자용 가방을 따로 두지 않은 이유 —
-/// "인자를 많이 챙겨 화력을 확보할까, 가방을 비워 전리품 공간을 남길까"라는
+/// 젬용 가방을 따로 두지 않은 이유 —
+/// "젬을 많이 챙겨 화력을 확보할까, 가방을 비워 전리품 공간을 남길까"라는
 /// 결정이 성립하려면 셋이 같은 자원을 두고 경쟁해야 한다.
 /// 가방을 나누는 순간 그 결정이 사라진다.
 /// </summary>
@@ -28,7 +28,7 @@ public class PlayerInventory : Singleton<PlayerInventory>
     private Inventory bag;
     private EquipmentLoadout loadout;
 
-    /// <summary>가방. 장비·인자·전리품이 전부 여기 들어간다.</summary>
+    /// <summary>가방. 장비·젬·전리품이 전부 여기 들어간다.</summary>
     public Inventory Bag => bag ??= new Inventory(baseSlots, baseWeightLimit);
 
     /// <summary>착용 중인 장비 8슬롯.</summary>

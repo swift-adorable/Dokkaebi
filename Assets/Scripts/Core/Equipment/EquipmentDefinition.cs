@@ -18,7 +18,7 @@ public struct EquipmentStat
 /// <summary>
 /// 착용 장비 정의. ItemDefinition을 상속해 같은 인벤토리에 들어간다.
 ///
-/// 상속으로 둔 이유 — 인자 · 장비 · 전리품이 한 가방을 공유해야
+/// 상속으로 둔 이유 — 젬 · 장비 · 전리품이 한 가방을 공유해야
 /// "화력을 챙길까, 전리품 공간을 남길까"라는 결정이 성립한다.
 /// (docs/Blob_Equipment_System.md 1절)
 /// </summary>

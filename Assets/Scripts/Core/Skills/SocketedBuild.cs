@@ -2,17 +2,17 @@ using System;
 using System.Collections.Generic;
 
 /// <summary>
-/// 지금 소켓에 끼워져 있는 인자들. RunSkillState를 대체한다.
+/// 지금 소켓에 끼워져 있는 젬들. RunSkillState를 대체한다.
 /// (docs/Blob_Skill_System.md 11·12절)
 ///
 /// RunSkillState와의 차이 —
 ///   · 「획득」이 없다. 줍는 것은 가방이 하고, 여기는 【끼운 것】만 안다.
 ///   · 자리를 지정해 끼운다. 자동 배치를 하지 않는다.
-///   · 뺄 수 있다. 뺀 인자는 사라지지 않고 호출부(가방)로 돌아간다.
+///   · 뺄 수 있다. 뺀 젬은 사라지지 않고 호출부(가방)로 돌아간다.
 ///   · 슬롯 수는 각성 레벨이 정한다. (SocketUnlockTable)
 ///
-/// 뺀 인자를 여기서 버리지 않고 호출부에 돌려주는 이유 —
-/// 인자는 실물 아이템이므로 조작 도중에 소멸하면 안 된다.
+/// 뺀 젬을 여기서 버리지 않고 호출부에 돌려주는 이유 —
+/// 젬은 실물 아이템이므로 조작 도중에 소멸하면 안 된다.
 /// 이 클래스는 아이템을 만들지도 없애지도 않는다. 자리만 관리한다.
 ///
 /// MonoBehaviour 의존이 없는 순수 클래스다. EditMode 테스트 대상.
@@ -49,7 +49,7 @@ public class SocketedBuild
     /// <summary>지금 열려 있는 슬롯 구성.</summary>
     public SocketCapacity Capacity => capacity;
 
-    /// <summary>끼워진 인자 전부. 순서는 Core → 소켓 → 발동 → 전령.</summary>
+    /// <summary>끼워진 젬 전부. 순서는 Core → 소켓 → 발동 → 전령.</summary>
     public IReadOnlyList<SkillDefinition> Equipped
     {
         get
@@ -67,19 +67,19 @@ public class SocketedBuild
     /// <summary>장착된 전령. 없으면 null.</summary>
     public SkillDefinition Herald => herald;
 
-    /// <summary>지정한 Core 슬롯의 인자. 비었으면 null.</summary>
+    /// <summary>지정한 Core 슬롯의 젬. 비었으면 null.</summary>
     public SkillDefinition GetCore(int coreIndex)
     {
         return IsValidCoreIndex(coreIndex) ? cores[coreIndex] : null;
     }
 
-    /// <summary>지정한 소켓의 인자. 비었으면 null.</summary>
+    /// <summary>지정한 소켓의 젬. 비었으면 null.</summary>
     public SkillDefinition GetSocket(int coreIndex, int socketIndex)
     {
         return IsValidSocket(coreIndex, socketIndex) ? sockets[coreIndex, socketIndex] : null;
     }
 
-    /// <summary>지정한 발동 슬롯의 인자. 비었으면 null.</summary>
+    /// <summary>지정한 발동 슬롯의 젬. 비었으면 null.</summary>
     public SkillDefinition GetMeta(int slot)
     {
         return slot >= 0 && slot < MaxMetas ? metas[slot] : null;
@@ -146,7 +146,7 @@ public class SocketedBuild
 
     // ────────────────────────────────── 장착 가능 판정
 
-    /// <summary>이 인자를 이 Core 슬롯에 끼울 수 있는지.</summary>
+    /// <summary>이 젬을 이 Core 슬롯에 끼울 수 있는지.</summary>
     public SocketError CanEquipCore(SkillDefinition definition, int coreIndex)
     {
         if (definition == null)
@@ -174,7 +174,7 @@ public class SocketedBuild
         return SocketError.None;
     }
 
-    /// <summary>이 인자를 이 소켓에 끼울 수 있는지.</summary>
+    /// <summary>이 젬을 이 소켓에 끼울 수 있는지.</summary>
     public SocketError CanEquipSupport(SkillDefinition definition, int coreIndex, int socketIndex)
     {
         if (definition == null)
@@ -210,7 +210,7 @@ public class SocketedBuild
         return SocketError.None;
     }
 
-    /// <summary>이 인자를 이 발동 슬롯에 끼울 수 있는지.</summary>
+    /// <summary>이 젬을 이 발동 슬롯에 끼울 수 있는지.</summary>
     public SocketError CanEquipMeta(SkillDefinition definition, int slot)
     {
         if (definition == null)
@@ -237,7 +237,7 @@ public class SocketedBuild
         return SocketError.None;
     }
 
-    /// <summary>이 인자를 전령 자리에 끼울 수 있는지.</summary>
+    /// <summary>이 젬을 전령 자리에 끼울 수 있는지.</summary>
     public SocketError CanEquipHerald(SkillDefinition definition)
     {
         if (definition == null)
@@ -257,7 +257,7 @@ public class SocketedBuild
 
     /// <summary>
     /// 분류를 보고 알맞은 자리에 대해 판정한다.
-    /// UI가 "이 인자를 지금 어디든 끼울 수 있는가"를 물을 때 쓴다.
+    /// UI가 "이 젬을 지금 어디든 끼울 수 있는가"를 물을 때 쓴다.
     /// </summary>
     public SocketError CanEquipAnywhere(SkillDefinition definition)
     {
@@ -475,7 +475,7 @@ public class SocketedBuild
         return removed;
     }
 
-    /// <summary>소켓에서 뺀다. 뺀 인자를 돌려준다.</summary>
+    /// <summary>소켓에서 뺀다. 뺀 젬을 돌려준다.</summary>
     public SkillDefinition UnequipSupport(int coreIndex, int socketIndex)
     {
         if (!IsValidSocket(coreIndex, socketIndex) || sockets[coreIndex, socketIndex] == null)
@@ -517,7 +517,7 @@ public class SocketedBuild
         return removed;
     }
 
-    /// <summary>전부 뺀다. 뺀 인자는 returned에 담긴다. 추출 정산에 쓴다.</summary>
+    /// <summary>전부 뺀다. 뺀 젬은 returned에 담긴다. 추출 정산에 쓴다.</summary>
     public void UnequipAll(List<SkillDefinition> returned = null)
     {
         for (int c = 0; c < MaxCores; c++)
@@ -538,7 +538,7 @@ public class SocketedBuild
     }
 
     /// <summary>
-    /// 런 종료 시 초기화한다. 【여기서 인자를 없애지 않는다.】
+    /// 런 종료 시 초기화한다. 【여기서 젬을 없애지 않는다.】
     /// 사망 시의 소멸은 Inventory.DropOnDeath가 담당한다. 규칙을 한 곳에만 둔다.
     /// </summary>
     public void Clear()

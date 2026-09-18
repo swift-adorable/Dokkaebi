@@ -16,7 +16,7 @@ public class CorpseController : MonoBehaviour, IPoolable
     [SerializeField] private int valueMultiplier = 1;
 
     [Header("Loot")]
-    [Tooltip("이 시체에서 나올 전리품 표. 비워 두면 인자 드랍만 굴린다.")]
+    [Tooltip("이 시체에서 나올 전리품 표. 비워 두면 젬 드랍만 굴린다.")]
     [SerializeField] private LootTable lootTable;
 
     [Tooltip("전리품 칸 수. 화면의 「전리품 (n/8)」의 8이다.")]
@@ -73,9 +73,9 @@ public class CorpseController : MonoBehaviour, IPoolable
     }
 
     /// <summary>
-    /// 전리품을 채운다. 표에서 뽑은 것에 더해 인자 드랍을 굴린다.
+    /// 전리품을 채운다. 표에서 뽑은 것에 더해 젬 드랍을 굴린다.
     ///
-    /// 인자를 가방에 바로 넣지 않고 여기 담는 이유 —
+    /// 젬을 가방에 바로 넣지 않고 여기 담는 이유 —
     /// 「무엇을 들고 갈지 고른다」가 추출 루팅의 결정이다.
     /// 자동으로 가방에 들어가면 그 결정이 사라진다.
     /// </summary>

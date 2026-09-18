@@ -245,7 +245,7 @@ public class LootWindowUI : MonoBehaviour
             UIPalette.TextDim);
 
         string footer = definition.IsSkillGem && definition.Skill != null
-            ? $"인자 · {definition.Skill.Category}  Lv{definition.Skill.RequiredLevel}"
+            ? $"젬 · {definition.Skill.Category}  Lv{definition.Skill.RequiredLevel}"
             : $"가치 {definition.BaseValue * stack.Count}";
 
         UIFactory.CreateLabel(detail, footer, 24, FontStyle.Normal,

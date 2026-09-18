@@ -8,7 +8,7 @@ namespace Blob.Tests
     /// v8부터 투사체 행동(관통·갈래·사슬 등)은 전부 Support가 부여한다.
     /// 부여 Core의 상태와 Support의 행동이 '한 발'에 합쳐져야 한다.
     ///
-    /// ※ 획득 방식이 레벨업 선택에서 인자 파밍으로 바뀌었으나
+    /// ※ 획득 방식이 레벨업 선택에서 젬 파밍으로 바뀌었으나
     ///   합성 규칙 자체는 바뀌지 않았다. 이 파일이 그것을 고정한다.
     /// </summary>
     public class CompositeFireIntegrationTests

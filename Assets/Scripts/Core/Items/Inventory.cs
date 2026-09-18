@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// 가방. 장비 · 인자 · 전리품이 전부 여기에 들어간다.
+/// 가방. 장비 · 젬 · 전리품이 전부 여기에 들어간다.
 ///
 /// 두 개의 독립된 자원으로 제한된다.
 ///   적재 공간 — 칸 수.  초반의 병목
@@ -220,7 +220,7 @@ public class Inventory
     /// 추출에 실패했을 때 잃는 것을 비운다.
     ///
     /// 각인만 남는다. 유저가 배울 규칙은 하나여야 하므로 예외를 늘리지 않는다.
-    /// 인자도 장비와 똑같이 잃는다. (docs/Blob_Progression_System.md 6절)
+    /// 젬도 장비와 똑같이 잃는다. (docs/Blob_Progression_System.md 6절)
     /// </summary>
     public int DropOnDeath()
     {

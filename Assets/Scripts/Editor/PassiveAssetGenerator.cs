@@ -186,7 +186,7 @@ public static class PassiveAssetGenerator
             column: 1, row: 0, materials: new[] { ("memory_core", 1) }));
 
         rows.Add(N("reg_salvage", "역분해",
-            "인자를 도로 풀어 재료로 되돌린다. 쓸모없는 인자가 사라진다.",
+            "젬을 도로 풀어 재료로 되돌린다. 쓸모없는 젬이 사라진다.",
             PassiveBranch.Regression, PassiveEffectType.GemSalvage, 1, level: 1, cost: 4500,
             column: 0, row: 1, prereq: new[] { "reg_bench" },
             materials: new[] { ("bio_sample", 6) }));

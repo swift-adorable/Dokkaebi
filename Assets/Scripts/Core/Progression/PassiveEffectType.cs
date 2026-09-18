@@ -71,7 +71,7 @@ public enum PassiveEffectType
     /// <summary>【해금】 처치만 해도 도감에 등록. 변이 샘플 흡수가 불필요해진다.</summary>
     CodexAuto = 41,
 
-    /// <summary>【해금】 인자를 분해해 재료로 되돌린다.</summary>
+    /// <summary>【해금】 젬을 분해해 재료로 되돌린다.</summary>
     GemSalvage = 42,
 
     /// <summary>【해금】 지도에 전리품 위치 표시.</summary>
@@ -164,7 +164,7 @@ public static class PassiveEffectInfo
             case PassiveEffectType.ShopSlots:      return "상점 갱신 횟수";
             case PassiveEffectType.CraftBench:     return "제작대";
             case PassiveEffectType.CodexAuto:      return "도감 자동 등록";
-            case PassiveEffectType.GemSalvage:     return "인자 분해";
+            case PassiveEffectType.GemSalvage:     return "젬 분해";
             case PassiveEffectType.MapLoot:        return "전리품 표시";
             default:                               return "없음";
         }

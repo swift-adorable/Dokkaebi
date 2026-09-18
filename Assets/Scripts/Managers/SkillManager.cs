@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// 인자(因子) 관리자 — 파밍 · 도감 · 소켓 장착.
+/// 젬(Gem) 관리자 — 파밍 · 도감 · 소켓 장착.
 /// (docs/Blob_Skill_System.md 0·11·12절)
 ///
 /// 흐름:
-///   도감(해금 기록) → 드랍 풀 → 적을 흡수하면 인자가 가방에 들어온다
+///   도감(해금 기록) → 드랍 풀 → 적을 흡수하면 젬이 가방에 들어온다
 ///   → 유저가 직접 소켓에 끼운다 → 즉시 작동
 ///   → 각성 레벨이 오르면 【선택창이 아니라 소켓이 열린다】
 ///
@@ -26,11 +26,11 @@ public class SkillManager : Singleton<SkillManager>
     [SerializeField] private SkillGemCatalog gemCatalog;
 
     [Header("도감 (세이브 연결 전 임시)")]
-    [Tooltip("※ 임시 — 변이 샘플 해금과 세이브가 붙기 전까지 전 인자를 드랍 풀에 넣는다.")]
+    [Tooltip("※ 임시 — 변이 샘플 해금과 세이브가 붙기 전까지 전 젬을 드랍 풀에 넣는다.")]
     [SerializeField] private bool unlockAllOnStart = true;
 
     [Header("드랍")]
-    [Tooltip("시체 1구를 흡수했을 때 인자가 나올 확률.")]
+    [Tooltip("시체 1구를 흡수했을 때 젬이 나올 확률.")]
     [Range(0f, 1f)]
     [SerializeField] private float gemDropChance = 0.18f;
 
@@ -61,7 +61,7 @@ public class SkillManager : Singleton<SkillManager>
     /// <summary>전체 정의 카탈로그. 로드 실패 시 null일 수 있다.</summary>
     public SkillCatalog Catalog => catalog;
 
-    /// <summary>인자를 주웠을 때 발행된다. UI 토스트가 구독한다.</summary>
+    /// <summary>젬을 주웠을 때 발행된다. UI 토스트가 구독한다.</summary>
     public event Action<SkillDefinition> OnGemGained;
 
     /// <summary>
@@ -73,7 +73,7 @@ public class SkillManager : Singleton<SkillManager>
     /// <summary>소켓 구성이 바뀌었을 때 발행된다.</summary>
     public event Action OnBuildChanged;
 
-    /// <summary>인자를 끼우지 못했을 때 그 이유가 실린다. UI가 문구로 바꾼다.</summary>
+    /// <summary>젬을 끼우지 못했을 때 그 이유가 실린다. UI가 문구로 바꾼다.</summary>
     public event Action<SkillDefinition, SocketError> OnEquipRejected;
 
     /// <summary>인스턴스를 보장한다. 씬 배치를 강제하지 않는다.</summary>
@@ -115,7 +115,7 @@ public class SkillManager : Singleton<SkillManager>
 
         SyncAwakeningLevel();
 
-        // 가방 화면(장비 · 가방 · 인자 소켓 · 패시브)을 보장한다.
+        // 가방 화면(장비 · 가방 · 젬 소켓 · 패시브)을 보장한다.
         InventoryScreenUI.EnsureInstance();
 
         if (grantFirstCore)
@@ -148,7 +148,7 @@ public class SkillManager : Singleton<SkillManager>
             {
                 GameLogger.Error(
                     $"[SkillManager] Resources/{SkillGemCatalog.ResourcePath} 에셋이 없습니다. " +
-                    "메뉴 Blob > Skill > 인자 아이템 에셋 생성 을 실행하십시오.", this);
+                    "메뉴 Blob > Skill > 젬 아이템 에셋 생성 을 실행하십시오.", this);
             }
         }
     }
@@ -212,7 +212,7 @@ public class SkillManager : Singleton<SkillManager>
 
     /// <summary>
     /// 레이드 시작 직후의 확정 드랍. 부여 계열 Core 1개.
-    /// 이것이 없으면 인자가 하나도 없어 아무것도 쏘지 못한다. (11-3절)
+    /// 이것이 없으면 젬이 하나도 없어 아무것도 쏘지 못한다. (11-3절)
     /// </summary>
     public bool GrantFirstCore()
     {
@@ -237,7 +237,7 @@ public class SkillManager : Singleton<SkillManager>
     }
 
     /// <summary>
-    /// 인자 드랍을 굴려 【아이템 정의만】 돌려준다. 시체가 자기 전리품 칸에 담는다.
+    /// 젬 드랍을 굴려 【아이템 정의만】 돌려준다. 시체가 자기 전리품 칸에 담는다.
     /// luckMultiplier는 적 등급 배수다. 희귀한 적일수록 잘 나온다.
     ///
     /// 가방에 바로 넣지 않는 이유 — 「무엇을 들고 갈지 고른다」가 추출 루팅의 결정이다.
@@ -261,7 +261,7 @@ public class SkillManager : Singleton<SkillManager>
     }
 
     /// <summary>
-    /// 인자를 가방에 넣는다. 자리가 없으면 false.
+    /// 젬을 가방에 넣는다. 자리가 없으면 false.
     ///
     /// 요구 레벨 미달이어도 넣는다. 【주울 수는 있으나 끼울 수 없다】가 규칙이다. (11-3절)
     /// </summary>
@@ -276,18 +276,18 @@ public class SkillManager : Singleton<SkillManager>
 
         if (bag.TryAdd(gem) <= 0)
         {
-            GameLogger.Log($"[SkillManager] 가방이 가득 차 인자를 줍지 못했습니다: {skill.DisplayName}");
+            GameLogger.Log($"[SkillManager] 가방이 가득 차 젬을 줍지 못했습니다: {skill.DisplayName}");
             return false;
         }
 
-        GameLogger.Log($"[SkillManager] 인자 획득: {skill.DisplayName}");
+        GameLogger.Log($"[SkillManager] 젬 획득: {skill.DisplayName}");
 
         OnGemGained?.Invoke(skill);
 
         return true;
     }
 
-    /// <summary>스킬 정의에 대응하는 인자 아이템. 없으면 null.</summary>
+    /// <summary>스킬 정의에 대응하는 젬 아이템. 없으면 null.</summary>
     public ItemDefinition FindGemItem(SkillDefinition skill)
     {
         if (skill == null)
@@ -295,19 +295,19 @@ public class SkillManager : Singleton<SkillManager>
 
         if (gemCatalog == null)
         {
-            GameLogger.Error("[SkillManager] 인자 아이템 카탈로그가 없습니다.", this);
+            GameLogger.Error("[SkillManager] 젬 아이템 카탈로그가 없습니다.", this);
             return null;
         }
 
         ItemDefinition gem = gemCatalog.Find(skill);
 
         if (gem == null)
-            GameLogger.Error($"[SkillManager] '{skill.DisplayName}'의 인자 아이템이 없습니다.", this);
+            GameLogger.Error($"[SkillManager] '{skill.DisplayName}'의 젬 아이템이 없습니다.", this);
 
         return gem;
     }
 
-    /// <summary>가방에 든 인자 목록. 소켓 UI가 이 목록을 그린다.</summary>
+    /// <summary>가방에 든 젬 목록. 소켓 UI가 이 목록을 그린다.</summary>
     public List<ItemStack> GetGemsInBag(List<ItemStack> result = null)
     {
         result ??= new List<ItemStack>();
@@ -331,8 +331,8 @@ public class SkillManager : Singleton<SkillManager>
 
     public bool TryEquipCore(SkillDefinition skill, int coreIndex)
     {
-        // Core 교체는 빠져나오는 인자가 최대 4개(기존 Core + 소켓 3)다.
-        // 끼울 인자 1개가 가방에서 빠지므로 실제로 필요한 여유는 그보다 1 적다.
+        // Core 교체는 빠져나오는 젬이 최대 4개(기존 Core + 소켓 3)다.
+        // 끼울 젬 1개가 가방에서 빠지므로 실제로 필요한 여유는 그보다 1 적다.
         int returning = CountReturnsForCore(skill, coreIndex);
 
         if (returning > 1 &&
@@ -347,7 +347,7 @@ public class SkillManager : Singleton<SkillManager>
                      build.CanEquipCore(skill, coreIndex));
     }
 
-    /// <summary>이 Core를 저 자리에 끼우면 가방으로 돌아올 인자가 몇 개인지.</summary>
+    /// <summary>이 Core를 저 자리에 끼우면 가방으로 돌아올 젬이 몇 개인지.</summary>
     private int CountReturnsForCore(SkillDefinition skill, int coreIndex)
     {
         if (skill == null)
@@ -392,9 +392,9 @@ public class SkillManager : Singleton<SkillManager>
     }
 
     /// <summary>
-    /// 가방에서 인자를 꺼내 소켓에 끼운다.
+    /// 가방에서 젬을 꺼내 소켓에 끼운다.
     ///
-    /// 빠져나온 인자(교체된 것, 태그를 잃은 Support)는 가방으로 돌아간다.
+    /// 빠져나온 젬(교체된 것, 태그를 잃은 Support)는 가방으로 돌아간다.
     /// 조작 도중에 아이템이 사라지지 않게 하는 것이 이 함수의 핵심 책임이다.
     /// </summary>
     private bool Equip(SkillDefinition skill, Func<bool> equipAction, SocketError precheck)
@@ -414,7 +414,7 @@ public class SkillManager : Singleton<SkillManager>
 
         if (!bag.Contains(gem))
         {
-            GameLogger.Warning($"[SkillManager] 가방에 없는 인자입니다: {skill.DisplayName}");
+            GameLogger.Warning($"[SkillManager] 가방에 없는 젬입니다: {skill.DisplayName}");
             return false;
         }
 
@@ -423,7 +423,7 @@ public class SkillManager : Singleton<SkillManager>
         if (!equipAction())
             return false;
 
-        // 끼울 인자를 먼저 빼서 자리를 만든 뒤 되돌린다. 순서를 바꾸면
+        // 끼울 젬을 먼저 빼서 자리를 만든 뒤 되돌린다. 순서를 바꾸면
         // 1:1 교체조차 가방이 꽉 찼을 때 실패한다.
         bag.Remove(gem);
 
@@ -439,7 +439,7 @@ public class SkillManager : Singleton<SkillManager>
         Inventory bag = PlayerInventory.EnsureInstance().Bag;
 
         // 뺄 것이 가방에 다 들어가는지 먼저 본다. 들어가지 못하면 빼지 않는다.
-        // 인자를 바닥에 버리는 처리를 만들지 않는 한, 이것이 아이템을 지키는 유일한 방법이다.
+        // 젬을 바닥에 버리는 처리를 만들지 않는 한, 이것이 아이템을 지키는 유일한 방법이다.
         int needed = build.GetCore(coreIndex) == null ? 0 : 1;
 
         for (int s = 0; s < SocketedBuild.SocketsPerCore; s++)
@@ -453,7 +453,7 @@ public class SkillManager : Singleton<SkillManager>
 
         if (bag.FreeSlots < needed)
         {
-            GameLogger.Log("[SkillManager] 가방에 자리가 없어 인자를 뺄 수 없습니다.");
+            GameLogger.Log("[SkillManager] 가방에 자리가 없어 젬을 뺄 수 없습니다.");
             return false;
         }
 
@@ -485,7 +485,7 @@ public class SkillManager : Singleton<SkillManager>
 
         if (bag.FreeSlots < 1)
         {
-            GameLogger.Log("[SkillManager] 가방에 자리가 없어 인자를 뺄 수 없습니다.");
+            GameLogger.Log("[SkillManager] 가방에 자리가 없어 젬을 뺄 수 없습니다.");
             return false;
         }
 
@@ -527,7 +527,7 @@ public class SkillManager : Singleton<SkillManager>
     /// <summary>
     /// 런 종료 시 소켓을 비운다.
     ///
-    /// 【인자를 여기서 없애지 않는다.】 추출 성공이면 그대로 창고로 가고,
+    /// 【젬을 여기서 없애지 않는다.】 추출 성공이면 그대로 창고로 가고,
     /// 사망이면 PlayerInventory.DropOnDeath가 규칙 하나로 처리한다.
     /// </summary>
     public void ResetRun()

@@ -3,11 +3,11 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// 가방 화면 — 장비 · 가방 · 인자 소켓 · 패시브를 한 화면의 탭으로 묶는다.
+/// 가방 화면 — 장비 · 가방 · 젬 소켓 · 패시브를 한 화면의 탭으로 묶는다.
 /// 배치는 덕코프 스크린샷을 따르고, 【조작은 전부 터치】다.
 ///
 /// 화면 구성
-///   상단 중앙 : 탭 (가방 / 인자 / 패시브)
+///   상단 중앙 : 탭 (가방 / 젬 / 패시브)
 ///   좌상단    : 크레딧
 ///   좌측      : 장비 8슬롯 · 가방 격자 (n/m)
 ///   우측      : 탭에 따라 — 아이템 상세 / 소켓 배치 / 패시브 트리
@@ -23,7 +23,7 @@ public partial class InventoryScreenUI : MonoBehaviour
 {
     private enum Tab { Bag = 0, Socket = 1, Passive = 2 }
 
-    private static readonly string[] TabNames = { "가방", "인자", "패시브" };
+    private static readonly string[] TabNames = { "가방", "젬", "패시브" };
 
     private const int BagColumns = 6;
     private const int BagRows = 6;
@@ -558,13 +558,13 @@ public partial class InventoryScreenUI : MonoBehaviour
             new Vector2(0.04f, 0.52f), new Vector2(0.96f, 0.78f), TextAnchor.UpperLeft,
             UIPalette.TextDim);
 
-        // 인자는 스킬 정보를 덧붙인다. 무엇을 하는 인자인지 모르면 끼울 판단이 안 선다.
+        // 젬은 스킬 정보를 덧붙인다. 무엇을 하는 젬인지 모르면 끼울 판단이 안 선다.
         if (definition.IsSkillGem && definition.Skill != null)
             DrawGemInfo(definition.Skill);
 
         if (definition.IsSkillGem)
         {
-            UIFactory.CreateButton(rightPanel, "인자 탭에서 장착",
+            UIFactory.CreateButton(rightPanel, "젬 탭에서 장착",
                 new Vector2(0.04f, 0.04f), new Vector2(0.50f, 0.12f),
                 UIPalette.Action, () => SelectTabKeepingSelection(Tab.Socket));
         }

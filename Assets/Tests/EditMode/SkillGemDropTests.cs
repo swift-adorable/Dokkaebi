@@ -4,7 +4,7 @@ using NUnit.Framework;
 namespace Blob.Tests
 {
     /// <summary>
-    /// 도감(해금 기록)과 인자 드랍 규칙. (Skill_System.md 11-2 · 11-3절)
+    /// 도감(해금 기록)과 젬 드랍 규칙. (Skill_System.md 11-2 · 11-3절)
     ///
     /// 여기서 지켜야 할 것 —
     ///  · 도감은 보유 목록이 아니라 「무엇이 나올 수 있는가」다.
@@ -32,7 +32,7 @@ namespace Blob.Tests
         // ── 도감 ──────────────────────────────────────────────────────────
 
         [Test]
-        public void 도감에_없는_인자는_드랍_풀에_들어오지_않는다()
+        public void 도감에_없는_젬은_드랍_풀에_들어오지_않는다()
         {
             List<SkillDefinition> all = SampleCatalog();
             var codex = new SkillCodex();
@@ -48,7 +48,7 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 같은_인자를_두_번_해금해도_한_번만_기록된다()
+        public void 같은_젬을_두_번_해금해도_한_번만_기록된다()
         {
             List<SkillDefinition> all = SampleCatalog();
             var codex = new SkillCodex();
@@ -61,7 +61,7 @@ namespace Blob.Tests
         [Test]
         public void 드랍_풀은_요구_레벨로_거르지_않는다()
         {
-            // 11-3절 — "각성 레벨에 미달하는 인자는 주울 수는 있으나 끼울 수 없다".
+            // 11-3절 — "각성 레벨에 미달하는 젬은 주울 수는 있으나 끼울 수 없다".
             // 여기서 걸러 버리면 "레벨을 올려야 끼운다"는 압박이 생기지 않는다.
             var late = SkillTestFactory.CreateSupport("sup_late", SkillTag.Projectile,
                 requiredLevel: 13);
