@@ -52,8 +52,12 @@ public class PlayerDash : MonoBehaviour
     /// <summary>남은 쿨다운(초).</summary>
     public float RemainingCooldown => cooldown.RemainingTime(Time.unscaledTime);
 
+    private PlayerNoise noise;
+
     private void Awake()
     {
+        noise = GetComponent<PlayerNoise>();
+
         rb = GetComponent<Rigidbody>();
         movement = GetComponent<PlayerMovement>();
     }
@@ -73,6 +77,10 @@ public class PlayerDash : MonoBehaviour
         // Time.time을 쓰면 일시정지(timeScale 0) 동안 쿨다운이 흐르지 않는다.
         if (!cooldown.TryConsume(Time.unscaledTime, EffectiveCooldown + dashDuration))
             return false;
+
+        // 대시는 큰 소리를 낸다. 「조용히 갈까 빨리 갈까」가 선택이 된다.
+        if (noise != null)
+            noise.ReportDash();
 
         StartCoroutine(DashRoutine(direction.normalized));
 

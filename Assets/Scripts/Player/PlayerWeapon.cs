@@ -32,6 +32,7 @@ public class PlayerWeapon : MonoBehaviour
     private CompositeFireState compositeFire;
 
     private PoolManager poolManager;
+    private PlayerNoise noise;
     private CooldownTimer cooldown;
 
     /// <summary>
@@ -100,6 +101,15 @@ public class PlayerWeapon : MonoBehaviour
     {
         if (poolManager == null)
             poolManager = PoolManager.EnsureInstance();
+
+        // 총성은 이동 소리보다 훨씬 멀리 간다.
+        // 「한 마리 잡고 바로 파밍하면 안 된다」가 여기서 성립한다.
+        // [확인됨 — research/duckov/08_전투_실측과_교전.md 3절]
+        if (noise == null)
+            noise = GetComponent<PlayerNoise>();
+
+        if (noise != null)
+            noise.ReportShot();
 
         WeaponModifiers modifiers = GetModifiers();
 

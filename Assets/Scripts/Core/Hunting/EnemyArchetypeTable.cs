@@ -62,6 +62,19 @@ public struct EnemyArchetypeStats
     /// </summary>
     public bool chasesForever;
 
+    /// <summary>
+    /// 시야각 【전체】(도). 이 각도 밖에서 다가오면 보지 못한다.
+    ///
+    /// 【불확실 — 문서에 숫자가 없다.】
+    /// 문서 8절은 「자전체·검체는 정면 넓고 측·후방 좁다」,
+    /// 「스캐브는 시야가 좁다」처럼 말로만 적었다.
+    /// 그 서술이 지키는 관계만 지키도록 값을 골랐고, 관계는 테스트가 강제한다.
+    /// </summary>
+    public float visionConeDegrees;
+
+    /// <summary>시야 거리(m). 【불확실 — 문서에 숫자가 없다.】</summary>
+    public float visionRange;
+
     /// <summary>원형 고유 내성. 등급·속성이 붙기 전의 값이다.</summary>
     public ElementalResistances resistances;
 
@@ -87,6 +100,18 @@ public struct EnemyArchetypeStats
 public static class EnemyArchetypeTable
 {
     public const int Count = 9;
+
+    /// <summary>시야 거리의 기본값(m). EnemyBrain의 detectDistance와 같은 선에서 출발한다.</summary>
+    public const float DefaultVisionRange = 18f;
+
+    /// <summary>「정면 넓고 측·후방 좁다」 — 자전체 · 검체. (문서 8절)</summary>
+    private const float FrontalCone = 100f;
+
+    /// <summary>「시야는 좁지만 우회 추적」 — 스캐브. (문서 8절)</summary>
+    private const float NarrowCone = 80f;
+
+    /// <summary>기계 눈 — 압착기 · 보안기. 좁을 이유가 없다.</summary>
+    private const float MachineCone = 150f;
 
     /// <summary>전기 2배 · 카오스 면역. 기계형(압착기 · 보안기)이 쓴다.</summary>
     private static ElementalResistances Mechanical => ElementalResistances.Mechanical;
@@ -116,15 +141,15 @@ public static class EnemyArchetypeTable
         {
             case EnemyArchetype.Scav:
                 return Make(20, 8, 0, 0f, Faction.Wild, ElementalResistances.Default, true,
-                            EnemyAnswer.Timing);
+                            EnemyAnswer.Timing, cone: NarrowCone);
 
             case EnemyArchetype.Crusher:
                 return Make(90, 14, 1, 4f, Faction.Facility, Mechanical, true,
-                            EnemyAnswer.Penetration);
+                            EnemyAnswer.Penetration, cone: MachineCone);
 
             case EnemyArchetype.Dynamo:
                 return Make(30, 10, 1, 0f, Faction.Subject, ElementalResistances.Default, true,
-                            EnemyAnswer.Angle);
+                            EnemyAnswer.Angle, cone: FrontalCone);
 
             // 발소리가 없다 — 매복형의 정체성이다.
             case EnemyArchetype.Lurker:
@@ -137,7 +162,7 @@ public static class EnemyArchetypeTable
 
             case EnemyArchetype.Specimen:
                 return Make(60, 14, 3, 1f, Faction.Subject, ElementalResistances.Default, true,
-                            EnemyAnswer.Cover);
+                            EnemyAnswer.Cover, cone: FrontalCone);
 
             case EnemyArchetype.Settled:
                 return Make(120, 20, 0, 0f, Faction.Settled, Settled, true,
@@ -145,7 +170,7 @@ public static class EnemyArchetypeTable
 
             case EnemyArchetype.Sentry:
                 return Make(70, 12, 2, 3f, Faction.Facility, Mechanical, true,
-                            EnemyAnswer.Dodge, chasesForever: true);
+                            EnemyAnswer.Dodge, chasesForever: true, cone: MachineCone);
 
             // 비물질 — 발소리가 없다.
             case EnemyArchetype.Wraith:
@@ -178,12 +203,15 @@ public static class EnemyArchetypeTable
     private static EnemyArchetypeStats Make(
         int health, int damage, int penetration, float armour,
         Faction faction, ElementalResistances resistances, bool footsteps,
-        EnemyAnswer answer, bool chasesForever = false)
+        EnemyAnswer answer, bool chasesForever = false,
+        float cone = Perception.DefaultConeDegrees, float sight = DefaultVisionRange)
     {
         return new EnemyArchetypeStats
         {
             answer = answer,
             chasesForever = chasesForever,
+            visionConeDegrees = cone,
+            visionRange = sight,
             health = health,
             damage = damage,
             armourPenetration = penetration,

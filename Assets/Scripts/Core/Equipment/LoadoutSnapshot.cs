@@ -35,11 +35,34 @@ public readonly struct LoadoutSnapshot
     /// <summary>현재 과중량 단계. UI 표시에 쓴다.</summary>
     public readonly EncumbranceLevel Encumbrance;
 
+    /// <summary>
+    /// 움직일 때 내는 소리의 반경 배수. 【작을수록 좋다.】
+    ///
+    /// 덕코프에서 「안 뛰는 것만으로 기습을 피한다」가 성립하는 축이다.
+    /// [확인됨 — research/duckov/08_전투_실측과_교전.md 3절]
+    /// 이 값이 없던 동안 소음 관련 장비는 아무 일도 하지 않았다. (감사 A11)
+    /// </summary>
+    public readonly float MoveSoundScale;
+
+    /// <summary>
+    /// 소리를 듣는 거리 배수. 【클수록 좋다.】 이어폰 6종이 올린다.
+    /// 적이 아니라 【플레이어】가 듣는 거리다 — 소리의 크기는 내는 쪽이 정한다.
+    /// </summary>
+    public readonly float HearingScale;
+
+    /// <summary>소리의 방향을 표시해 주는가. 이어폰 상위 티어가 준다.</summary>
+    public readonly bool LocatesSound;
+
     private LoadoutSnapshot(
         WeaponProfile weapon, DefenceProfile defence, int maxHealth,
         float moveScale, float dashDistanceScale, float dashCooldownScale,
-        EncumbranceLevel encumbrance)
+        EncumbranceLevel encumbrance,
+        float moveSoundScale, float hearingScale, bool locatesSound)
     {
+        MoveSoundScale = moveSoundScale;
+        HearingScale = hearingScale;
+        LocatesSound = locatesSound;
+
         Weapon = weapon;
         Defence = defence;
         MaxHealth = maxHealth;
@@ -55,7 +78,8 @@ public readonly struct LoadoutSnapshot
         DefenceProfile.None,
         CombatConstants.PlayerBaseHealth,
         1f, 1f, 1f,
-        EncumbranceLevel.Normal);
+        EncumbranceLevel.Normal,
+        1f, 1f, false);
 
     /// <summary>
     /// 착용 상태와 무게 단계로부터 최종 수치를 만든다.
@@ -93,6 +117,27 @@ public readonly struct LoadoutSnapshot
         float dashCooldown = Mathf.Max(
             0.1f, 1f + modifiers.Get(EquipmentStatType.DashCooldown));
 
+        // ── 소리 (감사 A11) ───────────────────────────────────────────
+        // MoveSoundRange는 「작아야 좋은」 축이다. 음수를 주는 장비가
+        // 소리를 줄인다. 0 아래로 내려가면 완전 무음이 되어 잠입이
+        // 선택이 아니라 정답이 되므로 0.2를 바닥으로 둔다. 【불확실 — 문서에 수치 없음】
+        float moveSound = Mathf.Clamp(
+            1f + modifiers.Get(EquipmentStatType.MoveSoundRange), 0.2f, 3f);
+
+        // 과중량은 소리도 키운다. 무겁게 들고 다니면 조용할 수 없다.
+        // 이동 배수의 역수를 그대로 쓰지 않는다 — 그러면 과중량 하나로
+        // 느려지고 시끄러워지고 대시까지 짧아져 벌이 세 겹이 된다.
+        if (encumbrance == EncumbranceLevel.Heavy)
+            moveSound *= 1.15f;
+        else if (encumbrance == EncumbranceLevel.Overloaded)
+            moveSound *= 1.3f;
+        else if (encumbrance == EncumbranceLevel.Immobile)
+            moveSound *= 1.5f;
+
+        float hearing = Mathf.Max(0.1f, 1f + modifiers.Get(EquipmentStatType.Hearing));
+
+        bool locates = modifiers.Get(EquipmentStatType.SoundLocate) > 0f;
+
         return new LoadoutSnapshot(
             weapon,
             modifiers.ToDefenceProfile(),
@@ -100,7 +145,10 @@ public readonly struct LoadoutSnapshot
             moveScale,
             dashDistance,
             dashCooldown,
-            encumbrance);
+            encumbrance,
+            moveSound,
+            hearing,
+            locates);
     }
 
     /// <summary>움직일 수 없는 상태인지. UI가 경고를 띄운다.</summary>

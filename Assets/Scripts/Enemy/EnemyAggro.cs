@@ -52,6 +52,10 @@ public class EnemyAggro : MonoBehaviour, IPoolable
     private Health health;
     private EnemyIdentity identity;
     private EnemyManager enemyManager;
+    private PlayerNoise playerNoise;
+
+    /// <summary>플레이어를 찾을 때마다 GetComponent를 다시 하지 않으려고 기억해 둔다.</summary>
+    private Transform cachedPlayer;
 
     private float nextEvaluateTime;
     private int targetId = AggroSelector.NoTarget;
@@ -123,13 +127,20 @@ public class EnemyAggro : MonoBehaviour, IPoolable
 
         if (player != null)
         {
+            if (cachedPlayer != player)
+            {
+                cachedPlayer = player;
+                player.TryGetComponent(out playerNoise);
+            }
+
             Buffer.Add(new AggroCandidate
             {
                 id = AggroSelector.PlayerId,
                 faction = Faction.Friendly,
                 position = player.position,
                 isPlayer = true,
-                isAlive = !player.TryGetComponent(out Health playerHealth) || !playerHealth.IsDead
+                isAlive = !player.TryGetComponent(out Health playerHealth) || !playerHealth.IsDead,
+                isDetected = Sense(player.position, playerNoise != null ? playerNoise.Radius : 0f)
             });
         }
 
@@ -140,13 +151,20 @@ public class EnemyAggro : MonoBehaviour, IPoolable
             if (other == null || other == this)
                 continue;
 
+            // 적끼리는 서로의 발소리를 듣는다 — 발소리가 있는 원형이라면.
+            // 잠복체·데이터체는 이 값이 0이라 측면·후방에서는 보이지 않는다.
+            float otherNoise = other.identity != null && other.identity.Profile.makesFootsteps
+                ? AllyFootstepRadius
+                : 0f;
+
             Buffer.Add(new AggroCandidate
             {
                 id = other.SelfId,
                 faction = other.Faction,
                 position = other.transform.position,
                 isPlayer = false,
-                isAlive = other.health == null || !other.health.IsDead
+                isAlive = other.health == null || !other.health.IsDead,
+                isDetected = Sense(other.transform.position, otherNoise)
             });
         }
 
@@ -161,6 +179,40 @@ public class EnemyAggro : MonoBehaviour, IPoolable
         targetId = picked;
 
         Resolve(picked, player);
+    }
+
+    /// <summary>
+    /// 적끼리 서로를 듣는 거리(m).
+    /// 【불확실 — 문서에 수치가 없다.】 플레이어가 걸을 때(9m)보다 조금 넓게 둔다.
+    /// 적은 은신하지 않으므로 서로를 못 찾으면 난전이 성립하지 않는다.
+    /// </summary>
+    private const float AllyFootstepRadius = 11f;
+
+    /// <summary>
+    /// 이 위치의 대상을 알아챘는가. 눈과 귀 두 축을 본다.
+    ///
+    /// 시야를 가리는 벽 판정은 아직 하지 않는다 —
+    /// EnemyBrain이 자기 레이캐스트를 따로 들고 있고, 두 곳에서 같은 판정을
+    /// 서로 모르게 돌리면 결과가 갈린다. 하나로 합치는 일은 따로 한다.
+    /// </summary>
+    private bool Sense(Vector3 targetPosition, float noiseRadius)
+    {
+        EnemyArchetypeStats stats = identity != null
+            ? EnemyArchetypeTable.Of(identity.Archetype)
+            : EnemyArchetypeTable.Of(EnemyArchetype.Scav);
+
+        var input = new PerceptionInput
+        {
+            viewerPosition = transform.position,
+            viewerForward = transform.forward,
+            visionConeDegrees = stats.visionConeDegrees,
+            visionRange = Mathf.Min(stats.visionRange, detectRange),
+            targetPosition = targetPosition,
+            targetNoiseRadius = noiseRadius,
+            hasLineOfSight = true
+        };
+
+        return Perception.Detect(in input) != DetectionKind.None;
     }
 
     /// <summary>고른 식별자를 실제 Transform으로 돌린다.</summary>
