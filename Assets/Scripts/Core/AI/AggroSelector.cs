@@ -16,6 +16,16 @@ public struct AggroCandidate
     public bool isPlayer;
 
     public bool isAlive;
+
+    /// <summary>
+    /// 지금 이 후보를 감지하고 있는가. (Perception이 판정한 결과)
+    ///
+    /// 【거리만 보던 것을 대체한다.】
+    /// 전에는 감지 거리 안이면 무조건 대상이 됐다. 그래서 뒤로 돌아가도,
+    /// 소리를 내지 않아도 결과가 같았다 — 잠입이라는 선택지가 없었다.
+    /// 「무엇을 노릴까」(여기)와 「알아챘는가」(Perception)를 나눈다.
+    /// </summary>
+    public bool isDetected;
 }
 
 /// <summary>
@@ -54,7 +64,7 @@ public static class AggroSelector
     /// </summary>
     /// <param name="self">고르는 쪽의 소속.</param>
     /// <param name="selfPosition">고르는 쪽의 위치.</param>
-    /// <param name="detectRange">새 대상을 찾는 거리.</param>
+    /// <param name="detectRange">목줄 계산의 기준이 되는 거리. 새 대상 탐색에는 쓰지 않는다.</param>
     /// <param name="currentTargetId">지금 물고 있는 대상. 없으면 NoTarget.</param>
     /// <param name="infiniteLeash">한 번 물면 거리와 무관하게 놓지 않는가. (보안기)</param>
     /// <param name="candidates">후보 전부. 자기 자신이 섞여 있어도 된다.</param>
@@ -98,7 +108,15 @@ public static class AggroSelector
             }
         }
 
-        // ── 2. 놓쳤으면 감지 거리 안에서 가장 가까운 적대를 문다 ─────
+        // ── 2. 놓쳤으면 【감지된】 적대 중 가장 가까운 것을 문다 ─────
+        // 감지 거리는 여기서 보지 않는다. 눈에 보이는가 · 소리가 들리는가는
+        // Perception이 이미 판정했고, 그 결과가 isDetected에 들어 있다.
+        //
+        // 【계약】 isDetected는 거리를 이미 반영한 값이다.
+        // 여기서 거리를 한 번 더 자르면 「총성을 듣고 먼 곳에서 찾아온다」가
+        // 막힌다 — 소리는 시야보다 멀리 갈 수 있어야 한다.
+        // 대신 부르는 쪽이 감지하지도 못한 것을 true로 넘기면,
+        // 목줄로 놓은 대상을 곧바로 다시 무는 일이 생긴다.
         int best = NoTarget;
         float bestDistance = float.PositiveInfinity;
 
@@ -106,12 +124,12 @@ public static class AggroSelector
         {
             AggroCandidate c = candidates[i];
 
-            if (!IsEngageable(self, c, selfId))
+            if (!c.isDetected || !IsEngageable(self, c, selfId))
                 continue;
 
             float distance = Flat(c.position - selfPosition);
 
-            if (distance > detectRange || distance >= bestDistance)
+            if (distance >= bestDistance)
                 continue;
 
             bestDistance = distance;

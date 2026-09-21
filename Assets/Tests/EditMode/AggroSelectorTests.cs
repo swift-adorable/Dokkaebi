@@ -16,23 +16,26 @@ namespace Blob.Tests
     {
         private const int Self = 100;
 
-        private static AggroCandidate Enemy(int id, Faction faction, float x, bool alive = true)
+        private static AggroCandidate Enemy(int id, Faction faction, float x,
+                                            bool alive = true, bool detected = true)
         {
             return new AggroCandidate
             {
                 id = id, faction = faction,
                 position = new Vector3(x, 0f, 0f),
-                isPlayer = false, isAlive = alive
+                isPlayer = false, isAlive = alive,
+                isDetected = detected
             };
         }
 
-        private static AggroCandidate Player(float x, bool alive = true)
+        private static AggroCandidate Player(float x, bool alive = true, bool detected = true)
         {
             return new AggroCandidate
             {
                 id = AggroSelector.PlayerId, faction = Faction.Friendly,
                 position = new Vector3(x, 0f, 0f),
-                isPlayer = true, isAlive = alive
+                isPlayer = true, isAlive = alive,
+                isDetected = detected
             };
         }
 
@@ -77,7 +80,14 @@ namespace Blob.Tests
         public void 너무_멀어지면_놓는다()
         {
             // 감지 18 · 기본 목줄 배수 2 → 36을 넘으면 놓는다.
-            var far = new List<AggroCandidate> { Enemy(1, Faction.Subject, 40f) };
+            //
+            // 【detected: false인 것이 핵심이다.】
+            // 처음에는 detected를 기본값(true)으로 두고 「놓는다」를 기대했는데
+            // 놓자마자 다시 물어서 실패했다. 그게 맞는 동작이다 —
+            // 40m 밖인데도 감지하고 있다면(예: 총성) 다시 무는 것이 옳다.
+            // 목줄은 「감지를 잃은 뒤 언제까지 쫓는가」를 정하는 축이지
+            // 「감지하고 있는데도 놓는가」가 아니다.
+            var far = new List<AggroCandidate> { Enemy(1, Faction.Subject, 40f, detected: false) };
 
             Assert.AreEqual(AggroSelector.NoTarget, Pick(Faction.Wild, far, current: 1),
                 "목줄 밖인데 계속 물고 있습니다.");
@@ -94,10 +104,30 @@ namespace Blob.Tests
             {
                 Enemy(1, Faction.Subject, 12f),
                 Enemy(2, Faction.Subject, 4f),
-                Enemy(3, Faction.Subject, 30f)   // 감지 밖
+                Enemy(3, Faction.Subject, 30f, detected: false)   // 감지 못 함
             };
 
             Assert.AreEqual(2, Pick(Faction.Wild, list));
+        }
+
+        [Test]
+        public void 감지하지_못한_대상은_물지_않는다()
+        {
+            // 【이것이 잠입이다.】 거리 안에 있어도 보지도 듣지도 못했으면 모른다.
+            var list = new List<AggroCandidate> { Enemy(1, Faction.Subject, 2f, detected: false) };
+
+            Assert.AreEqual(AggroSelector.NoTarget, Pick(Faction.Wild, list),
+                "감지하지 못한 적을 물었습니다. 시야각도 소리도 의미가 없어집니다.");
+        }
+
+        [Test]
+        public void 이미_문_대상은_감지를_잃어도_바로_놓지_않는다()
+        {
+            // 시야에서 잠깐 벗어났다고 즉시 잊으면, 엄폐물 뒤로 한 걸음만
+            // 움직여도 추적이 끊긴다. 놓는 것은 목줄이 정한다.
+            var list = new List<AggroCandidate> { Enemy(1, Faction.Subject, 5f, detected: false) };
+
+            Assert.AreEqual(1, Pick(Faction.Wild, list, current: 1));
         }
 
         // ── 2. 우호 ───────────────────────────────────────────────────

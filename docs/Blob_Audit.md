@@ -35,9 +35,22 @@
 | ~~A7~~ | ~~난이도 배율 6단~~ — **해결 (6-L)** `GameManager.Difficulty` → 적 피해·체력 | `Core/Combat/DifficultyLevel.cs:26-51` | **테스트뿐.** `Health.TakeDamage`의 배율 인자를 아무도 넘기지 않는다 |
 | ~~A8~~ | ~~내성 「가장 낮은 것 하나만」~~ | **해결 (7-B)** — `EnemyProfile.Build`가 몬스터 속성을 내성에 합성한다. 다만 합성 경로는 `TakeLowest`가 아니라 새로 만든 `ElementalResistances.LowerTo`다 (아래 주) | `Core/Hunting/EnemyProfile.cs` |
 | ~~A+~~ | ~~상태이상 면역~~ | **해결 (6-I)** — `Health.IsImmuneTo`가 항상 false였다. 역치 각인 3종 + 얼굴 마스크 15종이 이제 작동한다 | `Player/PlayerLoadout.cs` |
-| **A11** | **소리 축** — `MoveSoundRange` · `Hearing` · `SoundLocate` | `EquipmentStatType` | **없음.** 청각 방어구 6종이 아무 일도 하지 않는다. 적 AI는 거리 하나만 본다 |
+| ~~A11~~ | ~~소리 축~~ | **해결 (7-D)** — `LoadoutSnapshot`이 세 축을 합산하고, `PlayerNoise`가 소리를 내고, `Perception`이 그 소리를 듣는다 | `Core/AI/Perception.cs` · `Player/PlayerNoise.cs` |
 | **A9** | **패시브 효과 17종 중 13종** | `Core/Progression/PassiveEffectType.cs` | 실제로 읽히는 것은 `CarrySlots` · `CarryWeight` · `AbsorbAmount` · `LootRolls` **4종뿐** |
 | ~~A10~~ | ~~장비 에셋 82종~~ | **해결 (6-H)** — `PlayerWeapon.ApplyProfile` → 탄에 `SetWeaponBase` | `Player/PlayerLoadout.cs` |
+
+> **A11 주 — 감지를 두 축으로 나눴다. (7-D)**
+> 전에는 `EnemyBrain`의 `detectDistance` 반경 하나뿐이라,
+> 뒤로 돌아가도 가만히 서 있어도 결과가 같았다 — 잠입이 없었다.
+> 이제 눈(시야각·사거리·시선)과 귀(소리 반경)를 따로 본다.
+> **소리의 크기는 내는 쪽이 정한다** — 듣는 쪽마다 청력을 두면
+> 같은 총성이 누구에겐 들리고 누구에겐 안 들려 유저가 예측할 수 없다.
+> `Hearing`·`SoundLocate`는 그래서 【플레이어가 듣는】 축으로 들어갔다.
+>
+> 아직 남은 것 — `SoundLocate`가 방향을 표시할 UI가 없고,
+> 「소리를 듣고 그쪽으로 찾아간다」(수색 행동)가 없다. 지금은
+> 들으면 곧바로 대상이 된다. 조약돌 같은 유인 도구도 아직 없다.
+> `PlayerNoise.Emit`이 그 도구가 붙을 자리다.
 
 > **A6 주 — 배선 이전에 데이터가 틀려 있었다. (2026-09-21)**
 > A6은 「생성 경로가 없다」는 항목이었는데, 막상 3종을 열어 보니

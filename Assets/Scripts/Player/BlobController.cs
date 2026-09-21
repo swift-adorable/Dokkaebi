@@ -33,6 +33,11 @@ public class BlobController : MonoBehaviour
     /// <summary>현재 흡수 가능한 시체. (기존 호출부 호환용 위임 프로퍼티)</summary>
     public CorpseController NearbyCorpse => absorber != null ? absorber.NearbyCorpse : null;
 
+    /// <summary>지금 내는 소리. 적의 감지가 읽는다. (감사 A11)</summary>
+    public PlayerNoise Noise => noise;
+
+    private PlayerNoise noise;
+
     private void Awake()
     {
         input = GetComponent<PlayerInputHandler>();
@@ -50,6 +55,13 @@ public class BlobController : MonoBehaviour
 
         if (loadout == null)
             loadout = gameObject.AddComponent<PlayerLoadout>();
+
+        // 소리도 같은 이유로 여기서 만든다. 없으면 적이 플레이어를
+        // 【영원히 듣지 못한다】 — 뒤에서 아무리 뛰어도 조용한 셈이 된다.
+        noise = GetComponent<PlayerNoise>();
+
+        if (noise == null)
+            noise = gameObject.AddComponent<PlayerNoise>();
     }
 
     private void OnEnable()
