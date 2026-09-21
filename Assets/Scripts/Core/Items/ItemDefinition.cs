@@ -32,6 +32,9 @@ public class ItemDefinition : ScriptableObject
     [Min(0f)]
     [SerializeField] private float weight = 0.5f;
 
+    [Tooltip("아이콘. 비워 두면 UI가 종류별 색 판으로 대신 그린다.")]
+    [SerializeField] private Sprite icon;
+
     [Tooltip("차지하는 적재 칸 수. 대부분 1이다.")]
     [Min(1)]
     [SerializeField] private int slotSize = 1;
@@ -70,6 +73,9 @@ public class ItemDefinition : ScriptableObject
     public ItemKind Kind => kind;
     public int Tier => tier;
     public float Weight => weight;
+    /// <summary>아이콘. 아직 아트가 없으므로 null이 정상이다.</summary>
+    public Sprite Icon => icon;
+
     public int SlotSize => Mathf.Max(1, slotSize);
     public int StackMax => Mathf.Max(1, stackMax);
     public int MaxDurability => Mathf.Max(0, maxDurability);

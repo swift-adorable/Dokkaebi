@@ -504,6 +504,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Blob.Runtime::EnemySpawner
   enemyPrefab: {fileID: 372103695842319712, guid: 3de03b7729aac4122a5489d88880ddcc, type: 3}
+  rangedEnemyPrefab: {fileID: 1437810378520409102, guid: 03193a9ea1739479ba18b70000d5a181, type: 3}
+  rangedRatio: 0.35
   player: {fileID: 0}
   spawnInterval: 2
   spawnRadius: 12
@@ -690,9 +692,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7331627224f5342b7a41bfcf8a8cbd7f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MutationManager
-  catalog: []
-  choiceCount: 3
-  pauseGameDuringSelection: 1
+  catalog: {fileID: 0}
+  gemCatalog: {fileID: 0}
+  unlockAllOnStart: 1
+  gemDropChance: 0.18
+  grantFirstCore: 1
+  autoEquipFirstCore: 1
 --- !u!4 &614111514
 Transform:
   m_ObjectHideFlags: 0
@@ -722,7 +727,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DebugManager
   enableDebug: 1
   addXPKey: 49
-  giveAllMutationsKey: 50
+  giveAllSkillsKey: 50
   spawnEnemyKey: 51
   healKey: 52
   xpPerCheat: 10
@@ -785,6 +790,7 @@ GameObject:
   - component: {fileID: 659170791}
   - component: {fileID: 659170790}
   - component: {fileID: 659170796}
+  - component: {fileID: 659170797}
   m_Layer: 0
   m_Name: Blob
   m_TagString: Untagged
@@ -978,7 +984,6 @@ MonoBehaviour:
   bulletPrefab: {fileID: 9100672181249319323, guid: 070cefa67d75149e69ecff42b023fe67, type: 3}
   firePoint: {fileID: 0}
   firePointChildName: FirePoint
-  fireRate: 0.15
   prewarmCount: 32
 --- !u!114 &659170791
 MonoBehaviour:
@@ -992,7 +997,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8048b112a2bc4667bee723bc27caf9f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Blob.Runtime::PlayerAbsorber
-  xpPerCore: 1
+  xpPerCorpse: 1
 --- !u!114 &659170792
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1064,6 +1069,21 @@ MonoBehaviour:
   team: 0
   maxHealth: 10
   invulnerableDuration: 0.6
+  headArmour: 0
+  bodyArmour: 0
+--- !u!114 &659170797
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 659170781}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ac8ccffd192940c18d05e54a8f4181c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Blob.Runtime::PlayerLoadout
+  refreshInterval: 0.25
 --- !u!1 &671507352
 GameObject:
   m_ObjectHideFlags: 0
@@ -1897,6 +1917,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bed66c634208e4151adad99029b285c1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
+  difficulty: 3
 --- !u!4 &1358300966
 Transform:
   m_ObjectHideFlags: 0

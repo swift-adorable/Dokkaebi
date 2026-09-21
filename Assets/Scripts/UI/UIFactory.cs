@@ -168,6 +168,72 @@ public static class UIFactory
             1f - row * cellHeight - paddingY);
     }
 
+    /// <summary>
+    /// 정수 슬라이더. 코드로 만들 때 필요한 자식 3종(배경·채움·손잡이)을 함께 깐다.
+    ///
+    /// 손잡이를 크게 잡는 이유 — 모바일에는 마우스 커서가 없다.
+    /// 손가락이 덮는 넓이보다 작으면 값을 정확히 맞출 수 없다.
+    /// </summary>
+    public static Slider CreateIntSlider(
+        Transform parent, Vector2 anchorMin, Vector2 anchorMax,
+        int min, int max, int value)
+    {
+        RectTransform root = CreateRegion("Slider", parent, anchorMin, anchorMax);
+
+        var slider = root.gameObject.AddComponent<Slider>();
+
+        CreatePanel("Background", root, UIPalette.SlotLocked,
+            new Vector2(0f, 0.36f), new Vector2(1f, 0.64f));
+
+        RectTransform fillArea = CreateRegion("Fill Area", root,
+            new Vector2(0f, 0.36f), new Vector2(1f, 0.64f));
+
+        Image fill = CreatePanel("Fill", fillArea, UIPalette.Action,
+            Vector2.zero, Vector2.one);
+
+        RectTransform handleArea = CreateRegion("Handle Slide Area", root,
+            Vector2.zero, Vector2.one);
+
+        Image handle = CreatePanel("Handle", handleArea, UIPalette.SlotSelected,
+            Vector2.zero, Vector2.one);
+
+        var handleRect = handle.rectTransform;
+        handleRect.sizeDelta = new Vector2(56f, 0f);
+
+        slider.fillRect = fill.rectTransform;
+        slider.handleRect = handleRect;
+        slider.targetGraphic = handle;
+        slider.direction = Slider.Direction.LeftToRight;
+        slider.wholeNumbers = true;
+        slider.minValue = min;
+        slider.maxValue = max;
+        slider.SetValueWithoutNotify(value);
+
+        return slider;
+    }
+
+    /// <summary>숫자만 받는 입력칸. 슬라이더로 맞추기 어려운 값을 직접 친다.</summary>
+    public static InputField CreateIntField(
+        Transform parent, Vector2 anchorMin, Vector2 anchorMax, int value, int fontSize = 30)
+    {
+        Image back = CreatePanel("IntField", parent, UIPalette.SlotLocked, anchorMin, anchorMax);
+
+        var field = back.gameObject.AddComponent<InputField>();
+
+        Text text = CreateLabel(back.transform, string.Empty, fontSize, FontStyle.Bold,
+            new Vector2(0.08f, 0f), new Vector2(0.92f, 1f), TextAnchor.MiddleCenter);
+
+        text.supportRichText = false;
+
+        field.targetGraphic = back;
+        field.textComponent = text;
+        field.contentType = InputField.ContentType.IntegerNumber;
+        field.characterLimit = 6;
+        field.SetTextWithoutNotify(value.ToString());
+
+        return field;
+    }
+
     /// <summary>자식을 전부 지운다. 격자를 다시 그릴 때 쓴다.</summary>
     public static void ClearChildren(Transform parent)
     {

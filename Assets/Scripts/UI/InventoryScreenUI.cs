@@ -309,6 +309,8 @@ public partial class InventoryScreenUI : MonoBehaviour
 
     public void Close()
     {
+        CloseDiscardPopup();
+
         selected = null;
 
         panel.SetActive(false);
@@ -647,88 +649,20 @@ public partial class InventoryScreenUI : MonoBehaviour
     private const float ActionRowTop = 0.11f;
 
     /// <summary>
-    /// 버리기를 두 번 눌러야 하는 이유 —
-    /// 【버린 것은 돌아오지 않는다.】 땅에 떨어지는 월드 아이템이 아직 없어서
-    /// 버리기는 곧 삭제다. 한 번의 오터치로 최고 티어 장비가 사라지면
-    /// 그 판의 검증 자체가 끝난다. 그래서 확인을 한 번 받는다.
-    /// (월드 드랍이 생기면 이 확인은 지워도 된다)
+    /// 버리기는 개수를 고르는 팝업을 연다. (InventoryScreenDiscard.cs)
+    /// 「1개 / 전부」 두 버튼으로는 15개 중 7개를 버릴 수 없다 —
+    /// 과중량은 "몇 kg만 덜어내면 되는가"의 문제다.
     /// </summary>
-    private ItemStack discardPending;
-    private int discardPendingAmount;
-    private float discardPendingUntil;
-
-    private const float DiscardConfirmWindow = 3f;
-
-    private bool IsPending(ItemStack stack, int amount)
-        => discardPending == stack
-           && discardPendingAmount == amount
-           && Time.unscaledTime < discardPendingUntil;
-
     private void DrawDiscardButtons()
-    {
-        if (selected == null || selected.IsEmpty)
-            return;
-
-        bool many = selected.Count > 1;
-
-        if (!many)
-        {
-            DrawDiscardButton(selected.Count, "버리기", 0.54f, 0.96f);
-            return;
-        }
-
-        DrawDiscardButton(1, "1개 버리기", 0.54f, 0.74f);
-        DrawDiscardButton(selected.Count, "전부 버리기", 0.76f, 0.96f);
-    }
-
-    private void DrawDiscardButton(int amount, string label, float left, float right)
-    {
-        bool pending = IsPending(selected, amount);
-
-        UIFactory.CreateButton(rightPanel,
-            pending ? "정말 버립니다" : label,
-            new Vector2(left, ActionRowBottom), new Vector2(right, ActionRowTop),
-            pending ? UIPalette.Warning : UIPalette.Slot,
-            () => Discard(amount),
-            pending ? 24 : 26);
-    }
-
-    private void Discard(int amount)
     {
         if (selected == null || selected.IsEmpty)
             return;
 
         ItemStack target = selected;
 
-        if (!IsPending(target, amount))
-        {
-            discardPending = target;
-            discardPendingAmount = amount;
-            discardPendingUntil = Time.unscaledTime + DiscardConfirmWindow;
-
-            SetHint($"「{target.Definition.DisplayName}」 {amount}개 — 한 번 더 누르면 버립니다.");
-
-            Refresh();
-            return;
-        }
-
-        string name = target.Definition.DisplayName;
-
-        Inventory bag = PlayerInventory.EnsureInstance().Bag;
-
-        // 개체를 통째로 버리는 경우와 개수만 줄이는 경우를 나눈다.
-        // Take만 쓰면 0개짜리 빈 칸이 남는다.
-        if (amount >= target.Count)
-            bag.RemoveStack(target);
-        else
-            target.Take(amount);
-
-        discardPending = null;
-        selected = null;
-
-        SetHint($"「{name}」 {amount}개를 버렸습니다.");
-
-        Refresh();
+        UIFactory.CreateButton(rightPanel, "버리기",
+            new Vector2(0.54f, ActionRowBottom), new Vector2(0.96f, ActionRowTop),
+            UIPalette.Subtle, () => OpenDiscardPopup(target), 26);
     }
 
     /// <summary>고른 것에 맞춰 다음에 무엇을 하라고 알려준다.</summary>
