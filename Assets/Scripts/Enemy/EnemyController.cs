@@ -18,6 +18,7 @@ public class EnemyController : MonoBehaviour, IPoolable
     private int baseMaxHealth;
     private EnemyAttack attack;
     private EnemyBrain brain;
+    private EnemyIdentity identity;
     private PooledObject pooledObject;
     private PoolManager poolManager;
     private EnemyManager enemyManager;
@@ -31,6 +32,7 @@ public class EnemyController : MonoBehaviour, IPoolable
         health = GetComponent<Health>();
         attack = GetComponent<EnemyAttack>();
         brain = GetComponent<EnemyBrain>();
+        identity = GetComponent<EnemyIdentity>();
         pooledObject = GetComponent<PooledObject>();
     }
 
@@ -83,6 +85,13 @@ public class EnemyController : MonoBehaviour, IPoolable
     private void ApplyDifficultyHealth()
     {
         if (health == null)
+            return;
+
+        // 【EnemyIdentity가 있으면 여기서 체력을 만지지 않는다.】
+        // 원형·등급이 정한 절대값에 난이도 배율까지 EnemyIdentity가 함께 건다.
+        // 두 곳이 같은 값을 쓰면 IPoolable 통지 순서에 따라 결과가 달라진다 —
+        // 순서에 기대는 코드는 언젠가 반드시 틀린다.
+        if (identity != null)
             return;
 
         if (baseMaxHealth <= 0)

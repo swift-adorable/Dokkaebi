@@ -89,6 +89,19 @@ public class EnemyAttack : MonoBehaviour
     /// <summary>이 적의 공격 방식.</summary>
     public EnemyAttackKind Kind => attackKind;
 
+    /// <summary>
+    /// 원형 · 등급이 정한 공격 수치를 주입한다. (EnemyIdentity)
+    ///
+    /// 【더하지 않고 덮어쓴다.】 풀에서 재사용될 때마다 등급 배율을 더하면
+    /// 같은 프리팹이 돌 때마다 피해가 계속 커진다. 인스펙터 값은
+    /// EnemyIdentity가 없는 프리팹의 기본값으로만 남는다.
+    /// </summary>
+    public void SetOffence(int newDamage, int newArmourPenetration)
+    {
+        damage = Mathf.Max(1, newDamage);
+        armourPenetration = Mathf.Max(0, newArmourPenetration);
+    }
+
     private PoolManager poolManager;
 
     private void Awake()

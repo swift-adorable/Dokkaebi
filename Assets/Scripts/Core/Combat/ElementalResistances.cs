@@ -70,6 +70,26 @@ public struct ElementalResistances
     }
 
     /// <summary>
+    /// 한 속성만 「더 낮은 쪽」으로 끌어내린다. 나머지 속성은 건드리지 않는다.
+    ///
+    /// 【TakeLowest로 대신할 수 없다.】
+    /// 몬스터 속성 「경화」는 물리 하나만 0.5로 만든다. 이걸 구현하려고
+    /// Default(전부 1.0)를 만들어 TakeLowest에 넣으면, 손대지 않아야 할
+    /// 다른 속성까지 1.0으로 눌린다 — 압착기의 전기 2배, 정착체의 화염 1.5배가
+    /// 속성 하나 붙었다는 이유로 사라진다. 원형이 요구하던 답이 지워진다.
+    ///
+    /// TakeLowest는 【묶음 대 묶음】(레이드 특성 vs 개체)을 겹칠 때 쓴다.
+    /// 이 함수는 【한 속성】을 겹칠 때 쓴다. 둘은 다른 연산이다.
+    /// </summary>
+    public void LowerTo(DamageElement element, float multiplier)
+    {
+        float current = Get(element);
+
+        if (multiplier < current)
+            Set(element, multiplier);
+    }
+
+    /// <summary>
     /// 내성을 겹칠 때는 곱하지 않고 【가장 낮은 배율 하나만】 남긴다.
     ///
     /// 곱연산으로 중첩하면 방어형 속성 2개만으로 공략 불가가 된다.

@@ -33,11 +33,20 @@
 | **A5** | **기폭(원소 작렬)** | `Core/Combat/DetonationResolver.cs` | **테스트뿐.** 기폭 Core 3종이 아무 효과도 내지 않는다 |
 | **A6** | **잔류물 5종** | `Core/Combat/GroundEffectTable.cs` | **없음.** 「마름쇠」·「유지되는 대지」·「잔류물 효력」 3종이 기댈 대상이 없다 |
 | ~~A7~~ | ~~난이도 배율 6단~~ — **해결 (6-L)** `GameManager.Difficulty` → 적 피해·체력 | `Core/Combat/DifficultyLevel.cs:26-51` | **테스트뿐.** `Health.TakeDamage`의 배율 인자를 아무도 넘기지 않는다 |
-| **A8** | **내성 「가장 낮은 것 하나만」** | `ElementalResistances.TakeLowest:78-88` | **테스트뿐.** 몬스터 속성을 내성에 합성하는 경로 자체가 없다 |
+| ~~A8~~ | ~~내성 「가장 낮은 것 하나만」~~ | **해결 (7-B)** — `EnemyProfile.Build`가 몬스터 속성을 내성에 합성한다. 다만 합성 경로는 `TakeLowest`가 아니라 새로 만든 `ElementalResistances.LowerTo`다 (아래 주) | `Core/Hunting/EnemyProfile.cs` |
 | ~~A+~~ | ~~상태이상 면역~~ | **해결 (6-I)** — `Health.IsImmuneTo`가 항상 false였다. 역치 각인 3종 + 얼굴 마스크 15종이 이제 작동한다 | `Player/PlayerLoadout.cs` |
 | **A11** | **소리 축** — `MoveSoundRange` · `Hearing` · `SoundLocate` | `EquipmentStatType` | **없음.** 청각 방어구 6종이 아무 일도 하지 않는다. 적 AI는 거리 하나만 본다 |
 | **A9** | **패시브 효과 17종 중 13종** | `Core/Progression/PassiveEffectType.cs` | 실제로 읽히는 것은 `CarrySlots` · `CarryWeight` · `AbsorbAmount` · `LootRolls` **4종뿐** |
 | ~~A10~~ | ~~장비 에셋 82종~~ | **해결 (6-H)** — `PlayerWeapon.ApplyProfile` → 탄에 `SetWeaponBase` | `Player/PlayerLoadout.cs` |
+
+> **A8 주 — 왜 `TakeLowest`가 아닌가.**
+> 「경화」는 물리 하나만 0.5로 만든다. 이를 위해 전부 1.0인 묶음을 만들어
+> `TakeLowest`에 넣으면, 손대지 않아야 할 속성까지 1.0으로 눌린다 —
+> 압착기의 전기 2배와 정착체의 화염 1.5배가 속성 하나 붙었다는 이유로 사라진다.
+> **원형이 요구하던 답이 지워진다.** (7-B 작성 중 테스트가 이 결함을 잡았다)
+> 그래서 「한 속성만 내리는」 `LowerTo`를 새로 두고, `TakeLowest`는
+> **묶음 대 묶음**(레이드 특성 vs 개체)에 쓰도록 남겼다 — 7-G에서 호출된다.
+> 즉 A8은 해결됐지만 `TakeLowest` 자체의 호출부는 아직 테스트뿐이다.
 
 > **A1 · A2 · A3 · A4 · A10은 6-H에서 해결했다.**
 > 이제 「입고 → 쏘고 → 무거우면 느리고 → 죽으면 잃는다」 한 바퀴가 돈다.
@@ -231,8 +240,11 @@
 7단계 이후로 예정된 것들이다. 지금 문제 삼지 않는다.
 
 - **추출 성공 판정 자체** (8단계) — 추출 지점 · 정산 진입점이 코드에 한 줄도 없다
-- 적 원형 9종 · 등급 4 · 몬스터 속성 13종 — **코드에 0종**
-- 진영 5종 (`Team`은 Player/Enemy/Neutral 3종뿐), 시설 상태 3종, 레이드 특성 10종
+- ~~적 원형 9종 · 등급 4 · 몬스터 속성 13종~~ — **데이터·계산 완료 (7-A·B)**.
+  남은 것은 원형별 프리팹과 기믹(7-F)이다
+- 진영 5종 — **enum · 적대 판정 완료 (7-A)**. AI 연결은 7-C.
+  (`Team`은 여전히 Player/Enemy/Neutral 3종이며, `Faction`과 다른 축이다)
+- 시설 상태 3종, 레이드 특성 10종 — 미구현 (7-G)
 - 계정 레벨 경험치 · 정산 · 세이브 (현재 인스펙터 값)
 - 벙커 전부 (건물 · NPC · 상점 · 제작 · 의뢰)
 - 소모품 22종 중 19종, 소모품 사용 API, 퀵슬롯 기능
