@@ -216,7 +216,8 @@ public partial class InventoryScreenUI : MonoBehaviour
         button.targetGraphic = image;
         button.onClick.AddListener(Toggle);
 
-        UIFactory.CreateOutline(image, UIPalette.Edge, UIFactory.RadiusLarge, 2);
+        UIFactory.AddGlassSheen(image, UIFactory.RadiusLarge);
+        UIFactory.CreateOutline(image, UIPalette.Rim, UIFactory.RadiusLarge, 2);
 
         toggleLabel = UIFactory.CreateLabel(toggleButton.transform, "가방", 32, FontStyle.Bold,
             Vector2.zero, Vector2.one, TextAnchor.MiddleCenter);
@@ -235,10 +236,8 @@ public partial class InventoryScreenUI : MonoBehaviour
     private void BuildTopBar()
     {
         // 크레딧 — 스크린샷의 좌상단 화폐 표시 자리.
-        Image purse = UIFactory.CreatePanel("Credits", panel.transform, UIPalette.Header,
+        Image purse = UIFactory.CreateGlass("Credits", panel.transform, UIPalette.Header,
             new Vector2(0f, TopBarBottom), new Vector2(0.185f, 1f), UIFactory.RadiusLarge);
-
-        UIFactory.CreateOutline(purse, UIPalette.Edge, UIFactory.RadiusLarge, 2);
 
         creditLabel = UIFactory.CreateLabel(purse.transform, "₡ 0", 32, FontStyle.Bold,
             new Vector2(0.06f, 0f), new Vector2(0.94f, 1f), TextAnchor.MiddleRight,
@@ -271,10 +270,8 @@ public partial class InventoryScreenUI : MonoBehaviour
         leftColumn = UIFactory.CreateRegion("Left", panel.transform,
             new Vector2(0f, ColumnBottom), new Vector2(LeftRight, ColumnTop));
 
-        Image back = UIFactory.CreatePanel("Back", leftColumn, UIPalette.Panel,
+        UIFactory.CreateGlass("Back", leftColumn, UIPalette.Panel,
             Vector2.zero, Vector2.one, UIFactory.RadiusLarge);
-
-        UIFactory.CreateOutline(back, UIPalette.Edge, UIFactory.RadiusLarge, 2);
 
         UIFactory.CreateLabel(leftColumn, "장비", 27, FontStyle.Bold,
             new Vector2(0.035f, 0.92f), new Vector2(0.97f, 0.99f), TextAnchor.MiddleLeft,
@@ -324,11 +321,9 @@ public partial class InventoryScreenUI : MonoBehaviour
     {
         // 소지 중량 막대 — 스크린샷의 좌하단.
         // 소지 중량 — 좌하단. 막대 · 숫자를 한 카드 안에 담는다.
-        Image weightCard = UIFactory.CreatePanel("WeightCard", panel.transform,
-            UIPalette.Panel, new Vector2(0f, FooterBottom), new Vector2(0.40f, FooterTop),
+        UIFactory.CreateGlass("WeightCard", panel.transform, UIPalette.Panel,
+            new Vector2(0f, FooterBottom), new Vector2(0.40f, FooterTop),
             UIFactory.RadiusLarge);
-
-        UIFactory.CreateOutline(weightCard, UIPalette.Edge, UIFactory.RadiusLarge, 2);
 
         UIFactory.CreateLabel(panel.transform, "소지 중량", 20, FontStyle.Normal,
             new Vector2(0.018f, FooterBottom), new Vector2(0.07f, FooterTop),
@@ -543,10 +538,13 @@ public partial class InventoryScreenUI : MonoBehaviour
                     ? UIPalette.SlotEquippable
                     : stack == null
                         ? UIPalette.Inset
-                        : UIPalette.Darken(kind, 0.22f);
+                        : UIPalette.Glassify(kind, 0.34f);
 
             Image cell = UIFactory.CreatePanel($"Equip_{slots[i]}", equipmentGrid,
                 body, min, max);
+
+            if (stack != null || isSelectedSlot || canAccept)
+                UIFactory.AddGlassSheen(cell, UIFactory.Radius);
 
             // 낄 수 있는 자리는 테두리까지 밝혀 준다. 바탕색만 바꾸면
             // 어두운 화면에서 「조금 다른 회색」으로만 보인다.
@@ -682,14 +680,18 @@ public partial class InventoryScreenUI : MonoBehaviour
             ? UIPalette.Inset
             : chosen
                 ? UIPalette.SlotSelected
-                : UIPalette.Darken(kind, 0.22f);
+                : UIPalette.Glassify(kind, 0.34f);
 
         Image cell = UIFactory.CreatePanel(name, parent, body, min, max);
+
+        // 빈 칸에는 광택을 얹지 않는다. 격자 전체가 번들거려 아이템이 묻힌다.
+        if (!empty)
+            UIFactory.AddGlassSheen(cell, UIFactory.Radius);
 
         UIFactory.CreateOutline(cell,
             empty ? UIPalette.EdgeSoft
                   : chosen ? UIPalette.Brighten(UIPalette.SlotSelected, 0.22f)
-                           : UIPalette.Brighten(kind),
+                           : UIPalette.Glassify(UIPalette.Brighten(kind, 0.34f), 0.70f),
             UIFactory.Radius,
             chosen ? 3 : 2);
 
@@ -711,7 +713,7 @@ public partial class InventoryScreenUI : MonoBehaviour
         if (stack.Count > 1)
         {
             UIFactory.CreateBadge(cell.transform, stack.Count.ToString(),
-                new Vector2(0.58f, 0.60f), new Vector2(0.95f, 0.95f), 19,
+                new Vector2(0.54f, 0.52f), new Vector2(0.96f, 0.96f), 20,
                 UIPalette.TextAccent);
         }
 
@@ -826,10 +828,8 @@ public partial class InventoryScreenUI : MonoBehaviour
 
     private void DrawItemDetail()
     {
-        Image back = UIFactory.CreatePanel("Back", rightPanel, UIPalette.Panel,
+        UIFactory.CreateGlass("Back", rightPanel, UIPalette.Panel,
             Vector2.zero, Vector2.one, UIFactory.RadiusLarge);
-
-        UIFactory.CreateOutline(back, UIPalette.Edge, UIFactory.RadiusLarge, 2);
 
         if (selected?.Definition == null)
         {
@@ -844,8 +844,11 @@ public partial class InventoryScreenUI : MonoBehaviour
         Color kind = UIPalette.ForItem(definition.Kind);
 
         // 머리 띠는 아이템 종류 색을 쓴다 — 어떤 부류인지 색으로 먼저 읽힌다.
-        UIFactory.CreatePanel("Header", rightPanel, UIPalette.Darken(kind, 0.18f),
+        Image band = UIFactory.CreatePanel("Header", rightPanel,
+            UIPalette.Glassify(kind, 0.50f),
             new Vector2(0f, 0.865f), new Vector2(1f, 1f), UIFactory.RadiusLarge);
+
+        UIFactory.AddGlassSheen(band, UIFactory.RadiusLarge);
 
         // 아이콘 자리. 아트가 들어오면 definition.Icon이 채운다.
         Image icon = UIFactory.CreatePanel("Icon", rightPanel, UIPalette.Darken(kind, 0.34f),
@@ -862,7 +865,8 @@ public partial class InventoryScreenUI : MonoBehaviour
         }
 
         UIFactory.CreateLabel(rightPanel, definition.DisplayName, 33, FontStyle.Bold,
-            new Vector2(0.135f, 0.925f), new Vector2(0.96f, 0.99f), TextAnchor.LowerLeft);
+            new Vector2(0.135f, 0.925f), new Vector2(0.96f, 0.99f), TextAnchor.LowerLeft,
+            UIPalette.TextOnGlass);
 
         UIFactory.CreateLabel(rightPanel, ItemKindName(definition.Kind), 19, FontStyle.Normal,
             new Vector2(0.135f, 0.875f), new Vector2(0.60f, 0.925f), TextAnchor.UpperLeft,

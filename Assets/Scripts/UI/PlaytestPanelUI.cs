@@ -52,8 +52,12 @@ public class PlaytestPanelUI : MonoBehaviour
         if (instance != null)
             return instance;
 
-        // 가방 화면(1000)보다 위에 둔다. 가방을 열어 둔 채로도 지급할 수 있어야 한다.
-        Canvas canvas = UIFactory.CreateCanvas("PlaytestCanvas (Runtime)", 1200);
+        // 【가방 화면(1000)보다 아래에 둔다.】
+        // 위에 두었더니 좌상단 크레딧 카드를 덮었다. 개발용 버튼이
+        // 게임 UI를 가리면 정작 확인해야 할 것을 못 본다.
+        // 가방을 열면 검증 버튼은 그 뒤로 숨는다 —
+        // 지급 메뉴가 끝나면 가방이 자동으로 열리므로 흐름에는 지장이 없다.
+        Canvas canvas = UIFactory.CreateCanvas("PlaytestCanvas (Runtime)", 900);
 
         instance = canvas.gameObject.AddComponent<PlaytestPanelUI>();
         instance.Build(canvas.transform);
@@ -74,14 +78,13 @@ public class PlaytestPanelUI : MonoBehaviour
 
         BuildToggle(safe);
 
-        panel = UIFactory.CreatePanel("PlaytestPanel", safe, UIPalette.Panel,
+        // 패널은 뒤가 비치면 글자가 안 읽힌다. 유리 중에서도 짙은 쪽을 쓴다.
+        panel = UIFactory.CreateGlass("PlaytestPanel", safe,
+            new Color(0.10f, 0.13f, 0.19f, 0.88f),
             new Vector2(0.12f, 0.06f), new Vector2(0.88f, 0.94f),
             UIFactory.RadiusLarge).gameObject;
 
         var box = (RectTransform)panel.transform;
-
-        UIFactory.CreateOutline(panel.GetComponent<Image>(), UIPalette.Edge,
-            UIFactory.RadiusLarge, 2);
 
         UIFactory.CreatePanel("Header", box, UIPalette.Header,
             new Vector2(0f, 0.92f), new Vector2(1f, 1f), UIFactory.RadiusLarge);
@@ -120,18 +123,23 @@ public class PlaytestPanelUI : MonoBehaviour
         Image image = UIFactory.CreatePanel("PlaytestToggle", safe, UIPalette.Warning,
             Vector2.zero, Vector2.zero, UIFactory.Radius);
 
+        // 화면 맨 아래 왼쪽 구석. 위쪽은 크레딧·탭·가방 버튼이 쓰고,
+        // 오른쪽 아래는 DASH가 쓴다. 남는 자리는 여기뿐이다.
         var rect = image.rectTransform;
-        rect.anchorMin = new Vector2(0f, 1f);
-        rect.anchorMax = new Vector2(0f, 1f);
-        rect.pivot = new Vector2(0f, 1f);
-        rect.sizeDelta = new Vector2(150f, 74f);
-        rect.anchoredPosition = new Vector2(4f, -4f);
+        rect.anchorMin = new Vector2(0f, 0f);
+        rect.anchorMax = new Vector2(0f, 0f);
+        rect.pivot = new Vector2(0f, 0f);
+        rect.sizeDelta = new Vector2(132f, 62f);
+        rect.anchoredPosition = new Vector2(6f, 6f);
 
         var button = image.gameObject.AddComponent<Button>();
         button.targetGraphic = image;
         button.onClick.AddListener(Toggle);
 
-        UIFactory.CreateLabel(image.transform, "검증", 26, FontStyle.Bold,
+        UIFactory.AddGlassSheen(image, UIFactory.Radius);
+        UIFactory.CreateOutline(image, UIPalette.Rim, UIFactory.Radius, 2);
+
+        UIFactory.CreateLabel(image.transform, "검증", 24, FontStyle.Bold,
             Vector2.zero, Vector2.one, TextAnchor.MiddleCenter);
     }
 
