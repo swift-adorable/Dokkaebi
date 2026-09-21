@@ -54,11 +54,17 @@ public partial class InventoryScreenUI
     }
 
     /// <summary>머리글 줄의 아래 끝.</summary>
-    private const float HeaderLine = 0.895f;
+    private const float HeaderLine = 0.900f;
 
-    /// <summary>계열 탭 줄.</summary>
-    private const float TabBottom = 0.800f;
-    private const float TabTop = 0.880f;
+    /// <summary>
+    /// 계열 탭 줄.
+    ///
+    /// 【높이를 0.080에서 0.115로 올린다.】
+    /// 두 줄(계열 이름 · 0/5)이 들어가는 칸인데 40px밖에 되지 않아
+    /// 글자가 위아래로 꽉 차 보였다. 손가락 목표로도 작았다.
+    /// </summary>
+    private const float TabTop = 0.870f;
+    private const float TabBottom = 0.755f;
 
     /// <summary>본문(트리·상세)의 위 끝. 탭 줄과 한 칸 띄운다.</summary>
     private const float BodyTop = TabBottom - 0.020f;

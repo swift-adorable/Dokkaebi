@@ -50,9 +50,16 @@ public partial class InventoryScreenUI : MonoBehaviour
     /// <summary>좌우 두 칸의 경계. 양쪽이 반 칸씩 물러나 사이가 한 칸이 된다.</summary>
     private const float ColumnSplit = 0.5f;
 
-    /// <summary>중량 막대가 아래줄 안에서 차지하는 가로 범위.</summary>
-    private const float WeightBarLeft = 0.085f;
-    private const float WeightBarRight = 0.31f;
+    /// <summary>
+    /// 중량 막대가 카드 안에서 차지하는 가로 범위.
+    ///
+    /// 【글자 자리와 겹치지 않게 끊는다.】
+    /// 0.085에서 시작하던 막대가 「소지 중량」 글자(0.045~0.20) 위로
+    /// 올라와 글자를 반쯤 덮고 있었다. 세 칸은 서로 넘지 않는다.
+    ///   0.04~0.22 글자 · 0.25~0.62 막대 · 0.64~0.96 숫자
+    /// </summary>
+    private const float WeightBarLeft = 0.25f;
+    private const float WeightBarRight = 0.62f;
 
     /// <summary>중량 막대의 위아래 여백. 아래줄 높이 기준 비율이다.</summary>
     private const float WeightBarInset = 0.24f;
@@ -71,6 +78,12 @@ public partial class InventoryScreenUI : MonoBehaviour
 
     /// <summary>칸 사이 여백. 부모 기준 정규화 값이다.</summary>
     private const float BagCellPadding = 0.006f;
+
+    /// <summary>
+    /// 칸(장비 슬롯 · 가방 칸) 안쪽 여백. 【캔버스 픽셀】이다.
+    /// 칸은 가로세로 비가 제각각이라 비율로 주면 위아래만 얇아진다.
+    /// </summary>
+    private const float SlotPad = 12f;
 
     private static InventoryScreenUI instance;
 
@@ -384,7 +397,7 @@ public partial class InventoryScreenUI : MonoBehaviour
             Vector2.zero, Vector2.one, UIFactory.RadiusLarge);
 
         UIFactory.CreateLabel(weightCard, "소지 중량", 23, FontStyle.Normal,
-            new Vector2(0.045f, 0f), new Vector2(0.20f, 1f),
+            new Vector2(0.04f, 0f), new Vector2(0.22f, 1f),
             TextAnchor.MiddleLeft, UIPalette.TextDim);
 
         UIFactory.CreatePanel("WeightTrack", weightCard, UIPalette.Inset,
@@ -396,7 +409,7 @@ public partial class InventoryScreenUI : MonoBehaviour
             new Vector2(WeightBarLeft, 1f - WeightBarInset), radius: 6);
 
         weightLabel = UIFactory.CreateLabel(weightCard, string.Empty, 24, FontStyle.Bold,
-            new Vector2(0.62f, 0f), new Vector2(0.96f, 1f),
+            new Vector2(0.64f, 0f), new Vector2(0.96f, 1f),
             TextAnchor.MiddleRight, UIPalette.TextDim);
 
         // 퀵슬롯 1~8 — 하단 중앙.
@@ -646,9 +659,15 @@ public partial class InventoryScreenUI : MonoBehaviour
 
             // 부위 이름은 항상 작게 위에 남긴다 —
             // 끼고 나면 어느 자리였는지 알 수 없던 문제를 없앤다.
-            UIFactory.CreateLabel(cell.transform, EquipmentSlotName(slots[i]), 23,
-                FontStyle.Bold, new Vector2(0.07f, 0.56f), new Vector2(0.93f, 0.95f),
-                TextAnchor.UpperLeft, UIPalette.TextDim);
+            //
+            // 【여백을 비율이 아니라 픽셀로 준다.】
+            // 0.07(가로) / 0.05(세로)로 두었더니 칸이 가로로 길어
+            // 왼쪽은 14px, 위는 3px이 됐다. 글자가 천장에 붙어 보였다.
+            UIFactory.Inset(
+                UIFactory.CreateLabel(cell.transform, EquipmentSlotName(slots[i]), 23,
+                    FontStyle.Bold, new Vector2(0f, 0.5f), Vector2.one,
+                    TextAnchor.UpperLeft, UIPalette.TextDim).rectTransform,
+                left: SlotPad, bottom: 0f, right: SlotPad, top: SlotPad);
 
             if (stack?.Definition == null)
                 continue;
@@ -656,7 +675,10 @@ public partial class InventoryScreenUI : MonoBehaviour
             // 장비 이름은 흰 글자 + 반투명 검정 띠. 종류 색이 밝은 칸에서도 읽힌다.
             Image strip = UIFactory.CreatePanel("NameStrip", cell.transform,
                 UIPalette.NameStrip,
-                new Vector2(0.05f, 0.10f), new Vector2(0.95f, 0.50f), radius: 6);
+                new Vector2(0f, 0f), new Vector2(1f, 0.5f), radius: 6);
+
+            UIFactory.Inset(strip.rectTransform,
+                left: SlotPad, bottom: SlotPad, right: SlotPad, top: 0f);
 
             strip.raycastTarget = false;
 
@@ -968,13 +990,11 @@ public partial class InventoryScreenUI : MonoBehaviour
         Color kind = UIPalette.ForItem(definition.Kind);
 
         // 머리 띠는 아이템 종류 색을 쓴다 — 어떤 부류인지 색으로 먼저 읽힌다.
-        // 머리 띠는 바탕과 같은 폭이어야 하므로 내용물이 아니라 패널에 직접 얹는다.
-        Image band = UIFactory.CreatePanel("Header", rightPanel,
-            UIPalette.Glassify(kind, 0.50f),
-            new Vector2(0f, 0.865f), new Vector2(1f, 1f), UIFactory.RadiusLarge);
-
-        band.transform.SetSiblingIndex(1);
-
+        // 【머리 띠를 깔지 않는다.】
+        // 종류 색을 반투명 판으로 한 겹 더 얹어 놨더니, 패널 위에 정체를
+        // 알 수 없는 분홍 띠가 생겼다. 종류는 아이콘 색과 「소모품」 글자로
+        // 이미 읽힌다. 색을 알리려고 면을 늘리지 않는다.
+        //
         // 아이콘 자리. 아트가 들어오면 definition.Icon이 채운다.
         Image icon = UIFactory.CreatePanel("Icon", rightContent, UIPalette.Darken(kind, 0.34f),
             new Vector2(0f, 0.885f), new Vector2(0.10f, 0.98f), UIFactory.Radius);
