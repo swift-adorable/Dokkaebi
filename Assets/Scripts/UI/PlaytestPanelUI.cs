@@ -18,6 +18,7 @@ public class PlaytestPanelUI : MonoBehaviour
     private static PlaytestPanelUI instance;
 
     private GameObject panel;
+    private GameObject toggle;
     private Text output;
 
     private static readonly (string label, System.Func<string> action)[] Actions =
@@ -123,6 +124,8 @@ public class PlaytestPanelUI : MonoBehaviour
         Image image = UIFactory.CreatePanel("PlaytestToggle", safe, UIPalette.Warning,
             Vector2.zero, Vector2.zero, UIFactory.Radius);
 
+        toggle = image.gameObject;
+
         // 화면 맨 아래 왼쪽 구석. 위쪽은 크레딧·탭·가방 버튼이 쓰고,
         // 오른쪽 아래는 DASH가 쓴다. 남는 자리는 여기뿐이다.
         var rect = image.rectTransform;
@@ -131,6 +134,9 @@ public class PlaytestPanelUI : MonoBehaviour
         rect.pivot = new Vector2(0f, 0f);
         rect.sizeDelta = new Vector2(132f, 62f);
         rect.anchoredPosition = new Vector2(6f, 6f);
+
+        // 가방 화면의 소지 중량 카드와 같은 구석이라 겹친다.
+        // 가방이 열리면 SetHiddenByScreen이 이 버튼을 감춘다.
 
         var button = image.gameObject.AddComponent<Button>();
         button.targetGraphic = image;
@@ -169,6 +175,27 @@ public class PlaytestPanelUI : MonoBehaviour
             return;
 
         panel.SetActive(!panel.activeSelf);
+    }
+
+    /// <summary>
+    /// 가방 화면이 열리고 닫힐 때 불린다.
+    ///
+    /// 【왜 필요한가】
+    /// 검증 캔버스를 가방(1000)보다 아래(900)로 내렸는데, 가방 판이 반투명이라
+    /// 뒤에 켜져 있던 검증 패널의 글자가 그대로 **비쳐 보였다.**
+    /// 두 화면의 글자가 겹쳐 무엇도 읽히지 않았다.
+    /// 뒤에 있으면 어차피 누를 수도 없으니, 열려 있을 때는 통째로 감춘다.
+    /// </summary>
+    public static void SetHiddenByScreen(bool hidden)
+    {
+        if (instance == null)
+            return;
+
+        if (instance.panel != null && hidden)
+            instance.panel.SetActive(false);
+
+        if (instance.toggle != null)
+            instance.toggle.SetActive(!hidden);
     }
 
     private void Run(System.Func<string> action)

@@ -24,7 +24,8 @@ public partial class InventoryScreenUI
 
     private void DrawPassivePanel()
     {
-        UIFactory.CreatePanel("Back", rightPanel, UIPalette.Panel, Vector2.zero, Vector2.one);
+        UIFactory.CreateGlass("Back", rightPanel, UIPalette.Panel,
+            Vector2.zero, Vector2.one, UIFactory.RadiusLarge);
 
         PassiveManager manager = PassiveManager.EnsureInstance();
         PassiveTree tree = manager.Tree;
@@ -51,19 +52,24 @@ public partial class InventoryScreenUI
         DrawPassiveDetail(detailArea, manager);
     }
 
+    /// <summary>머리띠의 아래 끝. 띠와 그 안 글자가 같은 값을 쓴다.</summary>
+    private const float PassiveHeaderBottom = 0.915f;
+
     private void DrawPassiveHeader(PassiveManager manager)
     {
+        // 띠와 그 안의 글자가 같은 높이 범위를 쓴다. 다르면 글자가 모서리에 붙는다.
         UIFactory.CreatePanel("Header", rightPanel, UIPalette.Header,
-            new Vector2(0f, 0.92f), new Vector2(1f, 1f));
+            new Vector2(0f, PassiveHeaderBottom), new Vector2(1f, 1f), UIFactory.RadiusLarge);
 
         UIFactory.CreateLabel(rightPanel,
             $"패시브    계정 Lv.{manager.AccountLevel}", 32, FontStyle.Bold,
-            new Vector2(0.02f, 0.92f), new Vector2(0.55f, 1f), TextAnchor.MiddleLeft);
+            new Vector2(0.035f, PassiveHeaderBottom), new Vector2(0.55f, 1f),
+            TextAnchor.MiddleLeft, UIPalette.TextOnGlass);
 
         UIFactory.CreateLabel(rightPanel,
             $"₡ {manager.Credits:N0}", 30, FontStyle.Bold,
-            new Vector2(0.55f, 0.92f), new Vector2(0.98f, 1f), TextAnchor.MiddleRight,
-            UIPalette.TextAccent);
+            new Vector2(0.55f, PassiveHeaderBottom), new Vector2(0.965f, 1f),
+            TextAnchor.MiddleRight, UIPalette.TextAccent);
     }
 
     /// <summary>계열 5개. 역행은 발견 전까지 「???」다.</summary>
@@ -80,14 +86,20 @@ public partial class InventoryScreenUI
             bool visible = branch != PassiveBranch.Regression || manager.DiscoveredRegression;
             bool active = branch == selectedBranch && visible;
 
-            var min = new Vector2(i * width + 0.006f, 0.82f);
-            var max = new Vector2((i + 1) * width - 0.006f, 0.905f);
+            var min = new Vector2(i * width + 0.006f, 0.800f);
+            var max = new Vector2((i + 1) * width - 0.006f, PassiveHeaderBottom - 0.012f);
 
             Color color = !visible ? UIPalette.SlotLocked
                         : active ? PassiveBranchInfo.Color(branch)
                         : UIPalette.Subtle;
 
             Image cell = UIFactory.CreatePanel($"Branch_{branch}", rightPanel, color, min, max);
+
+            if (visible)
+                UIFactory.AddGlassSheen(cell, UIFactory.Radius);
+
+            UIFactory.CreateOutline(cell,
+                active ? UIPalette.Rim : UIPalette.EdgeSoft, UIFactory.Radius, active ? 3 : 2);
 
             var button = cell.gameObject.AddComponent<Button>();
             button.targetGraphic = cell;
@@ -104,20 +116,22 @@ public partial class InventoryScreenUI
                 continue;
             }
 
+            // 위아래 두 줄로 나눈다. 가운데를 기준으로 갈라야 한쪽만 치우치지 않는다.
             UIFactory.CreateLabel(cell.transform, PassiveBranchInfo.Name(branch), 26,
-                FontStyle.Bold, new Vector2(0.04f, 0.40f), new Vector2(0.96f, 0.96f),
-                TextAnchor.LowerCenter);
+                FontStyle.Bold, new Vector2(0.04f, 0.46f), new Vector2(0.96f, 0.94f),
+                TextAnchor.MiddleCenter, UIPalette.TextOnGlass);
 
             UIFactory.CreateLabel(cell.transform,
-                $"{manager.State.CountIn(tree, branch)}/{tree.CountIn(branch)}", 20,
-                FontStyle.Normal, new Vector2(0.04f, 0.06f), new Vector2(0.96f, 0.40f),
-                TextAnchor.UpperCenter, UIPalette.TextDim);
+                $"{manager.State.CountIn(tree, branch)}/{tree.CountIn(branch)}", 21,
+                FontStyle.Normal, new Vector2(0.04f, 0.06f), new Vector2(0.96f, 0.46f),
+                TextAnchor.MiddleCenter, UIPalette.TextDim);
         }
     }
 
     private void DrawBranchTree(RectTransform area, PassiveManager manager, PassiveTree tree)
     {
-        UIFactory.CreatePanel("TreeBack", area, UIPalette.Header, Vector2.zero, Vector2.one);
+        UIFactory.CreateGlass("TreeBack", area, UIPalette.Inset,
+            Vector2.zero, Vector2.one, UIFactory.Radius, 2);
 
         if (selectedBranch == PassiveBranch.Regression && !manager.DiscoveredRegression)
         {
@@ -214,7 +228,8 @@ public partial class InventoryScreenUI
 
     private void DrawPassiveDetail(RectTransform area, PassiveManager manager)
     {
-        UIFactory.CreatePanel("DetailBack", area, UIPalette.Header, Vector2.zero, Vector2.one);
+        UIFactory.CreateGlass("DetailBack", area, UIPalette.Inset,
+            Vector2.zero, Vector2.one, UIFactory.Radius, 2);
 
         if (selectedNode == null)
         {
