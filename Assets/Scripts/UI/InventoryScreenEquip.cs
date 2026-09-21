@@ -25,14 +25,17 @@ public partial class InventoryScreenUI
         EquipmentLoadout loadout = inventory.Loadout;
         Inventory bag = inventory.Bag;
 
-        ItemStack picked = selected;
-
-        // 고른 것이 없으면 그 자리를 비운다.
-        if (picked == null)
+        // 【빈손으로 슬롯을 누르면 고르기만 한다.】
+        // 예전에는 즉시 벗겨졌다. 무엇을 끼웠는지 확인하려고 누른 것만으로
+        // 장비가 가방으로 돌아가 버렸고, 가방이 차 있으면 그마저 실패했다.
+        // 이제 해제는 우측 행동 줄의 「해제」 한 번을 더 받는다.
+        if (selected == null || selectedSlot.HasValue)
         {
-            UnequipSlot(loadout, bag, slot);
+            SelectEquippedSlot(slot);
             return;
         }
+
+        ItemStack picked = selected;
 
         if (picked.Definition is not EquipmentDefinition definition)
         {
@@ -75,12 +78,51 @@ public partial class InventoryScreenUI
         }
 
         selected = null;
+        selectedSlot = null;
 
         SetHint(previous == null
             ? $"「{definition.DisplayName}」 착용"
             : $"「{definition.DisplayName}」(으)로 교체");
 
         AfterLoadoutChanged(inventory);
+    }
+
+    /// <summary>착용 중인 장비를 고른다. 우측에 상세와 「해제」가 뜬다.</summary>
+    private void SelectEquippedSlot(EquipmentSlot slot)
+    {
+        ItemStack current = PlayerInventory.EnsureInstance().Loadout.Get(slot);
+
+        if (current == null)
+        {
+            selectedSlot = null;
+            selected = null;
+
+            SetHint("빈 자리입니다. 가방에서 장비를 먼저 고르십시오.");
+
+            Refresh();
+            return;
+        }
+
+        // 같은 자리를 다시 누르면 선택을 푼다.
+        bool same = selectedSlot == slot;
+
+        selectedSlot = same ? null : slot;
+        selected = same ? null : current;
+
+        SetHint(DescribeSelection());
+
+        Refresh();
+    }
+
+    /// <summary>행동 줄의 「해제」. 여기까지 와야 실제로 벗는다.</summary>
+    private void UnequipSelectedSlot(EquipmentSlot slot)
+    {
+        PlayerInventory inventory = PlayerInventory.EnsureInstance();
+
+        selected = null;
+        selectedSlot = null;
+
+        UnequipSlot(inventory.Loadout, inventory.Bag, slot);
     }
 
     private void UnequipSlot(EquipmentLoadout loadout, Inventory bag, EquipmentSlot slot)

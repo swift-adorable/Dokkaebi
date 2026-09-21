@@ -208,8 +208,7 @@ public static class PlaytestActions
         Health target = null;
         float best = float.PositiveInfinity;
 
-        foreach (Health health in Object.FindObjectsByType<Health>(
-                     FindObjectsInactive.Exclude, FindObjectsSortMode.None))
+        foreach (Health health in Object.FindObjectsByType<Health>(FindObjectsInactive.Exclude))
         {
             if (health.Team != Team.Enemy || health.IsDead)
                 continue;

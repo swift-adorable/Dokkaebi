@@ -44,6 +44,21 @@ public static class UIFactory
         return canvas;
     }
 
+    /// <summary>
+    /// 안전 영역에 맞춰지는 컨테이너를 만들어 돌려준다.
+    /// 화면 UI는 캔버스가 아니라 **이것의 자식**으로 붙인다.
+    /// 그래야 노치와 홈 인디케이터를 피한다. (SafeAreaFitter)
+    /// </summary>
+    public static RectTransform CreateSafeArea(Canvas canvas)
+    {
+        RectTransform area = CreateRegion("SafeArea", canvas.transform,
+            Vector2.zero, Vector2.one);
+
+        area.gameObject.AddComponent<SafeAreaFitter>();
+
+        return area;
+    }
+
     public static GameObject CreateChild(string name, Transform parent)
     {
         var child = new GameObject(name);

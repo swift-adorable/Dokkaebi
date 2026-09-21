@@ -26,6 +26,12 @@ public static class UIPalette
     /// <summary>선택된 칸.</summary>
     public static readonly Color SlotSelected = new(0.36f, 0.56f, 0.82f, 0.98f);
 
+    /// <summary>
+    /// 고른 장비가 들어갈 수 있는 자리. 선택색(파랑)과 확실히 달라야 한다 —
+    /// 「지금 고른 것」과 「여기 넣을 수 있다」는 다른 뜻이다.
+    /// </summary>
+    public static readonly Color SlotEquippable = new(0.24f, 0.55f, 0.40f, 0.97f);
+
     /// <summary>잠긴 칸.</summary>
     public static readonly Color SlotLocked = new(0.10f, 0.11f, 0.13f, 0.85f);
 
