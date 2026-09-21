@@ -28,16 +28,22 @@ public partial class InventoryScreenUI
         }
     }
 
+    /// <summary>머리띠의 아래 끝. 띠와 그 안 글자가 같은 값을 쓴다.</summary>
+    private const float SocketHeaderBottom = 0.895f;
+
     private void DrawSocketPanel()
     {
-        UIFactory.CreatePanel("Back", rightPanel, UIPalette.Panel, Vector2.zero, Vector2.one);
+        UIFactory.CreateGlass("Back", rightPanel, UIPalette.Panel,
+            Vector2.zero, Vector2.one, UIFactory.RadiusLarge);
 
         SkillManager manager = SkillManager.EnsureInstance();
         SocketedBuild build = manager.Build;
         SocketCapacity capacity = build.Capacity;
 
+        // 머리띠와 그 위 글자는 **같은 높이 범위**를 써야 한다.
+        // 띠는 0.90~1.0인데 글자만 0.90~1.0으로 두면 위 모서리에 붙는다.
         UIFactory.CreatePanel("Header", rightPanel, UIPalette.Header,
-            new Vector2(0f, 0.90f), new Vector2(1f, 1f));
+            new Vector2(0f, SocketHeaderBottom), new Vector2(1f, 1f), UIFactory.RadiusLarge);
 
         int next = SocketUnlockTable.NextUnlockLevel(build.AwakeningLevel);
 
@@ -47,11 +53,12 @@ public partial class InventoryScreenUI
 
         UIFactory.CreateLabel(rightPanel,
             $"각성 Lv.{build.AwakeningLevel}", 32, FontStyle.Bold,
-            new Vector2(0.03f, 0.90f), new Vector2(0.45f, 1f), TextAnchor.MiddleLeft);
+            new Vector2(0.035f, SocketHeaderBottom), new Vector2(0.45f, 1f),
+            TextAnchor.MiddleLeft, UIPalette.TextOnGlass);
 
         UIFactory.CreateLabel(rightPanel, nextText, 24, FontStyle.Normal,
-            new Vector2(0.45f, 0.90f), new Vector2(0.97f, 1f), TextAnchor.MiddleRight,
-            UIPalette.TextDim);
+            new Vector2(0.45f, SocketHeaderBottom), new Vector2(0.965f, 1f),
+            TextAnchor.MiddleRight, UIPalette.TextDim);
 
         // 핵심 2줄 — 각 줄이 [핵심][소켓 1][소켓 2][소켓 3]이다.
         float rowHeight = 0.135f;
@@ -97,7 +104,7 @@ public partial class InventoryScreenUI
         UIFactory.CreateLabel(rightPanel,
             "가방에서 젬을 고른 뒤 자리를 누르십시오. 끼워진 자리를 그냥 누르면 빠집니다.",
             22, FontStyle.Normal,
-            new Vector2(0.03f, 0.02f), new Vector2(0.97f, 0.10f),
+            new Vector2(0.035f, 0.035f), new Vector2(0.965f, 0.12f),
             TextAnchor.MiddleLeft, UIPalette.TextDim);
     }
 
@@ -117,6 +124,14 @@ public partial class InventoryScreenUI
 
         Image cell = UIFactory.CreatePanel(
             $"Slot_{slot.Kind}_{slot.CoreIndex}_{slot.Index}", rightPanel, color, min, max);
+
+        if (unlocked)
+            UIFactory.AddGlassSheen(cell, UIFactory.Radius);
+
+        UIFactory.CreateOutline(cell,
+            isCandidate ? UIPalette.Brighten(UIPalette.SlotSelected, 0.22f)
+                        : unlocked ? UIPalette.EdgeSoft : UIPalette.Edge,
+            UIFactory.Radius, isCandidate ? 3 : 2);
 
         var button = cell.gameObject.AddComponent<Button>();
         button.targetGraphic = cell;

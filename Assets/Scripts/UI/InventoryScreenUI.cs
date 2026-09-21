@@ -379,6 +379,11 @@ public partial class InventoryScreenUI : MonoBehaviour
 
         if (GameManager.HasInstance)
             GameManager.Instance.OpenSkill();
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        // 검증 패널은 이 화면 뒤에 있다. 켜져 있으면 글자가 비쳐 보인다.
+        PlaytestPanelUI.SetHiddenByScreen(true);
+#endif
     }
 
     public void Close()
@@ -392,6 +397,10 @@ public partial class InventoryScreenUI : MonoBehaviour
 
         if (GameManager.HasInstance)
             GameManager.Instance.CloseSkill();
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        PlaytestPanelUI.SetHiddenByScreen(false);
+#endif
     }
 
     private void SelectTab(Tab next)

@@ -203,11 +203,8 @@ public static class UIFactory
             new Vector2(0.04f, 0f), new Vector2(0.96f, 1f),
             TextAnchor.MiddleCenter, textColor ?? UIPalette.Text);
 
-        // 【줄이 칸보다 크면 Unity는 글자를 아예 그리지 않는다.】
-        // 배지는 높이가 20픽셀도 안 되는데 글꼴은 그보다 크다.
-        // Truncate로 두면 알약만 까맣게 남고 숫자가 사라진다 — 실제로 그랬다.
+        // 숫자는 줄바꿈하지 않는다. 「12」가 「1 / 2」로 갈리면 안 된다.
         label.horizontalOverflow = HorizontalWrapMode.Overflow;
-        label.verticalOverflow = VerticalWrapMode.Overflow;
 
         label.raycastTarget = false;
 
@@ -234,7 +231,14 @@ public static class UIFactory
         label.alignment = alignment;
         label.color = color ?? UIPalette.Text;
         label.horizontalOverflow = HorizontalWrapMode.Wrap;
-        label.verticalOverflow = VerticalWrapMode.Truncate;
+
+        // 【Truncate로 두지 않는다.】
+        // Unity Text는 한 줄이 칸보다 크면 그 줄을 **아예 그리지 않는다.**
+        // 잘라서 보여 주는 것이 아니라 통째로 사라진다.
+        // 개수 배지와 패시브 계열의 진행도가 그렇게 없어졌고,
+        // 「표시가 안 된다」와 「값이 없다」를 구분할 수 없었다.
+        // 넘치더라도 보이는 편이 낫다 — 넘치면 눈에 띄어 고치게 된다.
+        label.verticalOverflow = VerticalWrapMode.Overflow;
 
         // 글자가 터치를 가로채면 아래의 칸 버튼이 눌리지 않는다.
         label.raycastTarget = false;
