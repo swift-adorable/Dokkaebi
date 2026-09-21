@@ -58,10 +58,23 @@ public static class PlaytestTools
 
         PlayerInventory.Instance.RefreshCapacity();
 
-        Debug.Log($"[Playtest] {added}개를 가방에 넣었습니다. "
-                  + $"({bag.UsedSlots}/{bag.SlotCapacity}칸, {bag.TotalWeight:0.0}/{bag.WeightLimit:0.0}kg)");
+        Report($"{added}개를 가방에 넣었습니다. "
+               + $"({bag.UsedSlots}/{bag.SlotCapacity}칸, {bag.TotalWeight:0.0}/{bag.WeightLimit:0.0}kg)");
 
         return added;
+    }
+
+    /// <summary>
+    /// 결과를 콘솔과 화면 양쪽에 남긴다.
+    ///
+    /// 에디터 Console 창(Window ▸ General ▸ Console)을 띄워 두지 않으면
+    /// Debug.Log는 없는 것과 같다. 가방 화면을 열어 같은 문장을 보여 준다.
+    /// </summary>
+    private static void Report(string message)
+    {
+        Debug.Log($"[Playtest] {message}");
+
+        InventoryScreenUI.ShowBagWithMessage(message);
     }
 
     // ── 지급 ──────────────────────────────────────────────────────────
@@ -162,7 +175,61 @@ public static class PlaytestTools
                 break;
         }
 
-        Debug.Log($"[Playtest] {bag.TotalWeight:0.0}/{bag.WeightLimit:0.0}kg — {bag.Encumbrance}");
+        Report($"{bag.TotalWeight:0.0}/{bag.WeightLimit:0.0}kg — {bag.Encumbrance}");
+    }
+
+    // ── 젬 ────────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// 젬은 적 드랍이 유일한 경로다. 그래서 8번(젬이 효과를 내는가)을
+    /// 확인하려면 원하는 젬이 떨어질 때까지 기다려야 했다. 직접 준다.
+    /// </summary>
+    private static void GiveGems(System.Func<SkillDefinition, bool> filter, string label)
+    {
+        List<ItemDefinition> gems = LoadFolder("Gems")
+            .Where(g => g.Skill != null && filter(g.Skill))
+            .OrderBy(g => g.Skill.RequiredLevel)
+            .ThenBy(g => g.Id)
+            .ToList();
+
+        if (gems.Count == 0)
+        {
+            Report($"{label} 젬 에셋이 없습니다. 「Blob/Skill/젬 에셋 생성」을 먼저 실행하십시오.");
+            return;
+        }
+
+        Give(gems);
+    }
+
+    [MenuItem(Menu + "젬 — Core 전부")]
+    public static void GiveCoreGems()
+    {
+        if (!RequirePlayMode()) return;
+
+        GiveGems(s => s.Category == SkillCategory.Core, "Core");
+    }
+
+    [MenuItem(Menu + "젬 — Support 전부")]
+    public static void GiveSupportGems()
+    {
+        if (!RequirePlayMode()) return;
+
+        GiveGems(s => s.Category == SkillCategory.Support, "Support");
+    }
+
+    /// <summary>체크리스트 8번의 최소 구성. 가방을 덜 먹는다.</summary>
+    [MenuItem(Menu + "젬 — 서리 Core · 깊은 상처 · 원거리 사격")]
+    public static void GiveCheckListGems()
+    {
+        if (!RequirePlayMode()) return;
+
+        Give(new ItemDefinition[]
+        {
+            Load<ItemDefinition>("Gems/gem_core_frost.asset"),
+            Load<ItemDefinition>("Gems/gem_core_laceration.asset"),
+            Load<ItemDefinition>("Gems/gem_sup_deep_cuts.asset"),
+            Load<ItemDefinition>("Gems/gem_sup_far_shot.asset")
+        });
     }
 
     // ── 상태 확인 ─────────────────────────────────────────────────────
@@ -185,15 +252,23 @@ public static class PlaytestTools
 
         LoadoutSnapshot s = loadout.Current;
 
-        Debug.Log(
-            $"[Playtest] 피해 {s.Weapon.Damage:0.#} / 간격 {s.Weapon.FireInterval:0.###}s "
+        string line =
+            $"피해 {s.Weapon.Damage:0.#} / 간격 {s.Weapon.FireInterval:0.###}s "
             + $"/ 사거리 {s.Weapon.EffectiveRange:0.#}m / 관통 {s.Weapon.ArmourPenetration}\n"
             + $"치명타 {s.Weapon.CriticalChance:P0} × {s.Weapon.CriticalMultiplier:0.##} "
             + $"/ 기대 DPS {s.Weapon.ExpectedDps:0.#}\n"
             + $"방어도 머리 {s.Defence.headArmour:0.##} · 몸통 {s.Defence.bodyArmour:0.##} "
             + $"/ 최대 체력 {s.MaxHealth}\n"
             + $"이동 ×{s.MoveScale:0.##} / 대시 거리 ×{s.DashDistanceScale:0.##} "
-            + $"· 쿨 ×{s.DashCooldownScale:0.##} / 무게 {s.Encumbrance}");
+            + $"· 쿨 ×{s.DashCooldownScale:0.##} / 무게 {s.Encumbrance}";
+
+        Debug.Log("[Playtest] " + line);
+
+        InventoryScreenUI.ShowBagWithMessage(
+            $"피해 {s.Weapon.Damage:0.#} · 간격 {s.Weapon.FireInterval:0.###}s "
+            + $"· 사거리 {s.Weapon.EffectiveRange:0.#}m · 관통 {s.Weapon.ArmourPenetration} "
+            + $"· 치명타 {s.Weapon.CriticalChance:P0} · 방어도 {s.Defence.bodyArmour:0.##} "
+            + $"· 이동 ×{s.MoveScale:0.##}");
     }
 
     /// <summary>가장 가까운 적에게 상태이상을 건다. 임계 전이를 눈으로 확인한다.</summary>

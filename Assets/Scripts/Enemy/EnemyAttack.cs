@@ -80,6 +80,12 @@ public class EnemyAttack : MonoBehaviour
 
     public float AttackRange => attackRange;
 
+    /// <summary>기본 피해. 프리팹 수치가 전투 정본과 맞는지 테스트가 읽는다.</summary>
+    public int Damage => damage;
+
+    /// <summary>방어 관통 레벨.</summary>
+    public int ArmourPenetration => armourPenetration;
+
     /// <summary>이 적의 공격 방식.</summary>
     public EnemyAttackKind Kind => attackKind;
 

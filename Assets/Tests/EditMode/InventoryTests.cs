@@ -275,5 +275,76 @@ namespace Blob.Tests
             Assert.AreEqual(5, inv.Remove(item, 99), "있는 만큼만 빠져야 합니다.");
             Assert.AreEqual(0, inv.UsedSlots, "빈 칸은 정리되어야 합니다.");
         }
+
+        // ── TryAddStack — 전리품 창이 쓰는 경로 ──────────────────────────
+        // 이 경로가 병합하지 않아서 고철을 세 번 주우면 세 칸을 먹었다.
+
+        [Test]
+        public void 개체로_담아도_같은_아이템끼리_겹친다()
+        {
+            var inv = new Inventory(slots: 5, weight: 100f);
+            ItemDefinition scrap = Create("scrap", stackMax: 20);
+
+            Assert.IsTrue(inv.TryAddStack(new ItemStack(scrap, 5)));
+            Assert.IsTrue(inv.TryAddStack(new ItemStack(scrap, 5)));
+            Assert.IsTrue(inv.TryAddStack(new ItemStack(scrap, 5)));
+
+            Assert.AreEqual(1, inv.UsedSlots,
+                "스택 상한 20인데 15개가 세 칸을 차지했습니다.");
+
+            Assert.AreEqual(15, inv.CountOf(scrap));
+        }
+
+        [Test]
+        public void 개체로_담을_때_스택_상한을_넘으면_다음_칸으로_넘어간다()
+        {
+            var inv = new Inventory(slots: 5, weight: 100f);
+            ItemDefinition ammo = Create("ammo", stackMax: 10);
+
+            Assert.IsTrue(inv.TryAddStack(new ItemStack(ammo, 8)));
+            Assert.IsTrue(inv.TryAddStack(new ItemStack(ammo, 7)));
+
+            Assert.AreEqual(2, inv.UsedSlots, "10 + 5로 두 칸이어야 합니다.");
+            Assert.AreEqual(15, inv.CountOf(ammo));
+        }
+
+        /// <summary>
+        /// 전리품 한 칸이 반만 옮겨지면 유저가 무엇을 가져왔는지 알 수 없다.
+        /// 들어갈 자리가 없으면 원본을 건드리지 않고 통째로 거절해야 한다.
+        /// </summary>
+        [Test]
+        public void 개체로_담을_때_전량이_안_들어가면_원본을_건드리지_않는다()
+        {
+            var inv = new Inventory(slots: 1, weight: 100f);
+            ItemDefinition ammo = Create("ammo", stackMax: 10);
+
+            inv.TryAdd(ammo, 8);
+
+            var incoming = new ItemStack(ammo, 7);
+
+            Assert.IsFalse(inv.TryAddStack(incoming),
+                "한 칸에 2개만 들어가므로 거절해야 합니다.");
+
+            Assert.AreEqual(7, incoming.Count,
+                "거절했는데 원본에서 일부가 빠져나갔습니다.");
+
+            Assert.AreEqual(8, inv.CountOf(ammo), "가방도 그대로여야 합니다.");
+        }
+
+        [Test]
+        public void 내구도가_있는_물건은_개체_그대로_들어간다()
+        {
+            var inv = new Inventory(slots: 5, weight: 100f);
+            ItemDefinition armour = Create("armour", ItemKind.Armour, maxDurability: 100);
+
+            var worn = new ItemStack(armour, 1);
+            worn.Damage(60);
+
+            Assert.IsTrue(inv.TryAddStack(worn));
+            Assert.IsTrue(inv.TryAddStack(new ItemStack(armour, 1)));
+
+            Assert.AreEqual(2, inv.UsedSlots,
+                "내구도가 다른 개체를 합치면 한쪽 내구도가 사라집니다.");
+        }
     }
 }

@@ -144,7 +144,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Blob.Runtime::Health
   team: 1
-  maxHealth: 3
+  maxHealth: 20
   invulnerableDuration: 0
 --- !u!54 &2202289866955090440
 Rigidbody:
@@ -203,7 +203,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d681ecc493445441fb3f81fbcf09ca6a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Blob.Runtime::EnemyAttack
-  damage: 1
+  damage: 8
   attackRange: 1.6
   windupDuration: 0.35
   attackCooldown: 1.2
