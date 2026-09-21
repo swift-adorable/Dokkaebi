@@ -277,7 +277,8 @@ public class EnemyAttack : MonoBehaviour
         // 적의 탄은 플레이어를 향한다. 탄 프리팹의 targetTeam이 Player여야 한다.
         if (projectile.TryGetComponent(out BulletController bullet))
         {
-            bullet.ConfigureAsEnemyShot(damage, attackRange, armourPenetration, appliedStatus, origin);
+            bullet.ConfigureAsEnemyShot(damage, attackRange, armourPenetration, appliedStatus,
+                origin, aggro != null ? aggro.Faction : Faction.Wild);
 
             // 플레이어와 겹친 상태로 쏠 때도 같은 문제가 생긴다. 같은 규칙을 적용한다.
             bullet.ResolveMuzzleOverlap(

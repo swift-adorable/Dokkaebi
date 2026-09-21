@@ -165,6 +165,42 @@ namespace Blob.Tests
             Assert.AreEqual(AggroSelector.NoTarget, Pick(Faction.Wild, list));
         }
 
+        // ── 4. 탄의 대상 판정 ─────────────────────────────────────────
+        // BulletController.CanHit이 쓰는 규칙과 같은 판정이다.
+        // 탄은 MonoBehaviour라 EditMode에서 직접 못 돌리므로,
+        // 【그 안에서 부르는 판정 함수】를 여기서 강제한다.
+
+        [Test]
+        public void 적_탄은_같은_소속을_맞히지_않는다()
+        {
+            Assert.IsFalse(FactionTable.IsHostile(Faction.Wild, Faction.Wild),
+                "같은 소속이 서로를 쏩니다.");
+
+            Assert.IsTrue(FactionTable.IsHostile(Faction.Wild, Faction.Facility),
+                "다른 소속을 못 쏩니다. 난전이 성립하지 않습니다.");
+        }
+
+        [Test]
+        public void 적_탄은_우호를_맞히지_않는다()
+        {
+            foreach (Faction f in (Faction[])System.Enum.GetValues(typeof(Faction)))
+                Assert.IsFalse(FactionTable.IsHostile(f, Faction.Friendly), $"{f} → 우호");
+        }
+
+        [Test]
+        public void 우호가_쏜_탄은_플레이어를_맞히지_않는다()
+        {
+            Assert.IsFalse(FactionTable.IsHostileToPlayer(Faction.Friendly));
+
+            foreach (Faction f in (Faction[])System.Enum.GetValues(typeof(Faction)))
+            {
+                if (f == Faction.Friendly)
+                    continue;
+
+                Assert.IsTrue(FactionTable.IsHostileToPlayer(f), $"{f}가 플레이어를 못 쏩니다.");
+            }
+        }
+
         [Test]
         public void 더_가까운_적대와_더_먼_플레이어_중_가까운_쪽을_문다()
         {

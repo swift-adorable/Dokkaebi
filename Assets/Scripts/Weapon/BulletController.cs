@@ -37,8 +37,22 @@ public class BulletController : MonoBehaviour, IPoolable
     [Tooltip("자동 소멸까지의 시간(초)")]
     [SerializeField] private float lifetime = 3f;
 
-    [Tooltip("이 소속의 대상에게만 피해를 준다.")]
+    [Tooltip("이 소속의 대상에게만 피해를 준다. 적 탄은 소속 대신 진영으로 거른다.")]
     [SerializeField] private Team targetTeam = Team.Enemy;
+
+    /// <summary>
+    /// 쏜 쪽의 진영. 적 탄만 쓴다.
+    ///
+    /// 【Team만으로는 난전이 성립하지 않는다.】
+    /// 적 탄은 targetTeam = Team.Player로 고정돼 있어, 진영을 넣어도
+    /// 적의 총알이 다른 적을 맞히는 일이 영영 없었다.
+    /// Team은 「총알이 누구를 때리는가」의 큰 구분이고,
+    /// Faction은 그 안에서 「누가 누구와 싸우는가」다. 축이 둘이다.
+    /// </summary>
+    private Faction shooterFaction = Faction.Wild;
+
+    /// <summary>적이 쏜 탄인가. 켜지면 Team 대신 진영으로 거른다.</summary>
+    private bool useFactionGate;
 
     [Header("Behaviour Tuning")]
     [Tooltip("분열(Split) 시 좌우 최대 각도(도). 3갈래가 -각도 / 0 / +각도로 퍼진다.")]
@@ -106,6 +120,14 @@ public class BulletController : MonoBehaviour, IPoolable
         ricochetState.Clear();
 
         AppliedStatus = StatusEffectType.None;
+
+        // 【풀에서 재사용될 때 반드시 끈다.】
+        // 적 탄으로 쓰인 오브젝트가 플레이어 탄으로 돌아왔을 때
+        // 진영 판정이 켜진 채면 플레이어 총알이 적을 못 맞힌다.
+        // 켜는 쪽(ConfigureAsEnemyShot)만 두고 끄는 쪽을 잊는 것이
+        // 풀링에서 가장 흔한 실패다.
+        useFactionGate = false;
+        shooterFaction = Faction.Wild;
     }
 
     public void OnDespawned()
@@ -148,8 +170,13 @@ public class BulletController : MonoBehaviour, IPoolable
     /// (docs/Blob_Combat_Baseline.md 4절)
     /// </summary>
     public void ConfigureAsEnemyShot(
-        int shotDamage, float range, int penetration, StatusEffectType status, Vector3 origin)
+        int shotDamage, float range, int penetration, StatusEffectType status, Vector3 origin,
+        Faction faction = Faction.Wild)
     {
+        // 적 탄만 진영으로 거른다. 여기서 켠다.
+        shooterFaction = faction;
+        useFactionGate = true;
+
         damage = Mathf.Max(1, shotDamage);
         effectiveRange = Mathf.Max(0f, range);
         armourPenetration = Mathf.Max(0, penetration);
@@ -353,7 +380,7 @@ public class BulletController : MonoBehaviour, IPoolable
         if (!other.TryGetComponent(out Health targetHealth))
             return false;
 
-        if (targetHealth.Team != targetTeam)
+        if (!CanHit(targetHealth, other.transform))
             return false;
 
         // 같은 대상을 다시 때리지 않는다. 귀환 중에만 재타격이 허용된다. (v5 §10)
@@ -368,6 +395,33 @@ public class BulletController : MonoBehaviour, IPoolable
         ResolveBehaviour(other.transform);
 
         return true;
+    }
+
+    /// <summary>
+    /// 이 탄이 이 대상을 때릴 수 있는가.
+    ///
+    /// 플레이어 탄은 예전 그대로 Team만 본다 — 플레이어가 무엇을 쏠지는
+    /// 진영이 정하는 것이 아니라 유저가 정한다.
+    /// 적 탄만 진영을 본다. 그래야 같은 편을 쏘지 않으면서
+    /// 다른 소속은 쏠 수 있다.
+    /// </summary>
+    private bool CanHit(Health targetHealth, Transform target)
+    {
+        if (!useFactionGate)
+            return targetHealth.Team == targetTeam;
+
+        if (targetHealth.Team == Team.Player)
+            return FactionTable.IsHostileToPlayer(shooterFaction);
+
+        if (targetHealth.Team != Team.Enemy)
+            return false;
+
+        // 소속을 모르는 적은 야생으로 본다. EnemyIdentity가 붙기 전의 프리팹이다.
+        Faction otherFaction = target.TryGetComponent(out EnemyIdentity identity)
+            ? identity.Faction
+            : Faction.Wild;
+
+        return FactionTable.IsHostile(shooterFaction, otherFaction);
     }
 
     /// <summary>
@@ -418,10 +472,15 @@ public class BulletController : MonoBehaviour, IPoolable
             bypassArmour = false
         };
 
-        // 난이도 배율은 【적이 주는 피해】에만 곱한다.
+        // 난이도 배율은 【플레이어가 맞을 때】에만 곱한다.
         // 플레이어 탄에 곱하면 "쉬운 난이도에서 내가 더 세진다"가 되어
         // 난이도가 적을 약하게 만드는 축이 아니라 나를 강하게 만드는 축이 된다.
-        float difficulty = targetTeam == Team.Player ? GameManager.EnemyDamageMultiplier : 1f;
+        //
+        // 【targetTeam이 아니라 맞은 쪽을 본다.】
+        // 적 탄이 다른 적을 맞힐 수 있게 된 뒤로는 targetTeam이
+        // "누가 맞았는가"를 더 이상 말해 주지 않는다. 그대로 뒀다면
+        // 적끼리의 싸움에까지 난이도 배율이 곱해졌을 것이다.
+        float difficulty = target.Team == Team.Player ? GameManager.EnemyDamageMultiplier : 1f;
 
         target.TakeDamage(request, difficulty);
     }

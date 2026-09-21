@@ -12,6 +12,7 @@ using UnityEngine;
 /// 그래서 주기마다 한 번, 그리고 대상을 잃었을 때만 다시 고른다.
 /// 개체마다 첫 판단 시점을 흩어 두어 같은 프레임에 몰리지 않게 한다.
 /// </summary>
+[RequireComponent(typeof(Health))]
 public class EnemyAggro : MonoBehaviour, IPoolable
 {
     [Header("Aggro")]
@@ -24,24 +25,44 @@ public class EnemyAggro : MonoBehaviour, IPoolable
     [SerializeField] private float reevaluateInterval = 0.4f;
 
     /// <summary>
-    /// 후보를 담는 공용 버퍼.
+    /// 지금 살아 있는 전부.
     ///
-    /// 【static인 이유】 개체마다 리스트를 들면 적 60마리면 60개다.
-    /// 판단은 한 번에 하나만 돌므로 하나를 돌려 쓴다.
+    /// 【EnemyManager.ActiveEnemies를 훑지 않는 이유】
+    /// 그쪽을 쓰면 후보마다 GetComponent&lt;EnemyAggro&gt;를 해야 한다.
+    /// 적 60마리 × 판단 주기마다면 적지 않다. 자기가 등록한다.
+    /// </summary>
+    private static readonly List<EnemyAggro> Live = new(64);
+
+    /// <summary>
+    /// 후보를 담는 공용 버퍼. 판단은 한 번에 하나만 도므로 하나를 돌려 쓴다.
     /// 매 프레임 경로에서 GC Alloc을 만들지 않는다. (마스터 프롬프트 7-2)
     /// </summary>
     private static readonly List<AggroCandidate> Buffer = new(64);
 
+    /// <summary>
+    /// 식별자 발급기.
+    ///
+    /// 【GetInstanceID를 쓰지 않는 이유】
+    /// Unity 6에서 폐기 예정이고, 후속인 EntityId는 int로 담을 수 없다.
+    /// AggroSelector는 순수 클래스라 Unity 타입에 묶이면 안 된다.
+    /// 1부터 센다 — 0은 플레이어 자리다.
+    /// </summary>
+    private static int nextId = 1;
+
+    private Health health;
     private EnemyIdentity identity;
     private EnemyManager enemyManager;
 
     private float nextEvaluateTime;
     private int targetId = AggroSelector.NoTarget;
 
+    /// <summary>이 개체의 식별자. 살아 있는 동안 바뀌지 않는다.</summary>
+    public int SelfId { get; private set; }
+
     /// <summary>지금 노리는 대상. 없으면 null.</summary>
     public Transform Target { get; private set; }
 
-    /// <summary>노리는 대상의 소속. 대상이 없으면 Friendly를 돌려준다(= 치지 않음).</summary>
+    /// <summary>노리는 대상의 소속. 대상이 없으면 우호를 돌려준다(= 치지 않음).</summary>
     public Faction TargetFaction { get; private set; } = Faction.Friendly;
 
     /// <summary>이 개체의 소속. EnemyIdentity가 없으면 야생으로 본다.</summary>
@@ -49,8 +70,17 @@ public class EnemyAggro : MonoBehaviour, IPoolable
 
     private void Awake()
     {
+        health = GetComponent<Health>();
         identity = GetComponent<EnemyIdentity>();
+
+        SelfId = nextId++;
     }
+
+    // 등록은 OnEnable/OnDisable에서 한다 —
+    // 씬에 직접 놓인 적은 OnSpawned가 오지 않는다.
+    private void OnEnable() => Live.Add(this);
+
+    private void OnDisable() => Live.Remove(this);
 
     public void OnSpawned()
     {
@@ -99,55 +129,48 @@ public class EnemyAggro : MonoBehaviour, IPoolable
                 faction = Faction.Friendly,
                 position = player.position,
                 isPlayer = true,
-                isAlive = !player.TryGetComponent(out Health h) || !h.IsDead
+                isAlive = !player.TryGetComponent(out Health playerHealth) || !playerHealth.IsDead
             });
         }
 
-        IReadOnlyList<EnemyController> others = enemyManager.ActiveEnemies;
-
-        for (int i = 0; i < others.Count; i++)
+        for (int i = 0; i < Live.Count; i++)
         {
-            EnemyController other = others[i];
+            EnemyAggro other = Live[i];
 
-            if (other == null)
+            if (other == null || other == this)
                 continue;
-
-            var otherAggro = other.GetComponent<EnemyAggro>();
 
             Buffer.Add(new AggroCandidate
             {
-                id = other.gameObject.GetInstanceID(),
-                faction = otherAggro != null ? otherAggro.Faction : Faction.Wild,
+                id = other.SelfId,
+                faction = other.Faction,
                 position = other.transform.position,
                 isPlayer = false,
-                isAlive = other.Health != null && !other.Health.IsDead
+                isAlive = other.health == null || !other.health.IsDead
             });
         }
-
-        int selfId = gameObject.GetInstanceID();
 
         bool infinite = identity != null && identity.Profile.chasesForever;
 
         int picked = AggroSelector.Select(
-            Faction, transform.position, detectRange, targetId, infinite, Buffer, selfId);
+            Faction, transform.position, detectRange, targetId, infinite, Buffer, SelfId);
 
         if (picked == targetId && Target != null)
             return;
 
         targetId = picked;
 
-        Resolve(picked, player, others);
+        Resolve(picked, player);
     }
 
     /// <summary>고른 식별자를 실제 Transform으로 돌린다.</summary>
-    private void Resolve(int picked, Transform player, IReadOnlyList<EnemyController> others)
+    private void Resolve(int picked, Transform player)
     {
+        Target = null;
+        TargetFaction = Faction.Friendly;
+
         if (picked == AggroSelector.NoTarget)
-        {
-            Target = null;
-            TargetFaction = Faction.Friendly;
             return;
-        }
 
         if (picked == AggroSelector.PlayerId)
         {
@@ -159,21 +182,16 @@ public class EnemyAggro : MonoBehaviour, IPoolable
             return;
         }
 
-        for (int i = 0; i < others.Count; i++)
+        for (int i = 0; i < Live.Count; i++)
         {
-            EnemyController other = others[i];
+            EnemyAggro other = Live[i];
 
-            if (other == null || other.gameObject.GetInstanceID() != picked)
+            if (other == null || other.SelfId != picked)
                 continue;
 
             Target = other.transform;
-
-            var otherAggro = other.GetComponent<EnemyAggro>();
-            TargetFaction = otherAggro != null ? otherAggro.Faction : Faction.Wild;
+            TargetFaction = other.Faction;
             return;
         }
-
-        Target = null;
-        TargetFaction = Faction.Friendly;
     }
 }
