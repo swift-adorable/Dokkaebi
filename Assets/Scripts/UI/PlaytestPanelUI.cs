@@ -142,7 +142,6 @@ public class PlaytestPanelUI : MonoBehaviour
         button.targetGraphic = image;
         button.onClick.AddListener(Toggle);
 
-        UIFactory.AddGlassSheen(image, UIFactory.Radius);
         UIFactory.CreateOutline(image, UIPalette.Rim, UIFactory.Radius, 2);
 
         UIFactory.CreateLabel(image.transform, "검증", 26, FontStyle.Bold,

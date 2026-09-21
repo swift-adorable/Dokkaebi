@@ -95,9 +95,6 @@ public partial class InventoryScreenUI
 
             Image cell = UIFactory.CreatePanel($"Branch_{branch}", rightPanel, color, min, max);
 
-            if (visible)
-                UIFactory.AddGlassSheen(cell, UIFactory.Radius);
-
             UIFactory.CreateOutline(cell,
                 active ? UIPalette.Rim : UIPalette.EdgeSoft, UIFactory.Radius, active ? 3 : 2);
 

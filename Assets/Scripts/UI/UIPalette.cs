@@ -100,12 +100,6 @@ public static class UIPalette
     /// </summary>
     public static readonly Color Rim = new(0.78f, 0.86f, 1f, 0.30f);
 
-    /// <summary>위쪽 절반을 덮는 넓고 옅은 광택. 판에 두께를 준다.</summary>
-    public static readonly Color SheenWide = new(1f, 1f, 1f, 0.045f);
-
-    /// <summary>맨 윗변의 얇고 밝은 띠. 모서리 하이라이트다.</summary>
-    public static readonly Color SheenEdge = new(1f, 1f, 1f, 0.10f);
-
     /// <summary>
     /// 반투명 위에 올릴 때 쓰는 글자색. 배경이 비쳐도 읽히도록
     /// 기본 글자보다 한 단계 밝다.
