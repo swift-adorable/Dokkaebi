@@ -118,6 +118,53 @@ public static class UIFactory
     }
 
     /// <summary>
+    /// 유리판. 반투명 바탕 + 위쪽 광택 + 밝은 테두리로 「비치는 판」을 만든다.
+    ///
+    /// 【진짜 블러가 아닌 이유】
+    /// ScreenSpaceOverlay 캔버스는 뒤 화면을 텍스처로 받을 수 없어서
+    /// 실제 배경 흐림은 별도 카메라와 셰이더가 필요하다. 지금 단계에서는
+    /// 그 비용이 얻는 것보다 크다.
+    ///
+    /// 대신 유리처럼 보이게 하는 세 가지를 쌓는다 —
+    ///   1) 낮은 알파 : 뒤가 비친다
+    ///   2) 위쪽 광택 : 빛이 위에서 든다는 신호. 이것 하나로 평면이 판으로 바뀐다
+    ///   3) 밝은 테두리 : 유리의 모서리. 면과 면을 갈라 준다
+    /// </summary>
+    public static Image CreateGlass(
+        string name, Transform parent, Color tint,
+        Vector2 anchorMin, Vector2 anchorMax, int radius = RadiusLarge,
+        int rimThickness = 2)
+    {
+        Image body = CreatePanel(name, parent, tint, anchorMin, anchorMax, radius);
+
+        AddGlassSheen(body, radius);
+
+        CreateOutline(body, UIPalette.Rim, radius, rimThickness);
+
+        return body;
+    }
+
+    /// <summary>
+    /// 위쪽 광택만 얹는다. 이미 만들어 둔 판을 유리처럼 보이게 할 때 쓴다.
+    ///
+    /// 두 겹으로 나누는 이유 — 넓고 옅은 띠는 「빛을 받은 면」,
+    /// 얇고 밝은 띠는 「모서리에 맺힌 하이라이트」다.
+    /// 하나만 쓰면 그냥 밝은 사각형으로 보인다.
+    /// </summary>
+    public static void AddGlassSheen(Image body, int radius = RadiusLarge)
+    {
+        Image wide = CreatePanel("Sheen", body.transform, UIPalette.SheenWide,
+            new Vector2(0f, 0.52f), new Vector2(1f, 1f), radius);
+
+        wide.raycastTarget = false;
+
+        Image edge = CreatePanel("SheenEdge", body.transform, UIPalette.SheenEdge,
+            new Vector2(0.02f, 0.93f), new Vector2(0.98f, 1f), radius);
+
+        edge.raycastTarget = false;
+    }
+
+    /// <summary>
     /// 윤곽선을 얹는다. 대상의 자식으로 들어가며 클릭을 가로채지 않는다.
     ///
     /// 왜 별도 이미지인가 — Image는 색을 하나만 가진다.
@@ -153,8 +200,14 @@ public static class UIFactory
         pill.raycastTarget = false;
 
         Text label = CreateLabel(pill.transform, text, fontSize, FontStyle.Bold,
-            new Vector2(0.08f, 0f), new Vector2(0.92f, 1f),
+            new Vector2(0.04f, 0f), new Vector2(0.96f, 1f),
             TextAnchor.MiddleCenter, textColor ?? UIPalette.Text);
+
+        // 【줄이 칸보다 크면 Unity는 글자를 아예 그리지 않는다.】
+        // 배지는 높이가 20픽셀도 안 되는데 글꼴은 그보다 크다.
+        // Truncate로 두면 알약만 까맣게 남고 숫자가 사라진다 — 실제로 그랬다.
+        label.horizontalOverflow = HorizontalWrapMode.Overflow;
+        label.verticalOverflow = VerticalWrapMode.Overflow;
 
         label.raycastTarget = false;
 
