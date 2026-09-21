@@ -89,12 +89,12 @@ public class PlaytestPanelUI : MonoBehaviour
         UIFactory.CreatePanel("Header", box, UIPalette.Header,
             new Vector2(0f, 0.92f), new Vector2(1f, 1f), UIFactory.RadiusLarge);
 
-        UIFactory.CreateLabel(box, "검증 도구 (개발 빌드 전용)", 30, FontStyle.Bold,
+        UIFactory.CreateLabel(box, "검증 도구 (개발 빌드 전용)", 32, FontStyle.Bold,
             new Vector2(0.03f, 0.92f), new Vector2(0.75f, 1f), TextAnchor.MiddleLeft);
 
         UIFactory.CreateButton(box, "닫기",
             new Vector2(0.79f, 0.928f), new Vector2(0.97f, 0.992f),
-            UIPalette.Subtle, () => panel.SetActive(false), 24, UIFactory.Radius);
+            UIPalette.Subtle, () => panel.SetActive(false), 26, UIFactory.Radius);
 
         BuildButtons(box);
 
@@ -103,7 +103,7 @@ public class PlaytestPanelUI : MonoBehaviour
 
         UIFactory.CreateOutline(well, UIPalette.EdgeSoft, UIFactory.Radius, 2);
 
-        output = UIFactory.CreateLabel(box, "버튼을 누르면 결과가 여기에 나옵니다.", 23,
+        output = UIFactory.CreateLabel(box, "버튼을 누르면 결과가 여기에 나옵니다.", 25,
             FontStyle.Normal, new Vector2(0.05f, 0.04f), new Vector2(0.95f, 0.25f),
             TextAnchor.UpperLeft, UIPalette.TextAccent);
 
@@ -139,7 +139,7 @@ public class PlaytestPanelUI : MonoBehaviour
         UIFactory.AddGlassSheen(image, UIFactory.Radius);
         UIFactory.CreateOutline(image, UIPalette.Rim, UIFactory.Radius, 2);
 
-        UIFactory.CreateLabel(image.transform, "검증", 24, FontStyle.Bold,
+        UIFactory.CreateLabel(image.transform, "검증", 26, FontStyle.Bold,
             Vector2.zero, Vector2.one, TextAnchor.MiddleCenter);
     }
 
@@ -158,7 +158,7 @@ public class PlaytestPanelUI : MonoBehaviour
             (string label, System.Func<string> action) entry = Actions[i];
 
             UIFactory.CreateButton(grid, entry.label, min, max,
-                UIPalette.Action, () => Run(entry.action), 23);
+                UIPalette.Action, () => Run(entry.action), 25);
         }
     }
 

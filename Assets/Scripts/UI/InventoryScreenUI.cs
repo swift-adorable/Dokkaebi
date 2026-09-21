@@ -188,7 +188,7 @@ public partial class InventoryScreenUI : MonoBehaviour
 
         BuildBottomBar();
 
-        hintLabel = UIFactory.CreateLabel(panel.transform, string.Empty, 24, FontStyle.Normal,
+        hintLabel = UIFactory.CreateLabel(panel.transform, string.Empty, 27, FontStyle.Normal,
             new Vector2(0f, HintBottom), new Vector2(1f, HintTop),
             TextAnchor.MiddleLeft, UIPalette.TextAccent);
 
@@ -219,7 +219,7 @@ public partial class InventoryScreenUI : MonoBehaviour
         UIFactory.AddGlassSheen(image, UIFactory.RadiusLarge);
         UIFactory.CreateOutline(image, UIPalette.Rim, UIFactory.RadiusLarge, 2);
 
-        toggleLabel = UIFactory.CreateLabel(toggleButton.transform, "가방", 32, FontStyle.Bold,
+        toggleLabel = UIFactory.CreateLabel(toggleButton.transform, "가방", 35, FontStyle.Bold,
             Vector2.zero, Vector2.one, TextAnchor.MiddleCenter);
 
         // 빈 소켓 알림 점. 버튼 좌상단 모서리에 걸친다.
@@ -227,7 +227,7 @@ public partial class InventoryScreenUI : MonoBehaviour
             UIPalette.TextAccent, new Vector2(-0.08f, 0.62f), new Vector2(0.30f, 1.16f),
             radius: 14);
 
-        UIFactory.CreateLabel(socketDot.transform, "0", 22, FontStyle.Bold,
+        UIFactory.CreateLabel(socketDot.transform, "0", 24, FontStyle.Bold,
             Vector2.zero, Vector2.one, TextAnchor.MiddleCenter, new Color(0.08f, 0.08f, 0.1f));
 
         socketDot.gameObject.SetActive(false);
@@ -239,7 +239,7 @@ public partial class InventoryScreenUI : MonoBehaviour
         Image purse = UIFactory.CreateGlass("Credits", panel.transform, UIPalette.Header,
             new Vector2(0f, TopBarBottom), new Vector2(0.185f, 1f), UIFactory.RadiusLarge);
 
-        creditLabel = UIFactory.CreateLabel(purse.transform, "₡ 0", 32, FontStyle.Bold,
+        creditLabel = UIFactory.CreateLabel(purse.transform, "₡ 0", 35, FontStyle.Bold,
             new Vector2(0.06f, 0f), new Vector2(0.94f, 1f), TextAnchor.MiddleRight,
             UIPalette.TextAccent);
 
@@ -259,7 +259,7 @@ public partial class InventoryScreenUI : MonoBehaviour
 
             Button button = UIFactory.CreateButton(panel.transform, TabNames[i],
                 new Vector2(x, TopBarBottom), new Vector2(x + width, 1f),
-                UIPalette.Inset, () => SelectTab((Tab)captured), 28, UIFactory.RadiusLarge);
+                UIPalette.Inset, () => SelectTab((Tab)captured), 32, UIFactory.RadiusLarge);
 
             tabButtons.Add(button);
         }
@@ -273,14 +273,14 @@ public partial class InventoryScreenUI : MonoBehaviour
         UIFactory.CreateGlass("Back", leftColumn, UIPalette.Panel,
             Vector2.zero, Vector2.one, UIFactory.RadiusLarge);
 
-        UIFactory.CreateLabel(leftColumn, "장비", 27, FontStyle.Bold,
+        UIFactory.CreateLabel(leftColumn, "장비", 30, FontStyle.Bold,
             new Vector2(0.035f, 0.92f), new Vector2(0.97f, 0.99f), TextAnchor.MiddleLeft,
             UIPalette.TextDim);
 
         equipmentGrid = UIFactory.CreateRegion("Equipment", leftColumn,
             new Vector2(0.03f, 0.63f), new Vector2(0.97f, 0.91f));
 
-        bagTitleLabel = UIFactory.CreateLabel(leftColumn, "가방", 27, FontStyle.Bold,
+        bagTitleLabel = UIFactory.CreateLabel(leftColumn, "가방", 30, FontStyle.Bold,
             new Vector2(0.035f, 0.55f), new Vector2(0.97f, 0.62f), TextAnchor.MiddleLeft,
             UIPalette.TextDim);
 
@@ -325,7 +325,7 @@ public partial class InventoryScreenUI : MonoBehaviour
             new Vector2(0f, FooterBottom), new Vector2(0.40f, FooterTop),
             UIFactory.RadiusLarge);
 
-        UIFactory.CreateLabel(panel.transform, "소지 중량", 20, FontStyle.Normal,
+        UIFactory.CreateLabel(panel.transform, "소지 중량", 23, FontStyle.Normal,
             new Vector2(0.018f, FooterBottom), new Vector2(0.07f, FooterTop),
             TextAnchor.MiddleLeft, UIPalette.TextDim);
 
@@ -337,7 +337,7 @@ public partial class InventoryScreenUI : MonoBehaviour
             new Vector2(WeightBarLeft, WeightBarBottom),
             new Vector2(WeightBarLeft, WeightBarTop), radius: 6);
 
-        weightLabel = UIFactory.CreateLabel(panel.transform, string.Empty, 21, FontStyle.Bold,
+        weightLabel = UIFactory.CreateLabel(panel.transform, string.Empty, 24, FontStyle.Bold,
             new Vector2(0.305f, FooterBottom), new Vector2(0.395f, FooterTop),
             TextAnchor.MiddleRight, UIPalette.TextDim);
 
@@ -347,7 +347,7 @@ public partial class InventoryScreenUI : MonoBehaviour
 
         UIFactory.CreateButton(panel.transform, "닫기",
             new Vector2(0.875f, FooterBottom), new Vector2(1f, FooterTop),
-            UIPalette.Subtle, Close, 28, UIFactory.RadiusLarge);
+            UIPalette.Subtle, Close, 31, UIFactory.RadiusLarge);
     }
 
     // ────────────────────────────────── 열고 닫기
@@ -566,16 +566,23 @@ public partial class InventoryScreenUI : MonoBehaviour
 
             // 부위 이름은 항상 작게 위에 남긴다 —
             // 끼고 나면 어느 자리였는지 알 수 없던 문제를 없앤다.
-            UIFactory.CreateLabel(cell.transform, EquipmentSlotName(slots[i]), 15,
-                FontStyle.Normal, new Vector2(0.07f, 0.60f), new Vector2(0.93f, 0.92f),
+            UIFactory.CreateLabel(cell.transform, EquipmentSlotName(slots[i]), 18,
+                FontStyle.Normal, new Vector2(0.07f, 0.58f), new Vector2(0.93f, 0.94f),
                 TextAnchor.UpperLeft, UIPalette.TextDim);
 
             if (stack?.Definition == null)
                 continue;
 
-            UIFactory.CreateLabel(cell.transform, stack.Definition.DisplayName, 19,
-                FontStyle.Bold, new Vector2(0.07f, 0.10f), new Vector2(0.93f, 0.58f),
-                TextAnchor.LowerLeft);
+            // 장비 이름은 흰 글자 + 반투명 검정 띠. 종류 색이 밝은 칸에서도 읽힌다.
+            Image strip = UIFactory.CreatePanel("NameStrip", cell.transform,
+                UIPalette.NameStrip,
+                new Vector2(0.05f, 0.10f), new Vector2(0.95f, 0.50f), radius: 6);
+
+            strip.raycastTarget = false;
+
+            UIFactory.CreateLabel(strip.transform, stack.Definition.DisplayName, 21,
+                FontStyle.Bold, new Vector2(0.06f, 0f), new Vector2(0.94f, 1f),
+                TextAnchor.MiddleLeft, Color.white);
 
             DrawDurabilityBar(cell.transform, stack);
         }
@@ -630,31 +637,46 @@ public partial class InventoryScreenUI : MonoBehaviour
         // 젬 탭은 가진 젬만큼 그린다 — 젬 4개에 빈 칸 16개는 정보가 아니다.
         int cells = tab == Tab.Socket
             ? Mathf.Max(BagColumns, bagStacks.Count)
-            : Mathf.Max(0, bag.SlotCapacity);
+            : Mathf.Max(bagStacks.Count, bag.SlotCapacity);
 
-        int rows = Mathf.Max(BagVisibleRows,
-            Mathf.CeilToInt(cells / (float)BagColumns));
-
-        // 부모(=뷰포트)의 실제 높이를 읽기 전에 레이아웃을 확정시킨다.
+        // 부모(=뷰포트)의 실제 크기를 읽기 전에 레이아웃을 확정시킨다.
         Canvas.ForceUpdateCanvases();
 
+        float viewWidth = bagViewport.rect.width;
         float viewHeight = bagViewport.rect.height;
 
-        bagGrid.sizeDelta = viewHeight > 0f
-            ? new Vector2(0f, viewHeight * rows / BagVisibleRows)
-            : Vector2.zero;
+        // 【칸을 정사각형으로 만든다.】
+        // 가로를 열 수로 나눈 값이 한 칸의 변이다. 내용물 높이를
+        // 「칸 변 × 줄 수」로 잡으면 세로도 같은 길이가 된다.
+        // 예전에는 높이를 뷰포트 기준으로 잡아서 칸이 납작했다.
+        float cellSize = viewWidth > 0f ? viewWidth / BagColumns : 0f;
 
-        // 세로 여백은 내용물이 길어진 만큼 줄여야 픽셀 간격이 그대로다.
-        float paddingY = BagCellPadding * BagVisibleRows / rows;
+        int needed = Mathf.CeilToInt(cells / (float)BagColumns);
 
-        for (int i = 0; i < cells; i++)
+        // 가방 탭은 화면을 채울 만큼은 그린다. 빈 칸이 곧 남은 자리라는 표시다.
+        int fits = cellSize > 0f ? Mathf.CeilToInt(viewHeight / cellSize) : BagVisibleRows;
+
+        int rows = Mathf.Max(1, tab == Tab.Socket ? needed : Mathf.Max(needed, fits));
+
+        float contentHeight = cellSize * rows;
+
+        bagGrid.sizeDelta = new Vector2(0f, contentHeight);
+
+        // 여백은 부모 기준 정규화 값이다. 가로와 세로의 기준 길이가 다르므로
+        // 같은 픽셀 간격을 내려면 각각 따로 환산해야 한다.
+        float gap = cellSize * 0.055f;
+
+        float paddingX = viewWidth > 0f ? gap / viewWidth : BagCellPadding;
+        float paddingY = contentHeight > 0f ? gap / contentHeight : BagCellPadding;
+
+        for (int i = 0; i < rows * BagColumns; i++)
         {
-            UIFactory.GetCellAnchors(i, BagColumns, rows, BagCellPadding, paddingY,
+            UIFactory.GetCellAnchors(i, BagColumns, rows, paddingX, paddingY,
                 out Vector2 min, out Vector2 max);
 
-            ItemStack stack = i < bagStacks.Count ? bagStacks[i] : null;
+            ItemStack cellStack = i < bagStacks.Count ? bagStacks[i] : null;
 
-            DrawItemCell($"Bag_{i}", bagGrid, min, max, stack);
+            DrawItemCell($"Bag_{i}", bagGrid, min, max, cellStack);
         }
     }
 
@@ -705,16 +727,44 @@ public partial class InventoryScreenUI : MonoBehaviour
         if (empty)
             return;
 
-        UIFactory.CreateLabel(cell.transform, stack.Definition.DisplayName, 17,
-            FontStyle.Bold, new Vector2(0.07f, 0.06f), new Vector2(0.93f, 0.62f),
-            TextAnchor.LowerLeft);
+        // 종류 도형. 가운데에 크게 깔아 배경처럼 쓴다 —
+        // 글자를 읽기 전에 「무기인가 재료인가」가 먼저 들어온다.
+        // 실제 그림이 생기면 definition.Icon이 이 자리를 대신한다.
+        Image glyph = UIFactory.CreatePanel("Glyph", cell.transform, UIPalette.GlyphTint,
+            new Vector2(0.20f, 0.16f), new Vector2(0.80f, 0.76f), radius: 0);
 
-        // 개수는 겹칠 수 있는 물건에만 뜬다. 1개짜리에 「1」을 붙이면 잡음이다.
+        glyph.raycastTarget = false;
+        glyph.preserveAspect = true;
+
+        if (stack.Definition.Icon != null)
+        {
+            glyph.sprite = stack.Definition.Icon;
+            glyph.color = Color.white;
+        }
+        else
+        {
+            glyph.sprite = UISprites.Of(UISprites.GlyphFor(stack.Definition.Kind));
+        }
+
+        // 이름은 좌상단. 반투명 검정 띠를 깔아 어떤 칸 색 위에서도 흰 글자가 읽히게 한다.
+        Image strip = UIFactory.CreatePanel("NameStrip", cell.transform, UIPalette.NameStrip,
+            new Vector2(0.04f, 0.72f), new Vector2(0.96f, 0.96f), radius: 6);
+
+        strip.raycastTarget = false;
+
+        Text nameLabel = UIFactory.CreateLabel(strip.transform, stack.Definition.DisplayName,
+            19, FontStyle.Bold, new Vector2(0.06f, 0f), new Vector2(0.94f, 1f),
+            TextAnchor.MiddleLeft, Color.white);
+
+        nameLabel.horizontalOverflow = HorizontalWrapMode.Wrap;
+
+        // 개수는 우하단. 겹칠 수 있는 물건에만 뜬다 —
+        // 1개짜리에 「1」을 붙이면 잡음이다.
         if (stack.Count > 1)
         {
             UIFactory.CreateBadge(cell.transform, stack.Count.ToString(),
-                new Vector2(0.54f, 0.52f), new Vector2(0.96f, 0.96f), 20,
-                UIPalette.TextAccent);
+                new Vector2(0.56f, 0.06f), new Vector2(0.96f, 0.30f), 22,
+                Color.white);
         }
 
         DrawDurabilityBar(cell.transform, stack);
@@ -731,8 +781,8 @@ public partial class InventoryScreenUI : MonoBehaviour
 
         float ratio = Mathf.Clamp01(stack.Durability / (float)stack.MaxDurability);
 
-        UIFactory.CreatePanel("DurTrack", cell, UIPalette.Badge,
-            new Vector2(0.07f, 0.015f), new Vector2(0.93f, 0.055f), radius: 3);
+        UIFactory.CreatePanel("DurTrack", cell, UIPalette.NameStrip,
+            new Vector2(0.06f, 0.035f), new Vector2(0.50f, 0.085f), radius: 3);
 
         Color color = stack.IsBroken
             ? UIPalette.Warning
@@ -741,8 +791,8 @@ public partial class InventoryScreenUI : MonoBehaviour
                 : UIPalette.Gain;
 
         UIFactory.CreatePanel("DurFill", cell, color,
-            new Vector2(0.07f, 0.015f),
-            new Vector2(0.07f + (0.93f - 0.07f) * ratio, 0.055f), radius: 3);
+            new Vector2(0.06f, 0.035f),
+            new Vector2(0.06f + (0.50f - 0.06f) * ratio, 0.085f), radius: 3);
     }
 
     private void SelectStack(ItemStack stack)
@@ -781,7 +831,7 @@ public partial class InventoryScreenUI : MonoBehaviour
 
             UIFactory.CreateOutline(cell, UIPalette.EdgeSoft, UIFactory.Radius, 2);
 
-            UIFactory.CreateLabel(cell.transform, (i + 1).ToString(), 18, FontStyle.Normal,
+            UIFactory.CreateLabel(cell.transform, (i + 1).ToString(), 21, FontStyle.Normal,
                 new Vector2(0.1f, 0.05f), new Vector2(0.88f, 0.4f),
                 TextAnchor.LowerRight, UIPalette.TextDim);
         }
@@ -833,7 +883,7 @@ public partial class InventoryScreenUI : MonoBehaviour
 
         if (selected?.Definition == null)
         {
-            UIFactory.CreateLabel(rightPanel, "칸을 눌러 무엇인지 확인하십시오.", 26,
+            UIFactory.CreateLabel(rightPanel, "칸을 눌러 무엇인지 확인하십시오.", 29,
                 FontStyle.Normal, Vector2.zero, Vector2.one, TextAnchor.MiddleCenter,
                 UIPalette.TextDim);
             return;
@@ -864,11 +914,11 @@ public partial class InventoryScreenUI : MonoBehaviour
             icon.preserveAspect = true;
         }
 
-        UIFactory.CreateLabel(rightPanel, definition.DisplayName, 33, FontStyle.Bold,
+        UIFactory.CreateLabel(rightPanel, definition.DisplayName, 37, FontStyle.Bold,
             new Vector2(0.135f, 0.925f), new Vector2(0.96f, 0.99f), TextAnchor.LowerLeft,
             UIPalette.TextOnGlass);
 
-        UIFactory.CreateLabel(rightPanel, ItemKindName(definition.Kind), 19, FontStyle.Normal,
+        UIFactory.CreateLabel(rightPanel, ItemKindName(definition.Kind), 22, FontStyle.Normal,
             new Vector2(0.135f, 0.875f), new Vector2(0.60f, 0.925f), TextAnchor.UpperLeft,
             UIPalette.TextDim);
 
@@ -882,7 +932,7 @@ public partial class InventoryScreenUI : MonoBehaviour
         if (selected.Count > 1)
             DrawChip(0.475f, 0.795f, 0.19f, $"×{selected.Count}", UIPalette.Text);
 
-        UIFactory.CreateLabel(rightPanel, definition.Description, 23, FontStyle.Normal,
+        UIFactory.CreateLabel(rightPanel, definition.Description, 26, FontStyle.Normal,
             new Vector2(0.04f, 0.63f), new Vector2(0.96f, 0.775f), TextAnchor.UpperLeft,
             UIPalette.TextDim);
 
@@ -894,7 +944,7 @@ public partial class InventoryScreenUI : MonoBehaviour
         {
             UIFactory.CreateButton(rightPanel, "젬 탭에서 장착",
                 new Vector2(0.04f, ActionRowBottom), new Vector2(0.50f, ActionRowTop),
-                UIPalette.Action, () => SelectTabKeepingSelection(Tab.Socket));
+                UIPalette.Action, () => SelectTabKeepingSelection(Tab.Socket), 27);
         }
         else if (definition is EquipmentDefinition equipment)
         {
@@ -927,7 +977,7 @@ public partial class InventoryScreenUI : MonoBehaviour
 
             UIFactory.CreateButton(rightPanel, "해제",
                 new Vector2(0.54f, ActionRowBottom), new Vector2(0.96f, ActionRowTop),
-                UIPalette.Action, () => UnequipSelectedSlot(slot), 26);
+                UIPalette.Action, () => UnequipSelectedSlot(slot), 28);
 
             return;
         }
@@ -936,7 +986,7 @@ public partial class InventoryScreenUI : MonoBehaviour
 
         UIFactory.CreateButton(rightPanel, "버리기",
             new Vector2(0.54f, ActionRowBottom), new Vector2(0.96f, ActionRowTop),
-            UIPalette.Subtle, () => OpenDiscardPopup(target), 26);
+            UIPalette.Subtle, () => OpenDiscardPopup(target), 28);
     }
 
     /// <summary>작은 알약 칩. 무게·가치처럼 짧은 수치를 담는다.</summary>
@@ -947,7 +997,7 @@ public partial class InventoryScreenUI : MonoBehaviour
 
         UIFactory.CreateOutline(chip, UIPalette.EdgeSoft, 8, 1);
 
-        UIFactory.CreateLabel(chip.transform, text, 21, FontStyle.Bold,
+        UIFactory.CreateLabel(chip.transform, text, 24, FontStyle.Bold,
             new Vector2(0.08f, 0f), new Vector2(0.92f, 1f), TextAnchor.MiddleCenter, color);
     }
 
@@ -968,11 +1018,11 @@ public partial class InventoryScreenUI : MonoBehaviour
             index % 2 == 0 ? UIPalette.Row : UIPalette.RowAlt,
             new Vector2(0.04f, bottom), new Vector2(0.96f, bottom + RowHeight), radius: 6);
 
-        UIFactory.CreateLabel(row.transform, label, 21, FontStyle.Normal,
+        UIFactory.CreateLabel(row.transform, label, 24, FontStyle.Normal,
             new Vector2(0.04f, 0f), new Vector2(0.60f, 1f), TextAnchor.MiddleLeft,
             UIPalette.TextDim);
 
-        UIFactory.CreateLabel(row.transform, value, 21, FontStyle.Bold,
+        UIFactory.CreateLabel(row.transform, value, 24, FontStyle.Bold,
             new Vector2(0.60f, 0f), new Vector2(0.96f, 1f), TextAnchor.MiddleRight,
             valueColor);
     }

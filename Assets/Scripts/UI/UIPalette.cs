@@ -54,10 +54,20 @@ public static class UIPalette
     public static readonly Color Warning = new(0.92f, 0.45f, 0.38f, 1f);
 
     /// <summary>
-    /// 숫자 배지의 알약 바탕. 칸 색이 아이템마다 달라서
-    /// 글자만 얹으면 밝은 칸에서 숫자가 사라진다.
+    /// 숫자 배지의 알약 바탕.
+    ///
+    /// 검은색이 아니라 투명한 회색이다 — 새까만 알약은 유리판 위에서
+    /// 구멍처럼 보인다. 회색은 칸 색을 비쳐 주면서도 숫자를 띄운다.
     /// </summary>
-    public static readonly Color Badge = new(0.02f, 0.03f, 0.05f, 0.80f);
+    public static readonly Color Badge = new(0.30f, 0.34f, 0.42f, 0.55f);
+
+    /// <summary>
+    /// 이름을 얹는 띠. 반투명 검정이라 어떤 칸 색 위에서도 흰 글자가 읽힌다.
+    /// </summary>
+    public static readonly Color NameStrip = new(0f, 0f, 0f, 0.46f);
+
+    /// <summary>종류 도형의 색. 칸 안에서 배경처럼 깔린다.</summary>
+    public static readonly Color GlyphTint = new(1f, 1f, 1f, 0.16f);
 
     /// <summary>패널 윤곽선. 면과 면을 갈라 준다.</summary>
     public static readonly Color Edge = new(0.62f, 0.72f, 0.88f, 0.34f);

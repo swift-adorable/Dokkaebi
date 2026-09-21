@@ -241,7 +241,7 @@ public partial class InventoryScreenUI
 
         if (row == 0)
         {
-            UIFactory.CreateLabel(rightPanel, "옵션이 없습니다.", 21, FontStyle.Normal,
+            UIFactory.CreateLabel(rightPanel, "옵션이 없습니다.", 24, FontStyle.Normal,
                 new Vector2(0.04f, 0.50f), new Vector2(0.96f, 0.58f),
                 TextAnchor.UpperLeft, UIPalette.TextDim);
         }

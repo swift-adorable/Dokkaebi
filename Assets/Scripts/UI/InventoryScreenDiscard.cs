@@ -100,12 +100,12 @@ public partial class InventoryScreenUI
             icon.preserveAspect = true;
         }
 
-        UIFactory.CreateLabel(box, definition.DisplayName, 34, FontStyle.Bold,
+        UIFactory.CreateLabel(box, definition.DisplayName, 37, FontStyle.Bold,
             new Vector2(0.26f, 0.87f), new Vector2(0.95f, 0.965f), TextAnchor.LowerLeft);
 
         UIFactory.CreateLabel(box,
             $"보유 {discardTarget.Count}개    {definition.Weight * discardTarget.Count:0.0} kg",
-            26, FontStyle.Normal,
+            28, FontStyle.Normal,
             new Vector2(0.26f, 0.775f), new Vector2(0.95f, 0.865f), TextAnchor.UpperLeft,
             UIPalette.TextAccent);
     }
@@ -113,11 +113,11 @@ public partial class InventoryScreenUI
     /// <summary>중앙 — 0 ~ 보유 개수 슬라이더와 직접 입력칸.</summary>
     private void BuildDiscardAmount(RectTransform box)
     {
-        UIFactory.CreateLabel(box, "버릴 개수", 26, FontStyle.Normal,
+        UIFactory.CreateLabel(box, "버릴 개수", 28, FontStyle.Normal,
             new Vector2(0.05f, 0.58f), new Vector2(0.60f, 0.68f), TextAnchor.MiddleLeft,
             UIPalette.TextDim);
 
-        discardCountLabel = UIFactory.CreateLabel(box, string.Empty, 26, FontStyle.Bold,
+        discardCountLabel = UIFactory.CreateLabel(box, string.Empty, 28, FontStyle.Bold,
             new Vector2(0.60f, 0.58f), new Vector2(0.95f, 0.68f), TextAnchor.MiddleRight,
             UIPalette.TextAccent);
 
