@@ -39,6 +39,7 @@ MonoBehaviour:
   ailmentPower: 0.25
   ailmentDurationMultiplier: 0.6
   rangeMultiplier: 1
+  zoneRadiusMultiplier: 1
   conditionKind: 0
   conditionStatus: 0
   conditionalDamageIncrease: 0

@@ -237,7 +237,7 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 속성은_열세_종이고_전부_분류와_이름이_있다()
+        public void 속성은_열네_종이고_전부_분류와_이름이_있다()
         {
             Assert.AreEqual(EnemyAffixTable.Count, EnemyAffixTable.Every.Count);
 
@@ -247,9 +247,9 @@ namespace Blob.Tests
                 Assert.IsNotEmpty(EnemyAffixTable.Name(affix), $"{affix}의 이름이 없습니다.");
             }
 
-            Assert.AreEqual(5,
+            Assert.AreEqual(6,
                 EnemyAffixTable.Every.Count(a => EnemyAffixTable.GroupOf(a) == EnemyAffixGroup.Defence),
-                "방어형은 5종입니다.");
+                "방어형은 6종입니다. (문서 5종 + 내한성)");
 
             Assert.AreEqual(3,
                 EnemyAffixTable.Every.Count(a => EnemyAffixTable.GroupOf(a) == EnemyAffixGroup.Survival),
@@ -397,6 +397,41 @@ namespace Blob.Tests
                 "꺼 둔 「과민」이 고유 개체를 통해 들어왔습니다.");
 
             CollectionAssert.Contains(profile.affixes, EnemyAffix.Swift);
+        }
+
+        [Test]
+        public void 모든_피해_속성에_저항하는_적이_존재한다()
+        {
+            // 【한 속성만 저항을 만나지 않으면 그 빌드만 판단을 요구받지 않는다.】
+            // 냉기가 그랬다 — 물리·화염·번개·카오스는 막는 속성이 있는데
+            // 냉기만 없었다. 문서에 의도라는 서술이 없어 누락으로 보고 채웠다.
+            // 속성을 추가·삭제할 때 이 균형이 깨지면 여기서 걸린다.
+            var covered = new HashSet<DamageElement>();
+
+            foreach (EnemyAffix affix in EnemyAffixTable.Every)
+            {
+                if (EnemyAffixTable.TryGetResistance(affix, out DamageElement element))
+                    covered.Add(element);
+            }
+
+            foreach (DamageElement element in (DamageElement[])Enum.GetValues(typeof(DamageElement)))
+            {
+                Assert.IsTrue(covered.Contains(element),
+                    $"{element} 피해에 저항하는 몬스터 속성이 없습니다. " +
+                    "그 속성으로 빌드한 유저만 「답을 바꾸는」 경험을 하지 않습니다.");
+            }
+        }
+
+        [Test]
+        public void 재생_수치가_비어_있지_않다()
+        {
+            // 문서 3절이 「초당 회복」이라고만 적고 비워 둔 칸이다.
+            // 0으로 두면 「재생」 속성이 아무 일도 하지 않는 채로 굴러 나온다.
+            Assert.Greater(EnemyAffixTable.RegenPerSecond, 0f,
+                "「재생」의 초당 회복량이 0입니다.");
+
+            Assert.Less(EnemyAffixTable.RegenPerSecond, 0.10f,
+                "초당 10% 이상이면 즉발 화력 외에는 답이 없어집니다.");
         }
 
         // ── 7. 진영 ───────────────────────────────────────────────────

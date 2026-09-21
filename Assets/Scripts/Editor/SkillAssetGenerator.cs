@@ -48,6 +48,7 @@ public static class SkillAssetGenerator
         public float ailPower;     // 상태이상 위력 증가율
         public float ailDuration;  // 상태이상·잔류물 지속시간 배수
         public float range;        // 유효 사거리 배수
+        public float zoneRadius;   // 잔류물 반경 배수 — range와 다른 축이다
         public float spread;       // 추가 투사체 간 각도(도)
         public StatusEffectType ailOverride;
         public StatusEffectType ailAddition;
@@ -70,7 +71,8 @@ public static class SkillAssetGenerator
             cost = CostType.None, costDesc = string.Empty,
             behaviour = ProjectileBehaviourType.None, charges = 0, ricochet = 0,
             extraProjectiles = 0, fireInterval = 1f, lifetime = 1f, speed = 1f,
-            dmg = 0f, ailPower = 0f, ailDuration = 1f, range = 1f, spread = 8f,
+            dmg = 0f, ailPower = 0f, ailDuration = 1f, range = 1f, zoneRadius = 1f,
+            spread = 8f,
             ailOverride = StatusEffectType.None, ailAddition = StatusEffectType.None,
             condition = SkillConditionKind.None,
             conditionStatus = StatusEffectType.None, conditionalDmg = 0f
@@ -169,6 +171,7 @@ public static class SkillAssetGenerator
         so.FindProperty("ailmentPower").floatValue = row.ailPower;
         so.FindProperty("ailmentDurationMultiplier").floatValue = row.ailDuration;
         so.FindProperty("rangeMultiplier").floatValue = row.range;
+        so.FindProperty("zoneRadiusMultiplier").floatValue = row.zoneRadius;
         so.FindProperty("spreadAngle").floatValue = row.spread;
         so.FindProperty("ailmentOverride").intValue = (int)row.ailOverride;
         so.FindProperty("ailmentAddition").intValue = (int)row.ailAddition;
@@ -426,10 +429,15 @@ public static class SkillAssetGenerator
         r.range = 0.7f;
         t.Add(r);
 
-        r = New("sup_caltrops", "마름쇠", "적중 지점에 잔류물을 남긴다.", SkillCategory.Support, 5);
+        // 【속성을 고정하지 않는다.】 전에는 FireZone이 박혀 있어서
+        // 서리 Core에 꽂아도 불바다가 생겼다. Support가 속성을 정하면
+        // 「Core = 속성」이라는 전투 3층이 깨진다.
+        r = New("sup_caltrops", "마름쇠",
+            "적중 지점에 잔류물을 남긴다. 종류는 꽂힌 Core의 속성을 따른다.",
+            SkillCategory.Support, 5);
         r.requiredTags = SkillTag.Zone;
         r.cost = CostType.BarrageDensity; r.costDesc = "발사 간격 +25%"; r.fireInterval = 1.25f;
-        r.ground = GroundEffectType.FireZone;
+        r.ground = GroundEffectType.FromCoreAilment;
         t.Add(r);
 
         r = New("sup_chain_detonation", "연쇄 기폭", "폭발이 1회 연쇄된다.", SkillCategory.Support, 7);
@@ -438,10 +446,20 @@ public static class SkillAssetGenerator
         r.dmg = 0.20f;
         t.Add(r);
 
+        // 【대가가 다른 축을 때리고 있었다.】
+        // 설명은 「잔류물 범위 -25%」인데 실제로 깎던 것은 rangeMultiplier,
+        // 즉 유효 사거리였다. 잔류물 반경 축이 없었기 때문이다.
+        // lifetime을 2f로 썼다가 곧바로 1f로 덮는 죽은 대입도 함께 지운다 —
+        // 남겨 두면 다음 사람이 어느 쪽이 의도인지 알 수 없다.
+        //
+        // 참고 — PoE2 Persistent Ground는 단계마다 +50%다.
+        // Blob은 +100% 한 단계로 두되 대가를 붙인다. (수치는 Blob의 결정)
+        // [확인됨 — docs/research/poe2/04_잔류물_계열.md]
         r = New("sup_lasting_ground", "유지되는 대지", "잔류물 지속시간이 100% 늘어난다.", SkillCategory.Support, 7);
         r.requiredTags = SkillTag.Zone;
-        r.cost = CostType.EffectiveRange; r.costDesc = "잔류물 범위 -25%"; r.lifetime = 2f;
-        r.ailDuration = 2f; r.lifetime = 1f; r.range = 0.75f;
+        r.cost = CostType.EffectiveRange; r.costDesc = "잔류물 반경 -25%";
+        r.ailDuration = 2f;
+        r.zoneRadius = 0.75f;
         t.Add(r);
 
         r = New("sup_long_fuse", "긴 퓨즈",
@@ -452,10 +470,16 @@ public static class SkillAssetGenerator
         r.dmg = 0.35f;
         t.Add(r);
 
-        r = New("sup_zone_potency", "잔류물 효력", "잔류물 범위가 한도까지 커진다.", SkillCategory.Support, 9);
+        // 【광고한 효과가 구현되어 있지 않았다.】
+        // 설명은 「잔류물 범위가 커진다」인데 담을 축이 없어 ailPower만 들어가
+        // 있었다. 문서 5-A의 금지 조항(효과를 설명 문자열에만 적지 않는다)을
+        // 어긴 상태였고, 「무엇이든 효과가 하나는 있다」만 보던 테스트는
+        // 이걸 잡지 못했다. 이제 반경 축에 실제로 넣는다.
+        r = New("sup_zone_potency", "잔류물 효력", "잔류물 반경이 60% 커진다.", SkillCategory.Support, 9);
         r.requiredTags = SkillTag.Zone;
-        r.cost = CostType.Duration; r.costDesc = "잔류물 지속시간 -30%"; r.lifetime = 0.7f;
-        r.ailDuration = 0.7f; r.lifetime = 1f; r.ailPower = 0.35f;
+        r.cost = CostType.Duration; r.costDesc = "잔류물 지속시간 -30%";
+        r.ailDuration = 0.7f;
+        r.zoneRadius = 1.6f;
         t.Add(r);
 
         // ── Support 조건부 계열 3 ─────────────────────────────────────────

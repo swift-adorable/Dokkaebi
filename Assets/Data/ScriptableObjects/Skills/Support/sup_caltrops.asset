@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Blob.Runtime::SkillDefinition
   id: sup_caltrops
   displayName: "\uB9C8\uB984\uC1E0"
-  description: "\uC801\uC911 \uC9C0\uC810\uC5D0 \uC794\uB958\uBB3C\uC744 \uB0A8\uAE34\uB2E4."
+  description: "\uC801\uC911 \uC9C0\uC810\uC5D0 \uC794\uB958\uBB3C\uC744 \uB0A8\uAE34\uB2E4.
+    \uC885\uB958\uB294 \uAF42\uD78C Core\uC758 \uC18D\uC131\uC744 \uB530\uB978\uB2E4."
   category: 1
   coreFamily: 0
   requiredLevel: 5
@@ -22,7 +23,7 @@ MonoBehaviour:
   requiredTags: 128
   createsStatus: 0
   consumesStatus: 0
-  createsGroundEffect: 1
+  createsGroundEffect: 6
   blocksStatusCreation: 0
   blockedStatus: 0
   mutuallyExclusiveIds: []
@@ -39,6 +40,7 @@ MonoBehaviour:
   ailmentPower: 0
   ailmentDurationMultiplier: 1
   rangeMultiplier: 1
+  zoneRadiusMultiplier: 1
   conditionKind: 0
   conditionStatus: 0
   conditionalDamageIncrease: 0

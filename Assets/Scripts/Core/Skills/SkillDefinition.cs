@@ -136,6 +136,10 @@ public class SkillDefinition : ScriptableObject
     [Min(0.1f)]
     [SerializeField] private float rangeMultiplier = 1f;
 
+    [Tooltip("잔류물 반경 배수. 【유효 사거리와 다른 축이다.】")]
+    [Min(0.1f)]
+    [SerializeField] private float zoneRadiusMultiplier = 1f;
+
     [Header("Effect — 조건부")]
     [Tooltip("조건. 명중 시점에 판정한다.")]
     [SerializeField] private SkillConditionKind conditionKind = SkillConditionKind.None;
@@ -205,6 +209,22 @@ public class SkillDefinition : ScriptableObject
     public float AilmentDurationMultiplier => Mathf.Max(0.1f, ailmentDurationMultiplier);
     public float RangeMultiplier => Mathf.Max(0.1f, rangeMultiplier);
 
+    /// <summary>
+    /// 잔류물 반경 배수.
+    ///
+    /// 【rangeMultiplier와 나눠 둔 이유 — 같은 실수가 두 번 났다.】
+    /// 문서 5-A는 이미 「ailmentDurationMultiplier와 lifetimeMultiplier는
+    /// 다른 축이다」를 경고하고 있었다. 그런데 잔류물 반경에는 축이 아예 없어서
+    ///   · 「잔류물 효력」(잔류물 범위가 커진다)  → 담을 곳이 없어 구현이 빠졌다
+    ///   · 「유지되는 대지」(대가: 잔류물 범위 -25%) → rangeMultiplier를 깎아
+    ///     엉뚱하게 유효 사거리가 줄었다
+    /// 축이 없으면 설명과 구현이 갈라진다. 그래서 축을 만든다.
+    ///
+    /// PoE2에도 「효과 범위 증가」가 독립 유형으로 있다.
+    /// [확인됨 — docs/research/poe2/03_보조젬_유형표.md]
+    /// </summary>
+    public float ZoneRadiusMultiplier => Mathf.Max(0.1f, zoneRadiusMultiplier);
+
     public StatusEffectType AilmentOverride => ailmentOverride;
     public StatusEffectType AilmentAddition => ailmentAddition;
 
@@ -230,6 +250,7 @@ public class SkillDefinition : ScriptableObject
         || ailmentPower != 0f
         || ailmentDurationMultiplier != 1f
         || rangeMultiplier != 1f
+        || zoneRadiusMultiplier != 1f
         || conditionKind != SkillConditionKind.None
         || createsStatus != StatusEffectType.None
         || consumesStatus != StatusEffectType.None

@@ -140,11 +140,38 @@ namespace Blob.Tests
 
             foreach (GroundEffectType g in System.Enum.GetValues(typeof(GroundEffectType)))
             {
-                if (g == GroundEffectType.None || g == GroundEffectType.GravityWell)
+                // FromCoreAilment는 실제 잔류물이 아니라 「Core가 정한다」는 표시다.
+                // Resolve가 이것을 위 4종 중 하나로 바꾼다. 아래에서 따로 검사한다.
+                if (g == GroundEffectType.None
+                    || g == GroundEffectType.GravityWell
+                    || g == GroundEffectType.FromCoreAilment)
                     continue;
 
                 CollectionAssert.Contains(fromDeath, g, $"{g}를 만드는 수단이 없습니다.");
             }
+        }
+
+        [Test]
+        public void 잔류물_속성은_Support가_아니라_Core가_정한다()
+        {
+            // 「마름쇠」가 FireZone으로 박혀 있어 서리 Core에 꽂아도
+            // 불바다가 생겼다. Support가 속성을 확정하면
+            // 「무기 = 기본값 / Core = 속성 / Support = 궤도」가 깨진다.
+            Assert.AreEqual(GroundEffectType.FrostField,
+                GroundEffectTable.Resolve(GroundEffectType.FromCoreAilment, StatusEffectType.Chill),
+                "서리 Core + 마름쇠는 서리 장판이어야 합니다.");
+
+            Assert.AreEqual(GroundEffectType.FireZone,
+                GroundEffectTable.Resolve(GroundEffectType.FromCoreAilment, StatusEffectType.Ignite));
+
+            // Core가 아무 속성도 부여하지 않으면 남길 것이 없다.
+            // 임의로 화염을 고르지 않는다 — 그게 애초의 버그였다.
+            Assert.AreEqual(GroundEffectType.None,
+                GroundEffectTable.Resolve(GroundEffectType.FromCoreAilment, StatusEffectType.None));
+
+            // 명시된 종류는 그대로 둔다. 중력 우물은 Core가 직접 만든다.
+            Assert.AreEqual(GroundEffectType.GravityWell,
+                GroundEffectTable.Resolve(GroundEffectType.GravityWell, StatusEffectType.Ignite));
         }
     }
 }

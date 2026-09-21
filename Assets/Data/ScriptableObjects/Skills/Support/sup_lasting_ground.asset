@@ -27,7 +27,7 @@ MonoBehaviour:
   blockedStatus: 0
   mutuallyExclusiveIds: []
   costType: 2
-  costDescription: "\uC794\uB958\uBB3C \uBC94\uC704 -25%"
+  costDescription: "\uC794\uB958\uBB3C \uBC18\uACBD -25%"
   grantedBehaviour: 0
   behaviourCharges: 0
   ricochetBounces: 0
@@ -38,7 +38,8 @@ MonoBehaviour:
   damageIncrease: 0
   ailmentPower: 0
   ailmentDurationMultiplier: 2
-  rangeMultiplier: 0.75
+  rangeMultiplier: 1
+  zoneRadiusMultiplier: 0.75
   conditionKind: 0
   conditionStatus: 0
   conditionalDamageIncrease: 0

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Blob.Runtime::SkillDefinition
   id: sup_zone_potency
   displayName: "\uC794\uB958\uBB3C \uD6A8\uB825"
-  description: "\uC794\uB958\uBB3C \uBC94\uC704\uAC00 \uD55C\uB3C4\uAE4C\uC9C0 \uCEE4\uC9C4\uB2E4."
+  description: "\uC794\uB958\uBB3C \uBC18\uACBD\uC774 60% \uCEE4\uC9C4\uB2E4."
   category: 1
   coreFamily: 0
   requiredLevel: 9
@@ -36,9 +36,10 @@ MonoBehaviour:
   fireIntervalMultiplier: 1
   lifetimeMultiplier: 1
   damageIncrease: 0
-  ailmentPower: 0.35
+  ailmentPower: 0
   ailmentDurationMultiplier: 0.7
   rangeMultiplier: 1
+  zoneRadiusMultiplier: 1.6
   conditionKind: 0
   conditionStatus: 0
   conditionalDamageIncrease: 0

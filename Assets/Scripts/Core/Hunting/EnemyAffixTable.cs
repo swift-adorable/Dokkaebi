@@ -7,14 +7,28 @@ using System.Collections.Generic;
 /// </summary>
 public static class EnemyAffixTable
 {
-    /// <summary>None을 제외한 실제 속성 수.</summary>
-    public const int Count = 13;
+    /// <summary>
+    /// None을 제외한 실제 속성 수.
+    /// 문서 3절은 13종이지만 냉기 내성(내한성)을 더해 14종이다.
+    /// 이유는 EnemyAffix.Cryostable 주석에 있다.
+    /// </summary>
+    public const int Count = 14;
 
     /// <summary>「갑각」이 더하는 방어도. (문서 3절)</summary>
     public const float CarapaceArmour = 3f;
 
     /// <summary>내성 계열 속성이 거는 배율. 곱하지 않고 가장 낮은 것 하나만 남는다.</summary>
     public const float ResistanceMultiplier = 0.5f;
+
+    /// <summary>
+    /// 「재생」의 초당 회복량. 최대 체력에 대한 비율이다.
+    ///
+    /// 문서 3절은 「초당 회복」이라고만 적고 수치를 비워 두었다.
+    /// PoE2의 Regenerates Life가 초당 최대 생명의 2%다.
+    /// [확인됨 — docs/research/poe2/01_몬스터_속성.md]
+    /// 같은 수치를 쓰되, 출처가 PoE2이고 Blob에서 검증되지 않았음을 밝힌다.
+    /// </summary>
+    public const float RegenPerSecond = 0.02f;
 
     /// <summary>「신속」의 이동 배율.</summary>
     public const float SwiftMoveScale = 1.4f;
@@ -32,7 +46,7 @@ public static class EnemyAffixTable
     private static readonly EnemyAffix[] All =
     {
         EnemyAffix.Carapace, EnemyAffix.Hardened, EnemyAffix.FireProof,
-        EnemyAffix.Insulated, EnemyAffix.Antibody,
+        EnemyAffix.Insulated, EnemyAffix.Antibody, EnemyAffix.Cryostable,
         EnemyAffix.Regenerating, EnemyAffix.Shell, EnemyAffix.Splitting,
         EnemyAffix.Swift, EnemyAffix.Hair, EnemyAffix.Hulking,
         EnemyAffix.Broadcast, EnemyAffix.Echo
@@ -50,6 +64,7 @@ public static class EnemyAffixTable
             case EnemyAffix.FireProof:
             case EnemyAffix.Insulated:
             case EnemyAffix.Antibody:
+            case EnemyAffix.Cryostable:
                 return EnemyAffixGroup.Defence;
 
             case EnemyAffix.Regenerating:
@@ -87,10 +102,8 @@ public static class EnemyAffixTable
             case EnemyAffix.FireProof: element = DamageElement.Fire;      return true;
             case EnemyAffix.Insulated: element = DamageElement.Lightning; return true;
             case EnemyAffix.Antibody:  element = DamageElement.Chaos;     return true;
+            case EnemyAffix.Cryostable: element = DamageElement.Cold;     return true;
 
-            // 【냉기 내성 속성은 없다.】 문서 3절 방어 5종에 없다.
-            // 레이드 특성 쪽에는 「저온 적응」이 있으므로 빠뜨린 것이 아니라
-            // 개체 속성으로는 두지 않은 것이다. 없는 것을 만들어 넣지 않는다.
             default: element = DamageElement.Physical; return false;
         }
     }
@@ -146,6 +159,7 @@ public static class EnemyAffixTable
             case EnemyAffix.FireProof:    return "내화성";
             case EnemyAffix.Insulated:    return "절연성";
             case EnemyAffix.Antibody:     return "항체";
+            case EnemyAffix.Cryostable:   return "내한성";
             case EnemyAffix.Regenerating: return "재생";
             case EnemyAffix.Shell:        return "껍질";
             case EnemyAffix.Splitting:    return "분열성";
