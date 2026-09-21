@@ -39,6 +39,16 @@ public class EnemyMovement : MonoBehaviour
     /// <summary>이동 속도 배수. 예비동작·과중량 같은 일시적 감속에 쓴다.</summary>
     public float SpeedScale { get; set; } = 1f;
 
+    /// <summary>
+    /// 개체 고유 이동 배율. 몬스터 속성 「신속」(×1.4) · 「육중」(×0.8)이 정한다.
+    ///
+    /// 【SpeedScale과 나눠 둔 이유】
+    /// SpeedScale은 원거리 예비동작 동안 0.45로 줄였다가 【1f로 되돌린다】.
+    /// 개체 배율을 같은 칸에 넣으면 첫 사격 한 번으로 「신속」이 사라진다.
+    /// 성격이 다른 두 값을 한 변수에 담지 않는다.
+    /// </summary>
+    public float BaseSpeedScale { get; set; } = 1f;
+
     /// <summary>이동을 멈춘다. 공격 예비동작 중에 사용한다.</summary>
     public bool IsHalted { get; set; }
 
@@ -96,7 +106,9 @@ public class EnemyMovement : MonoBehaviour
             return;
         }
 
-        float speed = moveSpeed * Mathf.Max(0f, SpeedScale);
+        float speed = moveSpeed
+                      * Mathf.Max(0f, BaseSpeedScale)
+                      * Mathf.Max(0f, SpeedScale);
         Vector3 direction;
 
         // 두뇌가 붙어 있으면 방향은 두뇌가 정한다. (EnemyBrain — 유지 거리·측면 이동·차례)
