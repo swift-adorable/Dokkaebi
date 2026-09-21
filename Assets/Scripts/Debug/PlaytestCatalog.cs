@@ -33,6 +33,9 @@ public class PlaytestCatalog : ScriptableObject
     [Header("과중량 유발")]
     [SerializeField] private ItemDefinition bulkMaterial;
 
+    [Header("스택 확인용 — 겹치는 재료·소모품")]
+    [SerializeField] private List<ItemDefinition> stackables = new();
+
     public IReadOnlyList<ItemDefinition> StarterKit => starterKit;
     public IReadOnlyList<ItemDefinition> EndgameKit => endgameKit;
     public IReadOnlyList<ItemDefinition> Weapons => weapons;
@@ -42,6 +45,7 @@ public class PlaytestCatalog : ScriptableObject
     public IReadOnlyList<ItemDefinition> SupportGems => supportGems;
     public IReadOnlyList<ItemDefinition> ChecklistGems => checklistGems;
     public ItemDefinition BulkMaterial => bulkMaterial;
+    public IReadOnlyList<ItemDefinition> Stackables => stackables;
 
     public static PlaytestCatalog Load() => Resources.Load<PlaytestCatalog>(ResourcePath);
 
@@ -51,7 +55,7 @@ public class PlaytestCatalog : ScriptableObject
         List<ItemDefinition> weaponList, List<ItemDefinition> imprintList,
         List<ItemDefinition> keyImprintList, List<ItemDefinition> cores,
         List<ItemDefinition> supports, List<ItemDefinition> checklist,
-        ItemDefinition bulk)
+        ItemDefinition bulk, List<ItemDefinition> stackableList)
     {
         starterKit = starter;
         endgameKit = endgame;
@@ -62,6 +66,7 @@ public class PlaytestCatalog : ScriptableObject
         supportGems = supports;
         checklistGems = checklist;
         bulkMaterial = bulk;
+        stackables = stackableList;
     }
 #endif
 }

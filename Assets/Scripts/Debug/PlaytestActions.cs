@@ -109,6 +109,46 @@ public static class PlaytestActions
                + $"({bag.UsedSlots}/{bag.SlotCapacity}칸)";
     }
 
+    /// <summary>
+    /// 겹치는 재료를 여러 개씩 준다. 【개수 배지가 실제로 뜨는지】 확인하는 용도다.
+    ///
+    /// 왜 따로 만들었나 — 하나씩 주우면 전부 1개라 숫자가 뜰 일이 없다.
+    /// 그래서 「개수가 표시되지 않는다」와 「겹치지 않는다」를 구분할 수 없었다.
+    /// </summary>
+    public static string GiveStackables()
+    {
+        if (Catalog == null)
+            return NoCatalog;
+
+        IReadOnlyList<ItemDefinition> items = Catalog.Stackables;
+
+        if (items == null || items.Count == 0)
+            return "겹치는 재료가 카탈로그에 없습니다. 검증 카탈로그를 다시 생성하십시오.";
+
+        Inventory bag = PlayerInventory.EnsureInstance().Bag;
+
+        var parts = new List<string>(items.Count);
+
+        foreach (ItemDefinition item in items)
+        {
+            if (item == null)
+                continue;
+
+            // 스택 상한의 절반 + 1. 상한에 딱 맞추면 「두 칸으로 갈리는가」를 못 본다.
+            int want = Mathf.Max(2, item.StackMax / 2 + 1);
+
+            int added = bag.TryAdd(item, want);
+
+            if (added > 0)
+                parts.Add($"{item.DisplayName} {added}");
+        }
+
+        PlayerInventory.Instance.RefreshCapacity();
+
+        return $"겹치는 재료 지급 — {string.Join(" · ", parts)}\n"
+               + $"({bag.UsedSlots}/{bag.SlotCapacity}칸, {bag.TotalWeight:0.0}/{bag.WeightLimit:0.0}kg)";
+    }
+
     /// <summary>가방을 통째로 비운다. 과중량 실험을 되돌린다.</summary>
     public static string ClearBag()
     {

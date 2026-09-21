@@ -230,19 +230,39 @@ public partial class InventoryScreenUI
             }
         }
 
-        if (gains.Count > 0)
-        {
-            UIFactory.CreateLabel(rightPanel, string.Join("\n", gains), 24,
-                FontStyle.Normal, new Vector2(0.04f, 0.30f), new Vector2(0.96f, 0.50f),
-                TextAnchor.UpperLeft, UIPalette.TextAccent);
-        }
+        // 표로 깐다. 줄글로 나열하면 어느 값이 이득이고 대가인지 한눈에 안 들어온다.
+        int row = 0;
 
-        if (costs.Count > 0)
+        foreach (string line in gains)
+            DrawStatLine(ref row, line, UIPalette.Gain);
+
+        foreach (string line in costs)
+            DrawStatLine(ref row, line, UIPalette.Cost);
+
+        if (row == 0)
         {
-            UIFactory.CreateLabel(rightPanel, "대가\n" + string.Join("\n", costs), 24,
-                FontStyle.Normal, new Vector2(0.04f, 0.13f), new Vector2(0.96f, 0.28f),
-                TextAnchor.UpperLeft, UIPalette.Warning);
+            UIFactory.CreateLabel(rightPanel, "옵션이 없습니다.", 21, FontStyle.Normal,
+                new Vector2(0.04f, 0.50f), new Vector2(0.96f, 0.58f),
+                TextAnchor.UpperLeft, UIPalette.TextDim);
         }
+    }
+
+    /// <summary>「이름 +값」 한 줄을 이름과 값으로 갈라 표에 넣는다.</summary>
+    private void DrawStatLine(ref int index, string line, Color valueColor)
+    {
+        // 행동 줄을 덮지 않도록 여기서 멈춘다. 넘치면 잘라 내는 편이
+        // 버튼 위에 글자가 겹치는 것보다 낫다.
+        if (index >= 8)
+            return;
+
+        int split = line.LastIndexOf(' ');
+
+        string label = split > 0 ? line.Substring(0, split) : line;
+        string value = split > 0 ? line.Substring(split + 1) : string.Empty;
+
+        DrawStatRow(index, 0.60f, label, value, valueColor);
+
+        index++;
     }
 
     private static string EquipmentStatName(EquipmentStatType type)

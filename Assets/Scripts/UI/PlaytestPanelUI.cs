@@ -30,6 +30,7 @@ public class PlaytestPanelUI : MonoBehaviour
         ("검증용 젬 4종", PlaytestActions.GiveChecklistGems),
         ("Core 젬 전부",  PlaytestActions.GiveCoreGems),
         ("Support 젬",    PlaytestActions.GiveSupportGems),
+        ("겹치는 재료",   PlaytestActions.GiveStackables),
         ("가방 채우기",   PlaytestActions.FillBag),
         ("가방 비우기",   PlaytestActions.ClearBag),
         ("현재 능력치",   PlaytestActions.DumpStats),
@@ -71,31 +72,67 @@ public class PlaytestPanelUI : MonoBehaviour
         // 화면 UI는 안전 영역 안에만 둔다. 노치와 홈 인디케이터를 피한다.
         RectTransform safe = UIFactory.CreateSafeArea(root.GetComponent<Canvas>());
 
+        BuildToggle(safe);
+
         panel = UIFactory.CreatePanel("PlaytestPanel", safe, UIPalette.Panel,
-            new Vector2(0.12f, 0.06f), new Vector2(0.88f, 0.94f)).gameObject;
+            new Vector2(0.12f, 0.06f), new Vector2(0.88f, 0.94f),
+            UIFactory.RadiusLarge).gameObject;
 
         var box = (RectTransform)panel.transform;
 
-        UIFactory.CreatePanel("Header", box, UIPalette.Header,
-            new Vector2(0f, 0.92f), new Vector2(1f, 1f));
+        UIFactory.CreateOutline(panel.GetComponent<Image>(), UIPalette.Edge,
+            UIFactory.RadiusLarge, 2);
 
-        UIFactory.CreateLabel(box, "검증 도구 (개발 빌드 전용)", 32, FontStyle.Bold,
+        UIFactory.CreatePanel("Header", box, UIPalette.Header,
+            new Vector2(0f, 0.92f), new Vector2(1f, 1f), UIFactory.RadiusLarge);
+
+        UIFactory.CreateLabel(box, "검증 도구 (개발 빌드 전용)", 30, FontStyle.Bold,
             new Vector2(0.03f, 0.92f), new Vector2(0.75f, 1f), TextAnchor.MiddleLeft);
 
         UIFactory.CreateButton(box, "닫기",
-            new Vector2(0.78f, 0.925f), new Vector2(0.97f, 0.995f),
-            UIPalette.Subtle, () => panel.SetActive(false), 26);
+            new Vector2(0.79f, 0.928f), new Vector2(0.97f, 0.992f),
+            UIPalette.Subtle, () => panel.SetActive(false), 24, UIFactory.Radius);
 
         BuildButtons(box);
 
-        UIFactory.CreatePanel("OutputBack", box, UIPalette.SlotLocked,
-            new Vector2(0.03f, 0.03f), new Vector2(0.97f, 0.26f));
+        Image well = UIFactory.CreatePanel("OutputBack", box, UIPalette.Inset,
+            new Vector2(0.03f, 0.03f), new Vector2(0.97f, 0.26f), UIFactory.Radius);
 
-        output = UIFactory.CreateLabel(box, "버튼을 누르면 결과가 여기에 나옵니다.", 24,
+        UIFactory.CreateOutline(well, UIPalette.EdgeSoft, UIFactory.Radius, 2);
+
+        output = UIFactory.CreateLabel(box, "버튼을 누르면 결과가 여기에 나옵니다.", 23,
             FontStyle.Normal, new Vector2(0.05f, 0.04f), new Vector2(0.95f, 0.25f),
             TextAnchor.UpperLeft, UIPalette.TextAccent);
 
         panel.SetActive(false);
+    }
+
+    /// <summary>
+    /// 검증 버튼. 씬의 DEBUG 버튼을 대신한다.
+    ///
+    /// 씬 오브젝트가 아니라 여기서 만드는 이유 —
+    /// 이 파일 전체가 `UNITY_EDITOR || DEVELOPMENT_BUILD`로 감싸여 있어서
+    /// **출시 빌드에는 컴파일조차 되지 않는다.** 씬에 놓인 버튼은 그 보장을 못 받는다.
+    /// 안전 영역 안에 두므로 노치·홈 인디케이터에도 걸리지 않는다.
+    /// </summary>
+    private void BuildToggle(Transform safe)
+    {
+        Image image = UIFactory.CreatePanel("PlaytestToggle", safe, UIPalette.Warning,
+            Vector2.zero, Vector2.zero, UIFactory.Radius);
+
+        var rect = image.rectTransform;
+        rect.anchorMin = new Vector2(0f, 1f);
+        rect.anchorMax = new Vector2(0f, 1f);
+        rect.pivot = new Vector2(0f, 1f);
+        rect.sizeDelta = new Vector2(150f, 74f);
+        rect.anchoredPosition = new Vector2(4f, -4f);
+
+        var button = image.gameObject.AddComponent<Button>();
+        button.targetGraphic = image;
+        button.onClick.AddListener(Toggle);
+
+        UIFactory.CreateLabel(image.transform, "검증", 26, FontStyle.Bold,
+            Vector2.zero, Vector2.one, TextAnchor.MiddleCenter);
     }
 
     private void BuildButtons(RectTransform box)
@@ -113,7 +150,7 @@ public class PlaytestPanelUI : MonoBehaviour
             (string label, System.Func<string> action) entry = Actions[i];
 
             UIFactory.CreateButton(grid, entry.label, min, max,
-                UIPalette.Action, () => Run(entry.action), 24);
+                UIPalette.Action, () => Run(entry.action), 23);
         }
     }
 
