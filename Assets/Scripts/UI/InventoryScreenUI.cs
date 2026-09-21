@@ -629,13 +629,106 @@ public partial class InventoryScreenUI : MonoBehaviour
         if (definition.IsSkillGem)
         {
             UIFactory.CreateButton(rightPanel, "젬 탭에서 장착",
-                new Vector2(0.04f, 0.04f), new Vector2(0.50f, 0.12f),
+                new Vector2(0.04f, ActionRowBottom), new Vector2(0.50f, ActionRowTop),
                 UIPalette.Action, () => SelectTabKeepingSelection(Tab.Socket));
         }
         else if (definition is EquipmentDefinition equipment)
         {
             DrawEquipmentInfo(equipment);
         }
+
+        DrawDiscardButtons();
+    }
+
+    // ────────────────────────────────── 버리기
+
+    /// <summary>상세 패널 맨 아래 행동 줄. 모든 아이템이 같은 높이를 쓴다.</summary>
+    private const float ActionRowBottom = 0.03f;
+    private const float ActionRowTop = 0.11f;
+
+    /// <summary>
+    /// 버리기를 두 번 눌러야 하는 이유 —
+    /// 【버린 것은 돌아오지 않는다.】 땅에 떨어지는 월드 아이템이 아직 없어서
+    /// 버리기는 곧 삭제다. 한 번의 오터치로 최고 티어 장비가 사라지면
+    /// 그 판의 검증 자체가 끝난다. 그래서 확인을 한 번 받는다.
+    /// (월드 드랍이 생기면 이 확인은 지워도 된다)
+    /// </summary>
+    private ItemStack discardPending;
+    private int discardPendingAmount;
+    private float discardPendingUntil;
+
+    private const float DiscardConfirmWindow = 3f;
+
+    private bool IsPending(ItemStack stack, int amount)
+        => discardPending == stack
+           && discardPendingAmount == amount
+           && Time.unscaledTime < discardPendingUntil;
+
+    private void DrawDiscardButtons()
+    {
+        if (selected == null || selected.IsEmpty)
+            return;
+
+        bool many = selected.Count > 1;
+
+        if (!many)
+        {
+            DrawDiscardButton(selected.Count, "버리기", 0.54f, 0.96f);
+            return;
+        }
+
+        DrawDiscardButton(1, "1개 버리기", 0.54f, 0.74f);
+        DrawDiscardButton(selected.Count, "전부 버리기", 0.76f, 0.96f);
+    }
+
+    private void DrawDiscardButton(int amount, string label, float left, float right)
+    {
+        bool pending = IsPending(selected, amount);
+
+        UIFactory.CreateButton(rightPanel,
+            pending ? "정말 버립니다" : label,
+            new Vector2(left, ActionRowBottom), new Vector2(right, ActionRowTop),
+            pending ? UIPalette.Warning : UIPalette.Slot,
+            () => Discard(amount),
+            pending ? 24 : 26);
+    }
+
+    private void Discard(int amount)
+    {
+        if (selected == null || selected.IsEmpty)
+            return;
+
+        ItemStack target = selected;
+
+        if (!IsPending(target, amount))
+        {
+            discardPending = target;
+            discardPendingAmount = amount;
+            discardPendingUntil = Time.unscaledTime + DiscardConfirmWindow;
+
+            SetHint($"「{target.Definition.DisplayName}」 {amount}개 — 한 번 더 누르면 버립니다.");
+
+            Refresh();
+            return;
+        }
+
+        string name = target.Definition.DisplayName;
+
+        Inventory bag = PlayerInventory.EnsureInstance().Bag;
+
+        // 개체를 통째로 버리는 경우와 개수만 줄이는 경우를 나눈다.
+        // Take만 쓰면 0개짜리 빈 칸이 남는다.
+        if (amount >= target.Count)
+            bag.RemoveStack(target);
+        else
+            target.Take(amount);
+
+        discardPending = null;
+        selected = null;
+
+        SetHint($"「{name}」 {amount}개를 버렸습니다.");
+
+        Refresh();
     }
 
     /// <summary>고른 것에 맞춰 다음에 무엇을 하라고 알려준다.</summary>
@@ -693,7 +786,7 @@ public partial class InventoryScreenUI : MonoBehaviour
             lines.Add($"대가: {skill.CostDescription}");
 
         UIFactory.CreateLabel(rightPanel, string.Join("\n", lines), 24, FontStyle.Normal,
-            new Vector2(0.04f, 0.16f), new Vector2(0.96f, 0.50f), TextAnchor.UpperLeft,
+            new Vector2(0.04f, 0.13f), new Vector2(0.96f, 0.50f), TextAnchor.UpperLeft,
             UIPalette.Text);
     }
 
@@ -701,5 +794,34 @@ public partial class InventoryScreenUI : MonoBehaviour
     {
         if (hintLabel != null)
             hintLabel.text = text;
+    }
+
+    /// <summary>
+    /// 가방 화면을 열어 한 줄을 띄운다. 검증 도구가 결과를 보이려고 쓴다.
+    ///
+    /// 【왜 필요한가】 Playtest 메뉴는 Debug.Log로만 결과를 말했다.
+    /// 에디터 Console 창을 찾아 띄워 두지 않으면 "아무 일도 안 일어난 것"과
+    /// 구분되지 않는다. 결과는 결과가 보이는 곳에 있어야 한다.
+    /// </summary>
+    public static void ShowBagWithMessage(string message)
+    {
+        InventoryScreenUI screen = EnsureInstance();
+
+        if (screen == null)
+            return;
+
+        if (!screen.IsOpen)
+            screen.Open((int)Tab.Bag);
+        else
+            screen.Refresh();
+
+        screen.SetHint(message);
+    }
+
+    /// <summary>열려 있을 때만 다시 그린다. 가방을 건드린 쪽이 부른다.</summary>
+    public static void RefreshIfOpen()
+    {
+        if (instance != null && instance.IsOpen)
+            instance.Refresh();
     }
 }

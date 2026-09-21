@@ -154,16 +154,54 @@ public class Inventory
         return count - remaining;
     }
 
-    /// <summary>담는다. 이미 만들어진 개체(내구도 유지)를 그대로 넣는다.</summary>
+    /// <summary>
+    /// 담는다. 이미 만들어진 개체(내구도 유지)를 그대로 넣는다.
+    ///
+    /// 【겹치는 아이템은 먼저 기존 칸에 합친다.】
+    /// 예전에는 무조건 새 칸에 붙였다. 그래서 전리품 창에서 고철을 세 번 주우면
+    /// 스택 상한이 20인데도 세 칸을 잡아먹었다. 가방이 금방 차서
+    /// 적재 설계(칸 수·무게)가 전부 헛돌았다.
+    ///
+    /// 【전부 아니면 전혀】 계약은 그대로다. 먼저 CanAdd로 전량이 들어가는지
+    /// 확인한 뒤에만 옮기기 시작한다. 그래야 전리품 한 칸이 반만 옮겨져
+    /// "무엇을 가져왔는지 화면만 보고 알 수 없는" 상태가 생기지 않는다.
+    /// (LootContainer.TryTakeTo의 주석과 같은 이유다)
+    /// </summary>
     public bool TryAddStack(ItemStack stack)
     {
         if (stack == null || stack.IsEmpty)
             return false;
 
-        if (FreeSlots < stack.TotalSlots)
+        if (!stack.Definition.IsStackable)
+        {
+            // 내구도가 있는 물건은 애초에 겹치지 않는다. 개체를 그대로 넣는다.
+            if (FreeSlots < stack.TotalSlots)
+                return false;
+
+            stacks.Add(stack);
+
+            return true;
+        }
+
+        if (!CanAdd(stack.Definition, stack.Count))
             return false;
 
-        stacks.Add(stack);
+        // 1) 기존 칸의 여유부터 채운다.
+        for (int i = 0; i < stacks.Count && !stack.IsEmpty; i++)
+            stacks[i].Merge(stack);
+
+        // 2) 남은 것은 새 칸으로. CanAdd가 자리를 보장했다.
+        while (!stack.IsEmpty)
+        {
+            if (FreeSlots < stack.Definition.SlotSize)
+                return false;
+
+            int amount = Mathf.Min(stack.Count, stack.Definition.StackMax);
+
+            stacks.Add(new ItemStack(stack.Definition, amount));
+
+            stack.Take(amount);
+        }
 
         return true;
     }

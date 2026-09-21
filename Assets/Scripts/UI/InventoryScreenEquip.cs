@@ -191,14 +191,14 @@ public partial class InventoryScreenUI
         if (gains.Count > 0)
         {
             UIFactory.CreateLabel(rightPanel, string.Join("\n", gains), 24,
-                FontStyle.Normal, new Vector2(0.04f, 0.28f), new Vector2(0.96f, 0.50f),
+                FontStyle.Normal, new Vector2(0.04f, 0.30f), new Vector2(0.96f, 0.50f),
                 TextAnchor.UpperLeft, UIPalette.TextAccent);
         }
 
         if (costs.Count > 0)
         {
             UIFactory.CreateLabel(rightPanel, "대가\n" + string.Join("\n", costs), 24,
-                FontStyle.Normal, new Vector2(0.04f, 0.04f), new Vector2(0.96f, 0.26f),
+                FontStyle.Normal, new Vector2(0.04f, 0.13f), new Vector2(0.96f, 0.28f),
                 TextAnchor.UpperLeft, UIPalette.Warning);
         }
     }
