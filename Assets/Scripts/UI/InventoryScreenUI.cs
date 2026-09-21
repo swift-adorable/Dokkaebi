@@ -216,7 +216,6 @@ public partial class InventoryScreenUI : MonoBehaviour
         button.targetGraphic = image;
         button.onClick.AddListener(Toggle);
 
-        UIFactory.AddGlassSheen(image, UIFactory.RadiusLarge);
         UIFactory.CreateOutline(image, UIPalette.Rim, UIFactory.RadiusLarge, 2);
 
         toggleLabel = UIFactory.CreateLabel(toggleButton.transform, "가방", 35, FontStyle.Bold,
@@ -273,15 +272,17 @@ public partial class InventoryScreenUI : MonoBehaviour
         UIFactory.CreateGlass("Back", leftColumn, UIPalette.Panel,
             Vector2.zero, Vector2.one, UIFactory.RadiusLarge);
 
+        // 제목은 패널 안쪽 여백(0.03)에 맞춰 왼쪽을 정렬한다.
+        // 아래 장비 격자·가방 격자와 같은 세로선에서 시작해야 줄이 맞는다.
         UIFactory.CreateLabel(leftColumn, "장비", 30, FontStyle.Bold,
-            new Vector2(0.035f, 0.92f), new Vector2(0.97f, 0.99f), TextAnchor.MiddleLeft,
+            new Vector2(0.03f, 0.915f), new Vector2(0.97f, 0.985f), TextAnchor.MiddleLeft,
             UIPalette.TextDim);
 
         equipmentGrid = UIFactory.CreateRegion("Equipment", leftColumn,
             new Vector2(0.03f, 0.63f), new Vector2(0.97f, 0.91f));
 
         bagTitleLabel = UIFactory.CreateLabel(leftColumn, "가방", 30, FontStyle.Bold,
-            new Vector2(0.035f, 0.55f), new Vector2(0.97f, 0.62f), TextAnchor.MiddleLeft,
+            new Vector2(0.03f, 0.55f), new Vector2(0.97f, 0.625f), TextAnchor.MiddleLeft,
             UIPalette.TextDim);
 
         // 가방 격자 뒤에 한 단계 눌린 면을 깔아 깊이를 준다.
@@ -552,9 +553,6 @@ public partial class InventoryScreenUI : MonoBehaviour
             Image cell = UIFactory.CreatePanel($"Equip_{slots[i]}", equipmentGrid,
                 body, min, max);
 
-            if (stack != null || isSelectedSlot || canAccept)
-                UIFactory.AddGlassSheen(cell, UIFactory.Radius);
-
             // 낄 수 있는 자리는 테두리까지 밝혀 준다. 바탕색만 바꾸면
             // 어두운 화면에서 「조금 다른 회색」으로만 보인다.
             UIFactory.CreateOutline(cell,
@@ -575,8 +573,8 @@ public partial class InventoryScreenUI : MonoBehaviour
 
             // 부위 이름은 항상 작게 위에 남긴다 —
             // 끼고 나면 어느 자리였는지 알 수 없던 문제를 없앤다.
-            UIFactory.CreateLabel(cell.transform, EquipmentSlotName(slots[i]), 18,
-                FontStyle.Normal, new Vector2(0.07f, 0.58f), new Vector2(0.93f, 0.94f),
+            UIFactory.CreateLabel(cell.transform, EquipmentSlotName(slots[i]), 23,
+                FontStyle.Bold, new Vector2(0.07f, 0.56f), new Vector2(0.93f, 0.95f),
                 TextAnchor.UpperLeft, UIPalette.TextDim);
 
             if (stack?.Definition == null)
@@ -589,7 +587,7 @@ public partial class InventoryScreenUI : MonoBehaviour
 
             strip.raycastTarget = false;
 
-            UIFactory.CreateLabel(strip.transform, stack.Definition.DisplayName, 21,
+            UIFactory.CreateLabel(strip.transform, stack.Definition.DisplayName, 24,
                 FontStyle.Bold, new Vector2(0.06f, 0f), new Vector2(0.94f, 1f),
                 TextAnchor.MiddleLeft, Color.white);
 
@@ -603,7 +601,7 @@ public partial class InventoryScreenUI : MonoBehaviour
         {
             case EquipmentSlot.Weapon:   return "무기";
             case EquipmentSlot.Head:     return "머리";
-            case EquipmentSlot.Body:     return "신체";
+            case EquipmentSlot.Body:     return "갑옷";
             case EquipmentSlot.Face:     return "얼굴";
             case EquipmentSlot.Ears:     return "이어폰";
             case EquipmentSlot.Backpack: return "가방";
@@ -716,9 +714,6 @@ public partial class InventoryScreenUI : MonoBehaviour
         Image cell = UIFactory.CreatePanel(name, parent, body, min, max);
 
         // 빈 칸에는 광택을 얹지 않는다. 격자 전체가 번들거려 아이템이 묻힌다.
-        if (!empty)
-            UIFactory.AddGlassSheen(cell, UIFactory.Radius);
-
         UIFactory.CreateOutline(cell,
             empty ? UIPalette.EdgeSoft
                   : chosen ? UIPalette.Brighten(UIPalette.SlotSelected, 0.22f)
@@ -906,8 +901,6 @@ public partial class InventoryScreenUI : MonoBehaviour
         Image band = UIFactory.CreatePanel("Header", rightPanel,
             UIPalette.Glassify(kind, 0.50f),
             new Vector2(0f, 0.865f), new Vector2(1f, 1f), UIFactory.RadiusLarge);
-
-        UIFactory.AddGlassSheen(band, UIFactory.RadiusLarge);
 
         // 아이콘 자리. 아트가 들어오면 definition.Icon이 채운다.
         Image icon = UIFactory.CreatePanel("Icon", rightPanel, UIPalette.Darken(kind, 0.34f),

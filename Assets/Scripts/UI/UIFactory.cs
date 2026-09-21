@@ -118,17 +118,20 @@ public static class UIFactory
     }
 
     /// <summary>
-    /// 유리판. 반투명 바탕 + 위쪽 광택 + 밝은 테두리로 「비치는 판」을 만든다.
+    /// 유리판. 반투명 바탕 + 밝은 테두리.
+    ///
+    /// 【광택(Sheen)을 뺀 이유】
+    /// 처음에는 위쪽 절반에 흰 막을 깔아 「빛 받은 면」을 만들었다.
+    /// 판이 반투명(0.42)일 때는 은은했지만, 글자가 안 읽혀 판을 0.80까지
+    /// 올리자 그 막이 **회색 띠**로 굳어 버렸다. 패널마다 위쪽에
+    /// 정체를 알 수 없는 회색 막대가 걸린 것처럼 보였다.
+    ///
+    /// 광택은 「바탕이 비칠 때만」 광택으로 읽힌다. 불투명한 판 위에서는
+    /// 그냥 다른 색 사각형이다. 유리의 인상은 테두리가 만들게 두고 광택은 버린다.
     ///
     /// 【진짜 블러가 아닌 이유】
     /// ScreenSpaceOverlay 캔버스는 뒤 화면을 텍스처로 받을 수 없어서
-    /// 실제 배경 흐림은 별도 카메라와 셰이더가 필요하다. 지금 단계에서는
-    /// 그 비용이 얻는 것보다 크다.
-    ///
-    /// 대신 유리처럼 보이게 하는 세 가지를 쌓는다 —
-    ///   1) 낮은 알파 : 뒤가 비친다
-    ///   2) 위쪽 광택 : 빛이 위에서 든다는 신호. 이것 하나로 평면이 판으로 바뀐다
-    ///   3) 밝은 테두리 : 유리의 모서리. 면과 면을 갈라 준다
+    /// 실제 배경 흐림은 별도 카메라와 셰이더가 필요하다.
     /// </summary>
     public static Image CreateGlass(
         string name, Transform parent, Color tint,
@@ -137,31 +140,9 @@ public static class UIFactory
     {
         Image body = CreatePanel(name, parent, tint, anchorMin, anchorMax, radius);
 
-        AddGlassSheen(body, radius);
-
         CreateOutline(body, UIPalette.Rim, radius, rimThickness);
 
         return body;
-    }
-
-    /// <summary>
-    /// 위쪽 광택만 얹는다. 이미 만들어 둔 판을 유리처럼 보이게 할 때 쓴다.
-    ///
-    /// 두 겹으로 나누는 이유 — 넓고 옅은 띠는 「빛을 받은 면」,
-    /// 얇고 밝은 띠는 「모서리에 맺힌 하이라이트」다.
-    /// 하나만 쓰면 그냥 밝은 사각형으로 보인다.
-    /// </summary>
-    public static void AddGlassSheen(Image body, int radius = RadiusLarge)
-    {
-        Image wide = CreatePanel("Sheen", body.transform, UIPalette.SheenWide,
-            new Vector2(0f, 0.52f), new Vector2(1f, 1f), radius);
-
-        wide.raycastTarget = false;
-
-        Image edge = CreatePanel("SheenEdge", body.transform, UIPalette.SheenEdge,
-            new Vector2(0.02f, 0.93f), new Vector2(0.98f, 1f), radius);
-
-        edge.raycastTarget = false;
     }
 
     /// <summary>

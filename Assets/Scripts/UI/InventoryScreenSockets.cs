@@ -125,9 +125,6 @@ public partial class InventoryScreenUI
         Image cell = UIFactory.CreatePanel(
             $"Slot_{slot.Kind}_{slot.CoreIndex}_{slot.Index}", rightPanel, color, min, max);
 
-        if (unlocked)
-            UIFactory.AddGlassSheen(cell, UIFactory.Radius);
-
         UIFactory.CreateOutline(cell,
             isCandidate ? UIPalette.Brighten(UIPalette.SlotSelected, 0.22f)
                         : unlocked ? UIPalette.EdgeSoft : UIPalette.Edge,
