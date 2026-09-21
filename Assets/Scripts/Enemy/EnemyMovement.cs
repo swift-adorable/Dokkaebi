@@ -35,6 +35,7 @@ public class EnemyMovement : MonoBehaviour
 
     /// <summary>이동 방향을 대신 정해 주는 두뇌. 없으면 기존 직선 추격을 쓴다.</summary>
     private IEnemySteering steering;
+    private EnemyAggro aggro;
 
     /// <summary>이동 속도 배수. 예비동작·과중량 같은 일시적 감속에 쓴다.</summary>
     public float SpeedScale { get; set; } = 1f;
@@ -73,6 +74,8 @@ public class EnemyMovement : MonoBehaviour
 
         // 인터페이스로 받으므로 두뇌 구현이 바뀌어도 이동은 고치지 않는다.
         steering = GetComponent<IEnemySteering>();
+
+        aggro = GetComponent<EnemyAggro>();
     }
 
     private void Start()
@@ -85,7 +88,10 @@ public class EnemyMovement : MonoBehaviour
         if (enemyManager == null)
             enemyManager = EnemyManager.EnsureInstance();
 
-        Transform target = enemyManager.PlayerTransform;
+        // 【대상은 플레이어로 고정되지 않는다.】
+        // 진영이 다르면 적끼리도 싸운다. EnemyAggro가 없는 프리팹은
+        // 예전처럼 플레이어를 따라간다 — 원형 프리팹이 붙기 전까지의 경로다.
+        Transform target = aggro != null ? aggro.Target : enemyManager.PlayerTransform;
 
         if (target == null)
         {

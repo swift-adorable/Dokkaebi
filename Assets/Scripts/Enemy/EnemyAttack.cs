@@ -103,11 +103,13 @@ public class EnemyAttack : MonoBehaviour
     }
 
     private PoolManager poolManager;
+    private EnemyAggro aggro;
 
     private void Awake()
     {
         movement = GetComponent<EnemyMovement>();
         brain = GetComponent<EnemyBrain>();
+        aggro = GetComponent<EnemyAggro>();
 
         // 원거리 적은 사거리 안에서 멈춰 쏜다. 근접까지 붙으면 원거리의 의미가 없다.
         if (attackKind == EnemyAttackKind.Ranged && movement != null)
@@ -185,7 +187,11 @@ public class EnemyAttack : MonoBehaviour
     /// </summary>
     private void ResolveAttack()
     {
-        Transform target = EnemyManager.EnsureInstance().PlayerTransform;
+        // 이동과 같은 대상을 때린다. 두 곳이 다른 대상을 보면
+        // 옆 적에게 다가가서 플레이어를 쏘는 장면이 나온다.
+        Transform target = aggro != null
+            ? aggro.Target
+            : EnemyManager.EnsureInstance().PlayerTransform;
 
         if (target == null)
             return;
@@ -208,8 +214,18 @@ public class EnemyAttack : MonoBehaviour
         if (!target.TryGetComponent(out Health targetHealth))
             return;
 
+        // 【Team이 아니라 Faction으로 거른다.】
+        // 전에는 Team.Enemy면 무조건 돌아섰다. 그래서 진영을 넣어도
+        // 적끼리는 영원히 서로를 때릴 수 없었다.
+        // Team은 「총알이 누구를 때리는가」, Faction은 「누가 누구와 싸우는가」다.
         if (targetHealth.Team == Team.Enemy)
-            return;
+        {
+            bool hostile = aggro != null
+                           && FactionTable.IsHostile(aggro.Faction, aggro.TargetFaction);
+
+            if (!hostile)
+                return;
+        }
 
         // 근접은 몸통 방어도를 쓴다. 사거리 보정은 적용하지 않는다.
         var request = new DamageRequest
