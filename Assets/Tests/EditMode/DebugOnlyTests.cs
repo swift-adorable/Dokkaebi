@@ -25,12 +25,22 @@ namespace Blob.Tests
         private const string ScenePath = "Assets/Scenes/SampleScene.unity";
 
         /// <summary>
-        /// 출시 빌드에 있으면 안 되는 컴포넌트. 여기 있는 것을 가진 오브젝트는
-        /// 반드시 DebugOnly 표시를 달고 있어야 한다.
+        /// 출시 빌드에 남으면 안 되는 오브젝트. 경로로 못 박는다.
+        ///
+        /// 【왜 타입이 아니라 경로인가】
+        /// 처음에는 「DebugUIManager가 붙은 오브젝트는 DebugOnly여야 한다」로 썼다가
+        /// 테스트가 잡아냈다 — DebugUIManager는 **Canvas 본체**에 붙어 있어서,
+        /// 그 규칙을 따르면 UI 캔버스를 통째로 지우게 된다.
+        /// 오브젝트를 지우는 것과 컴포넌트를 떼는 것은 다른 일이다.
+        /// 컴포넌트 쪽은 DebugOnlyStripper.StrippedComponents가 맡는다.
+        ///
+        /// 이름을 바꾸면 이 테스트가 깨진다 — 그게 맞다.
+        /// 개발용 UI의 이름을 바꿀 때는 출시 안전성을 다시 확인해야 한다.
         /// </summary>
-        private static readonly System.Type[] DevOnlyComponents =
+        private static readonly string[] RequiredDebugOnly =
         {
-            typeof(DebugUIManager)
+            "Canvas/Debug Button",
+            "Canvas/Debug Panel"
         };
 
         /// <summary>
@@ -74,23 +84,43 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 개발_전용_컴포넌트는_DebugOnly_표시를_달고_있다()
+        public void 개발용_UI에_DebugOnly_표시가_붙어_있다()
         {
             WithScene(scene =>
             {
-                foreach (GameObject go in AllObjects(scene))
-                {
-                    foreach (System.Type type in DevOnlyComponents)
-                    {
-                        if (go.GetComponent(type) == null)
-                            continue;
+                List<GameObject> all = AllObjects(scene);
 
-                        Assert.IsNotNull(go.GetComponent<DebugOnly>(),
-                            $"「{go.name}」에 {type.Name}이 있는데 DebugOnly 표시가 없습니다. "
-                            + "출시 빌드에 그대로 실려 화면에 노출됩니다.");
-                    }
+                foreach (string path in RequiredDebugOnly)
+                {
+                    string leaf = path.Substring(path.LastIndexOf('/') + 1);
+
+                    GameObject go = all.FirstOrDefault(o => o.name == leaf);
+
+                    Assert.IsNotNull(go,
+                        $"「{path}」를 씬에서 찾지 못했습니다. 이름이 바뀌었다면 "
+                        + "이 목록도 함께 고치고 출시 노출 여부를 다시 확인하십시오.");
+
+                    Assert.IsNotNull(go.GetComponent<DebugOnly>(),
+                        $"「{path}」에 DebugOnly 표시가 없습니다. "
+                        + "출시 빌드에 그대로 실려 화면에 노출되고 눌립니다.");
                 }
             });
+        }
+
+        /// <summary>
+        /// 오브젝트째 지울 수 없는 개발용 컴포넌트는 타입으로 떼어 낸다.
+        /// 그 목록에서 빠지면 출시 빌드에 치트가 살아 있게 된다.
+        /// </summary>
+        [Test]
+        public void 개발용_컴포넌트가_제거_목록에_들어_있다()
+        {
+            CollectionAssert.Contains(DebugOnlyStripper.StrippedComponents,
+                typeof(DebugUIManager),
+                "DebugUIManager가 제거 목록에 없습니다.");
+
+            CollectionAssert.Contains(DebugOnlyStripper.StrippedComponents,
+                typeof(DebugManager),
+                "DebugManager(치트 입력)가 제거 목록에 없습니다.");
         }
 
         [Test]
