@@ -114,3 +114,12 @@ MonoBehaviour:
   - {fileID: 11400000, guid: f88623e879f7f4b9f9963745bdd98c27, type: 2}
   - {fileID: 11400000, guid: 207153089e7bf4c89ada6a5a047314d8, type: 2}
   bulkMaterial: {fileID: 11400000, guid: 2cea37fa128934109856e90e89807614, type: 2}
+  stackables:
+  - {fileID: 11400000, guid: 69bb7210d5d424e1bb2ff19fd17aa70c, type: 2}
+  - {fileID: 11400000, guid: b7d8f76632b14415590786fd22094645, type: 2}
+  - {fileID: 11400000, guid: 073f0b2ddc0214420a46c8de6a221248, type: 2}
+  - {fileID: 11400000, guid: c293863982b3e4516bbbbb970c437b85, type: 2}
+  - {fileID: 11400000, guid: abf245023c6dc4773a272254e9082cc0, type: 2}
+  - {fileID: 11400000, guid: 2cea37fa128934109856e90e89807614, type: 2}
+  - {fileID: 11400000, guid: 3139cbbb43bcd4f0d9657cc111482330, type: 2}
+  - {fileID: 11400000, guid: 3c837c4d52bb94bde9bf049e5661eaa1, type: 2}

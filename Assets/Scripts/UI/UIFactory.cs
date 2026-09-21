@@ -83,16 +83,82 @@ public static class UIFactory
         return rect;
     }
 
-    /// <summary>색이 채워진 판. 클릭을 막는 배경으로도 쓴다.</summary>
+    /// <summary>둥근 모서리 반지름의 기본값. 칸·버튼이 쓴다.</summary>
+    public const int Radius = 10;
+
+    /// <summary>패널·카드처럼 큰 면이 쓰는 반지름.</summary>
+    public const int RadiusLarge = 18;
+
+    /// <summary>
+    /// 색이 채워진 판. 클릭을 막는 배경으로도 쓴다.
+    ///
+    /// radius가 0보다 크면 둥근 9-슬라이스 스프라이트를 쓴다.
+    /// 전부 각진 사각형이면 「대충 만든 화면」으로 보인다. (UISprites)
+    /// </summary>
     public static Image CreatePanel(
-        string name, Transform parent, Color color, Vector2 anchorMin, Vector2 anchorMax)
+        string name, Transform parent, Color color, Vector2 anchorMin, Vector2 anchorMax,
+        int radius = Radius)
     {
         RectTransform rect = CreateRegion(name, parent, anchorMin, anchorMax);
 
         var image = rect.gameObject.AddComponent<Image>();
         image.color = color;
 
+        if (radius > 0)
+        {
+            image.sprite = UISprites.Rounded(radius);
+            image.type = Image.Type.Sliced;
+
+            // 칸이 반지름보다 작아지면 Unity가 스프라이트를 통째로 줄여 버린다.
+            // 그러면 모서리가 뭉개지므로 슬라이스 비율을 유지하게 둔다.
+            image.pixelsPerUnitMultiplier = 1f;
+        }
+
         return image;
+    }
+
+    /// <summary>
+    /// 윤곽선을 얹는다. 대상의 자식으로 들어가며 클릭을 가로채지 않는다.
+    ///
+    /// 왜 별도 이미지인가 — Image는 색을 하나만 가진다.
+    /// 바탕색과 테두리색을 따로 두려면 판이 둘 있어야 한다.
+    /// </summary>
+    public static Image CreateOutline(
+        Image target, Color color, int radius = Radius, int thickness = 2)
+    {
+        Image outline = CreatePanel("Outline", target.transform, color,
+            Vector2.zero, Vector2.one, radius: 0);
+
+        outline.sprite = UISprites.RoundedOutline(radius, thickness);
+        outline.type = Image.Type.Sliced;
+        outline.raycastTarget = false;
+
+        return outline;
+    }
+
+    /// <summary>
+    /// 숫자 배지. 개수·수량처럼 칸 위에 얹는 작은 표시다.
+    ///
+    /// 어두운 알약을 깔고 그 위에 글자를 얹는 이유 —
+    /// 칸 배경색이 아이템 종류마다 달라서, 글자만 올리면
+    /// 밝은 칸에서 숫자가 사라진다.
+    /// </summary>
+    public static Text CreateBadge(
+        Transform parent, string text, Vector2 anchorMin, Vector2 anchorMax,
+        int fontSize = 20, Color? textColor = null)
+    {
+        Image pill = CreatePanel("Badge", parent, UIPalette.Badge,
+            anchorMin, anchorMax, radius: 8);
+
+        pill.raycastTarget = false;
+
+        Text label = CreateLabel(pill.transform, text, fontSize, FontStyle.Bold,
+            new Vector2(0.08f, 0f), new Vector2(0.92f, 1f),
+            TextAnchor.MiddleCenter, textColor ?? UIPalette.Text);
+
+        label.raycastTarget = false;
+
+        return label;
     }
 
     public static Text CreateLabel(
@@ -126,12 +192,21 @@ public static class UIFactory
     /// <summary>글자 하나짜리 버튼.</summary>
     public static Button CreateButton(
         Transform parent, string text, Vector2 anchorMin, Vector2 anchorMax,
-        Color color, UnityAction action, int fontSize = 30)
+        Color color, UnityAction action, int fontSize = 30, int radius = Radius)
     {
-        Image image = CreatePanel($"Button_{text}", parent, color, anchorMin, anchorMax);
+        Image image = CreatePanel($"Button_{text}", parent, color, anchorMin, anchorMax, radius);
 
         var button = image.gameObject.AddComponent<Button>();
         button.targetGraphic = image;
+
+        // 눌린 것이 보여야 한다. 색만 살짝 밝히고 되돌린다.
+        ColorBlock colors = button.colors;
+        colors.normalColor = Color.white;
+        colors.highlightedColor = new Color(1.12f, 1.12f, 1.12f, 1f);
+        colors.pressedColor = new Color(0.82f, 0.82f, 0.82f, 1f);
+        colors.selectedColor = Color.white;
+        colors.fadeDuration = 0.06f;
+        button.colors = colors;
 
         if (action != null)
             button.onClick.AddListener(action);

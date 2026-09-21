@@ -53,6 +53,51 @@ public static class UIPalette
     /// <summary>경고(과중량·실패).</summary>
     public static readonly Color Warning = new(0.92f, 0.45f, 0.38f, 1f);
 
+    /// <summary>
+    /// 숫자 배지의 알약 바탕. 칸 색이 아이템마다 달라서
+    /// 글자만 얹으면 밝은 칸에서 숫자가 사라진다.
+    /// </summary>
+    public static readonly Color Badge = new(0.04f, 0.05f, 0.07f, 0.88f);
+
+    /// <summary>패널 윤곽선. 면과 면을 갈라 준다.</summary>
+    public static readonly Color Edge = new(0.38f, 0.45f, 0.56f, 0.55f);
+
+    /// <summary>칸 윤곽선. 패널보다 약하다.</summary>
+    public static readonly Color EdgeSoft = new(0.42f, 0.50f, 0.62f, 0.30f);
+
+    /// <summary>패널 안쪽을 한 단계 눌러 깊이를 만든다.</summary>
+    public static readonly Color Inset = new(0.055f, 0.075f, 0.105f, 0.92f);
+
+    /// <summary>표 형태의 줄. 홀짝으로 번갈아 깐다.</summary>
+    public static readonly Color Row = new(0.15f, 0.19f, 0.25f, 0.85f);
+
+    public static readonly Color RowAlt = new(0.12f, 0.155f, 0.21f, 0.85f);
+
+    /// <summary>이득 수치(초록) / 대가 수치(주황).</summary>
+    public static readonly Color Gain = new(0.48f, 0.82f, 0.56f, 1f);
+
+    public static readonly Color Cost = new(0.95f, 0.62f, 0.40f, 1f);
+
+    /// <summary>같은 색을 밝혀 테두리로 쓴다. 종류별 색을 한 번 더 정의하지 않는다.</summary>
+    public static Color Brighten(Color source, float amount = 0.28f)
+    {
+        return new Color(
+            Mathf.Clamp01(source.r + amount),
+            Mathf.Clamp01(source.g + amount),
+            Mathf.Clamp01(source.b + amount),
+            Mathf.Clamp01(source.a + 0.05f));
+    }
+
+    /// <summary>같은 색을 어둡게. 칸 바탕은 테두리보다 가라앉아야 글자가 읽힌다.</summary>
+    public static Color Darken(Color source, float amount = 0.34f)
+    {
+        return new Color(
+            Mathf.Max(0f, source.r - amount),
+            Mathf.Max(0f, source.g - amount),
+            Mathf.Max(0f, source.b - amount),
+            source.a);
+    }
+
     /// <summary>스킬 분류별 색. Core / Support / Meta / Persistent 순.</summary>
     public static readonly Color[] SkillCategory =
     {

@@ -69,6 +69,9 @@ public static class PlaytestTools
     [MenuItem(Menu + "젬 — 서리 Core · 깊은 상처 · 원거리 사격")]
     public static void GiveChecklistGems() => Run(PlaytestActions.GiveChecklistGems);
 
+    [MenuItem(Menu + "겹치는 재료 지급 — 개수 배지 확인")]
+    public static void GiveStackables() => Run(PlaytestActions.GiveStackables);
+
     [MenuItem(Menu + "가방 채우기 — 과중량 유발")]
     public static void FillBag() => Run(PlaytestActions.FillBag);
 

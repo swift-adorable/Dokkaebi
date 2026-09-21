@@ -1,15 +1,20 @@
 using UnityEngine;
 
 /// <summary>
-/// 개발용 디버그 버튼. 씬의 「DEBUG」 버튼 OnClick에 TogglePanel()이 걸려 있다.
+/// 옛 디버그 패널 토글. 씬의 「DEBUG」 버튼이 쓰던 것이다.
 ///
-/// 검증 도구(PlaytestPanelUI)도 여기서 연다 —
-/// 화면에 떠 있는 버튼이 둘이면 게임 화면을 그만큼 더 가린다.
-/// 개발용 진입점은 하나로 모은다.
+/// 【지금은 쓰지 않는다】
+/// 개발용 진입점을 화면 좌상단의 「검증」 버튼(PlaytestPanelUI)으로 일원화했다.
+/// 그쪽은 파일 전체가 `UNITY_EDITOR || DEVELOPMENT_BUILD`로 감싸여 있어
+/// **출시 빌드에 컴파일조차 되지 않는다.** 씬에 놓인 버튼은 그 보장을 받지 못해
+/// 실제로 출시 빌드에 노출될 뻔했다.
+///
+/// 이 컴포넌트는 옛 씬 참조가 끊기지 않도록 남겨 둔다.
+/// DebugOnlyStripper가 출시 빌드에서 타입째 떼어 낸다.
 /// </summary>
 public class DebugUIManager : MonoBehaviour
 {
-    [Tooltip("옛 디버그 스크롤 패널(선택). 없어도 검증 패널은 열린다.")]
+    [Tooltip("옛 디버그 스크롤 패널. 지금은 쓰지 않는다.")]
     [SerializeField] private GameObject debugPanel;
 
     public void TogglePanel()

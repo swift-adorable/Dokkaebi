@@ -42,7 +42,8 @@ public static class PlaytestCatalogBuilder
             Gems(SkillCategory.Support),
             Pick("Gems/gem_core_frost", "Gems/gem_core_laceration",
                  "Gems/gem_sup_deep_cuts", "Gems/gem_sup_far_shot"),
-            One("Loot/scrap_metal"));
+            One("Loot/scrap_metal"),
+            Folder("Loot").Where(i => i.StackMax > 1).OrderBy(i => i.Id).ToList());
 
         EditorUtility.SetDirty(catalog);
 
