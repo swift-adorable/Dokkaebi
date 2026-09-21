@@ -24,15 +24,12 @@ public partial class InventoryScreenUI
 
     private void DrawPassivePanel()
     {
-        UIFactory.CreateGlass("Back", rightPanel, UIPalette.Panel,
-            Vector2.zero, Vector2.one, UIFactory.RadiusLarge);
-
         PassiveManager manager = PassiveManager.EnsureInstance();
         PassiveTree tree = manager.Tree;
 
         if (tree == null || tree.Count == 0)
         {
-            UIFactory.CreateLabel(rightPanel,
+            UIFactory.CreateLabel(rightContent,
                 "패시브 트리 에셋이 없습니다.\n메뉴 Blob > Passive > 패시브 에셋 생성 을 실행하십시오.",
                 28, FontStyle.Normal, Vector2.zero, Vector2.one, TextAnchor.MiddleCenter,
                 UIPalette.TextDim);
@@ -42,33 +39,48 @@ public partial class InventoryScreenUI
         DrawPassiveHeader(manager);
         DrawBranchTabs(manager, tree);
 
-        RectTransform treeArea = UIFactory.CreateRegion("Tree", rightPanel,
-            new Vector2(0.015f, 0.02f), new Vector2(0.63f, 0.80f));
+        // 좌우 바깥 여백은 rightContent가 이미 들여 놨다.
+        // 트리와 상세 사이만 한 칸 띄운다 — 양쪽이 반 칸씩 물러난다.
+        float half = UIFactory.Gap * 0.5f;
 
-        RectTransform detailArea = UIFactory.CreateRegion("NodeDetail", rightPanel,
-            new Vector2(0.65f, 0.02f), new Vector2(0.985f, 0.80f));
+        RectTransform treeArea = UIFactory.CreateSlice("Tree", rightContent,
+            Vector2.zero, new Vector2(Split, BodyTop), right: half);
+
+        RectTransform detailArea = UIFactory.CreateSlice("NodeDetail", rightContent,
+            new Vector2(Split, 0f), new Vector2(1f, BodyTop), left: half);
 
         DrawBranchTree(treeArea, manager, tree);
         DrawPassiveDetail(detailArea, manager);
     }
 
-    /// <summary>머리띠의 아래 끝. 띠와 그 안 글자가 같은 값을 쓴다.</summary>
-    private const float PassiveHeaderBottom = 0.915f;
+    /// <summary>머리글 줄의 아래 끝.</summary>
+    private const float HeaderLine = 0.895f;
 
+    /// <summary>계열 탭 줄.</summary>
+    private const float TabBottom = 0.800f;
+    private const float TabTop = 0.880f;
+
+    /// <summary>본문(트리·상세)의 위 끝. 탭 줄과 한 칸 띄운다.</summary>
+    private const float BodyTop = TabBottom - 0.020f;
+
+    /// <summary>좌우 분할선. 사이 간격은 양쪽이 반 칸씩 물러나 만든다.</summary>
+    private const float Split = 0.638f;
+
+    /// <summary>
+    /// 머리글. 회색 띠를 깔지 않는다 —
+    /// 패널 자체가 이미 한 겹이라 그 위에 또 판을 얹으면
+    /// 정체 모를 회색 막대가 된다. 글자만 얹어도 머리글로 읽힌다.
+    /// </summary>
     private void DrawPassiveHeader(PassiveManager manager)
     {
-        // 띠와 그 안의 글자가 같은 높이 범위를 쓴다. 다르면 글자가 모서리에 붙는다.
-        UIFactory.CreatePanel("Header", rightPanel, UIPalette.Header,
-            new Vector2(0f, PassiveHeaderBottom), new Vector2(1f, 1f), UIFactory.RadiusLarge);
-
-        UIFactory.CreateLabel(rightPanel,
+        UIFactory.CreateLabel(rightContent,
             $"패시브    계정 Lv.{manager.AccountLevel}", 32, FontStyle.Bold,
-            new Vector2(0.035f, PassiveHeaderBottom), new Vector2(0.55f, 1f),
+            new Vector2(0f, HeaderLine), new Vector2(0.55f, 1f),
             TextAnchor.MiddleLeft, UIPalette.TextOnGlass);
 
-        UIFactory.CreateLabel(rightPanel,
+        UIFactory.CreateLabel(rightContent,
             $"₡ {manager.Credits:N0}", 30, FontStyle.Bold,
-            new Vector2(0.55f, PassiveHeaderBottom), new Vector2(0.965f, 1f),
+            new Vector2(0.55f, HeaderLine), Vector2.one,
             TextAnchor.MiddleRight, UIPalette.TextAccent);
     }
 
@@ -77,6 +89,9 @@ public partial class InventoryScreenUI
     {
         var branches = (PassiveBranch[])System.Enum.GetValues(typeof(PassiveBranch));
 
+        // 좌우 바깥 여백은 rightContent가 이미 들여 놨다.
+        // 탭 사이만 반 칸씩 물러나 간격을 한 칸으로 만든다.
+        float half = UIFactory.Gap * 0.5f;
         float width = 1f / branches.Length;
 
         for (int i = 0; i < branches.Length; i++)
@@ -86,14 +101,21 @@ public partial class InventoryScreenUI
             bool visible = branch != PassiveBranch.Regression || manager.DiscoveredRegression;
             bool active = branch == selectedBranch && visible;
 
-            var min = new Vector2(i * width + 0.006f, 0.800f);
-            var max = new Vector2((i + 1) * width - 0.006f, PassiveHeaderBottom - 0.012f);
+            var min = new Vector2(i * width, TabBottom);
+            var max = new Vector2((i + 1) * width, TabTop);
 
             Color color = !visible ? UIPalette.SlotLocked
                         : active ? PassiveBranchInfo.Color(branch)
                         : UIPalette.Subtle;
 
-            Image cell = UIFactory.CreatePanel($"Branch_{branch}", rightPanel, color, min, max);
+            Image cell = UIFactory.CreatePanel($"Branch_{branch}", rightContent, color, min, max);
+
+            // 맞닿은 변만 반 칸 물러난다. 양 끝은 패널 여백에 맞춰 붙인다.
+            UIFactory.Inset(cell.rectTransform,
+                left: i == 0 ? 0f : half,
+                bottom: 0f,
+                right: i == branches.Length - 1 ? 0f : half,
+                top: 0f);
 
             UIFactory.CreateOutline(cell,
                 active ? UIPalette.Rim : UIPalette.EdgeSoft, UIFactory.Radius, active ? 3 : 2);
@@ -127,8 +149,10 @@ public partial class InventoryScreenUI
 
     private void DrawBranchTree(RectTransform area, PassiveManager manager, PassiveTree tree)
     {
-        UIFactory.CreateGlass("TreeBack", area, UIPalette.Inset,
-            Vector2.zero, Vector2.one, UIFactory.Radius, 2);
+        // 테두리를 두지 않는다. 바깥 패널이 이미 윤곽을 가지고 있어서
+        // 안쪽에 또 선을 그으면 그 사이가 빈 띠처럼 보인다.
+        UIFactory.CreatePanel("TreeBack", area, UIPalette.Inset,
+            Vector2.zero, Vector2.one, UIFactory.Radius);
 
         if (selectedBranch == PassiveBranch.Regression && !manager.DiscoveredRegression)
         {
@@ -225,8 +249,8 @@ public partial class InventoryScreenUI
 
     private void DrawPassiveDetail(RectTransform area, PassiveManager manager)
     {
-        UIFactory.CreateGlass("DetailBack", area, UIPalette.Inset,
-            Vector2.zero, Vector2.one, UIFactory.Radius, 2);
+        UIFactory.CreatePanel("DetailBack", area, UIPalette.Inset,
+            Vector2.zero, Vector2.one, UIFactory.Radius);
 
         if (selectedNode == null)
         {
