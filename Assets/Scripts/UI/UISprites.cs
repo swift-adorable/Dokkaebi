@@ -52,6 +52,152 @@ public static class UISprites
         return made;
     }
 
+    // ── 종류 표식 ─────────────────────────────────────────────────────
+
+    /// <summary>
+    /// 아이템 종류를 알려 주는 도형.
+    ///
+    /// 【왜 도형인가】
+    /// 실제 아이템 그림은 아직 없다. 그렇다고 칸을 글자로만 채우면
+    /// 격자가 표처럼 보이고, 무엇이 무기이고 무엇이 재료인지 한눈에 안 들어온다.
+    /// 색과 도형 두 축으로 구분하면 글자를 읽기 전에 분류가 먼저 읽힌다.
+    ///
+    /// 그림이 들어오면 ItemDefinition.Icon이 이 자리를 대신한다.
+    /// </summary>
+    public enum Glyph
+    {
+        Circle = 0,
+        Diamond = 1,
+        Triangle = 2,
+        Hexagon = 3,
+        Shield = 4,
+        Square = 5,
+        Cross = 6
+    }
+
+    private static readonly Dictionary<Glyph, Sprite> glyphCache = new();
+
+    /// <summary>도형 스프라이트. 128×128 한 장을 만들어 재사용한다.</summary>
+    public static Sprite Of(Glyph shape)
+    {
+        if (glyphCache.TryGetValue(shape, out Sprite cached) && cached != null)
+            return cached;
+
+        Sprite made = BuildGlyph(shape);
+
+        glyphCache[shape] = made;
+
+        return made;
+    }
+
+    public static Glyph GlyphFor(ItemKind kind)
+    {
+        switch (kind)
+        {
+            case ItemKind.Weapon:     return Glyph.Triangle;
+            case ItemKind.Armour:     return Glyph.Shield;
+            case ItemKind.Backpack:   return Glyph.Square;
+            case ItemKind.Imprint:    return Glyph.Hexagon;
+            case ItemKind.SkillGem:   return Glyph.Diamond;
+            case ItemKind.Consumable: return Glyph.Cross;
+            default:                  return Glyph.Circle;
+        }
+    }
+
+    private static Sprite BuildGlyph(Glyph shape)
+    {
+        const int Size = 128;
+
+        var texture = new Texture2D(Size, Size, TextureFormat.RGBA32, mipChain: false)
+        {
+            filterMode = FilterMode.Bilinear,
+            wrapMode = TextureWrapMode.Clamp,
+            hideFlags = HideFlags.HideAndDontSave
+        };
+
+        var pixels = new Color32[Size * Size];
+
+        for (int y = 0; y < Size; y++)
+        {
+            for (int x = 0; x < Size; x++)
+            {
+                // -1 ~ 1 좌표로 옮겨 도형 식을 단순하게 둔다.
+                float u = (x + 0.5f) / Size * 2f - 1f;
+                float v = (y + 0.5f) / Size * 2f - 1f;
+
+                float alpha = Mathf.Clamp01(Inside(shape, u, v));
+
+                pixels[y * Size + x] = new Color32(255, 255, 255, (byte)(alpha * 255f));
+            }
+        }
+
+        texture.SetPixels32(pixels);
+        texture.Apply(updateMipmaps: false);
+
+        var sprite = Sprite.Create(texture, new Rect(0, 0, Size, Size),
+            new Vector2(0.5f, 0.5f), 100f);
+
+        sprite.hideFlags = HideFlags.HideAndDontSave;
+
+        return sprite;
+    }
+
+    /// <summary>
+    /// 도형 안쪽이면 1, 밖이면 0. 경계에서 부드럽게 끊는다.
+    ///
+    /// 거리 함수 하나로 처리하는 이유 — 도형마다 그리기 코드를 따로 쓰면
+    /// 안티에일리어싱을 매번 다시 맞춰야 한다.
+    /// </summary>
+    private static float Inside(Glyph shape, float u, float v)
+    {
+        // 경계 한 픽셀 폭. 128칸을 -1~1로 폈으므로 한 칸이 0.0156이다.
+        const float Edge = 0.03f;
+
+        float distance;
+
+        switch (shape)
+        {
+            case Glyph.Diamond:
+                distance = Mathf.Abs(u) + Mathf.Abs(v) - 0.82f;
+                break;
+
+            case Glyph.Square:
+                distance = Mathf.Max(Mathf.Abs(u), Mathf.Abs(v)) - 0.66f;
+                break;
+
+            case Glyph.Triangle:
+                // 오른쪽을 보는 삼각형. 탄이 나가는 방향이다.
+                distance = Mathf.Max(u - 0.72f, Mathf.Abs(v) * 1.15f - (0.72f - u) * 0.62f - 0.06f);
+                break;
+
+            case Glyph.Hexagon:
+                distance = Mathf.Max(
+                    Mathf.Abs(u) * 0.866f + Mathf.Abs(v) * 0.5f,
+                    Mathf.Abs(v)) - 0.74f;
+                break;
+
+            case Glyph.Shield:
+                // 위는 네모, 아래는 뾰족하게. 방패의 실루엣이다.
+                distance = v > -0.1f
+                    ? Mathf.Max(Mathf.Abs(u) - 0.62f, v - 0.74f)
+                    : Mathf.Abs(u) - 0.62f * (1f + (v + 0.1f) / 0.85f);
+                break;
+
+            case Glyph.Cross:
+                // 십자. 회복·소모품을 뜻한다.
+                distance = Mathf.Min(
+                    Mathf.Max(Mathf.Abs(u) - 0.26f, Mathf.Abs(v) - 0.74f),
+                    Mathf.Max(Mathf.Abs(u) - 0.74f, Mathf.Abs(v) - 0.26f));
+                break;
+
+            default:
+                distance = Mathf.Sqrt(u * u + v * v) - 0.74f;
+                break;
+        }
+
+        return 0.5f - distance / Edge;
+    }
+
     /// <summary>
     /// 한 변이 2r+1인 정사각형을 만든다. 가운데 1픽셀이 늘어나는 9-슬라이스 중심이다.
     ///
