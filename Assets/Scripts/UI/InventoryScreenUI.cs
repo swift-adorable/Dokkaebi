@@ -25,6 +25,21 @@ public partial class InventoryScreenUI : MonoBehaviour
 
     private static readonly string[] TabNames = { "가방", "젬", "패시브" };
 
+    // ── 레이아웃 ──────────────────────────────────────────────────────
+    // 값은 전부 【안전 영역 기준】의 0~1이다. 노치와 홈 인디케이터는
+    // SafeAreaFitter가 이미 잘라 냈으므로 여기서는 화면 전체를 쓴다고 생각해도 된다.
+    // 한 곳에 모아 두는 이유 — 흩어져 있으면 한 줄만 옮겨도 겹치는지 알 수 없다.
+
+    private const float TopBarBottom = 0.90f;
+    private const float ColumnTop = 0.875f;
+    private const float ColumnBottom = 0.155f;
+    private const float LeftRight = 0.495f;
+    private const float RightLeft = 0.505f;
+    private const float FooterTop = 0.125f;
+    private const float FooterBottom = 0.025f;
+    private const float HintBottom = 0.132f;
+    private const float HintTop = 0.172f;
+
     private const int BagColumns = 6;
 
     /// <summary>
@@ -53,6 +68,19 @@ public partial class InventoryScreenUI : MonoBehaviour
     private ScrollRect bagScroll;
     private RectTransform rightPanel;
     private RectTransform quickSlots;
+
+    /// <summary>안전 영역 컨테이너. 화면 UI는 전부 이 아래에 붙는다.</summary>
+    private RectTransform safeArea;
+
+    /// <summary>
+    /// 지금 고른 【착용 중인】 장비의 자리. 가방에서 고른 것(selected)과 구분한다.
+    ///
+    /// 나눠 두는 이유 — 해제는 이제 두 단계다. 슬롯을 누르면 고르기만 하고,
+    /// 우측 행동 줄의 「해제」를 눌러야 실제로 벗는다.
+    /// 예전에는 빈손으로 슬롯을 누르면 즉시 벗겨져서, 무엇을 끼웠는지
+    /// 확인하려고 누른 것만으로 장비가 가방으로 돌아갔다.
+    /// </summary>
+    private EquipmentSlot? selectedSlot;
 
     private Text creditLabel;
     private Text bagTitleLabel;
@@ -131,22 +159,29 @@ public partial class InventoryScreenUI : MonoBehaviour
 
     private void Build(Transform parent)
     {
-        BuildToggleButton(parent);
+        safeArea = UIFactory.CreateSafeArea(parent.GetComponent<Canvas>());
 
-        panel = UIFactory.CreateRegion("Panel", parent, Vector2.zero, Vector2.one).gameObject;
+        BuildToggleButton(safeArea);
 
-        UIFactory.CreatePanel("Dim", panel.transform, UIPalette.Dim, Vector2.zero, Vector2.one);
+        panel = UIFactory.CreateRegion("Panel", safeArea, Vector2.zero, Vector2.one).gameObject;
+
+        // 덮개는 패널 안에 둔다. 패널이 꺼지면 같이 꺼져야 한다.
+        // 안전 영역 밖까지 덮으려고 앵커를 넉넉히 넘긴다.
+        Image dim = UIFactory.CreatePanel("Dim", panel.transform, UIPalette.Dim,
+            new Vector2(-0.2f, -0.2f), new Vector2(1.2f, 1.2f));
+
+        dim.raycastTarget = true;
 
         BuildTopBar();
         BuildLeftColumn();
 
         rightPanel = UIFactory.CreateRegion("Right", panel.transform,
-            new Vector2(0.53f, 0.17f), new Vector2(0.985f, 0.87f));
+            new Vector2(RightLeft, ColumnBottom), new Vector2(1f, ColumnTop));
 
         BuildBottomBar();
 
         hintLabel = UIFactory.CreateLabel(panel.transform, string.Empty, 24, FontStyle.Normal,
-            new Vector2(0.015f, 0.005f), new Vector2(0.52f, 0.045f),
+            new Vector2(0f, HintBottom), new Vector2(1f, HintTop),
             TextAnchor.MiddleLeft, UIPalette.TextAccent);
 
         panel.SetActive(false);
@@ -161,8 +196,8 @@ public partial class InventoryScreenUI : MonoBehaviour
         rect.anchorMin = new Vector2(1f, 1f);
         rect.anchorMax = new Vector2(1f, 1f);
         rect.pivot = new Vector2(1f, 1f);
-        rect.sizeDelta = new Vector2(240f, 110f);
-        rect.anchoredPosition = new Vector2(-40f, -40f);
+        rect.sizeDelta = new Vector2(220f, 96f);
+        rect.anchoredPosition = new Vector2(-8f, -8f);
 
         var image = toggleButton.AddComponent<Image>();
         image.color = UIPalette.Header;
@@ -179,17 +214,18 @@ public partial class InventoryScreenUI : MonoBehaviour
     {
         // 크레딧 — 스크린샷의 좌상단 화폐 표시 자리.
         Image purse = UIFactory.CreatePanel("Credits", panel.transform, UIPalette.Header,
-            new Vector2(0.015f, 0.905f), new Vector2(0.20f, 0.975f));
+            new Vector2(0f, TopBarBottom), new Vector2(0.185f, 1f));
 
         creditLabel = UIFactory.CreateLabel(purse.transform, "₡ 0", 32, FontStyle.Bold,
             new Vector2(0.06f, 0f), new Vector2(0.94f, 1f), TextAnchor.MiddleRight,
             UIPalette.TextAccent);
 
         // 탭 — 스크린샷의 상단 중앙 아이콘 줄. 아트 전이라 글자로 둔다.
-        float width = 0.10f;
-        float gap = 0.008f;
+        // 우상단은 「가방」 토글이 먹는다. 탭 줄의 중심을 그만큼 왼쪽으로 민다.
+        float width = 0.115f;
+        float gap = 0.01f;
         float total = TabNames.Length * width + (TabNames.Length - 1) * gap;
-        float startX = 0.5f - total * 0.5f;
+        float startX = 0.46f - total * 0.5f;
 
         tabButtons.Clear();
 
@@ -199,7 +235,7 @@ public partial class InventoryScreenUI : MonoBehaviour
             int captured = i;
 
             Button button = UIFactory.CreateButton(panel.transform, TabNames[i],
-                new Vector2(x, 0.905f), new Vector2(x + width, 0.975f),
+                new Vector2(x, TopBarBottom), new Vector2(x + width, 1f),
                 UIPalette.Subtle, () => SelectTab((Tab)captured), 30);
 
             tabButtons.Add(button);
@@ -209,7 +245,7 @@ public partial class InventoryScreenUI : MonoBehaviour
     private void BuildLeftColumn()
     {
         leftColumn = UIFactory.CreateRegion("Left", panel.transform,
-            new Vector2(0.015f, 0.17f), new Vector2(0.50f, 0.87f));
+            new Vector2(0f, ColumnBottom), new Vector2(LeftRight, ColumnTop));
 
         UIFactory.CreatePanel("Back", leftColumn, UIPalette.Panel, Vector2.zero, Vector2.one);
 
@@ -254,26 +290,27 @@ public partial class InventoryScreenUI : MonoBehaviour
     private void BuildBottomBar()
     {
         // 소지 중량 막대 — 스크린샷의 좌하단.
-        UIFactory.CreateLabel(panel.transform, "소지 중량", 24, FontStyle.Normal,
-            new Vector2(0.015f, 0.10f), new Vector2(0.10f, 0.155f),
+        // 소지 중량 — 좌하단. 막대와 숫자를 한 줄에 둔다.
+        UIFactory.CreateLabel(panel.transform, "소지 중량", 22, FontStyle.Normal,
+            new Vector2(0f, FooterBottom), new Vector2(0.075f, FooterTop),
             TextAnchor.MiddleLeft, UIPalette.TextDim);
 
         UIFactory.CreatePanel("WeightTrack", panel.transform, UIPalette.Slot,
-            new Vector2(0.10f, 0.11f), new Vector2(0.30f, 0.145f));
+            new Vector2(0.08f, FooterBottom + 0.025f), new Vector2(0.245f, FooterTop - 0.025f));
 
         weightFill = UIFactory.CreatePanel("WeightFill", panel.transform, UIPalette.Action,
-            new Vector2(0.10f, 0.11f), new Vector2(0.10f, 0.145f));
+            new Vector2(0.08f, FooterBottom + 0.025f), new Vector2(0.08f, FooterTop - 0.025f));
 
-        weightLabel = UIFactory.CreateLabel(panel.transform, string.Empty, 24, FontStyle.Bold,
-            new Vector2(0.31f, 0.10f), new Vector2(0.50f, 0.155f),
+        weightLabel = UIFactory.CreateLabel(panel.transform, string.Empty, 22, FontStyle.Bold,
+            new Vector2(0.25f, FooterBottom), new Vector2(0.40f, FooterTop),
             TextAnchor.MiddleLeft, UIPalette.TextDim);
 
-        // 퀵슬롯 — 스크린샷의 하단 중앙 1~8.
+        // 퀵슬롯 1~8 — 하단 중앙.
         quickSlots = UIFactory.CreateRegion("QuickSlots", panel.transform,
-            new Vector2(0.33f, 0.05f), new Vector2(0.70f, 0.145f));
+            new Vector2(0.42f, FooterBottom), new Vector2(0.86f, FooterTop));
 
         UIFactory.CreateButton(panel.transform, "닫기",
-            new Vector2(0.88f, 0.05f), new Vector2(0.985f, 0.14f),
+            new Vector2(0.88f, FooterBottom), new Vector2(1f, FooterTop),
             UIPalette.Subtle, Close);
     }
 
@@ -293,6 +330,7 @@ public partial class InventoryScreenUI : MonoBehaviour
             tab = (Tab)tabIndex;
 
         selected = null;
+        selectedSlot = null;
 
         // 활성화가 먼저다 — 꺼진 상태에서는 뷰포트 높이를 읽을 수 없어
         // 스크롤 내용물의 높이가 0으로 잡힌다.
@@ -312,6 +350,7 @@ public partial class InventoryScreenUI : MonoBehaviour
         CloseDiscardPopup();
 
         selected = null;
+        selectedSlot = null;
 
         panel.SetActive(false);
 
@@ -323,6 +362,7 @@ public partial class InventoryScreenUI : MonoBehaviour
     {
         tab = next;
         selected = null;
+        selectedSlot = null;
 
         SetHint(string.Empty);
         Refresh();
@@ -341,7 +381,7 @@ public partial class InventoryScreenUI : MonoBehaviour
         leftColumn.gameObject.SetActive(showLeft);
         quickSlots.gameObject.SetActive(showLeft);
 
-        rightPanel.anchorMin = new Vector2(showLeft ? 0.53f : 0.015f, 0.17f);
+        rightPanel.anchorMin = new Vector2(showLeft ? RightLeft : 0f, ColumnBottom);
 
         if (showLeft)
         {
@@ -422,9 +462,21 @@ public partial class InventoryScreenUI : MonoBehaviour
 
             ItemStack stack = loadout.Get(slots[i]);
 
-            Color color = stack == null
-                ? UIPalette.Slot
-                : UIPalette.ForItem(stack.Definition.Kind);
+            bool isSelectedSlot = selectedSlot == slots[i];
+
+            // 【고른 장비가 들어갈 수 있는 자리를 밝힌다.】
+            // 어느 칸에 끼워야 하는지 글로만 알려 주면 8칸을 하나씩 눌러 보게 된다.
+            bool canAccept = selected != null
+                             && selected.Definition is EquipmentDefinition
+                             && loadout.CanEquip(selected, slots[i]);
+
+            Color color = isSelectedSlot
+                ? UIPalette.SlotSelected
+                : canAccept
+                    ? UIPalette.SlotEquippable
+                    : stack == null
+                        ? UIPalette.Slot
+                        : UIPalette.ForItem(stack.Definition.Kind);
 
             Image cell = UIFactory.CreatePanel($"Equip_{slots[i]}", equipmentGrid,
                 color, min, max);
@@ -474,13 +526,32 @@ public partial class InventoryScreenUI : MonoBehaviour
 
         Inventory bag = PlayerInventory.EnsureInstance().Bag;
 
+        // 【탭에 맞는 것만 보여 준다.】
+        // 젬 탭에서 방탄복을 고를 일이 없고, 가방 탭에서 젬을 눌러 봐야
+        // 「젬 탭에서 장착」이라는 안내만 다시 나온다. 목록만 길어진다.
         bagStacks.Clear();
-        bagStacks.AddRange(bag.Stacks);
 
-        bagTitleLabel.text = $"가방 ({bag.UsedSlots}/{bag.SlotCapacity})";
+        int hidden = 0;
+
+        foreach (ItemStack stack in bag.Stacks)
+        {
+            if (BelongsToTab(stack))
+                bagStacks.Add(stack);
+            else
+                hidden++;
+        }
+
+        bagTitleLabel.text = tab == Tab.Socket
+            ? $"젬 ({bagStacks.Count}개)"
+            : $"가방 ({bag.UsedSlots}/{bag.SlotCapacity})"
+              + (hidden > 0 ? $"    젬 {hidden}개는 젬 탭에" : string.Empty);
 
         // 【전부 그린다.】 잘라내면 그 칸의 물건은 보이지도 눌리지도 않는다.
-        int cells = Mathf.Max(0, bag.SlotCapacity);
+        // 가방 탭은 실제 용량만큼(빈 칸이 곧 남은 자리다),
+        // 젬 탭은 가진 젬만큼 그린다 — 젬 4개에 빈 칸 16개는 정보가 아니다.
+        int cells = tab == Tab.Socket
+            ? Mathf.Max(BagColumns, bagStacks.Count)
+            : Mathf.Max(0, bag.SlotCapacity);
 
         int rows = Mathf.Max(BagVisibleRows,
             Mathf.CeilToInt(cells / (float)BagColumns));
@@ -539,9 +610,23 @@ public partial class InventoryScreenUI : MonoBehaviour
     {
         selected = selected == stack ? null : stack;
 
+        // 가방에서 무언가를 고르면 착용 슬롯 선택은 풀린다. 둘은 배타다.
+        selectedSlot = null;
+
         SetHint(DescribeSelection());
 
         Refresh();
+    }
+
+    /// <summary>이 칸이 지금 탭에 속하는가.</summary>
+    private bool BelongsToTab(ItemStack stack)
+    {
+        if (stack?.Definition == null)
+            return false;
+
+        return tab == Tab.Socket
+            ? stack.Definition.IsSkillGem
+            : !stack.Definition.IsSkillGem;
     }
 
     private void RefreshQuickSlots()
@@ -658,6 +743,18 @@ public partial class InventoryScreenUI : MonoBehaviour
         if (selected == null || selected.IsEmpty)
             return;
 
+        // 착용 중인 것은 가방에 없다. 버릴 수 없고, 대신 여기서 벗는다.
+        if (selectedSlot.HasValue)
+        {
+            EquipmentSlot slot = selectedSlot.Value;
+
+            UIFactory.CreateButton(rightPanel, "해제",
+                new Vector2(0.54f, ActionRowBottom), new Vector2(0.96f, ActionRowTop),
+                UIPalette.Action, () => UnequipSelectedSlot(slot), 26);
+
+            return;
+        }
+
         ItemStack target = selected;
 
         UIFactory.CreateButton(rightPanel, "버리기",
@@ -676,8 +773,11 @@ public partial class InventoryScreenUI : MonoBehaviour
         if (tab == Tab.Socket)
             return $"「{name}」 — 끼울 자리를 누르십시오.";
 
+        if (selectedSlot.HasValue)
+            return $"「{name}」 착용 중 — 오른쪽 아래 「해제」로 벗습니다.";
+
         return selected.Definition is EquipmentDefinition
-            ? $"「{name}」 — 왼쪽 위 장비 자리를 누르십시오."
+            ? $"「{name}」 — 초록색으로 밝아진 자리를 누르십시오."
             : string.Empty;
     }
 

@@ -20,7 +20,11 @@ public static class MobileInputUIFactory
 
     private const float DashButtonSize = 190f;
     private const float AbsorbPromptSize = 150f;
-    private const float EdgeMargin = 140f;
+    /// <summary>
+    /// 모서리에서 들이는 거리. 안전 영역이 노치·홈 인디케이터를 이미 잘라 냈으므로
+    /// 여기서는 「엄지가 화면 끝에 걸리지 않을 만큼」만 들이면 된다.
+    /// </summary>
+    private const float EdgeMargin = 60f;
 
     /// <summary>DASH 버튼과 ABSORB 버튼 사이 간격. 엄지로 오폭하지 않을 거리.</summary>
     private const float ButtonGap = 40f;
@@ -73,19 +77,25 @@ public static class MobileInputUIFactory
 
         canvasObject.AddComponent<GraphicRaycaster>();
 
+        // 【안전 영역 안에만 둔다.】
+        // DASH 버튼을 화면 우하단에 붙이면 아이폰의 홈 인디케이터와 겹친다.
+        // 그 위를 쓸어 올리면 게임이 아니라 iOS가 반응한다 —
+        // 조작이 안 먹는 것처럼 보이는 전형적인 원인이다.
+        RectTransform safe = UIFactory.CreateSafeArea(canvas);
+
         VirtualJoystick moveJoystick = CreateJoystick(
-            canvasObject.transform, "MoveJoystickArea",
+            safe, "MoveJoystickArea",
             new Vector2(0f, 0f), new Vector2(0.5f, JoystickAreaTop));
 
         VirtualJoystick aimJoystick = CreateJoystick(
-            canvasObject.transform, "AimJoystickArea",
+            safe, "AimJoystickArea",
             new Vector2(0.5f, 0f), new Vector2(1f, JoystickAreaTop));
 
         // 버튼류는 조이스틱 영역보다 나중에 만들어야 위에 그려지고 터치를 먼저 받는다.
-        VirtualButton dashButton = CreateDashButton(canvasObject.transform);
+        VirtualButton dashButton = CreateDashButton(safe);
 
         // 흡수는 화면 구석 고정이 아니라, 대상 시체 위에 떠오르는 컨텍스트 버튼이다.
-        VirtualButton absorbButton = CreateAbsorbPrompt(canvasObject.transform);
+        VirtualButton absorbButton = CreateAbsorbPrompt(safe);
 
         var touchSource = canvasObject.AddComponent<TouchInputSource>();
         touchSource.Initialize(moveJoystick, aimJoystick, dashButton, absorbButton);

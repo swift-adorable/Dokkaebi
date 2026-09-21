@@ -68,10 +68,11 @@ public class PlaytestPanelUI : MonoBehaviour
 
     private void Build(Transform root)
     {
-        BuildToggle(root);
+        // 화면 UI는 안전 영역 안에만 둔다. 노치와 홈 인디케이터를 피한다.
+        RectTransform safe = UIFactory.CreateSafeArea(root.GetComponent<Canvas>());
 
-        panel = UIFactory.CreatePanel("PlaytestPanel", root, UIPalette.Panel,
-            new Vector2(0.18f, 0.12f), new Vector2(0.82f, 0.88f)).gameObject;
+        panel = UIFactory.CreatePanel("PlaytestPanel", safe, UIPalette.Panel,
+            new Vector2(0.12f, 0.06f), new Vector2(0.88f, 0.94f)).gameObject;
 
         var box = (RectTransform)panel.transform;
 
@@ -97,27 +98,6 @@ public class PlaytestPanelUI : MonoBehaviour
         panel.SetActive(false);
     }
 
-    private void BuildToggle(Transform root)
-    {
-        // 좌하단. 우상단은 가방 버튼이, 우하단은 대시가 쓴다.
-        Image image = UIFactory.CreatePanel("PlaytestToggle", root, UIPalette.Warning,
-            Vector2.zero, Vector2.zero);
-
-        var rect = image.rectTransform;
-        rect.anchorMin = new Vector2(0f, 0f);
-        rect.anchorMax = new Vector2(0f, 0f);
-        rect.pivot = new Vector2(0f, 0f);
-        rect.sizeDelta = new Vector2(200f, 96f);
-        rect.anchoredPosition = new Vector2(30f, 30f);
-
-        var button = image.gameObject.AddComponent<Button>();
-        button.targetGraphic = image;
-        button.onClick.AddListener(Toggle);
-
-        UIFactory.CreateLabel(image.transform, "검증", 30, FontStyle.Bold,
-            Vector2.zero, Vector2.one, TextAnchor.MiddleCenter);
-    }
-
     private void BuildButtons(RectTransform box)
     {
         RectTransform grid = UIFactory.CreateRegion("Buttons", box,
@@ -137,6 +117,7 @@ public class PlaytestPanelUI : MonoBehaviour
         }
     }
 
+    /// <summary>씬의 「DEBUG」 버튼이 부른다. (DebugUIManager)</summary>
     public void Toggle()
     {
         if (panel == null)
