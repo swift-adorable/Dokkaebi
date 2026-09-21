@@ -262,12 +262,35 @@ Unity 에디터에서 고쳐도 **이미 만들어 둔 빌드의 코드는 그�
 막는 층이 셋이다 — `DebugOnly`(표시) · `DebugOnlyStripper`(빌드 시 제거) ·
 `DebugOnlyTests`(표시 누락 감지). 그래도 **눈으로 한 번 확인한다.**
 
+### Development Build를 끄고 켜는 법
+
+Unity 6에서 창 이름이 바뀌었다(`Build Settings` → **`File ▸ Build Profiles`**).
+체크박스는 그 창 오른쪽 **Platform Settings** 안의 **Development Build**다.
+
+찾아 헤매지 않도록 메뉴를 만들어 뒀다. 이쪽을 쓰는 편이 안전하다 —
+
+```
+Blob/Build/현재 빌드 설정 확인          ← 지금 어느 쪽인지 대화상자로 알려준다
+Blob/Build/출시 빌드로 전환 (개발 요소 제거)
+Blob/Build/개발 빌드 켜기 (검증 도구 포함)
+```
+
+「출시 빌드로 전환」은 Development Build뿐 아니라
+**스크립트 디버깅과 프로파일러 자동 연결도 함께 끈다.** 켜진 채로 두면
+출시 빌드에 디버거 대기 코드가 남는다.
+
+> **여기서 말하는 빌드는 Unity의 빌드다.** iOS는 Unity가 Xcode 프로젝트를 내보내고,
+> 그 뒤 Xcode에서 실기에 올린다. **DEVELOPMENT_BUILD 심볼은 Unity가 내보낼 때 정해진다** —
+> Xcode의 Debug/Release 스킴과는 별개이고, Xcode에서 바꿔도 소용없다.
+> 설정을 바꿨으면 **Unity에서 다시 내보내야** 한다.
+
 - [ ] **B-1** `EditMode` → `Blob.Tests.DebugOnlyTests` 4건 통과
-- [ ] **B-2** **Development Build 체크를 끄고** 빌드한다
+- [ ] **B-2** `Blob/Build/출시 빌드로 전환` → Unity에서 iOS 내보내기 → Xcode 빌드
 - [ ] **B-3** 실기에서 **좌상단 DEBUG 버튼이 보이지 않는가** ★
 - [ ] **B-4** 검증 패널을 열 방법이 전혀 없는가 (숫자키 치트도 죽어 있는가)
-- [ ] **B-5** 개발 빌드로 다시 빌드하면 DEBUG 버튼이 **돌아오는가**
+- [ ] **B-5** `Blob/Build/개발 빌드 켜기` → 다시 내보내면 DEBUG 버튼이 **돌아오는가**
   - 돌아오지 않으면 원본 씬에서 지워 버린 것이다. 되돌려야 한다
+  - 평소 작업은 이 상태로 둔다. 출시 직전에만 B-2로 바꾼다
 
 > 개발용 UI의 이름을 바꾸면 `DebugOnlyTests.RequiredDebugOnly`도 함께 고친다.
 > 테스트가 깨지는 것이 정상이다 — 그때 출시 노출 여부를 다시 확인하라는 신호다.
