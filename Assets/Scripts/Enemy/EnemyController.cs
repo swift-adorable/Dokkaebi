@@ -143,6 +143,21 @@ public class EnemyController : MonoBehaviour, IPoolable
         if (poolManager == null)
             poolManager = PoolManager.EnsureInstance();
 
-        poolManager.Spawn(corpsePrefab, transform.position, Quaternion.identity);
+        GameObject corpse =
+            poolManager.Spawn(corpsePrefab, transform.position, Quaternion.identity);
+
+        if (corpse == null)
+            return;
+
+        // 【보상은 시체가 아니라 죽은 적이 정한다.】
+        // 전에는 시체 프리팹의 valueMultiplier를 손으로 적어 두었다.
+        // 그러면 희귀 개체를 잡아도 일반과 같은 경험치가 나온다 —
+        // 「등급이 곧 드랍 품질이다」가 성립하지 않는다. (Hunting 6절)
+        if (!corpse.TryGetComponent(out CorpseController controller))
+            return;
+
+        EnemyRarity rarity = identity != null ? identity.Profile.rarity : EnemyRarity.Normal;
+
+        controller.SetReward(rarity, health != null ? health.KillContext : default);
     }
 }

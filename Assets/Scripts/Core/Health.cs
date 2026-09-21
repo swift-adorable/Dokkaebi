@@ -50,6 +50,29 @@ public class Health : MonoBehaviour, IDamageable, IPoolable
     public StatusEffectState Status { get; } = new StatusEffectState();
 
     /// <summary>
+    /// 마지막으로 들어온 타격이 치명타였는가. 조건부 드랍이 읽는다.
+    /// 「온전한 신경절 — 치명타가 아닌 공격으로 처치」 (Hunting 6-3절)
+    /// </summary>
+    public bool LastHitWasCritical { get; private set; }
+
+    /// <summary>
+    /// 살아 있는 동안 한 번이라도 점화된 적이 있는가.
+    ///
+    /// 【죽는 순간만 보면 안 된다.】 불을 붙였다가 꺼진 뒤에 죽여도
+    /// 「점화를 걸지 않고」가 되어 버려 조건이 거짓말이 된다.
+    /// 그래서 순간이 아니라 이력을 남긴다. OnSpawned에서 지운다.
+    /// </summary>
+    public bool EverIgnited { get; private set; }
+
+    /// <summary>지금 이 순간의 처치 조건. 죽을 때 읽는다.</summary>
+    public KillContext KillContext => new KillContext
+    {
+        killedByCritical = LastHitWasCritical,
+        frozenAtDeath = Status.Has(StatusEffectType.Freeze),
+        everIgnited = EverIgnited
+    };
+
+    /// <summary>
     /// 피해 계산에 넘길 방어 정보.
     ///
     /// 방어도 수치의 소재는 장비다. 여기서는 합산된 결과만 들고 있는다.
@@ -98,6 +121,9 @@ public class Health : MonoBehaviour, IDamageable, IPoolable
         // 저항 장비가 면역을 주면 아예 걸리지 않는다. (막는 것은 장비의 몫)
         if (IsImmuneTo(type))
             return;
+
+        if (type == StatusEffectType.Ignite)
+            EverIgnited = true;
 
         Status.Apply(type, sourceDamage, durationScale);
 
@@ -179,6 +205,11 @@ public class Health : MonoBehaviour, IDamageable, IPoolable
         // 남겨 두면 재사용된 개체가 이전 런의 점화를 그대로 들고 나온다.
         Status.ClearAll();
 
+        // 처치 조건의 이력도 같이 지운다. 안 지우면 이전에 태웠던 개체가
+        // 재사용될 때마다 「미연소 포자」가 영영 나오지 않는다.
+        LastHitWasCritical = false;
+        EverIgnited = false;
+
         if (StatusEffectSystem.HasInstance)
             StatusEffectSystem.Instance.Untrack(this);
     }
@@ -216,6 +247,10 @@ public class Health : MonoBehaviour, IDamageable, IPoolable
 
         if (computed <= 0)
             return 0;
+
+        // 【0 피해는 기록하지 않는다.】 빗나간 타격이 「마지막 타격」이 되면
+        // 조건부 드랍의 판정이 실제로 죽인 공격과 어긋난다.
+        LastHitWasCritical = request.isCritical;
 
         return ApplyRaw(computed, skipInvulnerability: request.bypassArmour);
     }
