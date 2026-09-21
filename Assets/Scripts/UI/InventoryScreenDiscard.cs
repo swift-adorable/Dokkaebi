@@ -64,14 +64,21 @@ public partial class InventoryScreenUI
         ItemDefinition definition = discardTarget.Definition;
 
         // 뒷면을 덮는 판. 팝업 밖을 눌러도 아래 UI가 눌리지 않게 막는다.
+        // 패널은 바깥 여백만큼 안으로 들어와 있다. 0~1로 두면 그 테두리
+        // 한 줄이 덮이지 않아, 그 자리를 누르면 뒤 UI가 눌린다.
         Image shade = UIFactory.CreatePanel("DiscardShade", panel.transform,
-            UIPalette.Dim, Vector2.zero, Vector2.one);
+            UIPalette.Dim, new Vector2(-0.2f, -0.2f), new Vector2(1.2f, 1.2f));
 
         shade.raycastTarget = true;
 
         discardPopup = shade.gameObject;
 
-        RectTransform box = UIFactory.CreateRegion("Box", discardPopup.transform,
+        // 덮개는 화면 끝까지 넘겼으므로, 팝업 자체는 패널 크기로 되돌린 뒤 잡는다.
+        // 그러지 않으면 덮개가 커진 만큼 팝업도 같이 커진다.
+        RectTransform frame = UIFactory.CreateRegion("Frame", discardPopup.transform,
+            new Vector2(1f / 7f, 1f / 7f), new Vector2(6f / 7f, 6f / 7f));
+
+        RectTransform box = UIFactory.CreateRegion("Box", frame,
             new Vector2(0.30f, 0.26f), new Vector2(0.70f, 0.74f));
 
         UIFactory.CreatePanel("Back", box, UIPalette.Panel, Vector2.zero, Vector2.one);

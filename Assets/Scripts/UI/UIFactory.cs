@@ -83,6 +83,50 @@ public static class UIFactory
         return rect;
     }
 
+    // ── 여백 ──────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// 화면 어디서나 쓰는 여백 한 칸. 【캔버스 기준 픽셀】이다.
+    ///
+    /// 【정규화(0~1) 여백을 쓰지 않는 이유】
+    /// 앵커 여백 0.02는 「부모 폭의 2%」라서, 같은 숫자를 세로로도 쓰면
+    /// 세로로 긴 칸에서는 훨씬 두꺼워 보인다. 이 화면의 우측 패널은
+    /// 세로가 가로의 약 3배라, 가로 0.020 / 세로 0.028을 주면 실제로는
+    /// 세로 여백이 가로의 네 배가 넘는다. 눈에 보이는 폭을 맞추려면
+    /// 비율이 아니라 픽셀로 줘야 하고, 그것이 offsetMin/offsetMax다.
+    /// 캔버스 배율은 가로·세로가 같으므로 이 값은 어느 축에서나 같은 두께다.
+    /// </summary>
+    public const float Gap = 26f;
+
+    /// <summary>rect의 네 변을 각각 픽셀만큼 안으로 들인다. 앵커는 건드리지 않는다.</summary>
+    public static RectTransform Inset(
+        RectTransform rect, float left, float bottom, float right, float top)
+    {
+        rect.offsetMin = new Vector2(rect.offsetMin.x + left, rect.offsetMin.y + bottom);
+        rect.offsetMax = new Vector2(rect.offsetMax.x - right, rect.offsetMax.y - top);
+
+        return rect;
+    }
+
+    /// <summary>네 변을 같은 픽셀만큼 들인다.</summary>
+    public static RectTransform Inset(RectTransform rect, float all)
+        => Inset(rect, all, all, all, all);
+
+    /// <summary>
+    /// 앵커로 자른 칸을 만들고, 지정한 변만 반 칸(Gap/2)씩 안으로 들인다.
+    ///
+    /// 두 칸이 맞닿는 자리에서 양쪽이 반 칸씩 물러나면 사이 간격이 정확히
+    /// 한 칸이 된다. 바깥 테두리도 한 칸이므로 전부 같은 두께로 보인다.
+    /// </summary>
+    public static RectTransform CreateSlice(
+        string name, Transform parent, Vector2 anchorMin, Vector2 anchorMax,
+        float left = 0f, float bottom = 0f, float right = 0f, float top = 0f)
+    {
+        RectTransform rect = CreateRegion(name, parent, anchorMin, anchorMax);
+
+        return Inset(rect, left, bottom, right, top);
+    }
+
     /// <summary>둥근 모서리 반지름의 기본값. 칸·버튼이 쓴다.</summary>
     public const int Radius = 10;
 
