@@ -108,5 +108,18 @@ public class EnemyIdentity : MonoBehaviour, IPoolable
             movement.BaseSpeedScale = profile.moveScale;
 
         OnProfileChanged?.Invoke(profile);
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        // 【스폰마다 실제 결과를 남긴다.】
+        // 프리팹에 적힌 기본값과 표에서 나온 값이 같으면, 계층을 들여다봐도
+        // 「프로필이 적용됐다」와 「프로필이 무시됐다」를 구분할 수 없다.
+        // 등급 배율이 붙은 개체가 나와야 구분되는데 그건 확률이라 기다릴 수 없다.
+        // 출시 빌드에서는 통째로 빠진다. (DebugOnlyStripper와 같은 기준)
+        GameLogger.Log(
+            $"[EnemyIdentity] {profile.Describe()} · {profile.rarity} · "
+            + $"체력 {profile.health} · 피해 {profile.damage} · 방어도 {profile.armour} · "
+            + $"이동 ×{profile.moveScale:0.00} · {profile.faction} · "
+            + $"물리 ×{profile.resistances.physical:0.00} 전기 ×{profile.resistances.lightning:0.00}");
+#endif
     }
 }
