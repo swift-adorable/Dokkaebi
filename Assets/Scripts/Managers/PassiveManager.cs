@@ -61,6 +61,18 @@ public class PassiveManager : Singleton<PassiveManager>
     }
 
     /// <summary>
+    /// 크레딧을 더한다. 처치 보상이 이 경로로 들어온다. (Hunting 6-1절)
+    /// 대입(Credits = x)과 나눠 둔 이유 — 더하기는 경합이 없어야 한다.
+    /// </summary>
+    public void AddCredits(int amount)
+    {
+        if (amount <= 0)
+            return;
+
+        Credits = credits + amount;
+    }
+
+    /// <summary>
     /// 역행 계열을 발견했는지. 켜지기 전에는 계열이 화면에 보이지도 않는다.
     ///
     /// 레벨도 돈도 아닌 【거기까지 갔는가】가 조건인 갈래를 하나 둔 것은

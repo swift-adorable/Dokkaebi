@@ -26,7 +26,40 @@ public class CorpseController : MonoBehaviour, IPoolable
     private LootContainer loot;
     private System.Random random;
 
+    /// <summary>
+    /// 죽은 적의 등급. 보상과 드랍 품질을 전부 이 값이 정한다.
+    /// EnemyController가 시체를 만들면서 넣어 준다.
+    /// </summary>
+    public EnemyRarity Rarity { get; private set; } = EnemyRarity.Normal;
+
+    /// <summary>이 개체가 만족시킨 조건부 드랍. (Hunting 6-3절)</summary>
+    public ConditionalDrop ConditionalDrops { get; private set; } = ConditionalDrop.None;
+
+    /// <summary>
+    /// 경험치·추첨에 곱하는 배수.
+    ///
+    /// 인스펙터 값은 EnemyRarity를 넘겨받지 못한 시체(씬에 직접 놓인 것 등)의
+    /// 기본값으로만 남는다. 등급을 받으면 표가 이긴다.
+    /// </summary>
     public int ValueMultiplier => Mathf.Max(1, valueMultiplier);
+
+    /// <summary>등급이 정한 경험치 배수. 정수로 깎지 않는다.</summary>
+    public float ExperienceMultiplier => EnemyRewardTable.ExperienceMultiplier(Rarity);
+
+    /// <summary>등급이 정한 크레딧 배수.</summary>
+    public float CreditMultiplier => EnemyRewardTable.CreditMultiplier(Rarity);
+
+    /// <summary>
+    /// 죽은 적의 정보를 받는다. EnemyController가 사망 직후 부른다.
+    ///
+    /// 【시체가 스스로 정하지 않는다.】 등급·속성·처치 조건은 전부
+    /// 죽은 쪽이 아는 정보다. 시체가 짐작하면 반드시 어긋난다.
+    /// </summary>
+    public void SetReward(EnemyRarity rarity, in KillContext context)
+    {
+        Rarity = rarity;
+        ConditionalDrops = ConditionalDropTable.Evaluate(in context);
+    }
 
     /// <summary>이 시체에 남은 전리품.</summary>
     public LootContainer Loot => loot ??= new LootContainer(lootSlots);
@@ -48,6 +81,11 @@ public class CorpseController : MonoBehaviour, IPoolable
         EnsurePassable();
 
         IsAbsorbed = false;
+
+        // 풀에서 재사용될 때 이전 개체의 등급·조건이 남으면
+        // 일반 적에게서 고유 보상이 나온다.
+        Rarity = EnemyRarity.Normal;
+        ConditionalDrops = ConditionalDrop.None;
 
         Loot.Clear();
 

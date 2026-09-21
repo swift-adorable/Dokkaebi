@@ -11,6 +11,10 @@ public class PlayerAbsorber : MonoBehaviour
     [Tooltip("시체 1구 흡수 시 획득하는 기본 경험치")]
     [SerializeField] private int xpPerCorpse = 1;
 
+    [Tooltip("시체 하나가 주는 기본 크레딧. 등급 배수가 여기에 곱해진다.")]
+    [Min(0)]
+    [SerializeField] private int creditsPerCorpse = 4;
+
     private PoolManager poolManager;
 
     /// <summary>현재 흡수 가능한 시체. 없으면 null. (흡수 프롬프트 UI가 참조한다)</summary>
@@ -43,15 +47,33 @@ public class PlayerAbsorber : MonoBehaviour
         // 경험치는 최초 1회만. 창을 여러 번 열어도 다시 들어오지 않는다.
         if (corpse.TryMarkAbsorbed())
         {
-            int gainedXP = Mathf.RoundToInt(
-                xpPerCorpse * corpse.ValueMultiplier * AbsorbMultiplier());
+            int baseAmount = Mathf.RoundToInt(xpPerCorpse * corpse.ValueMultiplier);
+
+            int gainedXP = EnemyRewardTable.Experience(
+                baseAmount, corpse.Rarity, AbsorbMultiplier());
 
             if (PlayerStats.HasInstance)
                 PlayerStats.Instance.AddXP(gainedXP);
             else
                 GameLogger.Warning("[PlayerAbsorber] PlayerStats가 씬에 없어 경험치를 지급하지 못했습니다.");
 
-            GameLogger.Log($"[PlayerAbsorber] 경험치 흡수 +{gainedXP}");
+            // ── 크레딧 (Hunting 6-1절) ────────────────────────────────
+            // 【경험치와 따로 준다.】 문서는 「소켓을 열려면 아래층,
+            // 벙커를 지으려면 위층」이라고 정했다. 두 보상이 한 덩어리로
+            // 들어오면 그 선택 자체가 생기지 않는다.
+            //
+            // 흡수 보너스(패시브)는 경험치 축의 것이므로 크레딧에 곱하지 않는다.
+            int gainedCredits = EnemyRewardTable.Credits(
+                Mathf.RoundToInt(creditsPerCorpse * corpse.ValueMultiplier), corpse.Rarity);
+
+            if (gainedCredits > 0)
+                PassiveManager.EnsureInstance().AddCredits(gainedCredits);
+
+            GameLogger.Log(
+                $"[PlayerAbsorber] {corpse.Rarity} 흡수 — 경험치 +{gainedXP} · 크레딧 +{gainedCredits}"
+                + (corpse.ConditionalDrops != ConditionalDrop.None
+                    ? $" · 조건 {corpse.ConditionalDrops}"
+                    : string.Empty));
         }
 
         // 집을 것이 없으면 창을 열지 않고 시체를 정리한다.
