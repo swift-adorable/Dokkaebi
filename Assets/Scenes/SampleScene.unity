@@ -130,6 +130,7 @@ GameObject:
   - component: {fileID: 211030505}
   - component: {fileID: 211030504}
   - component: {fileID: 211030503}
+  - component: {fileID: 1385422193}
   m_Layer: 5
   m_Name: Debug Panel
   m_TagString: Untagged
@@ -2146,6 +2147,7 @@ GameObject:
   - component: {fileID: 1888924739}
   - component: {fileID: 1888924738}
   - component: {fileID: 1888924737}
+  - component: {fileID: 1837762319}
   m_Layer: 5
   m_Name: Debug Button
   m_TagString: Untagged
@@ -2718,3 +2720,27 @@ SceneRoots:
   - {fileID: 671507355}
   - {fileID: 1358300966}
   - {fileID: 455094754}
+--- !u!114 &1837762319
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1888924735}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fa0a4b76cf43d454695377938c23d45a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1385422193
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 211030502}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fa0a4b76cf43d454695377938c23d45a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
