@@ -156,5 +156,86 @@ namespace Blob.Tests
                 $"유지 거리 {preferred}m가 사거리 {attack.AttackRange}m보다 멉니다. "
                 + "적이 영원히 쏘지 못합니다.");
         }
+    
+        // ── 원형·진영 배선 (7-F) ──────────────────────────────────────
+        //
+        // 【프리팹과 표가 갈라지지 않게 강제한다.】
+        // 런타임 수치는 EnemyIdentity가 EnemyArchetypeTable에서 가져오므로
+        // 프리팹에 적힌 값은 사실 쓰이지 않는다. 그래도 검사하는 이유는,
+        // 인스펙터를 연 사람이 압착기 프리팹에서 체력 20을 읽으면
+        // 틀린 정보를 사실로 믿게 되기 때문이다.
+
+        private static readonly (string path, EnemyArchetype archetype)[] Wired =
+        {
+            ("Assets/Prefabs/Enemy.prefab",        EnemyArchetype.Scav),
+            ("Assets/Prefabs/EnemyRanged.prefab",  EnemyArchetype.Dynamo),
+            ("Assets/Prefabs/EnemyCrusher.prefab", EnemyArchetype.Crusher)
+        };
+
+        [Test]
+        public void 적_프리팹이_원형과_진영을_갖는다()
+        {
+            foreach (var row in Wired)
+            {
+                var go = AssetDatabase.LoadAssetAtPath<GameObject>(row.path);
+
+                Assert.IsNotNull(go,
+                    $"{row.path}이 없습니다. 「Blob/Enemy/원형·진영 배선」을 실행하십시오.");
+
+                var identity = go.GetComponent<EnemyIdentity>();
+
+                Assert.IsNotNull(identity,
+                    $"{row.path}에 EnemyIdentity가 없습니다. "
+                    + "원형 수치도 등급도 속성도 하나도 적용되지 않습니다.");
+
+                Assert.AreEqual(row.archetype, identity.Archetype, row.path);
+
+                Assert.IsNotNull(go.GetComponent<EnemyAggro>(),
+                    $"{row.path}에 EnemyAggro가 없습니다. "
+                    + "진영이 있어도 누구를 노릴지 정하는 쪽이 없습니다.");
+            }
+        }
+
+        [Test]
+        public void 프리팹에_적힌_수치가_원형_표와_같다()
+        {
+            foreach (var row in Wired)
+            {
+                var go = AssetDatabase.LoadAssetAtPath<GameObject>(row.path);
+
+                Assert.IsNotNull(go, row.path);
+
+                EnemyArchetypeStats stats = EnemyArchetypeTable.Of(row.archetype);
+                string who = EnemyArchetypeTable.Name(row.archetype);
+
+                var health = go.GetComponent<Health>();
+
+                Assert.AreEqual(stats.health, health.Max,
+                    $"{who} 프리팹의 체력이 표({stats.health})와 다릅니다.");
+
+                var attack = go.GetComponent<EnemyAttack>();
+
+                Assert.AreEqual(stats.damage, attack.Damage,
+                    $"{who} 프리팹의 피해가 표({stats.damage})와 다릅니다.");
+
+                Assert.AreEqual(stats.armourPenetration, attack.ArmourPenetration,
+                    $"{who} 프리팹의 방어 관통이 표({stats.armourPenetration})와 다릅니다.");
+            }
+        }
+
+        [Test]
+        public void 배선된_프리팹이_서로_다른_진영을_덮는다()
+        {
+            // 【세 진영이 없으면 난전을 눈으로 볼 수 없다.】
+            // 전부 같은 소속이면 적끼리는 영원히 싸우지 않는다.
+            var factions = new System.Collections.Generic.HashSet<Faction>();
+
+            foreach (var row in Wired)
+                factions.Add(EnemyArchetypeTable.Of(row.archetype).faction);
+
+            Assert.GreaterOrEqual(factions.Count, 3,
+                $"배선된 프리팹이 진영 {factions.Count}종만 덮습니다. "
+                + "서로 적대하는 셋이 있어야 난전을 확인할 수 있습니다.");
+        }
     }
 }

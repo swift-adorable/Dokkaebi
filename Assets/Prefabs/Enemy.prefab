@@ -18,6 +18,8 @@ GameObject:
   - component: {fileID: 8342161792583253049}
   - component: {fileID: 4547313273617054741}
   - component: {fileID: 5512038840711992301}
+  - component: {fileID: 2422645268930344457}
+  - component: {fileID: 1118076246683048287}
   m_Layer: 0
   m_Name: Enemy
   m_TagString: Untagged
@@ -146,6 +148,8 @@ MonoBehaviour:
   team: 1
   maxHealth: 20
   invulnerableDuration: 0
+  headArmour: 0
+  bodyArmour: 0
 --- !u!54 &2202289866955090440
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -203,11 +207,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d681ecc493445441fb3f81fbcf09ca6a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Blob.Runtime::EnemyAttack
+  attackKind: 0
   damage: 8
   attackRange: 1.6
+  armourPenetration: 0
+  appliedStatus: 0
+  projectilePrefab: {fileID: 0}
+  muzzleOffset: {x: 0, y: 0.8, z: 0}
+  preferredDistance: 7
   windupDuration: 0.35
   attackCooldown: 1.2
   windupIndicator: {fileID: 0}
+  rangedWindupSpeedScale: 0.45
 --- !u!114 &5512038840711992301
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -233,3 +244,33 @@ MonoBehaviour:
     m_Bits: 0
   sightCheckInterval: 0.2
   eyeHeight: 0.9
+--- !u!114 &2422645268930344457
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 372103695842319712}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17cd5fe84e4a74bc2868d40a814e0c31, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Blob.Runtime::EnemyIdentity
+  archetype: 0
+  rollRarity: 1
+  fixedRarity: 0
+  fixedAffixes: 
+--- !u!114 &1118076246683048287
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 372103695842319712}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91fae52a7ad5746cbabeedb90c3e0586, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Blob.Runtime::EnemyAggro
+  detectRange: 18
+  reevaluateInterval: 0.4
