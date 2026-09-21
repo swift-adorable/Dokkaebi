@@ -22,6 +22,26 @@ public static class GroundEffectTable
         }
     }
 
+    /// <summary>
+    /// 스킬이 실제로 남길 잔류물을 정한다.
+    ///
+    /// FromCoreAilment면 꽂힌 Core의 부여 속성을 따른다 —
+    /// 화염 Core + 마름쇠 = 화염 잔류물, 서리 Core + 마름쇠 = 서리 장판.
+    /// Support가 속성을 확정하지 않는다는 것이 전투 3층의 전제다.
+    /// </summary>
+    /// <param name="declared">스킬 정의가 적어 둔 값.</param>
+    /// <param name="coreAilment">꽂힌 Core가 부여하는 상태. 없으면 None.</param>
+    public static GroundEffectType Resolve(
+        GroundEffectType declared, StatusEffectType coreAilment)
+    {
+        if (declared != GroundEffectType.FromCoreAilment)
+            return declared;
+
+        // Core가 아무 속성도 부여하지 않으면 남길 것이 없다.
+        // 임의로 화염을 고르지 않는다 — 그게 애초에 이 버그였다.
+        return FromStatus(coreAilment);
+    }
+
     /// <summary>진입한 대상에게 이 잔류물이 거는 상태. 없으면 None.</summary>
     public static StatusEffectType AppliesStatus(GroundEffectType ground)
     {

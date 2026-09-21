@@ -31,13 +31,25 @@
 | ~~A3~~ | ~~런 초기화~~ | **해결 (6-H)** — 사망 처리에서 함께 호출한다 | `Player/BlobController.cs` |
 | ~~A4~~ | ~~과중량 페널티~~ | **해결 (6-H)** — `PlayerMovement.SpeedScale` · `PlayerDash.DistanceScale` | `Core/Equipment/LoadoutSnapshot.cs` |
 | **A5** | **기폭(원소 작렬)** | `Core/Combat/DetonationResolver.cs` | **테스트뿐.** 기폭 Core 3종이 아무 효과도 내지 않는다 |
-| **A6** | **잔류물 5종** | `Core/Combat/GroundEffectTable.cs` | **없음.** 「마름쇠」·「유지되는 대지」·「잔류물 효력」 3종이 기댈 대상이 없다 |
+| **A6** | **잔류물 5종** | `Core/Combat/GroundEffectTable.cs` | **여전히 없음.** 다만 7-A 조사 중 **3종 모두에서 별개의 결함**이 나와 먼저 고쳤다 (아래 주) |
 | ~~A7~~ | ~~난이도 배율 6단~~ — **해결 (6-L)** `GameManager.Difficulty` → 적 피해·체력 | `Core/Combat/DifficultyLevel.cs:26-51` | **테스트뿐.** `Health.TakeDamage`의 배율 인자를 아무도 넘기지 않는다 |
 | ~~A8~~ | ~~내성 「가장 낮은 것 하나만」~~ | **해결 (7-B)** — `EnemyProfile.Build`가 몬스터 속성을 내성에 합성한다. 다만 합성 경로는 `TakeLowest`가 아니라 새로 만든 `ElementalResistances.LowerTo`다 (아래 주) | `Core/Hunting/EnemyProfile.cs` |
 | ~~A+~~ | ~~상태이상 면역~~ | **해결 (6-I)** — `Health.IsImmuneTo`가 항상 false였다. 역치 각인 3종 + 얼굴 마스크 15종이 이제 작동한다 | `Player/PlayerLoadout.cs` |
 | **A11** | **소리 축** — `MoveSoundRange` · `Hearing` · `SoundLocate` | `EquipmentStatType` | **없음.** 청각 방어구 6종이 아무 일도 하지 않는다. 적 AI는 거리 하나만 본다 |
 | **A9** | **패시브 효과 17종 중 13종** | `Core/Progression/PassiveEffectType.cs` | 실제로 읽히는 것은 `CarrySlots` · `CarryWeight` · `AbsorbAmount` · `LootRolls` **4종뿐** |
 | ~~A10~~ | ~~장비 에셋 82종~~ | **해결 (6-H)** — `PlayerWeapon.ApplyProfile` → 탄에 `SetWeaponBase` | `Player/PlayerLoadout.cs` |
+
+> **A6 주 — 배선 이전에 데이터가 틀려 있었다. (2026-09-21)**
+> A6은 「생성 경로가 없다」는 항목이었는데, 막상 3종을 열어 보니
+> 배선을 붙였어도 틀린 결과가 나올 상태였다.
+> · 「마름쇠」 — `FireZone` 고정. 서리 Core에 꽂아도 불바다.
+>   → `FromCoreAilment` + `GroundEffectTable.Resolve`로 Core가 정하게 했다.
+> · 「유지되는 대지」 — 대가 「잔류물 범위 -25%」가 `rangeMultiplier`(유효 사거리)를
+>   깎고 있었다. → 새 축 `zoneRadiusMultiplier`로 옮겼다.
+> · 「잔류물 효력」 — 「범위가 커진다」가 **구현되어 있지 않았다.** 담을 축이 없어
+>   `ailmentPower`만 들어가 있었다. → 반경 축에 1.6배로 넣었다.
+> 남은 것은 **생성 경로**다. `CreatesGroundEffect`를 읽는 곳이
+> `SkillDefinition.HasEffect()` 하나뿐이다.
 
 > **A8 주 — 왜 `TakeLowest`가 아닌가.**
 > 「경화」는 물리 하나만 0.5로 만든다. 이를 위해 전부 1.0인 묶음을 만들어
