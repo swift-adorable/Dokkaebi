@@ -41,6 +41,9 @@ public struct EnemyProfile
     /// <summary>발소리를 내는가. 원형이 정한다.</summary>
     public bool makesFootsteps;
 
+    /// <summary>한 번 물면 놓지 않는가. 보안기만 true다.</summary>
+    public bool chasesForever;
+
     /// <summary>붙은 속성. 표시와 잔향(사망 시 전달)이 읽는다.</summary>
     public EnemyAffix[] affixes;
 
@@ -64,6 +67,7 @@ public struct EnemyProfile
             faction = stats.faction,
             armourPenetration = stats.armourPenetration,
             makesFootsteps = stats.makesFootsteps,
+            chasesForever = stats.chasesForever,
             moveScale = 1f,
             resistances = stats.resistances,
             affixes = System.Array.Empty<EnemyAffix>()

@@ -53,6 +53,15 @@ public struct EnemyArchetypeStats
     /// <summary>이 원형이 요구하는 답. 원형당 하나다.</summary>
     public EnemyAnswer answer;
 
+    /// <summary>
+    /// 한 번 물면 거리와 무관하게 놓지 않는가.
+    ///
+    /// 보안기만 true다 — "한 번 추적하면 끝까지 쫓는다." (문서 8절)
+    /// 전부 true로 두면 도망이라는 선택지가 사라지고,
+    /// 전부 false면 보안기의 정체성이 없어진다.
+    /// </summary>
+    public bool chasesForever;
+
     /// <summary>원형 고유 내성. 등급·속성이 붙기 전의 값이다.</summary>
     public ElementalResistances resistances;
 
@@ -136,7 +145,7 @@ public static class EnemyArchetypeTable
 
             case EnemyArchetype.Sentry:
                 return Make(70, 12, 2, 3f, Faction.Facility, Mechanical, true,
-                            EnemyAnswer.Dodge);
+                            EnemyAnswer.Dodge, chasesForever: true);
 
             // 비물질 — 발소리가 없다.
             case EnemyArchetype.Wraith:
@@ -169,11 +178,12 @@ public static class EnemyArchetypeTable
     private static EnemyArchetypeStats Make(
         int health, int damage, int penetration, float armour,
         Faction faction, ElementalResistances resistances, bool footsteps,
-        EnemyAnswer answer)
+        EnemyAnswer answer, bool chasesForever = false)
     {
         return new EnemyArchetypeStats
         {
             answer = answer,
+            chasesForever = chasesForever,
             health = health,
             damage = damage,
             armourPenetration = penetration,
