@@ -271,6 +271,78 @@ public static class PlaytestTools
             + $"· 이동 ×{s.MoveScale:0.##}");
     }
 
+    /// <summary>
+    /// 지금 끼운 젬이 실제로 탄에 무엇을 하는지 찍는다.
+    ///
+    /// 【왜 필요한가】 젬을 끼워도 「적용되고 있는지」 확인할 방법이 없었다.
+    /// 소켓 화면은 「무엇을 끼웠는가」만 보여 준다. 그 결과로
+    /// 탄이 어떤 속성을 싣고 피해가 얼마나 늘었는지는 어디에도 안 나온다.
+    /// 「역병을 끼웠는데 중독이 걸리긴 하나?」를 이걸로 답한다.
+    /// </summary>
+    [MenuItem(Menu + "현재 젬 빌드 출력")]
+    public static void DumpBuild()
+    {
+        if (!RequirePlayMode()) return;
+
+        SocketedBuild build = SkillManager.EnsureInstance().Build;
+        WeaponModifiers m = build.GetModifiers();
+
+        var lines = new List<string>(8)
+        {
+            $"각성 Lv{build.AwakeningLevel} · 장착 {build.EquippedCount}개"
+        };
+
+        for (int c = 0; c < SocketedBuild.MaxCores; c++)
+        {
+            SkillDefinition core = build.GetCore(c);
+
+            if (core == null)
+                continue;
+
+            var supports = new List<string>(SocketedBuild.SocketsPerCore);
+
+            for (int i = 0; i < SocketedBuild.SocketsPerCore; i++)
+            {
+                SkillDefinition sup = build.GetSocket(c, i);
+
+                if (sup != null)
+                    supports.Add(sup.DisplayName);
+            }
+
+            StatusEffectType effective = build.EffectiveAilmentOf(c);
+            StatusEffectType added = build.AddedAilmentOf(c);
+
+            string ailment = effective == StatusEffectType.None ? "없음" : effective.ToString();
+
+            if (added != StatusEffectType.None)
+                ailment += $" + {added}";
+
+            lines.Add($"Core {c + 1}: {core.DisplayName} → 상태이상 {ailment}"
+                      + (supports.Count > 0 ? $" / 보조 {string.Join(", ", supports)}" : " / 보조 없음"));
+        }
+
+        if (build.EquippedCount == 0)
+            lines.Add("끼운 젬이 없습니다. 젬 탭에서 Core부터 끼우십시오.");
+
+        lines.Add($"탄 {m.TotalProjectiles}발 · 피해 {m.DamageIncrease:+0%;-0%;+0%} "
+                  + $"· 상태이상 위력 {m.AilmentPower:+0%;-0%;+0%} "
+                  + $"· 지속 ×{m.AilmentDurationMultiplier:0.##} "
+                  + $"· 사거리 ×{m.RangeMultiplier:0.##} "
+                  + $"· 간격 ×{m.FireIntervalMultiplier:0.##}");
+
+        string ailments = m.Ailments.Count == 0
+            ? "없음"
+            : string.Join(", ", m.Ailments);
+
+        lines.Add($"탄이 싣는 상태이상: {ailments}");
+
+        Debug.Log("[Playtest] " + string.Join("\n", lines));
+
+        InventoryScreenUI.ShowBagWithMessage(
+            $"탄 상태이상 [{ailments}] · 피해 {m.DamageIncrease:+0%;-0%;+0%} "
+            + $"· 위력 {m.AilmentPower:+0%;-0%;+0%} · 탄 {m.TotalProjectiles}발");
+    }
+
     /// <summary>가장 가까운 적에게 상태이상을 건다. 임계 전이를 눈으로 확인한다.</summary>
     [MenuItem(Menu + "가까운 적에게 냉각 6중첩 (→ 동결)")]
     public static void ChillNearestEnemy() => StackOnNearest(StatusEffectType.Chill, 6);

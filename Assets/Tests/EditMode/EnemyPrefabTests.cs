@@ -90,5 +90,71 @@ namespace Blob.Tests
                 $"무방어로 {hitsToKill}대면 죽습니다. "
                 + "5대 미만은 회피를 배울 틈이 없습니다.");
         }
+
+        // ── 원거리 — 자전체 ───────────────────────────────────────────
+        // 근접만 있으면 전투가 「붙는다 / 뺀다」 두 동작으로 끝난다.
+
+        private const string RangedPrefab = "Assets/Prefabs/EnemyRanged.prefab";
+
+        private static GameObject LoadRanged()
+        {
+            var go = AssetDatabase.LoadAssetAtPath<GameObject>(RangedPrefab);
+
+            Assert.IsNotNull(go,
+                $"{RangedPrefab}이 없습니다. 「Blob/Enemy/원거리 적 프리팹 생성」을 실행하십시오.");
+
+            return go;
+        }
+
+        [Test]
+        public void 원거리_적이_정본_수치를_쓴다()
+        {
+            GameObject go = LoadRanged();
+
+            var health = go.GetComponent<Health>();
+            var attack = go.GetComponent<EnemyAttack>();
+
+            Assert.AreEqual(EnemyPrefabGenerator.SpitterHealth, health.Max);
+            Assert.AreEqual(EnemyPrefabGenerator.SpitterDamage, attack.Damage);
+            Assert.AreEqual(EnemyPrefabGenerator.SpitterArmourPenetration,
+                attack.ArmourPenetration,
+                "자전체는 방어 관통 1입니다. (Combat_Baseline 5절)");
+        }
+
+        /// <summary>
+        /// 원거리인데 투사체가 비어 있으면 Awake에서 오류만 찍고
+        /// 아무것도 쏘지 않는다 — 「적이 공격하지 않는다」로 보인다.
+        /// </summary>
+        [Test]
+        public void 원거리_적은_투사체를_들고_있다()
+        {
+            var attack = LoadRanged().GetComponent<EnemyAttack>();
+
+            Assert.AreEqual(EnemyAttackKind.Ranged, attack.Kind,
+                "원거리로 설정되지 않았습니다.");
+
+            var so = new SerializedObject(attack);
+
+            Assert.IsNotNull(so.FindProperty("projectilePrefab").objectReferenceValue,
+                "projectilePrefab이 비어 있으면 예비동작만 하고 쏘지 않습니다.");
+        }
+
+        /// <summary>
+        /// 유지 거리가 사거리보다 멀면 영원히 사거리에 들어오지 못한다.
+        /// 「다가오지도 쏘지도 않는 적」이 되는 전형적인 설정 사고다.
+        /// </summary>
+        [Test]
+        public void 원거리_적의_유지_거리가_사거리_안쪽이다()
+        {
+            var attack = LoadRanged().GetComponent<EnemyAttack>();
+
+            var so = new SerializedObject(attack);
+
+            float preferred = so.FindProperty("preferredDistance").floatValue;
+
+            Assert.Less(preferred, attack.AttackRange,
+                $"유지 거리 {preferred}m가 사거리 {attack.AttackRange}m보다 멉니다. "
+                + "적이 영원히 쏘지 못합니다.");
+        }
     }
 }
