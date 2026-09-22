@@ -135,7 +135,7 @@ public static class UIPalette
             source.a);
     }
 
-    /// <summary>스킬 분류별 색. Core / Support / Meta / Persistent 순.</summary>
+    /// <summary>스킬 분류별 색. 핵심 젬 / 보조 젬 / 발동 젬 / 유지형 젬 순.</summary>
     public static readonly Color[] SkillCategory =
     {
         new(0.72f, 0.26f, 0.22f, 0.96f),

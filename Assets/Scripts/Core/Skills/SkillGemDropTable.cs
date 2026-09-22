@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using Random = System.Random;
 
 /// <summary>
-/// 젬 드랍 추첨. (docs/Blob_Skill_System.md 11-3절)
+/// 젬 드롭 추첨. (docs/Blob_Skill_System.md 11-3절)
 ///
 /// 난수원을 인자로 받으므로 고정 시드로 결정적 검증이 가능하다.
 /// 등급(Rarity) 개념이 없으므로 가중치를 쓰지 않고 균등 추첨한다.
@@ -11,7 +11,7 @@ using Random = System.Random;
 /// </summary>
 public static class SkillGemDropTable
 {
-    /// <summary>드랍 풀에서 하나를 균등 추첨한다. 풀이 비었으면 null.</summary>
+    /// <summary>드롭 풀에서 하나를 균등 추첨한다. 풀이 비었으면 null.</summary>
     public static SkillDefinition Draw(IReadOnlyList<SkillDefinition> pool, Random random)
     {
         if (pool == null || pool.Count == 0)
@@ -23,12 +23,12 @@ public static class SkillGemDropTable
     }
 
     /// <summary>
-    /// 레이드 시작 직후의 확정 드랍. 【부여 계열 Core만】 나온다.
+    /// 레이드 시작 직후의 확정 드롭. 【부여 계열 핵심 젬만】 나온다.
     ///
     /// 왜 부여 계열이어야 하는가 —
-    /// 기폭 계열 Core는 `투사체` 태그가 없다. 그것만 손에 쥐면
-    /// 투사체 Support 12종이 통째로 죽어 빌드가 서지 않는다.
-    /// 부여 계열은 전부 투사체 태그를 가지므로 어떤 Support든 갈 곳이 생긴다.
+    /// 기폭 계열 핵심 젬은 `투사체` 태그가 없다. 그것만 손에 쥐면
+    /// 투사체 보조 젬 12종이 통째로 죽어 빌드가 서지 않는다.
+    /// 부여 계열은 전부 투사체 태그를 가지므로 어떤 보조 젬든 갈 곳이 생긴다.
     /// </summary>
     public static SkillDefinition DrawFirstCore(IReadOnlyList<SkillDefinition> pool, Random random)
     {

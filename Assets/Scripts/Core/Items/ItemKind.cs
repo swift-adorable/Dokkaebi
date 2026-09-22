@@ -26,6 +26,6 @@ public enum ItemKind
     /// <summary>소모품. 회복 · 주사 · 음식.</summary>
     Consumable = 6,
 
-    /// <summary>열쇠 · 인증. 구역 게이트를 연다.</summary>
+    /// <summary>열쇠 · 인증. 구역 관문을 연다.</summary>
     Key = 7
 }

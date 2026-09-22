@@ -11,7 +11,7 @@ using static EquipmentAssetWriter;
 /// 이 생성기가 지켜야 하는 세 가지
 ///  1. 【최고 티어일수록 적재가 준다】 — "방어 최대화 = 파밍량 최소화"
 ///  2. 【성능 상단에는 음수 옵션이 하나 이상 붙는다】 (티어 4 이상)
-///  3. 【얼굴은 속성 대응 전담】 — 방어도를 거의 주지 않고 내성·면역만 준다
+///  3. 【얼굴은 속성 대응 전담】 — 방어도를 거의 주지 않고 저항·면역만 준다
 /// </summary>
 public static class ArmourAssetGenerator
 {
@@ -77,7 +77,7 @@ public static class ArmourAssetGenerator
     };
 
     // ── 얼굴 ──────────────────────────────────────────────────────────────
-    // 속성 대응 전담. 티어 2 = 내성 / 티어 4 = 면역 / 티어 6 = 면역 + 내성.
+    // 속성 대응 전담. 티어 2 = 저항 / 티어 4 = 면역 / 티어 6 = 면역 + 저항.
     // 티어 3~4에서 수치가 아니라 면역으로 넘어가는 것이 의도된 질적 도약이다.
     private struct FaceElement
     {
@@ -308,7 +308,7 @@ public static class ArmourAssetGenerator
                 name: $"{e.label} 차단 마스크",
                 desc: "상태이상 자체를 막는다. 다만 피해는 그대로 들어온다.");
 
-            // 티어 6 — 면역 + 내성. 시야를 대가로 받는다.
+            // 티어 6 — 면역 + 저항. 시야를 대가로 받는다.
             WriteFace(e, tier: 6, resist: 0.30f, immunity: e.status,
                 weight: 0.8f, dur: 150, value: 15000,
                 name: $"{e.label} 완전 차단면",

@@ -139,8 +139,8 @@ public class BulletController : MonoBehaviour, IPoolable
     /// <summary>
     /// 합성 발사로 이 탄이 부여하는 상태. (확정 기획 — 합성 발사)
     ///
-    /// 부여 계열 Core가 준 상태와 Support가 준 행동이 한 발에 합쳐진다.
-    /// 부여 Core가 2개면 발사마다 번갈아 실린다. (각 50% 빈도)
+    /// 부여 계열 핵심 젬이 준 상태와 보조 젬이 준 행동이 한 발에 합쳐진다.
+    /// 부여 핵심 젬이 2개면 발사마다 번갈아 실린다. (각 50% 빈도)
     /// </summary>
     public StatusEffectType AppliedStatus { get; private set; }
 
@@ -447,7 +447,7 @@ public class BulletController : MonoBehaviour, IPoolable
         if (AppliedStatus != StatusEffectType.None)
         {
             // 상태이상 위력은 직접 피해와 분리된 축이다.
-            // 「연소」 각인과 속성 Support가 여기만 키운다.
+            // 「연소」 각인과 속성 보조 젬이 여기만 키운다.
             float ailmentBase = damage * Mathf.Max(0f, 1f + (skillEffects?.AilmentPower ?? 0f));
 
             target.ApplyStatus(

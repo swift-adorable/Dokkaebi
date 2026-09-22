@@ -1,6 +1,6 @@
 using UnityEngine;
 
-/// <summary>적의 공격 방식. 원형마다 다르다. (docs/Blob_Hunting_System.md 1절)</summary>
+/// <summary>적의 공격 방식. 유형마다 다르다. (docs/Blob_Hunting_System.md 1절)</summary>
 public enum EnemyAttackKind
 {
     /// <summary>근접 — 사거리 안에서 직접 판정한다. 포자충 · 사냥개</summary>
@@ -27,10 +27,10 @@ public enum EnemyAttackKind
 public class EnemyAttack : MonoBehaviour
 {
     [Header("Attack")]
-    [Tooltip("근접인지 원거리인지. 원형마다 다르다.")]
+    [Tooltip("근접인지 원거리인지. 유형마다 다르다.")]
     [SerializeField] private EnemyAttackKind attackKind = EnemyAttackKind.Melee;
 
-    [Tooltip("기본 피해. 원형별 수치는 Combat_Baseline 8절을 따른다.")]
+    [Tooltip("기본 피해. 유형별 수치는 Combat_Baseline 8절을 따른다.")]
     [SerializeField] private int damage = 8;
 
     [Tooltip("공격 판정이 닿는 거리. 원거리는 훨씬 길다.")]
@@ -90,7 +90,7 @@ public class EnemyAttack : MonoBehaviour
     public EnemyAttackKind Kind => attackKind;
 
     /// <summary>
-    /// 원형 · 등급이 정한 공격 수치를 주입한다. (EnemyIdentity)
+    /// 유형 · 등급이 정한 공격 수치를 주입한다. (EnemyIdentity)
     ///
     /// 【더하지 않고 덮어쓴다.】 풀에서 재사용될 때마다 등급 배율을 더하면
     /// 같은 프리팹이 돌 때마다 피해가 계속 커진다. 인스펙터 값은

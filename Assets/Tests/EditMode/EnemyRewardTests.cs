@@ -5,7 +5,7 @@ using NUnit.Framework;
 namespace Blob.Tests
 {
     /// <summary>
-    /// 드랍과 보상의 계약 테스트. (docs/Blob_Hunting_System.md 6절)
+    /// 드롭과 보상의 계약 테스트. (docs/Blob_Hunting_System.md 6절)
     /// </summary>
     public class EnemyRewardTests
     {
@@ -82,7 +82,7 @@ namespace Blob.Tests
             Assert.AreEqual(0, EnemyRewardTable.Credits(0, EnemyRarity.Unique));
         }
 
-        // ── 드랍 품질 ─────────────────────────────────────────────────
+        // ── 드롭 품질 ─────────────────────────────────────────────────
 
         [Test]
         public void 장비_티어_범위가_문서와_같다()
@@ -133,7 +133,7 @@ namespace Blob.Tests
                 "고유 장비가 내구도 100%로 나옵니다. (문서 6절 「내구도 손상」)");
         }
 
-        // ── 조건부 드랍 ───────────────────────────────────────────────
+        // ── 조건부 드롭 ───────────────────────────────────────────────
 
         [Test]
         public void 치명타로_죽이면_온전한_신경절이_나오지_않는다()

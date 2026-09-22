@@ -19,9 +19,9 @@ public static class SkillGemAssetGenerator
     /// <summary>
     /// 분류별 무게(kg)와 기본 가치.
     ///
-    /// Core를 가장 무겁게 둔 이유 — Core는 빌드의 뼈대라 반드시 들고 나가야 한다.
-    /// 그것이 무거워야 "예비 Core를 하나 더 챙길까"가 실제 판단이 된다.
-    /// Support는 가볍다. 여러 개를 주워 조합을 시험하는 것이 이 게임의 재미이기 때문이다.
+    /// 핵심 젬을 가장 무겁게 둔 이유 — 핵심 젬은 빌드의 뼈대라 반드시 들고 나가야 한다.
+    /// 그것이 무거워야 "예비 핵심 젬을 하나 더 챙길까"가 실제 판단이 된다.
+    /// 보조 젬은 가볍다. 여러 개를 주워 조합을 시험하는 것이 이 게임의 재미이기 때문이다.
     /// </summary>
     private static readonly float[] WeightByCategory = { 0.8f, 0.4f, 0.6f, 0.6f };
 

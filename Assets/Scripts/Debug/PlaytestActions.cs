@@ -73,10 +73,10 @@ public static class PlaytestActions
         => Catalog == null ? NoCatalog : Give(Catalog.KeyImprints, "대표 각인");
 
     public static string GiveCoreGems()
-        => Catalog == null ? NoCatalog : Give(Catalog.CoreGems, "Core 젬");
+        => Catalog == null ? NoCatalog : Give(Catalog.CoreGems, "핵심 젬");
 
     public static string GiveSupportGems()
-        => Catalog == null ? NoCatalog : Give(Catalog.SupportGems, "Support 젬");
+        => Catalog == null ? NoCatalog : Give(Catalog.SupportGems, "보조 젬");
 
     public static string GiveChecklistGems()
         => Catalog == null ? NoCatalog : Give(Catalog.ChecklistGems, "검증용 젬");

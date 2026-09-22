@@ -166,7 +166,7 @@ namespace Blob.Tests
         [Test]
         public void 낮은_피해로_덮어써서_도트를_약화시킬_수_없다()
         {
-            // 엣지 케이스 — 약한 공격이 강한 도트를 덮어쓰면
+            // 예외 상황 — 약한 공격이 강한 도트를 덮어쓰면
             // "약한 무기를 섞으면 손해"라는 비직관적 규칙이 생긴다.
             var state = new StatusEffectState();
             state.Apply(StatusEffectType.Ignite, 100f);
@@ -374,7 +374,7 @@ namespace Blob.Tests
         [Test]
         public void ClearAll은_전부_초기화한다()
         {
-            // 풀 재사용 시 이전 런의 상태가 남으면 안 된다.
+            // 풀 재사용 시 이전 출격의 상태가 남으면 안 된다.
             var state = new StatusEffectState();
             state.Apply(StatusEffectType.Ignite, 10f);
             state.Apply(StatusEffectType.Shock, 10f);
@@ -390,7 +390,7 @@ namespace Blob.Tests
         [Test]
         public void 남은_시간보다_큰_deltaTime은_남은_만큼만_피해를_준다()
         {
-            // 엣지 케이스 — 프레임 드랍 시 도트가 과다 피해를 주면 안 된다.
+            // 예외 상황 — 프레임 드롭 시 도트가 과다 피해를 주면 안 된다.
             var state = new StatusEffectState();
             state.Apply(StatusEffectType.Ignite, 10f);
 

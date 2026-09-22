@@ -28,7 +28,7 @@ public class PlayerWeapon : MonoBehaviour
     /// </summary>
     private WeaponProfile profile = WeaponProfile.Unarmed;
 
-    /// <summary>합성 발사의 적재 속성 순번. 적재 Core 2개일 때 번갈아 부여한다.</summary>
+    /// <summary>합성 발사의 적재 속성 순번. 적재 핵심 젬 2개일 때 번갈아 부여한다.</summary>
     private CompositeFireState compositeFire;
 
     private PoolManager poolManager;
@@ -113,7 +113,7 @@ public class PlayerWeapon : MonoBehaviour
 
         WeaponModifiers modifiers = GetModifiers();
 
-        // 합성 발사: 적재 계열 Core가 2개면 발사마다 번갈아 부여한다. (확정 기획)
+        // 합성 발사: 적재 계열 핵심 젬이 2개면 발사마다 번갈아 부여한다. (확정 기획)
         // 투사체마다가 아니라 '발사마다'이므로 루프 밖에서 한 번만 고른다.
         StatusEffectType ailment = SelectAilment(modifiers);
 
@@ -165,7 +165,7 @@ public class PlayerWeapon : MonoBehaviour
         }
     }
 
-    /// <summary>이번 발사에 실을 적재 속성을 고른다. 적재 계열 Core가 없으면 None.</summary>
+    /// <summary>이번 발사에 실을 적재 속성을 고른다. 적재 계열 핵심 젬이 없으면 None.</summary>
     private StatusEffectType SelectAilment(WeaponModifiers modifiers)
     {
         int index = compositeFire.NextAilmentIndex(modifiers.Ailments.Count);

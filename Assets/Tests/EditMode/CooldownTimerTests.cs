@@ -95,10 +95,10 @@ namespace Blob.Tests
             Assert.AreEqual(7, shots, "연사 간격이 지켜지지 않으면 DPS 밸런스가 무너집니다.");
         }
 
-        // ── 엣지 케이스 ──────────────────────────────────────────
+        // ── 예외 상황 ──────────────────────────────────────────
 
         [Test]
-        public void 엣지_쿨다운_0이면_매번_사용_가능하다()
+        public void 예외_쿨다운_0이면_매번_사용_가능하다()
         {
             var timer = new CooldownTimer();
 
@@ -108,7 +108,7 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 엣지_음수_쿨다운은_0으로_취급한다()
+        public void 예외_음수_쿨다운은_0으로_취급한다()
         {
             var timer = new CooldownTimer();
 
@@ -119,7 +119,7 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 엣지_시간이_역행해도_RemainingTime은_음수가_되지_않는다()
+        public void 예외_시간이_역행해도_RemainingTime은_음수가_되지_않는다()
         {
             var timer = new CooldownTimer();
 
@@ -131,7 +131,7 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 엣지_초기_상태에서_음수_시각도_처리한다()
+        public void 예외_초기_상태에서_음수_시각도_처리한다()
         {
             var timer = new CooldownTimer();
 

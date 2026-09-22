@@ -277,7 +277,7 @@ public static class MobileInputUIFactory
         return uiFont;
     }
 
-    /// <summary>원형 스프라이트를 절차적으로 생성한다. (외부 에셋 의존 제거)</summary>
+    /// <summary>유형 스프라이트를 절차적으로 생성한다. (외부 에셋 의존 제거)</summary>
     private static Sprite GetCircleSprite()
     {
         if (circleSprite != null)

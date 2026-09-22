@@ -16,7 +16,7 @@ public class CorpseController : MonoBehaviour, IPoolable
     [SerializeField] private int valueMultiplier = 1;
 
     [Header("Loot")]
-    [Tooltip("이 시체에서 나올 전리품 표. 비워 두면 젬 드랍만 굴린다.")]
+    [Tooltip("이 시체에서 나올 전리품 표. 비워 두면 젬 드롭만 굴린다.")]
     [SerializeField] private LootTable lootTable;
 
     [Tooltip("전리품 칸 수. 화면의 「전리품 (n/8)」의 8이다.")]
@@ -27,12 +27,12 @@ public class CorpseController : MonoBehaviour, IPoolable
     private System.Random random;
 
     /// <summary>
-    /// 죽은 적의 등급. 보상과 드랍 품질을 전부 이 값이 정한다.
+    /// 죽은 적의 등급. 보상과 드롭 품질을 전부 이 값이 정한다.
     /// EnemyController가 시체를 만들면서 넣어 준다.
     /// </summary>
     public EnemyRarity Rarity { get; private set; } = EnemyRarity.Normal;
 
-    /// <summary>이 개체가 만족시킨 조건부 드랍. (Hunting 6-3절)</summary>
+    /// <summary>이 개체가 만족시킨 조건부 드롭. (Hunting 6-3절)</summary>
     public ConditionalDrop ConditionalDrops { get; private set; } = ConditionalDrop.None;
 
     /// <summary>
@@ -111,7 +111,7 @@ public class CorpseController : MonoBehaviour, IPoolable
     }
 
     /// <summary>
-    /// 전리품을 채운다. 표에서 뽑은 것에 더해 젬 드랍을 굴린다.
+    /// 전리품을 채운다. 표에서 뽑은 것에 더해 젬 드롭을 굴린다.
     ///
     /// 젬을 가방에 바로 넣지 않고 여기 담는 이유 —
     /// 「무엇을 들고 갈지 고른다」가 추출 루팅의 결정이다.

@@ -28,12 +28,12 @@
 |---|---|---|---|
 | ~~A1~~ | ~~장비 착용~~ | **해결 (6-H)** — 가방 화면에서 장비를 골라 8슬롯에 착용·해제한다 | `UI/InventoryScreenEquip.cs` |
 | ~~A2~~ | ~~사망 시 소지품 소실~~ | **해결 (6-H)** — `BlobController.HandleDied`가 호출한다 | `Player/BlobController.cs` |
-| ~~A3~~ | ~~런 초기화~~ | **해결 (6-H)** — 사망 처리에서 함께 호출한다 | `Player/BlobController.cs` |
+| ~~A3~~ | ~~출격 초기화~~ | **해결 (6-H)** — 사망 처리에서 함께 호출한다 | `Player/BlobController.cs` |
 | ~~A4~~ | ~~과중량 페널티~~ | **해결 (6-H)** — `PlayerMovement.SpeedScale` · `PlayerDash.DistanceScale` | `Core/Equipment/LoadoutSnapshot.cs` |
-| **A5** | **기폭(원소 작렬)** | `Core/Combat/DetonationResolver.cs` | **테스트뿐.** 기폭 Core 3종이 아무 효과도 내지 않는다 |
+| **A5** | **기폭(원소 작렬)** | `Core/Combat/DetonationResolver.cs` | **테스트뿐.** 기폭 핵심 젬 3종이 아무 효과도 내지 않는다 |
 | **A6** | **잔류물 5종** | `Core/Combat/GroundEffectTable.cs` | **여전히 없음.** 다만 7-A 조사 중 **3종 모두에서 별개의 결함**이 나와 먼저 고쳤다 (아래 주) |
 | ~~A7~~ | ~~난이도 배율 6단~~ — **해결 (6-L)** `GameManager.Difficulty` → 적 피해·체력 | `Core/Combat/DifficultyLevel.cs:26-51` | **테스트뿐.** `Health.TakeDamage`의 배율 인자를 아무도 넘기지 않는다 |
-| ~~A8~~ | ~~내성 「가장 낮은 것 하나만」~~ | **해결 (7-B)** — `EnemyProfile.Build`가 몬스터 속성을 내성에 합성한다. 다만 합성 경로는 `TakeLowest`가 아니라 새로 만든 `ElementalResistances.LowerTo`다 (아래 주) | `Core/Hunting/EnemyProfile.cs` |
+| ~~A8~~ | ~~저항 「가장 낮은 것 하나만」~~ | **해결 (7-B)** — `EnemyProfile.Build`가 몬스터 속성을 저항에 합성한다. 다만 합성 경로는 `TakeLowest`가 아니라 새로 만든 `ElementalResistances.LowerTo`다 (아래 주) | `Core/Hunting/EnemyProfile.cs` |
 | ~~A+~~ | ~~상태이상 면역~~ | **해결 (6-I)** — `Health.IsImmuneTo`가 항상 false였다. 역치 각인 3종 + 얼굴 마스크 15종이 이제 작동한다 | `Player/PlayerLoadout.cs` |
 | ~~A11~~ | ~~소리 축~~ | **해결 (7-D)** — `LoadoutSnapshot`이 세 축을 합산하고, `PlayerNoise`가 소리를 내고, `Perception`이 그 소리를 듣는다 | `Core/AI/Perception.cs` · `Player/PlayerNoise.cs` |
 | **A9** | **패시브 효과 17종 중 13종** | `Core/Progression/PassiveEffectType.cs` | 실제로 읽히는 것은 `CarrySlots` · `CarryWeight` · `AbsorbAmount` · `LootRolls` **4종뿐** |
@@ -55,8 +55,8 @@
 > **A6 주 — 배선 이전에 데이터가 틀려 있었다. (2026-09-21)**
 > A6은 「생성 경로가 없다」는 항목이었는데, 막상 3종을 열어 보니
 > 배선을 붙였어도 틀린 결과가 나올 상태였다.
-> · 「마름쇠」 — `FireZone` 고정. 서리 Core에 꽂아도 불바다.
->   → `FromCoreAilment` + `GroundEffectTable.Resolve`로 Core가 정하게 했다.
+> · 「마름쇠」 — `FireZone` 고정. 서리 핵심 젬에 꽂아도 불바다.
+>   → `FromCoreAilment` + `GroundEffectTable.Resolve`로 핵심 젬이 정하게 했다.
 > · 「유지되는 대지」 — 대가 「잔류물 범위 -25%」가 `rangeMultiplier`(유효 사거리)를
 >   깎고 있었다. → 새 축 `zoneRadiusMultiplier`로 옮겼다.
 > · 「잔류물 효력」 — 「범위가 커진다」가 **구현되어 있지 않았다.** 담을 축이 없어
@@ -68,14 +68,14 @@
 > 「경화」는 물리 하나만 0.5로 만든다. 이를 위해 전부 1.0인 묶음을 만들어
 > `TakeLowest`에 넣으면, 손대지 않아야 할 속성까지 1.0으로 눌린다 —
 > 압착기의 전기 2배와 정착체의 화염 1.5배가 속성 하나 붙었다는 이유로 사라진다.
-> **원형이 요구하던 답이 지워진다.** (7-B 작성 중 테스트가 이 결함을 잡았다)
+> **유형이 요구하던 답이 지워진다.** (7-B 작성 중 테스트가 이 결함을 잡았다)
 > 그래서 「한 속성만 내리는」 `LowerTo`를 새로 두고, `TakeLowest`는
 > **묶음 대 묶음**(레이드 특성 vs 개체)에 쓰도록 남겼다 — 7-G에서 호출된다.
 > 즉 A8은 해결됐지만 `TakeLowest` 자체의 호출부는 아직 테스트뿐이다.
 
 > **A1 · A2 · A3 · A4 · A10은 6-H에서 해결했다.**
 > 이제 「입고 → 쏘고 → 무거우면 느리고 → 죽으면 잃는다」 한 바퀴가 돈다.
-> 남은 것은 **A5 · A6 · A8 · A9 · A11** — 기폭 · 잔류물 · 내성 합성 ·
+> 남은 것은 **A5 · A6 · A8 · A9 · A11** — 기폭 · 잔류물 · 저항 합성 ·
 > 패시브 13종 · **소리 축**이다. (A7 난이도는 6-L에서 해결)
 >
 > **A11은 조사로 새로 드러났다.** 덕코프에서 소리는 적 감지의 중심축이다 —
@@ -118,10 +118,10 @@
 > `LoadoutSnapshotTests.장비는_최대_체력을_올리지_않는다`만 고치면 된다.
 > 각인이 깎고 난 최저치는 `PlayerMinHealth = 40`으로 막았다.
 
-### ~~B3. 내성 중첩~~ — 해결 (6-K)
+### ~~B3. 저항 중첩~~ — 해결 (6-K)
 
 - `Combat_Baseline.md` 2-2절: 「곱연산으로 중첩하지 않고 **가장 낮은 배율 하나만**」
-- `Hunting_System.md`: 「경화 외피 레이드 + 경화 적 → 물리 내성 **×0.25**」 ← 곱연산 예시
+- `Hunting_System.md`: 「경화 외피 레이드 + 경화 적 → 물리 저항 **×0.25**」 ← 곱연산 예시
 
 코드는 `TakeLowest`를 구현했으나 호출부가 없다(A8).
 
@@ -179,13 +179,13 @@
 `SkillDefinition`에 **피해 증가율 · 상태이상 위력 · 치명타 필드가 하나도 없다.**
 `WeaponModifiers`가 표현할 수 있는 것은 궤도 · 탄 수 · 간격 · 수명 · 속도 · 적재 속성뿐이다.
 
-결과: **Support 35종 중 21종이 대가만 적용되고 효과가 적용되지 않는다.**
+결과: **보조 젬 35종 중 21종이 대가만 적용되고 효과가 적용되지 않는다.**
 「불난 집 부채질」 「치명적인 중독」 「기세」 등을 끼우면 **손해만 본다.**
 
 > **해결** — `SkillDefinition`에 `damageIncrease` · `ailmentPower` ·
 > `ailmentDurationMultiplier` · `rangeMultiplier` · 조건부 3필드를 추가했다.
 > `WeaponModifiers`가 합산하고 `BulletController`가 명중 시점에 적용한다.
-> Support 21종에 값을 채웠고 `SkillEffectTests`가 「효과 없는 Support」를 막는다.
+> 보조 젬 21종에 값을 채웠고 `SkillEffectTests`가 「효과 없는 보조 젬」를 막는다.
 >
 > **6-J에서 「화염 조율」·「원소 융합」까지 채워 `KnownGaps`가 비었다.**
 
@@ -198,18 +198,18 @@
 > 분리하고, 「유효 사거리」 대가는 `rangeMultiplier`로 옮겼다.
 > `지속시간_Support가_투사체_수명을_건드리지_않는다` 테스트가 재발을 막는다.
 
-### ~~D3. 차단형 Support 4종이 구조적으로 영구 무효~~ — 해결 (6-J)
+### ~~D3. 차단형 보조 젬 4종이 구조적으로 영구 무효~~ — 해결 (6-J)
 
-「번제」(화염 차단) 같은 차단형은 요구 태그 때문에 **그 상태를 만드는 유일한 Core에만** 장착 가능한데,
-`IsStatusBlocked`가 **빌드 전역**이라 그 Core의 상태 생성이 꺼진다. 같은 Core 중복도 금지다.
+「번제」(화염 차단) 같은 차단형은 요구 태그 때문에 **그 상태를 만드는 유일한 핵심 젬에만** 장착 가능한데,
+`IsStatusBlocked`가 **빌드 전역**이라 그 핵심 젬의 상태 생성이 꺼진다. 같은 핵심 젬 중복도 금지다.
 → 상태 발생원이 사라져 영구히 작동하지 않았다.
 
-> **해결** — 차단 범위를 **Core 하나**로 좁혔다(`IsStatusBlockedForCore`).
-> 【자기 Core는 못 걸고, 다른 발생원이 걸어 준 것을 이용한다.】
+> **해결** — 차단 범위를 **핵심 젬 하나**로 좁혔다(`IsStatusBlockedForCore`).
+> 【자기 핵심 젬은 못 걸고, 다른 발생원이 걸어 준 것을 이용한다.】
 > 동시에 **속성 전환 축**(`ailmentOverride` · `ailmentAddition`)을 만들어
-> 「화염 조율」이 다른 Core의 속성을 점화로 바꿔 공급할 수 있게 했다.
+> 「화염 조율」이 다른 핵심 젬의 속성을 점화로 바꿔 공급할 수 있게 했다.
 > 문서의 「단독으로는 전혀 작동하지 않는다」는 그대로 유지된다 —
-> Core가 하나뿐인 Lv6 이하에서는 여전히 아무 일도 하지 않는다.
+> 핵심 젬이 하나뿐인 Lv6 이하에서는 여전히 아무 일도 하지 않는다.
 >
 > 이 작업으로 **KnownGaps 2종(화염 조율·원소 융합)도 함께 비었다.**
 
@@ -252,15 +252,15 @@
 | E7 | 동시 공격 제한 | **2** (임대 3초) | `Core/AI/AttackTokenPool.cs:22,25` |
 | E8 | 적 감지 거리 · 반응 시간 | **18m / 0.35초** | `Enemy/EnemyBrain.cs:24,35` |
 | E9 | 적 예비동작 · 쿨다운 | **0.35초 / 1.2초** | `Enemy/EnemyAttack.cs:55-59` |
-| E10 | 젬의 무게 · 가치 | Core 0.8 / Support 0.4 / Meta · 전령 0.6 kg | `Editor/SkillGemAssetGenerator.cs:26,101` |
-| E11 | 젬 드랍 확률 | **18%** | `Managers/SkillManager.cs:33` |
+| E10 | 젬의 무게 · 가치 | 핵심 젬 0.8 / 보조 젬 0.4 / 발동 젬 · 전령 0.6 kg | `Editor/SkillGemAssetGenerator.cs:26,101` |
+| E11 | 젬 드롭 확률 | **18%** | `Managers/SkillManager.cs:33` |
 | E12 | 무기별 부착 슬롯 | 0/1/2/3/4/6 | `Editor/WeaponAssetGenerator.cs` |
 | E13 | 마모(33%) 시 방어 옵션 | **절반** | `EquipmentModifiers.cs:46-53` |
 | E14 | 기폭 반경 · 중첩 배수 | **3m / 중첩당 1.2배** | `DetonationResolver.cs:49,52` — **어느 문서에도 근거가 없다** |
 
 ---
 
-> **7-E 주 — 드랍에서 남긴 것. (2026-09-22)**
+> **7-E 주 — 드롭에서 남긴 것. (2026-09-22)**
 > · **변이 샘플** — 떨어뜨릴지(`EnemyRewardTable.SampleChance`)는 정했지만
 >   아이템도 흡수도 없다. 문서 6-4절의 핵심은 「추출 성공 시 도감 영구 등록,
 >   실패 시 소실」인데 **추출 판정 자체가 없다**(아래 F절). 절반만 만들면
@@ -275,9 +275,9 @@
 7단계 이후로 예정된 것들이다. 지금 문제 삼지 않는다.
 
 - **추출 성공 판정 자체** (8단계) — 추출 지점 · 정산 진입점이 코드에 한 줄도 없다
-- ~~적 원형 9종 · 등급 4 · 몬스터 속성 13종~~ — **데이터·계산 완료 (7-A·B)**.
+- ~~적 유형 9종 · 등급 4 · 몬스터 속성 13종~~ — **데이터·계산 완료 (7-A·B)**.
   프리팹은 3종 배선됨 — 스캐브(야생) · 자전체(실험체) · 압착기(시설).
-  나머지 6종과 원형별 기믹이 7-F에 남는다.
+  나머지 6종과 유형별 기믹이 7-F에 남는다.
   **`EnemySpawner`가 압착기를 모른다** — 근접/원거리 두 종만 낸다.
   그래서 지금 구성으로는 진영이 달라도 난전이 일어나지 않는다.
   스폰 구성은 9단계(맵 전역 사전 배치)에서 바뀌므로 거기서 함께 푼다.
@@ -290,8 +290,8 @@
 - 계정 레벨 경험치 · 정산 · 세이브 (현재 인스펙터 값)
 - 벙커 전부 (건물 · NPC · 상점 · 제작 · 의뢰)
 - 소모품 22종 중 19종, 소모품 사용 API, 퀵슬롯 기능
-- 장 · 게이트 · 표식 · 레코더 · 업적 · 엔딩
-- Meta 5종의 에너지 축적, 전령 5종의 처치 시 연쇄
+- 장 · 문턱 · 표식 · 레코더 · 업적 · 엔딩
+- 발동 젬 5종의 에너지 축적, 전령 5종의 처치 시 연쇄
 - 세트 계열 · 격리 방호 장비 (`ContainmentWard` 판정은 있으나 **주는 에셋이 0종**)
 
 ---
@@ -301,14 +301,14 @@
 | 항목 | 위치 | 비고 |
 |---|---|---|
 | 상태이상 피해는 무적을 무시한다 | `Core/Health.cs:172-174` | 무적 0.6초의 예외. 문서 미기재 |
-| 내성 0 = 완전 면역 (최소 피해 1 예외) | `DamageResolver.cs:69-71` | 하한 1과의 우선순위가 문서에 없다 |
+| 저항 0 = 완전 면역 (최소 피해 1 예외) | `DamageResolver.cs:69-71` | 하한 1과의 우선순위가 문서에 없다 |
 | 머리/몸통 방어도 분리 | `DefenceProfile.cs:12-17` | `Combat_Baseline`은 방어도 1개를 전제한다 |
-| 소켓에 Core가 없으면 Support 장착 불가 | `SocketedBuild.cs:192` | 소켓 규칙 표에 없는 제약 |
+| 소켓에 핵심 젬이 없으면 보조 젬 장착 불가 | `SocketedBuild.cs:192` | 소켓 규칙 표에 없는 제약 |
 | 가방이 꽉 차면 젬을 뺄 수 없다 | `SkillManager.cs:441-458` | 문서는 「탈착 가능」까지만 |
 | 상호 배타 쌍이 문서보다 3쌍 많다 | `SkillAssetGenerator.cs:303/415, 428/435, 444/451` | 문서는 1쌍만 적는다 |
 | 전리품 창 격자 5×2 = 10칸 | `UI/LootWindowUI.cs:19` | 컨테이너는 8칸이라 2칸이 안 그려진다 |
 | ~~가방 화면 격자 6×6 = 36칸~~ | `UI/InventoryScreenUI.cs` | **해결 (6-O)** — 6열 고정 + 세로 스크롤. 칸 크기는 「보이는 6행」이 정하고 용량이 늘면 내용물이 길어진다. 전리품 창도 같은 잘라내기를 제거했다 |
-| 적 원형 이름 「포자충 · 사냥개 · 감시자」 | `Enemy/EnemyAttack.cs:6,9` | 문서의 9종 이름에 없다 |
+| 적 유형 이름 「포자충 · 사냥개 · 감시자」 | `Enemy/EnemyAttack.cs:6,9` | 문서의 9종 이름에 없다 |
 
 ### 코드 주석의 문서 절 번호가 전반적으로 어긋나 있다
 

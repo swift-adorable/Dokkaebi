@@ -25,7 +25,7 @@ namespace Blob.Tests
             otherPrefab = new GameObject("BulletPrefab");
             otherPrefab.SetActive(false);
 
-            // 의도적으로 경고/에러 로그를 유발하는 엣지 케이스가 있으므로,
+            // 의도적으로 경고/에러 로그를 유발하는 예외 상황가 있으므로,
             // 로그 자체가 테스트를 실패시키지 않도록 한다.
             LogAssert.ignoreFailingMessages = true;
         }
@@ -109,10 +109,10 @@ namespace Blob.Tests
             Assert.IsFalse(instance.activeSelf);
         }
 
-        // ── 엣지 케이스 ──────────────────────────────────────────
+        // ── 예외 상황 ──────────────────────────────────────────
 
         [Test]
-        public void 엣지_중복_Despawn은_두_번째부터_false를_반환한다()
+        public void 예외_중복_Despawn은_두_번째부터_false를_반환한다()
         {
             GameObject instance = manager.Spawn(prefab, Vector3.zero, Quaternion.identity);
 
@@ -123,7 +123,7 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 엣지_중복_Despawn_후에도_풀_상태가_오염되지_않는다()
+        public void 예외_중복_Despawn_후에도_풀_상태가_오염되지_않는다()
         {
             GameObject instance = manager.Spawn(prefab, Vector3.zero, Quaternion.identity);
 
@@ -137,7 +137,7 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 엣지_풀_소속이_아닌_오브젝트_Despawn은_false를_반환한다()
+        public void 예외_풀_소속이_아닌_오브젝트_Despawn은_false를_반환한다()
         {
             var stray = new GameObject("NotPooled");
 
@@ -149,13 +149,13 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 엣지_null_Despawn은_예외없이_false를_반환한다()
+        public void 예외_null_Despawn은_예외없이_false를_반환한다()
         {
             Assert.IsFalse(manager.Despawn(null));
         }
 
         [Test]
-        public void 엣지_null_프리팹_Spawn은_null을_반환하고_풀을_만들지_않는다()
+        public void 예외_null_프리팹_Spawn은_null을_반환하고_풀을_만들지_않는다()
         {
             // ignoreFailingMessages만으로는 에러 로그가 테스트를 실패시키는 것을 막지 못한다.
             // 예상되는 로그를 명시적으로 선언한다.
@@ -168,7 +168,7 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 엣지_Prewarm에_null이나_0을_넣어도_안전하다()
+        public void 예외_Prewarm에_null이나_0을_넣어도_안전하다()
         {
             Assert.DoesNotThrow(() => manager.Prewarm(null, 10));
             Assert.DoesNotThrow(() => manager.Prewarm(prefab, 0));

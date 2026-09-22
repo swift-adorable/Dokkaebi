@@ -5,22 +5,22 @@ using UnityEngine;
 /// </summary>
 public struct SocketCapacity
 {
-    /// <summary>쓸 수 있는 Core 슬롯 수 (0~2).</summary>
+    /// <summary>쓸 수 있는 핵심 젬 슬롯 수 (0~2).</summary>
     public int CoreSlots;
 
-    /// <summary>1번 Core에 열린 소켓 수 (0~3).</summary>
+    /// <summary>1번 핵심 젬에 열린 소켓 수 (0~3).</summary>
     public int SocketsInCore0;
 
-    /// <summary>2번 Core에 열린 소켓 수 (0~3).</summary>
+    /// <summary>2번 핵심 젬에 열린 소켓 수 (0~3).</summary>
     public int SocketsInCore1;
 
-    /// <summary>발동(Meta) 슬롯 수 (0~2).</summary>
+    /// <summary>발동 슬롯 수 (0~2).</summary>
     public int MetaSlots;
 
     /// <summary>전령 슬롯 수 (0~1).</summary>
     public int HeraldSlots;
 
-    /// <summary>지정한 Core에 열린 소켓 수. 범위를 벗어나면 0.</summary>
+    /// <summary>지정한 핵심 젬에 열린 소켓 수. 범위를 벗어나면 0.</summary>
     public int SocketsIn(int coreIndex)
     {
         return coreIndex == 0 ? SocketsInCore0
@@ -45,33 +45,33 @@ public struct SocketCapacity
 /// </summary>
 public static class SocketUnlockTable
 {
-    /// <summary>Core 동시 보유 상한.</summary>
+    /// <summary>핵심 젬 동시 보유 상한.</summary>
     public const int MaxCores = 2;
 
-    /// <summary>Core 1개당 소켓 수.</summary>
+    /// <summary>핵심 젬 1개당 소켓 수.</summary>
     public const int SocketsPerCore = 3;
 
-    /// <summary>발동(Meta) 동시 장착 상한.</summary>
+    /// <summary>발동 동시 장착 상한.</summary>
     public const int MaxMetas = 2;
 
     /// <summary>전령 동시 장착 상한.</summary>
     public const int MaxHeralds = 1;
 
-    /// <summary>2번째 Core 슬롯이 열리는 레벨. (기존 확정 사항 유지)</summary>
+    /// <summary>2번째 핵심 젬 슬롯이 열리는 레벨. (기존 확정 사항 유지)</summary>
     public const int SecondCoreUnlockLevel = 7;
 
     /// <summary>모든 슬롯이 열리는 레벨. 이 이상은 더 열 것이 없다.</summary>
     public const int FullyOpenLevel = 15;
 
     /// <summary>
-    /// 12-1절 표를 그대로 옮긴 것. 행 = { 레벨, Core, 소켓0, 소켓1, 발동, 전령 }.
+    /// 12-1절 표를 그대로 옮긴 것. 행 = { 레벨, 핵심 젬, 소켓0, 소켓1, 발동, 전령 }.
     ///
     /// 표를 코드에 두는 이유 — 문서와의 대조가 diff 한 번으로 끝난다.
     /// 값을 바꾸려면 문서와 이 표를 같이 고쳐야 하고, 계약 테스트가 둘의 어긋남을 잡는다.
     /// </summary>
     private static readonly int[,] Rows =
     {
-        //  Lv   Core  소켓0  소켓1  발동  전령
+        //  Lv   핵심 젬  소켓0  소켓1  발동  전령
         {    1,     1,     1,     0,    0,    0 },
         {    3,     1,     2,     0,    0,    0 },
         {    5,     1,     3,     0,    0,    0 },
@@ -99,7 +99,7 @@ public static class SocketUnlockTable
     public static SocketCapacity Evaluate(int awakeningLevel)
     {
         // 각성 레벨이 0이 되는 경로는 없어야 하지만, 생겨도 아무것도 끼우지 못하는
-        // 상태로 런이 시작되면 안 된다. 여기서 한 번 잘라 둔다.
+        // 상태로 출격이 시작되면 안 된다. 여기서 한 번 잘라 둔다.
         int level = ClampLevel(awakeningLevel);
 
         var capacity = new SocketCapacity();

@@ -9,7 +9,7 @@ public static class EnemyAffixTable
 {
     /// <summary>
     /// None을 제외한 실제 속성 수.
-    /// 문서 3절은 13종이지만 냉기 내성(내한성)을 더해 14종이다.
+    /// 문서 3절은 13종이지만 냉기 저항(내한성)을 더해 14종이다.
     /// 이유는 EnemyAffix.Cryostable 주석에 있다.
     /// </summary>
     public const int Count = 14;
@@ -17,7 +17,7 @@ public static class EnemyAffixTable
     /// <summary>「갑각」이 더하는 방어도. (문서 3절)</summary>
     public const float CarapaceArmour = 3f;
 
-    /// <summary>내성 계열 속성이 거는 배율. 곱하지 않고 가장 낮은 것 하나만 남는다.</summary>
+    /// <summary>저항 계열 속성이 거는 배율. 곱하지 않고 가장 낮은 것 하나만 남는다.</summary>
     public const float ResistanceMultiplier = 0.5f;
 
     /// <summary>
@@ -93,7 +93,7 @@ public static class EnemyAffixTable
         return affix != EnemyAffix.Hair;
     }
 
-    /// <summary>이 속성이 내성을 깎는가. 깎는다면 어느 속성을.</summary>
+    /// <summary>이 속성이 저항을 깎는가. 깎는다면 어느 속성을.</summary>
     public static bool TryGetResistance(EnemyAffix affix, out DamageElement element)
     {
         switch (affix)

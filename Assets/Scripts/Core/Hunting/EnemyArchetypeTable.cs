@@ -1,11 +1,11 @@
 using System;
 
 /// <summary>
-/// 이 원형이 플레이어에게 요구하는 답.
+/// 이 유형이 플레이어에게 요구하는 답.
 /// docs/Blob_Combat_Baseline.md 5절 표의 「요구하는 답」 열을 그대로 옮긴 것이다.
 ///
 /// 【enum으로 둔 이유】
-/// 「하나의 원형이 두 개의 답을 요구하게 만들지 않는다」는 설계 규칙을
+/// 「하나의 유형이 두 개의 답을 요구하게 만들지 않는다」는 설계 규칙을
 /// 검사하려면 답이 데이터여야 한다. 주석에만 있으면 아무도 어기는 줄 모른다.
 /// </summary>
 public enum EnemyAnswer
@@ -16,7 +16,7 @@ public enum EnemyAnswer
     /// <summary>방어 관통 — 장비로 방어도를 뚫는다.</summary>
     Penetration = 1,
 
-    /// <summary>각도 — 시야 콘 바깥으로 돈다.</summary>
+    /// <summary>각도 — 시야각 바깥으로 돈다.</summary>
     Angle = 2,
 
     /// <summary>선제 — 먼저 찾아야 한다.</summary>
@@ -36,7 +36,7 @@ public enum EnemyAnswer
 }
 
 /// <summary>
-/// 원형 한 종의 고정 수치.
+/// 유형 한 종의 고정 수치.
 /// 출처는 docs/Blob_Combat_Baseline.md 5절 표다. 여기서 값을 새로 만들지 않는다.
 /// </summary>
 [Serializable]
@@ -50,7 +50,7 @@ public struct EnemyArchetypeStats
     /// <summary>소속. 진영 판정이 이 값을 본다.</summary>
     public Faction faction;
 
-    /// <summary>이 원형이 요구하는 답. 원형당 하나다.</summary>
+    /// <summary>이 유형이 요구하는 답. 유형당 하나다.</summary>
     public EnemyAnswer answer;
 
     /// <summary>
@@ -91,7 +91,7 @@ public struct EnemyArchetypeStats
     /// <summary>시야 거리(m). 【불확실 — 문서에 숫자가 없다.】</summary>
     public float visionRange;
 
-    /// <summary>원형 고유 내성. 등급·속성이 붙기 전의 값이다.</summary>
+    /// <summary>유형 고유 저항. 등급·속성이 붙기 전의 값이다.</summary>
     public ElementalResistances resistances;
 
     /// <summary>
@@ -105,9 +105,9 @@ public struct EnemyArchetypeStats
 }
 
 /// <summary>
-/// 원형 9종의 고정 수치표. (docs/Blob_Combat_Baseline.md 5절 · Hunting 1·4·8절)
+/// 유형 9종의 고정 수치표. (docs/Blob_Combat_Baseline.md 5절 · Hunting 1·4·8절)
 ///
-/// 【하나의 원형이 두 개의 답을 요구하게 만들지 않는다.】
+/// 【하나의 유형이 두 개의 답을 요구하게 만들지 않는다.】
 /// "체력이 많고 빠르고 원거리에 방어도까지 높은" 적은 만들지 않는다.
 /// 이 규칙은 EnemyArchetypeTests가 강제한다.
 ///
@@ -144,7 +144,7 @@ public static class EnemyArchetypeTable
     private const float MachineCone = 150f;
 
     // ── 청각 ──────────────────────────────────────────────────────────
-    // 값은 Perception이 갖는다. 여기서는 어느 원형이 어느 귀를 쓰는지만 정한다.
+    // 값은 Perception이 갖는다. 여기서는 어느 유형이 어느 귀를 쓰는지만 정한다.
 
     /// <summary>둔한 귀 — 기계형. 눈은 넓지만 귀로는 잘 못 찾는다.</summary>
     private const float DullEar = Perception.DullHearing;
@@ -165,7 +165,7 @@ public static class EnemyArchetypeTable
     /// <summary>집요함 — 보안기. 옛 chasesForever의 자리다.</summary>
     private const float RelentlessMemory = 30f;
 
-    // ── 강제 추격 거리 ────────────────────────────────────────────────
+    // ── 강제 추적 거리 ────────────────────────────────────────────────
 
     /// <summary>한 번 물면 조금 끈질기다 — 자전체 · 검체.</summary>
     private const float NearForcedChase = 15f;

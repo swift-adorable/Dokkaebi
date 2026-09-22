@@ -60,7 +60,7 @@ public class EnemyMovement : MonoBehaviour
     /// 정지 거리를 바꾼다. 원거리 적이 사거리 밖에서 멈추게 할 때 쓴다.
     ///
     /// Inspector 값을 직접 바꾸지 않고 함수를 두는 이유 —
-    /// 원형별 프리팹을 따로 만들지 않아도 EnemyAttack이 자기 방식에 맞게
+    /// 유형별 프리팹을 따로 만들지 않아도 EnemyAttack이 자기 방식에 맞게
     /// 이동을 조정할 수 있다.
     /// </summary>
     public void SetStoppingDistance(float distance)
@@ -90,7 +90,7 @@ public class EnemyMovement : MonoBehaviour
 
         // 【대상은 플레이어로 고정되지 않는다.】
         // 진영이 다르면 적끼리도 싸운다. EnemyAggro가 없는 프리팹은
-        // 예전처럼 플레이어를 따라간다 — 원형 프리팹이 붙기 전까지의 경로다.
+        // 예전처럼 플레이어를 따라간다 — 유형 프리팹이 붙기 전까지의 경로다.
         Transform target = aggro != null ? aggro.Target : enemyManager.PlayerTransform;
 
         if (target == null)

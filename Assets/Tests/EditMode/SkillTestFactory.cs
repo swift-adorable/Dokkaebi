@@ -67,7 +67,7 @@ namespace Blob.Tests
                 requiredLevel: requiredLevel);
         }
 
-        /// <summary>전령(Persistent). v8부터 Nucleus 비용이 없고 동시 1개만 장착된다.</summary>
+        /// <summary>전령. v8부터 Nucleus 비용이 없고 동시 1개만 장착된다.</summary>
         public static SkillDefinition CreatePersistent(
             string id,
             int requiredLevel = 1)

@@ -5,8 +5,8 @@ namespace Blob.Tests
     /// <summary>
     /// 합성 발사가 SocketedBuild → WeaponModifiers 경로에서 실제로 성립하는지 검증한다.
     ///
-    /// v8부터 투사체 행동(관통·갈래·사슬 등)은 전부 Support가 부여한다.
-    /// 부여 Core의 상태와 Support의 행동이 '한 발'에 합쳐져야 한다.
+    /// v8부터 투사체 행동(관통·갈래·사슬 등)은 전부 보조 젬이 부여한다.
+    /// 부여 핵심 젬의 상태와 보조 젬의 행동이 '한 발'에 합쳐져야 한다.
     ///
     /// ※ 획득 방식이 레벨업 선택에서 젬 파밍으로 바뀌었으나
     ///   합성 규칙 자체는 바뀌지 않았다. 이 파일이 그것을 고정한다.
@@ -22,7 +22,7 @@ namespace Blob.Tests
             return build;
         }
 
-        /// <summary>투사체 행동을 부여하는 Support. (v8 — 행동은 Core가 아니라 Support의 몫)</summary>
+        /// <summary>투사체 행동을 부여하는 Support. (v8 — 행동은 핵심 젬이 아니라 보조 젬의 몫)</summary>
         private static SkillDefinition BehaviourSupport(
             string id, ProjectileBehaviourType behaviour, int charges)
         {
@@ -52,7 +52,7 @@ namespace Blob.Tests
             Assert.AreEqual(1, modifiers.Ailments.Count);
             Assert.AreEqual(StatusEffectType.Ignite, modifiers.Ailments[0]);
 
-            // 합성의 핵심: Core가 2개여도 탄 수는 1발 그대로다.
+            // 합성의 핵심: 핵심 젬이 2개여도 탄 수는 1발 그대로다.
             Assert.AreEqual(1, modifiers.TotalProjectiles);
         }
 
@@ -170,7 +170,7 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void Core가_없으면_상태도_행동도_없다()
+        public void 핵심젬이_없으면_상태도_행동도_없다()
         {
             SocketedBuild build = FullBuild();
 

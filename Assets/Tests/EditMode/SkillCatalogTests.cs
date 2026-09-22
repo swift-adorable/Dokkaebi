@@ -52,7 +52,7 @@ namespace Blob.Tests
             int cores = Of(SkillCategory.Core).Count();
             int supports = Of(SkillCategory.Support).Count();
 
-            Assert.Greater(supports, cores * 3, "Support가 Core의 3배를 넘어야 합니다.");
+            Assert.Greater(supports, cores * 3, "보조 젬이 핵심 젬의 3배를 넘어야 합니다.");
         }
 
         [Test]
@@ -99,7 +99,7 @@ namespace Blob.Tests
                 if (c == CostType.None)
                     continue;
 
-                Assert.Contains(c, used, $"{c} 통화를 쓰는 Support가 없습니다.");
+                Assert.Contains(c, used, $"{c} 통화를 쓰는 보조 젬이 없습니다.");
             }
         }
 
@@ -122,7 +122,7 @@ namespace Blob.Tests
         public void 모든_Support는_붙을_수_있는_Core가_존재한다()
         {
             // ★ 태그 게이팅의 존재 이유 그 자체다.
-            // 요구 태그를 만족하는 Core가 없으면 그 Support는 영원히 죽은 선택지가 된다.
+            // 요구 태그를 만족하는 핵심 젬이 없으면 그 보조 젬은 영원히 죽은 선택지가 된다.
             var coreTags = Of(SkillCategory.Core).Select(c => c.Tags).ToList();
 
             foreach (SkillDefinition s in Of(SkillCategory.Support))
@@ -132,14 +132,14 @@ namespace Blob.Tests
 
                 bool any = coreTags.Any(t => (t & s.RequiredTags) == s.RequiredTags);
 
-                Assert.IsTrue(any, $"{s.Id}({s.DisplayName})의 요구 태그를 만족하는 Core가 없습니다.");
+                Assert.IsTrue(any, $"{s.Id}({s.DisplayName})의 요구 태그를 만족하는 핵심 젬이 없습니다.");
             }
         }
 
         [Test]
         public void 모든_Core는_붙일_수_있는_Support가_존재한다()
         {
-            // 반대 방향. 소켓 3개가 항상 비어 있는 Core가 있으면 안 된다.
+            // 반대 방향. 소켓 3개가 항상 비어 있는 핵심 젬이 있으면 안 된다.
             var supports = Of(SkillCategory.Support).ToList();
 
             foreach (SkillDefinition c in Of(SkillCategory.Core))
@@ -148,11 +148,11 @@ namespace Blob.Tests
                     s.RequiredTags == SkillTag.None || (c.Tags & s.RequiredTags) == s.RequiredTags);
 
                 Assert.GreaterOrEqual(count, SocketedBuild.SocketsPerCore,
-                    $"{c.Id}({c.DisplayName})에 붙일 Support가 소켓 수보다 적습니다.");
+                    $"{c.Id}({c.DisplayName})에 붙일 보조 젬이 소켓 수보다 적습니다.");
             }
         }
 
-        // ── Core 구조 ─────────────────────────────────────────────────────
+        // ── 핵심 젬 구조 ─────────────────────────────────────────────────────
 
         [Test]
         public void 부여_Core는_전부_투사체_태그와_생성_상태를_가진다()
@@ -164,7 +164,7 @@ namespace Blob.Tests
             foreach (SkillDefinition d in ailments)
             {
                 Assert.IsTrue((d.Tags & SkillTag.Projectile) != 0,
-                    $"{d.Id} — 부여 Core는 투사체 태그를 가져야 투사체 Support가 붙을 곳이 생깁니다.");
+                    $"{d.Id} — 부여 핵심 젬은 투사체 태그를 가져야 투사체 보조 젬이 붙을 곳이 생깁니다.");
                 Assert.AreNotEqual(StatusEffectType.None, d.CreatesStatus, $"{d.Id}가 만드는 상태가 없습니다.");
             }
         }
@@ -187,7 +187,7 @@ namespace Blob.Tests
         /// <summary>
         /// 만들 수단이 없는 상태는 죽은 어휘다.
         ///
-        /// 【임계 상태는 제외한다.】 동결·마비·부식은 Core가 직접 걸지 않는다.
+        /// 【임계 상태는 제외한다.】 동결·마비·부식은 핵심 젬이 직접 걸지 않는다.
         /// 원본(냉각·감전·중독)이 최대 중첩에 차면 전이로만 생긴다.
         /// </summary>
         [Test]
@@ -206,12 +206,12 @@ namespace Blob.Tests
                     || s == StatusEffectType.Corrode)
                 {
                     Assert.IsFalse(created.Contains(s),
-                        $"{s}는 임계 상태입니다. Core가 직접 걸면 안 됩니다.");
+                        $"{s}는 임계 상태입니다. 핵심 젬이 직접 걸면 안 됩니다.");
 
                     continue;
                 }
 
-                Assert.Contains(s, created, $"{s}를 만드는 Core가 없습니다.");
+                Assert.Contains(s, created, $"{s}를 만드는 핵심 젬이 없습니다.");
             }
         }
 
@@ -290,7 +290,7 @@ namespace Blob.Tests
             var creatable = Of(SkillCategory.Core).Select(d => d.CreatesStatus).ToList();
 
             foreach (SkillDefinition d in All.Where(x => x.BlocksStatusCreation))
-                Assert.Contains(d.BlockedStatus, creatable, $"{d.Id}가 차단하는 상태를 만들 Core가 없습니다.");
+                Assert.Contains(d.BlockedStatus, creatable, $"{d.Id}가 차단하는 상태를 만들 핵심 젬이 없습니다.");
         }
 
         [Test]
@@ -323,7 +323,7 @@ namespace Blob.Tests
             CollectionAssert.Contains(shortFuse.MutuallyExclusiveIds, "sup_long_fuse");
         }
 
-        // ── Meta · 전령 ───────────────────────────────────────────────────
+        // ── 발동 젬 · 전령 ───────────────────────────────────────────────────
 
         [Test]
         public void 발동_스킬은_전부_발동_태그를_가진다()
@@ -358,16 +358,16 @@ namespace Blob.Tests
             foreach (SkillDefinition d in All)
                 Assert.GreaterOrEqual(d.RequiredLevel, 1, $"{d.Id}의 요구 레벨이 1 미만입니다.");
 
-            // Lv1에 고를 수 있는 Core가 없으면 런이 시작되지 않는다.
+            // Lv1에 고를 수 있는 핵심 젬이 없으면 출격이 시작되지 않는다.
             Assert.IsTrue(Of(SkillCategory.Core).Any(d => d.RequiredLevel == 1),
-                "요구 레벨 1인 Core가 하나도 없습니다.");
+                "요구 레벨 1인 핵심 젬이 하나도 없습니다.");
         }
 
         [Test]
         public void 초반_각성_레벨에서_끼울_수_있는_젬이_충분하다()
         {
-            // 엣지 케이스 — 요구 레벨이 전부 높으면 초반에 주운 젬을 하나도
-            // 끼우지 못한다. Lv3 시점에 열리는 자리는 Core 1 + 소켓 2 = 3개이므로
+            // 예외 상황 — 요구 레벨이 전부 높으면 초반에 주운 젬을 하나도
+            // 끼우지 못한다. Lv3 시점에 열리는 자리는 핵심 젬 1 + 소켓 2 = 3개이므로
             // 그보다 넉넉한 후보가 있어야 파밍이 의미를 가진다.
             int earlyCount = All.Count(d => d.RequiredLevel <= 3);
 

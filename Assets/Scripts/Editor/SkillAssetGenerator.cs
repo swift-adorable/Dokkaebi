@@ -193,9 +193,9 @@ public static class SkillAssetGenerator
         var t = new List<Row>();
         Row r;
 
-        // ── Core 부여 계열 5 ──────────────────────────────────────────────
+        // ── 핵심 젬 부여 계열 5 ──────────────────────────────────────────────
         // 전부 투사체 태그를 가진다. Blob의 기본 동사가 사격이므로
-        // 투사체 Support가 붙을 곳이 항상 존재해야 한다.
+        // 투사체 보조 젬이 붙을 곳이 항상 존재해야 한다.
 
         r = New("core_fire", "화염", "적중한 적을 점화시킨다.", SkillCategory.Core, 1);
         r.family = CoreFamily.Ailment;
@@ -228,7 +228,7 @@ public static class SkillAssetGenerator
         r.creates = StatusEffectType.Bleed;
         t.Add(r);
 
-        // ── Core 기폭 계열 3 ──────────────────────────────────────────────
+        // ── 핵심 젬 기폭 계열 3 ──────────────────────────────────────────────
         // 투사체 태그가 없다. 파동·잔류물·플레이어 중심 효과다.
 
         r = New("core_elemental_burst", "원소 작렬",
@@ -253,7 +253,7 @@ public static class SkillAssetGenerator
         r.tags = SkillTag.AreaOfEffect | SkillTag.Detonator;
         t.Add(r);
 
-        // ── Support 투사체 계열 12 ────────────────────────────────────────
+        // ── 보조 젬 투사체 계열 12 ────────────────────────────────────────
 
         r = New("sup_pierce", "관통", "일직선상의 대상을 연속으로 타격한다. 기본 3체.", SkillCategory.Support, 1);
         r.requiredTags = SkillTag.Projectile;
@@ -340,7 +340,7 @@ public static class SkillAssetGenerator
         r.condition = SkillConditionKind.FarTarget; r.conditionalDmg = 0.40f;
         t.Add(r);
 
-        // ── Support 속성 계열 10 ──────────────────────────────────────────
+        // ── 보조 젬 속성 계열 10 ──────────────────────────────────────────
         // 확산형 1 + 배타형 1 대칭. 배타형은 단독으로 전혀 작동하지 않으므로
         // 반드시 상태를 만드는 다른 수단이 필요하다.
 
@@ -420,7 +420,7 @@ public static class SkillAssetGenerator
         r.conditionStatus = StatusEffectType.Bleed; r.conditionalDmg = 0.80f;
         t.Add(r);
 
-        // ── Support 기폭 장치 · 잔류물 계열 6 ─────────────────────────────
+        // ── 보조 젬 기폭 장치 · 잔류물 계열 6 ─────────────────────────────
 
         r = New("sup_short_fuse", "짧은 퓨즈", "기폭 지연이 사라진다.", SkillCategory.Support, 5);
         r.requiredTags = SkillTag.Detonator;
@@ -430,10 +430,10 @@ public static class SkillAssetGenerator
         t.Add(r);
 
         // 【속성을 고정하지 않는다.】 전에는 FireZone이 박혀 있어서
-        // 서리 Core에 꽂아도 불바다가 생겼다. Support가 속성을 정하면
-        // 「Core = 속성」이라는 전투 3층이 깨진다.
+        // 서리 핵심 젬에 꽂아도 불바다가 생겼다. 보조 젬이 속성을 정하면
+        // 「핵심 젬 = 속성」이라는 전투 3층이 깨진다.
         r = New("sup_caltrops", "마름쇠",
-            "적중 지점에 잔류물을 남긴다. 종류는 꽂힌 Core의 속성을 따른다.",
+            "적중 지점에 잔류물을 남긴다. 종류는 꽂힌 핵심 젬의 속성을 따른다.",
             SkillCategory.Support, 5);
         r.requiredTags = SkillTag.Zone;
         r.cost = CostType.BarrageDensity; r.costDesc = "발사 간격 +25%"; r.fireInterval = 1.25f;
@@ -452,7 +452,7 @@ public static class SkillAssetGenerator
         // lifetime을 2f로 썼다가 곧바로 1f로 덮는 죽은 대입도 함께 지운다 —
         // 남겨 두면 다음 사람이 어느 쪽이 의도인지 알 수 없다.
         //
-        // 참고 — PoE2 Persistent Ground는 단계마다 +50%다.
+        // 참고 — PoE2 유지형 젬 Ground는 단계마다 +50%다.
         // Blob은 +100% 한 단계로 두되 대가를 붙인다. (수치는 Blob의 결정)
         // [확인됨 — docs/research/poe2/04_잔류물_계열.md]
         r = New("sup_lasting_ground", "유지되는 대지", "잔류물 지속시간이 100% 늘어난다.", SkillCategory.Support, 7);
@@ -482,8 +482,8 @@ public static class SkillAssetGenerator
         r.zoneRadius = 1.6f;
         t.Add(r);
 
-        // ── Support 조건부 계열 3 ─────────────────────────────────────────
-        // 요구 태그가 없다. 어떤 Core에도 붙는다.
+        // ── 보조 젬 조건부 계열 3 ─────────────────────────────────────────
+        // 요구 태그가 없다. 어떤 핵심 젬에도 붙는다.
 
         r = New("sup_momentum", "기세", "일정 거리 이상 이동하면 피해가 증가한다.", SkillCategory.Support, 5);
         r.cost = CostType.ControlConstraint; r.costDesc = "정지하면 보너스가 즉시 소멸한다";
@@ -502,7 +502,7 @@ public static class SkillAssetGenerator
         r.fireInterval = 0.85f;
         t.Add(r);
 
-        // ── Support 지속시간 계열 2 ───────────────────────────────────────
+        // ── 보조 젬 지속시간 계열 2 ───────────────────────────────────────
 
         r = New("sup_duration_extend", "지속시간 연장",
             "상태이상과 잔류물의 지속시간이 50% 늘어난다.", SkillCategory.Support, 3);
@@ -520,12 +520,12 @@ public static class SkillAssetGenerator
         r.ailDuration = 0.5f; r.lifetime = 1f; r.ailPower = 0.60f;
         t.Add(r);
 
-        // ── Support 속성 전환 2 ───────────────────────────────────────────
+        // ── 보조 젬 속성 전환 2 ───────────────────────────────────────────
 
         r = New("sup_fire_attunement", "화염 조율",
             "부여 계열의 속성을 화염으로 완전히 전환한다.", SkillCategory.Support, 9);
         r.requiredTags = SkillTag.Projectile;
-        r.cost = CostType.FunctionalExclusion; r.costDesc = "전환 전 속성 전용 Support가 무효화된다";
+        r.cost = CostType.FunctionalExclusion; r.costDesc = "전환 전 속성 전용 보조 젬이 무효화된다";
         r.exclusive = new[] { "sup_elemental_fusion" };
         r.ailOverride = StatusEffectType.Ignite;
         t.Add(r);
@@ -548,7 +548,7 @@ public static class SkillAssetGenerator
         t.Add(r);
 
         r = New("meta_cast_on_ignite", "점화 시 시전",
-            "점화된 적을 처치할 때마다 10% 충전된다. 발동 시 장착한 Core를 주변 적 전체에게 발동한다.",
+            "점화된 적을 처치할 때마다 10% 충전된다. 발동 시 장착한 핵심 젬을 주변 적 전체에게 발동한다.",
             SkillCategory.Meta, 11);
         r.tags = SkillTag.Trigger | SkillTag.Fire;
         t.Add(r);
@@ -560,7 +560,7 @@ public static class SkillAssetGenerator
         t.Add(r);
 
         r = New("meta_cast_on_crit", "치명타 시 시전",
-            "치명타가 발생할 때마다 6% 충전된다. 발동 시 장착한 Core를 즉시 재발동한다.",
+            "치명타가 발생할 때마다 6% 충전된다. 발동 시 장착한 핵심 젬을 즉시 재발동한다.",
             SkillCategory.Meta, 13);
         r.tags = SkillTag.Trigger;
         t.Add(r);
@@ -571,7 +571,7 @@ public static class SkillAssetGenerator
         r.tags = SkillTag.Trigger;
         t.Add(r);
 
-        // ── Persistent(전령) 5 ────────────────────────────────────────────
+        // ── 유지형 젬(전령) 5 ────────────────────────────────────────────
         // 전부 "조건부 처치 시 연쇄" 구조다. 동시 장착 1개.
 
         r = New("her_ash", "재의 전령",

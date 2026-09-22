@@ -18,8 +18,8 @@ namespace Blob.Tests
     ///   즉 가만히 서 있어도 2분 30초를 버틴다. 「죽으면 잃는가」를 확인할 수 없었다.
     ///   적 체력 3 → 어떤 무기로도 한 발. 전투 체감이 전부 무의미했다.
     ///
-    /// 수치의 출처는 docs/Blob_Combat_Baseline.md 5절 「적 원형」 표다.
-    /// 7단계에서 원형 9종을 데이터로 만들면 이 테스트를 그 표 전체로 넓힌다.
+    /// 수치의 출처는 docs/Blob_Combat_Baseline.md 5절 「적 유형」 표다.
+    /// 7단계에서 유형 9종을 데이터로 만들면 이 테스트를 그 표 전체로 넓힌다.
     /// </summary>
     public class EnemyPrefabTests
     {
@@ -157,7 +157,7 @@ namespace Blob.Tests
                 + "적이 영원히 쏘지 못합니다.");
         }
     
-        // ── 원형·진영 배선 (7-F) ──────────────────────────────────────
+        // ── 유형·진영 배선 (7-F) ──────────────────────────────────────
         //
         // 【프리팹과 표가 갈라지지 않게 강제한다.】
         // 런타임 수치는 EnemyIdentity가 EnemyArchetypeTable에서 가져오므로
@@ -173,20 +173,20 @@ namespace Blob.Tests
         };
 
         [Test]
-        public void 적_프리팹이_원형과_진영을_갖는다()
+        public void 적_프리팹이_유형과_진영을_갖는다()
         {
             foreach (var row in Wired)
             {
                 var go = AssetDatabase.LoadAssetAtPath<GameObject>(row.path);
 
                 Assert.IsNotNull(go,
-                    $"{row.path}이 없습니다. 「Blob/Enemy/원형·진영 배선」을 실행하십시오.");
+                    $"{row.path}이 없습니다. 「Blob/Enemy/유형·진영 배선」을 실행하십시오.");
 
                 var identity = go.GetComponent<EnemyIdentity>();
 
                 Assert.IsNotNull(identity,
                     $"{row.path}에 EnemyIdentity가 없습니다. "
-                    + "원형 수치도 등급도 속성도 하나도 적용되지 않습니다.");
+                    + "유형 수치도 등급도 속성도 하나도 적용되지 않습니다.");
 
                 Assert.AreEqual(row.archetype, identity.Archetype, row.path);
 
@@ -197,7 +197,7 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 프리팹에_적힌_수치가_원형_표와_같다()
+        public void 프리팹에_적힌_수치가_유형_표와_같다()
         {
             foreach (var row in Wired)
             {

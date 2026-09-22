@@ -9,14 +9,14 @@ using UnityEngine;
 /// 나눠 두는 이유 — 계산이 MonoBehaviour 안에 있으면 EditMode에서 검증할 수 없다.
 /// MCP로 PlayMode를 돌릴 수 없으므로 검증 가능한 쪽에 계산을 둔다.
 ///
-/// 프리팹에는 원형만 지정한다. 등급과 속성은 스폰 때마다 다시 뽑는다 —
+/// 프리팹에는 유형만 지정한다. 등급과 속성은 스폰 때마다 다시 뽑는다 —
 /// 「매 출격마다 무작위 재배치」가 문서 7절의 요구다.
 /// </summary>
 [RequireComponent(typeof(Health))]
 public class EnemyIdentity : MonoBehaviour, IPoolable
 {
     [Header("Archetype")]
-    [Tooltip("이 프리팹이 어떤 원형인가. 수치는 EnemyArchetypeTable이 갖는다.")]
+    [Tooltip("이 프리팹이 어떤 유형인가. 수치는 EnemyArchetypeTable이 갖는다.")]
     [SerializeField] private EnemyArchetype archetype = EnemyArchetype.Scav;
 
     [Header("Rarity")]

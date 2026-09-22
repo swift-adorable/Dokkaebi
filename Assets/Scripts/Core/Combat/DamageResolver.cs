@@ -66,7 +66,7 @@ public static class DamageResolver
 
         float resistance = defence.resistances.Get(request.element);
 
-        // 내성 0은 완전 면역이다. 하한 1을 적용하지 않는다.
+        // 저항 0은 완전 면역이다. 하한 1을 적용하지 않는다.
         if (resistance <= 0f)
             return 0;
 

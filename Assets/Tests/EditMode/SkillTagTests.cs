@@ -62,7 +62,7 @@ namespace Blob.Tests
         [Test]
         public void 요구_태그가_None이면_항상_장착_가능하다()
         {
-            // 엣지 케이스: 태그 제약이 없는 Support는 어떤 Core에도 붙는다.
+            // 예외 상황: 태그 제약이 없는 보조 젬은 어떤 핵심 젬에도 붙는다.
             Assert.IsTrue(SkillTag.None.ContainsAll(SkillTag.None));
             Assert.IsTrue(SkillTag.Zone.ContainsAll(SkillTag.None));
         }

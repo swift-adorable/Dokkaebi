@@ -122,7 +122,7 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 중장_3단_각인은_대시_쿨타임을_사실상_막는다()
+        public void 중장_3단_각인은_대시_쿨다운을_사실상_막는다()
         {
             var loadout = new EquipmentLoadout();
             loadout.TryEquip(Stack(Load("Imprints/imp_bulwark_t3.asset")), EquipmentSlot.ImprintA, out _);

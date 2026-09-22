@@ -189,7 +189,7 @@ namespace Blob.Tests
         [Test]
         public void 귀환_중에는_큐를_더_소비하지_않는다()
         {
-            // 엣지 케이스: 귀환 중에 Chain이 남아 있다고 방향을 틀면 Return이 성립하지 않는다.
+            // 예외 상황: 귀환 중에 Chain이 남아 있다고 방향을 틀면 Return이 성립하지 않는다.
             ProjectileBehaviourState state = State(chain: 2, ret: 1);
 
             ProjectileCollisionResult result =
