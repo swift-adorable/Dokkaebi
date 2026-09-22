@@ -49,8 +49,10 @@ public partial class InventoryScreenUI : MonoBehaviour
     // 이미 끝난 일을 알려 줄 뿐이었다. 꼭 알려야 하는 실패만 잠깐 뜨는
     // 알림으로 바꾸고(ShowToast), 그 줄은 본문이 가져간다.
 
-    private const float TopBarBottom = 0.90f;
-    private const float ColumnTop = TopBarBottom;
+    // 【상단 줄을 없앴다.】
+    // 크레딧 하나 때문에 화면 위 10%를 통째로 비워 두고 있었다.
+    // 크레딧은 패널 안 머리글 오른쪽으로 들어갔고, 본문이 그 자리를 가져간다.
+    private const float ColumnTop = 1f;
     private const float ColumnBottom = 0.10f;
     private const float FooterTop = ColumnBottom;
 
@@ -61,9 +63,11 @@ public partial class InventoryScreenUI : MonoBehaviour
     /// 가방을 열었다고 바깥이 사라지면, 지금 어디에 서 있고 무엇이 다가오는지가
     /// 보이지 않는다. 추출 루팅에서 가방을 여는 순간은 대개 안전하지 않은
     /// 순간이라 「짐을 보면서 바깥도 본다」가 성립해야 한다.
-    /// 왼쪽에 붙이고 나머지는 그대로 비춘다.
+    ///
+    /// 0.55에서 0.38로 줄인다 — 절반이 넘으면 「한쪽에 치우쳤다」로 읽히지 않는다.
+    /// 그만큼 칸이 좁아지므로 긴 이름은 말줄임으로 자른다.
     /// </summary>
-    private const float SidePanelRight = 0.55f;
+    private const float SidePanelRight = 0.38f;
 
     /// <summary>패시브 화면만 폭을 다 쓴다. 트리를 접으면 볼 수가 없다.</summary>
     private const float ColumnSplit = 0.5f;
@@ -88,7 +92,13 @@ public partial class InventoryScreenUI : MonoBehaviour
     /// 장비 탭은 폭을 다 쓰므로 여덟 열, 스킬 탭은 절반이라 여섯 열이다.
     /// 열 수를 고정해 두면 넓은 쪽에서 칸이 주먹만 해진다.
     /// </summary>
-    private const int BagColumns = 6;
+    /// <summary>
+    /// 가방 격자의 열 수.
+    ///
+    /// 폭이 0.38로 줄면서 여섯 열로는 칸이 커 보인다. 일곱 열이면
+    /// 한 칸이 100px 언저리라 덕코프의 격자와 비슷해진다.
+    /// </summary>
+    private const int BagColumns = 7;
 
     /// <summary>
     /// 한 번에 보이는 행. 【칸 크기의 기준】이다.
@@ -133,9 +143,11 @@ public partial class InventoryScreenUI : MonoBehaviour
     /// </summary>
     private RectTransform rightContent;
 
-    /// <summary>위·아래 줄. 바깥 여백은 panel이 이미 들여 놨다.</summary>
-    private RectTransform topBar;
+    /// <summary>아래 줄. 바깥 여백은 panel이 이미 들여 놨다.</summary>
     private RectTransform footer;
+
+    /// <summary>본문 영역. 패시브에서는 아래줄 자리까지 내려간다.</summary>
+    private RectTransform bodyRegion;
 
 
     /// <summary>안전 영역 컨테이너. 화면 UI는 전부 이 아래에 붙는다.</summary>
@@ -265,17 +277,15 @@ public partial class InventoryScreenUI : MonoBehaviour
 
         float half = UIFactory.Gap * 0.5f;
 
-        topBar = UIFactory.CreateSlice("TopBar", panel.transform,
-            new Vector2(0f, TopBarBottom), Vector2.one, bottom: half);
-
-        RectTransform body = UIFactory.CreateSlice("Body", panel.transform,
+        bodyRegion = UIFactory.CreateSlice("Body", panel.transform,
             new Vector2(0f, ColumnBottom), new Vector2(1f, ColumnTop),
             bottom: half, top: half);
+
+        RectTransform body = bodyRegion;
 
         footer = UIFactory.CreateSlice("Footer", panel.transform,
             Vector2.zero, new Vector2(1f, FooterTop), top: half);
 
-        BuildTopBar();
         BuildLeftColumn(body);
 
         rightPanel = UIFactory.CreateSlice("Right", body,
@@ -413,21 +423,6 @@ public partial class InventoryScreenUI : MonoBehaviour
         Open((int)next);
     }
 
-    private void BuildTopBar()
-    {
-        // 크레딧 — 스크린샷의 좌상단 화폐 표시 자리.
-        //
-        // 【탭 줄이 있던 가운데는 비운다.】
-        // 장비·스킬·패시브 버튼은 화면에 늘 떠 있는 쪽(HUD)으로 나갔다.
-        // 같은 버튼을 두 군데 두면 어느 쪽을 눌러야 하는지가 또 배울 거리가 된다.
-        Image purse = UIFactory.CreateGlass("Credits", topBar, UIPalette.Header,
-            Vector2.zero, new Vector2(0.185f, 1f), UIFactory.RadiusLarge);
-
-        creditLabel = UIFactory.CreateLabel(purse.transform, "₡ 0", 35, FontStyle.Bold,
-            new Vector2(0.06f, 0f), new Vector2(0.94f, 1f), TextAnchor.MiddleRight,
-            UIPalette.TextAccent);
-    }
-
     // ── 좌측 칸의 세로 배치 ───────────────────────────────────────────
     // 장비 탭과 스킬 탭이 【같은 네 단】을 쓴다.
     //
@@ -457,7 +452,10 @@ public partial class InventoryScreenUI : MonoBehaviour
         float titleBottom = titleTop - ListTitleHeight;
         float listTop = titleBottom - BandGap;
 
+        // 스킬 탭에서만 「다음 개방」이 뜬다. 그때는 크레딧을 접는다 —
+        // 젬을 끼우는 화면에서 돈은 쓸 일이 없다.
         topInfoLabel.gameObject.SetActive(skillTab);
+        creditLabel.gameObject.SetActive(!skillTab);
 
         equipmentGrid.anchorMin = new Vector2(0f, bandBottom);
         equipmentGrid.anchorMax = new Vector2(1f, TopBandTop);
@@ -494,8 +492,15 @@ public partial class InventoryScreenUI : MonoBehaviour
             new Vector2(0f, TopBandTop + BandGap), new Vector2(0.55f, TitleTop),
             TextAnchor.MiddleLeft, UIPalette.TextDim);
 
-        topInfoLabel = UIFactory.CreateLabel(content, string.Empty, 24, FontStyle.Normal,
-            new Vector2(0.55f, TopBandTop + BandGap), new Vector2(1f, TitleTop),
+        // 【크레딧이 여기로 들어왔다.】
+        // 화면 위 10%를 크레딧 하나 때문에 비워 두고 있었다.
+        // 머리글 오른쪽은 어차피 비어 있던 자리다.
+        creditLabel = UIFactory.CreateLabel(content, "₡ 0", 28, FontStyle.Bold,
+            new Vector2(0.45f, TopBandTop + BandGap), new Vector2(1f, TitleTop),
+            TextAnchor.MiddleRight, UIPalette.TextAccent);
+
+        topInfoLabel = UIFactory.CreateLabel(content, string.Empty, 22, FontStyle.Normal,
+            new Vector2(0.30f, TopBandTop + BandGap), new Vector2(1f, TitleTop),
             TextAnchor.MiddleRight, UIPalette.TextDim);
 
         equipmentGrid = UIFactory.CreateRegion("TopBand", content,
@@ -699,6 +704,12 @@ public partial class InventoryScreenUI : MonoBehaviour
         if (quickBar != null)
             quickBar.gameObject.SetActive(true);
 
+        for (int i = 0; i < hudButtons.Count; i++)
+        {
+            if (hudButtons[i] != null)
+                hudButtons[i].gameObject.SetActive(true);
+        }
+
         RefreshToggle();
         RefreshQuickSlots();
 
@@ -740,6 +751,9 @@ public partial class InventoryScreenUI : MonoBehaviour
 
         leftColumn.gameObject.SetActive(showLeft);
         rightPanel.gameObject.SetActive(showRight);
+
+        bodyRegion.anchorMin = new Vector2(0f, passive ? 0f : ColumnBottom);
+        bodyRegion.offsetMin = new Vector2(0f, passive ? 0f : half);
 
         // 【덮개는 늘 켜 두고 색만 바꾼다.】
         // 장비·스킬에서는 투명하게 둔다 — 뒤가 그대로 보이면서도,
@@ -793,6 +807,9 @@ public partial class InventoryScreenUI : MonoBehaviour
 
     private void RefreshCredits()
     {
+        if (creditLabel == null)
+            return;
+
         int amount = PassiveManager.HasInstance ? PassiveManager.Instance.Credits : 0;
 
         creditLabel.text = $"₡ {amount:N0}";
@@ -966,14 +983,10 @@ public partial class InventoryScreenUI : MonoBehaviour
         // 「스킬 탭에서 장착」이라는 안내만 다시 나온다. 목록만 길어진다.
         bagStacks.Clear();
 
-        int hidden = 0;
-
         foreach (ItemStack stack in bag.Stacks)
         {
             if (BelongsToTab(stack))
                 bagStacks.Add(stack);
-            else
-                hidden++;
         }
 
         // 부모(=뷰포트)의 실제 크기를 읽기 전에 레이아웃을 확정시킨다.
@@ -996,8 +1009,10 @@ public partial class InventoryScreenUI : MonoBehaviour
             return;
         }
 
-        bagTitleLabel.text = $"가방 ({bag.UsedSlots}/{bag.SlotCapacity})"
-            + (hidden > 0 ? $"    젬 {hidden}개는 스킬 탭에" : string.Empty);
+        // 【「젬 n개는 스킬 탭에」를 적지 않는다.】
+        // 스킬 버튼이 화면에 늘 떠 있으니 한 번 눌러 보면 안다.
+        // 매번 같은 줄을 읽게 만드는 것이 더 비싸다.
+        bagTitleLabel.text = $"가방 ({bag.UsedSlots}/{bag.SlotCapacity})";
 
         // 【전부 그린다.】 잘라내면 그 칸의 물건은 보이지도 눌리지도 않는다.
         int cells = Mathf.Max(bagStacks.Count, bag.SlotCapacity);
@@ -1233,7 +1248,7 @@ public partial class InventoryScreenUI : MonoBehaviour
             19, FontStyle.Bold, new Vector2(0.06f, 0f), new Vector2(0.94f, 1f),
             TextAnchor.MiddleLeft, Color.white);
 
-        FitName(nameLabel, 19);
+        WrapName(nameLabel, 18);
 
         // 개수는 우하단. 겹칠 수 있는 물건에만 뜬다 —
         // 1개짜리에 「1」을 붙이면 잡음이다.
@@ -1248,18 +1263,30 @@ public partial class InventoryScreenUI : MonoBehaviour
     }
 
     /// <summary>
-    /// 이름이 칸을 넘지 않게 맞춘다.
+    /// 이름이 칸을 넘으면 「앞부분…」으로 자른다.
     ///
-    /// 두 줄까지 접고, 그래도 안 들어가면 글자를 줄인다.
-    /// 최소 크기를 원래의 3분의 2로 묶어 둔다 — 그 아래로 내려가면
-    /// 읽히지가 않아서 이름을 적은 의미가 없다.
+    /// 자동 축소를 쓰지 않는 이유는 EllipsisLabel의 주석에 적어 두었다 —
+    /// 긴 이름만 글자가 작아지면 같은 줄의 칸들이 제각각으로 보인다.
     /// </summary>
     private static void FitName(Text label, int size)
+    {
+        label.fontSize = size;
+
+        label.gameObject.AddComponent<EllipsisLabel>().SetText(label.text);
+    }
+
+    /// <summary>
+    /// 좁은 칸의 이름. 두 줄까지 접고 그래도 넘치면 글자를 줄인다.
+    ///
+    /// 가방 칸은 100px 남짓이라 말줄임을 걸면 「반출…」처럼 두세 자만 남는다.
+    /// 그 정도로는 무엇인지 구분되지 않아서, 여기서는 접는 쪽이 낫다.
+    /// </summary>
+    private static void WrapName(Text label, int size)
     {
         label.horizontalOverflow = HorizontalWrapMode.Wrap;
         label.verticalOverflow = VerticalWrapMode.Truncate;
         label.resizeTextForBestFit = true;
-        label.resizeTextMinSize = Mathf.Max(12, Mathf.RoundToInt(size * 0.67f));
+        label.resizeTextMinSize = Mathf.Max(11, Mathf.RoundToInt(size * 0.7f));
         label.resizeTextMaxSize = size;
     }
 
