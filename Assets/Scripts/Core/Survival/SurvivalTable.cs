@@ -60,21 +60,29 @@ public static class SurvivalTable
     public const float DehydratedMoveScale = 0.80f;
 
     /// <summary>
-    /// [불확실] 탈수의 회복 배율.
+    /// [확인됨] 탈수일 때 에너지가 차는 비율. 덕코프 「체력 회복 −70%」 그대로.
     ///
-    /// 덕코프 원본은 −70%지만 그것은 **스태미나** 회복이다. Blob에 스태미나가
-    /// 없어 받는 회복량으로 옮기는데, 그대로 옮기면 「물을 안 마시면 회복약이
-    /// 거의 안 듣는다」가 되어 원본보다 훨씬 무겁다. 세기를 절반으로 낮췄다.
+    /// 덕코프의 「체력」은 스태미나이고, Blob은 스태미나를 에너지에 합쳤다
+    /// (용어 기준표 1-2). 그래서 이 −70%는 **에너지가 차는 양**에 붙는다.
+    /// 「물이 없으면 먹어도 배가 덜 찬다」 — 물부터 마셔야 음식이 제값을 한다.
+    ///
+    /// 【체력(HP)에는 손대지 않는다.】 이 축의 존재 이유는 추출 압박 하나이고,
+    /// 회복약을 덜 듣게 만드는 것은 전투 페널티라 방침에서 벗어난다.
+    /// (Survival_System 6절)
     /// </summary>
-    public const float DehydratedHealScale = 0.65f;
+    public const float DehydratedEnergyRestoreScale = 0.30f;
 
     // ── 허기 (에너지 0) ───────────────────────────────────────────────
 
     /// <summary>[확인됨] 허기의 이동 배율. 덕코프 −10%.</summary>
     public const float StarvingMoveScale = 0.90f;
 
-    /// <summary>[불확실] 허기의 회복 배율. 탈수와 같은 이유로 −50% → −25%.</summary>
-    public const float StarvingHealScale = 0.75f;
+    // 【허기의 회복 페널티는 넣지 않는다.】
+    // 덕코프의 배고픔은 「체력(스태미나) 회복 −50%」인데, Blob은 스태미나를
+    // 에너지에 합쳤으므로 그대로 옮기면 「굶주리면 에너지가 덜 찬다」가 되어
+    // 자기 자신을 가리킨다. 탈수까지 겹치면 0.3 × 0.5 = 15%만 차서
+    // 빠져나올 수 없는 나선이 된다 — 원본에는 없던 문제다.
+    // 허기의 압박은 이동 −10%와 지속 피해로 충분하다(둘 다 원본 값 그대로).
 
     /// <summary>[확인됨] 허기 최대 중첩. 덕코프 3.</summary>
     public const int StarvingMaxStacks = 3;

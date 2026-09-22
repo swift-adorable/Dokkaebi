@@ -90,24 +90,13 @@ public class SurvivalState
     }
 
     /// <summary>
-    /// 지금 곱해야 할 회복 배율. 부식(StatusEffectState.HealingMultiplier)과
-    /// 같은 자리에 곱한다 — 새 축을 만들지 않는다.
+    /// 지금 에너지가 차는 비율. 탈수면 덕코프대로 30%만 찬다.
+    ///
+    /// 【물부터 마셔야 음식이 제값을 한다.】 두 게이지가 따로 놀지 않고 엮인다.
+    /// 체력(HP) 회복에는 손대지 않는다 — 이 축은 추출 압박용이지 전투 페널티가 아니다.
     /// </summary>
-    public float HealingMultiplier
-    {
-        get
-        {
-            float scale = 1f;
-
-            if (IsDehydrated)
-                scale *= SurvivalTable.DehydratedHealScale;
-
-            if (IsStarving)
-                scale *= SurvivalTable.StarvingHealScale;
-
-            return scale;
-        }
-    }
+    public float EnergyRestoreMultiplier
+        => IsDehydrated ? SurvivalTable.DehydratedEnergyRestoreScale : 1f;
 
     // ── 시간 ──────────────────────────────────────────────────────────
 
@@ -158,11 +147,21 @@ public class SurvivalState
 
     // ── 채우고 비우기 ─────────────────────────────────────────────────
 
-    /// <summary>음료·음식이 채운다. 8단계의 소모품이 쓸 입구다.</summary>
+    /// <summary>
+    /// 음료·음식이 채운다. 8단계의 소모품이 쓸 입구다.
+    ///
+    /// 【배율은 부르기 전의 상태로 정한다.】 물을 먼저 더하고 나서 재면,
+    /// 물과 음식이 한 아이템에 들어 있을 때와 따로 먹을 때의 결과가 달라진다.
+    /// 「마시기 전에 목이 말랐다면 그 끼니는 덜 찬다」가 설명하기 쉽다.
+    /// </summary>
     public void Restore(float waterAmount, float energyAmount)
     {
+        float energyScale = EnergyRestoreMultiplier;
+
         water = Mathf.Clamp(water + Mathf.Max(0f, waterAmount), 0f, maxWater);
-        energy = Mathf.Clamp(energy + Mathf.Max(0f, energyAmount), 0f, maxEnergy);
+
+        energy = Mathf.Clamp(
+            energy + Mathf.Max(0f, energyAmount) * energyScale, 0f, maxEnergy);
 
         ClearStarvationIfFed();
     }

@@ -68,16 +68,10 @@ public class PlayerSurvival : MonoBehaviour
 
         health = GetComponent<Health>();
         loadout = GetComponent<PlayerLoadout>();
-
-        // 회복 배율을 Health에 물린다. 상태이상 배율과 같은 자리에 곱해진다.
-        health.ExternalHealingScale = () => state.HealingMultiplier;
     }
 
     private void OnDestroy()
     {
-        if (health != null)
-            health.ExternalHealingScale = null;
-
         if (instance == this)
             instance = null;
     }
