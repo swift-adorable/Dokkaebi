@@ -337,8 +337,8 @@ public class SkillManager : Singleton<SkillManager>
 
     public bool TryEquipCore(SkillDefinition skill, int coreIndex)
     {
-        // 【자리 검사를 하지 않는다.】 젬은 가방 칸을 쓰지 않는다.
-        // (ItemDefinition.IsSlotless) 핵심 젬을 갈아 끼우면 소켓의 보조 젬까지
+        // 【자리 검사를 하지 않는다.】 젬은 적재에 잡히지 않는다.
+        // (ItemDefinition.IsCargo) 핵심 젬을 갈아 끼우면 소켓의 보조 젬까지
         // 최대 4개가 한꺼번에 돌아오는데, 예전에는 그만큼의 빈 칸이 없으면
         // 교체 자체가 막혔다. 이제 돌아올 곳은 늘 있다.
         return Equip(skill, () => build.TryEquipCore(skill, coreIndex, returned),

@@ -94,7 +94,7 @@ public class PlaytestPanelUI : MonoBehaviour
         UIFactory.CreatePanel("Header", box, UIPalette.Header,
             new Vector2(0f, 0.92f), new Vector2(1f, 1f), UIFactory.RadiusLarge);
 
-        UIFactory.CreateLabel(box, "검증 도구 (개발 빌드 전용)", 32, FontStyle.Bold,
+        UIFactory.CreateLabel(box, "디버그 도구 (개발 빌드 전용)", 32, FontStyle.Bold,
             new Vector2(0.03f, 0.92f), new Vector2(0.75f, 1f), TextAnchor.MiddleLeft);
 
         UIFactory.CreateButton(box, "닫기",
@@ -123,32 +123,47 @@ public class PlaytestPanelUI : MonoBehaviour
     /// **출시 빌드에는 컴파일조차 되지 않는다.** 씬에 놓인 버튼은 그 보장을 못 받는다.
     /// 안전 영역 안에 두므로 노치·홈 인디케이터에도 걸리지 않는다.
     /// </summary>
+    /// <summary>
+    /// 화면 버튼줄의 자리·크기. 【InventoryScreenUI와 같은 값이어야 한다.】
+    /// 두 캔버스가 나뉘어 있어 한쪽만 고치면 줄이 어긋난다.
+    /// </summary>
+    private const float ButtonWidth = 150f;
+    private const float ButtonHeight = 88f;
+    private const float ButtonGap = 10f;
+    private const float ButtonMargin = 10f;
+
+    /// <summary>장비·스킬·패시브 세 개 다음이 이 버튼의 자리다.</summary>
+    private const int SlotFromRight = 3;
+
     private void BuildToggle(Transform safe)
     {
-        Image image = UIFactory.CreatePanel("PlaytestToggle", safe, UIPalette.Warning,
-            Vector2.zero, Vector2.zero, UIFactory.Radius);
+        Image image = UIFactory.CreatePanel("DebugToggle", safe, UIPalette.Warning,
+            Vector2.zero, Vector2.zero, UIFactory.RadiusLarge);
 
         toggle = image.gameObject;
 
-        // 화면 맨 아래 왼쪽 구석. 위쪽은 크레딧·탭·가방 버튼이 쓰고,
-        // 오른쪽 아래는 DASH가 쓴다. 남는 자리는 여기뿐이다.
+        // 【오른쪽 위, 세 버튼 왼쪽에 붙인다.】
+        // 전에는 왼쪽 맨 아래였다. 거기는 가방 화면의 소지 중량 카드 자리라
+        // 겹쳤고, 화면을 열 때마다 감췄다 켰다 해야 했다.
+        // 같은 줄에 두면 「화면을 여는 버튼들」이 한 곳에 모인다.
         var rect = image.rectTransform;
-        rect.anchorMin = new Vector2(0f, 0f);
-        rect.anchorMax = new Vector2(0f, 0f);
-        rect.pivot = new Vector2(0f, 0f);
-        rect.sizeDelta = new Vector2(132f, 62f);
-        rect.anchoredPosition = new Vector2(6f, 6f);
+        rect.anchorMin = Vector2.one;
+        rect.anchorMax = Vector2.one;
+        rect.pivot = Vector2.one;
+        rect.sizeDelta = new Vector2(ButtonWidth, ButtonHeight);
 
-        // 가방 화면의 소지 중량 카드와 같은 구석이라 겹친다.
-        // 가방이 열리면 SetHiddenByScreen이 이 버튼을 감춘다.
+        rect.anchoredPosition = new Vector2(
+            -(ButtonMargin + SlotFromRight * (ButtonWidth + ButtonGap)), -ButtonMargin);
 
         var button = image.gameObject.AddComponent<Button>();
         button.targetGraphic = image;
         button.onClick.AddListener(Toggle);
 
-        UIFactory.CreateOutline(image, UIPalette.Rim, UIFactory.Radius, 2);
+        UIFactory.CreateOutline(image, UIPalette.Rim, UIFactory.RadiusLarge, 2);
 
-        UIFactory.CreateLabel(image.transform, "검증", 26, FontStyle.Bold,
+        // 【이름은 「디버그」.】 「검증」은 QA가 하는 일처럼 읽혀서,
+        // 이것이 개발 빌드에만 있는 도구라는 사실이 드러나지 않았다.
+        UIFactory.CreateLabel(image.transform, "디버그", 28, FontStyle.Bold,
             Vector2.zero, Vector2.one, TextAnchor.MiddleCenter);
     }
 

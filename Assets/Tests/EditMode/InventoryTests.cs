@@ -191,17 +191,32 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 젬도_무게는_그대로_센다()
+        public void 젬은_무게도_잡지_않는다()
         {
-            // 칸과 무게는 별개의 축이다. 칸에서 뺐다고 무게까지 빼지는 않는다.
-            // 무게는 넘어도 담을 수 있으므로(느려질 뿐) 젬이 잠기지는 않는다.
-            var inv = new Inventory(slots: 10, weight: 100f);
+            // 칸과 무게를 따로 두면 「칸은 안 먹는데 무게는 먹는다」처럼
+            // 반쪽만 적용된 상태가 생기고, 그 차이를 유저가 배울 방법이 없다.
+            var inv = new Inventory(slots: 10, weight: 10f);
 
             ItemDefinition gem = Create("gem_fire", ItemKind.SkillGem, weight: 0.5f);
+            ItemDefinition loot = Create("loot", weight: 3f);
 
-            inv.TryAdd(gem, 4);
+            inv.TryAdd(gem, 40);
+            inv.TryAdd(loot, 2);
 
-            Assert.AreEqual(2f, inv.TotalWeight, 0.001f);
+            Assert.AreEqual(6f, inv.TotalWeight, 0.001f, "젬 40개는 무게에 잡히지 않습니다.");
+            Assert.AreEqual(EncumbranceLevel.Normal, inv.Encumbrance,
+                "젬 때문에 과중량이 되면 안 됩니다.");
+        }
+
+        [Test]
+        public void 젬의_낱개_무게는_정의에_그대로_남는다()
+        {
+            // 상세 화면은 「이게 무거운 물건인가」를 여전히 보여 줘야 한다.
+            // 어깨에 안 걸릴 뿐, 물건의 성질이 사라진 것은 아니다.
+            ItemDefinition gem = Create("gem_fire", ItemKind.SkillGem, weight: 0.5f);
+
+            Assert.AreEqual(0.5f, gem.Weight, 0.001f);
+            Assert.AreEqual(0f, gem.WeightCost, 0.001f);
         }
 
         [Test]

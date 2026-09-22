@@ -51,7 +51,12 @@ public class ItemStack
     public bool IsEmpty => Definition == null || Count <= 0;
 
     /// <summary>이 칸의 총 무게.</summary>
-    public float TotalWeight => Definition == null ? 0f : Definition.Weight * Count;
+    /// <summary>
+    /// 어깨에 걸리는 무게. 【젬은 0이다.】 (ItemDefinition.IsCargo — 결정 2-31)
+    /// 낱개 무게(Definition.Weight)는 상세에 그대로 적는다 — 물건의 성질이고,
+    /// 소켓에 끼우기 전까지 "이게 무거운 물건인가"는 여전히 정보다.
+    /// </summary>
+    public float TotalWeight => Definition == null ? 0f : Definition.WeightCost * Count;
 
     /// <summary>이 칸이 차지하는 적재 칸 수.</summary>
     public int TotalSlots => Definition == null ? 0 : Definition.SlotCost;

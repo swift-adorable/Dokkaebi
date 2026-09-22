@@ -1335,15 +1335,16 @@ public partial class InventoryScreenUI : MonoBehaviour
             int captured = i;
             button.onClick.AddListener(() => OnQuickSlotClicked(captured));
 
-            UIFactory.CreateLabel(cell.transform, (i + 1).ToString(), 20, FontStyle.Normal,
-                new Vector2(0.1f, 0.04f), new Vector2(0.9f, 0.34f),
-                TextAnchor.LowerRight, UIPalette.TextDim);
+            // 칸 번호는 왼쪽 위 구석으로. 아래는 이름 띠가 가져간다.
+            UIFactory.CreateLabel(cell.transform, (i + 1).ToString(), 19, FontStyle.Normal,
+                new Vector2(0.06f, 0.70f), new Vector2(0.40f, 0.96f),
+                TextAnchor.UpperLeft, UIPalette.TextDim);
 
             if (empty)
                 continue;
 
             Image glyph = UIFactory.CreatePanel("Glyph", cell.transform, UIPalette.GlyphTint,
-                new Vector2(0.22f, 0.28f), new Vector2(0.78f, 0.80f), radius: 0);
+                new Vector2(0.20f, 0.34f), new Vector2(0.80f, 0.90f), radius: 0);
 
             glyph.raycastTarget = false;
             glyph.preserveAspect = true;
@@ -1358,10 +1359,26 @@ public partial class InventoryScreenUI : MonoBehaviour
                 glyph.sprite = UISprites.Of(UISprites.GlyphFor(stack.Definition.Kind));
             }
 
+            // 【이름이 없어서 무엇을 걸어 뒀는지 알 수 없었다.】
+            // 아트가 없는 지금은 도형이 종류(소모품)까지만 말해 준다.
+            // 회복약인지 해독제인지는 이름을 봐야 안다 — 급할 때 누르는 자리다.
+            Image strip = UIFactory.CreatePanel("NameStrip", cell.transform,
+                UIPalette.NameStrip, new Vector2(0.04f, 0.04f), new Vector2(0.96f, 0.30f),
+                radius: 5);
+
+            strip.raycastTarget = false;
+
+            Text quickName = UIFactory.CreateLabel(strip.transform,
+                stack.Definition.DisplayName, 16, FontStyle.Bold,
+                new Vector2(0.06f, 0f), new Vector2(0.94f, 1f),
+                TextAnchor.MiddleCenter, Color.white);
+
+            ItemCell.WrapName(quickName, 16);
+
             if (stack.Count > 1)
             {
                 UIFactory.CreateBadge(cell.transform, stack.Count.ToString(),
-                    new Vector2(0.50f, 0.66f), new Vector2(0.96f, 0.96f), 20, Color.white);
+                    new Vector2(0.54f, 0.68f), new Vector2(0.96f, 0.97f), 20, Color.white);
             }
         }
     }
