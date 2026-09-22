@@ -703,6 +703,10 @@ public partial class InventoryScreenUI : MonoBehaviour
         if (GameManager.HasInstance)
             GameManager.Instance.OpenSkill();
 
+        // 생존 게이지와 소지 중량 카드가 좌하단에서 겹친다.
+        // 가방을 열면 소지 중량이 그 자리를 가져간다.
+        SurvivalHudUI.SetHiddenByScreen(true);
+
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         // 검증 패널은 이 화면 뒤에 있다. 켜져 있으면 글자가 비쳐 보인다.
         PlaytestPanelUI.SetHiddenByScreen(true);
@@ -732,6 +736,11 @@ public partial class InventoryScreenUI : MonoBehaviour
 
         if (GameManager.HasInstance)
             GameManager.Instance.CloseSkill();
+
+        SurvivalHudUI.SetHiddenByScreen(false);
+
+        // 파밍 중이었다면 오른쪽 전리품 패널도 같이 닫힌다. 둘은 한 벌이다.
+        ExchangeWindowUI.CloseIfOpen();
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         PlaytestPanelUI.SetHiddenByScreen(false);
@@ -1657,5 +1666,17 @@ public partial class InventoryScreenUI : MonoBehaviour
     {
         if (instance != null && instance.IsOpen)
             instance.Refresh();
+    }
+
+    /// <summary>화면이 이미 있는가. 열려 있는지와는 다르다.</summary>
+    public static bool HasInstance => instance != null;
+
+    public static InventoryScreenUI Instance => instance;
+
+    /// <summary>열려 있을 때만 알림을 띄운다. 전리품 패널이 실패를 알릴 때 쓴다.</summary>
+    public static void ShowToastIfOpen(string message)
+    {
+        if (instance != null && instance.IsOpen)
+            instance.ShowToast(message);
     }
 }
