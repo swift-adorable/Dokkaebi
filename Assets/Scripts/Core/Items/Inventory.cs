@@ -88,7 +88,7 @@ public class Inventory
     /// 담을 수 있는지. 칸 수만 본다. 무게는 막지 않는다.
     ///
     /// 겹칠 수 있는 아이템은 기존 칸에 들어가므로 칸을 쓰지 않을 수 있다.
-    /// 젬은 칸을 쓰지 않으므로(ItemDefinition.IsSlotless) 늘 담을 수 있다.
+    /// 젬은 적재에 잡히지 않으므로(ItemDefinition.IsCargo) 늘 담을 수 있다.
     /// </summary>
     public bool CanAdd(ItemDefinition definition, int count = 1)
     {

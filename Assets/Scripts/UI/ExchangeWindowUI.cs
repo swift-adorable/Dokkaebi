@@ -253,10 +253,10 @@ public class ExchangeWindowUI : MonoBehaviour
 
         titleLabel.text = otherName;
 
-        // 젬은 칸을 쓰지 않아 격자에 나오지 않는다(2-31). 그래서 개수만 따로 적는다 —
+        // 젬은 적재에 잡히지 않아 격자에 나오지 않는다(2-31). 그래서 개수만 따로 적는다 —
         // 적지 않으면 전리품에서 젬을 주웠을 때 왼쪽에 아무 변화가 없어
         // "주워지긴 한 건가"를 알 수 없다.
-        int gems = CountSlotless(bag);
+        int gems = CountGems(bag);
 
         bagTitle.text = gems > 0
             ? $"가방 ({bag.UsedSlots}/{bag.SlotCapacity})    젬 {gems}"
@@ -281,13 +281,13 @@ public class ExchangeWindowUI : MonoBehaviour
         RefreshFooter(bag);
     }
 
-    private static int CountSlotless(Inventory bag)
+    private static int CountGems(Inventory bag)
     {
         int count = 0;
 
         for (int i = 0; i < bag.Stacks.Count; i++)
         {
-            if (bag.Stacks[i]?.Definition != null && bag.Stacks[i].Definition.IsSlotless)
+            if (bag.Stacks[i]?.Definition != null && !bag.Stacks[i].Definition.IsCargo)
                 count += bag.Stacks[i].Count;
         }
 
@@ -298,14 +298,14 @@ public class ExchangeWindowUI : MonoBehaviour
     {
         UIFactory.ClearChildren(bagList.Content);
 
-        // 【젬은 여기 보이지 않는다.】 젬은 칸을 쓰지 않으므로(2-31)
+        // 【젬은 여기 보이지 않는다.】 젬은 적재에 잡히지 않으므로(2-31)
         // 「가방에 자리가 있나」를 재는 이 격자에 섞이면 칸 수가 어긋나 보인다.
         // 주운 젬은 스킬 화면에서 확인한다.
         var stacks = new System.Collections.Generic.List<ItemStack>(bag.Stacks.Count);
 
         for (int i = 0; i < bag.Stacks.Count; i++)
         {
-            if (bag.Stacks[i]?.Definition != null && !bag.Stacks[i].Definition.IsSlotless)
+            if (bag.Stacks[i]?.Definition != null && bag.Stacks[i].Definition.IsCargo)
                 stacks.Add(bag.Stacks[i]);
         }
 
