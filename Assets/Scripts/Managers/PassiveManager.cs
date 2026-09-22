@@ -35,8 +35,12 @@ public class PassiveManager : Singleton<PassiveManager>
     /// <summary>배운 패시브.</summary>
     public PassiveState State => state;
 
-    /// <summary>패시브 트리. 로드 실패 시 null일 수 있다.</summary>
-    public PassiveTree Tree => tree;
+    /// <summary>
+    /// 패시브 트리. 인스펙터가 비어 있으면 처음 읽을 때 Resources에서 불러온다.
+    /// 【Start를 기다리지 않는다.】 EnsureInstance()로 갓 만들어진 매니저를
+    /// 같은 프레임에 UI가 읽어도 트리가 나와야 하기 때문이다.
+    /// </summary>
+    public PassiveTree Tree => tree != null ? tree : (tree = PassiveTree.Load());
 
     /// <summary>계정 레벨.</summary>
     public int AccountLevel

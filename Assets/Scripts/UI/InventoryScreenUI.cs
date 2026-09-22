@@ -124,6 +124,14 @@ public partial class InventoryScreenUI : MonoBehaviour
 
     private static InventoryScreenUI instance;
 
+    /// <summary>
+    /// 오른쪽 위 세 버튼(장비·스킬·패시브)을 가릴 이유가 있는가.
+    ///
+    /// 버리기 팝업·검증 패널처럼 화면을 덮는 것이 떠 있을 때 켠다.
+    /// 세 버튼은 패널 밖에 있어서, 덮개를 깔아도 그 위에 그대로 떠 있었다.
+    /// </summary>
+    private bool hudSuppressed;
+
     private GameObject panel;
 
     /// <summary>끼울 수 있는 젬이 있을 때 가방 버튼에 붙는 점.</summary>
@@ -707,11 +715,7 @@ public partial class InventoryScreenUI : MonoBehaviour
         if (quickBar != null)
             quickBar.gameObject.SetActive(true);
 
-        for (int i = 0; i < hudButtons.Count; i++)
-        {
-            if (hudButtons[i] != null)
-                hudButtons[i].gameObject.SetActive(true);
-        }
+        RefreshHudVisibility();
 
         RefreshToggle();
         RefreshQuickSlots();
@@ -769,11 +773,7 @@ public partial class InventoryScreenUI : MonoBehaviour
         // 【패시브는 화면을 통째로 쓴다.】
         // 트리는 접으면 볼 수가 없다. 위의 화면 버튼과 아래줄까지 접고,
         // 나가는 길은 패널 오른쪽 위의 「닫기」 하나로 둔다.
-        for (int i = 0; i < hudButtons.Count; i++)
-        {
-            if (hudButtons[i] != null)
-                hudButtons[i].gameObject.SetActive(!passive);
-        }
+        RefreshHudVisibility();
 
         footer.gameObject.SetActive(!passive);
 
@@ -819,12 +819,41 @@ public partial class InventoryScreenUI : MonoBehaviour
         RefreshToggle();
     }
 
+    /// <summary>
+    /// 세 버튼을 보일지 한 곳에서 정한다.
+    /// 가릴 이유는 둘 — 패시브 화면(화면을 통째로 쓴다)과 덮는 팝업이다.
+    /// 흩어 두면 한쪽이 켠 것을 다른 쪽이 모르고 도로 켠다.
+    /// </summary>
+    private void RefreshHudVisibility()
+    {
+        bool show = tab != Tab.Passive && !hudSuppressed;
+
+        for (int i = 0; i < hudButtons.Count; i++)
+        {
+            if (hudButtons[i] != null)
+                hudButtons[i].gameObject.SetActive(show);
+        }
+    }
+
+    /// <summary>
+    /// 화면 밖(검증 패널 등)에서 세 버튼을 잠시 감출 때 부른다.
+    /// 인스턴스가 없으면 아직 버튼도 없으므로 그냥 돌아간다.
+    /// </summary>
+    public static void SetHudSuppressed(bool value)
+    {
+        if (instance == null)
+            return;
+
+        instance.hudSuppressed = value;
+        instance.RefreshHudVisibility();
+    }
+
     private void RefreshCredits()
     {
         if (creditLabel == null)
             return;
 
-        int amount = PassiveManager.HasInstance ? PassiveManager.Instance.Credits : 0;
+        int amount = PassiveManager.EnsureInstance().Credits;
 
         creditLabel.text = $"₡ {amount:N0}";
     }

@@ -30,7 +30,11 @@ public class PlaytestPanelUI : MonoBehaviour
         ("각인 24종",     PlaytestActions.GiveAllImprints),
         ("검증용 젬 4종", PlaytestActions.GiveChecklistGems),
         ("핵심 젬 전부",  PlaytestActions.GiveCoreGems),
-        ("보조 젬",    PlaytestActions.GiveSupportGems),
+        ("보조 젬",       PlaytestActions.GiveSupportGems),
+        ("발동 젬",       PlaytestActions.GiveMetaGems),
+        ("전령 젬",       PlaytestActions.GiveHeraldGems),
+        ("각성 Lv +1",    PlaytestActions.RaiseAwakeningLevel),
+        ("계정 Lv +1",    PlaytestActions.RaiseAccountLevel),
         ("겹치는 재료",   PlaytestActions.GiveStackables),
         ("가방 채우기",   PlaytestActions.FillBag),
         ("가방 비우기",   PlaytestActions.ClearBag),
@@ -95,7 +99,7 @@ public class PlaytestPanelUI : MonoBehaviour
 
         UIFactory.CreateButton(box, "닫기",
             new Vector2(0.79f, 0.928f), new Vector2(0.97f, 0.992f),
-            UIPalette.Subtle, () => panel.SetActive(false), 26, UIFactory.Radius);
+            UIPalette.Subtle, () => SetOpen(false), 26, UIFactory.Radius);
 
         BuildButtons(box);
 
@@ -173,7 +177,21 @@ public class PlaytestPanelUI : MonoBehaviour
         if (panel == null)
             return;
 
-        panel.SetActive(!panel.activeSelf);
+        SetOpen(!panel.activeSelf);
+    }
+
+    /// <summary>
+    /// 패널을 켜고 끈다. 【화면 버튼도 함께 치운다.】
+    ///
+    /// 장비·스킬·패시브 세 버튼은 가방 캔버스(1000) 밖의 화면 UI라
+    /// 이 패널(900) 위로 그대로 떠올라 오른쪽 위 칸을 덮었다.
+    /// 여기 한 곳에서만 여닫아, 어느 경로로 닫아도 버튼이 되돌아온다.
+    /// </summary>
+    private void SetOpen(bool open)
+    {
+        panel.SetActive(open);
+
+        InventoryScreenUI.SetHudSuppressed(open);
     }
 
     /// <summary>
@@ -190,8 +208,8 @@ public class PlaytestPanelUI : MonoBehaviour
         if (instance == null)
             return;
 
-        if (instance.panel != null && hidden)
-            instance.panel.SetActive(false);
+        if (instance.panel != null && hidden && instance.panel.activeSelf)
+            instance.SetOpen(false);
 
         if (instance.toggle != null)
             instance.toggle.SetActive(!hidden);

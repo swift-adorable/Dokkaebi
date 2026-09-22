@@ -108,6 +108,18 @@ MonoBehaviour:
   - {fileID: 11400000, guid: a6d038790b6a14c60a076f4dfe61725a, type: 2}
   - {fileID: 11400000, guid: 80273311e66594c6daa373df15b452d5, type: 2}
   - {fileID: 11400000, guid: ff6ddfcd1653349dbb3264e2142d4921, type: 2}
+  metaGems:
+  - {fileID: 11400000, guid: 768f7a4db25184b71bf75f3e203591e4, type: 2}
+  - {fileID: 11400000, guid: 5b82e5c1df74f40c39a6fced027e317e, type: 2}
+  - {fileID: 11400000, guid: 9a45911447e28461eb77cc9f02cde00f, type: 2}
+  - {fileID: 11400000, guid: 88b7734875c044dac8c222218c6b909c, type: 2}
+  - {fileID: 11400000, guid: 3a5ab65f8458b4ca1b30e3fe6719779a, type: 2}
+  heraldGems:
+  - {fileID: 11400000, guid: 9b80593a314ed4045a35d83f92be4b1c, type: 2}
+  - {fileID: 11400000, guid: d44042a7447fb4b9f951a6db43e3f696, type: 2}
+  - {fileID: 11400000, guid: bfa6a205b58024f93851f49047a0eb13, type: 2}
+  - {fileID: 11400000, guid: bf046f06f8eee4c12a5a41c9ffb22f5d, type: 2}
+  - {fileID: 11400000, guid: 7337fe81c4fdd4a9e82f98388073afa2, type: 2}
   checklistGems:
   - {fileID: 11400000, guid: ea02ccdd31fb84320941d7da8d4b6f7b, type: 2}
   - {fileID: 11400000, guid: d610417b45a774906979bfa2d760cec6, type: 2}

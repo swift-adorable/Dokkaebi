@@ -350,6 +350,8 @@ public static class UIFactory
         Transform parent, Vector2 anchorMin, Vector2 anchorMax,
         int min, int max, int value)
     {
+        const float HandleDiameter = 56f;
+
         RectTransform root = CreateRegion("Slider", parent, anchorMin, anchorMax);
 
         var slider = root.gameObject.AddComponent<Slider>();
@@ -363,14 +365,27 @@ public static class UIFactory
         Image fill = CreatePanel("Fill", fillArea, UIPalette.Action,
             Vector2.zero, Vector2.one);
 
+        // 【손잡이가 슬라이더 밖으로 나가지 않게 한다.】
+        // 미끄럼 영역을 0~1로 두면 최댓값에서 손잡이 중심이 오른쪽 끝에 붙어
+        // 반지름만큼 밖으로 삐져나간다. 옆에 붙은 입력칸을 덮던 원인이다.
+        // 좌우를 반지름만큼 들여서, 손잡이는 어느 값에서도 안쪽에 머문다.
+        //
+        // 세로도 손잡이 지름으로 고정한다. Slider가 손잡이의 세로 앵커를
+        // 0~1로 덮어쓰기 때문에, 영역이 높으면 손잡이가 길쭉해져 원이 안 된다.
         RectTransform handleArea = CreateRegion("Handle Slide Area", root,
-            Vector2.zero, Vector2.one);
+            new Vector2(0f, 0.5f), new Vector2(1f, 0.5f));
+
+        handleArea.sizeDelta = new Vector2(-HandleDiameter, HandleDiameter);
 
         Image handle = CreatePanel("Handle", handleArea, UIPalette.SlotSelected,
-            Vector2.zero, Vector2.one);
+            Vector2.zero, Vector2.one, radius: 0);
+
+        // 동그란 손잡이. 반지름이 지름의 절반인 둥근 사각형은 곧 원이다.
+        handle.sprite = UISprites.Rounded(Mathf.RoundToInt(HandleDiameter * 0.5f));
+        handle.type = Image.Type.Simple;
 
         var handleRect = handle.rectTransform;
-        handleRect.sizeDelta = new Vector2(56f, 0f);
+        handleRect.sizeDelta = new Vector2(HandleDiameter, 0f);
 
         slider.fillRect = fill.rectTransform;
         slider.handleRect = handleRect;

@@ -44,6 +44,11 @@ public partial class InventoryScreenUI
         discardAmount = stack.Count;
 
         BuildDiscardPopup();
+
+        // 【덮개 위로 버튼이 솟는 것을 막는다.】
+        // 세 버튼은 패널 밖에 있어서 덮개가 가리지 못한다.
+        hudSuppressed = true;
+        RefreshHudVisibility();
     }
 
     private void CloseDiscardPopup()
@@ -56,6 +61,9 @@ public partial class InventoryScreenUI
         discardSlider = null;
         discardField = null;
         discardCountLabel = null;
+
+        hudSuppressed = false;
+        RefreshHudVisibility();
     }
 
     // ── 구성 ──────────────────────────────────────────────────────────
@@ -130,13 +138,13 @@ public partial class InventoryScreenUI
             UIPalette.TextAccent);
 
         discardSlider = UIFactory.CreateIntSlider(box,
-            new Vector2(0.05f, 0.38f), new Vector2(0.70f, 0.56f),
+            new Vector2(0.05f, 0.38f), new Vector2(0.68f, 0.56f),
             0, discardTarget.Count, discardAmount);
 
         discardSlider.onValueChanged.AddListener(v => SyncDiscardWidgets((int)v));
 
         discardField = UIFactory.CreateIntField(box,
-            new Vector2(0.73f, 0.38f), new Vector2(0.95f, 0.56f), discardAmount);
+            new Vector2(0.74f, 0.38f), new Vector2(0.95f, 0.56f), discardAmount);
 
         // onEndEdit이 아니라 onValueChanged를 쓴다 — 치는 동안 슬라이더가 따라와야
         // "지금 몇 개를 버리려는 중인지"가 한눈에 보인다.
