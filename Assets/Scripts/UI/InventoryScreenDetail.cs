@@ -53,6 +53,37 @@ public partial class InventoryScreenUI
 
     // ── 열고 닫기 ─────────────────────────────────────────────────────
 
+    /// <summary>
+    /// 바깥(전리품·창고 패널)에서 상세를 연다.
+    /// 그 칸의 물건은 이미 가방으로 옮겨진 뒤여야 한다.
+    /// </summary>
+    public static void OpenDetailFor(ItemStack stack)
+    {
+        if (instance == null || stack?.Definition == null)
+            return;
+
+        if (!instance.IsOpen)
+            instance.Open((int)Tab.Bag);
+
+        instance.OpenItemDetail(stack);
+    }
+
+    /// <summary>
+    /// 바깥에서 「장착」을 눌렀다. 들어갈 자리는 여기서 고른다 —
+    /// 각인만 두 자리라 부르는 쪽이 알 필요가 없다.
+    /// </summary>
+    public static void EquipFromOutside(ItemStack stack)
+    {
+        if (instance == null || stack?.Definition is not EquipmentDefinition definition)
+            return;
+
+        EquipmentLoadout loadout = PlayerInventory.EnsureInstance().Loadout;
+
+        instance.EquipFromDetail(stack, ResolveEquipSlot(loadout, definition));
+
+        instance.Refresh();
+    }
+
     /// <summary>가방의 아이템, 또는 착용 중인 장비의 상세를 연다.</summary>
     private void OpenItemDetail(ItemStack stack, EquipmentSlot? equipSlot = null)
     {

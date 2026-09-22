@@ -19,7 +19,7 @@ public static class UISprites
     private static readonly Dictionary<int, Sprite> solidCache = new();
     private static readonly Dictionary<int, Sprite> outlineCache = new();
 
-    private static Sprite sheenCache;
+    private static readonly Dictionary<int, Sprite> sheenCache = new();
 
     /// <summary>
     /// 위에서 아래로 사라지는 흰 띠. 【유리의 광택이다.】
@@ -28,44 +28,87 @@ public static class UISprites
     /// 배경 흐림(blur)은 셰이더가 있어야 하지만, 광택과 테두리만으로도
     /// 「유리판」이라는 인상의 대부분이 만들어진다.
     ///
-    /// 세로로만 변하므로 가로 1픽셀이면 충분하다. 9-슬라이스로 가로를 늘린다.
+    /// 【위 모서리를 스프라이트가 직접 깎는다.】
+    /// 처음에는 Mask 컴포넌트로 잘라 냈는데, Mask는 스텐실 버퍼를 쓴다 —
+    /// 패널마다 그리기 호출이 둘씩 늘고 배칭이 끊긴다. 유리판 여섯 개면
+    /// 드로우콜 열몇 개를 광택 하나에 쓰는 셈이라 모바일에서 낼 값이 아니다.
+    ///
+    /// 대신 **가로만 9-슬라이스**한다(border의 위아래를 0으로 둔다).
+    /// 세로는 늘어나지 않으므로 그러데이션이 그대로 보존되고,
+    /// 위 두 모서리의 둥근 모양도 스프라이트에 그려 둔 채로 남는다.
+    /// 컴포넌트는 Image 하나뿐 — 배칭도 끊기지 않는다.
     /// </summary>
-    public static Sprite Sheen()
+    public static Sprite Sheen(int radius)
     {
-        if (sheenCache != null)
-            return sheenCache;
+        radius = Mathf.Clamp(radius, 1, 64);
 
-        const int Height = 64;
+        if (sheenCache.TryGetValue(radius, out Sprite cached) && cached != null)
+            return cached;
 
-        var texture = new Texture2D(1, Height, TextureFormat.RGBA32, mipChain: false)
+        int width = radius * 2 + 1;
+        const int Height = 96;
+
+        var texture = new Texture2D(width, Height, TextureFormat.RGBA32, mipChain: false)
         {
             filterMode = FilterMode.Bilinear,
             wrapMode = TextureWrapMode.Clamp,
             hideFlags = HideFlags.HideAndDontSave
         };
 
-        var pixels = new Color32[Height];
+        var pixels = new Color32[width * Height];
 
         for (int y = 0; y < Height; y++)
         {
             // y가 0이 아래, Height-1이 위다. 위쪽이 밝다.
             float t = y / (float)(Height - 1);
 
-            // 위 1/3에만 몰아 준다. 전체에 깔면 그냥 밝은 판이 되어 버린다.
-            float a = Mathf.Pow(Mathf.Clamp01((t - 0.55f) / 0.45f), 1.6f);
+            // 위쪽에 몰아 준다. 전체에 깔면 그냥 밝은 판이 되어 버린다.
+            float gradient = Mathf.Pow(t, 2.2f);
 
-            pixels[y] = new Color32(255, 255, 255, (byte)(a * 255f));
+            for (int x = 0; x < width; x++)
+            {
+                // 위 두 모서리만 깎는다. 아래는 그러데이션이 이미 0이라 각져도 안 보인다.
+                float corner = TopCornerCoverage(x, y, width, Height, radius);
+
+                pixels[y * width + x] =
+                    new Color32(255, 255, 255, (byte)(gradient * corner * 255f));
+            }
         }
 
         texture.SetPixels32(pixels);
         texture.Apply(updateMipmaps: false);
 
-        sheenCache = Sprite.Create(texture, new Rect(0, 0, 1, Height),
-            new Vector2(0.5f, 0.5f), 100f, 0, SpriteMeshType.FullRect);
+        var sprite = Sprite.Create(
+            texture,
+            new Rect(0, 0, width, Height),
+            new Vector2(0.5f, 0.5f),
+            pixelsPerUnit: 100f,
+            extrude: 0,
+            meshType: SpriteMeshType.FullRect,
+            // 가로만 자른다 — 위아래를 0으로 두어 세로 그러데이션을 지킨다.
+            border: new Vector4(radius, 0f, radius, 0f));
 
-        sheenCache.hideFlags = HideFlags.HideAndDontSave;
+        sprite.hideFlags = HideFlags.HideAndDontSave;
 
-        return sheenCache;
+        sheenCache[radius] = sprite;
+
+        return sprite;
+    }
+
+    /// <summary>위쪽 두 모서리만 둥글게. 아래쪽은 그대로 둔다.</summary>
+    private static float TopCornerCoverage(int x, int y, int width, int height, int radius)
+    {
+        int top = height - 1;
+
+        if (y < top - radius)
+            return 1f;
+
+        float cx = x < radius ? radius : x > width - 1 - radius ? width - 1 - radius : x;
+        float cy = top - radius;
+
+        float distance = Mathf.Sqrt((x - cx) * (x - cx) + (y - cy) * (y - cy));
+
+        return Mathf.Clamp01(radius - distance + 0.5f);
     }
 
     /// <summary>속이 찬 둥근 사각형. 패널·버튼·칸의 바탕이다.</summary>

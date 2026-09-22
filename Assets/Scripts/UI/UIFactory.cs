@@ -180,6 +180,12 @@ public static class UIFactory
     /// 켜고 UI 셰이더에서 화면을 다시 샘플링해야 한다. 모바일에서 매 프레임
     /// 화면 복사가 생기므로 비용을 재 보고 따로 결정한다. (Survival 7절과 별개)
     /// </summary>
+    /// <summary>
+    /// 광택의 세기. 【한 곳에서만 고친다.】
+    /// 0.12에서 「띠」로 보이기 시작하면 낮춘다.
+    /// </summary>
+    private const float SheenAlpha = 0.10f;
+
     public static Image CreateGlass(
         string name, Transform parent, Color tint,
         Vector2 anchorMin, Vector2 anchorMax, int radius = RadiusLarge,
@@ -197,45 +203,28 @@ public static class UIFactory
     /// <summary>
     /// 위쪽 모서리에 맺히는 빛. 유리판 위에만 깐다.
     ///
-    /// 마스크를 쓰지 않고 같은 둥근 사각형으로 잘라 내는 이유 —
-    /// RectMask2D는 사각으로만 자른다. 모서리에서 광택이 네모나게 튀어나온다.
+    /// 【Image 하나로 끝낸다.】 Mask로 모서리를 자르면 스텐실 버퍼를 써서
+    /// 패널마다 그리기 호출이 둘씩 늘고 배칭이 끊긴다. 광택 하나에
+    /// 낼 값이 아니다. 모서리는 스프라이트가 직접 깎는다 (UISprites.Sheen).
+    ///
+    /// 판의 위쪽 절반에만 깔되, 그 안에서 다시 위로 몰린 그러데이션이라
+    /// 실제로 밝은 것은 맨 위 한 줌이다. 【띠의 끝이 보이면 실패다.】
     /// </summary>
     private static void CreateSheen(Image body, int radius)
     {
-        GameObject sheenObject = CreateChild("Sheen", body.transform);
+        GameObject sheen = CreateChild("Sheen", body.transform);
 
-        var rect = sheenObject.GetComponent<RectTransform>();
-        rect.anchorMin = Vector2.zero;
+        var rect = sheen.GetComponent<RectTransform>();
+        rect.anchorMin = new Vector2(0f, 0.5f);
         rect.anchorMax = Vector2.one;
         rect.offsetMin = Vector2.zero;
         rect.offsetMax = Vector2.zero;
 
-        // 둥근 바탕을 한 장 더 깔고 그 위에 세로 그러데이션을 얹는다.
-        // 바탕이 모서리를 잘라 주므로 광택도 같은 모양으로 둥글어진다.
-        var mask = sheenObject.AddComponent<Image>();
-        mask.sprite = UISprites.Rounded(radius);
-        mask.type = Image.Type.Sliced;
-        mask.pixelsPerUnitMultiplier = 1f;
-        // 알파는 1로 둔다. Mask는 알파로 스텐실을 자르므로 흐리면 모서리가 뭉갠다.
-        // 실제로 그려지지는 않는다 — showMaskGraphic이 꺼져 있다.
-        mask.color = Color.white;
-        mask.raycastTarget = false;
-
-        var clip = sheenObject.AddComponent<Mask>();
-        clip.showMaskGraphic = false;
-
-        GameObject gradient = CreateChild("Gradient", sheenObject.transform);
-
-        var gradientRect = gradient.GetComponent<RectTransform>();
-        gradientRect.anchorMin = Vector2.zero;
-        gradientRect.anchorMax = Vector2.one;
-        gradientRect.offsetMin = Vector2.zero;
-        gradientRect.offsetMax = Vector2.zero;
-
-        var image = gradient.AddComponent<Image>();
-        image.sprite = UISprites.Sheen();
-        image.type = Image.Type.Simple;
-        image.color = new Color(1f, 1f, 1f, 0.12f);
+        var image = sheen.AddComponent<Image>();
+        image.sprite = UISprites.Sheen(radius);
+        image.type = Image.Type.Sliced;
+        image.pixelsPerUnitMultiplier = 1f;
+        image.color = new Color(1f, 1f, 1f, SheenAlpha);
         image.raycastTarget = false;
     }
 
