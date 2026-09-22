@@ -40,6 +40,8 @@ public static class PlaytestCatalogBuilder
                  "Imprints/imp_feather_t3", "Imprints/imp_precision_t3"),
             Gems(SkillCategory.Core),
             Gems(SkillCategory.Support),
+            Gems(SkillCategory.Meta),
+            Gems(SkillCategory.Persistent),
             Pick("Gems/gem_core_frost", "Gems/gem_core_laceration",
                  "Gems/gem_sup_deep_cuts", "Gems/gem_sup_far_shot"),
             One("Loot/scrap_metal"),
@@ -53,7 +55,8 @@ public static class PlaytestCatalogBuilder
         Debug.Log($"[Playtest] 검증 카탈로그 생성 — "
                   + $"티어1 {catalog.StarterKit.Count} · 티어6 {catalog.EndgameKit.Count} · "
                   + $"무기 {catalog.Weapons.Count} · 각인 {catalog.Imprints.Count} · "
-                  + $"Core {catalog.CoreGems.Count} · Support {catalog.SupportGems.Count}");
+                  + $"핵심 {catalog.CoreGems.Count} · 보조 {catalog.SupportGems.Count} · "
+                  + $"발동 {catalog.MetaGems.Count} · 전령 {catalog.HeraldGems.Count}");
     }
 
     private static ItemDefinition One(string path)

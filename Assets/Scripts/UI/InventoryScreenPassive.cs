@@ -27,16 +27,19 @@ public partial class InventoryScreenUI
         PassiveManager manager = PassiveManager.EnsureInstance();
         PassiveTree tree = manager.Tree;
 
+        // 【머리글을 먼저 그린다.】 트리가 없을 때도 「닫기」는 있어야 한다.
+        // 예전에는 안내문만 그리고 돌아가서, 이 화면에 들어오면 나갈 길이 없었다.
+        DrawPassiveHeader(manager);
+
         if (tree == null || tree.Count == 0)
         {
             UIFactory.CreateLabel(rightContent,
                 "패시브 트리 에셋이 없습니다.\n메뉴 Blob > Passive > 패시브 에셋 생성 을 실행하십시오.",
-                28, FontStyle.Normal, Vector2.zero, Vector2.one, TextAnchor.MiddleCenter,
-                UIPalette.TextDim);
+                28, FontStyle.Normal, Vector2.zero, new Vector2(1f, HeaderLine),
+                TextAnchor.MiddleCenter, UIPalette.TextDim);
             return;
         }
 
-        DrawPassiveHeader(manager);
         DrawBranchTabs(manager, tree);
 
         // 좌우 바깥 여백은 rightContent가 이미 들여 놨다.

@@ -81,6 +81,54 @@ public static class PlaytestActions
     public static string GiveChecklistGems()
         => Catalog == null ? NoCatalog : Give(Catalog.ChecklistGems, "검증용 젬");
 
+    public static string GiveMetaGems()
+        => Catalog == null ? NoCatalog : Give(Catalog.MetaGems, "발동 젬");
+
+    public static string GiveHeraldGems()
+        => Catalog == null ? NoCatalog : Give(Catalog.HeraldGems, "전령 젬");
+
+    // ── 레벨 ──────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// 각성 레벨을 한 칸 올린다. 【소켓이 열리는 것을 보려고 쓴다.】
+    ///
+    /// Level을 직접 밀어 넣지 않고 모자란 경험치를 그대로 채운다.
+    /// 실제 레벨업 경로(AddXP → EnqueueLevelUp → SocketUnlockTable)를 똑같이 타야
+    /// 「검증에서는 열렸는데 게임에서는 안 열린다」가 생기지 않는다.
+    /// </summary>
+    public static string RaiseAwakeningLevel()
+    {
+        if (!PlayerStats.HasInstance)
+            return "PlayerStats가 없습니다. 레이드 중에만 올릴 수 있습니다.";
+
+        PlayerStats stats = PlayerStats.Instance;
+
+        int before = stats.Level;
+
+        stats.AddXP(stats.RequiredXP);
+
+        string opened = SocketUnlockTable.DescribeUnlock(stats.Level);
+
+        string message = $"각성 Lv.{before} → Lv.{stats.Level}";
+
+        return string.IsNullOrEmpty(opened) ? message : $"{message} — {opened} 개방";
+    }
+
+    /// <summary>
+    /// 계정 레벨을 한 칸 올린다. 패시브 해금 조건이 이것이다.
+    /// 각성과 달리 런과 무관한 영구 축이라 그냥 올린다.
+    /// </summary>
+    public static string RaiseAccountLevel()
+    {
+        PassiveManager manager = PassiveManager.EnsureInstance();
+
+        int before = manager.AccountLevel;
+
+        manager.AccountLevel = before + 1;
+
+        return $"계정 Lv.{before} → Lv.{manager.AccountLevel}";
+    }
+
     /// <summary>무게 상한의 1.6배까지 채운다. 「움직일 수 없음」 단계까지 간다.</summary>
     public static string FillBag()
     {

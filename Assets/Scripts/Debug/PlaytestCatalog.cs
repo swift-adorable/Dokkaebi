@@ -28,6 +28,8 @@ public class PlaytestCatalog : ScriptableObject
     [SerializeField] private List<ItemDefinition> keyImprints = new();
     [SerializeField] private List<ItemDefinition> coreGems = new();
     [SerializeField] private List<ItemDefinition> supportGems = new();
+    [SerializeField] private List<ItemDefinition> metaGems = new();
+    [SerializeField] private List<ItemDefinition> heraldGems = new();
     [SerializeField] private List<ItemDefinition> checklistGems = new();
 
     [Header("과중량 유발")]
@@ -43,6 +45,12 @@ public class PlaytestCatalog : ScriptableObject
     public IReadOnlyList<ItemDefinition> KeyImprints => keyImprints;
     public IReadOnlyList<ItemDefinition> CoreGems => coreGems;
     public IReadOnlyList<ItemDefinition> SupportGems => supportGems;
+
+    /// <summary>발동 젬(Meta). 조건이 차면 저절로 터진다.</summary>
+    public IReadOnlyList<ItemDefinition> MetaGems => metaGems;
+
+    /// <summary>전령 젬(Persistent). 유지형, 동시 1개.</summary>
+    public IReadOnlyList<ItemDefinition> HeraldGems => heraldGems;
     public IReadOnlyList<ItemDefinition> ChecklistGems => checklistGems;
     public ItemDefinition BulkMaterial => bulkMaterial;
     public IReadOnlyList<ItemDefinition> Stackables => stackables;
@@ -54,7 +62,8 @@ public class PlaytestCatalog : ScriptableObject
         List<ItemDefinition> starter, List<ItemDefinition> endgame,
         List<ItemDefinition> weaponList, List<ItemDefinition> imprintList,
         List<ItemDefinition> keyImprintList, List<ItemDefinition> cores,
-        List<ItemDefinition> supports, List<ItemDefinition> checklist,
+        List<ItemDefinition> supports, List<ItemDefinition> metas,
+        List<ItemDefinition> heralds, List<ItemDefinition> checklist,
         ItemDefinition bulk, List<ItemDefinition> stackableList)
     {
         starterKit = starter;
@@ -64,6 +73,8 @@ public class PlaytestCatalog : ScriptableObject
         keyImprints = keyImprintList;
         coreGems = cores;
         supportGems = supports;
+        metaGems = metas;
+        heraldGems = heralds;
         checklistGems = checklist;
         bulkMaterial = bulk;
         stackables = stackableList;
