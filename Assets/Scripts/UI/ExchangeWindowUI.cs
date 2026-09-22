@@ -174,6 +174,8 @@ public class ExchangeWindowUI : MonoBehaviour
 
         closing = true;
 
+        ItemActionMenu.Close();
+
         panel.SetActive(false);
 
         // 다 집었으면 시체를 정리한다. 남아 있으면 그대로 두어
@@ -240,6 +242,9 @@ public class ExchangeWindowUI : MonoBehaviour
         takeAllButton.interactable = !other.IsEmpty;
 
         // 칸 크기를 픽셀로 환산하려면 실제 크기가 확정되어 있어야 한다.
+        // 다시 그리면 차림표가 가리키던 칸이 사라진다.
+        ItemActionMenu.Close();
+
         Canvas.ForceUpdateCanvases();
 
         DrawGrid();
@@ -266,32 +271,105 @@ public class ExchangeWindowUI : MonoBehaviour
 
             int captured = i;
 
-            // 【한 번 누르면 줍는다.】 상세를 거치지 않는다.
-            // 왼쪽 가방에서는 상세가 뜨지만, 여기 있는 것은 아직 내 물건이
-            // 아니라서 「장착·버리기」가 나올 자리가 없다. 할 일이 하나뿐이면
-            // 두 번 누르게 만들 이유가 없다.
-            ItemCell.Draw($"Loot_{i}", grid.Content, min, max, stack, chosen: false,
-                () => Take(captured));
+            // 【누르면 칸 옆에 차림표가 뜬다.】 바로 줍지 않는다.
+            // 한 번 눌러 바로 줍게 해 뒀더니 「줍기」 말고는 아무것도 할 수
+            // 없었다. 총을 주울지, 먼저 볼지, 그 자리에서 갈아 끼울지를
+            // 고를 수 없으면 창이 버튼 하나짜리 목록이 된다.
+            Image cell = ItemCell.Draw($"Loot_{i}", grid.Content, min, max, stack,
+                chosen: false, null);
+
+            if (stack?.Definition == null)
+                continue;
+
+            var button = cell.GetComponent<Button>();
+
+            if (button == null)
+                continue;
+
+            RectTransform cellRect = cell.rectTransform;
+            ItemStack capturedStack = stack;
+
+            button.onClick.AddListener(() => OpenMenu(cellRect, captured, capturedStack));
         }
+    }
+
+    // ────────────────────────────────── 차림표
+
+    /// <summary>
+    /// 칸의 차림표를 연다. 【무엇을 넣을지는 아이템 성격이 정한다.】
+    ///
+    /// 「사용」은 아직 넣지 않는다 — 소모품을 쓰는 시스템 자체가 8단계다.
+    /// 누르면 아무 일도 없는 버튼을 두는 것보다 없는 편이 낫다.
+    /// </summary>
+    private void OpenMenu(RectTransform cell, int index, ItemStack stack)
+    {
+        ItemDefinition definition = stack.Definition;
+
+        bool equippable = definition is EquipmentDefinition;
+
+        var entries = ItemActionMenu.ForContainerItem(
+            definition,
+            take: () => Take(index),
+            equip: equippable ? () => TakeAndEquip(index, stack) : null,
+            use: null,
+            detail: () => TakeAndOpenDetail(index, stack));
+
+        ItemActionMenu.Open(cell, entries);
+    }
+
+    /// <summary>
+    /// 그 자리에서 갈아 끼운다. 가방을 거쳐 간다 —
+    /// 장착 경로가 「가방에 있는 것」을 전제로 하고, 벗은 장비가 갈 곳도 가방이다.
+    ///
+    /// 가방이 꽉 차 있어도 대부분 통한다. 끼울 것이 빠지고 벗은 것이
+    /// 들어오므로 칸 수가 그대로이기 때문이다.
+    /// </summary>
+    private void TakeAndEquip(int index, ItemStack stack)
+    {
+        if (!TakeInto(index))
+            return;
+
+        InventoryScreenUI.EquipFromOutside(stack);
+
+        AfterMove();
+    }
+
+    /// <summary>
+    /// 【상세를 보려면 먼저 주워야 한다.】 상세 패널은 「버리기·장착·퀵슬롯」이
+    /// 달린 내 물건의 화면이고, 남의 칸에 있는 것에는 그 버튼들이 뜻이 없다.
+    /// 읽어 보고 마음에 안 들면 상세의 「버리기」로 되돌리면 된다.
+    /// </summary>
+    private void TakeAndOpenDetail(int index, ItemStack stack)
+    {
+        if (!TakeInto(index))
+            return;
+
+        AfterMove();
+
+        InventoryScreenUI.OpenDetailFor(stack);
+    }
+
+    /// <summary>가방으로 옮긴다. 자리가 없으면 알리고 false.</summary>
+    private bool TakeInto(int index)
+    {
+        if (other == null || other.Get(index) == null)
+            return false;
+
+        if (other.TryTakeTo(index, PlayerInventory.EnsureInstance().Bag))
+            return true;
+
+        // 못 옮기면 아이템은 있던 자리에 그대로 남는다. 사라지지 않는다.
+        InventoryScreenUI.ShowToastIfOpen("가방에 자리가 없습니다.");
+
+        return false;
     }
 
     // ────────────────────────────────── 옮기기
 
     private void Take(int index)
     {
-        if (other == null || other.Get(index) == null)
-            return;
-
-        Inventory bag = PlayerInventory.EnsureInstance().Bag;
-
-        if (!other.TryTakeTo(index, bag))
-        {
-            // 못 옮기면 아이템은 있던 자리에 그대로 남는다. 사라지지 않는다.
-            InventoryScreenUI.ShowToastIfOpen("가방에 자리가 없습니다.");
-            return;
-        }
-
-        AfterMove();
+        if (TakeInto(index))
+            AfterMove();
     }
 
     private void TakeAll()
