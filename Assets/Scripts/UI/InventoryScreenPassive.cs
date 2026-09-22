@@ -72,6 +72,15 @@ public partial class InventoryScreenUI
     /// <summary>좌우 분할선. 사이 간격은 양쪽이 반 칸씩 물러나 만든다.</summary>
     private const float Split = 0.638f;
 
+    // ── 트리 격자 ─────────────────────────────────────────────────────
+    // 칸과 연결선이 같은 값을 써야 선이 칸에 맞는다. 한 곳에 둔다.
+
+    /// <summary>트리가 쓰는 세로 범위. 위쪽은 계열 설명 줄이 쓴다.</summary>
+    private const float TreeHeight = 0.93f;
+
+    private const float NodeInsetX = 0.025f;
+    private const float NodeInsetY = 0.02f;
+
     /// <summary>
     /// 머리글. 회색 띠를 깔지 않는다 —
     /// 패널 자체가 이미 한 겹이라 그 위에 또 판을 얹으면
@@ -79,9 +88,16 @@ public partial class InventoryScreenUI
     /// </summary>
     private void DrawPassiveHeader(PassiveManager manager)
     {
+        // 【나가는 길을 왼쪽 위에 둔다.】
+        // 화면을 통째로 쓰게 되면서 아래줄의 「닫기」가 사라졌다.
+        // 전체 화면에서 나가는 버튼은 왼쪽 위라는 것이 가장 널리 쓰인다.
+        UIFactory.CreateButton(rightContent, "←",
+            new Vector2(0f, HeaderLine), new Vector2(0.045f, 1f),
+            UIPalette.Subtle, Close, 30);
+
         UIFactory.CreateLabel(rightContent,
             $"패시브    계정 Lv.{manager.AccountLevel}", 32, FontStyle.Bold,
-            new Vector2(0f, HeaderLine), new Vector2(0.55f, 1f),
+            new Vector2(0.06f, HeaderLine), new Vector2(0.55f, 1f),
             TextAnchor.MiddleLeft, UIPalette.TextOnGlass);
 
         UIFactory.CreateLabel(rightContent,
@@ -184,6 +200,10 @@ public partial class InventoryScreenUI
         int columns = tree.Columns;
         int rows = tree.Rows;
 
+        // 【선을 먼저 긋는다.】
+        // 나중에 그리면 칸 위를 덮는다. 자식보다 먼저 만들어야 뒤로 간다.
+        DrawBranchLinks(area, manager, columns, rows);
+
         for (int i = 0; i < branchBuffer.Count; i++)
         {
             PassiveNode node = branchBuffer[i];
@@ -192,19 +212,108 @@ public partial class InventoryScreenUI
                 continue;
 
             float cellWidth = 1f / columns;
-            float cellHeight = 0.92f / rows;
+            float cellHeight = TreeHeight / rows;
 
             // row 0이 맨 아래다. 트리가 아래에서 위로 자란다.
             var min = new Vector2(
-                node.Column * cellWidth + 0.025f,
-                node.Row * cellHeight + 0.02f);
+                node.Column * cellWidth + NodeInsetX,
+                node.Row * cellHeight + NodeInsetY);
 
             var max = new Vector2(
-                (node.Column + 1) * cellWidth - 0.025f,
-                (node.Row + 1) * cellHeight - 0.02f);
+                (node.Column + 1) * cellWidth - NodeInsetX,
+                (node.Row + 1) * cellHeight - NodeInsetY);
 
             DrawPassiveNode(area, manager, node, min, max);
         }
+    }
+
+    // ── 연결선 ────────────────────────────────────────────────────────
+
+    /// <summary>선 굵기(px). 가로·세로가 같아 보이려면 픽셀로 줘야 한다.</summary>
+    private const float LinkThickness = 3f;
+
+    /// <summary>
+    /// 선행 관계를 선으로 잇는다.
+    ///
+    /// 【없으면 트리가 아니라 그냥 흩어진 칸들이다.】
+    /// 지금까지는 「가방 정리 1 → 2 → 3」이 선행 관계라는 것이
+    /// 눌러 봐야만 드러났다. 잠긴 칸을 눌러 "요구 조건이 있다"를 읽고
+    /// 그제야 어느 칸이 먼저인지 찾아야 했다.
+    ///
+    /// 꺾은선으로 긋는다 — 대각선은 회전이 필요해 픽셀 굵기가 흔들린다.
+    /// 아래에서 위로 자라므로 「선행에서 올라가 · 옆으로 · 다시 올라가」 세 토막이다.
+    /// </summary>
+    private void DrawBranchLinks(RectTransform area, PassiveManager manager,
+                                 int columns, int rows)
+    {
+        PassiveTree tree = manager.Tree;
+
+        float cellWidth = 1f / columns;
+        float cellHeight = TreeHeight / rows;
+
+        for (int i = 0; i < branchBuffer.Count; i++)
+        {
+            PassiveNode node = branchBuffer[i];
+
+            if (node == null || node.IsRoot)
+                continue;
+
+            float childX = (node.Column + 0.5f) * cellWidth;
+            float childBottom = node.Row * cellHeight + NodeInsetY;
+
+            for (int p = 0; p < node.Prerequisites.Count; p++)
+            {
+                PassiveNode parent = tree.Find(node.Prerequisites[p]);
+
+                if (parent == null || parent.Branch != node.Branch)
+                    continue;
+
+                float parentX = (parent.Column + 0.5f) * cellWidth;
+                float parentTop = (parent.Row + 1) * cellHeight - NodeInsetY;
+
+                // 이미 배운 선행으로 이어진 길만 밝힌다 — 어디까지 왔는지가 보인다.
+                Color color = manager.State.IsLearned(parent)
+                    ? PassiveBranchInfo.Color(node.Branch)
+                    : UIPalette.Edge;
+
+                float middle = (parentTop + childBottom) * 0.5f;
+
+                Vertical(area, parentX, parentTop, middle, color);
+
+                if (!Mathf.Approximately(parentX, childX))
+                    Horizontal(area, parentX, childX, middle, color);
+
+                Vertical(area, childX, middle, childBottom, color);
+            }
+        }
+    }
+
+    private static void Vertical(RectTransform area, float x, float from, float to, Color color)
+    {
+        float low = Mathf.Min(from, to);
+        float high = Mathf.Max(from, to);
+
+        if (high - low < 0.001f)
+            return;
+
+        Image line = UIFactory.CreatePanel("Link", area, color,
+            new Vector2(x, low), new Vector2(x, high), radius: 0);
+
+        // 앵커가 한 점으로 모인 축만 sizeDelta가 픽셀 굵기가 된다.
+        line.rectTransform.sizeDelta = new Vector2(LinkThickness, 0f);
+        line.raycastTarget = false;
+    }
+
+    private static void Horizontal(RectTransform area, float from, float to, float y, Color color)
+    {
+        float left = Mathf.Min(from, to);
+        float right = Mathf.Max(from, to);
+
+        Image line = UIFactory.CreatePanel("Link", area, color,
+            new Vector2(left, y), new Vector2(right, y), radius: 0);
+
+        line.rectTransform.sizeDelta = new Vector2(0f, LinkThickness);
+        line.raycastTarget = false;
     }
 
     private void DrawPassiveNode(RectTransform area, PassiveManager manager,
