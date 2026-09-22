@@ -4,11 +4,16 @@ using UnityEngine.UI;
 /// <summary>
 /// 화면 좌하단의 체력 · 수분 · 에너지. (docs/Blob_Survival_System.md 7절)
 ///
-/// 【셋을 붙여 둔다.】 떨어뜨려 놓으면 「지금 위험한 게 어느 쪽인가」를
-/// 두 군데를 봐야 안다. 덕코프도 같은 자리에 한 덩어리로 둔다.
+/// 【덕코프와 같은 모양으로 둔다.】
+///   하트 + 긴 막대 하나 · 그 오른쪽에 물방울 · 번개 원형 게이지 둘.
 ///
-/// 체력은 크게, 수분·에너지는 그 아래 작게 — 순서가 곧 급한 순서다.
-/// 체력은 순식간에 0이 되고 수분·에너지는 십수 분에 걸쳐 준다.
+/// 처음에는 가로 막대 셋을 세로로 쌓고 왼쪽에 「체력 / 수분 / 에너지」를
+/// 글자로 적었다. 좁은 폭에서 글자가 두 줄로 접혔고, 그 자리는 막대가
+/// 써야 할 자리였다. **표식은 도형으로 둔다** — 한 번 배우면 글자보다 빠르다.
+///
+/// 【체력만 길게 두는 이유】 체력은 초 단위로 변하고 수분·에너지는 십수 분에
+/// 걸쳐 변한다. 급한 축에 넓은 면적을 준다. 원형 게이지는 「얼마나 남았나」를
+/// 한눈에 보여 주되 자리를 적게 먹는다.
 /// </summary>
 public class SurvivalHudUI : MonoBehaviour
 {
@@ -16,16 +21,18 @@ public class SurvivalHudUI : MonoBehaviour
 
     // ── 치수 (캔버스 픽셀) ────────────────────────────────────────────
 
-    private const float PanelWidth = 360f;
-    private const float PanelHeight = 108f;
-    private const float Margin = 14f;
+    private const float Margin = 16f;
 
-    private const float HealthBarHeight = 36f;
-    private const float SmallBarHeight = 22f;
-    private const float BarGap = 8f;
+    private const float HeartSize = 44f;
+    private const float BarWidth = 250f;
+    private const float BarHeight = 34f;
+    private const float GaugeSize = 58f;
+    private const float Gap = 10f;
 
-    /// <summary>막대 왼쪽의 표식 자리. 「체력」·물방울·번개가 들어간다.</summary>
-    private const float MarkWidth = 34f;
+    private const float PanelWidth =
+        HeartSize + Gap + BarWidth + Gap + GaugeSize + Gap + GaugeSize;
+
+    private const float PanelHeight = 60f;
 
     private RectTransform root;
 
@@ -33,11 +40,18 @@ public class SurvivalHudUI : MonoBehaviour
     private Image waterFill;
     private Image energyFill;
 
+    private Image heartIcon;
+    private Image waterIcon;
+    private Image energyIcon;
+
     private Text healthLabel;
     private Text waterLabel;
     private Text energyLabel;
 
     private Health health;
+
+    /// <summary>가방·전리품 화면이 열려 있으면 감춘다.</summary>
+    private bool hiddenByScreen;
 
     public static SurvivalHudUI EnsureInstance()
     {
@@ -49,7 +63,7 @@ public class SurvivalHudUI : MonoBehaviour
         if (instance != null)
             return instance;
 
-        // 가방 화면(1000)보다 아래. 가방을 열면 그 판이 이 위를 덮는다.
+        // 가방 화면(1000)보다 아래. 화면이 열리면 그 판이 이 위를 덮는다.
         Canvas canvas = UIFactory.CreateCanvas("SurvivalHudCanvas (Runtime)", 800);
 
         instance = canvas.gameObject.AddComponent<SurvivalHudUI>();
@@ -62,6 +76,24 @@ public class SurvivalHudUI : MonoBehaviour
     {
         if (instance == this)
             instance = null;
+    }
+
+    /// <summary>
+    /// 화면(가방 · 전리품)이 열리고 닫힐 때 불린다.
+    ///
+    /// 가방 화면은 좌하단에 소지 중량 카드를 둔다 — 같은 자리다.
+    /// 둘이 겹쳐서 어느 막대가 무엇인지 읽을 수 없었다.
+    /// 덕코프도 가방을 열면 생존 게이지 대신 소지 중량을 보여 준다.
+    /// </summary>
+    public static void SetHiddenByScreen(bool hidden)
+    {
+        if (instance == null)
+            return;
+
+        instance.hiddenByScreen = hidden;
+
+        if (instance.root != null)
+            instance.root.gameObject.SetActive(!hidden);
     }
 
     // ────────────────────────────────── 생성
@@ -79,57 +111,141 @@ public class SurvivalHudUI : MonoBehaviour
         root.sizeDelta = new Vector2(PanelWidth, PanelHeight);
         root.anchoredPosition = new Vector2(Margin, Margin);
 
-        // 세로로 세 줄. 위에서부터 체력 · 수분 · 에너지.
-        // 정규화 값으로 나누면 세 줄의 높이가 제각각이 되므로 픽셀로 계산한다.
-        float total = HealthBarHeight + SmallBarHeight * 2f + BarGap * 2f;
+        float cursor = 0f;
 
-        float healthTop = 1f;
-        float healthBottom = healthTop - HealthBarHeight / total;
+        heartIcon = BuildIcon("Heart", cursor, HeartSize, UISprites.Glyph.Heart,
+            UIPalette.HealthBar);
 
-        float waterTop = healthBottom - BarGap / total;
-        float waterBottom = waterTop - SmallBarHeight / total;
+        cursor += HeartSize + Gap;
 
-        float energyTop = waterBottom - BarGap / total;
-        float energyBottom = energyTop - SmallBarHeight / total;
+        BuildHealthBar(cursor);
 
-        BuildBar("Health", healthBottom, healthTop, UIPalette.HealthBar, "체력", 22,
-            out healthFill, out healthLabel);
+        cursor += BarWidth + Gap;
 
-        BuildBar("Water", waterBottom, waterTop, UIPalette.WaterBar, "수분", 18,
-            out waterFill, out waterLabel);
+        BuildGauge("Water", cursor, UISprites.Glyph.Drop, UIPalette.WaterBar,
+            out waterIcon, out waterFill, out waterLabel);
 
-        BuildBar("Energy", energyBottom, energyTop, UIPalette.EnergyBar, "에너지", 18,
-            out energyFill, out energyLabel);
+        cursor += GaugeSize + Gap;
+
+        BuildGauge("Energy", cursor, UISprites.Glyph.Bolt, UIPalette.EnergyBar,
+            out energyIcon, out energyFill, out energyLabel);
     }
 
-    private void BuildBar(string name, float bottom, float top, Color color,
-                          string mark, int fontSize, out Image fill, out Text label)
+    /// <summary>표식 하나. 가로 위치는 픽셀, 세로는 가운데 정렬이다.</summary>
+    private Image BuildIcon(string name, float left, float size,
+                            UISprites.Glyph glyph, Color color)
     {
-        RectTransform row = UIFactory.CreateRegion($"{name}Row", root,
-            new Vector2(0f, bottom), new Vector2(1f, top));
+        GameObject go = UIFactory.CreateChild($"{name}Icon", root);
 
-        // 표식은 왼쪽 고정 폭. 아트가 들어오면 아이콘이 이 자리를 가져간다.
-        float markRatio = MarkWidth / PanelWidth;
+        var rect = go.GetComponent<RectTransform>();
+        rect.anchorMin = new Vector2(0f, 0.5f);
+        rect.anchorMax = new Vector2(0f, 0.5f);
+        rect.pivot = new Vector2(0f, 0.5f);
+        rect.sizeDelta = new Vector2(size, size);
+        rect.anchoredPosition = new Vector2(left, 0f);
 
-        UIFactory.CreateLabel(row, mark, fontSize, FontStyle.Bold,
-            Vector2.zero, new Vector2(markRatio, 1f), TextAnchor.MiddleLeft,
-            UIPalette.TextDim);
+        var image = go.AddComponent<Image>();
+        image.sprite = UISprites.Of(glyph);
+        image.color = color;
+        image.preserveAspect = true;
+        image.raycastTarget = false;
 
-        Image track = UIFactory.CreatePanel($"{name}Track", row, UIPalette.Inset,
-            new Vector2(markRatio + 0.015f, 0.10f), new Vector2(1f, 0.90f),
-            UIFactory.Radius);
+        return image;
+    }
+
+    private void BuildHealthBar(float left)
+    {
+        GameObject go = UIFactory.CreateChild("HealthBar", root);
+
+        var rect = go.GetComponent<RectTransform>();
+        rect.anchorMin = new Vector2(0f, 0.5f);
+        rect.anchorMax = new Vector2(0f, 0.5f);
+        rect.pivot = new Vector2(0f, 0.5f);
+        rect.sizeDelta = new Vector2(BarWidth, BarHeight);
+        rect.anchoredPosition = new Vector2(left, 0f);
+
+        var track = go.AddComponent<Image>();
+        track.color = UIPalette.Inset;
+        track.sprite = UISprites.Rounded(UIFactory.Radius);
+        track.type = Image.Type.Sliced;
+        track.raycastTarget = false;
 
         UIFactory.CreateOutline(track, UIPalette.EdgeSoft, UIFactory.Radius, 2);
 
-        // 채움은 트랙 안에서 왼쪽에 붙어 오른쪽 끝(anchorMax.x)만 움직인다.
-        fill = UIFactory.CreatePanel($"{name}Fill", track.transform, color,
-            Vector2.zero, Vector2.one, UIFactory.Radius);
+        // 채움은 왼쪽에 붙어 오른쪽 끝(anchorMax.x)만 움직인다.
+        healthFill = UIFactory.CreatePanel("HealthFill", go.transform,
+            UIPalette.HealthBar, Vector2.zero, Vector2.one, UIFactory.Radius);
 
-        UIFactory.Inset(fill.rectTransform, 3f);
+        UIFactory.Inset(healthFill.rectTransform, 3f);
 
-        label = UIFactory.CreateLabel(track.transform, string.Empty,
-            Mathf.Max(15, fontSize - 3), FontStyle.Bold,
-            new Vector2(0.04f, 0f), new Vector2(0.96f, 1f), TextAnchor.MiddleRight,
+        healthFill.raycastTarget = false;
+
+        healthLabel = UIFactory.CreateLabel(go.transform, string.Empty, 20, FontStyle.Bold,
+            new Vector2(0.05f, 0f), new Vector2(0.95f, 1f), TextAnchor.MiddleCenter,
+            UIPalette.TextOnGlass);
+    }
+
+    /// <summary>
+    /// 원형 게이지. 【안쪽에서 시계 방향으로 찬다.】
+    /// Image.Type.Filled + Radial360이면 한 장의 원 스프라이트로 그려진다.
+    /// </summary>
+    private void BuildGauge(string name, float left, UISprites.Glyph glyph, Color color,
+                            out Image icon, out Image fill, out Text label)
+    {
+        GameObject go = UIFactory.CreateChild($"{name}Gauge", root);
+
+        var rect = go.GetComponent<RectTransform>();
+        rect.anchorMin = new Vector2(0f, 0.5f);
+        rect.anchorMax = new Vector2(0f, 0.5f);
+        rect.pivot = new Vector2(0f, 0.5f);
+        rect.sizeDelta = new Vector2(GaugeSize, GaugeSize);
+        rect.anchoredPosition = new Vector2(left, 0f);
+
+        int radius = Mathf.RoundToInt(GaugeSize * 0.5f);
+
+        // 뒤판 — 남은 양이 0이어도 자리는 보인다.
+        var back = go.AddComponent<Image>();
+        back.sprite = UISprites.Rounded(radius);
+        back.type = Image.Type.Simple;
+        back.color = UIPalette.Inset;
+        back.raycastTarget = false;
+
+        // 고리 — 채워지는 부분.
+        GameObject fillObject = UIFactory.CreateChild("Fill", go.transform);
+
+        var fillRect = fillObject.GetComponent<RectTransform>();
+        fillRect.anchorMin = Vector2.zero;
+        fillRect.anchorMax = Vector2.one;
+        fillRect.offsetMin = Vector2.zero;
+        fillRect.offsetMax = Vector2.zero;
+
+        fill = fillObject.AddComponent<Image>();
+        fill.sprite = UISprites.RoundedOutline(radius, Mathf.Max(4, radius / 6));
+        fill.type = Image.Type.Filled;
+        fill.fillMethod = Image.FillMethod.Radial360;
+        fill.fillOrigin = (int)Image.Origin360.Top;
+        fill.fillClockwise = true;
+        fill.color = color;
+        fill.raycastTarget = false;
+
+        // 표식은 고리 안쪽 가운데.
+        GameObject iconObject = UIFactory.CreateChild("Icon", go.transform);
+
+        var iconRect = iconObject.GetComponent<RectTransform>();
+        iconRect.anchorMin = new Vector2(0.24f, 0.30f);
+        iconRect.anchorMax = new Vector2(0.76f, 0.82f);
+        iconRect.offsetMin = Vector2.zero;
+        iconRect.offsetMax = Vector2.zero;
+
+        icon = iconObject.AddComponent<Image>();
+        icon.sprite = UISprites.Of(glyph);
+        icon.color = color;
+        icon.preserveAspect = true;
+        icon.raycastTarget = false;
+
+        // 숫자는 아래쪽에 작게. 고리와 표식을 가리지 않는다.
+        label = UIFactory.CreateLabel(go.transform, string.Empty, 16, FontStyle.Bold,
+            new Vector2(0.10f, 0.04f), new Vector2(0.90f, 0.30f), TextAnchor.MiddleCenter,
             UIPalette.TextOnGlass);
     }
 
@@ -143,7 +259,7 @@ public class SurvivalHudUI : MonoBehaviour
     /// </summary>
     private void LateUpdate()
     {
-        if (root == null)
+        if (root == null || hiddenByScreen)
             return;
 
         RefreshHealth();
@@ -152,54 +268,54 @@ public class SurvivalHudUI : MonoBehaviour
 
     private void RefreshHealth()
     {
-        if (health == null || health.gameObject == null)
+        if (health == null)
             health = FindPlayerHealth();
 
         if (health == null)
         {
-            SetBar(healthFill, healthLabel, 0f, "—", UIPalette.HealthBar, false);
+            SetHorizontal(healthFill, healthLabel, 0f, "—", UIPalette.HealthBar, false);
             return;
         }
 
         float ratio = health.Normalized;
 
-        SetBar(healthFill, healthLabel, ratio, $"{health.Current} / {health.Max}",
-            UIPalette.HealthBar, ratio <= SurvivalTable.HealthWarnRatio);
+        bool warn = ratio <= SurvivalTable.HealthWarnRatio;
+
+        SetHorizontal(healthFill, healthLabel, ratio, $"{health.Current} / {health.Max}",
+            UIPalette.HealthBar, warn);
+
+        if (heartIcon != null)
+            heartIcon.color = warn ? UIPalette.Warning : UIPalette.HealthBar;
     }
 
     private void RefreshSurvival()
     {
         if (!PlayerSurvival.HasInstance)
         {
-            SetBar(waterFill, waterLabel, 0f, "—", UIPalette.WaterBar, false);
-            SetBar(energyFill, energyLabel, 0f, "—", UIPalette.EnergyBar, false);
+            SetRadial(waterFill, waterIcon, waterLabel, 0f, "—", UIPalette.WaterBar, false);
+            SetRadial(energyFill, energyIcon, energyLabel, 0f, "—", UIPalette.EnergyBar, false);
             return;
         }
 
         SurvivalState state = PlayerSurvival.Instance.State;
 
         // 【바닥나면 경고색으로 고정된다.】 지금 페널티를 받고 있다는 표시다.
-        SetBar(waterFill, waterLabel, state.WaterRatio,
+        SetRadial(waterFill, waterIcon, waterLabel, state.WaterRatio,
             Mathf.CeilToInt(state.Water).ToString(), UIPalette.WaterBar,
             state.WaterRatio <= SurvivalTable.WarnRatio);
 
-        SetBar(energyFill, energyLabel, state.EnergyRatio,
+        SetRadial(energyFill, energyIcon, energyLabel, state.EnergyRatio,
             Mathf.CeilToInt(state.Energy).ToString(), UIPalette.EnergyBar,
             state.EnergyRatio <= SurvivalTable.WarnRatio);
     }
 
-    private static void SetBar(Image fill, Text label, float ratio, string text,
-                               Color normal, bool warn)
+    private static void SetHorizontal(Image fill, Text label, float ratio, string text,
+                                      Color normal, bool warn)
     {
         if (fill != null)
         {
-            RectTransform rect = fill.rectTransform;
-
-            rect.anchorMax = new Vector2(Mathf.Clamp01(ratio), 1f);
-
+            fill.rectTransform.anchorMax = new Vector2(Mathf.Clamp01(ratio), 1f);
             fill.color = warn ? UIPalette.Warning : normal;
-
-            // 0이면 채움이 없어도 자리는 남는다. 색만으로 상태를 말하게 둔다.
             fill.gameObject.SetActive(ratio > 0f);
         }
 
@@ -207,9 +323,27 @@ public class SurvivalHudUI : MonoBehaviour
             label.text = text;
     }
 
+    private static void SetRadial(Image fill, Image icon, Text label, float ratio,
+                                  string text, Color normal, bool warn)
+    {
+        Color color = warn ? UIPalette.Warning : normal;
+
+        if (fill != null)
+        {
+            fill.fillAmount = Mathf.Clamp01(ratio);
+            fill.color = color;
+        }
+
+        if (icon != null)
+            icon.color = color;
+
+        if (label != null)
+            label.text = text;
+    }
+
     /// <summary>
-    /// 플레이어의 Health. 씬에 프리팹으로 놓이므로 찾아서 쓴다.
-    /// 매 프레임 찾지 않도록 한 번 잡으면 들고 있는다.
+    /// 플레이어의 Health. 씬에 놓이므로 찾아서 쓴다.
+    /// 한 번 잡으면 들고 있는다 — 매 프레임 찾지 않는다.
     /// </summary>
     private static Health FindPlayerHealth()
     {

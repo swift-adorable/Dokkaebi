@@ -72,7 +72,20 @@ public static class UISprites
         Hexagon = 3,
         Shield = 4,
         Square = 5,
-        Cross = 6
+        Cross = 6,
+
+        // ── 생존 세 축의 표식 (Survival_System 7절) ──────────────────
+        // 글자 대신 도형을 쓴다. 「체력·수분·에너지」를 적으면 좁은 화면에서
+        // 두 줄로 접히고, 그 자리는 막대가 써야 한다.
+
+        /// <summary>체력.</summary>
+        Heart = 7,
+
+        /// <summary>수분.</summary>
+        Drop = 8,
+
+        /// <summary>에너지.</summary>
+        Bolt = 9
     }
 
     private static readonly Dictionary<Glyph, Sprite> glyphCache = new();
@@ -189,6 +202,51 @@ public static class UISprites
                     Mathf.Max(Mathf.Abs(u) - 0.26f, Mathf.Abs(v) - 0.74f),
                     Mathf.Max(Mathf.Abs(u) - 0.74f, Mathf.Abs(v) - 0.26f));
                 break;
+
+            case Glyph.Heart:
+            {
+                // 하트. 위쪽 두 원과 아래쪽 꼭짓점.
+                // 살짝 내려 그린다 — 꼭짓점이 길어 무게중심이 아래로 쏠린다.
+                float hv = v - 0.14f;
+
+                float lobes = Mathf.Min(
+                    Mathf.Sqrt((u + 0.33f) * (u + 0.33f) + (hv - 0.22f) * (hv - 0.22f)) - 0.40f,
+                    Mathf.Sqrt((u - 0.33f) * (u - 0.33f) + (hv - 0.22f) * (hv - 0.22f)) - 0.40f);
+
+                // 아래는 역삼각형. 두 원의 아래쪽에 맞물린다.
+                float point = Mathf.Max(hv - 0.22f, Mathf.Abs(u) * 0.78f + hv * 0.62f - 0.35f);
+
+                distance = Mathf.Min(lobes, point);
+                break;
+            }
+
+            case Glyph.Drop:
+            {
+                // 물방울. 아래는 원, 위는 뾰족하게.
+                float dv = v + 0.16f;
+
+                float ball = Mathf.Sqrt(u * u + dv * dv) - 0.50f;
+
+                float tip = Mathf.Max(-dv, Mathf.Abs(u) * 1.30f + dv * 0.62f - 0.42f);
+
+                distance = Mathf.Min(ball, tip);
+                break;
+            }
+
+            case Glyph.Bolt:
+            {
+                // 번개. 기울어진 띠 두 개를 위아래로 어긋나게 붙인다.
+                float upper = Mathf.Max(
+                    Mathf.Max(Mathf.Abs(u * 1.45f + v * 0.62f - 0.10f) - 0.26f, -v),
+                    v - 0.86f);
+
+                float lower = Mathf.Max(
+                    Mathf.Max(Mathf.Abs(u * 1.45f + v * 0.62f + 0.10f) - 0.26f, v),
+                    -v - 0.86f);
+
+                distance = Mathf.Min(upper, lower);
+                break;
+            }
 
             default:
                 distance = Mathf.Sqrt(u * u + v * v) - 0.74f;
