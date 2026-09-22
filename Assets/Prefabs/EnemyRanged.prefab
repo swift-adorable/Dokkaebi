@@ -189,7 +189,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 352c47ce17ef0410a92731d536c71a4a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Blob.Runtime::EnemyMovement
-  moveSpeed: 2.5
+  moveSpeed: 2.6
   stoppingDistance: 1.2
   separationRadius: 1.1
   separationWeight: 0.8
@@ -211,7 +211,7 @@ MonoBehaviour:
   damage: 10
   attackRange: 9
   armourPenetration: 1
-  appliedStatus: 0
+  appliedStatus: 4
   projectilePrefab: {fileID: 9100672181249319323, guid: 070cefa67d75149e69ecff42b023fe67, type: 3}
   muzzleOffset: {x: 0, y: 0.8, z: 0}
   preferredDistance: 7

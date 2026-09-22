@@ -25,26 +25,44 @@ public static class EnemyArchetypeWiring
 {
     private const string MeleePath = "Assets/Prefabs/Enemy.prefab";
     private const string RangedPath = "Assets/Prefabs/EnemyRanged.prefab";
-    private const string CrusherPath = "Assets/Prefabs/EnemyCrusher.prefab";
+
+    private const string Folder = "Assets/Prefabs";
+
+    /// <summary>유형별 프리팹 이름. 이미 있는 둘은 이름이 달라 따로 잡는다.</summary>
+    private static string PathOf(EnemyArchetype archetype)
+    {
+        switch (archetype)
+        {
+            case EnemyArchetype.Scav:   return MeleePath;
+            case EnemyArchetype.Dynamo: return RangedPath;
+            default:                    return $"{Folder}/Enemy{archetype}.prefab";
+        }
+    }
 
     [MenuItem("Blob/Enemy/유형·진영 배선")]
     public static void Wire()
     {
-        // 스캐브(야생) · 자전체(실험체) — 이미 있는 둘.
+        // 이미 있는 둘 — 이름을 바꾸지 않는다. 씬과 스폰기가 이 경로를 참조한다.
         Attach(MeleePath, EnemyArchetype.Scav);
         Attach(RangedPath, EnemyArchetype.Dynamo);
 
-        // 【세 번째가 없으면 난전을 볼 수 없다.】
-        // 스캐브(야생)와 자전체(실험체)만으로도 서로 적대하지만,
-        // 압착기(시설)를 더해야 「세 진영이 얽힌다」가 실제로 나온다.
-        // 압착기는 전기 2배 / 카오스 면역이라 속성 판단도 같이 확인된다.
-        CreateCrusher();
+        // 나머지 일곱은 근접/원거리 중 맞는 쪽을 본떠 만든다.
+        //
+        // 【본뜨는 쪽을 표가 정한다.】
+        // 원거리형을 근접 프리팹에서 만들면 투사체 참조가 비어 있어
+        // 「쏘는데 아무것도 안 나간다」가 된다. 손으로 고르지 않는다.
+        foreach (EnemyArchetype archetype in (EnemyArchetype[])System.Enum.GetValues(typeof(EnemyArchetype)))
+        {
+            if (archetype == EnemyArchetype.Scav || archetype == EnemyArchetype.Dynamo)
+                continue;
+
+            CreateFrom(archetype);
+        }
 
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
 
-        Debug.Log("[EnemyArchetypeWiring] 배선 완료 — "
-                  + "Enemy=스캐브(야생) · EnemyRanged=자전체(실험체) · EnemyCrusher=압착기(시설)");
+        Debug.Log($"[EnemyArchetypeWiring] 배선 완료 — 유형 {EnemyArchetypeTable.Count}종");
     }
 
     /// <summary>프리팹에 EnemyIdentity·EnemyAggro를 붙이고 유형을 지정한다.</summary>
@@ -102,6 +120,15 @@ public static class EnemyArchetypeWiring
             so.ApplyModifiedPropertiesWithoutUndo();
         }
 
+        var movement = root.GetComponent<EnemyMovement>();
+
+        if (movement != null)
+        {
+            var so = new SerializedObject(movement);
+            so.FindProperty("moveSpeed").floatValue = stats.moveSpeed;
+            so.ApplyModifiedPropertiesWithoutUndo();
+        }
+
         var attack = root.GetComponent<EnemyAttack>();
 
         if (attack != null)
@@ -109,18 +136,38 @@ public static class EnemyArchetypeWiring
             var so = new SerializedObject(attack);
             so.FindProperty("damage").intValue = stats.damage;
             so.FindProperty("armourPenetration").intValue = stats.armourPenetration;
+            so.FindProperty("attackKind").intValue =
+                (int)(stats.ranged ? EnemyAttackKind.Ranged : EnemyAttackKind.Melee);
+            so.FindProperty("appliedStatus").intValue = (int)stats.appliedStatus;
+            so.FindProperty("windupDuration").floatValue = stats.windupDuration;
+            so.FindProperty("attackCooldown").floatValue = stats.attackCooldown;
+
+            // 근접은 유지 거리를 쓰지 않는다. 0으로 덮으면 붙기 전에 멈춘다.
+            if (stats.ranged)
+                so.FindProperty("preferredDistance").floatValue = stats.preferredDistance;
+
             so.ApplyModifiedPropertiesWithoutUndo();
         }
     }
 
-    /// <summary>근접 프리팹을 본떠 압착기를 만든다. 시설 진영의 대표다.</summary>
-    private static void CreateCrusher()
+    /// <summary>
+    /// 이 유형의 프리팹을 만든다. 이미 있으면 덮어쓴다.
+    ///
+    /// 원거리형은 원거리 프리팹을, 근접형은 근접 프리팹을 본뜬다 —
+    /// 투사체 참조가 거기에 들어 있다.
+    /// </summary>
+    private static void CreateFrom(EnemyArchetype archetype)
     {
-        var source = AssetDatabase.LoadAssetAtPath<GameObject>(MeleePath);
+        EnemyArchetypeStats stats = EnemyArchetypeTable.Of(archetype);
+
+        string sourcePath = stats.ranged ? RangedPath : MeleePath;
+        string targetPath = PathOf(archetype);
+
+        var source = AssetDatabase.LoadAssetAtPath<GameObject>(sourcePath);
 
         if (source == null)
         {
-            Debug.LogError($"[EnemyArchetypeWiring] {MeleePath}을 찾지 못했습니다.");
+            Debug.LogError($"[EnemyArchetypeWiring] {sourcePath}을 찾지 못했습니다.");
             return;
         }
 
@@ -128,26 +175,15 @@ public static class EnemyArchetypeWiring
 
         try
         {
-            instance.name = "EnemyCrusher";
+            instance.name = $"Enemy{archetype}";
 
-            // 느리다 — 「느리고 단단」이 압착기의 정체성이다. (문서 1절)
-            // 체력·피해·방어도는 바로 아래 Attach가 표에서 베껴 넣는다.
-            var movement = instance.GetComponent<EnemyMovement>();
-
-            if (movement != null)
-            {
-                var so = new SerializedObject(movement);
-                so.FindProperty("moveSpeed").floatValue = 1.4f;
-                so.ApplyModifiedPropertiesWithoutUndo();
-            }
-
-            PrefabUtility.SaveAsPrefabAsset(instance, CrusherPath);
+            PrefabUtility.SaveAsPrefabAsset(instance, targetPath);
         }
         finally
         {
             Object.DestroyImmediate(instance);
         }
 
-        Attach(CrusherPath, EnemyArchetype.Crusher);
+        Attach(targetPath, archetype);
     }
 }

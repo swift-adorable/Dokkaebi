@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &3095889724310037528
+--- !u!1 &4315201933595078754
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,32 +8,32 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 671007243996404389}
-  - component: {fileID: 1733500805875904049}
-  - component: {fileID: 2162824164937342921}
-  - component: {fileID: 276218296887120638}
-  - component: {fileID: 6575738933746679246}
-  - component: {fileID: 6361815112146432182}
-  - component: {fileID: 583691963526721343}
-  - component: {fileID: 376033774527759913}
-  - component: {fileID: 549169318959609357}
-  - component: {fileID: 4047043677378974314}
-  - component: {fileID: 3683499000688206755}
-  - component: {fileID: 5602081596088513816}
+  - component: {fileID: 8104975044502121134}
+  - component: {fileID: 5103169977074836182}
+  - component: {fileID: 5375869356648455765}
+  - component: {fileID: 6315214425091048319}
+  - component: {fileID: 8834668627352020926}
+  - component: {fileID: 1150725628030462503}
+  - component: {fileID: 462247348419140583}
+  - component: {fileID: 7368789444491103368}
+  - component: {fileID: 1795758507608464512}
+  - component: {fileID: 6037101015771905950}
+  - component: {fileID: 617137840997878102}
+  - component: {fileID: 3260926080518193095}
   m_Layer: 0
-  m_Name: EnemyCrusher
+  m_Name: EnemyWraith
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &671007243996404389
+--- !u!4 &8104975044502121134
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3095889724310037528}
+  m_GameObject: {fileID: 4315201933595078754}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 5, y: 0.5, z: 5}
@@ -42,21 +42,21 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!33 &1733500805875904049
+--- !u!33 &5103169977074836182
 MeshFilter:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3095889724310037528}
+  m_GameObject: {fileID: 4315201933595078754}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
---- !u!23 &2162824164937342921
+--- !u!23 &5375869356648455765
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3095889724310037528}
+  m_GameObject: {fileID: 4315201933595078754}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -99,13 +99,13 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &276218296887120638
+--- !u!65 &6315214425091048319
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3095889724310037528}
+  m_GameObject: {fileID: 4315201933595078754}
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -120,43 +120,43 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &6575738933746679246
+--- !u!114 &8834668627352020926
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3095889724310037528}
+  m_GameObject: {fileID: 4315201933595078754}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cccd4be093daa42a0b1086febea8de97, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyController
   corpsePrefab: {fileID: 4554347442326328039, guid: bda0a4661fe6d45569efb04919334b28, type: 3}
---- !u!114 &6361815112146432182
+--- !u!114 &1150725628030462503
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3095889724310037528}
+  m_GameObject: {fileID: 4315201933595078754}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3addb66c72c6e4042b64a26ae3c2c16f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Blob.Runtime::Health
   team: 1
-  maxHealth: 90
+  maxHealth: 80
   invulnerableDuration: 0
-  headArmour: 4
-  bodyArmour: 4
---- !u!54 &583691963526721343
+  headArmour: 0
+  bodyArmour: 0
+--- !u!54 &462247348419140583
 Rigidbody:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3095889724310037528}
+  m_GameObject: {fileID: 4315201933595078754}
   serializedVersion: 5
   m_Mass: 1
   m_LinearDamping: 0
@@ -177,55 +177,55 @@ Rigidbody:
   m_Interpolate: 1
   m_Constraints: 112
   m_CollisionDetection: 1
---- !u!114 &376033774527759913
+--- !u!114 &7368789444491103368
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3095889724310037528}
+  m_GameObject: {fileID: 4315201933595078754}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 352c47ce17ef0410a92731d536c71a4a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Blob.Runtime::EnemyMovement
-  moveSpeed: 1.4
+  moveSpeed: 2.8
   stoppingDistance: 1.2
   separationRadius: 1.1
   separationWeight: 0.8
   maxNeighborChecks: 8
   rotationSpeed: 540
---- !u!114 &549169318959609357
+--- !u!114 &1795758507608464512
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3095889724310037528}
+  m_GameObject: {fileID: 4315201933595078754}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d681ecc493445441fb3f81fbcf09ca6a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Blob.Runtime::EnemyAttack
   attackKind: 0
-  damage: 14
+  damage: 16
   attackRange: 1.6
-  armourPenetration: 1
+  armourPenetration: 5
   appliedStatus: 0
   projectilePrefab: {fileID: 0}
   muzzleOffset: {x: 0, y: 0.8, z: 0}
   preferredDistance: 7
-  windupDuration: 0.6
-  attackCooldown: 1.8
+  windupDuration: 0.3
+  attackCooldown: 1.3
   windupIndicator: {fileID: 0}
   rangedWindupSpeedScale: 0.45
---- !u!114 &4047043677378974314
+--- !u!114 &6037101015771905950
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3095889724310037528}
+  m_GameObject: {fileID: 4315201933595078754}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4e9bb1d60759445e3962db8a4e9f0937, type: 3}
@@ -244,29 +244,29 @@ MonoBehaviour:
     m_Bits: 0
   sightCheckInterval: 0.2
   eyeHeight: 0.9
---- !u!114 &3683499000688206755
+--- !u!114 &617137840997878102
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3095889724310037528}
+  m_GameObject: {fileID: 4315201933595078754}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 17cd5fe84e4a74bc2868d40a814e0c31, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Blob.Runtime::EnemyIdentity
-  archetype: 1
+  archetype: 8
   rollRarity: 1
   fixedRarity: 0
   fixedAffixes: 
---- !u!114 &5602081596088513816
+--- !u!114 &3260926080518193095
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3095889724310037528}
+  m_GameObject: {fileID: 4315201933595078754}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 91fae52a7ad5746cbabeedb90c3e0586, type: 3}

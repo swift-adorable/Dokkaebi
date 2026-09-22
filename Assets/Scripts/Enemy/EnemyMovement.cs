@@ -40,6 +40,9 @@ public class EnemyMovement : MonoBehaviour
     /// <summary>이동 속도 배수. 예비동작·과중량 같은 일시적 감속에 쓴다.</summary>
     public float SpeedScale { get; set; } = 1f;
 
+    /// <summary>프리팹에 적힌 기본 이동 속도(m/s). 유형 표와 같은지 테스트가 본다.</summary>
+    public float BaseMoveSpeed => moveSpeed;
+
     /// <summary>
     /// 개체 고유 이동 배율. 몬스터 속성 「신속」(×1.4) · 「육중」(×0.8)이 정한다.
     ///

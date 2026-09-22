@@ -91,6 +91,30 @@ public struct EnemyArchetypeStats
     /// <summary>시야 거리(m). 【불확실 — 문서에 숫자가 없다.】</summary>
     public float visionRange;
 
+    // ── 행동 ──────────────────────────────────────────────────────────
+    // 【전부 불확실 — 문서에 숫자가 없다.】
+    // 기획서는 「느리고 단단」 「기습」 「연사」처럼 말로만 적었다.
+    // 그 서술이 지키는 관계만 지키도록 값을 골랐고, 관계는 테스트가 강제한다.
+    // 여기 두는 이유 — 프리팹에 손으로 적으면 표와 갈라진다.
+
+    /// <summary>이동 속도(m/s).</summary>
+    public float moveSpeed;
+
+    /// <summary>근접인가 원거리인가.</summary>
+    public bool ranged;
+
+    /// <summary>공격이 거는 상태이상. 없으면 None.</summary>
+    public StatusEffectType appliedStatus;
+
+    /// <summary>원거리일 때 유지하려는 거리(m).</summary>
+    public float preferredDistance;
+
+    /// <summary>예비동작(초). 길수록 「보고 피할 수 있다」에 가깝다.</summary>
+    public float windupDuration;
+
+    /// <summary>공격 사이 간격(초).</summary>
+    public float attackCooldown;
+
     /// <summary>유형 고유 저항. 등급·속성이 붙기 전의 값이다.</summary>
     public ElementalResistances resistances;
 
@@ -173,6 +197,17 @@ public static class EnemyArchetypeTable
     /// <summary>이 거리 안에서는 사실상 떼어낼 수 없다 — 보안기.</summary>
     private const float FarForcedChase = 40f;
 
+    // ── 행동 기준값 ───────────────────────────────────────────────────
+    // 스캐브가 기준이다. 나머지는 「스캐브보다 느리다/빠르다」로만 말한다.
+
+    public const float BaseMoveSpeed = 2.5f;
+    public const float BaseWindup = 0.35f;
+    public const float BaseCooldown = 1.2f;
+
+    /// <summary>원거리형이 유지하려는 거리(m). 「거리가 답」인 화공체만 더 멀다.</summary>
+    private const float RangedDistance = 7f;
+    private const float LongDistance = 9f;
+
     /// <summary>전기 2배 · 카오스 면역. 기계형(압착기 · 보안기)이 쓴다.</summary>
     private static ElementalResistances Mechanical => ElementalResistances.Mechanical;
 
@@ -201,39 +236,56 @@ public static class EnemyArchetypeTable
         {
             case EnemyArchetype.Scav:
                 return Make(20, 8, 0, 0f, Faction.Wild, ElementalResistances.Default, true,
-                            EnemyAnswer.Timing, cone: NarrowCone);
+                            EnemyAnswer.Timing, cone: NarrowCone);   // 기준값 그대로
 
             // 기계 눈 — 넓게 보지만 귀는 둔하다.
             case EnemyArchetype.Crusher:
                 return Make(90, 14, 1, 4f, Faction.Facility, Mechanical, true,
-                            EnemyAnswer.Penetration, cone: MachineCone, hearing: DullEar);
+                            EnemyAnswer.Penetration, cone: MachineCone, hearing: DullEar,
+                            // 「느리고 단단」 — 느린 만큼 예비동작도 길어 보고 피할 수 있다.
+                            speed: 1.4f, windup: 0.60f, cooldown: 1.8f);
 
             // 한 번 물면 끈질기다. 각도로 따돌려도 금방 다시 붙는다.
             case EnemyArchetype.Dynamo:
                 return Make(30, 10, 1, 0f, Faction.Subject, ElementalResistances.Default, true,
                             EnemyAnswer.Angle, cone: FrontalCone,
-                            forget: LongMemory, forcedChase: NearForcedChase);
+                            forget: LongMemory, forcedChase: NearForcedChase,
+                            // 「기본 원거리 · 감전 부여」
+                            speed: 2.6f, ranged: true, status: StatusEffectType.Shock,
+                            distance: RangedDistance);
 
             // 발소리가 없고 귀가 밝다 — 매복형의 정체성이다.
             // 대신 놓치면 금방 잊고 다시 숨는다(기본 8초). 집요함까지 주면
             // 「선제」 하나였던 답이 둘이 된다.
             case EnemyArchetype.Lurker:
                 return Make(25, 16, 2, 0f, Faction.Wild, ElementalResistances.Default, false,
-                            EnemyAnswer.Initiative, hearing: KeenEar);
+                            EnemyAnswer.Initiative, hearing: KeenEar,
+                            // 「기습」 — 빠르고 예비동작이 짧다. 먼저 찾지 못하면 맞고 시작한다.
+                            speed: 3.0f, windup: 0.20f, cooldown: 1.4f);
 
             case EnemyArchetype.Chemic:
+                // 「8방향 장판」 — 장판 자체는 아직 없다(7-F 잔여).
+                // 지금은 「멀리 서서 느리게 쏜다」까지만 표현한다.
                 return Make(45, 6, 0, 0f, Faction.Wild, ElementalResistances.Default, true,
-                            EnemyAnswer.Distance);
+                            EnemyAnswer.Distance,
+                            speed: 1.9f, ranged: true, status: StatusEffectType.Corrode,
+                            distance: LongDistance, windup: 0.50f, cooldown: 2.0f);
 
             // 자전체와 같은 계열 — 끈질기다. 엄폐로 사선을 끊어도 계속 찾아온다.
             case EnemyArchetype.Specimen:
                 return Make(60, 14, 3, 1f, Faction.Subject, ElementalResistances.Default, true,
                             EnemyAnswer.Cover, cone: FrontalCone,
-                            forget: LongMemory, forcedChase: NearForcedChase);
+                            forget: LongMemory, forcedChase: NearForcedChase,
+                            // 「원거리 연사 · 중독 부여」 — 쿨다운이 가장 짧다.
+                            // 연사가 곧 「엄폐로 사선을 끊어라」를 만든다.
+                            speed: 2.2f, ranged: true, status: StatusEffectType.Poison,
+                            distance: RangedDistance, windup: 0.30f, cooldown: 0.8f);
 
             case EnemyArchetype.Settled:
+                // 「중력·은신」 — 둘 다 아직 없다(7-F 잔여). 지금은 느리고 무겁게만.
                 return Make(120, 20, 0, 0f, Faction.Settled, Settled, true,
-                            EnemyAnswer.Element);
+                            EnemyAnswer.Element,
+                            speed: 1.8f, windup: 0.50f, cooldown: 1.5f);
 
             // 옛 chasesForever의 자리. 40m 안에서는 잊지 않고,
             // 벗어나도 30초를 더 찾아다닌다. 「끝까지」가 아니라 「멀리까지」다 —
@@ -241,12 +293,18 @@ public static class EnemyArchetypeTable
             case EnemyArchetype.Sentry:
                 return Make(70, 12, 2, 3f, Faction.Facility, Mechanical, true,
                             EnemyAnswer.Dodge, cone: MachineCone, hearing: DullEar,
-                            forget: RelentlessMemory, forcedChase: FarForcedChase);
+                            forget: RelentlessMemory, forcedChase: FarForcedChase,
+                            // 「3점사 × 2~4」 — 점사 자체는 아직 없다(7-F 잔여).
+                            // 지금은 멀리서 또박또박 쏘는 것까지.
+                            speed: 2.4f, ranged: true, distance: LongDistance,
+                            windup: 0.40f, cooldown: 1.6f);
 
             // 비물질 — 발소리가 없다.
             case EnemyArchetype.Wraith:
+                // 「비물질」 — 발소리가 없고 빠르다. 관통 5로 방어도를 그냥 뚫는다.
                 return Make(80, 16, 5, 0f, Faction.Settled, Incorporeal, false,
-                            EnemyAnswer.Element);
+                            EnemyAnswer.Element,
+                            speed: 2.8f, windup: 0.30f, cooldown: 1.3f);
 
             default:
                 return Make(20, 8, 0, 0f, Faction.Wild, ElementalResistances.Default, true,
@@ -277,11 +335,20 @@ public static class EnemyArchetypeTable
         EnemyAnswer answer,
         float cone = Perception.DefaultConeDegrees, float sight = DefaultVisionRange,
         float hearing = Perception.NormalHearing,
-        float forget = ShortMemory, float forcedChase = 0f)
+        float forget = ShortMemory, float forcedChase = 0f,
+        float speed = BaseMoveSpeed, bool ranged = false,
+        StatusEffectType status = StatusEffectType.None,
+        float distance = 0f, float windup = BaseWindup, float cooldown = BaseCooldown)
     {
         return new EnemyArchetypeStats
         {
             answer = answer,
+            moveSpeed = speed,
+            ranged = ranged,
+            appliedStatus = status,
+            preferredDistance = distance,
+            windupDuration = windup,
+            attackCooldown = cooldown,
             hearingScale = hearing,
             forgetTime = forget,
             forcedChaseRange = forcedChase,
