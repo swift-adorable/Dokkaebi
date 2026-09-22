@@ -62,11 +62,12 @@ public static class Perception
     /// <summary>
     /// 시야각의 기본값(도). 문서에 수치가 없다.
     ///
-    /// 【불확실】 문서 8절은 「정면 넓고 측·후방 좁다」처럼 말로만 적었다.
-    /// 120도는 정면을 보면서도 옆을 완전히 놓치지는 않는 선이다.
+    /// 문서 8절은 「정면 넓고 측·후방 좁다」처럼 말로만 적었지만,
+    /// 덕코프 생물 59종의 실측 최빈값이 140도다 (140×27 · 100×14 · 120×5 · 150×2).
+    /// [확인됨 — docs/research/duckov/05_적_AI_실측치.md]
     /// 원형별 값은 EnemyArchetypeTable이 갖는다.
     /// </summary>
-    public const float DefaultConeDegrees = 120f;
+    public const float DefaultConeDegrees = 140f;
 
     /// <summary>
     /// 이 거리 안이면 시야각과 무관하게 본다.
