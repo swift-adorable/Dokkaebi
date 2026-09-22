@@ -88,6 +88,7 @@ public class Inventory
     /// 담을 수 있는지. 칸 수만 본다. 무게는 막지 않는다.
     ///
     /// 겹칠 수 있는 아이템은 기존 칸에 들어가므로 칸을 쓰지 않을 수 있다.
+    /// 젬은 칸을 쓰지 않으므로(ItemDefinition.IsSlotless) 늘 담을 수 있다.
     /// </summary>
     public bool CanAdd(ItemDefinition definition, int count = 1)
     {
@@ -111,7 +112,7 @@ public class Inventory
 
         int newStacks = Mathf.CeilToInt(remaining / (float)definition.StackMax);
 
-        return newStacks * definition.SlotSize <= FreeSlots;
+        return newStacks * definition.SlotCost <= FreeSlots;
     }
 
     /// <summary>담는다. 실제로 담긴 개수를 반환한다. 부분 적재를 허용한다.</summary>
@@ -141,7 +142,7 @@ public class Inventory
         // 2) 남은 것은 새 칸에 담는다.
         while (remaining > 0)
         {
-            if (FreeSlots < definition.SlotSize)
+            if (FreeSlots < definition.SlotCost)
                 break;
 
             int amount = Mathf.Min(remaining, definition.StackMax);
@@ -193,7 +194,7 @@ public class Inventory
         // 2) 남은 것은 새 칸으로. CanAdd가 자리를 보장했다.
         while (!stack.IsEmpty)
         {
-            if (FreeSlots < stack.Definition.SlotSize)
+            if (FreeSlots < stack.Definition.SlotCost)
                 return false;
 
             int amount = Mathf.Min(stack.Count, stack.Definition.StackMax);

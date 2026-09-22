@@ -337,39 +337,12 @@ public class SkillManager : Singleton<SkillManager>
 
     public bool TryEquipCore(SkillDefinition skill, int coreIndex)
     {
-        // 핵심 젬 교체는 빠져나오는 젬이 최대 4개(기존 핵심 젬 + 소켓 3)다.
-        // 끼울 젬 1개가 가방에서 빠지므로 실제로 필요한 여유는 그보다 1 적다.
-        int returning = CountReturnsForCore(skill, coreIndex);
-
-        if (returning > 1 &&
-            PlayerInventory.EnsureInstance().Bag.FreeSlots + 1 < returning)
-        {
-            GameLogger.Log("[SkillManager] 가방에 자리가 없어 핵심 스킬을 교체할 수 없습니다.");
-            OnEquipRejected?.Invoke(skill, SocketError.None);
-            return false;
-        }
-
+        // 【자리 검사를 하지 않는다.】 젬은 가방 칸을 쓰지 않는다.
+        // (ItemDefinition.IsSlotless) 핵심 젬을 갈아 끼우면 소켓의 보조 젬까지
+        // 최대 4개가 한꺼번에 돌아오는데, 예전에는 그만큼의 빈 칸이 없으면
+        // 교체 자체가 막혔다. 이제 돌아올 곳은 늘 있다.
         return Equip(skill, () => build.TryEquipCore(skill, coreIndex, returned),
                      build.CanEquipCore(skill, coreIndex));
-    }
-
-    /// <summary>이 핵심 젬을 저 자리에 끼우면 가방으로 돌아올 젬이 몇 개인지.</summary>
-    private int CountReturnsForCore(SkillDefinition skill, int coreIndex)
-    {
-        if (skill == null)
-            return 0;
-
-        int count = build.GetCore(coreIndex) == null ? 0 : 1;
-
-        for (int s = 0; s < SocketedBuild.SocketsPerCore; s++)
-        {
-            SkillDefinition support = build.GetSocket(coreIndex, s);
-
-            if (support != null && !skill.Tags.ContainsAll(support.RequiredTags))
-                count++;
-        }
-
-        return count;
     }
 
     public bool TryEquipSupport(SkillDefinition skill, int coreIndex, int socketIndex)
@@ -444,8 +417,7 @@ public class SkillManager : Singleton<SkillManager>
     {
         Inventory bag = PlayerInventory.EnsureInstance().Bag;
 
-        // 뺄 것이 가방에 다 들어가는지 먼저 본다. 들어가지 못하면 빼지 않는다.
-        // 젬을 바닥에 버리는 처리를 만들지 않는 한, 이것이 아이템을 지키는 유일한 방법이다.
+        // 뺄 것이 있는지만 본다. 자리는 보지 않는다 — 젬은 칸을 쓰지 않는다.
         int needed = build.GetCore(coreIndex) == null ? 0 : 1;
 
         for (int s = 0; s < SocketedBuild.SocketsPerCore; s++)
@@ -456,12 +428,6 @@ public class SkillManager : Singleton<SkillManager>
 
         if (needed == 0)
             return false;
-
-        if (bag.FreeSlots < needed)
-        {
-            GameLogger.Log("[SkillManager] 가방에 자리가 없어 젬을 뺄 수 없습니다.");
-            return false;
-        }
 
         returned.Clear();
         build.UnequipCore(coreIndex, returned);
@@ -488,12 +454,6 @@ public class SkillManager : Singleton<SkillManager>
     private bool Unequip(Func<SkillDefinition> unequipAction)
     {
         Inventory bag = PlayerInventory.EnsureInstance().Bag;
-
-        if (bag.FreeSlots < 1)
-        {
-            GameLogger.Log("[SkillManager] 가방에 자리가 없어 젬을 뺄 수 없습니다.");
-            return false;
-        }
 
         SkillDefinition removed = unequipAction();
 
