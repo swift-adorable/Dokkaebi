@@ -187,6 +187,14 @@ public class Health : MonoBehaviour, IDamageable, IPoolable
     /// </summary>
     public System.Func<bool> IsMoving { get; set; }
 
+    /// <summary>
+    /// 상태이상 밖에서 더 곱하는 회복 배율. 플레이어의 생존 상태(탈수·허기)가 문다.
+    ///
+    /// 컴포넌트를 직접 참조하지 않는 이유 — Health는 적도 쓴다.
+    /// 적에게 없는 축을 Health가 알고 있으면 안 된다. IsMoving과 같은 방식이다.
+    /// </summary>
+    public System.Func<float> ExternalHealingScale { get; set; }
+
     /// <summary>상태이상이 새로 걸렸을 때. 외형·UI가 구독한다.</summary>
     public event Action<StatusEffectType> OnStatusChanged;
 
@@ -297,7 +305,8 @@ public class Health : MonoBehaviour, IDamageable, IPoolable
         if (pool == null || amount <= 0)
             return 0;
 
-        float multiplier = Status.HealingMultiplier;
+        float multiplier = Status.HealingMultiplier
+                           * (ExternalHealingScale != null ? ExternalHealingScale() : 1f);
 
         // 절반이 되어도 최소 1은 회복한다. 0이 되면 "약을 썼는데 아무 일도 없다"가 된다.
         int scaled = multiplier < 1f

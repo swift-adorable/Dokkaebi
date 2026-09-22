@@ -87,6 +87,55 @@ public static class PlaytestActions
     public static string GiveHeraldGems()
         => Catalog == null ? NoCatalog : Give(Catalog.HeraldGems, "전령 젬");
 
+    // ── 생존 ──────────────────────────────────────────────────────────
+
+    /// <summary>수분·에너지를 절반만 남긴다. 게이지가 실제로 줄어드는지 본다.</summary>
+    public static string HalveSurvival()
+    {
+        PlayerSurvival survival = PlayerSurvival.EnsureInstance();
+
+        if (survival == null)
+            return "플레이어를 찾지 못했습니다. 레이드 중에만 됩니다.";
+
+        SurvivalState state = survival.State;
+
+        survival.Drain(state.Water * 0.5f, state.Energy * 0.5f);
+
+        return $"수분 {state.Water:0} / 에너지 {state.Energy:0}";
+    }
+
+    /// <summary>
+    /// 수분·에너지를 0으로 만든다. 【탈수·허기 페널티를 바로 본다.】
+    /// 16분을 기다려야 확인되는 것을 기다리지 않게 한다.
+    /// </summary>
+    public static string EmptySurvival()
+    {
+        PlayerSurvival survival = PlayerSurvival.EnsureInstance();
+
+        if (survival == null)
+            return "플레이어를 찾지 못했습니다. 레이드 중에만 됩니다.";
+
+        survival.Drain(SurvivalTable.MaxWater, SurvivalTable.MaxEnergy);
+
+        SurvivalState state = survival.State;
+
+        return $"탈수·허기 적용 — 이동 ×{state.MoveMultiplier:0.00} · "
+               + $"회복 ×{state.HealingMultiplier:0.00} · 허기 {state.StarvingStacks}중첩";
+    }
+
+    /// <summary>출격 상태로 되돌린다.</summary>
+    public static string RefillSurvival()
+    {
+        PlayerSurvival survival = PlayerSurvival.EnsureInstance();
+
+        if (survival == null)
+            return "플레이어를 찾지 못했습니다. 레이드 중에만 됩니다.";
+
+        survival.Refill();
+
+        return $"수분·에너지 가득 ({SurvivalTable.MaxWater:0} / {SurvivalTable.MaxEnergy:0})";
+    }
+
     // ── 레벨 ──────────────────────────────────────────────────────────
 
     /// <summary>

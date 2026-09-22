@@ -91,6 +91,18 @@ public static class UIPalette
     public static readonly Color RowAlt = new(0.40f, 0.50f, 0.66f, 0.12f);
 
     /// <summary>이득 수치(초록) / 대가 수치(주황).</summary>
+    // ── 생존 게이지 (Survival_System 7절) ─────────────────────────────
+    // 색으로 구분한다 — 아트가 없는 지금은 이것이 유일한 구분이다.
+
+    /// <summary>체력. 붉은색.</summary>
+    public static readonly Color HealthBar = new(0.86f, 0.28f, 0.32f, 0.95f);
+
+    /// <summary>수분. 푸른색.</summary>
+    public static readonly Color WaterBar = new(0.32f, 0.66f, 0.92f, 0.95f);
+
+    /// <summary>에너지. 황색.</summary>
+    public static readonly Color EnergyBar = new(0.95f, 0.74f, 0.30f, 0.95f);
+
     public static readonly Color Gain = new(0.48f, 0.82f, 0.56f, 1f);
 
     public static readonly Color Cost = new(0.95f, 0.62f, 0.40f, 1f);

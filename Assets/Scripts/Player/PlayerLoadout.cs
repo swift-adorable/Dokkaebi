@@ -72,6 +72,13 @@ public class PlayerLoadout : MonoBehaviour
         Apply(snapshot);
     }
 
+    /// <summary>
+    /// 탈수·허기가 깎는 이동 배율. 생존 컴포넌트가 없으면 1이다
+    /// (적·테스트 씬에는 없다).
+    /// </summary>
+    private static float SurvivalMoveScale()
+        => PlayerSurvival.HasInstance ? PlayerSurvival.Instance.State.MoveMultiplier : 1f;
+
     /// <summary>스냅샷을 각 컴포넌트에 나눠준다. 테스트가 직접 부를 수 있다.</summary>
     public void Apply(in LoadoutSnapshot snapshot)
     {
@@ -80,8 +87,11 @@ public class PlayerLoadout : MonoBehaviour
         if (weapon != null)
             weapon.ApplyProfile(snapshot.Weapon);
 
+        // 【SpeedScale의 주인은 여기 하나다.】
+        // 생존 페널티(탈수·허기)를 여기서 함께 곱한다. PlayerSurvival이 직접
+        // 쓰면 다음 Refresh에서 장비 값으로 덮여 페널티가 깜빡거린다.
         if (movement != null)
-            movement.SpeedScale = snapshot.MoveScale;
+            movement.SpeedScale = snapshot.MoveScale * SurvivalMoveScale();
 
         if (dash != null)
         {

@@ -118,6 +118,10 @@ public class SkillManager : Singleton<SkillManager>
         // 가방 화면(장비 · 가방 · 젬 소켓 · 패시브)을 보장한다.
         InventoryScreenUI.EnsureInstance();
 
+        // 체력 · 수분 · 에너지 막대. 씬 배치를 강제하지 않는다.
+        PlayerSurvival.EnsureInstance();
+        SurvivalHudUI.EnsureInstance();
+
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         // 검증 패널. 실기 빌드에서 장비를 얻을 유일한 경로다.
         // 출시 빌드에는 컴파일되지 않는다.
