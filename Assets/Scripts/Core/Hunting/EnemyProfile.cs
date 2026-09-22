@@ -38,6 +38,12 @@ public struct EnemyProfile
     /// <summary>사망 시 2마리로 분열하는가. (분열성)</summary>
     public bool splitsOnDeath;
 
+    /// <summary>
+    /// 초당 회복하는 최대 체력 비율. 「재생」 속성과 「재생 조직」 레이드 특성이 쓴다.
+    /// 둘 다 걸려도 더하지 않는다 — 가장 큰 것 하나만 남는다.
+    /// </summary>
+    public float regenPerSecond;
+
     /// <summary>발소리를 내는가. 유형이 정한다.</summary>
     public bool makesFootsteps;
 
@@ -126,6 +132,10 @@ public struct EnemyProfile
 
                 case EnemyAffix.Splitting:
                     profile.splitsOnDeath = true;
+                    break;
+
+                case EnemyAffix.Regenerating:
+                    profile.regenPerSecond = EnemyAffixTable.RegenPerSecond;
                     break;
             }
 
