@@ -35,12 +35,16 @@ public class PlayerInventory : Singleton<PlayerInventory>
 
     private Inventory bag;
     private EquipmentLoadout loadout;
+    private QuickSlots quickSlots;
 
     /// <summary>가방. 장비·젬·전리품이 전부 여기 들어간다.</summary>
     public Inventory Bag => bag ??= new Inventory(baseSlots, baseWeightLimit);
 
     /// <summary>착용 중인 장비 8슬롯.</summary>
     public EquipmentLoadout Loadout => loadout ??= new EquipmentLoadout();
+
+    /// <summary>화면 하단 줄이 읽는 퀵슬롯 8칸. 가방을 가리키기만 한다.</summary>
+    public QuickSlots Quick => quickSlots ??= new QuickSlots();
 
     /// <summary>과중량 단계. 이동 속도 보정이 이 값을 본다.</summary>
     public EncumbranceLevel Encumbrance => Bag.Encumbrance;
