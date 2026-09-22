@@ -29,85 +29,76 @@ public partial class InventoryScreenUI
         }
     }
 
-    /// <summary>머리글 줄의 아래 끝. 회색 띠는 깔지 않고 글자만 얹는다.</summary>
-    private const float SocketHeaderBottom = 0.885f;
-
-    private void DrawSocketPanel()
+    /// <summary>
+    /// 소켓판을 주어진 칸에 그린다. 【장비 8칸과 같은 자리】다.
+    ///
+    /// 전에는 화면 오른쪽 절반을 혼자 썼다. 왼쪽에 젬 목록, 오른쪽에 소켓판이라
+    /// 장비 화면(위 슬롯 · 아래 목록)과 구조가 달랐다. 이제 둘을 맞춘다 —
+    /// 위가 끼우는 자리, 아래가 가진 것.
+    /// </summary>
+    private void DrawSocketPanel(RectTransform area)
     {
         SkillManager manager = SkillManager.EnsureInstance();
         SocketedBuild build = manager.Build;
         SocketCapacity capacity = build.Capacity;
 
+        equipTitleLabel.text = $"각성 Lv.{build.AwakeningLevel}";
+
         int next = SocketUnlockTable.NextUnlockLevel(build.AwakeningLevel);
 
-        string nextText = next > 0
+        topInfoLabel.text = next > 0
             ? $"다음 개방 Lv.{next} ({SocketUnlockTable.DescribeUnlock(next)})"
             : "전부 개방됨";
 
-        UIFactory.CreateLabel(rightContent,
-            $"각성 Lv.{build.AwakeningLevel}", 32, FontStyle.Bold,
-            new Vector2(0f, SocketHeaderBottom), new Vector2(0.45f, 1f),
-            TextAnchor.MiddleLeft, UIPalette.TextOnGlass);
-
-        UIFactory.CreateLabel(rightContent, nextText, 24, FontStyle.Normal,
-            new Vector2(0.45f, SocketHeaderBottom), Vector2.one,
-            TextAnchor.MiddleRight, UIPalette.TextDim);
-
-        // 핵심 2줄 — 각 줄이 [핵심][소켓 1][소켓 2][소켓 3]이다.
-        //
-        // 【칸 폭을 손으로 적지 않는다.】
-        // 0.03에서 시작해 0.32, 0.225 간격… 처럼 적어 두면 좌우 여백이
-        // 서로 달라진다. 쓸 수 있는 폭을 열 수로 나눠서 계산한다.
-        // 좌우 바깥 여백은 rightContent가 이미 들여 놨으므로 0~1을 다 쓴다.
+        // 핵심 2줄 + 발동·전령 1줄 = 세 줄. 칸 폭은 계산으로 낸다 —
+        // 손으로 적으면 좌우 여백이 서로 달라진다.
         const int Columns = 4;
+        const int Rows = 3;
 
-        float rowHeight = 0.135f;
-        float rowGap = 0.028f;
-        float cellGap = 0.014f;
+        float cellGap = 0.012f;
+        float rowGap = 0.05f;
 
         float cellWidth = (1f - cellGap * (Columns - 1)) / Columns;
+        float rowHeight = (1f - rowGap * (Rows - 1)) / Rows;
 
         float Left(int column) => column * (cellWidth + cellGap);
-
-        float y = SocketHeaderBottom - rowGap;
+        float Bottom(int row) => 1f - (row + 1) * rowHeight - row * rowGap;
 
         for (int c = 0; c < SocketedBuild.MaxCores; c++)
         {
-            y -= rowHeight;
+            float y = Bottom(c);
 
-            DrawSlot(new SlotRef(SlotKind.Core, c, 0),
+            DrawSlot(area, new SlotRef(SlotKind.Core, c, 0),
                 build.GetCore(c), c < capacity.CoreSlots, $"핵심 {c + 1}",
                 new Vector2(Left(0), y), new Vector2(Left(0) + cellWidth, y + rowHeight));
 
-            for (int s = 0; s < SocketedBuild.SocketsPerCore; s++)
+            for (int i = 0; i < SocketedBuild.SocketsPerCore; i++)
             {
-                DrawSlot(new SlotRef(SlotKind.Support, c, s),
-                    build.GetSocket(c, s), s < capacity.SocketsIn(c), $"소켓 {s + 1}",
-                    new Vector2(Left(s + 1), y),
-                    new Vector2(Left(s + 1) + cellWidth, y + rowHeight));
+                DrawSlot(area, new SlotRef(SlotKind.Support, c, i),
+                    build.GetSocket(c, i), i < capacity.SocketsIn(c), $"소켓 {i + 1}",
+                    new Vector2(Left(i + 1), y),
+                    new Vector2(Left(i + 1) + cellWidth, y + rowHeight));
             }
-
-            y -= rowGap;
         }
 
         // 발동 2 + 전령 1 — 같은 격자의 0·1·3열을 쓴다.
-        y -= rowHeight;
+        float last = Bottom(Rows - 1);
 
         for (int i = 0; i < SocketedBuild.MaxMetas; i++)
         {
-            DrawSlot(new SlotRef(SlotKind.Meta, 0, i),
+            DrawSlot(area, new SlotRef(SlotKind.Meta, 0, i),
                 build.GetMeta(i), i < capacity.MetaSlots, $"발동 {i + 1}",
-                new Vector2(Left(i), y), new Vector2(Left(i) + cellWidth, y + rowHeight));
+                new Vector2(Left(i), last), new Vector2(Left(i) + cellWidth, last + rowHeight));
         }
 
-        DrawSlot(new SlotRef(SlotKind.Herald, 0, 0),
+        DrawSlot(area, new SlotRef(SlotKind.Herald, 0, 0),
             build.Herald, capacity.HeraldSlots > 0, "전령",
-            new Vector2(Left(Columns - 1), y),
-            new Vector2(Left(Columns - 1) + cellWidth, y + rowHeight));
+            new Vector2(Left(Columns - 1), last),
+            new Vector2(Left(Columns - 1) + cellWidth, last + rowHeight));
     }
 
-    private void DrawSlot(SlotRef slot, SkillDefinition occupant, bool unlocked,
-                          string emptyLabel, Vector2 min, Vector2 max)
+    private void DrawSlot(RectTransform area, SlotRef slot, SkillDefinition occupant,
+                          bool unlocked, string emptyLabel, Vector2 min, Vector2 max)
     {
         SkillDefinition picked = PickedSkill();
 
@@ -121,7 +112,7 @@ public partial class InventoryScreenUI
                     : UIPalette.Slot;
 
         Image cell = UIFactory.CreatePanel(
-            $"Slot_{slot.Kind}_{slot.CoreIndex}_{slot.Index}", rightContent, color, min, max);
+            $"Slot_{slot.Kind}_{slot.CoreIndex}_{slot.Index}", area, color, min, max);
 
         UIFactory.CreateOutline(cell,
             isCandidate ? UIPalette.Brighten(UIPalette.SlotSelected, 0.22f)
@@ -139,7 +130,7 @@ public partial class InventoryScreenUI
                     : occupant != null ? occupant.DisplayName
                     : $"{emptyLabel}\n비어 있음";
 
-        UIFactory.CreateLabel(cell.transform, text, 24, FontStyle.Bold,
+        UIFactory.CreateLabel(cell.transform, text, 23, FontStyle.Bold,
             new Vector2(0.06f, 0.06f), new Vector2(0.94f, 0.94f), TextAnchor.MiddleCenter,
             unlocked ? UIPalette.Text : UIPalette.TextDim);
     }

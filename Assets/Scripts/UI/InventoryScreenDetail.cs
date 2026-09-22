@@ -46,6 +46,10 @@ public partial class InventoryScreenUI
     private const float SlotGridBottom = 0.116f;
     private const float SlotGridTop = 0.300f;
 
+    /// <summary>퀵슬롯 줄. 소모품에만 나오므로 수치 표와 겹치지 않는다.</summary>
+    private const float QuickRowBottom = 0.400f;
+    private const float QuickRowTop = 0.480f;
+
     /// <summary>수치 표가 시작하는 높이. 아래 버튼들을 덮지 않는 선이다.</summary>
     private const float StatTop = 0.62f;
 
@@ -295,6 +299,12 @@ public partial class InventoryScreenUI
             return;
         }
 
+        if (definition.Kind == ItemKind.Consumable)
+        {
+            DrawQuickSlotRow(target);
+            return;
+        }
+
         if (definition is not EquipmentDefinition equipment)
             return;
 
@@ -317,6 +327,65 @@ public partial class InventoryScreenUI
                 new Vector2(0f, ActionRowTop + 0.012f), new Vector2(1f, ActionRowTop + 0.078f),
                 TextAnchor.MiddleCenter, UIPalette.Warning);
         }
+    }
+
+    /// <summary>
+    /// 퀵슬롯 8칸 — 【화면 하단 줄에 걸 자리】.
+    ///
+    /// 소모품에만 붙인다. 장비는 착용하는 것이고 젬은 끼우는 것이라
+    /// 급할 때 한 번 누를 일이 없다. 여덟 칸을 다 보여 주는 이유 —
+    /// 「몇 번에 걸까」는 손가락이 기억하는 것이라 유저가 직접 골라야 한다.
+    /// 이미 걸린 칸을 다시 누르면 뺀다.
+    /// </summary>
+    private void DrawQuickSlotRow(ItemStack target)
+    {
+        QuickSlots quick = PlayerInventory.EnsureInstance().Quick;
+
+        int current = quick.IndexOf(target);
+
+        UIFactory.CreateLabel(detailContent,
+            current == QuickSlots.None
+                ? "퀵슬롯에 걸기"
+                : $"퀵슬롯 {current + 1}번에 걸려 있습니다 — 같은 칸을 누르면 뺍니다",
+            22, FontStyle.Bold,
+            new Vector2(0f, QuickRowTop + 0.008f), new Vector2(1f, QuickRowTop + 0.062f),
+            TextAnchor.MiddleLeft, UIPalette.TextDim);
+
+        for (int i = 0; i < QuickSlots.Count; i++)
+        {
+            float left = i / (float)QuickSlots.Count + 0.005f;
+            float right = (i + 1) / (float)QuickSlots.Count - 0.005f;
+
+            int captured = i;
+
+            Button slot = UIFactory.CreateButton(detailContent, (i + 1).ToString(),
+                new Vector2(left, QuickRowBottom), new Vector2(right, QuickRowTop),
+                current == i ? UIPalette.Action : UIPalette.Subtle,
+                () => AssignQuickSlot(captured, target), 24);
+
+            // 다른 것이 이미 걸린 칸은 색으로만 알린다 — 누르면 밀려난다.
+            ItemStack occupant = quick.Get(i);
+
+            if (occupant == null || ReferenceEquals(occupant, target))
+                continue;
+
+            var label = slot.GetComponentInChildren<Text>();
+
+            if (label != null)
+                label.color = UIPalette.TextAccent;
+        }
+    }
+
+    private void AssignQuickSlot(int index, ItemStack target)
+    {
+        PlayerInventory.EnsureInstance().Quick.Assign(index, target);
+
+        RefreshQuickSlots();
+
+        // 상세는 열어 둔다 — 여덟 칸 중 한 번에 고르지 못할 수 있다.
+        UIFactory.ClearChildren(detailContent);
+
+        DrawItemDetail();
     }
 
     /// <summary>
