@@ -223,16 +223,16 @@ public class ItemActionMenu : MonoBehaviour
         box.anchoredPosition = new Vector2(x, y);
     }
 
-    // ────────────────────────────────── 차림표 만들기
+    // ────────────────────────────────── 빠른 메뉴 만들기
 
     /// <summary>
-    /// 아이템 성격에 맞는 줄을 고른다. 【컨테이너(전리품·창고·상점) 쪽 칸용.】
+    /// 【컨테이너(전리품·창고·상점) 쪽 칸.】 아직 내 물건이 아니다.
     ///
-    /// 덕코프의 줄 이름을 그대로 쓴다 — 장비 · 사용 · 탄약 제거.
+    /// 덕코프의 줄 이름을 그대로 쓴다 — 줍기 · 장비 · 사용.
     /// 「마커」는 넣지 않는다: 위키에 그 버튼의 설명이 없고(확인 불가),
-    /// Blob에는 지도가 없어 표시할 곳도 없다.
-    /// 「상세보기」는 덕코프에 없지만 더한다 — 모바일은 마우스를 올려
-    /// 설명을 볼 수 없어서, 읽을 길이 버튼밖에 없다.
+    /// Blob에는 지도가 없어 표시할 곳도 없다. (지도가 생기면 다시 본다)
+    /// 「상세보기」는 덕코프에 없지만 더한다 — 모바일은 올려놓아 설명을
+    /// 볼 수 없어서, 읽을 길이 버튼밖에 없다.
     /// </summary>
     public static List<Entry> ForContainerItem(
         ItemDefinition definition,
@@ -258,6 +258,51 @@ public class ItemActionMenu : MonoBehaviour
         entries.Add(new Entry("상세보기", UIPalette.Subtle, detail));
 
         return entries;
+    }
+
+    /// <summary>
+    /// 【가방 칸.】 내 물건이다 — 끼우고, 걸고, 버릴 수 있다.
+    ///
+    /// 「상세보기」를 맨 아래에 두는 이유 — 가방에 있는 것은 대개 이미
+    /// 무엇인지 안다. 자주 하는 일이 위로 온다.
+    /// </summary>
+    public static List<Entry> ForBagItem(
+        ItemDefinition definition,
+        Action equip, Action use, Action quick, Action discard, Action detail)
+    {
+        var entries = new List<Entry>(4);
+
+        if (definition == null)
+            return entries;
+
+        if (equip != null && (IsEquipment(definition.Kind) || definition.IsSkillGem))
+            entries.Add(new Entry("장착", UIPalette.Action, equip));
+
+        if (use != null && definition.Kind == ItemKind.Consumable)
+            entries.Add(new Entry("사용", UIPalette.Gain, use));
+
+        if (quick != null && definition.Kind == ItemKind.Consumable)
+            entries.Add(new Entry("퀵슬롯", UIPalette.SlotEquippable, quick));
+
+        entries.Add(new Entry("상세보기", UIPalette.Subtle, detail));
+
+        // 되돌릴 수 없는 일은 맨 아래. 손가락이 가장 먼 줄이다.
+        if (discard != null)
+            entries.Add(new Entry("버리기", UIPalette.Warning, discard));
+
+        return entries;
+    }
+
+    /// <summary>
+    /// 【착용 중인 장비 슬롯 · 꽂힌 젬.】 벗는 것과 보는 것만 할 수 있다.
+    /// </summary>
+    public static List<Entry> ForEquippedItem(string removeLabel, Action remove, Action detail)
+    {
+        return new List<Entry>(2)
+        {
+            new Entry(removeLabel, UIPalette.Action, remove),
+            new Entry("상세보기", UIPalette.Subtle, detail)
+        };
     }
 
     private static bool IsEquipment(ItemKind kind)

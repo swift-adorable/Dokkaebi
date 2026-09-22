@@ -139,7 +139,9 @@ public partial class InventoryScreenUI
         button.interactable = unlocked;
 
         SlotRef captured = slot;
-        button.onClick.AddListener(() => OnSlotClicked(captured));
+        RectTransform cellRect = cell.rectTransform;
+
+        button.onClick.AddListener(() => OnSlotClicked(captured, cellRect));
 
         string text = !unlocked ? $"{emptyLabel}\n잠김"
                     : occupant != null ? occupant.DisplayName
@@ -234,7 +236,7 @@ public partial class InventoryScreenUI
     /// 누르면 대신 젬이 빠졌다. 같은 자리를 같은 방식으로 눌러도 결과가
     /// 정반대라 실수로 빼는 일이 잦았다. 이제 넣고 빼는 일은 둘 다 상세에서 한다.
     /// </summary>
-    private void OnSlotClicked(SlotRef slot)
+    private void OnSlotClicked(SlotRef slot, RectTransform cell)
     {
         // 자리를 고르는 중이면 그것이 먼저다. 밝은 칸이면 넣고, 아니면 그만둔다.
         if (placingGem != null)
@@ -254,13 +256,19 @@ public partial class InventoryScreenUI
 
         SkillDefinition occupant = OccupantOf(slot);
 
-        if (occupant != null)
+        if (occupant == null)
         {
-            OpenSocketDetail(occupant, slot);
+            ShowToast("빈 자리입니다. 아래에서 젬을 누르고 「장착」을 누르십시오.");
             return;
         }
 
-        ShowToast("빈 자리입니다. 아래에서 젬을 누르고 「장착」을 누르십시오.");
+        // 꽂혀 있는 젬도 가방 칸과 같은 규칙이다 — 빠른 메뉴가 먼저 뜬다.
+        var entries = ItemActionMenu.ForEquippedItem(
+            "빼기",
+            remove: () => TakeGemOut(slot),
+            detail: () => OpenSocketDetail(occupant, slot));
+
+        ItemActionMenu.Open(cell, entries);
     }
 
     private static SkillDefinition OccupantOf(SlotRef slot)
