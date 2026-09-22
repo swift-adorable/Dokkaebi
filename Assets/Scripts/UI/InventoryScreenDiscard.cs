@@ -38,6 +38,7 @@ public partial class InventoryScreenUI
             return;
 
         CloseDiscardPopup();
+        CloseItemDetail();
 
         discardTarget = stack;
         discardAmount = stack.Count;
@@ -225,7 +226,9 @@ public partial class InventoryScreenUI
 
         PlayerInventory.Instance.RefreshCapacity();
 
-        SetHint($"「{name}」 {amount}개를 버렸습니다.");
+        selectedSlot = null;
+
+        ShowToast($"「{name}」 {amount}개를 버렸습니다.");
 
         Refresh();
     }
