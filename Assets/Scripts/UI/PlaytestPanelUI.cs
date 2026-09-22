@@ -127,13 +127,9 @@ public class PlaytestPanelUI : MonoBehaviour
     /// 화면 버튼줄의 자리·크기. 【InventoryScreenUI와 같은 값이어야 한다.】
     /// 두 캔버스가 나뉘어 있어 한쪽만 고치면 줄이 어긋난다.
     /// </summary>
-    private const float ButtonWidth = 150f;
-    private const float ButtonHeight = 88f;
-    private const float ButtonGap = 10f;
+    private const float ButtonWidth = 132f;
+    private const float ButtonHeight = 62f;
     private const float ButtonMargin = 10f;
-
-    /// <summary>장비·스킬·패시브 세 개 다음이 이 버튼의 자리다.</summary>
-    private const int SlotFromRight = 3;
 
     private void BuildToggle(Transform safe)
     {
@@ -142,18 +138,16 @@ public class PlaytestPanelUI : MonoBehaviour
 
         toggle = image.gameObject;
 
-        // 【오른쪽 위, 세 버튼 왼쪽에 붙인다.】
-        // 전에는 왼쪽 맨 아래였다. 거기는 가방 화면의 소지 중량 카드 자리라
-        // 겹쳤고, 화면을 열 때마다 감췄다 켰다 해야 했다.
-        // 같은 줄에 두면 「화면을 여는 버튼들」이 한 곳에 모인다.
+        // 【왼쪽 위.】 오른쪽 위는 장비·스킬·패시브가 쓴다.
+        // 개발용 버튼을 그 줄에 섞으면 출시 화면과 개발 화면이 같아 보인다.
+        // 반대편 구석에 두면 「이건 게임의 일부가 아니다」가 자리로 드러난다.
+        // 예전 자리(왼쪽 맨 아래)는 가방 화면의 소지 중량 카드와 겹쳤다.
         var rect = image.rectTransform;
-        rect.anchorMin = Vector2.one;
-        rect.anchorMax = Vector2.one;
-        rect.pivot = Vector2.one;
+        rect.anchorMin = new Vector2(0f, 1f);
+        rect.anchorMax = new Vector2(0f, 1f);
+        rect.pivot = new Vector2(0f, 1f);
         rect.sizeDelta = new Vector2(ButtonWidth, ButtonHeight);
-
-        rect.anchoredPosition = new Vector2(
-            -(ButtonMargin + SlotFromRight * (ButtonWidth + ButtonGap)), -ButtonMargin);
+        rect.anchoredPosition = new Vector2(ButtonMargin, -ButtonMargin);
 
         var button = image.gameObject.AddComponent<Button>();
         button.targetGraphic = image;
