@@ -372,6 +372,38 @@ namespace Blob.Tests
         }
 
         [Test]
+        public void 저항_속성이_원형의_약점을_뒤집지_않는다()
+        {
+            // 【압착기는 「전기로 잡아라」가 정체성이다.】
+            // 절연성이 붙었다고 전기가 오히려 덜 아프게 되면
+            // 전기 빌드에게는 공략법이 사라진다.
+            EnemyProfile insulated = EnemyProfile.Build(
+                EnemyArchetype.Crusher, EnemyRarity.Magic, new[] { EnemyAffix.Insulated });
+
+            Assert.AreEqual(1f, insulated.resistances.lightning, 0.001f,
+                "압착기 + 절연성의 전기 배율이 1.0이 아닙니다. " +
+                "2.0이면 속성이 안 먹은 것이고, 0.5면 약점이 뒤집힌 것입니다.");
+
+            // 손대지 않은 속성은 그대로다.
+            Assert.AreEqual(0f, insulated.resistances.chaos, 0.001f, "카오스 면역이 사라졌습니다.");
+        }
+
+        [Test]
+        public void 이미_저항이_높은_적이_속성_때문에_물러지지_않는다()
+        {
+            // 정착체의 물리 0.66에 경화(0.5)를 얹으면 0.5다.
+            // 0.33(곱연산)도 아니고, 0.66보다 커져서도 안 된다.
+            EnemyProfile hardened = EnemyProfile.Build(
+                EnemyArchetype.Settled, EnemyRarity.Magic, new[] { EnemyAffix.Hardened });
+
+            Assert.AreEqual(0.5f, hardened.resistances.physical, 0.001f);
+
+            Assert.LessOrEqual(hardened.resistances.physical,
+                EnemyArchetypeTable.Of(EnemyArchetype.Settled).resistances.physical,
+                "속성이 붙었는데 오히려 물리에 약해졌습니다.");
+        }
+
+        [Test]
         public void 신속과_육중이_이동_배율에_들어간다()
         {
             EnemyProfile swift = EnemyProfile.Build(

@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 
 /// <summary>
 /// 속성 내성 배율 묶음. 1.0이 기본이고, 0.5면 절반만 받고, 2.0이면 두 배로 받는다.
@@ -70,7 +71,7 @@ public struct ElementalResistances
     }
 
     /// <summary>
-    /// 한 속성만 「더 낮은 쪽」으로 끌어내린다. 나머지 속성은 건드리지 않는다.
+    /// 한 속성에 저항 속성 하나를 얹는다. 나머지 속성은 건드리지 않는다.
     ///
     /// 【TakeLowest로 대신할 수 없다.】
     /// 몬스터 속성 「경화」는 물리 하나만 0.5로 만든다. 이걸 구현하려고
@@ -85,8 +86,22 @@ public struct ElementalResistances
     {
         float current = Get(element);
 
-        if (multiplier < current)
-            Set(element, multiplier);
+        // 【약점을 저항으로 뒤집지 않는다.】
+        // 그냥 multiplier로 덮으면 압착기의 전기 2배가 0.5배가 되어,
+        // 「얘는 전기로 잡아라」라는 원형의 답이 속성 하나로 사라진다.
+        // 전기 들고 간 사람에게는 공략법이 없어지는 것과 같다.
+        //
+        // 대신 곱하고, multiplier를 바닥으로 삼는다.
+        //   전기 2.0  + 절연성 → 1.0  (약점이 줄 뿐 사라지지 않는다)
+        //   물리 1.0  + 경화   → 0.5  (기존과 같다)
+        //   물리 0.66 + 경화   → 0.5  (0.33이 되지 않는다 — 곱연산 금지)
+        //   이미 0.4  + 경화   → 0.4  (더 약해지지 않는다)
+        //
+        // 마지막 Min이 없으면 이미 잘 저항하던 적이 속성을 얻고
+        // 오히려 물러지는 일이 생긴다.
+        float softened = Mathf.Min(current, Mathf.Max(current * multiplier, multiplier));
+
+        Set(element, softened);
     }
 
     /// <summary>
