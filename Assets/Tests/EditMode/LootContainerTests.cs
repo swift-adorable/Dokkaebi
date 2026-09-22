@@ -33,6 +33,60 @@ namespace Blob.Tests
             return def;
         }
 
+        // ── 가방 → 컨테이너 (창고의 「넣기」) ─────────────────────────────
+
+        [Test]
+        public void 가방에서_컨테이너로_옮긴다()
+        {
+            var loot = new LootContainer(4);
+            var bag = new Inventory(slots: 4, weight: 100f);
+
+            ItemDefinition item = Create("scrap", weight: 2f);
+
+            bag.TryAdd(item);
+
+            ItemStack stack = bag.Stacks[0];
+
+            Assert.IsTrue(loot.TryPutFrom(bag, stack));
+
+            Assert.AreEqual(0, bag.Stacks.Count, "가방에서 빠져야 합니다.");
+            Assert.AreEqual(1, loot.UsedSlots);
+            Assert.AreSame(stack, loot.Get(0), "같은 개체가 그대로 옮겨져야 합니다.");
+        }
+
+        [Test]
+        public void 컨테이너가_꽉_차면_가방에_그대로_남는다()
+        {
+            // 【아이템은 사라지지 않는다.】 반대 방향에서도 같은 규칙이다.
+            var loot = new LootContainer(1);
+            var bag = new Inventory(slots: 4, weight: 100f);
+
+            ItemDefinition item = Create("scrap");
+
+            loot.TryPut(Create("filler"));
+            bag.TryAdd(item);
+
+            ItemStack stack = bag.Stacks[0];
+
+            Assert.IsFalse(loot.TryPutFrom(bag, stack));
+
+            Assert.AreEqual(1, bag.Stacks.Count, "가방에 그대로 있어야 합니다.");
+            Assert.AreSame(stack, bag.Stacks[0]);
+            Assert.AreEqual(1, loot.UsedSlots, "컨테이너는 그대로여야 합니다.");
+        }
+
+        [Test]
+        public void 가방에_없는_개체는_옮기지_않는다()
+        {
+            var loot = new LootContainer(4);
+            var bag = new Inventory(slots: 4, weight: 100f);
+
+            var orphan = new ItemStack(Create("scrap"), 1);
+
+            Assert.IsFalse(loot.TryPutFrom(bag, orphan));
+            Assert.AreEqual(0, loot.UsedSlots, "가방에 없던 것이 생겨나면 안 됩니다.");
+        }
+
         // ── 칸 ────────────────────────────────────────────────────────────
 
         [Test]

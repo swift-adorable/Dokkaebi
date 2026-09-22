@@ -127,6 +127,34 @@ public class LootContainer
         return true;
     }
 
+    /// <summary>
+    /// 가방에서 이쪽으로 옮긴다. 【반대 방향】이다.
+    ///
+    /// 시체·상자에서는 쓸 일이 없다 — 주운 것을 시체에 도로 넣는 조작은 없다.
+    /// 창고와 상점이 이 길을 쓴다. 두 창이 같은 틀(ExchangeWindowUI)을
+    /// 쓰므로, 틀이 아니라 여기에 두어야 창마다 다른 규칙이 생기지 않는다.
+    ///
+    /// 전부 아니면 전혀. 가방에서 뺐는데 넣지 못하면 도로 넣는다 —
+    /// 이 클래스는 아이템을 만들지도 없애지도 않는다.
+    /// </summary>
+    public bool TryPutFrom(Inventory bag, ItemStack stack)
+    {
+        if (bag == null || stack == null || stack.IsEmpty || IsFull)
+            return false;
+
+        if (!bag.RemoveStack(stack))
+            return false;
+
+        if (TryPut(stack))
+            return true;
+
+        // 여기까지 오면 IsFull 검사와 TryPut의 판단이 어긋난 것이다.
+        // 아이템을 잃는 것보다 되돌리는 편이 낫다.
+        bag.TryAddStack(stack);
+
+        return false;
+    }
+
     /// <summary>가능한 만큼 전부 옮긴다. 실제로 옮긴 칸 수를 돌려준다.</summary>
     public int TakeAllTo(Inventory bag)
     {

@@ -272,6 +272,109 @@ public static class UIFactory
     }
 
     /// <summary>
+    /// 스크롤되는 목록 한 벌 — 눌린 바탕 · 잘라 내는 면 · 위로 자라는 내용물.
+    ///
+    /// 가방 격자와 전리품 격자가 똑같은 스물몇 줄을 각자 세우고 있었다.
+    /// 한쪽만 고치면 두 화면의 스크롤 감이 달라지므로 한 곳에 둔다.
+    /// </summary>
+    public readonly struct ScrollList
+    {
+        /// <summary>뒤에 깔리는 눌린 면. 자리를 옮길 때 같이 옮겨야 한다.</summary>
+        public readonly Image Well;
+
+        /// <summary>잘라 내는 면. 【칸 크기 계산은 이 면의 rect를 쓴다.】</summary>
+        public readonly RectTransform Viewport;
+
+        /// <summary>내용물. 높이(sizeDelta.y)를 직접 정해 준다.</summary>
+        public readonly RectTransform Content;
+
+        public readonly ScrollRect Scroll;
+
+        public ScrollList(Image well, RectTransform viewport, RectTransform content,
+                          ScrollRect scroll)
+        {
+            Well = well;
+            Viewport = viewport;
+            Content = content;
+            Scroll = scroll;
+        }
+    }
+
+    /// <summary>
+    /// 스크롤 목록을 만든다. 내용물의 높이는 부르는 쪽이 정한다 —
+    /// 칸 격자냐 글줄이냐에 따라 재는 법이 다르기 때문이다.
+    /// </summary>
+    public static ScrollList CreateScrollList(
+        string name, Transform parent, Vector2 anchorMin, Vector2 anchorMax,
+        float inset = 8f)
+    {
+        Image well = CreatePanel($"{name}Well", parent, UIPalette.Inset,
+            anchorMin, anchorMax, Radius);
+
+        RectTransform viewport = CreateSlice(name, parent, anchorMin, anchorMax,
+            left: inset, bottom: inset, right: inset, top: inset);
+
+        // 마스크가 없으면 스크롤한 칸이 위쪽 영역을 덮는다.
+        viewport.gameObject.AddComponent<RectMask2D>();
+
+        // 드래그를 받으려면 레이캐스트 대상이 필요하다. 빈 칸 사이나
+        // 마지막 줄 아래를 문질러도 스크롤되게 만드는 투명 판이다.
+        var catcher = viewport.gameObject.AddComponent<Image>();
+        catcher.color = new Color(0f, 0f, 0f, 0f);
+
+        // 내용물은 위를 기준으로 자란다 — 첫 칸의 자리가 용량과 무관하게 같다.
+        RectTransform content = CreateRegion($"{name}Content", viewport,
+            new Vector2(0f, 1f), new Vector2(1f, 1f));
+
+        content.pivot = new Vector2(0.5f, 1f);
+        content.sizeDelta = Vector2.zero;
+
+        var scroll = viewport.gameObject.AddComponent<ScrollRect>();
+        scroll.viewport = viewport;
+        scroll.content = content;
+        scroll.horizontal = false;
+        scroll.vertical = true;
+        scroll.movementType = ScrollRect.MovementType.Elastic;
+        scroll.elasticity = 0.1f;
+        scroll.inertia = true;
+        scroll.decelerationRate = 0.135f;
+        scroll.scrollSensitivity = 40f;
+
+        return new ScrollList(well, viewport, content, scroll);
+    }
+
+    /// <summary>
+    /// 정사각형 칸 격자의 치수. 【가로를 열 수로 나눈 값이 한 변이다.】
+    ///
+    /// 여백을 정규화 값으로 돌려주는 이유 — GetCellAnchors가 0~1을 받는다.
+    /// 가로와 세로의 기준 길이가 다르므로 같은 픽셀 간격이라도 값이 다르다.
+    /// 이 환산을 빼먹으면 세로 여백만 벌어진다 (여러 번 겪은 실수다).
+    /// </summary>
+    public static void SquareGridMetrics(
+        RectTransform viewport, int columns, int cellCount, int minRows,
+        out int rows, out float contentHeight, out float paddingX, out float paddingY)
+    {
+        float viewWidth = Mathf.Max(0f, viewport.rect.width);
+        float viewHeight = Mathf.Max(0f, viewport.rect.height);
+
+        float cellSize = columns > 0 && viewWidth > 0f ? viewWidth / columns : 0f;
+
+        int needed = Mathf.CeilToInt(cellCount / (float)Mathf.Max(1, columns));
+
+        // 화면을 채울 만큼은 그린다. 빈 칸이 곧 남은 자리라는 표시다.
+        int fits = cellSize > 0f ? Mathf.CeilToInt(viewHeight / cellSize) : minRows;
+
+        rows = Mathf.Max(1, Mathf.Max(Mathf.Max(needed, fits), minRows));
+
+        contentHeight = cellSize * rows;
+
+        float gap = cellSize * 0.055f;
+
+        paddingX = viewWidth > 0f ? gap / viewWidth : 0.01f;
+        paddingY = contentHeight > 0f ? gap / contentHeight : 0.01f;
+    }
+
+    /// <summary>
     /// 넘치면 스크롤되는 글자 상자.
     ///
     /// 【왜 그냥 Label을 쓰지 않는가】

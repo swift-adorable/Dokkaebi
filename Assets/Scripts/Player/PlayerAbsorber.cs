@@ -83,7 +83,7 @@ public class PlayerAbsorber : MonoBehaviour
             return true;
         }
 
-        LootWindowUI.EnsureInstance().Open(corpse);
+        ExchangeWindowUI.EnsureInstance().Open(corpse);
 
         return true;
     }
