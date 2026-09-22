@@ -58,7 +58,15 @@ public class EnemyAggro : MonoBehaviour, IPoolable
     private Transform cachedPlayer;
 
     private float nextEvaluateTime;
-    private int targetId = AggroSelector.NoTarget;
+
+    /// <summary>마지막으로 판단한 시각. 망각 시간을 흘리려면 간격을 알아야 한다.</summary>
+    private float lastEvaluateTime;
+
+    /// <summary>이 개체가 물고 있는 대상과, 놓친 채 흐른 시간.</summary>
+    private AggroMemory memory = AggroMemory.Empty;
+
+    /// <summary>이번 판단에서 쓸 원형 수치. 후보마다 표를 다시 읽지 않는다.</summary>
+    private EnemyArchetypeStats stats;
 
     /// <summary>이 개체의 식별자. 살아 있는 동안 바뀌지 않는다.</summary>
     public int SelfId { get; private set; }
@@ -88,18 +96,19 @@ public class EnemyAggro : MonoBehaviour, IPoolable
 
     public void OnSpawned()
     {
-        targetId = AggroSelector.NoTarget;
+        memory = AggroMemory.Empty;
         Target = null;
         TargetFaction = Faction.Friendly;
 
         // 첫 판단을 흩는다. 한 무리가 같이 스폰되면 같은 프레임에 몰린다.
         nextEvaluateTime = Time.time + Random.Range(0f, reevaluateInterval);
+        lastEvaluateTime = Time.time;
     }
 
     public void OnDespawned()
     {
         Target = null;
-        targetId = AggroSelector.NoTarget;
+        memory = AggroMemory.Empty;
     }
 
     private void Update()
@@ -120,6 +129,10 @@ public class EnemyAggro : MonoBehaviour, IPoolable
     {
         if (enemyManager == null)
             enemyManager = EnemyManager.EnsureInstance();
+
+        stats = identity != null
+            ? EnemyArchetypeTable.Of(identity.Archetype)
+            : EnemyArchetypeTable.Of(EnemyArchetype.Scav);
 
         Buffer.Clear();
 
@@ -168,15 +181,27 @@ public class EnemyAggro : MonoBehaviour, IPoolable
             });
         }
 
-        bool infinite = identity != null && identity.Profile.chasesForever;
+        // 【포기 조건을 시간으로 바꿨다.】
+        // 거리로만 놓으면 플레이어가 적보다 느릴 때 — 짐을 잔뜩 든 순간 —
+        // 교전을 피할 방법이 없다. 시간으로 두면 「엄폐물 뒤에서 버틴다」가
+        // 유효한 수가 된다. 거리는 지형에 낀 적을 떼는 최후 방어선으로만 남긴다.
+        var pursuit = new AggroPursuit
+        {
+            forgetTime = stats.forgetTime,
+            forcedChaseRange = stats.forcedChaseRange,
+            safetyRange = detectRange * AggroSelector.DefaultSafetyMultiplier
+        };
+
+        float elapsed = Mathf.Max(0f, Time.time - lastEvaluateTime);
+        lastEvaluateTime = Time.time;
+
+        int before = memory.targetId;
 
         int picked = AggroSelector.Select(
-            Faction, transform.position, detectRange, targetId, infinite, Buffer, SelfId);
+            Faction, transform.position, in pursuit, ref memory, elapsed, Buffer, SelfId);
 
-        if (picked == targetId && Target != null)
+        if (picked == before && Target != null)
             return;
-
-        targetId = picked;
 
         Resolve(picked, player);
     }
@@ -197,16 +222,13 @@ public class EnemyAggro : MonoBehaviour, IPoolable
     /// </summary>
     private bool Sense(Vector3 targetPosition, float noiseRadius)
     {
-        EnemyArchetypeStats stats = identity != null
-            ? EnemyArchetypeTable.Of(identity.Archetype)
-            : EnemyArchetypeTable.Of(EnemyArchetype.Scav);
-
         var input = new PerceptionInput
         {
             viewerPosition = transform.position,
             viewerForward = transform.forward,
             visionConeDegrees = stats.visionConeDegrees,
             visionRange = Mathf.Min(stats.visionRange, detectRange),
+            listenerHearingScale = stats.hearingScale,
             targetPosition = targetPosition,
             targetNoiseRadius = noiseRadius,
             hasLineOfSight = true
