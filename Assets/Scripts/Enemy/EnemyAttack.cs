@@ -89,6 +89,9 @@ public class EnemyAttack : MonoBehaviour
     /// <summary>이 적의 공격 방식.</summary>
     public EnemyAttackKind Kind => attackKind;
 
+    /// <summary>원거리일 때 쏘는 것. 비어 있으면 공격이 아무 일도 하지 않는다.</summary>
+    public GameObject ProjectilePrefab => projectilePrefab;
+
     /// <summary>
     /// 유형 · 등급이 정한 공격 수치를 주입한다. (EnemyIdentity)
     ///

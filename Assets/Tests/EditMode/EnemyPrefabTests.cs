@@ -167,9 +167,17 @@ namespace Blob.Tests
 
         private static readonly (string path, EnemyArchetype archetype)[] Wired =
         {
-            ("Assets/Prefabs/Enemy.prefab",        EnemyArchetype.Scav),
-            ("Assets/Prefabs/EnemyRanged.prefab",  EnemyArchetype.Dynamo),
-            ("Assets/Prefabs/EnemyCrusher.prefab", EnemyArchetype.Crusher)
+            // 이미 있던 둘은 이름이 다르다. 씬과 스폰기가 이 경로를 참조하므로 바꾸지 않는다.
+            ("Assets/Prefabs/Enemy.prefab",         EnemyArchetype.Scav),
+            ("Assets/Prefabs/EnemyRanged.prefab",   EnemyArchetype.Dynamo),
+
+            ("Assets/Prefabs/EnemyCrusher.prefab",  EnemyArchetype.Crusher),
+            ("Assets/Prefabs/EnemyLurker.prefab",   EnemyArchetype.Lurker),
+            ("Assets/Prefabs/EnemyChemic.prefab",   EnemyArchetype.Chemic),
+            ("Assets/Prefabs/EnemySpecimen.prefab", EnemyArchetype.Specimen),
+            ("Assets/Prefabs/EnemySettled.prefab",  EnemyArchetype.Settled),
+            ("Assets/Prefabs/EnemySentry.prefab",   EnemyArchetype.Sentry),
+            ("Assets/Prefabs/EnemyWraith.prefab",   EnemyArchetype.Wraith)
         };
 
         [Test]
@@ -220,6 +228,52 @@ namespace Blob.Tests
 
                 Assert.AreEqual(stats.armourPenetration, attack.ArmourPenetration,
                     $"{who} 프리팹의 방어 관통이 표({stats.armourPenetration})와 다릅니다.");
+
+                // 【원거리형을 근접 프리팹에서 만들면 쏘는데 아무것도 안 나간다.】
+                // 투사체 참조는 원거리 프리팹에만 들어 있다.
+                Assert.AreEqual(
+                    stats.ranged ? EnemyAttackKind.Ranged : EnemyAttackKind.Melee,
+                    attack.Kind,
+                    $"{who} 프리팹의 공격 방식이 표와 다릅니다.");
+
+                var movement = go.GetComponent<EnemyMovement>();
+
+                Assert.AreEqual(stats.moveSpeed, movement.BaseMoveSpeed, 0.001f,
+                    $"{who} 프리팹의 이동 속도가 표({stats.moveSpeed})와 다릅니다.");
+            }
+        }
+
+        [Test]
+        public void 유형_아홉이_모두_프리팹을_갖는다()
+        {
+            Assert.AreEqual(EnemyArchetypeTable.Count, Wired.Length,
+                "유형 표는 9종인데 배선된 프리팹 수가 다릅니다.");
+
+            var seen = new System.Collections.Generic.HashSet<EnemyArchetype>();
+
+            foreach (var row in Wired)
+            {
+                Assert.IsTrue(seen.Add(row.archetype), $"{row.archetype}이 두 번 배선됐습니다.");
+
+                Assert.IsNotNull(AssetDatabase.LoadAssetAtPath<GameObject>(row.path), row.path);
+            }
+        }
+
+        [Test]
+        public void 원거리형이_투사체를_들고_있다()
+        {
+            // 원거리인데 투사체가 비어 있으면 공격이 아무 일도 하지 않는다.
+            // 「쏘는 것처럼 보이는데 피해가 안 들어온다」는 눈으로 찾기 가장 어려운 버그다.
+            foreach (var row in Wired)
+            {
+                if (!EnemyArchetypeTable.Of(row.archetype).ranged)
+                    continue;
+
+                var go = AssetDatabase.LoadAssetAtPath<GameObject>(row.path);
+                var attack = go.GetComponent<EnemyAttack>();
+
+                Assert.IsNotNull(attack.ProjectilePrefab,
+                    $"{EnemyArchetypeTable.Name(row.archetype)}이 원거리인데 투사체가 없습니다.");
             }
         }
 
