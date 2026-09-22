@@ -49,7 +49,6 @@ public class ExchangeWindowUI : MonoBehaviour
 
     private GameObject panel;
     private Text titleLabel;
-    private Text footerLabel;
     private Button takeAllButton;
 
     private UIFactory.ScrollList grid;
@@ -112,20 +111,18 @@ public class ExchangeWindowUI : MonoBehaviour
             new Vector2(0.04f, 0.895f), new Vector2(0.72f, 1f),
             TextAnchor.MiddleLeft, UIPalette.TextOnGlass);
 
-        UIFactory.CreateButton(box, "닫기",
-            new Vector2(0.74f, 0.910f), new Vector2(0.96f, 0.988f),
-            UIPalette.Subtle, Close, 24);
+        // 【닫기를 두지 않는다.】 파밍은 가방 화면과 한 벌로 여닫힌다.
+        // 닫는 버튼이 양쪽에 하나씩 있으면 「어느 쪽이 무엇을 닫는가」를
+        // 매번 생각해야 한다. 나가는 길은 가방 화면의 닫기 하나다.
 
+        // 【무게 안내줄도 뺐다.】 왼쪽 아래에 소지 중량 막대가 이미 있다.
+        // 같은 것을 두 군데서 다른 말로 적으면 어느 쪽이 맞는지 헷갈린다.
         grid = UIFactory.CreateScrollList("LootGrid", box,
-            new Vector2(0.04f, 0.225f), new Vector2(0.96f, 0.875f));
+            new Vector2(0.04f, 0.155f), new Vector2(0.96f, 0.875f));
 
         takeAllButton = UIFactory.CreateButton(box, "전부 줍기",
-            new Vector2(0.04f, 0.105f), new Vector2(0.96f, 0.200f),
+            new Vector2(0.04f, 0.035f), new Vector2(0.96f, 0.130f),
             UIPalette.Action, TakeAll, 26);
-
-        footerLabel = UIFactory.CreateLabel(box, string.Empty, 20, FontStyle.Normal,
-            new Vector2(0.04f, 0.025f), new Vector2(0.96f, 0.095f),
-            TextAnchor.MiddleCenter, UIPalette.TextDim);
 
         panel.SetActive(false);
     }
@@ -159,6 +156,11 @@ public class ExchangeWindowUI : MonoBehaviour
         // 가방 탭으로 연다 — 파밍 중에 보고 싶은 것은 「자리가 얼마나 남았나」다.
         InventoryScreenUI.EnsureInstance().Open(0);
 
+        // 【패널이 뜨면 화면 버튼은 감춘다.】 (장비·스킬·패시브)
+        // 세 버튼은 패널 밖의 화면 UI라 어떤 판을 깔아도 그 위로 떠오른다.
+        // 열려 있는 패널 뒤로 글자가 비쳐 보이면 둘 다 읽히지 않는다.
+        InventoryScreenUI.SetHudSuppressed(true);
+
         Refresh();
     }
 
@@ -186,6 +188,10 @@ public class ExchangeWindowUI : MonoBehaviour
         // 「무엇을 닫는 중인지」가 헷갈린다.
         if (InventoryScreenUI.HasInstance && InventoryScreenUI.Instance.IsOpen)
             InventoryScreenUI.Instance.Close();
+
+        // 감춘 것을 되돌린다. Close보다 뒤에 둬야 한다 —
+        // 가방 화면의 Close가 이 값을 읽어 버튼을 다시 그린다.
+        InventoryScreenUI.SetHudSuppressed(false);
 
         closing = false;
     }
@@ -237,7 +243,6 @@ public class ExchangeWindowUI : MonoBehaviour
         Canvas.ForceUpdateCanvases();
 
         DrawGrid();
-        RefreshFooter();
     }
 
     private void DrawGrid()
@@ -268,24 +273,6 @@ public class ExchangeWindowUI : MonoBehaviour
             ItemCell.Draw($"Loot_{i}", grid.Content, min, max, stack, chosen: false,
                 () => Take(captured));
         }
-    }
-
-    /// <summary>다 들었을 때의 무게를 미리 보여 준다. 추출 판단의 근거다.</summary>
-    private void RefreshFooter()
-    {
-        Inventory bag = PlayerInventory.EnsureInstance().Bag;
-
-        float now = bag.TotalWeight;
-        float after = now + other.TotalWeight;
-
-        bool willOverload = after > bag.WeightLimit;
-
-        footerLabel.text =
-            $"다 들면 {after:0.0} / {bag.WeightLimit:0.0} kg"
-            + (willOverload ? "  (과중량)" : string.Empty)
-            + $"    빈 칸 {bag.FreeSlots}";
-
-        footerLabel.color = willOverload ? UIPalette.Warning : UIPalette.TextDim;
     }
 
     // ────────────────────────────────── 옮기기

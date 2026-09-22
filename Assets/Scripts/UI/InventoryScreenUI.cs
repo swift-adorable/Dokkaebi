@@ -423,7 +423,10 @@ public partial class InventoryScreenUI : MonoBehaviour
             QuickSlots.Count * QuickCellSize + (QuickSlots.Count - 1) * QuickCellGap,
             QuickCellSize + QuickNumberBand);
 
-        quickBar.anchoredPosition = new Vector2(0f, 12f);
+        // 【화면 맨 아래에 붙인다.】 안전 영역 안이므로 홈 인디케이터에 닿지 않는다.
+        // 12px 띄워 두었더니 왼쪽의 소지 중량 막대보다 위로 떠서,
+        // 아래줄이 두 층으로 보였다.
+        quickBar.anchoredPosition = new Vector2(0f, 2f);
     }
 
     /// <summary>같은 버튼을 다시 누르면 닫는다.</summary>

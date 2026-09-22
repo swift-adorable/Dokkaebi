@@ -19,6 +19,55 @@ public static class UISprites
     private static readonly Dictionary<int, Sprite> solidCache = new();
     private static readonly Dictionary<int, Sprite> outlineCache = new();
 
+    private static Sprite sheenCache;
+
+    /// <summary>
+    /// 위에서 아래로 사라지는 흰 띠. 【유리의 광택이다.】
+    ///
+    /// iOS의 Liquid Glass는 「투명한 판 + 위쪽 모서리에 맺힌 빛」으로 읽힌다.
+    /// 배경 흐림(blur)은 셰이더가 있어야 하지만, 광택과 테두리만으로도
+    /// 「유리판」이라는 인상의 대부분이 만들어진다.
+    ///
+    /// 세로로만 변하므로 가로 1픽셀이면 충분하다. 9-슬라이스로 가로를 늘린다.
+    /// </summary>
+    public static Sprite Sheen()
+    {
+        if (sheenCache != null)
+            return sheenCache;
+
+        const int Height = 64;
+
+        var texture = new Texture2D(1, Height, TextureFormat.RGBA32, mipChain: false)
+        {
+            filterMode = FilterMode.Bilinear,
+            wrapMode = TextureWrapMode.Clamp,
+            hideFlags = HideFlags.HideAndDontSave
+        };
+
+        var pixels = new Color32[Height];
+
+        for (int y = 0; y < Height; y++)
+        {
+            // y가 0이 아래, Height-1이 위다. 위쪽이 밝다.
+            float t = y / (float)(Height - 1);
+
+            // 위 1/3에만 몰아 준다. 전체에 깔면 그냥 밝은 판이 되어 버린다.
+            float a = Mathf.Pow(Mathf.Clamp01((t - 0.55f) / 0.45f), 1.6f);
+
+            pixels[y] = new Color32(255, 255, 255, (byte)(a * 255f));
+        }
+
+        texture.SetPixels32(pixels);
+        texture.Apply(updateMipmaps: false);
+
+        sheenCache = Sprite.Create(texture, new Rect(0, 0, 1, Height),
+            new Vector2(0.5f, 0.5f), 100f, 0, SpriteMeshType.FullRect);
+
+        sheenCache.hideFlags = HideFlags.HideAndDontSave;
+
+        return sheenCache;
+    }
+
     /// <summary>속이 찬 둥근 사각형. 패널·버튼·칸의 바탕이다.</summary>
     public static Sprite Rounded(int radius)
     {

@@ -162,20 +162,23 @@ public static class UIFactory
     }
 
     /// <summary>
-    /// 유리판. 반투명 바탕 + 밝은 테두리.
+    /// 유리판. 【iOS의 Liquid Glass를 목표로 한다.】
     ///
-    /// 【광택(Sheen)을 뺀 이유】
-    /// 처음에는 위쪽 절반에 흰 막을 깔아 「빛 받은 면」을 만들었다.
-    /// 판이 반투명(0.42)일 때는 은은했지만, 글자가 안 읽혀 판을 0.80까지
-    /// 올리자 그 막이 **회색 띠**로 굳어 버렸다. 패널마다 위쪽에
-    /// 정체를 알 수 없는 회색 막대가 걸린 것처럼 보였다.
+    /// 유리로 읽히게 하는 것은 세 가지다 —
+    ///   1. 반투명한 바탕        (뒤가 비친다)
+    ///   2. 위쪽 모서리의 광택    (빛이 위에서 온다)
+    ///   3. 밝은 테두리          (판의 두께)
     ///
-    /// 광택은 「바탕이 비칠 때만」 광택으로 읽힌다. 불투명한 판 위에서는
-    /// 그냥 다른 색 사각형이다. 유리의 인상은 테두리가 만들게 두고 광택은 버린다.
+    /// 【한 번 실패했던 광택을 다시 넣는다.】
+    /// 예전에는 위쪽 **절반**을 흰 막으로 덮었다. 판이 0.80까지 불투명해지자
+    /// 그 막이 회색 띠로 굳어 「정체를 알 수 없는 막대」가 되었다.
+    /// 이번에는 위쪽 45%에만, 제곱 곡선으로 몰아서, 아주 옅게(0.12) 깐다.
+    /// 띠의 끝이 보이지 않아야 광택이다 — 경계가 보이면 그냥 다른 색 사각형이다.
     ///
-    /// 【진짜 블러가 아닌 이유】
-    /// ScreenSpaceOverlay 캔버스는 뒤 화면을 텍스처로 받을 수 없어서
-    /// 실제 배경 흐림은 별도 카메라와 셰이더가 필요하다.
+    /// 【진짜 배경 흐림(blur)은 아직 없다.】
+    /// Liquid Glass의 핵심은 뒤를 흐리는 것인데, 그러려면 URP의 불투명 텍스처를
+    /// 켜고 UI 셰이더에서 화면을 다시 샘플링해야 한다. 모바일에서 매 프레임
+    /// 화면 복사가 생기므로 비용을 재 보고 따로 결정한다. (Survival 7절과 별개)
     /// </summary>
     public static Image CreateGlass(
         string name, Transform parent, Color tint,
@@ -184,9 +187,56 @@ public static class UIFactory
     {
         Image body = CreatePanel(name, parent, tint, anchorMin, anchorMax, radius);
 
+        CreateSheen(body, radius);
+
         CreateOutline(body, UIPalette.Rim, radius, rimThickness);
 
         return body;
+    }
+
+    /// <summary>
+    /// 위쪽 모서리에 맺히는 빛. 유리판 위에만 깐다.
+    ///
+    /// 마스크를 쓰지 않고 같은 둥근 사각형으로 잘라 내는 이유 —
+    /// RectMask2D는 사각으로만 자른다. 모서리에서 광택이 네모나게 튀어나온다.
+    /// </summary>
+    private static void CreateSheen(Image body, int radius)
+    {
+        GameObject sheenObject = CreateChild("Sheen", body.transform);
+
+        var rect = sheenObject.GetComponent<RectTransform>();
+        rect.anchorMin = Vector2.zero;
+        rect.anchorMax = Vector2.one;
+        rect.offsetMin = Vector2.zero;
+        rect.offsetMax = Vector2.zero;
+
+        // 둥근 바탕을 한 장 더 깔고 그 위에 세로 그러데이션을 얹는다.
+        // 바탕이 모서리를 잘라 주므로 광택도 같은 모양으로 둥글어진다.
+        var mask = sheenObject.AddComponent<Image>();
+        mask.sprite = UISprites.Rounded(radius);
+        mask.type = Image.Type.Sliced;
+        mask.pixelsPerUnitMultiplier = 1f;
+        // 알파는 1로 둔다. Mask는 알파로 스텐실을 자르므로 흐리면 모서리가 뭉갠다.
+        // 실제로 그려지지는 않는다 — showMaskGraphic이 꺼져 있다.
+        mask.color = Color.white;
+        mask.raycastTarget = false;
+
+        var clip = sheenObject.AddComponent<Mask>();
+        clip.showMaskGraphic = false;
+
+        GameObject gradient = CreateChild("Gradient", sheenObject.transform);
+
+        var gradientRect = gradient.GetComponent<RectTransform>();
+        gradientRect.anchorMin = Vector2.zero;
+        gradientRect.anchorMax = Vector2.one;
+        gradientRect.offsetMin = Vector2.zero;
+        gradientRect.offsetMax = Vector2.zero;
+
+        var image = gradient.AddComponent<Image>();
+        image.sprite = UISprites.Sheen();
+        image.type = Image.Type.Simple;
+        image.color = new Color(1f, 1f, 1f, 0.12f);
+        image.raycastTarget = false;
     }
 
     /// <summary>
