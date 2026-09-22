@@ -167,9 +167,9 @@ public partial class InventoryScreenUI
             return;
         }
 
-        UIFactory.CreateLabel(area, PassiveBranchInfo.Subtitle(selectedBranch), 22,
-            FontStyle.Normal, new Vector2(0.03f, 0.94f), new Vector2(0.97f, 0.99f),
-            TextAnchor.MiddleLeft, UIPalette.TextDim);
+        // 【계열 설명을 적지 않는다.】
+        // 「얼마나 들고 나가는가」 같은 한 줄은 탭 이름을 다시 말하는 것에 가깝다.
+        // 트리 위쪽 한 줄을 차지하면서 알려 주는 것이 없다.
 
         // 중개 계열은 레벨을 보지 않는다. 그 사실을 화면에 적어 둔다.
         if (PassiveBranchInfo.UnlockKind(selectedBranch) == PassiveUnlockKind.CreditsOnly)
@@ -225,11 +225,13 @@ public partial class InventoryScreenUI
         PassiveNode captured = node;
         button.onClick.AddListener(() => SelectPassiveNode(captured));
 
-        if (selectedNode == node)
-        {
-            UIFactory.CreatePanel("Focus", cell.transform, UIPalette.SlotSelected,
-                new Vector2(0.03f, 0.02f), new Vector2(0.97f, 0.10f));
-        }
+        // 【고른 칸은 테두리로 알린다.】
+        // 전에는 칸 아래쪽에 파란 띠를 깔았는데, 진행 막대처럼 보여서
+        // 「무언가 차오르는 중」으로 읽혔다. 고른 것과 아무 상관이 없다.
+        UIFactory.CreateOutline(cell,
+            selectedNode == node ? UIPalette.Rim : UIPalette.EdgeSoft,
+            UIFactory.Radius,
+            selectedNode == node ? 3 : 2);
 
         Color textColor = learned || error == PassiveError.None
             ? UIPalette.Text
@@ -240,17 +242,13 @@ public partial class InventoryScreenUI
             textColor);
 
         UIFactory.CreateLabel(cell.transform, learned ? "배움" : node.EffectText, 19,
-            FontStyle.Normal, new Vector2(0.06f, 0.20f), new Vector2(0.94f, 0.44f),
+            FontStyle.Normal, new Vector2(0.06f, 0.06f), new Vector2(0.94f, 0.44f),
             TextAnchor.UpperCenter, learned ? UIPalette.TextAccent : UIPalette.TextDim);
 
-        // 필요물품이 있는 칸은 그 사실만 표시한다. 무엇이 필요한지는 상세에서 본다.
-        if (!learned && node.NeedsMaterials)
-        {
-            UIFactory.CreateLabel(cell.transform, "물품 필요", 18, FontStyle.Normal,
-                new Vector2(0.06f, 0.04f), new Vector2(0.94f, 0.20f),
-                TextAnchor.UpperCenter,
-                error == PassiveError.MissingMaterials ? UIPalette.Warning : UIPalette.TextDim);
-        }
+        // 【「물품 필요」를 칸에 적지 않는다.】
+        // 무엇이 몇 개 필요한지는 적지 못하면서 자리만 차지했다.
+        // 필요물품은 오른쪽 상세에 정확히 적혀 있고, 모자라서 못 배우는 경우는
+        // 「배우기」 버튼이 꺼지고 그 위에 이유가 뜬다.
     }
 
     private void DrawPassiveDetail(RectTransform area, PassiveManager manager)
@@ -343,8 +341,9 @@ public partial class InventoryScreenUI
 
         PassiveManager manager = PassiveManager.EnsureInstance();
 
-        if (manager.TryLearn(selectedNode))
-            SetHint($"「{selectedNode.DisplayName}」 배움");
+        // 성공은 알리지 않는다 — 칸이 「배움」으로 바뀌는 것이 곧 결과다.
+        if (!manager.TryLearn(selectedNode))
+            ShowToast("배우지 못했습니다. 조건을 확인하십시오.");
 
         Refresh();
     }

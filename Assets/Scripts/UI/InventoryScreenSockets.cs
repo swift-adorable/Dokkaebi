@@ -4,8 +4,9 @@ using UnityEngine.UI;
 /// <summary>
 /// 가방 화면의 「젬」 탭 — 소켓 배치.
 ///
-/// 조작은 한 가지다 — 왼쪽 가방에서 젬을 누르고, 오른쪽 자리를 누른다.
-/// 고른 것이 없는 상태로 자리를 누르면 그 자리가 비고 젬은 가방으로 돌아간다.
+/// 조작은 한 가지다 — 【누르면 상세가 뜨고, 그 안에서 한다.】
+/// 왼쪽 목록의 젬을 누르면 「끼울 자리」가 버튼으로 나오고,
+/// 꽂혀 있는 자리를 누르면 그 젬의 상세와 「빼기」가 나온다.
 ///
 /// 【SkillSelectionUI(레벨업 3장 선택)를 대체한 화면이다.】
 /// 레벨업은 선택창을 열지 않는다. 자리가 하나 열릴 뿐이다.
@@ -103,12 +104,6 @@ public partial class InventoryScreenUI
             build.Herald, capacity.HeraldSlots > 0, "전령",
             new Vector2(Left(Columns - 1), y),
             new Vector2(Left(Columns - 1) + cellWidth, y + rowHeight));
-
-        UIFactory.CreateLabel(rightContent,
-            "가방에서 젬을 고른 뒤 자리를 누르십시오. 끼워진 자리를 그냥 누르면 빠집니다.",
-            22, FontStyle.Normal,
-            Vector2.zero, new Vector2(1f, 0.115f),
-            TextAnchor.MiddleLeft, UIPalette.TextDim);
     }
 
     private void DrawSlot(SlotRef slot, SkillDefinition occupant, bool unlocked,
@@ -149,7 +144,7 @@ public partial class InventoryScreenUI
             unlocked ? UIPalette.Text : UIPalette.TextDim);
     }
 
-    /// <summary>가방에서 고른 것이 젬이면 그 스킬. 아니면 null.</summary>
+    /// <summary>지금 상세가 열려 있는 것이 젬이면 그 스킬. 아니면 null.</summary>
     private SkillDefinition PickedSkill()
     {
         return selected?.Definition != null && selected.Definition.IsSkillGem
@@ -177,17 +172,48 @@ public partial class InventoryScreenUI
         }
     }
 
+    /// <summary>
+    /// 소켓 자리를 눌렀다. 꽂혀 있으면 그 젬의 상세를, 비어 있으면 알림만 띄운다.
+    ///
+    /// 【빈 자리를 눌러 끼우지 않는다.】
+    /// 전에는 「왼쪽에서 고른 뒤 여기를 누른다」였는데, 고른 것이 없는 상태로
+    /// 누르면 대신 젬이 빠졌다. 같은 자리를 같은 방식으로 눌러도 결과가
+    /// 정반대라 실수로 빼는 일이 잦았다. 이제 넣고 빼는 일은 둘 다 상세에서 한다.
+    /// </summary>
     private void OnSlotClicked(SlotRef slot)
+    {
+        SkillDefinition occupant = OccupantOf(slot);
+
+        if (occupant != null)
+        {
+            OpenSocketDetail(occupant, slot);
+            return;
+        }
+
+        ShowToast("빈 자리입니다. 왼쪽에서 젬을 누른 뒤 「끼울 자리」에서 고르십시오.");
+    }
+
+    private static SkillDefinition OccupantOf(SlotRef slot)
+    {
+        SocketedBuild build = SkillManager.EnsureInstance().Build;
+
+        switch (slot.Kind)
+        {
+            case SlotKind.Core:    return build.GetCore(slot.CoreIndex);
+            case SlotKind.Support: return build.GetSocket(slot.CoreIndex, slot.Index);
+            case SlotKind.Meta:    return build.GetMeta(slot.Index);
+            default:               return build.Herald;
+        }
+    }
+
+    /// <summary>상세의 「끼울 자리」 버튼. 고른 자리에 바로 들어간다.</summary>
+    private void PlaceGem(SlotRef slot)
     {
         SkillManager manager = SkillManager.EnsureInstance();
         SkillDefinition picked = PickedSkill();
 
-        // 고른 젬이 없으면 그 자리를 비운다.
         if (picked == null)
-        {
-            UnequipSlot(manager, slot);
             return;
-        }
 
         bool equipped;
 
@@ -210,13 +236,18 @@ public partial class InventoryScreenUI
                 break;
         }
 
-        if (equipped)
-        {
-            SetHint($"「{picked.DisplayName}」 장착");
-            selected = null;
-        }
+        if (!equipped)
+            return;
 
-        Refresh();
+        CloseDetailAndRefresh();
+    }
+
+    /// <summary>상세의 「빼기」. 젬이 가방으로 돌아간다.</summary>
+    private void TakeGemOut(SlotRef slot)
+    {
+        UnequipSlot(SkillManager.EnsureInstance(), slot);
+
+        CloseDetailAndRefresh();
     }
 
     private void UnequipSlot(SkillManager manager, SlotRef slot)
@@ -242,9 +273,7 @@ public partial class InventoryScreenUI
                 break;
         }
 
-        if (removed)
-            SetHint("젬을 가방으로 되돌렸습니다.");
-
-        Refresh();
+        if (!removed)
+            ShowToast("빼지 못했습니다. 가방에 자리가 있는지 확인하십시오.");
     }
 }

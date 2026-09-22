@@ -7,31 +7,34 @@ using UnityEngine.UI;
 /// 배치는 덕코프 스크린샷을 따르고, 【조작은 전부 터치】다.
 ///
 /// 화면 구성
-///   상단 중앙 : 탭 (가방 / 젬 / 패시브)
+///   상단 중앙 : 탭 (장비 / 스킬 / 패시브)
 ///   좌상단    : 크레딧
-///   좌측      : 장비 8슬롯 · 가방 격자 (n/m)
-///   우측      : 탭에 따라 — 아이템 상세 / 소켓 배치 / 패시브 트리
+///   장비 탭   : 장비 8슬롯 · 가방 격자 (폭 전체)
+///   스킬 탭   : 좌 스킬 젬 목록(분류별) · 우 소켓판
+///   패시브 탭 : 계열 트리 (폭 전체)
 ///   하단 중앙 : 퀵슬롯 1~8
 ///   하단 좌   : 소지 중량 막대
 ///
-/// 【PC 스크린샷과 다른 점】 키 힌트(F/X/RMB/L/N)와 마우스 호버 툴팁이 없다.
-/// 칸을 한 번 누르면 고르고, 상세는 우측 패널에 나타난다.
-/// 모바일에는 호버가 없으므로 「누르면 고른다 · 고른 것의 상세는 정해진 자리에」가
-/// 유일하게 성립하는 방식이다.
+/// 【무엇을 누르든 상세가 뜬다.】
+/// 가방의 아이템 · 착용 중인 장비 · 소켓에 꽂힌 젬 — 무엇을 누르든
+/// 화면 가운데에 같은 모양의 상세가 뜨고, 장착 · 해제 · 버리기를 거기서 한다.
+/// 전에는 「고르고 → 밝아진 자리를 누른다」라는 두 단계였는데,
+/// 어디를 눌러야 하는지 화면 아래 한 줄로만 알려 줘서 매번 읽어야 했다.
+/// 모바일에는 호버가 없으니 「누르면 그 자리에서 다 한다」가 가장 짧다.
 /// </summary>
 public partial class InventoryScreenUI : MonoBehaviour
 {
     private enum Tab { Bag = 0, Socket = 1, Passive = 2 }
 
-    private static readonly string[] TabNames = { "가방", "젬", "패시브" };
+    private static readonly string[] TabNames = { "장비", "스킬", "패시브" };
 
     // ── 레이아웃 ──────────────────────────────────────────────────────
     // 값은 전부 【안전 영역 기준】의 0~1이다. 노치와 홈 인디케이터는
     // SafeAreaFitter가 이미 잘라 냈으므로 여기서는 화면 전체를 쓴다고 생각해도 된다.
     // 한 곳에 모아 두는 이유 — 흩어져 있으면 한 줄만 옮겨도 겹치는지 알 수 없다.
 
-    // ── 세로 네 줄 ────────────────────────────────────────────────────
-    // 위에서부터 탭줄 · 본문 · 안내줄 · 아래줄. 값은 【패널 기준】 0~1이다.
+    // ── 세로 세 줄 ────────────────────────────────────────────────────
+    // 위에서부터 탭줄 · 본문 · 아래줄. 값은 【패널 기준】 0~1이다.
     //
     // 【줄 사이 간격을 여기서 빼지 않는 이유】
     // 이전에는 0.90 다음을 0.875에서 시작하는 식으로 경계마다 다른 숫자를
@@ -39,13 +42,17 @@ public partial class InventoryScreenUI : MonoBehaviour
     // 바깥 테두리는 아예 0이라 줄이 화면 끝에 붙었다.
     // 이제 경계는 맞닿게 두고, 양쪽이 UIFactory.Gap의 절반씩 물러난다.
     // 어느 경계에서나 간격이 정확히 한 칸이고, 바깥도 한 칸이다.
+    //
+    // 【안내줄(네 번째 줄)을 없앴다.】
+    // 본문과 아래줄 사이에 「"…" 착용」 한 줄을 띄우려고 4.2%를 늘 비워 뒀다.
+    // 대부분의 순간에는 아무 글자도 없어서 그냥 빈 띠였고, 글자가 있을 때도
+    // 이미 끝난 일을 알려 줄 뿐이었다. 꼭 알려야 하는 실패만 잠깐 뜨는
+    // 알림으로 바꾸고(ShowToast), 그 줄은 본문이 가져간다.
 
     private const float TopBarBottom = 0.90f;
     private const float ColumnTop = TopBarBottom;
-    private const float ColumnBottom = 0.142f;
-    private const float HintTop = ColumnBottom;
-    private const float HintBottom = 0.10f;
-    private const float FooterTop = HintBottom;
+    private const float ColumnBottom = 0.10f;
+    private const float FooterTop = ColumnBottom;
 
     /// <summary>좌우 두 칸의 경계. 양쪽이 반 칸씩 물러나 사이가 한 칸이 된다.</summary>
     private const float ColumnSplit = 0.5f;
@@ -64,7 +71,16 @@ public partial class InventoryScreenUI : MonoBehaviour
     /// <summary>중량 막대의 위아래 여백. 아래줄 높이 기준 비율이다.</summary>
     private const float WeightBarInset = 0.24f;
 
-    private const int BagColumns = 6;
+    /// <summary>
+    /// 가방 격자의 열 수.
+    ///
+    /// 장비 탭은 폭을 다 쓰므로 여덟 열, 스킬 탭은 절반이라 여섯 열이다.
+    /// 열 수를 고정해 두면 넓은 쪽에서 칸이 주먹만 해진다.
+    /// </summary>
+    private int BagColumns => UsesFullWidth ? 8 : 6;
+
+    /// <summary>이 탭이 좌측 칸에 폭을 다 주는가. 소켓판이 있는 스킬 탭만 나눠 쓴다.</summary>
+    private bool UsesFullWidth => tab != Tab.Socket;
 
     /// <summary>
     /// 한 번에 보이는 행. 【칸 크기의 기준】이다.
@@ -128,10 +144,16 @@ public partial class InventoryScreenUI : MonoBehaviour
     private EquipmentSlot? selectedSlot;
 
     private Text creditLabel;
+
+    /// <summary>「장비」 머리글. 스킬 탭에서는 통째로 꺼진다.</summary>
+    private Text equipTitleLabel;
+
+    /// <summary>가방 격자 뒤에 깔린 눌린 면. 장비 칸을 끄면 같이 위로 늘어난다.</summary>
+    private Image bagWell;
+
     private Text bagTitleLabel;
     private Text weightLabel;
     private Image weightFill;
-    private Text hintLabel;
 
     private readonly List<Button> tabButtons = new();
     private readonly List<ItemStack> bagStacks = new();
@@ -197,7 +219,7 @@ public partial class InventoryScreenUI : MonoBehaviour
 
     private void HandleEquipRejected(SkillDefinition skill, SocketError error)
     {
-        SetHint(SocketErrorText.Describe(error));
+        ShowToast(SocketErrorText.Describe(error));
     }
 
     // ────────────────────────────────── 생성
@@ -237,10 +259,6 @@ public partial class InventoryScreenUI : MonoBehaviour
         footer = UIFactory.CreateSlice("Footer", panel.transform,
             Vector2.zero, new Vector2(1f, FooterTop), top: half);
 
-        RectTransform hint = UIFactory.CreateSlice("Hint", panel.transform,
-            new Vector2(0f, HintBottom), new Vector2(1f, HintTop),
-            bottom: half, top: half);
-
         BuildTopBar();
         BuildLeftColumn(body);
 
@@ -248,9 +266,7 @@ public partial class InventoryScreenUI : MonoBehaviour
             new Vector2(ColumnSplit, 0f), Vector2.one, left: half);
 
         BuildBottomBar();
-
-        hintLabel = UIFactory.CreateLabel(hint, string.Empty, 27, FontStyle.Normal,
-            Vector2.zero, Vector2.one, TextAnchor.MiddleLeft, UIPalette.TextAccent);
+        BuildToast();
 
         panel.SetActive(false);
     }
@@ -324,6 +340,49 @@ public partial class InventoryScreenUI : MonoBehaviour
         }
     }
 
+    // ── 좌측 칸의 세로 배치 ───────────────────────────────────────────
+    // 장비 탭은 「장비 머리글 · 장비 8칸 · 가방 머리글 · 가방 격자」 네 단이고,
+    // 스킬 탭은 장비 두 단을 접어 젬 목록이 위까지 올라온다.
+    //
+    // 【장비 칸을 조금 키웠다.】
+    // 0.63~0.905(27.5%)에서 0.60~0.905(30.5%)로 늘린다. 장비 탭이 폭을
+    // 다 쓰게 되면서 칸이 가로로 두 배가 되므로, 「진압용 중장갑 (중간)」
+    // 같은 긴 이름이 두 줄로 들어간다.
+
+    private const float EquipTitleBottom = 0.915f;
+    private const float EquipGridTop = 0.905f;
+    private const float EquipGridBottom = 0.60f;
+    private const float BagTitleTop = 0.595f;
+    private const float BagTitleBottom = 0.525f;
+    private const float BagTop = 0.515f;
+
+    /// <summary>장비 칸을 접었을 때 — 젬 목록이 쓰는 범위.</summary>
+    private const float GemTitleTop = 0.985f;
+    private const float GemTitleBottom = 0.925f;
+    private const float GemListTop = 0.915f;
+
+    /// <summary>장비 칸을 보일지에 맞춰 좌측 칸의 세로 배치를 바꾼다.</summary>
+    private void LayoutLeftColumn(bool showEquipment)
+    {
+        equipTitleLabel.gameObject.SetActive(showEquipment);
+        equipmentGrid.gameObject.SetActive(showEquipment);
+
+        float titleTop = showEquipment ? 0.985f : GemTitleTop;
+        float titleBottom = showEquipment ? BagTitleBottom : GemTitleBottom;
+        float listTop = showEquipment ? BagTop : GemListTop;
+
+        var title = bagTitleLabel.rectTransform;
+        title.anchorMin = new Vector2(0f, titleBottom);
+        title.anchorMax = new Vector2(1f, showEquipment ? BagTitleTop : titleTop);
+        title.offsetMin = Vector2.zero;
+        title.offsetMax = Vector2.zero;
+
+        bagWell.rectTransform.anchorMax = new Vector2(1f, listTop);
+
+        bagViewport.anchorMax = new Vector2(1f, listTop);
+        bagViewport.offsetMax = new Vector2(-8f, -8f);
+    }
+
     private void BuildLeftColumn(RectTransform body)
     {
         leftColumn = UIFactory.CreateSlice("Left", body,
@@ -338,23 +397,23 @@ public partial class InventoryScreenUI : MonoBehaviour
             UIFactory.CreateRegion("Content", leftColumn, Vector2.zero, Vector2.one),
             UIFactory.Gap);
 
-        UIFactory.CreateLabel(content, "장비", 30, FontStyle.Bold,
-            new Vector2(0f, 0.915f), new Vector2(1f, 0.985f), TextAnchor.MiddleLeft,
-            UIPalette.TextDim);
+        equipTitleLabel = UIFactory.CreateLabel(content, "장비", 30, FontStyle.Bold,
+            new Vector2(0f, EquipTitleBottom), new Vector2(1f, 0.985f),
+            TextAnchor.MiddleLeft, UIPalette.TextDim);
 
         equipmentGrid = UIFactory.CreateRegion("Equipment", content,
-            new Vector2(0f, 0.63f), new Vector2(1f, 0.905f));
+            new Vector2(0f, EquipGridBottom), new Vector2(1f, EquipGridTop));
 
         bagTitleLabel = UIFactory.CreateLabel(content, "가방", 30, FontStyle.Bold,
-            new Vector2(0f, 0.55f), new Vector2(1f, 0.625f), TextAnchor.MiddleLeft,
-            UIPalette.TextDim);
+            new Vector2(0f, BagTitleBottom), new Vector2(1f, BagTitleTop),
+            TextAnchor.MiddleLeft, UIPalette.TextDim);
 
         // 가방 격자 뒤에 한 단계 눌린 면을 깔아 깊이를 준다.
-        UIFactory.CreatePanel("BagWell", content, UIPalette.Inset,
-            Vector2.zero, new Vector2(1f, 0.545f), UIFactory.Radius);
+        bagWell = UIFactory.CreatePanel("BagWell", content, UIPalette.Inset,
+            Vector2.zero, new Vector2(1f, BagTop), UIFactory.Radius);
 
         bagViewport = UIFactory.CreateSlice("Bag", content,
-            Vector2.zero, new Vector2(1f, 0.545f),
+            Vector2.zero, new Vector2(1f, BagTop),
             left: 8f, bottom: 8f, right: 8f, top: 8f);
 
         // 마스크가 없으면 스크롤한 칸이 위쪽 장비 영역을 덮는다.
@@ -425,6 +484,69 @@ public partial class InventoryScreenUI : MonoBehaviour
             UIPalette.Subtle, Close, 31, UIFactory.RadiusLarge);
     }
 
+    // ────────────────────────────────── 잠깐 뜨는 알림
+
+    /// <summary>
+    /// 실패한 이유를 잠깐 띄우는 띠.
+    ///
+    /// 【자리를 잡아 두지 않는다.】
+    /// 전에는 본문과 아래줄 사이에 한 줄을 늘 비워 두고 거기에 적었다.
+    /// 대부분의 순간에는 글자가 없어 그냥 빈 띠였다. 이제 아래줄 위에
+    /// 겹쳐 떴다가 사라진다 — 배치를 밀지 않는다.
+    /// </summary>
+    private GameObject toast;
+
+    private Text toastLabel;
+    private float toastHideAt;
+
+    private const float ToastSeconds = 2.8f;
+
+    private void BuildToast()
+    {
+        Image back = UIFactory.CreatePanel("Toast", panel.transform, UIPalette.Header,
+            new Vector2(0.18f, FooterTop + 0.02f), new Vector2(0.82f, FooterTop + 0.11f),
+            UIFactory.RadiusLarge);
+
+        back.raycastTarget = false;
+
+        UIFactory.CreateOutline(back, UIPalette.Rim, UIFactory.RadiusLarge, 2);
+
+        toast = back.gameObject;
+
+        toastLabel = UIFactory.CreateLabel(toast.transform, string.Empty, 25, FontStyle.Bold,
+            new Vector2(0.03f, 0f), new Vector2(0.97f, 1f),
+            TextAnchor.MiddleCenter, UIPalette.TextAccent);
+
+        toastLabel.raycastTarget = false;
+
+        toast.SetActive(false);
+    }
+
+    private void ShowToast(string text)
+    {
+        if (toast == null)
+            return;
+
+        if (string.IsNullOrEmpty(text))
+        {
+            toast.SetActive(false);
+            return;
+        }
+
+        toastLabel.text = text;
+        toast.SetActive(true);
+
+        // 일시정지 중에도 흐르는 시계를 쓴다 — 이 화면이 열려 있으면
+        // timeScale이 0이라 Time.time은 멈춰 있다.
+        toastHideAt = Time.unscaledTime + ToastSeconds;
+    }
+
+    private void Update()
+    {
+        if (toast != null && toast.activeSelf && Time.unscaledTime >= toastHideAt)
+            toast.SetActive(false);
+    }
+
     // ────────────────────────────────── 열고 닫기
 
     public void Toggle()
@@ -439,6 +561,8 @@ public partial class InventoryScreenUI : MonoBehaviour
     {
         if (tabIndex >= 0 && tabIndex < TabNames.Length)
             tab = (Tab)tabIndex;
+
+        CloseItemDetail();
 
         selected = null;
         selectedSlot = null;
@@ -464,6 +588,9 @@ public partial class InventoryScreenUI : MonoBehaviour
     public void Close()
     {
         CloseDiscardPopup();
+        CloseItemDetail();
+
+        ShowToast(string.Empty);
 
         selected = null;
         selectedSlot = null;
@@ -480,11 +607,12 @@ public partial class InventoryScreenUI : MonoBehaviour
 
     private void SelectTab(Tab next)
     {
+        CloseItemDetail();
+
         tab = next;
         selected = null;
         selectedSlot = null;
 
-        SetHint(string.Empty);
         Refresh();
     }
 
@@ -495,49 +623,56 @@ public partial class InventoryScreenUI : MonoBehaviour
         RefreshTabs();
         RefreshCredits();
 
-        // 패시브는 트리를 넓게 보여 줘야 하므로 좌측을 접는다. 스크린샷과 같다.
+        // 【탭마다 필요한 만큼만 쓴다.】
+        //   장비  — 좌측만. 상세는 눌렀을 때 가운데에 뜨므로 우측이 놀 이유가 없다.
+        //   스킬  — 좌 젬 목록 · 우 소켓판. 둘을 같이 봐야 어디에 끼울지 정한다.
+        //   패시브 — 우측만. 트리를 넓게 펴야 한다.
         bool showLeft = tab != Tab.Passive;
+        bool showRight = tab != Tab.Bag;
+
+        float half = UIFactory.Gap * 0.5f;
 
         leftColumn.gameObject.SetActive(showLeft);
         quickSlots.gameObject.SetActive(showLeft);
-
-        // 패시브 탭은 좌측 칸을 접고 폭을 다 쓴다.
-        // 앵커만 옮기면 왼쪽에 반 칸(칸 사이 간격)이 남으므로 함께 지운다.
-        rightPanel.anchorMin = new Vector2(showLeft ? ColumnSplit : 0f, 0f);
-        rightPanel.offsetMin = new Vector2(showLeft ? UIFactory.Gap * 0.5f : 0f, 0f);
+        rightPanel.gameObject.SetActive(showRight);
 
         if (showLeft)
         {
-            RefreshEquipment();
+            // 우측이 없으면 폭을 다 쓴다. 앵커만 옮기면 오른쪽에 반 칸이
+            // 남으므로 물러났던 여백도 같이 되돌린다.
+            leftColumn.anchorMax = new Vector2(showRight ? ColumnSplit : 1f, 1f);
+            leftColumn.offsetMax = new Vector2(showRight ? -half : 0f, 0f);
+
+            LayoutLeftColumn(tab != Tab.Socket);
+
+            if (tab != Tab.Socket)
+                RefreshEquipment();
+
             RefreshBag();
             RefreshQuickSlots();
             RefreshWeight();
         }
 
-        UIFactory.ClearChildren(rightPanel);
-
-        // 바탕은 각 Draw가 rightPanel에 가득 깔고, 글자·칸은 여기 붙는다.
-        // 지우고 다시 만드는 이유 — ClearChildren이 방금 같이 지웠다.
-        UIFactory.CreateGlass("Back", rightPanel, UIPalette.Panel,
-            Vector2.zero, Vector2.one, UIFactory.RadiusLarge);
-
-        rightContent = UIFactory.Inset(
-            UIFactory.CreateRegion("Content", rightPanel, Vector2.zero, Vector2.one),
-            UIFactory.Gap);
-
-        switch (tab)
+        if (showRight)
         {
-            case Tab.Socket:
+            rightPanel.anchorMin = new Vector2(showLeft ? ColumnSplit : 0f, 0f);
+            rightPanel.offsetMin = new Vector2(showLeft ? half : 0f, 0f);
+
+            UIFactory.ClearChildren(rightPanel);
+
+            // 바탕은 각 Draw가 rightPanel에 가득 깔고, 글자·칸은 여기 붙는다.
+            // 지우고 다시 만드는 이유 — ClearChildren이 방금 같이 지웠다.
+            UIFactory.CreateGlass("Back", rightPanel, UIPalette.Panel,
+                Vector2.zero, Vector2.one, UIFactory.RadiusLarge);
+
+            rightContent = UIFactory.Inset(
+                UIFactory.CreateRegion("Content", rightPanel, Vector2.zero, Vector2.one),
+                UIFactory.Gap);
+
+            if (tab == Tab.Socket)
                 DrawSocketPanel();
-                break;
-
-            case Tab.Passive:
+            else
                 DrawPassivePanel();
-                break;
-
-            default:
-                DrawItemDetail();
-                break;
         }
 
         RefreshToggle();
@@ -664,7 +799,7 @@ public partial class InventoryScreenUI : MonoBehaviour
             // 0.07(가로) / 0.05(세로)로 두었더니 칸이 가로로 길어
             // 왼쪽은 14px, 위는 3px이 됐다. 글자가 천장에 붙어 보였다.
             UIFactory.Inset(
-                UIFactory.CreateLabel(cell.transform, EquipmentSlotName(slots[i]), 23,
+                UIFactory.CreateLabel(cell.transform, EquipmentSlotName(slots[i]), 21,
                     FontStyle.Bold, new Vector2(0f, 0.5f), Vector2.one,
                     TextAnchor.UpperLeft, UIPalette.TextDim).rectTransform,
                 left: SlotPad, bottom: 0f, right: SlotPad, top: SlotPad);
@@ -682,9 +817,18 @@ public partial class InventoryScreenUI : MonoBehaviour
 
             strip.raycastTarget = false;
 
-            UIFactory.CreateLabel(strip.transform, stack.Definition.DisplayName, 24,
-                FontStyle.Bold, new Vector2(0.06f, 0f), new Vector2(0.94f, 1f),
+            // 【긴 이름이 칸을 넘던 자리다.】
+            // 「진압용 중장갑 (중간)」처럼 아홉 자가 넘는 이름이 띠 밖으로
+            // 삐져나와 옆 칸과 겹쳐 보였다. 두 가지를 같이 건다 —
+            // 줄바꿈을 허용해 두 줄까지 접고, 그래도 넘치면 글자를 줄인다.
+            // 장비 탭이 폭을 다 쓰게 되면서 칸이 두 배로 넓어졌으므로
+            // 실제로 줄어드는 경우는 아주 긴 이름뿐이다.
+            Text equipName = UIFactory.CreateLabel(strip.transform,
+                stack.Definition.DisplayName, 22, FontStyle.Bold,
+                new Vector2(0.05f, 0f), new Vector2(0.95f, 1f),
                 TextAnchor.MiddleLeft, Color.white);
+
+            FitName(equipName, 22);
 
             DrawDurabilityBar(cell.transform, stack);
         }
@@ -715,8 +859,8 @@ public partial class InventoryScreenUI : MonoBehaviour
         Inventory bag = PlayerInventory.EnsureInstance().Bag;
 
         // 【탭에 맞는 것만 보여 준다.】
-        // 젬 탭에서 방탄복을 고를 일이 없고, 가방 탭에서 젬을 눌러 봐야
-        // 「젬 탭에서 장착」이라는 안내만 다시 나온다. 목록만 길어진다.
+        // 스킬 탭에서 방탄복을 고를 일이 없고, 장비 탭에서 젬을 눌러 봐야
+        // 「스킬 탭에서 장착」이라는 안내만 다시 나온다. 목록만 길어진다.
         bagStacks.Clear();
 
         int hidden = 0;
@@ -729,36 +873,38 @@ public partial class InventoryScreenUI : MonoBehaviour
                 hidden++;
         }
 
-        bagTitleLabel.text = tab == Tab.Socket
-            ? $"젬 ({bagStacks.Count}개)"
-            : $"가방 ({bag.UsedSlots}/{bag.SlotCapacity})"
-              + (hidden > 0 ? $"    젬 {hidden}개는 젬 탭에" : string.Empty);
-
-        // 【전부 그린다.】 잘라내면 그 칸의 물건은 보이지도 눌리지도 않는다.
-        // 가방 탭은 실제 용량만큼(빈 칸이 곧 남은 자리다),
-        // 젬 탭은 가진 젬만큼 그린다 — 젬 4개에 빈 칸 16개는 정보가 아니다.
-        int cells = tab == Tab.Socket
-            ? Mathf.Max(BagColumns, bagStacks.Count)
-            : Mathf.Max(bagStacks.Count, bag.SlotCapacity);
-
         // 부모(=뷰포트)의 실제 크기를 읽기 전에 레이아웃을 확정시킨다.
         Canvas.ForceUpdateCanvases();
 
         float viewWidth = bagViewport.rect.width;
         float viewHeight = bagViewport.rect.height;
 
+        int columns = BagColumns;
+
         // 【칸을 정사각형으로 만든다.】
         // 가로를 열 수로 나눈 값이 한 칸의 변이다. 내용물 높이를
         // 「칸 변 × 줄 수」로 잡으면 세로도 같은 길이가 된다.
-        // 예전에는 높이를 뷰포트 기준으로 잡아서 칸이 납작했다.
-        float cellSize = viewWidth > 0f ? viewWidth / BagColumns : 0f;
+        float cellSize = viewWidth > 0f ? viewWidth / columns : 0f;
 
-        int needed = Mathf.CeilToInt(cells / (float)BagColumns);
+        if (tab == Tab.Socket)
+        {
+            bagTitleLabel.text = $"스킬 젬 ({bagStacks.Count}개)";
+            DrawGemSections(columns, cellSize, viewWidth, viewHeight);
+            return;
+        }
 
-        // 가방 탭은 화면을 채울 만큼은 그린다. 빈 칸이 곧 남은 자리라는 표시다.
+        bagTitleLabel.text = $"가방 ({bag.UsedSlots}/{bag.SlotCapacity})"
+            + (hidden > 0 ? $"    젬 {hidden}개는 스킬 탭에" : string.Empty);
+
+        // 【전부 그린다.】 잘라내면 그 칸의 물건은 보이지도 눌리지도 않는다.
+        int cells = Mathf.Max(bagStacks.Count, bag.SlotCapacity);
+
+        int needed = Mathf.CeilToInt(cells / (float)columns);
+
+        // 화면을 채울 만큼은 그린다. 빈 칸이 곧 남은 자리라는 표시다.
         int fits = cellSize > 0f ? Mathf.CeilToInt(viewHeight / cellSize) : BagVisibleRows;
 
-        int rows = Mathf.Max(1, tab == Tab.Socket ? needed : Mathf.Max(needed, fits));
+        int rows = Mathf.Max(1, Mathf.Max(needed, fits));
 
         float contentHeight = cellSize * rows;
 
@@ -771,14 +917,143 @@ public partial class InventoryScreenUI : MonoBehaviour
         float paddingX = viewWidth > 0f ? gap / viewWidth : BagCellPadding;
         float paddingY = contentHeight > 0f ? gap / contentHeight : BagCellPadding;
 
-        for (int i = 0; i < rows * BagColumns; i++)
+        for (int i = 0; i < rows * columns; i++)
         {
-            UIFactory.GetCellAnchors(i, BagColumns, rows, paddingX, paddingY,
+            UIFactory.GetCellAnchors(i, columns, rows, paddingX, paddingY,
                 out Vector2 min, out Vector2 max);
 
             ItemStack cellStack = i < bagStacks.Count ? bagStacks[i] : null;
 
             DrawItemCell($"Bag_{i}", bagGrid, min, max, cellStack);
+        }
+    }
+
+    /// <summary>
+    /// 스킬 탭의 젬 목록 — 【분류별로 끊어서】 보여 준다.
+    ///
+    /// 전에는 43개를 한 덩어리로 늘어놓아서, 어느 것이 핵심이고 어느 것이
+    /// 보조인지 하나씩 눌러 봐야 알 수 있었다. 오른쪽 소켓판은 이미
+    /// 「핵심 · 소켓 · 발동 · 전령」으로 나뉘어 있으니, 왼쪽도 같은 순서로
+    /// 끊어 두면 「이 줄의 젬은 저 줄의 자리에 들어간다」가 바로 읽힌다.
+    /// </summary>
+    private void DrawGemSections(int columns, float cellSize, float viewWidth, float viewHeight)
+    {
+        var order = new[]
+        {
+            SkillCategory.Core, SkillCategory.Support,
+            SkillCategory.Meta, SkillCategory.Persistent
+        };
+
+        float headerHeight = cellSize * 0.42f;
+
+        // 1차 — 전체 높이를 먼저 잰다. 정규화 좌표를 쓰려면 분모가 있어야 한다.
+        float total = 0f;
+        var rowsOf = new int[order.Length];
+
+        for (int c = 0; c < order.Length; c++)
+        {
+            int count = CountGems(order[c]);
+
+            if (count == 0)
+                continue;
+
+            rowsOf[c] = Mathf.CeilToInt(count / (float)columns);
+            total += headerHeight + rowsOf[c] * cellSize;
+        }
+
+        if (total <= 0f)
+        {
+            bagGrid.sizeDelta = new Vector2(0f, Mathf.Max(1f, viewHeight));
+
+            UIFactory.CreateLabel(bagGrid, "가진 스킬 젬이 없습니다.", 26, FontStyle.Normal,
+                Vector2.zero, Vector2.one, TextAnchor.MiddleCenter, UIPalette.TextDim);
+            return;
+        }
+
+        total = Mathf.Max(total, viewHeight);
+
+        bagGrid.sizeDelta = new Vector2(0f, total);
+
+        float gap = cellSize * 0.055f;
+        float padX = viewWidth > 0f ? gap / viewWidth : BagCellPadding;
+        float padY = gap / total;
+
+        // 2차 — 위에서부터 쌓는다. y는 【위에서 잰 거리】(px)다.
+        float y = 0f;
+
+        for (int c = 0; c < order.Length; c++)
+        {
+            if (rowsOf[c] == 0)
+                continue;
+
+            SkillCategory category = order[c];
+
+            UIFactory.CreateLabel(bagGrid,
+                $"{SkillCategoryName(category)} 젬", 23, FontStyle.Bold,
+                new Vector2(0.012f, 1f - (y + headerHeight) / total),
+                new Vector2(0.99f, 1f - y / total),
+                TextAnchor.MiddleLeft, UIPalette.TextAccent);
+
+            y += headerHeight;
+
+            int index = 0;
+
+            for (int i = 0; i < bagStacks.Count; i++)
+            {
+                if (CategoryOf(bagStacks[i]) != category)
+                    continue;
+
+                int column = index % columns;
+                int row = index / columns;
+
+                float top = y + row * cellSize;
+
+                var min = new Vector2(
+                    column / (float)columns + padX,
+                    1f - (top + cellSize) / total + padY);
+
+                var max = new Vector2(
+                    (column + 1) / (float)columns - padX,
+                    1f - top / total - padY);
+
+                DrawItemCell($"Gem_{category}_{index}", bagGrid, min, max, bagStacks[i]);
+
+                index++;
+            }
+
+            y += rowsOf[c] * cellSize;
+        }
+    }
+
+    private int CountGems(SkillCategory category)
+    {
+        int count = 0;
+
+        for (int i = 0; i < bagStacks.Count; i++)
+        {
+            if (CategoryOf(bagStacks[i]) == category)
+                count++;
+        }
+
+        return count;
+    }
+
+    /// <summary>젬이 아니면 유지형으로 몰아 둔다 — 목록에서 사라지지 않게.</summary>
+    private static SkillCategory CategoryOf(ItemStack stack)
+    {
+        return stack?.Definition?.Skill != null
+            ? stack.Definition.Skill.Category
+            : SkillCategory.Persistent;
+    }
+
+    public static string SkillCategoryName(SkillCategory category)
+    {
+        switch (category)
+        {
+            case SkillCategory.Core:    return "핵심";
+            case SkillCategory.Support: return "보조";
+            case SkillCategory.Meta:    return "발동";
+            default:                    return "전령";
         }
     }
 
@@ -855,7 +1130,7 @@ public partial class InventoryScreenUI : MonoBehaviour
             19, FontStyle.Bold, new Vector2(0.06f, 0f), new Vector2(0.94f, 1f),
             TextAnchor.MiddleLeft, Color.white);
 
-        nameLabel.horizontalOverflow = HorizontalWrapMode.Wrap;
+        FitName(nameLabel, 19);
 
         // 개수는 우하단. 겹칠 수 있는 물건에만 뜬다 —
         // 1개짜리에 「1」을 붙이면 잡음이다.
@@ -867,6 +1142,22 @@ public partial class InventoryScreenUI : MonoBehaviour
         }
 
         DrawDurabilityBar(cell.transform, stack);
+    }
+
+    /// <summary>
+    /// 이름이 칸을 넘지 않게 맞춘다.
+    ///
+    /// 두 줄까지 접고, 그래도 안 들어가면 글자를 줄인다.
+    /// 최소 크기를 원래의 3분의 2로 묶어 둔다 — 그 아래로 내려가면
+    /// 읽히지가 않아서 이름을 적은 의미가 없다.
+    /// </summary>
+    private static void FitName(Text label, int size)
+    {
+        label.horizontalOverflow = HorizontalWrapMode.Wrap;
+        label.verticalOverflow = VerticalWrapMode.Truncate;
+        label.resizeTextForBestFit = true;
+        label.resizeTextMinSize = Mathf.Max(12, Mathf.RoundToInt(size * 0.67f));
+        label.resizeTextMaxSize = size;
     }
 
     /// <summary>내구도 막대. 없는 아이템에는 그리지 않는다.</summary>
@@ -894,17 +1185,14 @@ public partial class InventoryScreenUI : MonoBehaviour
             new Vector2(0.06f + (0.50f - 0.06f) * ratio, 0.085f), radius: 3);
     }
 
-    private void SelectStack(ItemStack stack)
-    {
-        selected = selected == stack ? null : stack;
-
-        // 가방에서 무언가를 고르면 착용 슬롯 선택은 풀린다. 둘은 배타다.
-        selectedSlot = null;
-
-        SetHint(DescribeSelection());
-
-        Refresh();
-    }
+    /// <summary>
+    /// 가방 칸을 눌렀다. 【고르는 것이 아니라 상세를 연다.】
+    ///
+    /// 전에는 여기서 고르기만 하고, 어디에 넣을지는 밝아진 자리를
+    /// 다시 눌러야 했다. 두 단계인 것을 화면 아래 한 줄로만 알려 줘서
+    /// 매번 그 줄을 읽어야 했다. 이제 상세 안에서 전부 끝낸다.
+    /// </summary>
+    private void SelectStack(ItemStack stack) => OpenItemDetail(stack);
 
     /// <summary>이 칸이 지금 탭에 속하는가.</summary>
     private bool BelongsToTab(ItemStack stack)
@@ -973,132 +1261,10 @@ public partial class InventoryScreenUI : MonoBehaviour
         }
     }
 
-    // ────────────────────────────────── 우측 — 아이템 상세 (가방 탭)
-
-    private void DrawItemDetail()
-    {
-        if (selected?.Definition == null)
-        {
-            UIFactory.CreateLabel(rightContent, "칸을 눌러 무엇인지 확인하십시오.", 29,
-                FontStyle.Normal, Vector2.zero, Vector2.one, TextAnchor.MiddleCenter,
-                UIPalette.TextDim);
-            return;
-        }
-
-        ItemDefinition definition = selected.Definition;
-
-        Color kind = UIPalette.ForItem(definition.Kind);
-
-        // 머리 띠는 아이템 종류 색을 쓴다 — 어떤 부류인지 색으로 먼저 읽힌다.
-        // 【머리 띠를 깔지 않는다.】
-        // 종류 색을 반투명 판으로 한 겹 더 얹어 놨더니, 패널 위에 정체를
-        // 알 수 없는 분홍 띠가 생겼다. 종류는 아이콘 색과 「소모품」 글자로
-        // 이미 읽힌다. 색을 알리려고 면을 늘리지 않는다.
-        //
-        // 아이콘 자리. 아트가 들어오면 definition.Icon이 채운다.
-        Image icon = UIFactory.CreatePanel("Icon", rightContent, UIPalette.Darken(kind, 0.34f),
-            new Vector2(0f, 0.885f), new Vector2(0.10f, 0.98f), UIFactory.Radius);
-
-        UIFactory.CreateOutline(icon, UIPalette.Brighten(kind), UIFactory.Radius, 2);
-
-        if (definition.Icon != null)
-        {
-            icon.sprite = definition.Icon;
-            icon.type = Image.Type.Simple;
-            icon.color = Color.white;
-            icon.preserveAspect = true;
-        }
-
-        UIFactory.CreateLabel(rightContent, definition.DisplayName, 37, FontStyle.Bold,
-            new Vector2(0.135f, 0.925f), new Vector2(1f, 0.99f), TextAnchor.LowerLeft,
-            UIPalette.TextOnGlass);
-
-        UIFactory.CreateLabel(rightContent, ItemKindName(definition.Kind), 22, FontStyle.Normal,
-            new Vector2(0.135f, 0.875f), new Vector2(0.60f, 0.925f), TextAnchor.UpperLeft,
-            UIPalette.TextDim);
-
-        // 무게·가치는 칩으로. 문장에 섞으면 눈이 숫자를 못 찾는다.
-        // 【칩이 서로 겹치고 있었다.】
-        // 0.035+0.24 = 0.275 인데 다음 칩이 0.255에서 시작해 0.02가 포개졌다.
-        // 칩 바탕이 반투명이라 겹친 만큼 알파가 두 번 칠해져,
-        // 한 줄짜리 막대 안에 밝은 세로 띠 두 개가 생겼다.
-        // 이제 폭과 간격을 계산으로 낸다 — 손으로 적으면 또 어긋난다.
-        const float ChipWidth = 0.205f;
-        const float ChipGap = 0.018f;
-
-        DrawChip(0f, 0.795f, ChipWidth,
-            $"{definition.Weight * selected.Count:0.0} kg", UIPalette.TextAccent);
-
-        DrawChip(ChipWidth + ChipGap, 0.795f, ChipWidth,
-            $"₡ {definition.BaseValue * selected.Count:N0}", UIPalette.TextAccent);
-
-        if (selected.Count > 1)
-        {
-            DrawChip((ChipWidth + ChipGap) * 2f, 0.795f, ChipWidth * 0.7f,
-                $"×{selected.Count}", UIPalette.Text);
-        }
-
-        UIFactory.CreateLabel(rightContent, definition.Description, 26, FontStyle.Normal,
-            new Vector2(0f, 0.63f), new Vector2(1f, 0.775f), TextAnchor.UpperLeft,
-            UIPalette.TextDim);
-
-        // 젬은 스킬 정보를 덧붙인다. 무엇을 하는 젬인지 모르면 끼울 판단이 안 선다.
-        if (definition.IsSkillGem && definition.Skill != null)
-            DrawGemInfo(definition.Skill);
-
-        if (definition.IsSkillGem)
-        {
-            UIFactory.CreateButton(rightContent, "젬 탭에서 장착",
-                new Vector2(0f, ActionRowBottom), new Vector2(0.49f, ActionRowTop),
-                UIPalette.Action, () => SelectTabKeepingSelection(Tab.Socket), 27);
-        }
-        else if (definition is EquipmentDefinition equipment)
-        {
-            DrawEquipmentInfo(equipment);
-        }
-
-        DrawDiscardButtons();
-    }
-
-    // ────────────────────────────────── 버리기
-
-    /// <summary>상세 패널 맨 아래 행동 줄. 모든 아이템이 같은 높이를 쓴다.</summary>
-    private const float ActionRowBottom = 0.03f;
-    private const float ActionRowTop = 0.11f;
-
-    /// <summary>
-    /// 버리기는 개수를 고르는 팝업을 연다. (InventoryScreenDiscard.cs)
-    /// 「1개 / 전부」 두 버튼으로는 15개 중 7개를 버릴 수 없다 —
-    /// 과중량은 "몇 kg만 덜어내면 되는가"의 문제다.
-    /// </summary>
-    private void DrawDiscardButtons()
-    {
-        if (selected == null || selected.IsEmpty)
-            return;
-
-        // 착용 중인 것은 가방에 없다. 버릴 수 없고, 대신 여기서 벗는다.
-        if (selectedSlot.HasValue)
-        {
-            EquipmentSlot slot = selectedSlot.Value;
-
-            UIFactory.CreateButton(rightContent, "해제",
-                new Vector2(0.51f, ActionRowBottom), new Vector2(1f, ActionRowTop),
-                UIPalette.Action, () => UnequipSelectedSlot(slot), 28);
-
-            return;
-        }
-
-        ItemStack target = selected;
-
-        UIFactory.CreateButton(rightContent, "버리기",
-            new Vector2(0.51f, ActionRowBottom), new Vector2(1f, ActionRowTop),
-            UIPalette.Subtle, () => OpenDiscardPopup(target), 28);
-    }
-
     /// <summary>작은 알약 칩. 무게·가치처럼 짧은 수치를 담는다.</summary>
     private void DrawChip(float left, float bottom, float width, string text, Color color)
     {
-        Image chip = UIFactory.CreatePanel($"Chip_{text}", rightContent, UIPalette.Inset,
+        Image chip = UIFactory.CreatePanel($"Chip_{text}", detailContent, UIPalette.Inset,
             new Vector2(left, bottom), new Vector2(left + width, bottom + 0.058f), radius: 8);
 
         UIFactory.CreateOutline(chip, UIPalette.EdgeSoft, 8, 1);
@@ -1120,7 +1286,7 @@ public partial class InventoryScreenUI : MonoBehaviour
 
         float bottom = top - (index + 1) * RowHeight - index * Gap;
 
-        Image row = UIFactory.CreatePanel($"Row_{index}", rightContent,
+        Image row = UIFactory.CreatePanel($"Row_{index}", detailContent,
             index % 2 == 0 ? UIPalette.Row : UIPalette.RowAlt,
             new Vector2(0f, bottom), new Vector2(1f, bottom + RowHeight), radius: 6);
 
@@ -1141,7 +1307,7 @@ public partial class InventoryScreenUI : MonoBehaviour
             case ItemKind.Armour:     return "방어구";
             case ItemKind.Backpack:   return "가방";
             case ItemKind.Imprint:    return "각인";
-            case ItemKind.SkillGem:   return "젬";
+            case ItemKind.SkillGem:   return "스킬 젬";
             case ItemKind.Consumable: return "소모품";
             case ItemKind.Key:        return "열쇠";
             case ItemKind.Material:   return "재료";
@@ -1149,48 +1315,9 @@ public partial class InventoryScreenUI : MonoBehaviour
         }
     }
 
-    /// <summary>고른 것에 맞춰 다음에 무엇을 하라고 알려준다.</summary>
-    private string DescribeSelection()
-    {
-        if (selected?.Definition == null)
-            return string.Empty;
-
-        string name = selected.Definition.DisplayName;
-
-        if (tab == Tab.Socket)
-            return $"「{name}」 — 끼울 자리를 누르십시오.";
-
-        if (selectedSlot.HasValue)
-            return $"「{name}」 착용 중 — 오른쪽 아래 「해제」로 벗습니다.";
-
-        return selected.Definition is EquipmentDefinition
-            ? $"「{name}」 — 초록색으로 밝아진 자리를 누르십시오."
-            : string.Empty;
-    }
-
-    private void SelectTabKeepingSelection(Tab next)
-    {
-        ItemStack keep = selected;
-
-        tab = next;
-        selected = keep;
-
-        SetHint(keep?.Definition != null
-            ? $"「{keep.Definition.DisplayName}」 — 끼울 자리를 누르십시오."
-            : string.Empty);
-
-        Refresh();
-    }
-
     private void DrawGemInfo(SkillDefinition skill)
     {
-        string category = skill.Category switch
-        {
-            SkillCategory.Core => "핵심",
-            SkillCategory.Support => "보조",
-            SkillCategory.Meta => "발동",
-            _ => "유지형"
-        };
+        string category = SkillCategoryName(skill.Category);
 
         var lines = new List<string>(5)
         {
@@ -1214,14 +1341,8 @@ public partial class InventoryScreenUI : MonoBehaviour
             string label = split > 0 ? lines[i].Substring(0, split) : lines[i];
             string value = split > 0 ? lines[i].Substring(split + 1).Trim() : string.Empty;
 
-            DrawStatRow(i, 0.60f, label, value, UIPalette.Text);
+            DrawStatRow(i, StatTop, label, value, UIPalette.Text);
         }
-    }
-
-    private void SetHint(string text)
-    {
-        if (hintLabel != null)
-            hintLabel.text = text;
     }
 
     /// <summary>
@@ -1243,7 +1364,7 @@ public partial class InventoryScreenUI : MonoBehaviour
         else
             screen.Refresh();
 
-        screen.SetHint(message);
+        screen.ShowToast(message);
     }
 
     /// <summary>열려 있을 때만 다시 그린다. 가방을 건드린 쪽이 부른다.</summary>

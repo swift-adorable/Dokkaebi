@@ -4,58 +4,62 @@ using UnityEngine;
 /// <summary>
 /// 가방 화면의 장비 8슬롯 조작. (로드맵 6-H)
 ///
-/// 조작 규칙은 젬 탭과 같다 —
-/// 【왼쪽 가방에서 장비를 누르고, 왼쪽 위 슬롯을 누른다.】
-/// 고른 것이 없는 상태로 낀 슬롯을 누르면 벗어서 가방으로 돌아간다.
+/// 조작 규칙은 스킬 탭과 같다 — 【누르면 상세가 뜨고, 그 안에서 한다.】
+/// 가방의 장비를 누르면 「장착」, 착용 중인 것을 누르면 「장착 해제」가 나온다.
 ///
-/// 규칙을 두 탭에서 같게 두는 이유 — 모바일에서 조작 방식이 화면마다 다르면
+/// 규칙을 세 탭에서 같게 두는 이유 — 모바일에서 조작 방식이 화면마다 다르면
 /// 유저가 매번 다시 배워야 한다.
 /// </summary>
 public partial class InventoryScreenUI
 {
     /// <summary>
-    /// 장비 슬롯을 눌렀을 때.
+    /// 장비 슬롯을 눌렀다. 【상세를 연다.】
     ///
-    /// 벗은 장비를 가방에 넣지 못하면 착용 자체를 취소한다 —
-    /// 여기서 반만 처리하면 장비가 사라진다.
+    /// 전에는 여기서 「고른 것이 있으면 입히고, 없으면 고른다」를 모두 처리했다.
+    /// 같은 자리를 눌러도 손에 무엇이 들렸느냐에 따라 다른 일이 일어나서,
+    /// 무엇을 끼웠는지 확인하려고 누른 것만으로 장비가 바뀌기도 했다.
+    /// 이제 누르면 상세가 뜨고, 실제 동작은 그 안의 버튼이 한다.
     /// </summary>
     private void OnEquipSlotClicked(EquipmentSlot slot)
+    {
+        ItemStack current = PlayerInventory.EnsureInstance().Loadout.Get(slot);
+
+        if (current?.Definition == null)
+        {
+            ShowToast($"「{EquipmentSlotName(slot)}」 자리가 비어 있습니다. 가방에서 장비를 누르십시오.");
+            return;
+        }
+
+        OpenItemDetail(current, slot);
+    }
+
+    /// <summary>
+    /// 상세의 「장착」. 벗은 장비를 가방에 넣지 못하면 착용 자체를 취소한다 —
+    /// 여기서 반만 처리하면 장비가 사라진다.
+    /// </summary>
+    private void EquipFromDetail(ItemStack picked, EquipmentSlot slot)
     {
         PlayerInventory inventory = PlayerInventory.EnsureInstance();
         EquipmentLoadout loadout = inventory.Loadout;
         Inventory bag = inventory.Bag;
 
-        // 【빈손으로 슬롯을 누르면 고르기만 한다.】
-        // 예전에는 즉시 벗겨졌다. 무엇을 끼웠는지 확인하려고 누른 것만으로
-        // 장비가 가방으로 돌아가 버렸고, 가방이 차 있으면 그마저 실패했다.
-        // 이제 해제는 우측 행동 줄의 「해제」 한 번을 더 받는다.
-        if (selected == null || selectedSlot.HasValue)
+        if (picked?.Definition is not EquipmentDefinition definition)
         {
-            SelectEquippedSlot(slot);
-            return;
-        }
-
-        ItemStack picked = selected;
-
-        if (picked.Definition is not EquipmentDefinition definition)
-        {
-            SetHint("장비가 아닙니다.");
+            ShowToast("장비가 아닙니다.");
             return;
         }
 
         if (!loadout.CanEquip(picked, slot))
         {
-            SetHint(DescribeEquipFailure(loadout, definition, slot));
+            ShowToast(DescribeEquipFailure(loadout, definition, slot));
             return;
         }
-
-        ItemStack previous = loadout.Get(slot);
 
         // 착용하려는 것은 가방에서 빠지고 벗은 것이 들어오므로 칸 수는 그대로다.
         // 다만 가방에 없던 것을 끼우려는 경우를 대비해 먼저 뺀다.
         if (!bag.RemoveStack(picked))
         {
-            SetHint("가방에 없는 장비입니다.");
+            ShowToast("가방에 없는 장비입니다.");
             return;
         }
 
@@ -63,7 +67,7 @@ public partial class InventoryScreenUI
         {
             // 실패하면 원상복구한다. 가방에서 뺐는데 착용이 안 되면 사라진다.
             bag.TryAddStack(picked);
-            SetHint("착용하지 못했습니다.");
+            ShowToast("착용하지 못했습니다.");
             return;
         }
 
@@ -73,71 +77,33 @@ public partial class InventoryScreenUI
             loadout.TryEquip(displaced, slot, out _);
             bag.TryAddStack(picked);
 
-            SetHint("가방이 가득 차 벗은 장비를 넣을 수 없습니다.");
+            ShowToast("가방이 가득 차 벗은 장비를 넣을 수 없습니다.");
             return;
         }
 
+        CloseItemDetail();
+
         selected = null;
         selectedSlot = null;
-
-        SetHint(previous == null
-            ? $"「{definition.DisplayName}」 착용"
-            : $"「{definition.DisplayName}」(으)로 교체");
 
         AfterLoadoutChanged(inventory);
     }
 
-    /// <summary>착용 중인 장비를 고른다. 우측에 상세와 「해제」가 뜬다.</summary>
-    private void SelectEquippedSlot(EquipmentSlot slot)
-    {
-        ItemStack current = PlayerInventory.EnsureInstance().Loadout.Get(slot);
-
-        if (current == null)
-        {
-            selectedSlot = null;
-            selected = null;
-
-            SetHint("빈 자리입니다. 가방에서 장비를 먼저 고르십시오.");
-
-            Refresh();
-            return;
-        }
-
-        // 같은 자리를 다시 누르면 선택을 푼다.
-        bool same = selectedSlot == slot;
-
-        selectedSlot = same ? null : slot;
-        selected = same ? null : current;
-
-        SetHint(DescribeSelection());
-
-        Refresh();
-    }
-
-    /// <summary>행동 줄의 「해제」. 여기까지 와야 실제로 벗는다.</summary>
-    private void UnequipSelectedSlot(EquipmentSlot slot)
+    /// <summary>상세의 「장착 해제」.</summary>
+    private void UnequipFromSlot(EquipmentSlot slot)
     {
         PlayerInventory inventory = PlayerInventory.EnsureInstance();
+        EquipmentLoadout loadout = inventory.Loadout;
+        Inventory bag = inventory.Bag;
 
-        selected = null;
-        selectedSlot = null;
-
-        UnequipSlot(inventory.Loadout, inventory.Bag, slot);
-    }
-
-    private void UnequipSlot(EquipmentLoadout loadout, Inventory bag, EquipmentSlot slot)
-    {
         ItemStack current = loadout.Get(slot);
 
         if (current == null)
-        {
-            SetHint("가방에서 장비를 고른 뒤 자리를 누르십시오.");
             return;
-        }
 
         if (bag.FreeSlots <= 0 && !bag.CanAdd(current.Definition))
         {
-            SetHint("가방이 가득 차 벗을 수 없습니다.");
+            ShowToast("가방이 가득 차 벗을 수 없습니다.");
             return;
         }
 
@@ -147,13 +113,16 @@ public partial class InventoryScreenUI
         {
             // 넣지 못하면 다시 입힌다. 벗은 채로 사라지게 두지 않는다.
             loadout.TryEquip(current, slot, out _);
-            SetHint("가방이 가득 차 벗을 수 없습니다.");
+            ShowToast("가방이 가득 차 벗을 수 없습니다.");
             return;
         }
 
-        SetHint($"「{current.Definition.DisplayName}」 벗음");
+        CloseItemDetail();
 
-        AfterLoadoutChanged(PlayerInventory.EnsureInstance());
+        selected = null;
+        selectedSlot = null;
+
+        AfterLoadoutChanged(inventory);
     }
 
     /// <summary>착용이 바뀌면 적재 한도와 실제 성능을 즉시 다시 계산한다.</summary>
@@ -241,8 +210,8 @@ public partial class InventoryScreenUI
 
         if (row == 0)
         {
-            UIFactory.CreateLabel(rightContent, "옵션이 없습니다.", 24, FontStyle.Normal,
-                new Vector2(0f, 0.50f), new Vector2(1f, 0.58f),
+            UIFactory.CreateLabel(detailContent, "옵션이 없습니다.", 24, FontStyle.Normal,
+                new Vector2(0f, StatTop - 0.07f), new Vector2(1f, StatTop),
                 TextAnchor.UpperLeft, UIPalette.TextDim);
         }
     }
@@ -252,7 +221,7 @@ public partial class InventoryScreenUI
     {
         // 행동 줄을 덮지 않도록 여기서 멈춘다. 넘치면 잘라 내는 편이
         // 버튼 위에 글자가 겹치는 것보다 낫다.
-        if (index >= 8)
+        if (index >= 7)
             return;
 
         int split = line.LastIndexOf(' ');
@@ -260,7 +229,7 @@ public partial class InventoryScreenUI
         string label = split > 0 ? line.Substring(0, split) : line;
         string value = split > 0 ? line.Substring(split + 1) : string.Empty;
 
-        DrawStatRow(index, 0.60f, label, value, valueColor);
+        DrawStatRow(index, StatTop, label, value, valueColor);
 
         index++;
     }
