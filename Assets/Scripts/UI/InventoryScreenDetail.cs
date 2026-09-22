@@ -137,8 +137,9 @@ public partial class InventoryScreenUI
         RectTransform frame = UIFactory.CreateRegion("Frame", detailPopup.transform,
             new Vector2(1f / 7f, 1f / 7f), new Vector2(6f / 7f, 6f / 7f));
 
+        // 【폭을 한 겹 줄인다.】 0.46 → 0.41 (약 10%).
         RectTransform box = UIFactory.CreateRegion("Box", frame,
-            new Vector2(0.27f, 0.075f), new Vector2(0.73f, 0.945f));
+            new Vector2(0.295f, 0.075f), new Vector2(0.705f, 0.945f));
 
         UIFactory.CreateGlass("Back", box, UIPalette.Panel,
             Vector2.zero, Vector2.one, UIFactory.RadiusLarge);
@@ -152,6 +153,9 @@ public partial class InventoryScreenUI
         detailContent = UIFactory.Inset(
             UIFactory.CreateRegion("Content", box, Vector2.zero, Vector2.one),
             UIFactory.Gap);
+
+        // 행 높이를 글자에 맞춰 늘리려면 이 면의 실제 크기를 알아야 한다.
+        Canvas.ForceUpdateCanvases();
 
         if (detailSkill != null)
             DrawSocketedGemDetail();
@@ -265,13 +269,16 @@ public partial class InventoryScreenUI
         // 아래 줄 — 닫기, 그리고 가방에 있는 것만 버릴 수 있다.
         if (inBag)
         {
-            UIFactory.CreateButton(detailContent, "닫기",
-                new Vector2(0f, DetailCloseBottom), new Vector2(0.49f, DetailCloseTop),
-                UIPalette.Subtle, CloseDetailAndRefresh, 26);
-
+            // 【버리기를 왼쪽에, 작게.】
+            // 둘이 같은 크기로 나란히 있으면 손가락이 어느 쪽인지 덜 가린다.
+            // 자주 누르는 「닫기」를 크게 두고, 되돌릴 수 없는 「버리기」를 줄인다.
             UIFactory.CreateButton(detailContent, "버리기",
-                new Vector2(0.51f, DetailCloseBottom), new Vector2(1f, DetailCloseTop),
-                UIPalette.Subtle, () => OpenDiscardPopup(target), 26);
+                new Vector2(0f, DetailCloseBottom), new Vector2(0.30f, DetailCloseTop),
+                UIPalette.Subtle, () => OpenDiscardPopup(target), 24);
+
+            UIFactory.CreateButton(detailContent, "닫기",
+                new Vector2(0.33f, DetailCloseBottom), new Vector2(1f, DetailCloseTop),
+                UIPalette.Subtle, CloseDetailAndRefresh, 26);
         }
         else
         {

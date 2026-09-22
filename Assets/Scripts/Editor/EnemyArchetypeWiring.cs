@@ -120,6 +120,20 @@ public static class EnemyArchetypeWiring
             so.ApplyModifiedPropertiesWithoutUndo();
         }
 
+        // 【높이를 물리로도 막는다.】
+        // 코드에서 Y 속도를 0으로 눌러도, 물리 엔진이 충돌 해소로 위치를
+        // 직접 밀어 올리는 경우가 남는다. 탑다운이라 높이는 쓰지 않으므로
+        // Rigidbody에서 아예 잠근다.
+        var body = root.GetComponent<Rigidbody>();
+
+        if (body != null)
+        {
+            var so = new SerializedObject(body);
+            so.FindProperty("m_Constraints").intValue =
+                (int)(RigidbodyConstraints.FreezeRotation | RigidbodyConstraints.FreezePositionY);
+            so.ApplyModifiedPropertiesWithoutUndo();
+        }
+
         var movement = root.GetComponent<EnemyMovement>();
 
         if (movement != null)

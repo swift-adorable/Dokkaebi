@@ -38,6 +38,9 @@ public partial class InventoryScreenUI
     /// </summary>
     private void DrawSocketPanel(RectTransform area)
     {
+        // 칸 크기를 픽셀로 환산하려면 실제 크기가 확정되어 있어야 한다.
+        Canvas.ForceUpdateCanvases();
+
         SkillManager manager = SkillManager.EnsureInstance();
         SocketedBuild build = manager.Build;
         SocketCapacity capacity = build.Capacity;
@@ -55,8 +58,16 @@ public partial class InventoryScreenUI
         const int Columns = 4;
         const int Rows = 3;
 
-        float cellGap = 0.012f;
-        float rowGap = 0.05f;
+        // 【세로 여백을 가로와 같게 만든다.】
+        // 가로는 0.012, 세로는 0.05를 쓰고 있었다. 칸이 가로로 길어서
+        // 픽셀로 환산하면 가로 9px · 세로 17px — 세로만 벌어져 보였다.
+        // 가로 간격을 픽셀로 잰 뒤 그만큼을 세로에 환산한다.
+        const float cellGap = 0.012f;
+
+        float width = Mathf.Max(1f, area.rect.width);
+        float height = Mathf.Max(1f, area.rect.height);
+
+        float rowGap = cellGap * width / height;
 
         float cellWidth = (1f - cellGap * (Columns - 1)) / Columns;
         float rowHeight = (1f - rowGap * (Rows - 1)) / Rows;

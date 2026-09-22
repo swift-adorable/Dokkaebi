@@ -149,10 +149,11 @@ public class EnemyMovement : MonoBehaviour
         if (separationWeight > 0f)
             direction = (direction + CalculateSeparation() * separationWeight).normalized;
 
-        rb.linearVelocity = new Vector3(
-            direction.x * speed,
-            rb.linearVelocity.y,
-            direction.z * speed);
+        // 【Y를 0으로 눌러 둔다.】
+        // 전에는 rb.linearVelocity.y를 그대로 물려줬다. 중력이 꺼져 있고
+        // Rigidbody의 Y 고정도 없어서, 적끼리 부딪혀 한 번 위로 밀리면
+        // 그 속도가 영영 남아 하늘로 올라갔다. 탑다운이라 높이는 쓰지 않는다.
+        rb.linearVelocity = new Vector3(direction.x * speed, 0f, direction.z * speed);
     }
 
     /// <summary>주변 적에게서 멀어지는 방향을 구한다. 적끼리 한 점에 뭉치는 것을 막는다.</summary>
@@ -203,6 +204,7 @@ public class EnemyMovement : MonoBehaviour
 
     private void StopHorizontal()
     {
-        rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
+        // 멈출 때도 Y를 남기지 않는다 — 남기면 밀려 올라간 채로 떠 있게 된다.
+        rb.linearVelocity = Vector3.zero;
     }
 }
