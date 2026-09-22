@@ -37,14 +37,12 @@ public partial class InventoryScreenUI
     private bool IsDetailOpen => detailPopup != null;
 
     // ── 상세 안의 세로 배치 ───────────────────────────────────────────
-    // 아래에서부터 닫기 줄 · 행동 줄 · (젬이면) 자리 버튼 · 수치 표 · 설명.
+    // 아래에서부터 닫기 줄 · 행동 줄 · 수치 표 · 설명.
 
     private const float DetailCloseBottom = 0.020f;
     private const float DetailCloseTop = 0.098f;
     private const float ActionRowBottom = 0.116f;
     private const float ActionRowTop = 0.194f;
-    private const float SlotGridBottom = 0.116f;
-    private const float SlotGridTop = 0.300f;
 
     /// <summary>퀵슬롯 줄. 소모품에만 나오므로 수치 표와 겹치지 않는다.</summary>
     private const float QuickRowBottom = 0.400f;
@@ -102,6 +100,10 @@ public partial class InventoryScreenUI
         detailEquipSlot = null;
         detailSocket = null;
         detailSkill = null;
+
+        // 상세가 닫히면 「자리 고르는 중」도 끝난다.
+        // BeginPlacingGem은 이 함수를 먼저 부른 뒤에 다시 세운다.
+        placingGem = null;
     }
 
     /// <summary>닫고 화면을 다시 그린다. 행동 버튼들이 쓴다.</summary>
@@ -215,9 +217,9 @@ public partial class InventoryScreenUI
                 $"×{detailStack.Count}", UIPalette.Text);
         }
 
-        UIFactory.CreateLabel(detailContent, definition.Description, 25, FontStyle.Normal,
-            new Vector2(0f, 0.64f), new Vector2(1f, 0.775f), TextAnchor.UpperLeft,
-            UIPalette.TextDim);
+        // 설명은 길이가 제각각이라 넘치면 굴린다. (UIFactory.CreateScrollText)
+        UIFactory.CreateScrollText(detailContent, definition.Description, 25, FontStyle.Normal,
+            new Vector2(0f, 0.64f), new Vector2(1f, 0.775f), UIPalette.TextDim);
 
         if (definition.IsSkillGem && definition.Skill != null)
             DrawGemInfo(definition.Skill);
@@ -241,9 +243,8 @@ public partial class InventoryScreenUI
             new Vector2(0f, 0.875f), new Vector2(1f, 0.925f), TextAnchor.UpperLeft,
             UIPalette.TextDim);
 
-        UIFactory.CreateLabel(detailContent, detailSkill.Description, 25, FontStyle.Normal,
-            new Vector2(0f, 0.68f), new Vector2(1f, 0.855f), TextAnchor.UpperLeft,
-            UIPalette.TextDim);
+        UIFactory.CreateScrollText(detailContent, detailSkill.Description, 25, FontStyle.Normal,
+            new Vector2(0f, 0.68f), new Vector2(1f, 0.855f), UIPalette.TextDim);
 
         DrawGemInfo(detailSkill);
 
@@ -299,10 +300,10 @@ public partial class InventoryScreenUI
             return;
         }
 
-        // 젬 — 들어갈 수 있는 자리를 버튼으로 나열한다.
+        // 젬 — 「장착」 하나로 두고, 자리는 소켓판에서 고른다.
         if (definition.IsSkillGem && definition.Skill != null)
         {
-            DrawGemSlotButtons(definition.Skill);
+            DrawGemEquipButton(definition.Skill, target);
             return;
         }
 
@@ -416,54 +417,39 @@ public partial class InventoryScreenUI
     }
 
     /// <summary>
-    /// 이 젬이 들어갈 수 있는 자리를 전부 버튼으로 깐다.
+    /// 젬의 「장착」 버튼 하나.
     ///
-    /// 【「끼우기」 한 버튼으로 알아서 넣지 않는 이유】
+    /// 【자리 목록을 상세 안에 깔지 않는 이유】
+    /// 「핵심 1 / 1-소켓 2 / 발동 1」 같은 이름만 나열하면, 그 이름이
+    /// 소켓판의 어느 칸인지 머릿속에서 맞춰 봐야 한다. 최대 열 칸이 넘어
+    /// 상세의 절반을 먹기도 했다. 이제 누르면 상세가 닫히고 소켓판에서
+    /// 들어갈 수 있는 칸이 직접 밝아진다 — 이름 대신 자리를 보고 고른다.
+    ///
+    /// 【그래도 자동으로 넣지는 않는다.】
     /// 보조 젬은 소켓 여섯 자리 중 어디에 꽂느냐가 곧 빌드다.
-    /// 1번 핵심에 붙일지 2번에 붙일지를 게임이 대신 정하면
-    /// 유저가 고를 것이 사라진다.
+    /// 게임이 대신 정하면 유저가 고를 것이 사라진다.
     /// </summary>
-    private void DrawGemSlotButtons(SkillDefinition skill)
+    private void DrawGemEquipButton(SkillDefinition skill, ItemStack target)
     {
         var targets = new List<SlotRef>(8);
 
         CollectPlaceableSlots(skill, targets);
 
-        if (targets.Count == 0)
-        {
-            UIFactory.CreateLabel(detailContent, "지금 끼울 수 있는 자리가 없습니다.", 23,
-                FontStyle.Normal, new Vector2(0f, ActionRowBottom), new Vector2(1f, ActionRowTop),
-                TextAnchor.MiddleCenter, UIPalette.TextDim);
+        bool any = targets.Count > 0;
+
+        Button equip = UIFactory.CreateButton(detailContent, "장착",
+            new Vector2(0f, ActionRowBottom), new Vector2(1f, ActionRowTop),
+            UIPalette.Action, () => BeginPlacingGem(target), 28);
+
+        equip.interactable = any;
+
+        if (any)
             return;
-        }
 
-        UIFactory.CreateLabel(detailContent, "끼울 자리", 22, FontStyle.Bold,
-            new Vector2(0f, SlotGridTop + 0.008f), new Vector2(1f, SlotGridTop + 0.062f),
-            TextAnchor.MiddleLeft, UIPalette.TextDim);
-
-        const int Columns = 4;
-
-        int rows = Mathf.CeilToInt(targets.Count / (float)Columns);
-
-        float height = (SlotGridTop - SlotGridBottom) / rows;
-
-        for (int i = 0; i < targets.Count; i++)
-        {
-            int column = i % Columns;
-            int row = i / Columns;
-
-            float left = column / (float)Columns + 0.006f;
-            float right = (column + 1) / (float)Columns - 0.006f;
-
-            float bottom = SlotGridTop - (row + 1) * height + 0.008f;
-            float top = SlotGridTop - row * height - 0.008f;
-
-            SlotRef captured = targets[i];
-
-            UIFactory.CreateButton(detailContent, SlotName(captured),
-                new Vector2(left, bottom), new Vector2(right, top),
-                UIPalette.Action, () => PlaceGem(captured), 23);
-        }
+        UIFactory.CreateLabel(detailContent, "지금 끼울 수 있는 자리가 없습니다.", 21,
+            FontStyle.Normal,
+            new Vector2(0f, ActionRowTop + 0.012f), new Vector2(1f, ActionRowTop + 0.078f),
+            TextAnchor.MiddleCenter, UIPalette.TextDim);
     }
 
     private void CollectPlaceableSlots(SkillDefinition skill, List<SlotRef> into)

@@ -826,7 +826,10 @@ public partial class InventoryScreenUI : MonoBehaviour
     /// </summary>
     private void RefreshHudVisibility()
     {
-        bool show = tab != Tab.Passive && !hudSuppressed;
+        // 【닫혀 있으면 늘 보인다.】
+        // 패시브 규칙은 「그 화면이 떠 있는 동안」에만 해당한다.
+        // tab만 보다가, 패시브를 껐을 때 tab이 그대로라 버튼까지 같이 사라졌다.
+        bool show = !hudSuppressed && (!IsOpen || tab != Tab.Passive);
 
         for (int i = 0; i < hudButtons.Count; i++)
         {
@@ -1583,7 +1586,7 @@ public partial class InventoryScreenUI : MonoBehaviour
     private void DrawStatRow(string label, string value, Color valueColor)
     {
         // 아래 버튼들을 덮기 시작하면 멈춘다. 겹치는 것보다 잘리는 편이 낫다.
-        if (statCursor <= SlotGridTop + 0.04f)
+        if (statCursor <= ActionRowTop + 0.04f)
             return;
 
         float host = Mathf.Max(1f, detailContent.rect.height);

@@ -49,9 +49,13 @@ public partial class InventoryScreenUI
 
         int next = SocketUnlockTable.NextUnlockLevel(build.AwakeningLevel);
 
-        topInfoLabel.text = next > 0
-            ? $"다음 개방 Lv.{next} ({SocketUnlockTable.DescribeUnlock(next)})"
-            : "전부 개방됨";
+        // 【고르는 중에는 안내가 우선이다.】 밝아진 칸만으로는
+        // "지금 무엇을 기다리는 중인지"와 "어떻게 그만두는지"를 알 수 없다.
+        topInfoLabel.text = placingGem != null
+            ? $"「{placingGem.Definition.DisplayName}」 — 밝은 자리를 누르십시오 (다른 곳을 누르면 취소)"
+            : next > 0
+                ? $"다음 개방 Lv.{next} ({SocketUnlockTable.DescribeUnlock(next)})"
+                : "전부 개방됨";
 
         // 핵심 2줄 + 발동·전령 1줄 = 세 줄. 칸 폭은 계산으로 낸다 —
         // 손으로 적으면 좌우 여백이 서로 달라진다.
@@ -146,12 +150,60 @@ public partial class InventoryScreenUI
             unlocked ? UIPalette.Text : UIPalette.TextDim);
     }
 
-    /// <summary>지금 상세가 열려 있는 것이 젬이면 그 스킬. 아니면 null.</summary>
+    /// <summary>
+    /// 상세에서 「장착」을 눌러 지금 자리를 고르는 중인 젬. 평소에는 null.
+    ///
+    /// selected와 따로 두는 이유 — selected는 상세가 닫히면 풀린다.
+    /// 자리 고르기는 상세가 닫힌 **뒤에** 시작되므로 살아남는 표시가 필요하다.
+    /// </summary>
+    private ItemStack placingGem;
+
+    /// <summary>
+    /// 지금 소켓판이 밝혀 줘야 할 젬. 자리를 고르는 중이면 그것, 아니면 상세의 것.
+    /// </summary>
     private SkillDefinition PickedSkill()
     {
-        return selected?.Definition != null && selected.Definition.IsSkillGem
-            ? selected.Definition.Skill
+        ItemStack source = placingGem ?? selected;
+
+        return source?.Definition != null && source.Definition.IsSkillGem
+            ? source.Definition.Skill
             : null;
+    }
+
+    /// <summary>
+    /// 상세를 닫고 소켓판에서 자리를 고르게 한다. 「장착」 버튼이 부른다.
+    ///
+    /// 상세가 화면 가운데를 덮고 있어서, 밝아진 자리를 보려면 먼저 치워야 한다.
+    /// </summary>
+    private void BeginPlacingGem(ItemStack stack)
+    {
+        if (stack?.Definition == null || !stack.Definition.IsSkillGem)
+            return;
+
+        // CloseItemDetail이 placingGem을 비우므로 그 뒤에 세운다.
+        CloseItemDetail();
+
+        placingGem = stack;
+        selected = stack;
+        selectedSlot = null;
+
+        // 소켓판이 보이는 탭이어야 밝혀 봐야 소용이 있다.
+        tab = Tab.Socket;
+
+        Refresh();
+    }
+
+    /// <summary>고르기를 그만둔다. 밝기가 꺼지고 평소 화면으로 돌아간다.</summary>
+    private void CancelPlacingGem()
+    {
+        if (placingGem == null)
+            return;
+
+        placingGem = null;
+        selected = null;
+        selectedSlot = null;
+
+        Refresh();
     }
 
     private bool CanPlace(SlotRef slot, SkillDefinition skill)
@@ -184,6 +236,22 @@ public partial class InventoryScreenUI
     /// </summary>
     private void OnSlotClicked(SlotRef slot)
     {
+        // 자리를 고르는 중이면 그것이 먼저다. 밝은 칸이면 넣고, 아니면 그만둔다.
+        if (placingGem != null)
+        {
+            SkillDefinition picked = PickedSkill();
+
+            if (picked != null && CanPlace(slot, picked))
+            {
+                PlaceGem(slot);
+                return;
+            }
+
+            CancelPlacingGem();
+            ShowToast("끼우기를 그만두었습니다.");
+            return;
+        }
+
         SkillDefinition occupant = OccupantOf(slot);
 
         if (occupant != null)
@@ -192,7 +260,7 @@ public partial class InventoryScreenUI
             return;
         }
 
-        ShowToast("빈 자리입니다. 왼쪽에서 젬을 누른 뒤 「끼울 자리」에서 고르십시오.");
+        ShowToast("빈 자리입니다. 아래에서 젬을 누르고 「장착」을 누르십시오.");
     }
 
     private static SkillDefinition OccupantOf(SlotRef slot)

@@ -271,6 +271,70 @@ public static class UIFactory
         return label;
     }
 
+    /// <summary>
+    /// 넘치면 스크롤되는 글자 상자.
+    ///
+    /// 【왜 그냥 Label을 쓰지 않는가】
+    /// 설명 길이는 에셋이 정한다. 짧은 것에 맞춰 칸을 잡으면 긴 것이 잘리고,
+    /// 긴 것에 맞추면 대부분의 순간에 빈 띠가 남는다. 칸은 고정하고,
+    /// 넘치는 만큼만 손가락으로 밀 수 있게 한다.
+    ///
+    /// 내용이 칸보다 짧으면 ScrollRect가 움직이지 않으므로(Clamped)
+    /// 평소에는 그냥 글자와 똑같이 보인다.
+    /// </summary>
+    public static ScrollRect CreateScrollText(
+        Transform parent, string text, int fontSize, FontStyle style,
+        Vector2 anchorMin, Vector2 anchorMax, Color? color = null)
+    {
+        RectTransform root = CreateRegion("ScrollText", parent, anchorMin, anchorMax);
+
+        var scroll = root.gameObject.AddComponent<ScrollRect>();
+        scroll.horizontal = false;
+        scroll.vertical = true;
+        scroll.movementType = ScrollRect.MovementType.Clamped;
+        scroll.scrollSensitivity = 28f;
+
+        // 잘라 내는 면. 마스크가 없으면 넘친 글자가 상세 밖까지 그려진다.
+        RectTransform viewport = CreateRegion("Viewport", root, Vector2.zero, Vector2.one);
+
+        viewport.gameObject.AddComponent<RectMask2D>();
+
+        // 내용은 위쪽에 매달아 두고 높이만 늘어나게 한다.
+        // 글자를 자식으로 두면 ContentSizeFitter가 잴 대상이 없으므로
+        // Text를 내용 자신에게 붙인다.
+        GameObject contentObject = CreateChild("Content", viewport);
+
+        var content = contentObject.GetComponent<RectTransform>();
+        content.anchorMin = new Vector2(0f, 1f);
+        content.anchorMax = new Vector2(1f, 1f);
+        content.pivot = new Vector2(0.5f, 1f);
+        content.offsetMin = Vector2.zero;
+        content.offsetMax = Vector2.zero;
+        content.anchoredPosition = Vector2.zero;
+
+        var label = contentObject.AddComponent<Text>();
+        label.font = Font;
+        label.text = text;
+        label.fontSize = fontSize;
+        label.fontStyle = style;
+        label.alignment = TextAnchor.UpperLeft;
+        label.color = color ?? UIPalette.Text;
+        label.horizontalOverflow = HorizontalWrapMode.Wrap;
+        label.verticalOverflow = VerticalWrapMode.Overflow;
+
+        // 【여기서는 터치를 받아야 한다.】 글자 위를 밀어서 굴리기 때문이다.
+        label.raycastTarget = true;
+
+        var fitter = contentObject.AddComponent<ContentSizeFitter>();
+        fitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
+        fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+        scroll.viewport = viewport;
+        scroll.content = content;
+
+        return scroll;
+    }
+
     /// <summary>글자 하나짜리 버튼.</summary>
     public static Button CreateButton(
         Transform parent, string text, Vector2 anchorMin, Vector2 anchorMax,
