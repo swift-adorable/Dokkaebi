@@ -95,10 +95,10 @@ public partial class InventoryScreenUI : MonoBehaviour
     /// <summary>
     /// 가방 격자의 열 수.
     ///
-    /// 폭이 0.38로 줄면서 여섯 열로는 칸이 커 보인다. 일곱 열이면
-    /// 한 칸이 100px 언저리라 덕코프의 격자와 비슷해진다.
+    /// 일곱 열은 칸이 너무 잘아 이름이 두 글자도 안 들어갔다.
+    /// 다섯 열이면 한 칸이 140px 남짓이라 이름이 읽힌다.
     /// </summary>
-    private const int BagColumns = 7;
+    private const int BagColumns = 5;
 
     /// <summary>
     /// 한 번에 보이는 행. 【칸 크기의 기준】이다.
@@ -112,6 +112,9 @@ public partial class InventoryScreenUI : MonoBehaviour
 
     /// <summary>칸 사이 여백. 부모 기준 정규화 값이다.</summary>
     private const float BagCellPadding = 0.006f;
+
+    /// <summary>칸과 칸 사이 여백(px). 가로세로가 같아 보이려면 픽셀로 줘야 한다.</summary>
+    private const float CellGapPixels = 8f;
 
     /// <summary>
     /// 칸(장비 슬롯 · 가방 칸) 안쪽 여백. 【캔버스 픽셀】이다.
@@ -488,7 +491,7 @@ public partial class InventoryScreenUI : MonoBehaviour
             UIFactory.CreateRegion("Content", leftColumn, Vector2.zero, Vector2.one),
             UIFactory.Gap);
 
-        equipTitleLabel = UIFactory.CreateLabel(content, "장비", 30, FontStyle.Bold,
+        equipTitleLabel = UIFactory.CreateLabel(content, "장비", 29, FontStyle.Bold,
             new Vector2(0f, TopBandTop + BandGap), new Vector2(0.55f, TitleTop),
             TextAnchor.MiddleLeft, UIPalette.TextDim);
 
@@ -506,7 +509,7 @@ public partial class InventoryScreenUI : MonoBehaviour
         equipmentGrid = UIFactory.CreateRegion("TopBand", content,
             new Vector2(0f, EquipBandBottom), new Vector2(1f, TopBandTop));
 
-        bagTitleLabel = UIFactory.CreateLabel(content, "가방", 30, FontStyle.Bold,
+        bagTitleLabel = UIFactory.CreateLabel(content, "가방", 29, FontStyle.Bold,
             Vector2.zero, Vector2.one, TextAnchor.MiddleLeft, UIPalette.TextDim);
 
         // 아래 단 뒤에 한 단계 눌린 면을 깔아 깊이를 준다.
@@ -763,6 +766,17 @@ public partial class InventoryScreenUI : MonoBehaviour
         weightCard.gameObject.SetActive(!passive);
         quickBar.gameObject.SetActive(!passive);
 
+        // 【패시브는 화면을 통째로 쓴다.】
+        // 트리는 접으면 볼 수가 없다. 위의 화면 버튼과 아래줄까지 접고,
+        // 나가는 길은 패널 오른쪽 위의 「닫기」 하나로 둔다.
+        for (int i = 0; i < hudButtons.Count; i++)
+        {
+            if (hudButtons[i] != null)
+                hudButtons[i].gameObject.SetActive(!passive);
+        }
+
+        footer.gameObject.SetActive(!passive);
+
         if (showLeft)
         {
             leftColumn.anchorMax = new Vector2(SidePanelRight, 1f);
@@ -865,9 +879,21 @@ public partial class InventoryScreenUI : MonoBehaviour
 
         var slots = (EquipmentSlot[])System.Enum.GetValues(typeof(EquipmentSlot));
 
+        // 【가로와 세로 여백을 같게 만든다.】
+        // 정규화 여백 0.008 하나를 두 축에 쓰면, 가로로 긴 칸에서는
+        // 가로 6px · 세로 2px이 된다. 세로만 답답해 보이던 이유다.
+        // 픽셀로 정하고 각 축의 길이로 나눠 환산한다.
+        Canvas.ForceUpdateCanvases();
+
+        float gridWidth = Mathf.Max(1f, equipmentGrid.rect.width);
+        float gridHeight = Mathf.Max(1f, equipmentGrid.rect.height);
+
+        float padX = CellGapPixels / gridWidth;
+        float padY = CellGapPixels / gridHeight;
+
         for (int i = 0; i < slots.Length; i++)
         {
-            UIFactory.GetCellAnchors(i, 4, 2, 0.008f, out Vector2 min, out Vector2 max);
+            UIFactory.GetCellAnchors(i, 4, 2, padX, padY, out Vector2 min, out Vector2 max);
 
             ItemStack stack = loadout.Get(slots[i]);
 
@@ -919,7 +945,7 @@ public partial class InventoryScreenUI : MonoBehaviour
             // 0.07(가로) / 0.05(세로)로 두었더니 칸이 가로로 길어
             // 왼쪽은 14px, 위는 3px이 됐다. 글자가 천장에 붙어 보였다.
             UIFactory.Inset(
-                UIFactory.CreateLabel(cell.transform, EquipmentSlotName(slots[i]), 21,
+                UIFactory.CreateLabel(cell.transform, EquipmentSlotName(slots[i]), 20,
                     FontStyle.Bold, new Vector2(0f, 0.5f), Vector2.one,
                     TextAnchor.UpperLeft, UIPalette.TextDim).rectTransform,
                 left: SlotPad, bottom: 0f, right: SlotPad, top: SlotPad);
@@ -944,11 +970,11 @@ public partial class InventoryScreenUI : MonoBehaviour
             // 장비 탭이 폭을 다 쓰게 되면서 칸이 두 배로 넓어졌으므로
             // 실제로 줄어드는 경우는 아주 긴 이름뿐이다.
             Text equipName = UIFactory.CreateLabel(strip.transform,
-                stack.Definition.DisplayName, 22, FontStyle.Bold,
+                stack.Definition.DisplayName, 21, FontStyle.Bold,
                 new Vector2(0.05f, 0f), new Vector2(0.95f, 1f),
                 TextAnchor.MiddleLeft, Color.white);
 
-            FitName(equipName, 22);
+            FitName(equipName, 21);
 
             DrawDurabilityBar(cell.transform, stack);
         }
@@ -1488,24 +1514,106 @@ public partial class InventoryScreenUI : MonoBehaviour
     /// 홀짝으로 바탕을 번갈아 까는 이유 — 값이 여러 줄이면
     /// 어느 값이 어느 이름의 것인지 눈이 놓친다.
     /// </summary>
-    private void DrawStatRow(int index, float top, string label, string value, Color valueColor)
+    // ── 수치 표 ───────────────────────────────────────────────────────
+    //
+    // 【행 높이를 글자에 맞춰 늘린다.】
+    // 전에는 모든 행이 같은 높이(0.052)였다. 「대가: 초기 피해가 지연 피해로
+    // 전환된다」처럼 값이 길면 글자가 행 밖으로 삐져나와 다음 행과 겹쳤다.
+    // 이제 값의 실제 높이를 재서 그만큼 행을 늘린다.
+
+    /// <summary>행 안쪽 위아래 여백(px).</summary>
+    private const float StatRowPadPixels = 12f;
+
+    /// <summary>한 줄짜리 행의 최소 높이(px). 손가락이 닿는 크기를 지킨다.</summary>
+    private const float StatRowMinPixels = 46f;
+
+    private const float StatRowGap = 0.008f;
+
+    /// <summary>값 칸이 시작하는 가로 위치. 왼쪽은 부제목이 쓴다.</summary>
+    private const float StatValueLeft = 0.42f;
+    private const float StatValueRight = 0.96f;
+
+    /// <summary>다음 행이 놓일 높이. 표를 그리기 전에 BeginStatRows가 되돌린다.</summary>
+    private float statCursor;
+    private int statIndex;
+
+    private void BeginStatRows()
     {
-        const float RowHeight = 0.052f;
-        const float Gap = 0.006f;
+        statCursor = StatTop;
+        statIndex = 0;
+    }
 
-        float bottom = top - (index + 1) * RowHeight - index * Gap;
+    /// <summary>
+    /// 표 한 줄. 왼쪽에 부제목, 오른쪽에 값.
+    ///
+    /// 홀짝으로 바탕을 번갈아 까는 이유 — 값이 여러 줄이면
+    /// 어느 값이 어느 이름의 것인지 눈이 놓친다.
+    ///
+    /// 값이 한 줄이면 부제목도 세로 가운데에, 여러 줄이면 둘 다 위에 붙인다.
+    /// </summary>
+    private void DrawStatRow(string label, string value, Color valueColor)
+    {
+        // 아래 버튼들을 덮기 시작하면 멈춘다. 겹치는 것보다 잘리는 편이 낫다.
+        if (statCursor <= SlotGridTop + 0.04f)
+            return;
 
-        Image row = UIFactory.CreatePanel($"Row_{index}", detailContent,
-            index % 2 == 0 ? UIPalette.Row : UIPalette.RowAlt,
-            new Vector2(0f, bottom), new Vector2(1f, bottom + RowHeight), radius: 6);
+        float host = Mathf.Max(1f, detailContent.rect.height);
+        float width = Mathf.Max(1f, detailContent.rect.width);
 
-        UIFactory.CreateLabel(row.transform, label, 24, FontStyle.Normal,
-            new Vector2(0.04f, 0f), new Vector2(0.60f, 1f), TextAnchor.MiddleLeft,
-            UIPalette.TextDim);
+        Image row = UIFactory.CreatePanel($"Row_{statIndex}", detailContent,
+            statIndex % 2 == 0 ? UIPalette.Row : UIPalette.RowAlt,
+            new Vector2(0f, statCursor - 0.05f), new Vector2(1f, statCursor), radius: 6);
 
-        UIFactory.CreateLabel(row.transform, value, 24, FontStyle.Bold,
-            new Vector2(0.60f, 0f), new Vector2(0.96f, 1f), TextAnchor.MiddleRight,
-            valueColor);
+        Text valueLabel = UIFactory.CreateLabel(row.transform, value, 23, FontStyle.Bold,
+            new Vector2(StatValueLeft, 0f), new Vector2(StatValueRight, 1f),
+            TextAnchor.UpperRight, valueColor);
+
+        valueLabel.horizontalOverflow = HorizontalWrapMode.Wrap;
+        valueLabel.verticalOverflow = VerticalWrapMode.Overflow;
+
+        float textHeight = PreferredHeight(
+            valueLabel, value, width * (StatValueRight - StatValueLeft));
+
+        float pixels = Mathf.Max(StatRowMinPixels, textHeight + StatRowPadPixels);
+        float height = pixels / host;
+
+        row.rectTransform.anchorMin = new Vector2(0f, statCursor - height);
+        row.rectTransform.anchorMax = new Vector2(1f, statCursor);
+        row.rectTransform.offsetMin = Vector2.zero;
+        row.rectTransform.offsetMax = Vector2.zero;
+
+        bool single = pixels <= StatRowMinPixels;
+
+        valueLabel.alignment = single ? TextAnchor.MiddleRight : TextAnchor.UpperRight;
+
+        UIFactory.Inset(valueLabel.rectTransform,
+            left: 0f, bottom: 0f, right: 0f, top: single ? 0f : StatRowPadPixels * 0.5f);
+
+        Text nameLabel = UIFactory.CreateLabel(row.transform, label, 23, FontStyle.Normal,
+            new Vector2(0.04f, 0f), new Vector2(StatValueLeft - 0.02f, 1f),
+            single ? TextAnchor.MiddleLeft : TextAnchor.UpperLeft, UIPalette.TextDim);
+
+        UIFactory.Inset(nameLabel.rectTransform,
+            left: 0f, bottom: 0f, right: 0f, top: single ? 0f : StatRowPadPixels * 0.5f);
+
+        statCursor -= height + StatRowGap;
+        statIndex++;
+    }
+
+    /// <summary>
+    /// 이 폭에서 글자가 몇 픽셀 높이가 되는가.
+    ///
+    /// 레이아웃이 확정되기 전에도 재야 하므로, 폭을 직접 넘겨 계산한다.
+    /// </summary>
+    private static float PreferredHeight(Text label, string text, float width)
+    {
+        TextGenerationSettings settings = label.GetGenerationSettings(new Vector2(width, 0f));
+
+        settings.horizontalOverflow = HorizontalWrapMode.Wrap;
+        settings.verticalOverflow = VerticalWrapMode.Overflow;
+
+        return label.cachedTextGeneratorForLayout.GetPreferredHeight(text, settings)
+               / Mathf.Max(0.0001f, label.pixelsPerUnit);
     }
 
     private static string ItemKindName(ItemKind kind)
@@ -1543,6 +1651,8 @@ public partial class InventoryScreenUI : MonoBehaviour
         if (!string.IsNullOrEmpty(skill.CostDescription))
             lines.Add($"대가: {skill.CostDescription}");
 
+        BeginStatRows();
+
         for (int i = 0; i < lines.Count; i++)
         {
             int split = lines[i].IndexOf(':');
@@ -1550,7 +1660,7 @@ public partial class InventoryScreenUI : MonoBehaviour
             string label = split > 0 ? lines[i].Substring(0, split) : lines[i];
             string value = split > 0 ? lines[i].Substring(split + 1).Trim() : string.Empty;
 
-            DrawStatRow(i, StatTop, label, value, UIPalette.Text);
+            DrawStatRow(label, value, UIPalette.Text);
         }
     }
 

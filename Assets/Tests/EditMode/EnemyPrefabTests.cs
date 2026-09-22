@@ -260,6 +260,26 @@ namespace Blob.Tests
         }
 
         [Test]
+        public void 적_프리팹이_높이로_떠오르지_않는다()
+        {
+            // 【하늘로 올라가던 버그를 고정한다.】
+            // 중력이 꺼져 있는데 Y가 자유로우면, 적끼리 부딪혀 한 번 위로
+            // 밀린 속도가 영영 남는다. 실제로 적들이 화면 위로 흩어져 떠올랐다.
+            // 탑다운이라 높이는 쓰지 않으므로 물리에서 아예 잠근다.
+            foreach (var row in Wired)
+            {
+                var body = AssetDatabase.LoadAssetAtPath<GameObject>(row.path)
+                    .GetComponent<Rigidbody>();
+
+                Assert.IsNotNull(body, row.path);
+
+                Assert.IsTrue((body.constraints & RigidbodyConstraints.FreezePositionY) != 0,
+                    $"{EnemyArchetypeTable.Name(row.archetype)}의 Y가 잠겨 있지 않습니다. "
+                    + "부딪히면 하늘로 올라갑니다.");
+            }
+        }
+
+        [Test]
         public void 원거리형이_투사체를_들고_있다()
         {
             // 원거리인데 투사체가 비어 있으면 공격이 아무 일도 하지 않는다.

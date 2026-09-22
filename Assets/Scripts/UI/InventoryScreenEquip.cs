@@ -200,6 +200,8 @@ public partial class InventoryScreenUI
         }
 
         // 표로 깐다. 줄글로 나열하면 어느 값이 이득이고 대가인지 한눈에 안 들어온다.
+        BeginStatRows();
+
         int row = 0;
 
         foreach (string line in gains)
@@ -216,20 +218,20 @@ public partial class InventoryScreenUI
         }
     }
 
-    /// <summary>「이름 +값」 한 줄을 이름과 값으로 갈라 표에 넣는다.</summary>
+    /// <summary>
+    /// 「이름 +값」 한 줄을 이름과 값으로 갈라 표에 넣는다.
+    ///
+    /// 아래 버튼을 덮기 시작하면 DrawStatRow가 알아서 멈춘다 —
+    /// 행 높이가 글자에 따라 달라져서 「몇 줄까지」로는 셀 수 없다.
+    /// </summary>
     private void DrawStatLine(ref int index, string line, Color valueColor)
     {
-        // 행동 줄을 덮지 않도록 여기서 멈춘다. 넘치면 잘라 내는 편이
-        // 버튼 위에 글자가 겹치는 것보다 낫다.
-        if (index >= 7)
-            return;
-
         int split = line.LastIndexOf(' ');
 
         string label = split > 0 ? line.Substring(0, split) : line;
         string value = split > 0 ? line.Substring(split + 1) : string.Empty;
 
-        DrawStatRow(index, StatTop, label, value, valueColor);
+        DrawStatRow(label, value, valueColor);
 
         index++;
     }

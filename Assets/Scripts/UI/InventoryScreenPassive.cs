@@ -88,22 +88,23 @@ public partial class InventoryScreenUI
     /// </summary>
     private void DrawPassiveHeader(PassiveManager manager)
     {
-        // 【나가는 길을 왼쪽 위에 둔다.】
-        // 화면을 통째로 쓰게 되면서 아래줄의 「닫기」가 사라졌다.
-        // 전체 화면에서 나가는 버튼은 왼쪽 위라는 것이 가장 널리 쓰인다.
-        UIFactory.CreateButton(rightContent, "←",
-            new Vector2(0f, HeaderLine), new Vector2(0.045f, 1f),
-            UIPalette.Subtle, Close, 30);
-
+        // 【나가는 길은 오른쪽 위의 「닫기」 하나다.】
+        // 왼쪽 위에 「←」를 따로 뒀더니 아래의 「닫기」와 둘이 되어,
+        // 어느 쪽이 무엇인지 매번 읽어야 했다. 크레딧을 왼쪽으로 물리고
+        // 그 자리를 닫기가 가져간다 — 오른쪽 위는 원래 닫는 자리다.
         UIFactory.CreateLabel(rightContent,
             $"패시브    계정 Lv.{manager.AccountLevel}", 32, FontStyle.Bold,
-            new Vector2(0.06f, HeaderLine), new Vector2(0.55f, 1f),
+            new Vector2(0f, HeaderLine), new Vector2(0.55f, 1f),
             TextAnchor.MiddleLeft, UIPalette.TextOnGlass);
 
         UIFactory.CreateLabel(rightContent,
             $"₡ {manager.Credits:N0}", 30, FontStyle.Bold,
-            new Vector2(0.55f, HeaderLine), Vector2.one,
+            new Vector2(0.55f, HeaderLine), new Vector2(0.86f, 1f),
             TextAnchor.MiddleRight, UIPalette.TextAccent);
+
+        UIFactory.CreateButton(rightContent, "닫기",
+            new Vector2(0.89f, HeaderLine), Vector2.one,
+            UIPalette.Subtle, Close, 26);
     }
 
     /// <summary>계열 5개. 역행은 발견 전까지 「???」다.</summary>
