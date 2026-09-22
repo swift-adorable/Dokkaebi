@@ -157,7 +157,7 @@ namespace Blob.Tests
         [UnityTest]
         public IEnumerator 풀_재사용_시_이전_상태가_새지_않는다()
         {
-            // 재사용된 개체가 이전 런의 점화를 들고 나오면 밸런스가 조용히 무너진다.
+            // 재사용된 개체가 이전 출격의 점화를 들고 나오면 밸런스가 조용히 무너진다.
             Health target = CreateTarget();
 
             target.ApplyStatus(StatusEffectType.Ignite, 10f);

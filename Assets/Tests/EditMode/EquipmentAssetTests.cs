@@ -239,7 +239,7 @@ namespace Blob.Tests
                 bool hasCost = spec.extra != null && spec.extra.Any(EquipmentStatMeta.IsDrawback);
 
                 Assert.IsTrue(hasCost,
-                    $"{spec.id}에 대가가 없습니다. 페널티 없는 장비는 성능 하단이나 드랍 전용이어야 합니다.");
+                    $"{spec.id}에 대가가 없습니다. 페널티 없는 장비는 성능 하단이나 드롭 전용이어야 합니다.");
             }
         }
 

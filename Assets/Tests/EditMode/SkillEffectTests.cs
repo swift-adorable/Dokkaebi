@@ -7,7 +7,7 @@ namespace Blob.Tests
     /// <summary>
     /// 「대가만 있고 효과가 없는 젬은 존재할 수 없다」를 강제한다. (D1)
     ///
-    /// 이 테스트가 없던 동안 Support 35종 중 21종이 대가만 적용되고
+    /// 이 테스트가 없던 동안 보조 젬 35종 중 21종이 대가만 적용되고
     /// 효과는 설명 문자열에만 있었다. 끼우면 손해만 보는 젬이었다.
     /// 문서에만 적힌 규칙은 언젠가 무너진다 — 그래서 여기에 고정한다.
     /// </summary>
@@ -46,7 +46,7 @@ namespace Blob.Tests
                 .ToList();
 
             Assert.IsEmpty(missing,
-                "효과가 데이터에 없는 Support입니다. 끼우면 대가만 적용됩니다: "
+                "효과가 데이터에 없는 보조 젬입니다. 끼우면 대가만 적용됩니다: "
                 + string.Join(", ", missing));
         }
 
@@ -254,11 +254,11 @@ namespace Blob.Tests
         }
 
         /// <summary>
-        /// 【자기 Core는 못 걸고, 다른 발생원이 걸어 준 것을 이용한다.】
+        /// 【자기 핵심 젬은 못 걸고, 다른 발생원이 걸어 준 것을 이용한다.】
         ///
         /// 차단이 빌드 전역이던 동안 배타형 4종은 구조적으로 영구 무효였다 —
-        /// 「번제」는 화염 태그를 요구해 화염 Core에만 끼울 수 있는데,
-        /// 전역 차단이면 그 화염 Core의 점화까지 꺼져 조건이 영원히 성립하지 않았다.
+        /// 「번제」는 화염 태그를 요구해 화염 핵심 젬에만 끼울 수 있는데,
+        /// 전역 차단이면 그 화염 핵심 젬의 점화까지 꺼져 조건이 영원히 성립하지 않았다.
         /// </summary>
         [Test]
         public void 번제를_낀_Core는_점화를_걸_수_없다()
@@ -266,15 +266,15 @@ namespace Blob.Tests
             var build = new SocketedBuild();
             build.SetAwakeningLevel(15);
 
-            Assert.IsTrue(build.TryEquipCore(Find("core_fire"), 0), "화염 Core 장착");
+            Assert.IsTrue(build.TryEquipCore(Find("core_fire"), 0), "화염 핵심 젬 장착");
             Assert.IsTrue(build.TryEquipSupport(Find("sup_burnt_offering"), 0, 0), "번제 장착");
 
             Assert.AreEqual(StatusEffectType.None, build.EffectiveAilmentOf(0),
-                "번제를 낀 Core는 점화를 걸 수 없어야 합니다.");
+                "번제를 낀 핵심 젬은 점화를 걸 수 없어야 합니다.");
         }
 
         /// <summary>
-        /// 다른 Core가 속성 전환으로 점화를 공급하면 배타형이 성립한다.
+        /// 다른 핵심 젬이 속성 전환으로 점화를 공급하면 배타형이 성립한다.
         /// 이것이 「단독으로는 작동하지 않는다」의 정확한 뜻이다.
         /// </summary>
         [Test]
@@ -286,12 +286,12 @@ namespace Blob.Tests
             build.TryEquipCore(Find("core_fire"), 0);
             build.TryEquipSupport(Find("sup_burnt_offering"), 0, 0);
 
-            // 2번째 Core에 화염 조율을 끼워 점화를 공급한다.
-            Assert.IsTrue(build.TryEquipCore(Find("core_thunder"), 1), "2번째 Core 장착");
+            // 2번째 핵심 젬에 화염 조율을 끼워 점화를 공급한다.
+            Assert.IsTrue(build.TryEquipCore(Find("core_thunder"), 1), "2번째 핵심 젬 장착");
             Assert.IsTrue(build.TryEquipSupport(Find("sup_fire_attunement"), 1, 0), "화염 조율 장착");
 
             Assert.AreEqual(StatusEffectType.Ignite, build.EffectiveAilmentOf(1),
-                "화염 조율이 2번째 Core의 속성을 점화로 바꾸지 못했습니다.");
+                "화염 조율이 2번째 핵심 젬의 속성을 점화로 바꾸지 못했습니다.");
 
             Assert.IsFalse(build.IsStatusUnavailable(StatusEffectType.Ignite),
                 "빌드 어딘가에서 점화가 나와야 번제가 일을 합니다.");
@@ -301,7 +301,7 @@ namespace Blob.Tests
                 "탄에 점화가 실리지 않았습니다.");
         }
 
-        /// <summary>차단은 자기 Core에만 적용된다. 다른 Core는 영향을 받지 않는다.</summary>
+        /// <summary>차단은 자기 핵심 젬에만 적용된다. 다른 핵심 젬은 영향을 받지 않는다.</summary>
         [Test]
         public void 차단은_다른_Core에_번지지_않는다()
         {
@@ -313,10 +313,10 @@ namespace Blob.Tests
             build.TryEquipCore(Find("core_thunder"), 1);
 
             Assert.IsTrue(build.IsStatusBlockedForCore(0, StatusEffectType.Ignite),
-                "번제를 낀 Core는 점화가 막혀야 합니다.");
+                "번제를 낀 핵심 젬은 점화가 막혀야 합니다.");
 
             Assert.IsFalse(build.IsStatusBlockedForCore(1, StatusEffectType.Ignite),
-                "다른 Core까지 막으면 배타형이 영원히 무효가 됩니다.");
+                "다른 핵심 젬까지 막으면 배타형이 영원히 무효가 됩니다.");
         }
 
         /// <summary>「원소 융합」은 원래 속성을 유지한 채 2차 속성을 더한다.</summary>

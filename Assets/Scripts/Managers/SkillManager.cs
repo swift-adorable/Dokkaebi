@@ -7,7 +7,7 @@ using UnityEngine;
 /// (docs/Blob_Skill_System.md 0·11·12절)
 ///
 /// 흐름:
-///   도감(해금 기록) → 드랍 풀 → 적을 흡수하면 젬이 가방에 들어온다
+///   도감(해금 기록) → 드롭 풀 → 적을 흡수하면 젬이 가방에 들어온다
 ///   → 유저가 직접 소켓에 끼운다 → 즉시 작동
 ///   → 각성 레벨이 오르면 【선택창이 아니라 소켓이 열린다】
 ///
@@ -26,19 +26,19 @@ public class SkillManager : Singleton<SkillManager>
     [SerializeField] private SkillGemCatalog gemCatalog;
 
     [Header("도감 (세이브 연결 전 임시)")]
-    [Tooltip("※ 임시 — 변이 샘플 해금과 세이브가 붙기 전까지 전 젬을 드랍 풀에 넣는다.")]
+    [Tooltip("※ 임시 — 변이 샘플 해금과 세이브가 붙기 전까지 전 젬을 드롭 풀에 넣는다.")]
     [SerializeField] private bool unlockAllOnStart = true;
 
-    [Header("드랍")]
+    [Header("드롭")]
     [Tooltip("시체 1구를 흡수했을 때 젬이 나올 확률.")]
     [Range(0f, 1f)]
     [SerializeField] private float gemDropChance = 0.18f;
 
-    [Tooltip("레이드 시작 직후 부여 계열 Core 1개를 확정 지급한다. (11-3절) " +
+    [Tooltip("레이드 시작 직후 부여 계열 핵심 젬 1개를 확정 지급한다. (11-3절) " +
              "끄면 아무것도 쏘지 못하는 상태로 시작한다.")]
     [SerializeField] private bool grantFirstCore = true;
 
-    [Tooltip("첫 Core를 자동으로 1번 슬롯에 끼운다. 끄면 유저가 직접 끼운다.")]
+    [Tooltip("첫 핵심 젬을 자동으로 1번 슬롯에 끼운다. 끄면 유저가 직접 끼운다.")]
     [SerializeField] private bool autoEquipFirstCore = true;
 
     private readonly SocketedBuild build = new();
@@ -52,10 +52,10 @@ public class SkillManager : Singleton<SkillManager>
     /// <summary>지금 소켓에 끼워져 있는 구성.</summary>
     public SocketedBuild Build => build;
 
-    /// <summary>도감 — 무엇이 드랍 풀에 들어오는가.</summary>
+    /// <summary>도감 — 무엇이 드롭 풀에 들어오는가.</summary>
     public SkillCodex Codex => codex;
 
-    /// <summary>현재 드랍 풀. 도감에 해금된 것만 들어 있다.</summary>
+    /// <summary>현재 드롭 풀. 도감에 해금된 것만 들어 있다.</summary>
     public IReadOnlyList<SkillDefinition> DropPool => dropPool;
 
     /// <summary>전체 정의 카탈로그. 로드 실패 시 null일 수 있다.</summary>
@@ -159,7 +159,7 @@ public class SkillManager : Singleton<SkillManager>
         }
     }
 
-    /// <summary>도감이 바뀌었을 때 드랍 풀을 다시 만든다.</summary>
+    /// <summary>도감이 바뀌었을 때 드롭 풀을 다시 만든다.</summary>
     public void RebuildDropPool()
     {
         if (catalog == null)
@@ -170,7 +170,7 @@ public class SkillManager : Singleton<SkillManager>
 
         codex.BuildDropPool(catalog.Definitions, dropPool);
 
-        GameLogger.Log($"[SkillManager] 드랍 풀 {dropPool.Count}종 (도감 {codex.Count}종 해금)");
+        GameLogger.Log($"[SkillManager] 드롭 풀 {dropPool.Count}종 (도감 {codex.Count}종 해금)");
     }
 
     // ────────────────────────────────── 각성 레벨 = 소켓 개방
@@ -214,10 +214,10 @@ public class SkillManager : Singleton<SkillManager>
         build.SetAwakeningLevel(level);
     }
 
-    // ────────────────────────────────── 드랍 · 획득
+    // ────────────────────────────────── 드롭 · 획득
 
     /// <summary>
-    /// 레이드 시작 직후의 확정 드랍. 부여 계열 Core 1개.
+    /// 레이드 시작 직후의 확정 드롭. 부여 계열 핵심 젬 1개.
     /// 이것이 없으면 젬이 하나도 없어 아무것도 쏘지 못한다. (11-3절)
     /// </summary>
     public bool GrantFirstCore()
@@ -229,7 +229,7 @@ public class SkillManager : Singleton<SkillManager>
 
         if (core == null)
         {
-            GameLogger.Error("[SkillManager] 드랍 풀에 부여 계열 Core가 없습니다. 도감을 확인하십시오.", this);
+            GameLogger.Error("[SkillManager] 드롭 풀에 부여 계열 핵심 젬이 없습니다. 도감을 확인하십시오.", this);
             return false;
         }
 
@@ -243,7 +243,7 @@ public class SkillManager : Singleton<SkillManager>
     }
 
     /// <summary>
-    /// 젬 드랍을 굴려 【아이템 정의만】 돌려준다. 시체가 자기 전리품 칸에 담는다.
+    /// 젬 드롭을 굴려 【아이템 정의만】 돌려준다. 시체가 자기 전리품 칸에 담는다.
     /// luckMultiplier는 적 등급 배수다. 희귀한 적일수록 잘 나온다.
     ///
     /// 가방에 바로 넣지 않는 이유 — 「무엇을 들고 갈지 고른다」가 추출 루팅의 결정이다.
@@ -337,7 +337,7 @@ public class SkillManager : Singleton<SkillManager>
 
     public bool TryEquipCore(SkillDefinition skill, int coreIndex)
     {
-        // Core 교체는 빠져나오는 젬이 최대 4개(기존 Core + 소켓 3)다.
+        // 핵심 젬 교체는 빠져나오는 젬이 최대 4개(기존 핵심 젬 + 소켓 3)다.
         // 끼울 젬 1개가 가방에서 빠지므로 실제로 필요한 여유는 그보다 1 적다.
         int returning = CountReturnsForCore(skill, coreIndex);
 
@@ -353,7 +353,7 @@ public class SkillManager : Singleton<SkillManager>
                      build.CanEquipCore(skill, coreIndex));
     }
 
-    /// <summary>이 Core를 저 자리에 끼우면 가방으로 돌아올 젬이 몇 개인지.</summary>
+    /// <summary>이 핵심 젬을 저 자리에 끼우면 가방으로 돌아올 젬이 몇 개인지.</summary>
     private int CountReturnsForCore(SkillDefinition skill, int coreIndex)
     {
         if (skill == null)
@@ -400,7 +400,7 @@ public class SkillManager : Singleton<SkillManager>
     /// <summary>
     /// 가방에서 젬을 꺼내 소켓에 끼운다.
     ///
-    /// 빠져나온 젬(교체된 것, 태그를 잃은 Support)는 가방으로 돌아간다.
+    /// 빠져나온 젬(교체된 것, 태그를 잃은 보조 젬)는 가방으로 돌아간다.
     /// 조작 도중에 아이템이 사라지지 않게 하는 것이 이 함수의 핵심 책임이다.
     /// </summary>
     private bool Equip(SkillDefinition skill, Func<bool> equipAction, SocketError precheck)
@@ -528,10 +528,10 @@ public class SkillManager : Singleton<SkillManager>
         returned.Clear();
     }
 
-    // ────────────────────────────────── 런 종료
+    // ────────────────────────────────── 출격 종료
 
     /// <summary>
-    /// 런 종료 시 소켓을 비운다.
+    /// 출격 종료 시 소켓을 비운다.
     ///
     /// 【젬을 여기서 없애지 않는다.】 추출 성공이면 그대로 창고로 가고,
     /// 사망이면 PlayerInventory.DropOnDeath가 규칙 하나로 처리한다.

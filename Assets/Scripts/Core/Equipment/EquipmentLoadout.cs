@@ -113,9 +113,9 @@ public class EquipmentLoadout
     }
 
     /// <summary>
-    /// 세트 게이트 판정. 규칙 부여가 아니라 【누적 수치】다.
+    /// 세트 문턱 판정. 규칙 부여가 아니라 【누적 수치】다.
     ///
-    /// 올 오어 낫싱이 아니라서 「장비 1점 + 소모품 1개」 조합이 성립한다.
+    /// 전부 아니면 전무가 아니라서 「장비 1점 + 소모품 1개」 조합이 성립한다.
     /// (docs/Blob_Equipment_System.md 5-3절)
     /// </summary>
     public int ContainmentWard(int consumableBonus = 0)

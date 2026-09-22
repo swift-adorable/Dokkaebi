@@ -217,7 +217,7 @@ namespace Blob.Tests
         [Test]
         public void 같은_보조를_다른_핵심에는_하나씩_끼울_수_있다()
         {
-            // 11-3절 — 중복 드랍을 허용하고, 두 Core에 하나씩 끼우는 것이 그 용도다.
+            // 11-3절 — 중복 드롭을 허용하고, 두 핵심 젬에 하나씩 끼우는 것이 그 용도다.
             SocketedBuild build = At(SocketUnlockTable.FullyOpenLevel);
             SkillDefinition support = Support("sup_a");
 
@@ -308,7 +308,7 @@ namespace Blob.Tests
             build.Clear();
 
             Assert.AreEqual(0, build.EquippedCount);
-            Assert.AreEqual(1, build.AwakeningLevel, "런이 끝나면 각성 레벨도 초기화됩니다.");
+            Assert.AreEqual(1, build.AwakeningLevel, "출격이 끝나면 각성 레벨도 초기화됩니다.");
         }
 
         [Test]

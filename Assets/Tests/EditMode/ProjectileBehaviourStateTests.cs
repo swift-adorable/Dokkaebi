@@ -121,10 +121,10 @@ namespace Blob.Tests
             Assert.AreEqual(4, state.TotalRemaining);
         }
 
-        // ── 엣지 케이스 ──────────────────────────────────────────
+        // ── 예외 상황 ──────────────────────────────────────────
 
         [Test]
-        public void 엣지_음수_설정은_0으로_보정된다()
+        public void 예외_음수_설정은_0으로_보정된다()
         {
             var state = new ProjectileBehaviourState();
 
@@ -135,7 +135,7 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 엣지_None에_대한_조작은_무시된다()
+        public void 예외_None에_대한_조작은_무시된다()
         {
             var state = new ProjectileBehaviourState();
 
@@ -145,7 +145,7 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 엣지_소진_후_반복_호출해도_음수가_되지_않는다()
+        public void 예외_소진_후_반복_호출해도_음수가_되지_않는다()
         {
             var state = new ProjectileBehaviourState { PierceRemaining = 1 };
 
@@ -159,7 +159,7 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 엣지_Clear는_모든_행동을_제거한다()
+        public void 예외_Clear는_모든_행동을_제거한다()
         {
             var state = new ProjectileBehaviourState
             {

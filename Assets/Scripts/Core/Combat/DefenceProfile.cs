@@ -21,10 +21,10 @@ public struct DefenceProfile
     /// <summary>근접 · 접촉 · 폭발 피격에 적용되는 방어도.</summary>
     public float bodyArmour;
 
-    /// <summary>속성 내성 배율.</summary>
+    /// <summary>속성 저항 배율.</summary>
     public ElementalResistances resistances;
 
-    /// <summary>방어도 0 / 내성 전부 1.0인 기본값.</summary>
+    /// <summary>방어도 0 / 저항 전부 1.0인 기본값.</summary>
     public static DefenceProfile None => new DefenceProfile
     {
         headArmour = 0f,

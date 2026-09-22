@@ -49,7 +49,7 @@ public class SocketedBuild
     /// <summary>지금 열려 있는 슬롯 구성.</summary>
     public SocketCapacity Capacity => capacity;
 
-    /// <summary>끼워진 젬 전부. 순서는 Core → 소켓 → 발동 → 전령.</summary>
+    /// <summary>끼워진 젬 전부. 순서는 핵심 젬 → 소켓 → 발동 → 전령.</summary>
     public IReadOnlyList<SkillDefinition> Equipped
     {
         get
@@ -61,13 +61,13 @@ public class SocketedBuild
 
     public int EquippedCount => Equipped.Count;
 
-    /// <summary>공격 수단이 하나라도 있는지. Core가 없으면 아무것도 쏘지 못한다.</summary>
+    /// <summary>공격 수단이 하나라도 있는지. 핵심 젬이 없으면 아무것도 쏘지 못한다.</summary>
     public bool HasCore => cores[0] != null || cores[1] != null;
 
     /// <summary>장착된 전령. 없으면 null.</summary>
     public SkillDefinition Herald => herald;
 
-    /// <summary>지정한 Core 슬롯의 젬. 비었으면 null.</summary>
+    /// <summary>지정한 핵심 젬 슬롯의 젬. 비었으면 null.</summary>
     public SkillDefinition GetCore(int coreIndex)
     {
         return IsValidCoreIndex(coreIndex) ? cores[coreIndex] : null;
@@ -129,7 +129,7 @@ public class SocketedBuild
 
     /// <summary>
     /// 각성 레벨을 올린다. 자리가 열릴 뿐이고 끼워진 것은 건드리지 않는다.
-    /// 레벨은 런 중에 내려가지 않으므로 축소에 따른 탈착은 다루지 않는다.
+    /// 레벨은 출격 중에 내려가지 않으므로 축소에 따른 탈착은 다루지 않는다.
     /// </summary>
     public void SetAwakeningLevel(int level)
     {
@@ -146,7 +146,7 @@ public class SocketedBuild
 
     // ────────────────────────────────── 장착 가능 판정
 
-    /// <summary>이 젬을 이 Core 슬롯에 끼울 수 있는지.</summary>
+    /// <summary>이 젬을 이 핵심 젬 슬롯에 끼울 수 있는지.</summary>
     public SocketError CanEquipCore(SkillDefinition definition, int coreIndex)
     {
         if (definition == null)
@@ -164,7 +164,7 @@ public class SocketedBuild
         if (definition.RequiredLevel > awakeningLevel)
             return SocketError.LevelTooHigh;
 
-        // 같은 Core를 두 자리에 넣는 것은 수치 중첩이므로 막는다. (14절 5번)
+        // 같은 핵심 젬을 두 자리에 넣는 것은 수치 중첩이므로 막는다. (14절 5번)
         for (int c = 0; c < MaxCores; c++)
         {
             if (c != coreIndex && cores[c] == definition)
@@ -195,12 +195,12 @@ public class SocketedBuild
         if (definition.RequiredLevel > awakeningLevel)
             return SocketError.LevelTooHigh;
 
-        // 태그 게이팅. Core가 요구 태그를 전부 가져야 한다. (10-2 [1])
+        // 태그 게이팅. 핵심 젬이 요구 태그를 전부 가져야 한다. (10-2 [1])
         if (!cores[coreIndex].Tags.ContainsAll(definition.RequiredTags))
             return SocketError.TagMismatch;
 
-        // 같은 Core 안의 중복만 막는다.
-        // 다른 Core에 같은 Support를 하나씩 끼우는 것은 11-3절이 명시적으로 허용한다.
+        // 같은 핵심 젬 안의 중복만 막는다.
+        // 다른 핵심 젬에 같은 보조 젬을 하나씩 끼우는 것은 11-3절이 명시적으로 허용한다.
         for (int s = 0; s < SocketsPerCore; s++)
         {
             if (s != socketIndex && sockets[coreIndex, s] == definition)
@@ -307,8 +307,8 @@ public class SocketedBuild
     // ────────────────────────────────── 장착
 
     /// <summary>
-    /// Core 슬롯에 끼운다. 원래 있던 Core와, 새 Core의 태그를 만족하지 못하게 된
-    /// Support가 <paramref name="returned"/>에 담겨 돌아간다. 호출부가 가방에 되돌린다.
+    /// 핵심 젬 슬롯에 끼운다. 원래 있던 핵심 젬과, 새 핵심 젬의 태그를 만족하지 못하게 된
+    /// 보조 젬이 <paramref name="returned"/>에 담겨 돌아간다. 호출부가 가방에 되돌린다.
     /// </summary>
     public bool TryEquipCore(SkillDefinition definition, int coreIndex,
                              List<SkillDefinition> returned = null)
@@ -323,7 +323,7 @@ public class SocketedBuild
 
         cores[coreIndex] = definition;
 
-        // Core가 바뀌면 태그 게이팅을 다시 통과하지 못하는 Support가 생긴다.
+        // 핵심 젬이 바뀌면 태그 게이팅을 다시 통과하지 못하는 보조 젬이 생긴다.
         // 조용히 무효화하지 않고 가방으로 돌려보낸다. 아이템을 없애지 않기 위해서다.
         for (int s = 0; s < SocketsPerCore; s++)
         {
@@ -344,7 +344,7 @@ public class SocketedBuild
         return true;
     }
 
-    /// <summary>소켓에 끼운다. 원래 있던 Support가 returned에 담겨 돌아간다.</summary>
+    /// <summary>소켓에 끼운다. 원래 있던 보조 젬이 returned에 담겨 돌아간다.</summary>
     public bool TryEquipSupport(SkillDefinition definition, int coreIndex, int socketIndex,
                                 List<SkillDefinition> returned = null)
     {
@@ -448,7 +448,7 @@ public class SocketedBuild
     // ────────────────────────────────── 탈착
 
     /// <summary>
-    /// Core를 뺀다. 그 Core의 소켓에 있던 Support도 전부 함께 빠진다.
+    /// 핵심 젬을 뺀다. 그 핵심 젬의 소켓에 있던 보조 젬도 전부 함께 빠진다.
     /// 뺀 것 전부가 returned에 담긴다.
     /// </summary>
     public SkillDefinition UnequipCore(int coreIndex, List<SkillDefinition> returned = null)
@@ -538,7 +538,7 @@ public class SocketedBuild
     }
 
     /// <summary>
-    /// 런 종료 시 초기화한다. 【여기서 젬을 없애지 않는다.】
+    /// 출격 종료 시 초기화한다. 【여기서 젬을 없애지 않는다.】
     /// 사망 시의 소멸은 Inventory.DropOnDeath가 담당한다. 규칙을 한 곳에만 둔다.
     /// </summary>
     public void Clear()
@@ -582,17 +582,17 @@ public class SocketedBuild
     }
 
     /// <summary>
-    /// 【그 Core가】 이 상태를 유발할 수 없게 되었는지.
+    /// 【그 핵심 젬이】 이 상태를 유발할 수 없게 되었는지.
     ///
-    /// 차단 범위를 Core 하나로 좁힌 이유 —
-    /// 빌드 전역으로 막으면 배타형 Support가 구조적으로 영구 무효가 된다.
-    /// 「번제」는 화염 태그를 요구하므로 화염 Core에만 끼울 수 있는데,
-    /// 전역 차단이면 그 화염 Core의 점화까지 꺼져 조건(점화된 적)이 영원히 성립하지 않는다.
+    /// 차단 범위를 핵심 젬 하나로 좁힌 이유 —
+    /// 빌드 전역으로 막으면 배타형 보조 젬이 구조적으로 영구 무효가 된다.
+    /// 「번제」는 화염 태그를 요구하므로 화염 핵심 젬에만 끼울 수 있는데,
+    /// 전역 차단이면 그 화염 핵심 젬의 점화까지 꺼져 조건(점화된 적)이 영원히 성립하지 않는다.
     /// 「점화를 유발할 수 없지만 점화된 적에게 큰 피해」라는 정체성 자체가 불가능해진다.
     ///
-    /// Core 단위로 좁히면 설계가 성립한다 —
-    /// 【자기 Core는 못 걸고, 다른 발생원이 걸어 준 것을 이용한다.】
-    /// 다른 발생원은 2번째 Core(Lv7)이거나 「화염 조율」 같은 속성 전환이다.
+    /// 핵심 젬 단위로 좁히면 설계가 성립한다 —
+    /// 【자기 핵심 젬은 못 걸고, 다른 발생원이 걸어 준 것을 이용한다.】
+    /// 다른 발생원은 2번째 핵심 젬(Lv7)이거나 「화염 조율」 같은 속성 전환이다.
     /// 그래서 문서의 「단독으로는 전혀 작동하지 않는다」가 그대로 유지된다.
     /// (docs/Blob_Audit.md D3)
     /// </summary>
@@ -601,7 +601,7 @@ public class SocketedBuild
         if (status == StatusEffectType.None || !IsValidCoreIndex(coreIndex))
             return false;
 
-        // Core 자신이 막는 경우.
+        // 핵심 젬 자신이 막는 경우.
         SkillDefinition core = cores[coreIndex];
 
         if (core != null && core.BlocksStatusCreation
@@ -610,7 +610,7 @@ public class SocketedBuild
             return true;
         }
 
-        // 그 Core의 소켓에 꽂힌 Support만 본다. 다른 Core의 소켓은 상관없다.
+        // 그 핵심 젬의 소켓에 꽂힌 보조 젬만 본다. 다른 핵심 젬의 소켓은 상관없다.
         for (int s = 0; s < SocketsPerCore; s++)
         {
             SkillDefinition support = sockets[coreIndex, s];
@@ -629,7 +629,7 @@ public class SocketedBuild
     }
 
     /// <summary>
-    /// 빌드 전체에서 이 상태를 만들 수 있는 Core가 하나도 없는지.
+    /// 빌드 전체에서 이 상태를 만들 수 있는 핵심 젬이 하나도 없는지.
     /// UI가 「이 젬은 지금 아무 일도 하지 않습니다」를 알릴 때 쓴다.
     /// </summary>
     public bool IsStatusUnavailable(StatusEffectType status)
@@ -650,7 +650,7 @@ public class SocketedBuild
     }
 
     /// <summary>
-    /// 그 Core가 실제로 부여하는 상태. 속성 전환 Support가 있으면 바뀐다.
+    /// 그 핵심 젬이 실제로 부여하는 상태. 속성 전환 보조 젬이 있으면 바뀐다.
     /// 차단되었거나 부여 계열이 아니면 None.
     /// </summary>
     public StatusEffectType EffectiveAilmentOf(int coreIndex)
@@ -668,7 +668,7 @@ public class SocketedBuild
 
         StatusEffectType status = core.CreatesStatus;
 
-        // 속성 전환 — 그 Core의 부여 속성 자체를 바꾼다.
+        // 속성 전환 — 그 핵심 젬의 부여 속성 자체를 바꾼다.
         for (int s = 0; s < SocketsPerCore; s++)
         {
             SkillDefinition support = sockets[coreIndex, s];
@@ -684,7 +684,7 @@ public class SocketedBuild
     }
 
     /// <summary>
-    /// 그 Core가 추가로 부여하는 2차 상태. 「원소 융합」이 만든다.
+    /// 그 핵심 젬이 추가로 부여하는 2차 상태. 「원소 융합」이 만든다.
     /// 없으면 None.
     /// </summary>
     public StatusEffectType AddedAilmentOf(int coreIndex)
@@ -739,8 +739,8 @@ public class SocketedBuild
             modifiers.Apply(definition);
         }
 
-        // 합성 발사: 부여 계열 Core가 생성하는 상태를 탄에 싣는다.
-        // Core 단위로 계산한다 — 속성 전환과 기능 배타가 둘 다 Core별이기 때문이다.
+        // 합성 발사: 부여 계열 핵심 젬이 생성하는 상태를 탄에 싣는다.
+        // 핵심 젬 단위로 계산한다 — 속성 전환과 기능 배타가 둘 다 핵심 젬별이기 때문이다.
         for (int c = 0; c < MaxCores; c++)
         {
             modifiers.AddAilment(EffectiveAilmentOf(c));

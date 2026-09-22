@@ -1,6 +1,6 @@
 # Passive System
 
-> **담당** — 계정이 배우는 것 · 런을 넘어 남는 것
+> **담당** — 계정이 배우는 것 · 출격을 넘어 남는 것
 > 조사 기록: [`research/duckov_스킬.md`](research/duckov_스킬.md)
 
 전투 수치는 이 문서에 **없다** — 그것은 [`Equipment_System.md`](Blob_Equipment_System.md)의 몫이다. **그 경계가 이 문서의 핵심이다.**
@@ -99,7 +99,7 @@ Blob은 그 1:1을 그대로 쓰지 않고 절반에서 끊는다. 우리 가방
 | `AbsorbAmount` | 경험치 획득 +n% |
 | `AbsorbRange` | 흡수 감지 범위 +n |
 | `LootRolls` | 시체 전리품 추첨 +n회 |
-| `RareDropRate` | 희귀 드랍 +n% |
+| `RareDropRate` | 희귀 드롭 +n% |
 
 **회수 — 죽어도 남는 것**
 
@@ -117,7 +117,7 @@ Blob은 그 1:1을 그대로 쓰지 않고 절반에서 끊는다. 우리 가방
 |---|---|
 | `SellPrice` | 판매가 +n% |
 | `StashSlots` | 창고 칸 +n |
-| `ShopRefresh` | 상점 갱신 쿨타임 −n% |
+| `ShopRefresh` | 상점 갱신 쿨다운 −n% |
 | `ShopSlots` | 상점 갱신 횟수 +n |
 
 **역행 — 숨겨진 것**

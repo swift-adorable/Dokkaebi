@@ -130,31 +130,31 @@ namespace Blob.Tests
             Assert.AreEqual(5, pool.CountAll);
         }
 
-        // ── 엣지 케이스 ──────────────────────────────────────────
+        // ── 예외 상황 ──────────────────────────────────────────
 
         [Test]
-        public void 엣지_null_프리팹은_생성자에서_예외를_던진다()
+        public void 예외_null_프리팹은_생성자에서_예외를_던진다()
         {
             Assert.Throws<ArgumentNullException>(
                 () => new GameObjectPool(null, parent, 4, 16));
         }
 
         [Test]
-        public void 엣지_maxSize가_0이면_예외를_던진다()
+        public void 예외_maxSize가_0이면_예외를_던진다()
         {
             Assert.Throws<ArgumentOutOfRangeException>(
                 () => new GameObjectPool(prefab, parent, 4, 0));
         }
 
         [Test]
-        public void 엣지_음수_capacity는_예외를_던진다()
+        public void 예외_음수_capacity는_예외를_던진다()
         {
             Assert.Throws<ArgumentOutOfRangeException>(
                 () => new GameObjectPool(prefab, parent, -1, 16));
         }
 
         [Test]
-        public void 엣지_null_Release는_예외없이_무시된다()
+        public void 예외_null_Release는_예외없이_무시된다()
         {
             GameObjectPool pool = CreatePool();
 
@@ -163,7 +163,7 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 엣지_Prewarm에_0이하를_넣으면_아무것도_하지_않는다()
+        public void 예외_Prewarm에_0이하를_넣으면_아무것도_하지_않는다()
         {
             GameObjectPool pool = CreatePool();
 
@@ -174,7 +174,7 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 엣지_maxSize를_초과한_반납분은_보관하지_않는다()
+        public void 예외_maxSize를_초과한_반납분은_보관하지_않는다()
         {
             GameObjectPool pool = CreatePool(capacity: 1, maxSize: 2);
 

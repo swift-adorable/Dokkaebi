@@ -1,7 +1,7 @@
 using System;
 
 /// <summary>
-/// 조건부 드랍 3종. (docs/Blob_Hunting_System.md 6-3절)
+/// 조건부 드롭 3종. (docs/Blob_Hunting_System.md 6-3절)
 ///
 /// 【빌드를 「가장 센 것」 하나로 수렴시키지 않는 가장 값싼 장치다.】
 /// 치명타 빌드는 「온전한 신경절」을 못 얻고,
@@ -27,7 +27,7 @@ public enum ConditionalDrop
 }
 
 /// <summary>
-/// 처치 순간의 사정. 조건부 드랍이 이것만 본다.
+/// 처치 순간의 사정. 조건부 드롭이 이것만 본다.
 /// </summary>
 public struct KillContext
 {
@@ -46,7 +46,7 @@ public struct KillContext
     public bool everIgnited;
 }
 
-/// <summary>조건부 드랍 판정. 순수 클래스다.</summary>
+/// <summary>조건부 드롭 판정. 순수 클래스다.</summary>
 public static class ConditionalDropTable
 {
     public static ConditionalDrop Evaluate(in KillContext context)

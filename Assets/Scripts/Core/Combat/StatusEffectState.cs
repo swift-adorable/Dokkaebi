@@ -64,7 +64,7 @@ public sealed class StatusEffectState
     /// <param name="type">거는 상태</param>
     /// <param name="baseDamage">부여 시점의 기본 피해. 초당 피해의 기준이 된다.</param>
     /// <param name="durationScale">
-    /// 지속시간 배수. Support 「치명적인 중독」·「깊은 상처」 같은 것이 여기를 건드린다.
+    /// 지속시간 배수. 보조 젬 「치명적인 중독」·「깊은 상처」 같은 것이 여기를 건드린다.
     /// 【투사체 수명과 다른 축이다.】 (docs/Blob_Audit.md D2)
     /// </param>
     public void Apply(StatusEffectType type, float baseDamage, float durationScale = 1f)

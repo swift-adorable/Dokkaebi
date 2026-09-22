@@ -3,10 +3,10 @@ using NUnit.Framework;
 namespace Blob.Tests
 {
     /// <summary>
-    /// 합성 발사 테스트. (확정 기획 — Core 2개는 한 발에 합쳐진다)
+    /// 합성 발사 테스트. (확정 기획 — 핵심 젬 2개는 한 발에 합쳐진다)
     ///
-    /// 핵심 규약: 적재 계열 Core가 2개여도 탄 수는 늘지 않고, 상태만 번갈아 실린다.
-    /// 두 상태를 매 발사마다 동시에 걸면 Support 「이차 주입」이 무가치해진다.
+    /// 핵심 규약: 적재 계열 핵심 젬이 2개여도 탄 수는 늘지 않고, 상태만 번갈아 실린다.
+    /// 두 상태를 매 발사마다 동시에 걸면 보조 젬 「이차 주입」이 무가치해진다.
     /// </summary>
     public class CompositeFireStateTests
     {
@@ -43,7 +43,7 @@ namespace Blob.Tests
         public void 각_상태의_적용_빈도는_정확히_절반이다()
         {
             // 「이차 주입」의 대가(적용 빈도 절반)와 같은 수준이어야
-            // 해당 Support가 무가치해지지 않는다.
+            // 해당 보조 젬이 무가치해지지 않는다.
             var state = new CompositeFireState();
 
             int first = 0;
@@ -64,7 +64,7 @@ namespace Blob.Tests
         [Test]
         public void 런_도중_적재_Core가_늘어도_안전하다()
         {
-            // 엣지 케이스: 1개로 쏘다가 레벨업으로 2번째 적재 Core를 얻는 경우.
+            // 예외 상황: 1개로 쏘다가 레벨업으로 2번째 적재 핵심 젬을 얻는 경우.
             var state = new CompositeFireState();
 
             state.NextAilmentIndex(1);

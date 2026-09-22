@@ -36,7 +36,7 @@ public struct ProjectileCollisionResult
 /// </summary>
 public static class ProjectileCollisionResolver
 {
-    /// <summary>분열(Core)의 갈래 수. v5 §6-1 "3갈래로 갈라집니다".</summary>
+    /// <summary>분열(핵심 젬)의 갈래 수. v5 §6-1 "3갈래로 갈라집니다".</summary>
     public const int SplitChildCount = 3;
 
     /// <summary>Fork의 갈래 수. PoE2 기준 2개. (마스터 프롬프트 3절)</summary>

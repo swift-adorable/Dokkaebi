@@ -86,14 +86,14 @@ public class EquipmentModifiers
     {
         ElementalResistances resist = ElementalResistances.Default;
 
-        // 내성 옵션은 배율에서 빼는 값이다. 0.12 = 내성 ×0.88
+        // 저항 옵션은 배율에서 빼는 값이다. 0.12 = 저항 ×0.88
         resist.physical -= Get(EquipmentStatType.ResistPhysical);
         resist.fire -= Get(EquipmentStatType.ResistFire);
         resist.cold -= Get(EquipmentStatType.ResistCold);
         resist.lightning -= Get(EquipmentStatType.ResistLightning);
         resist.chaos -= Get(EquipmentStatType.ResistChaos);
 
-        // 내성이 음수가 되면 피해가 회복으로 뒤집힌다. 0에서 막는다.
+        // 저항이 음수가 되면 피해가 회복으로 뒤집힌다. 0에서 막는다.
         resist.physical = Mathf.Max(0f, resist.physical);
         resist.fire = Mathf.Max(0f, resist.fire);
         resist.cold = Mathf.Max(0f, resist.cold);

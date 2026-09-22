@@ -88,7 +88,7 @@ public class EnemyController : MonoBehaviour, IPoolable
             return;
 
         // 【EnemyIdentity가 있으면 여기서 체력을 만지지 않는다.】
-        // 원형·등급이 정한 절대값에 난이도 배율까지 EnemyIdentity가 함께 건다.
+        // 유형·등급이 정한 절대값에 난이도 배율까지 EnemyIdentity가 함께 건다.
         // 두 곳이 같은 값을 쓰면 IPoolable 통지 순서에 따라 결과가 달라진다 —
         // 순서에 기대는 코드는 언젠가 반드시 틀린다.
         if (identity != null)
@@ -152,7 +152,7 @@ public class EnemyController : MonoBehaviour, IPoolable
         // 【보상은 시체가 아니라 죽은 적이 정한다.】
         // 전에는 시체 프리팹의 valueMultiplier를 손으로 적어 두었다.
         // 그러면 희귀 개체를 잡아도 일반과 같은 경험치가 나온다 —
-        // 「등급이 곧 드랍 품질이다」가 성립하지 않는다. (Hunting 6절)
+        // 「등급이 곧 드롭 품질이다」가 성립하지 않는다. (Hunting 6절)
         if (!corpse.TryGetComponent(out CorpseController controller))
             return;
 

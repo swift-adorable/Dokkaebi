@@ -13,7 +13,7 @@ public enum SocketError
     /// <summary>젬이 없다.</summary>
     NullGem,
 
-    /// <summary>그 자리에 들어갈 분류가 아니다. (Support를 Core 자리에 등)</summary>
+    /// <summary>그 자리에 들어갈 분류가 아니다. (보조 젬을 핵심 젬 자리에 등)</summary>
     WrongCategory,
 
     /// <summary>존재하지 않는 자리다.</summary>
@@ -25,10 +25,10 @@ public enum SocketError
     /// <summary>젬의 요구 레벨이 각성 레벨보다 높다. 주울 수는 있으나 끼울 수 없다.</summary>
     LevelTooHigh,
 
-    /// <summary>그 Core에 아직 아무것도 끼워지지 않아 소켓이 작동하지 않는다.</summary>
+    /// <summary>그 핵심 젬에 아직 아무것도 끼워지지 않아 소켓이 작동하지 않는다.</summary>
     NoCore,
 
-    /// <summary>Core가 이 Support의 요구 태그를 만족하지 않는다. (태그 게이팅)</summary>
+    /// <summary>핵심 젬이 이 보조 젬의 요구 태그를 만족하지 않는다. (태그 게이팅)</summary>
     TagMismatch,
 
     /// <summary>같은 젬이 이미 그 자리 무리 안에 있다.</summary>

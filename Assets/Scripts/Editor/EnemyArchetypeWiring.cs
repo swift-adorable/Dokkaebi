@@ -2,7 +2,7 @@ using UnityEditor;
 using UnityEngine;
 
 /// <summary>
-/// 원형 데이터(7-A·B)와 진영 어그로(7-C)를 실제 프리팹에 붙인다. (로드맵 7-F 일부)
+/// 유형 데이터(7-A·B)와 진영 어그로(7-C)를 실제 프리팹에 붙인다. (로드맵 7-F 일부)
 ///
 /// 【왜 지금 당겨서 하는가】
 /// 7-A(데이터) · 7-B(적용) · 7-C(어그로)를 전부 「붙일 곳 없이」 쌓아 놨다.
@@ -27,7 +27,7 @@ public static class EnemyArchetypeWiring
     private const string RangedPath = "Assets/Prefabs/EnemyRanged.prefab";
     private const string CrusherPath = "Assets/Prefabs/EnemyCrusher.prefab";
 
-    [MenuItem("Blob/Enemy/원형·진영 배선")]
+    [MenuItem("Blob/Enemy/유형·진영 배선")]
     public static void Wire()
     {
         // 스캐브(야생) · 자전체(실험체) — 이미 있는 둘.
@@ -47,7 +47,7 @@ public static class EnemyArchetypeWiring
                   + "Enemy=스캐브(야생) · EnemyRanged=자전체(실험체) · EnemyCrusher=압착기(시설)");
     }
 
-    /// <summary>프리팹에 EnemyIdentity·EnemyAggro를 붙이고 원형을 지정한다.</summary>
+    /// <summary>프리팹에 EnemyIdentity·EnemyAggro를 붙이고 유형을 지정한다.</summary>
     private static void Attach(string path, EnemyArchetype archetype)
     {
         var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
@@ -85,7 +85,7 @@ public static class EnemyArchetypeWiring
     }
 
     /// <summary>
-    /// 원형 표의 수치를 프리팹에 베껴 넣는다. 손으로 적지 않는다.
+    /// 유형 표의 수치를 프리팹에 베껴 넣는다. 손으로 적지 않는다.
     /// </summary>
     private static void WriteStats(GameObject root, EnemyArchetype archetype)
     {

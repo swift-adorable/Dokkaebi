@@ -93,10 +93,10 @@ namespace Blob.Tests
             Assert.AreEqual(20, pool.Current);
         }
 
-        // ── 엣지 케이스 ──────────────────────────────────────────
+        // ── 예외 상황 ──────────────────────────────────────────
 
         [Test]
-        public void 엣지_남은_체력보다_큰_피해는_남은_만큼만_적용된다()
+        public void 예외_남은_체력보다_큰_피해는_남은_만큼만_적용된다()
         {
             var pool = new HealthPool(10);
 
@@ -108,7 +108,7 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 엣지_사망_후_추가_피해는_0을_반환한다()
+        public void 예외_사망_후_추가_피해는_0을_반환한다()
         {
             var pool = new HealthPool(3);
 
@@ -119,7 +119,7 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 엣지_사망_상태에서는_회복되지_않는다()
+        public void 예외_사망_상태에서는_회복되지_않는다()
         {
             var pool = new HealthPool(3);
 
@@ -130,7 +130,7 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 엣지_0이하_피해와_회복은_무시된다()
+        public void 예외_0이하_피해와_회복은_무시된다()
         {
             var pool = new HealthPool(10);
 
@@ -146,7 +146,7 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 엣지_최대_체력을_가득_찬_상태에서_회복하면_0이다()
+        public void 예외_최대_체력을_가득_찬_상태에서_회복하면_0이다()
         {
             var pool = new HealthPool(10);
 
@@ -155,7 +155,7 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 엣지_최대_체력_0이하는_1로_보정된다()
+        public void 예외_최대_체력_0이하는_1로_보정된다()
         {
             var pool = new HealthPool(0);
 

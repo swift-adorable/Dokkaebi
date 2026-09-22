@@ -65,7 +65,7 @@ public class EnemyAggro : MonoBehaviour, IPoolable
     /// <summary>이 개체가 물고 있는 대상과, 놓친 채 흐른 시간.</summary>
     private AggroMemory memory = AggroMemory.Empty;
 
-    /// <summary>이번 판단에서 쓸 원형 수치. 후보마다 표를 다시 읽지 않는다.</summary>
+    /// <summary>이번 판단에서 쓸 유형 수치. 후보마다 표를 다시 읽지 않는다.</summary>
     private EnemyArchetypeStats stats;
 
     /// <summary>이 개체의 식별자. 살아 있는 동안 바뀌지 않는다.</summary>
@@ -164,7 +164,7 @@ public class EnemyAggro : MonoBehaviour, IPoolable
             if (other == null || other == this)
                 continue;
 
-            // 적끼리는 서로의 발소리를 듣는다 — 발소리가 있는 원형이라면.
+            // 적끼리는 서로의 발소리를 듣는다 — 발소리가 있는 유형이라면.
             // 잠복체·데이터체는 이 값이 0이라 측면·후방에서는 보이지 않는다.
             float otherNoise = other.identity != null && other.identity.Profile.makesFootsteps
                 ? AllyFootstepRadius

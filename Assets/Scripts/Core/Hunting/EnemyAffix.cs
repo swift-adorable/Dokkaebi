@@ -5,7 +5,7 @@
 ///
 /// 【「갑각」과 「경화」는 다른 축이다 — 두 시스템의 분업 지점이다.】
 ///   갑각(방어도)은 【장비】의 방어 관통으로 뚫고,
-///   경화(내성)는 【젬】의 속성 전환으로 우회한다.
+///   경화(저항)는 【젬】의 속성 전환으로 우회한다.
 /// 상태이상은 방어도를 무시하므로 갑각에는 도트가 답이지만 경화에는 통하지 않는다.
 /// </summary>
 public enum EnemyAffix
@@ -16,20 +16,20 @@ public enum EnemyAffix
     /// <summary>갑각 — 방어도 +3. 답은 방어 관통 또는 상태이상.</summary>
     Carapace = 1,
 
-    /// <summary>경화 — 물리 내성 ×0.5. 답은 속성 전환.</summary>
+    /// <summary>경화 — 물리 저항 ×0.5. 답은 속성 전환.</summary>
     Hardened = 2,
 
-    /// <summary>내화성 — 화염 내성 ×0.5.</summary>
+    /// <summary>내화성 — 화염 저항 ×0.5.</summary>
     FireProof = 3,
 
-    /// <summary>절연성 — 번개 내성 ×0.5.</summary>
+    /// <summary>절연성 — 번개 저항 ×0.5.</summary>
     Insulated = 4,
 
-    /// <summary>항체 — 카오스 내성 ×0.5.</summary>
+    /// <summary>항체 — 카오스 저항 ×0.5.</summary>
     Antibody = 5,
 
     /// <summary>
-    /// 내한성 — 냉기 내성 ×0.5.
+    /// 내한성 — 냉기 저항 ×0.5.
     ///
     /// 【문서 3절에 없던 것을 더했다 — 근거를 남긴다.】
     /// Blob의 피해 속성은 물리·화염·냉기·번개·카오스 5종인데,

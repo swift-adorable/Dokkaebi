@@ -27,7 +27,7 @@ namespace Blob.Tests
         public void 레벨_0_이하도_레벨_1로_취급한다()
         {
             // 각성 레벨이 0이 되는 경로는 없어야 하지만, 생겨도 아무것도 못 끼우는
-            // 상태로 런이 시작되면 안 된다.
+            // 상태로 출격이 시작되면 안 된다.
             Assert.AreEqual(1, SocketUnlockTable.Evaluate(0).CoreSlots);
             Assert.AreEqual(1, SocketUnlockTable.Evaluate(-5).CoreSlots);
         }
@@ -105,7 +105,7 @@ namespace Blob.Tests
             Assert.AreEqual(0, SocketUnlockTable.SlotsOpenedAt(2));
             Assert.AreEqual(1, SocketUnlockTable.SlotsOpenedAt(3));
 
-            // Lv7은 Core 1 + 소켓 1 = 2개가 한꺼번에 열린다.
+            // Lv7은 핵심 젬 1 + 소켓 1 = 2개가 한꺼번에 열린다.
             Assert.AreEqual(2, SocketUnlockTable.SlotsOpenedAt(7));
         }
 

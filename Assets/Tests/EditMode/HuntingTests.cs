@@ -9,16 +9,16 @@ namespace Blob.Tests
     /// 7단계 사냥 데이터 골격의 계약 테스트.
     ///
     /// 【여기서 강제하는 것】
-    ///   1. 원형 수치가 전투 정본(Combat_Baseline 5절) 표와 한 글자도 다르지 않다
+    ///   1. 유형 수치가 전투 정본(Combat_Baseline 5절) 표와 한 글자도 다르지 않다
     ///   2. 조합 금지 규칙이 실제로 막힌다
-    ///   3. 내성이 곱해지지 않는다
-    ///   4. 설계 규칙 — 한 원형이 두 개의 답을 요구하지 않는다
+    ///   3. 저항이 곱해지지 않는다
+    ///   4. 설계 규칙 — 한 유형이 두 개의 답을 요구하지 않는다
     ///
     /// 문서와 코드의 드리프트를 테스트로 막는다. (마스터 프롬프트 7-8)
     /// </summary>
     public class HuntingTests
     {
-        // ── 1. 원형 수치가 문서 표와 같다 ─────────────────────────────
+        // ── 1. 유형 수치가 문서 표와 같다 ─────────────────────────────
 
         /// <summary>docs/Blob_Combat_Baseline.md 5절 표를 그대로 옮긴 것.</summary>
         private static readonly (EnemyArchetype archetype,
@@ -36,7 +36,7 @@ namespace Blob.Tests
         };
 
         [Test]
-        public void 원형_수치가_전투_정본과_같다()
+        public void 유형_수치가_전투_정본과_같다()
         {
             foreach (var row in Baseline)
             {
@@ -51,7 +51,7 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 원형은_아홉_종이고_표에_빠진_것이_없다()
+        public void 유형은_아홉_종이고_표에_빠진_것이_없다()
         {
             var all = (EnemyArchetype[])Enum.GetValues(typeof(EnemyArchetype));
 
@@ -59,7 +59,7 @@ namespace Blob.Tests
                 "enum과 EnemyArchetypeTable.Count가 어긋났습니다.");
 
             Assert.AreEqual(all.Length, Baseline.Length,
-                "원형을 추가했는데 이 테스트의 정본 표를 갱신하지 않았습니다.");
+                "유형을 추가했는데 이 테스트의 정본 표를 갱신하지 않았습니다.");
 
             foreach (EnemyArchetype archetype in all)
             {
@@ -69,7 +69,7 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 원형_내성이_문서와_같다()
+        public void 유형_저항이_문서와_같다()
         {
             // 압착기 · 보안기 — 기계형. 전기 2배 / 카오스 면역.
             foreach (EnemyArchetype mech in new[] { EnemyArchetype.Crusher, EnemyArchetype.Sentry })
@@ -96,7 +96,7 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 발소리가_없는_원형은_잠복체와_데이터체뿐이다()
+        public void 발소리가_없는_유형은_잠복체와_데이터체뿐이다()
         {
             var silent = ((EnemyArchetype[])Enum.GetValues(typeof(EnemyArchetype)))
                 .Where(a => !EnemyArchetypeTable.Of(a).makesFootsteps)
@@ -104,7 +104,7 @@ namespace Blob.Tests
 
             CollectionAssert.AreEquivalent(
                 new[] { EnemyArchetype.Lurker, EnemyArchetype.Wraith }, silent,
-                "발소리 없는 원형이 문서 8절과 다릅니다. " +
+                "발소리 없는 유형이 문서 8절과 다릅니다. " +
                 "「먼저 감지당하는가」가 이 게임의 핵심 긴장입니다.");
         }
 
@@ -116,7 +116,7 @@ namespace Blob.Tests
         /// 【이전 판을 폐기했다 — 정정】
         /// 처음에는 「체력 60 이상 + 방어도 4 이상 금지」라는 기준을 내가 만들어
         /// 넣었고, 압착기(90 / 4)에서 실패했다. 그런데 압착기는 문서가
-        /// 「느리고 단단」하라고 직접 지정한 원형이다. 원문에 없는 임계값을
+        /// 「느리고 단단」하라고 직접 지정한 유형이다. 원문에 없는 임계값을
         /// 지어내 문서를 틀렸다고 판정한 셈이다. 문서의 열을 그대로 쓴다.
         /// </summary>
         private static readonly (EnemyArchetype archetype, EnemyAnswer answer)[] Answers =
@@ -133,7 +133,7 @@ namespace Blob.Tests
         };
 
         [Test]
-        public void 원형이_요구하는_답이_문서와_같다()
+        public void 유형이_요구하는_답이_문서와_같다()
         {
             foreach (var row in Answers)
             {
@@ -145,20 +145,20 @@ namespace Blob.Tests
         [Test]
         public void 요구하는_답이_한쪽으로_몰리지_않는다()
         {
-            // 【하나의 원형이 두 개의 답을 요구하게 만들지 않는다】를 뒤집어 읽으면,
-            // 아홉 원형이 서로 다른 답을 고르게 나눠 가져야 한다는 뜻이다.
+            // 【하나의 유형이 두 개의 답을 요구하게 만들지 않는다】를 뒤집어 읽으면,
+            // 아홉 유형이 서로 다른 답을 고르게 나눠 가져야 한다는 뜻이다.
             // 절반이 같은 답이면 나머지 답을 주는 장비·젬이 죽은 선택지가 된다.
             var counts = Answers
                 .GroupBy(row => row.answer)
                 .ToDictionary(g => g.Key, g => g.Count());
 
             Assert.GreaterOrEqual(counts.Count, 6,
-                "아홉 원형이 쓰는 답이 6종 미만입니다. 대응 수단이 놀게 됩니다.");
+                "아홉 유형이 쓰는 답이 6종 미만입니다. 대응 수단이 놀게 됩니다.");
 
             foreach (var pair in counts)
             {
                 Assert.LessOrEqual(pair.Value, 2,
-                    $"답 「{pair.Key}」를 요구하는 원형이 {pair.Value}종입니다. " +
+                    $"답 「{pair.Key}」를 요구하는 유형이 {pair.Value}종입니다. " +
                     "한 가지 대응만 갖추면 되는 구간이 생깁니다.");
             }
         }
@@ -183,7 +183,7 @@ namespace Blob.Tests
         public void 체력_배율이_피해_배율보다_훨씬_가파르다()
         {
             // 【의도된 비대칭이다.】 보스는 아프게가 아니라 단단하게 위협한다.
-            // 이 관계가 뒤집히면 「런 안에서 젬 / 런 사이에 장비」 분업이 무너진다.
+            // 이 관계가 뒤집히면 「출격 안에서 젬 / 출격 사이에 장비」 분업이 무너진다.
             float health = EnemyRarityTable.HealthMultiplier(EnemyRarity.Unique);
             float damage = EnemyRarityTable.DamageMultiplier(EnemyRarity.Unique);
 
@@ -261,7 +261,7 @@ namespace Blob.Tests
 
             Assert.AreEqual(2,
                 EnemyAffixTable.Every.Count(a => EnemyAffixTable.GroupOf(a) == EnemyAffixGroup.Support),
-                "지원형은 2종입니다.");
+                "지유형은 2종입니다.");
         }
 
         // ── 5. 롤 ─────────────────────────────────────────────────────
@@ -356,23 +356,23 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 내성은_곱해지지_않고_가장_낮은_것_하나만_남는다()
+        public void 저항은_곱해지지_않고_가장_낮은_것_하나만_남는다()
         {
             // 정착체는 물리 0.66. 여기에 「경화」(물리 0.5)를 얹는다.
-            // 곱하면 0.33 — 물리 빌드는 런을 버려야 한다. 그래서 곱하지 않는다.
+            // 곱하면 0.33 — 물리 빌드는 출격을 버려야 한다. 그래서 곱하지 않는다.
             EnemyProfile profile = EnemyProfile.Build(
                 EnemyArchetype.Settled, EnemyRarity.Magic, new[] { EnemyAffix.Hardened });
 
             Assert.AreEqual(0.5f, profile.resistances.physical, 0.001f,
-                "물리 내성이 0.5가 아닙니다. 곱연산이 들어갔다면 0.33이 됩니다. " +
+                "물리 저항이 0.5가 아닙니다. 곱연산이 들어갔다면 0.33이 됩니다. " +
                 "(docs/Blob_Hunting_System.md 9절)");
 
-            // 화염은 건드리지 않았으므로 원형 값이 그대로다.
+            // 화염은 건드리지 않았으므로 유형 값이 그대로다.
             Assert.AreEqual(1.5f, profile.resistances.fire, 0.001f);
         }
 
         [Test]
-        public void 저항_속성이_원형의_약점을_뒤집지_않는다()
+        public void 저항_속성이_유형의_약점을_뒤집지_않는다()
         {
             // 【압착기는 「전기로 잡아라」가 정체성이다.】
             // 절연성이 붙었다고 전기가 오히려 덜 아프게 되면
@@ -469,7 +469,7 @@ namespace Blob.Tests
         // ── 7. 진영 ───────────────────────────────────────────────────
 
         [Test]
-        public void 진영은_다섯이고_원형_아홉이_전부_소속을_갖는다()
+        public void 진영은_다섯이고_유형_아홉이_전부_소속을_갖는다()
         {
             Assert.AreEqual(FactionTable.Count,
                 Enum.GetValues(typeof(Faction)).Length);
@@ -485,7 +485,7 @@ namespace Blob.Tests
             Assert.AreEqual(2, byFaction[Faction.Settled], "정착: 정착체 · 데이터체");
 
             Assert.IsFalse(byFaction.ContainsKey(Faction.Friendly),
-                "우호는 적 원형이 아닙니다.");
+                "우호는 적 유형이 아닙니다.");
         }
 
         [Test]

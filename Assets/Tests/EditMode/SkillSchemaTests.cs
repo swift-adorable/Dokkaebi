@@ -28,14 +28,14 @@ namespace Blob.Tests
         [Test]
         public void 스킬_분류는_4종이다()
         {
-            // v8: Core / Support / 발동(Meta) / 전령(Persistent)
+            // v8: 핵심 젬 / 보조 젬 / 발동 / 전령
             Assert.AreEqual(4, Enum.GetValues(typeof(SkillCategory)).Length);
         }
 
         [Test]
         public void Core_계열은_부여와_기폭_둘뿐이다()
         {
-            // v8: 전달 계열은 Support로 내려갔다. 투사체 행동은 Core의 몫이 아니다.
+            // v8: 전달 계열은 보조 젬으로 내려갔다. 투사체 행동은 핵심 젬의 몫이 아니다.
             Assert.AreEqual(3, Enum.GetValues(typeof(CoreFamily)).Length,
                 "None + 부여 + 기폭 = 3이어야 합니다.");
 
@@ -46,7 +46,7 @@ namespace Blob.Tests
         [Test]
         public void 동시_장착_상한은_11칸이다()
         {
-            // 11 = Core 2 + Support 6 + 발동 2 + 전령 1
+            // 11 = 핵심 젬 2 + 보조 젬 6 + 발동 2 + 전령 1
             // 적재(Loadout) 개념은 폐기되었으나 이 상한 자체는 그대로다.
             // 가방 용량이 그 자리를 대신 맡는다. (Skill_System.md 11-1절)
             Assert.AreEqual(

@@ -18,10 +18,10 @@ public enum EquipmentStatType
     /// <summary>방어 관통 — 적의 방어도를 뚫는다. Pierce(관통)와 다른 개념이다.</summary>
     ArmourPenetration = 3,
 
-    /// <summary>격리 방호 — 누적 수치 게이트. 1 이상이면 1단계, 2 이상이면 2단계 차단.</summary>
+    /// <summary>격리 방호 — 누적 수치 문턱. 1 이상이면 1단계, 2 이상이면 2단계 차단.</summary>
     ContainmentWard = 4,
 
-    // 속성 내성 배율에 더해지는 값. 음수가 내성 강화다. (0.12 = 내성 ×0.88)
+    // 속성 저항 배율에 더해지는 값. 음수가 저항 강화다. (0.12 = 저항 ×0.88)
     ResistPhysical = 10,
     ResistFire = 11,
     ResistCold = 12,
@@ -94,7 +94,7 @@ public enum EquipmentStatType
 /// 옵션의 부호 의미. 【대부분은 양수가 이득이지만 예외가 있다.】
 ///
 /// 이 클래스가 필요한 이유 —
-/// 「발사 간격 +150%」와 「대시 쿨타임 +99초」는 양수인데 페널티다.
+/// 「발사 간격 +150%」와 「대시 쿨다운 +99초」는 양수인데 페널티다.
 /// 부호만 보고 대가를 판정하면 각인 「중장 Ⅲ」이 순증으로 통과한다.
 /// 실제로 EquipmentAssetTests가 그 버그를 잡았다.
 ///
@@ -108,7 +108,7 @@ public static class EquipmentStatMeta
     {
         switch (type)
         {
-            // 쿨타임 · 간격 — 짧아야 좋다
+            // 쿨다운 · 간격 — 짧아야 좋다
             case EquipmentStatType.DashCooldown:
             case EquipmentStatType.FireIntervalIncrease:
 

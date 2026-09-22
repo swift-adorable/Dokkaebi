@@ -99,7 +99,7 @@ namespace Blob.Tests
         {
             Assert.AreEqual(GroundEffectType.FireZone, GroundEffectTable.FromStatus(StatusEffectType.Ignite));
             Assert.AreEqual(GroundEffectType.ToxicSwamp, GroundEffectTable.FromStatus(StatusEffectType.Poison));
-            // 서리 Core가 거는 것은 냉각이므로 잔류물도 냉각 기준이다.
+            // 서리 핵심 젬이 거는 것은 냉각이므로 잔류물도 냉각 기준이다.
             Assert.AreEqual(GroundEffectType.FrostField, GroundEffectTable.FromStatus(StatusEffectType.Chill));
             Assert.AreEqual(GroundEffectType.BloodZone, GroundEffectTable.FromStatus(StatusEffectType.Bleed));
         }
@@ -107,7 +107,7 @@ namespace Blob.Tests
         [Test]
         public void 감전과_응집은_잔류물을_남기지_않는다()
         {
-            // 감전은 증폭 전용이고, 응집은 중력 붕괴 Core가 직접 우물을 만든다.
+            // 감전은 증폭 전용이고, 응집은 중력 붕괴 핵심 젬이 직접 우물을 만든다.
             Assert.AreEqual(GroundEffectType.None, GroundEffectTable.FromStatus(StatusEffectType.Shock));
             Assert.AreEqual(GroundEffectType.None, GroundEffectTable.FromStatus(StatusEffectType.Congeal));
         }
@@ -129,7 +129,7 @@ namespace Blob.Tests
         public void 잔류물_5종이_전부_어딘가에서_만들어진다()
         {
             // 만들 수단이 없는 잔류물은 죽은 enum이다.
-            // 중력 우물만 Core가 직접 만들고, 나머지 4종은 사망 시 생성된다.
+            // 중력 우물만 핵심 젬이 직접 만들고, 나머지 4종은 사망 시 생성된다.
             var fromDeath = new[]
             {
                 GroundEffectTable.FromStatus(StatusEffectType.Ignite),
@@ -140,7 +140,7 @@ namespace Blob.Tests
 
             foreach (GroundEffectType g in System.Enum.GetValues(typeof(GroundEffectType)))
             {
-                // FromCoreAilment는 실제 잔류물이 아니라 「Core가 정한다」는 표시다.
+                // FromCoreAilment는 실제 잔류물이 아니라 「핵심 젬이 정한다」는 표시다.
                 // Resolve가 이것을 위 4종 중 하나로 바꾼다. 아래에서 따로 검사한다.
                 if (g == GroundEffectType.None
                     || g == GroundEffectType.GravityWell
@@ -154,22 +154,22 @@ namespace Blob.Tests
         [Test]
         public void 잔류물_속성은_Support가_아니라_Core가_정한다()
         {
-            // 「마름쇠」가 FireZone으로 박혀 있어 서리 Core에 꽂아도
-            // 불바다가 생겼다. Support가 속성을 확정하면
-            // 「무기 = 기본값 / Core = 속성 / Support = 궤도」가 깨진다.
+            // 「마름쇠」가 FireZone으로 박혀 있어 서리 핵심 젬에 꽂아도
+            // 불바다가 생겼다. 보조 젬이 속성을 확정하면
+            // 「무기 = 기본값 / 핵심 젬 = 속성 / 보조 젬 = 궤도」가 깨진다.
             Assert.AreEqual(GroundEffectType.FrostField,
                 GroundEffectTable.Resolve(GroundEffectType.FromCoreAilment, StatusEffectType.Chill),
-                "서리 Core + 마름쇠는 서리 장판이어야 합니다.");
+                "서리 핵심 젬 + 마름쇠는 서리 장판이어야 합니다.");
 
             Assert.AreEqual(GroundEffectType.FireZone,
                 GroundEffectTable.Resolve(GroundEffectType.FromCoreAilment, StatusEffectType.Ignite));
 
-            // Core가 아무 속성도 부여하지 않으면 남길 것이 없다.
+            // 핵심 젬이 아무 속성도 부여하지 않으면 남길 것이 없다.
             // 임의로 화염을 고르지 않는다 — 그게 애초의 버그였다.
             Assert.AreEqual(GroundEffectType.None,
                 GroundEffectTable.Resolve(GroundEffectType.FromCoreAilment, StatusEffectType.None));
 
-            // 명시된 종류는 그대로 둔다. 중력 우물은 Core가 직접 만든다.
+            // 명시된 종류는 그대로 둔다. 중력 우물은 핵심 젬이 직접 만든다.
             Assert.AreEqual(GroundEffectType.GravityWell,
                 GroundEffectTable.Resolve(GroundEffectType.GravityWell, StatusEffectType.Ignite));
         }

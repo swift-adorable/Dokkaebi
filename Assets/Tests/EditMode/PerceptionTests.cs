@@ -158,10 +158,10 @@ namespace Blob.Tests
                 Perception.Detect(At(0f, 10f, noise: 12f)));
         }
 
-        // ── 원형별 시야 ───────────────────────────────────────────────
+        // ── 유형별 시야 ───────────────────────────────────────────────
 
         [Test]
-        public void 원형마다_시야각이_정해져_있다()
+        public void 유형마다_시야각이_정해져_있다()
         {
             foreach (EnemyArchetype a in (EnemyArchetype[])Enum.GetValues(typeof(EnemyArchetype)))
             {
@@ -192,7 +192,7 @@ namespace Blob.Tests
             Assert.Greater(sentry, scav, "보안기가 스캐브보다 좁습니다.");
         }
 
-        // ── 원형별 청각 · 추적 ────────────────────────────────────────
+        // ── 유형별 청각 · 추적 ────────────────────────────────────────
 
         [Test]
         public void 청각은_세_값만_쓴다()
@@ -229,7 +229,7 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 모든_원형이_망각_시간을_갖는다()
+        public void 모든_유형이_망각_시간을_갖는다()
         {
             // 0이면 감지를 잃는 즉시 놓는다 — 엄폐물 뒤로 한 걸음에 추적이 끊긴다.
             foreach (EnemyArchetype a in (EnemyArchetype[])Enum.GetValues(typeof(EnemyArchetype)))
@@ -244,7 +244,7 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 강제_추격_거리는_덕코프의_세_값만_쓴다()
+        public void 강제_추적_거리는_덕코프의_세_값만_쓴다()
         {
             // 0 / 15 / 40. 60은 구역 하나와 맞먹어 「구역을 뜬다」 외의 수가 없어진다.
             float[] allowed = { 0f, 15f, 40f };
@@ -254,7 +254,7 @@ namespace Blob.Tests
                 float range = EnemyArchetypeTable.Of(a).forcedChaseRange;
 
                 Assert.IsTrue(allowed.Any(v => Mathf.Approximately(v, range)),
-                    $"{EnemyArchetypeTable.Name(a)}의 강제 추격 거리가 {range}입니다.");
+                    $"{EnemyArchetypeTable.Name(a)}의 강제 추적 거리가 {range}입니다.");
             }
         }
 
@@ -276,16 +276,16 @@ namespace Blob.Tests
                     $"{EnemyArchetypeTable.Name(a)}가 보안기보다 오래 기억합니다.");
 
                 Assert.LessOrEqual(other.forcedChaseRange, sentry.forcedChaseRange,
-                    $"{EnemyArchetypeTable.Name(a)}가 보안기보다 멀리서 강제 추격합니다.");
+                    $"{EnemyArchetypeTable.Name(a)}가 보안기보다 멀리서 강제 추적합니다.");
             }
 
-            Assert.Greater(sentry.forcedChaseRange, 0f, "보안기가 강제 추격을 잃었습니다.");
+            Assert.Greater(sentry.forcedChaseRange, 0f, "보안기가 강제 추적을 잃었습니다.");
         }
 
         [Test]
         public void 잠복체는_귀가_밝은_대신_오래_쫓지_않는다()
         {
-            // 【하나의 원형이 두 개의 답을 요구하게 만들지 않는다.】
+            // 【하나의 유형이 두 개의 답을 요구하게 만들지 않는다.】
             // 잠복체의 답은 「선제」다. 귀가 밝은 것으로 이미 답했으므로
             // 집요함까지 주면 답이 둘이 된다.
             EnemyArchetypeStats lurker = EnemyArchetypeTable.Of(EnemyArchetype.Lurker);

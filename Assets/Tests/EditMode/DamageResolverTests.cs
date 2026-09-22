@@ -114,7 +114,7 @@ namespace Blob.Tests
         // ── 속성 상성 ──────────────────────────────────────────────────
 
         [Test]
-        public void 내성_0은_완전_면역이며_하한_1을_적용하지_않는다()
+        public void 저항_0은_완전_면역이며_하한_1을_적용하지_않는다()
         {
             DamageRequest chaos = Basic(100);
             chaos.element = DamageElement.Chaos;
@@ -139,7 +139,7 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 내성은_곱해지지_않고_가장_낮은_값_하나만_남는다()
+        public void 저항은_곱해지지_않고_가장_낮은_값_하나만_남는다()
         {
             // 곱연산으로 중첩하면 방어형 속성 2개만으로 공략 불가가 된다.
             var a = ElementalResistances.Default;

@@ -50,7 +50,7 @@ public class Health : MonoBehaviour, IDamageable, IPoolable
     public StatusEffectState Status { get; } = new StatusEffectState();
 
     /// <summary>
-    /// 마지막으로 들어온 타격이 치명타였는가. 조건부 드랍이 읽는다.
+    /// 마지막으로 들어온 타격이 치명타였는가. 조건부 드롭이 읽는다.
     /// 「온전한 신경절 — 치명타가 아닌 공격으로 처치」 (Hunting 6-3절)
     /// </summary>
     public bool LastHitWasCritical { get; private set; }
@@ -202,7 +202,7 @@ public class Health : MonoBehaviour, IDamageable, IPoolable
         invulnerability.Reset();
 
         // 상태이상도 반드시 함께 초기화한다.
-        // 남겨 두면 재사용된 개체가 이전 런의 점화를 그대로 들고 나온다.
+        // 남겨 두면 재사용된 개체가 이전 출격의 점화를 그대로 들고 나온다.
         Status.ClearAll();
 
         // 처치 조건의 이력도 같이 지운다. 안 지우면 이전에 태웠던 개체가
@@ -249,7 +249,7 @@ public class Health : MonoBehaviour, IDamageable, IPoolable
             return 0;
 
         // 【0 피해는 기록하지 않는다.】 빗나간 타격이 「마지막 타격」이 되면
-        // 조건부 드랍의 판정이 실제로 죽인 공격과 어긋난다.
+        // 조건부 드롭의 판정이 실제로 죽인 공격과 어긋난다.
         LastHitWasCritical = request.isCritical;
 
         return ApplyRaw(computed, skipInvulnerability: request.bypassArmour);

@@ -13,7 +13,7 @@ public enum EquipmentSlot
     /// <summary>몸통 — 몸통 방어도(근접 피격) + 적재 공간.</summary>
     Body = 2,
 
-    /// <summary>얼굴 — 속성 내성 · 상태이상 면역 + 시야·감지.</summary>
+    /// <summary>얼굴 — 속성 저항 · 상태이상 면역 + 시야·감지.</summary>
     Face = 3,
 
     /// <summary>청각 — 소리 · 위치 파악.</summary>

@@ -35,7 +35,7 @@ public enum PassiveEffectType
     /// <summary>시체 전리품 추첨 횟수 +n.</summary>
     LootRolls = 12,
 
-    /// <summary>희귀 드랍 확률 +n%.</summary>
+    /// <summary>희귀 드롭 확률 +n%.</summary>
     RareDropRate = 13,
 
     // ── 회수 : 죽어도 남는 것 ─────────────────────────────────────────
@@ -58,7 +58,7 @@ public enum PassiveEffectType
     /// <summary>창고 칸 +n.</summary>
     StashSlots = 31,
 
-    /// <summary>상점 갱신 쿨타임 −n%.</summary>
+    /// <summary>상점 갱신 쿨다운 −n%.</summary>
     ShopRefresh = 32,
 
     /// <summary>상점 갱신 횟수 +n.</summary>
@@ -139,7 +139,7 @@ public static class PassiveEffectInfo
         if (IsUnlockFlag(type))
             return Name(type);
 
-        // 쿨타임 감소는 값이 양수여도 「−」로 보여야 뜻이 맞는다.
+        // 쿨다운 감소는 값이 양수여도 「−」로 보여야 뜻이 맞는다.
         string sign = type == PassiveEffectType.ShopRefresh ? "−" : "+";
 
         return $"{Name(type)} {sign}{value:0.#}{Unit(type)}";
@@ -154,13 +154,13 @@ public static class PassiveEffectInfo
             case PassiveEffectType.AbsorbAmount:   return "경험치 획득";
             case PassiveEffectType.AbsorbRange:    return "흡수 범위";
             case PassiveEffectType.LootRolls:      return "전리품 추첨";
-            case PassiveEffectType.RareDropRate:   return "희귀 드랍";
+            case PassiveEffectType.RareDropRate:   return "희귀 드롭";
             case PassiveEffectType.SafeSlots:      return "보존 칸";
             case PassiveEffectType.CorpseRecovery: return "시체 회수";
             case PassiveEffectType.ExtractMark:    return "추출 지점 표시";
             case PassiveEffectType.SellPrice:      return "판매가";
             case PassiveEffectType.StashSlots:     return "창고 칸";
-            case PassiveEffectType.ShopRefresh:    return "상점 갱신 쿨타임";
+            case PassiveEffectType.ShopRefresh:    return "상점 갱신 쿨다운";
             case PassiveEffectType.ShopSlots:      return "상점 갱신 횟수";
             case PassiveEffectType.CraftBench:     return "제작대";
             case PassiveEffectType.CodexAuto:      return "도감 자동 등록";

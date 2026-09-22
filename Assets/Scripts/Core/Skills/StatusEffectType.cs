@@ -63,14 +63,14 @@ public enum GroundEffectType
     GravityWell = 5,
 
     /// <summary>
-    /// 【속성은 꽂힌 Core가 정한다.】 Support가 쓰는 값이다.
+    /// 【속성은 꽂힌 핵심 젬이 정한다.】 보조 젬이 쓰는 값이다.
     ///
-    /// 「마름쇠」는 잔류물을 남기는 Support인데 FireZone으로 고정돼 있었다.
-    /// 서리 Core에 꽂아도 불바다가 생긴다는 뜻이고, 이는
-    /// 「무기 = 기본값 / Core = 속성 / Support = 궤도」라는 전투 3층
-    /// 원칙을 Support가 깨는 것이다. (Master_Prompt 기획 확정 현황)
+    /// 「마름쇠」는 잔류물을 남기는 보조 젬인데 FireZone으로 고정돼 있었다.
+    /// 서리 핵심 젬에 꽂아도 불바다가 생긴다는 뜻이고, 이는
+    /// 「무기 = 기본값 / 핵심 젬 = 속성 / 보조 젬 = 궤도」라는 전투 3층
+    /// 원칙을 보조 젬이 깨는 것이다. (Master_Prompt 기획 확정 현황)
     ///
-    /// 실제 종류는 GroundEffectTable.Resolve가 Core의 부여 상태로 정한다.
+    /// 실제 종류는 GroundEffectTable.Resolve가 핵심 젬의 부여 상태로 정한다.
     /// </summary>
     FromCoreAilment = 6
 }

@@ -17,7 +17,7 @@ public static class GroundEffectTable
             case StatusEffectType.Bleed: return GroundEffectType.BloodZone;
 
             // 감전은 잔류물을 남기지 않는다. 증폭 전용 상태이기 때문이다.
-            // 응집은 중력 붕괴 Core가 직접 우물을 만들므로 사망 시 생성이 중복이다.
+            // 응집은 중력 붕괴 핵심 젬이 직접 우물을 만들므로 사망 시 생성이 중복이다.
             default: return GroundEffectType.None;
         }
     }
@@ -25,19 +25,19 @@ public static class GroundEffectTable
     /// <summary>
     /// 스킬이 실제로 남길 잔류물을 정한다.
     ///
-    /// FromCoreAilment면 꽂힌 Core의 부여 속성을 따른다 —
-    /// 화염 Core + 마름쇠 = 화염 잔류물, 서리 Core + 마름쇠 = 서리 장판.
-    /// Support가 속성을 확정하지 않는다는 것이 전투 3층의 전제다.
+    /// FromCoreAilment면 꽂힌 핵심 젬의 부여 속성을 따른다 —
+    /// 화염 핵심 젬 + 마름쇠 = 화염 잔류물, 서리 핵심 젬 + 마름쇠 = 서리 장판.
+    /// 보조 젬이 속성을 확정하지 않는다는 것이 전투 3층의 전제다.
     /// </summary>
     /// <param name="declared">스킬 정의가 적어 둔 값.</param>
-    /// <param name="coreAilment">꽂힌 Core가 부여하는 상태. 없으면 None.</param>
+    /// <param name="coreAilment">꽂힌 핵심 젬이 부여하는 상태. 없으면 None.</param>
     public static GroundEffectType Resolve(
         GroundEffectType declared, StatusEffectType coreAilment)
     {
         if (declared != GroundEffectType.FromCoreAilment)
             return declared;
 
-        // Core가 아무 속성도 부여하지 않으면 남길 것이 없다.
+        // 핵심 젬이 아무 속성도 부여하지 않으면 남길 것이 없다.
         // 임의로 화염을 고르지 않는다 — 그게 애초에 이 버그였다.
         return FromStatus(coreAilment);
     }

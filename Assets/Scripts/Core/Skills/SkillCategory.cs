@@ -7,7 +7,7 @@ public enum SkillCategory
     /// <summary>핵심 스킬. 소켓 3개 보유, 동시 보유 상한 2개 (2번째는 Lv7 개방).</summary>
     Core = 0,
 
-    /// <summary>보조 스킬. 반드시 Core 소켓에 장착된다. 전역 버프가 아니다.</summary>
+    /// <summary>보조 스킬. 반드시 핵심 젬 소켓에 장착된다. 전역 버프가 아니다.</summary>
     Support = 1,
 
     /// <summary>발동 스킬. 에너지 축적 후 자동 발동. 동시 장착 2개. 확률 발동 금지.</summary>
@@ -21,21 +21,21 @@ public enum SkillCategory
 }
 
 /// <summary>
-/// Core의 역할 계열 — Skill System v8 §5.
+/// 핵심 젬의 역할 계열 — Skill System v8 §5.
 /// 부여(무엇을 남기는가) → 기폭(무엇을 소모하는가)
 ///
-/// ※ "전달 계열"은 없다. "어떻게 닿는가"는 Core가 아니라 소켓의 Support가
+/// ※ "전달 계열"은 없다. "어떻게 닿는가"는 핵심 젬이 아니라 소켓의 보조 젬이
 ///    담당한다. PoE2에서 투사체 행동은 전부 보조 젬이기 때문이다.
 /// </summary>
 public enum CoreFamily
 {
-    /// <summary>Core가 아닌 정의의 기본값.</summary>
+    /// <summary>핵심 젬이 아닌 정의의 기본값.</summary>
     None = 0,
 
     /// <summary>
     /// 부여 계열 — 화염 / 역병 / 서리 / 뇌전 / 열상.
     /// 적에게 상태를 남기는 것이 본체이며 피해는 부수 효과다.
-    /// 전부 `투사체` 태그를 가지므로 투사체 Support가 붙을 곳이 항상 존재한다.
+    /// 전부 `투사체` 태그를 가지므로 투사체 보조 젬이 붙을 곳이 항상 존재한다.
     /// </summary>
     Ailment = 1,
 

@@ -64,7 +64,7 @@ public static class Perception
     /// 문서 8절은 「정면 넓고 측·후방 좁다」처럼 말로만 적었지만,
     /// 덕코프 생물 59종의 실측 최빈값이 140도다 (140×27 · 100×14 · 120×5 · 150×2).
     /// [확인됨 — docs/research/duckov/05_적_AI_실측치.md]
-    /// 원형별 값은 EnemyArchetypeTable이 갖는다.
+    /// 유형별 값은 EnemyArchetypeTable이 갖는다.
     /// </summary>
     public const float DefaultConeDegrees = 140f;
 

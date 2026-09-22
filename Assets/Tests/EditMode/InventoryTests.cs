@@ -80,7 +80,7 @@ namespace Blob.Tests
         [Test]
         public void 부분_적재를_허용한다()
         {
-            // 엣지 케이스 — 공간이 모자라면 들어갈 만큼만 넣는다.
+            // 예외 상황 — 공간이 모자라면 들어갈 만큼만 넣는다.
             // 전부 실패시키면 "한 칸 남았는데 아무것도 못 줍는" 상황이 된다.
             var inv = new Inventory(slots: 2, weight: 100f);
             ItemDefinition item = Create("scrap");
@@ -128,7 +128,7 @@ namespace Blob.Tests
         [Test]
         public void 상한이_0이면_페널티를_주지_않는다()
         {
-            // 엣지 케이스 — 0으로 나누면 무한대가 되어 항상 Immobile이 된다.
+            // 예외 상황 — 0으로 나누면 무한대가 되어 항상 Immobile이 된다.
             Assert.AreEqual(EncumbranceLevel.Normal, WeightCalculator.Evaluate(100f, 0f));
         }
 

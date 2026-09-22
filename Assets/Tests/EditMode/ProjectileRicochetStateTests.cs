@@ -47,7 +47,7 @@ namespace Blob.Tests
         [Test]
         public void 추가_튕김은_횟수를_더한다()
         {
-            // 「추가 튕김」 Support: 튕김 횟수 +3
+            // 「추가 튕김」 보조 젬: 튕김 횟수 +3
             var state = new ProjectileRicochetState();
             state.Set(3);
             state.Add(3);
@@ -115,7 +115,7 @@ namespace Blob.Tests
         [Test]
         public void 법선이_없으면_입사_방향을_유지한다()
         {
-            // 엣지 케이스: 모서리에서 법선이 0이면 방향이 NaN이 되어 탄이 사라진다.
+            // 예외 상황: 모서리에서 법선이 0이면 방향이 NaN이 되어 탄이 사라진다.
             Vector3 reflected = ProjectileRicochetState.Reflect(Vector3.forward, Vector3.zero);
 
             Assert.AreEqual(1f, reflected.z, 0.001f);

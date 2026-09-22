@@ -29,7 +29,7 @@ public struct AggroCandidate
 }
 
 /// <summary>
-/// 이 원형이 얼마나 집요한가. 원형표가 정한다.
+/// 이 유형이 얼마나 집요한가. 유형표가 정한다.
 ///
 /// 【세 값이 각각 맡는 일】
 ///   · forgetTime       — 놓친 뒤 몇 초를 더 찾아다니는가
@@ -116,7 +116,7 @@ public static class AggroSelector
     /// </summary>
     public const float DefaultSafetyMultiplier = 3f;
 
-    /// <summary>원형 정보가 없을 때 쓰는 기본 추적 성향.</summary>
+    /// <summary>유형 정보가 없을 때 쓰는 기본 추적 성향.</summary>
     public static AggroPursuit DefaultPursuit(float detectRange) => new AggroPursuit
     {
         forgetTime = DefaultForgetTime,
@@ -129,7 +129,7 @@ public static class AggroSelector
     /// </summary>
     /// <param name="self">고르는 쪽의 소속.</param>
     /// <param name="selfPosition">고르는 쪽의 위치.</param>
-    /// <param name="pursuit">이 원형이 얼마나 집요한가.</param>
+    /// <param name="pursuit">이 유형이 얼마나 집요한가.</param>
     /// <param name="memory">이 개체의 기억. 갱신되어 돌아간다.</param>
     /// <param name="elapsed">지난번 호출로부터 흐른 시간(초).</param>
     /// <param name="candidates">후보 전부. 자기 자신이 섞여 있어도 된다.</param>
@@ -208,8 +208,8 @@ public static class AggroSelector
     /// 물고 있던 대상을 계속 물 것인가.
     ///
     /// 순서가 중요하다 — 최후 방어선(거리)이 가장 먼저다.
-    /// 강제 추격 거리보다 안전 거리가 뒤에 오면, 지형에 낀 적이
-    /// 「강제 추격 거리 안이라」 영원히 물고 있게 된다.
+    /// 강제 추적 거리보다 안전 거리가 뒤에 오면, 지형에 낀 적이
+    /// 「강제 추적 거리 안이라」 영원히 물고 있게 된다.
     /// </summary>
     private static bool KeepHolding(
         Faction self, in AggroCandidate c, int selfId, Vector3 selfPosition,
@@ -223,7 +223,7 @@ public static class AggroSelector
         if (pursuit.safetyRange > 0f && distance > pursuit.safetyRange)
             return false;
 
-        // 보고 있거나, 강제 추격 거리 안이면 시간이 흐르지 않는다.
+        // 보고 있거나, 강제 추적 거리 안이면 시간이 흐르지 않는다.
         if (c.isDetected || distance <= pursuit.forcedChaseRange)
         {
             memory.unseenTime = 0f;

@@ -179,13 +179,13 @@ namespace Blob.Tests
 
             Assert.AreEqual(4, defence.headArmour);
             Assert.AreEqual(0, defence.bodyArmour);
-            Assert.AreEqual(0.88f, defence.resistances.fire, 0.001f, "내성 옵션은 배율에서 빼는 값입니다.");
+            Assert.AreEqual(0.88f, defence.resistances.fire, 0.001f, "저항 옵션은 배율에서 빼는 값입니다.");
         }
 
         [Test]
-        public void 내성이_음수로_뒤집히지_않는다()
+        public void 저항이_음수로_뒤집히지_않는다()
         {
-            // 엣지 케이스 — 음수가 되면 피해가 회복이 된다.
+            // 예외 상황 — 음수가 되면 피해가 회복이 된다.
             var loadout = new EquipmentLoadout();
 
             loadout.TryEquip(new ItemStack(Create("absurd", EquipmentSlot.Head,
@@ -244,12 +244,12 @@ namespace Blob.Tests
             Assert.AreEqual(3f, loadout.Modifiers.Get(EquipmentStatType.HeadArmour), 0.001f);
         }
 
-        // ── 누적 게이트 ───────────────────────────────────────────────
+        // ── 누적 문턱 ───────────────────────────────────────────────
 
         [Test]
         public void 격리_방호는_장비와_소모품을_합쳐_계산된다()
         {
-            // 올 오어 낫싱이 아니라서 「장비 1점 + 소모품 1개」 조합이 성립한다.
+            // 전부 아니면 전무가 아니라서 「장비 1점 + 소모품 1개」 조합이 성립한다.
             var loadout = new EquipmentLoadout();
 
             loadout.TryEquip(new ItemStack(Create("ward_helm", EquipmentSlot.Head,

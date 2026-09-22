@@ -105,7 +105,7 @@ public static class ImprintAssetGenerator
             S(EquipmentStatType.BodyArmour, 1.6f),
             S(EquipmentStatType.MoveAbility, -0.15f)));
 
-        // 「대시 불가」 — 쿨타임을 크게 늘려 표현한다.
+        // 「대시 불가」 — 쿨다운을 크게 늘려 표현한다.
         list.Add(New("bulwark", "중장", 3, "움직이지 않는다. 그 자리에서 버틴다.",
             S(EquipmentStatType.HeadArmour, 2.6f),
             S(EquipmentStatType.BodyArmour, 2.6f),

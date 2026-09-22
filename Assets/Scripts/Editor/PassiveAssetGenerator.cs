@@ -162,7 +162,7 @@ public static class PassiveAssetGenerator
             PassiveBranch.Brokerage, PassiveEffectType.StashSlots, 20, level: 1, cost: 2400,
             column: 2, row: 1, prereq: new[] { "brok_stash_1" }));
 
-        rows.Add(N("brok_refresh_1", "거래선 1", "상점 갱신 쿨타임 −10%.",
+        rows.Add(N("brok_refresh_1", "거래선 1", "상점 갱신 쿨다운 −10%.",
             PassiveBranch.Brokerage, PassiveEffectType.ShopRefresh, 10, level: 1, cost: 3000,
             column: 0, row: 2, prereq: new[] { "brok_sell_2" }));
 
@@ -170,7 +170,7 @@ public static class PassiveAssetGenerator
             PassiveBranch.Brokerage, PassiveEffectType.ShopSlots, 1, level: 1, cost: 3600,
             column: 2, row: 2, prereq: new[] { "brok_stash_2" }));
 
-        rows.Add(N("brok_refresh_2", "거래선 2", "상점 갱신 쿨타임 −10%.",
+        rows.Add(N("brok_refresh_2", "거래선 2", "상점 갱신 쿨다운 −10%.",
             PassiveBranch.Brokerage, PassiveEffectType.ShopRefresh, 10, level: 1, cost: 5400,
             column: 0, row: 3, prereq: new[] { "brok_refresh_1" }));
 

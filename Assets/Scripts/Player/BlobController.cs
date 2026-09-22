@@ -94,7 +94,7 @@ public class BlobController : MonoBehaviour
 
         int lost = PlayerInventory.EnsureInstance().DropOnDeath();
 
-        // 각성 레벨과 소켓은 런 안의 것이다. 남은 젬은 이미 위에서 사라졌다.
+        // 각성 레벨과 소켓은 출격 안의 것이다. 남은 젬은 이미 위에서 사라졌다.
         if (SkillManager.HasInstance)
             SkillManager.Instance.ResetRun();
 

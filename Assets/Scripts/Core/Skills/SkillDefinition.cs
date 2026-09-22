@@ -30,7 +30,7 @@ public class SkillDefinition : ScriptableObject
     [Header("분류")]
     [SerializeField] private SkillCategory category = SkillCategory.Core;
 
-    [Tooltip("Core일 때만 의미가 있다. 전달 / 적재 / 기폭")]
+    [Tooltip("핵심 젬일 때만 의미가 있다. 전달 / 적재 / 기폭")]
     [SerializeField] private CoreFamily coreFamily = CoreFamily.None;
 
     [Tooltip("이 레벨 미만에서는 선택지에 등장하지 않는다. v5 목록의 Lv 값.")]
@@ -43,7 +43,7 @@ public class SkillDefinition : ScriptableObject
     [Tooltip("이 Skill이 보유한 태그.")]
     [SerializeField] private SkillTag tags = SkillTag.None;
 
-    [Tooltip("Support 전용. 장착 대상 Core가 이 태그를 전부 가져야 장착 가능하다. " +
+    [Tooltip("보조 젬 전용. 장착 대상 핵심 젬이 이 태그를 전부 가져야 장착 가능하다. " +
              "None이면 태그 제약이 없다.")]
     [SerializeField] private SkillTag requiredTags = SkillTag.None;
 
@@ -114,9 +114,9 @@ public class SkillDefinition : ScriptableObject
     [SerializeField] private float lifetimeMultiplier = 1f;
 
     [Header("Effect — 효과")]
-    // 여기부터가 「이 Support가 무엇을 해 주는가」다.
+    // 여기부터가 「이 보조 젬이 무엇을 해 주는가」다.
     //
-    // 이 축이 없던 동안 Support 35종 중 21종은 대가만 적용되고 효과가 없었다.
+    // 이 축이 없던 동안 보조 젬 35종 중 21종은 대가만 적용되고 효과가 없었다.
     // 끼우면 손해만 보는 젬이었다. (docs/Blob_Audit.md D1)
     //
     // 전부 가산 합산이다. PoE의 「증가 / 더 증가」 2단 구조를 쓰지 않는다 —
@@ -151,14 +151,14 @@ public class SkillDefinition : ScriptableObject
     [SerializeField] private float conditionalDamageIncrease = 0f;
 
     [Header("Effect — 속성 전환")]
-    // 속성 전환 Support가 자기가 꽂힌 Core의 부여 속성을 바꾼다.
+    // 속성 전환 보조 젬이 자기가 꽂힌 핵심 젬의 부여 속성을 바꾼다.
     //
-    // 이 축이 배타형 Support를 살린다 —
-    // 「번제」가 화염 Core의 점화를 끄면, 「화염 조율」을 낀 다른 Core가
+    // 이 축이 배타형 보조 젬을 살린다 —
+    // 「번제」가 화염 핵심 젬의 점화를 끄면, 「화염 조율」을 낀 다른 핵심 젬이
     // 점화를 대신 공급한다. 그래야 「점화된 적에게 큰 피해」가 성립한다.
     // (docs/Blob_Audit.md D3)
 
-    [Tooltip("이 Support가 꽂힌 Core의 부여 속성을 이것으로 바꾼다. (전환)")]
+    [Tooltip("이 보조 젬이 꽂힌 핵심 젬의 부여 속성을 이것으로 바꾼다. (전환)")]
     [SerializeField] private StatusEffectType ailmentOverride = StatusEffectType.None;
 
     [Tooltip("원래 속성을 유지한 채 이것을 추가로 부여한다. (융합)")]
@@ -293,11 +293,11 @@ public class SkillDefinition : ScriptableObject
         if (category != SkillCategory.Core)
             coreFamily = CoreFamily.None;
 
-        // 유지형 태그는 Persistent(전령)의 정의상 필수다.
+        // 유지형 태그는 유지형 젬(전령)의 정의상 필수다.
         if (category == SkillCategory.Persistent)
             tags |= SkillTag.Persistent;
 
-        // requiredTags는 Support 전용 개념이다. (10-2 [1])
+        // requiredTags는 보조 젬 전용 개념이다. (10-2 [1])
         if (category != SkillCategory.Support)
             requiredTags = SkillTag.None;
 

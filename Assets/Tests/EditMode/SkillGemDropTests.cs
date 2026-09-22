@@ -4,12 +4,12 @@ using NUnit.Framework;
 namespace Blob.Tests
 {
     /// <summary>
-    /// 도감(해금 기록)과 젬 드랍 규칙. (Skill_System.md 11-2 · 11-3절)
+    /// 도감(해금 기록)과 젬 드롭 규칙. (Skill_System.md 11-2 · 11-3절)
     ///
     /// 여기서 지켜야 할 것 —
     ///  · 도감은 보유 목록이 아니라 「무엇이 나올 수 있는가」다.
-    ///  · 드랍은 요구 레벨로 거르지 않는다. 주울 수는 있고 끼우지 못할 뿐이다.
-    ///  · 첫 Core는 반드시 부여 계열이다. 아니면 투사체 Support가 통째로 죽는다.
+    ///  · 드롭은 요구 레벨로 거르지 않는다. 주울 수는 있고 끼우지 못할 뿐이다.
+    ///  · 첫 핵심 젬은 반드시 부여 계열이다. 아니면 투사체 보조 젬이 통째로 죽는다.
     /// </summary>
     public class SkillGemDropTests
     {
@@ -32,7 +32,7 @@ namespace Blob.Tests
         // ── 도감 ──────────────────────────────────────────────────────────
 
         [Test]
-        public void 도감에_없는_젬은_드랍_풀에_들어오지_않는다()
+        public void 도감에_없는_젬은_드롭_풀에_들어오지_않는다()
         {
             List<SkillDefinition> all = SampleCatalog();
             var codex = new SkillCodex();
@@ -59,7 +59,7 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 드랍_풀은_요구_레벨로_거르지_않는다()
+        public void 드롭_풀은_요구_레벨로_거르지_않는다()
         {
             // 11-3절 — "각성 레벨에 미달하는 젬은 주울 수는 있으나 끼울 수 없다".
             // 여기서 걸러 버리면 "레벨을 올려야 끼운다"는 압박이 생기지 않는다.
@@ -74,7 +74,7 @@ namespace Blob.Tests
             CollectionAssert.Contains(codex.BuildDropPool(all), late);
         }
 
-        // ── 드랍 ──────────────────────────────────────────────────────────
+        // ── 드롭 ──────────────────────────────────────────────────────────
 
         [Test]
         public void 첫_Core는_반드시_부여_계열이다()
@@ -94,14 +94,14 @@ namespace Blob.Tests
                 Assert.IsNotNull(drawn);
                 Assert.AreEqual(SkillCategory.Core, drawn.Category);
                 Assert.AreEqual(CoreFamily.Ailment, drawn.Family,
-                    "기폭 계열만 손에 쥐면 투사체 Support가 통째로 죽습니다.");
+                    "기폭 계열만 손에 쥐면 투사체 보조 젬이 통째로 죽습니다.");
             }
         }
 
         [Test]
-        public void 부여_Core가_없으면_첫_드랍은_null이다()
+        public void 부여_Core가_없으면_첫_드롭은_null이다()
         {
-            // 조용히 기폭 Core를 주는 것보다 실패를 드러내는 편이 낫다.
+            // 조용히 기폭 핵심 젬을 주는 것보다 실패를 드러내는 편이 낫다.
             var pool = new List<SkillDefinition>
             {
                 SkillTestFactory.CreateCore("core_shockwave", SkillTag.AreaOfEffect,
@@ -112,7 +112,7 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 같은_시드는_같은_드랍을_낸다()
+        public void 같은_시드는_같은_드롭을_낸다()
         {
             List<SkillDefinition> all = SampleCatalog();
             var codex = new SkillCodex();
