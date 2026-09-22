@@ -112,12 +112,14 @@ namespace Blob.Tests
             Advance(state, 60f);
 
             Assert.AreEqual(1f, state.MoveMultiplier, 0.001f);
-            Assert.AreEqual(1f, state.HealingMultiplier, 0.001f);
+            Assert.AreEqual(1f, state.EnergyRestoreMultiplier, 0.001f);
         }
 
         [Test]
-        public void 탈수는_이동과_회복을_깎는다()
+        public void 탈수는_이동을_깎고_음식을_덜_차게_한다()
         {
+            // 덕코프 「체력(스태미나) 회복 −70%」 그대로. Blob은 스태미나를
+            // 에너지에 합쳤으므로 에너지가 차는 양에 붙는다.
             var state = new SurvivalState();
 
             state.Drain(SurvivalTable.MaxWater, 0f);
@@ -125,7 +127,88 @@ namespace Blob.Tests
             Assert.IsTrue(state.IsDehydrated);
             Assert.IsFalse(state.IsStarving);
             Assert.AreEqual(SurvivalTable.DehydratedMoveScale, state.MoveMultiplier, 0.001f);
-            Assert.AreEqual(SurvivalTable.DehydratedHealScale, state.HealingMultiplier, 0.001f);
+            Assert.AreEqual(0.30f, state.EnergyRestoreMultiplier, 0.001f);
+        }
+
+        [Test]
+        public void 목마르면_먹어도_덜_찬다()
+        {
+            // 【물부터 마셔야 음식이 제값을 한다.】 두 게이지가 엮이는 자리다.
+            var state = new SurvivalState();
+
+            state.Drain(SurvivalTable.MaxWater, 40f);
+
+            float before = state.Energy;
+
+            state.Restore(0f, 20f);
+
+            Assert.AreEqual(before + 6f, state.Energy, 0.01f, "20의 30%인 6만 찹니다.");
+        }
+
+        [Test]
+        public void 물을_먼저_마시면_음식이_제값을_한다()
+        {
+            var state = new SurvivalState();
+
+            state.Drain(SurvivalTable.MaxWater, 40f);
+
+            float before = state.Energy;
+
+            state.Restore(50f, 0f);   // 먼저 마신다
+            state.Restore(0f, 20f);   // 그 다음 먹는다
+
+            Assert.AreEqual(before + 20f, state.Energy, 0.01f, "온전히 20이 찹니다.");
+        }
+
+        [Test]
+        public void 배율은_부르기_전의_상태로_정한다()
+        {
+            // 한 번의 호출 안에서 물을 먼저 더하고 재면, 물과 음식이 한 아이템에
+            // 들어 있을 때와 따로 먹을 때의 결과가 달라진다.
+            var state = new SurvivalState();
+
+            state.Drain(SurvivalTable.MaxWater, 40f);
+
+            float before = state.Energy;
+
+            state.Restore(50f, 20f);   // 한 번에
+
+            Assert.AreEqual(before + 6f, state.Energy, 0.01f,
+                "목이 마른 채로 부른 것이므로 30%만 찹니다.");
+        }
+
+        [Test]
+        public void 체력_회복에는_손대지_않는다()
+        {
+            // 이 축의 존재 이유는 추출 압박이다. 회복약을 덜 듣게 만드는 것은
+            // 전투 페널티라 방침에서 벗어난다. (Survival_System 6절)
+            var state = new SurvivalState();
+
+            state.Drain(SurvivalTable.MaxWater, SurvivalTable.MaxEnergy);
+
+            Assert.IsTrue(state.IsDehydrated && state.IsStarving);
+
+            // 굶주려도 에너지 회복 배율은 탈수분만 걸린다 — 자기 자신을 막지 않는다.
+            Assert.AreEqual(SurvivalTable.DehydratedEnergyRestoreScale,
+                state.EnergyRestoreMultiplier, 0.001f);
+        }
+
+        [Test]
+        public void 굶주림_자체는_회복을_막지_않는다()
+        {
+            // 덕코프의 배고픔은 스태미나 회복을 깎지만, Blob은 그 축이 에너지라
+            // 그대로 옮기면 자기 자신을 가리켜 빠져나올 수 없는 나선이 된다.
+            var state = new SurvivalState();
+
+            state.Drain(0f, SurvivalTable.MaxEnergy);
+
+            Assert.IsTrue(state.IsStarving);
+            Assert.IsFalse(state.IsDehydrated);
+            Assert.AreEqual(1f, state.EnergyRestoreMultiplier, 0.001f);
+
+            state.Restore(0f, 30f);
+
+            Assert.AreEqual(30f, state.Energy, 0.01f, "온전히 찹니다.");
         }
 
         [Test]

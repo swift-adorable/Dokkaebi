@@ -120,7 +120,7 @@ public static class PlaytestActions
         SurvivalState state = survival.State;
 
         return $"탈수·허기 적용 — 이동 ×{state.MoveMultiplier:0.00} · "
-               + $"회복 ×{state.HealingMultiplier:0.00} · 허기 {state.StarvingStacks}중첩";
+               + $"음식 ×{state.EnergyRestoreMultiplier:0.00} · 허기 {state.StarvingStacks}중첩";
     }
 
     /// <summary>출격 상태로 되돌린다.</summary>
