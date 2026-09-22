@@ -16,7 +16,8 @@ namespace Blob.Tests
     {
         private static PerceptionInput At(float x, float z,
                                           float cone = 120f, float range = 18f,
-                                          float noise = 0f, bool los = true)
+                                          float noise = 0f, bool los = true,
+                                          float hearing = 0f)
         {
             return new PerceptionInput
             {
@@ -24,6 +25,7 @@ namespace Blob.Tests
                 viewerForward = Vector3.forward,
                 visionConeDegrees = cone,
                 visionRange = range,
+                listenerHearingScale = hearing,
                 targetPosition = new Vector3(x, 0f, z),
                 targetNoiseRadius = noise,
                 hasLineOfSight = los
@@ -99,6 +101,54 @@ namespace Blob.Tests
                 Perception.Detect(At(0f, 10f, noise: 12f, los: false)));
         }
 
+        // ── 귀 · 듣는 쪽의 청각 ───────────────────────────────────────
+        // 【7-D 결정을 뒤집은 자리다.】
+        // 처음에는 「소리 크기는 내는 쪽만 정한다」로 두었다. 듣는 쪽마다 값이
+        // 다르면 플레이어가 「이 소리가 어디까지 갔나」를 계산할 수 없다는 이유였다.
+        // 덕코프는 듣는 쪽에 청각 능력을 두되 값을 두 개(0.75 · 1.0)에 몰아
+        // 그 문제를 피한다 — 59종 중 48종이 그 둘이다.
+        // [확인됨 — docs/research/duckov/05_적_AI_실측치.md 3절]
+
+        [Test]
+        public void 값을_채우지_않으면_보통_귀로_본다()
+        {
+            // 구조체를 기본값으로 만든 호출자가 귀머거리가 되면 안 된다.
+            Assert.AreEqual(Perception.NormalHearing, Perception.Hearing(0f));
+            Assert.AreEqual(Perception.NormalHearing, Perception.Hearing(-1f));
+        }
+
+        [Test]
+        public void 귀가_밝으면_더_멀리서_듣는다()
+        {
+            // 소리 반경 8 · 거리 10 → 보통 귀로는 못 듣는다.
+            Assert.AreEqual(DetectionKind.None,
+                Perception.Detect(At(0f, -10f, noise: 8f, hearing: Perception.NormalHearing)));
+
+            // 같은 소리를 잠복체(2.0)는 듣는다. 「먼저 찾는 쪽」이라는 정체성이다.
+            Assert.AreEqual(DetectionKind.Heard,
+                Perception.Detect(At(0f, -10f, noise: 8f, hearing: Perception.KeenHearing)));
+        }
+
+        [Test]
+        public void 귀가_둔하면_가까운_소리도_놓친다()
+        {
+            // 소리 반경 12 · 거리 10 → 보통 귀는 듣는다.
+            Assert.AreEqual(DetectionKind.Heard,
+                Perception.Detect(At(0f, -10f, noise: 12f, hearing: Perception.NormalHearing)));
+
+            // 기계형(0.75)은 9m까지만 듣는다 — 눈은 넓지만 귀로는 못 찾는다.
+            Assert.AreEqual(DetectionKind.None,
+                Perception.Detect(At(0f, -10f, noise: 12f, hearing: Perception.DullHearing)));
+        }
+
+        [Test]
+        public void 아무리_귀가_밝아도_소리가_없으면_못_듣는다()
+        {
+            // 「안 뛰는 것만으로 기습을 피한다」는 청각 배율이 아무리 높아도 성립한다.
+            Assert.AreEqual(DetectionKind.None,
+                Perception.Detect(At(0f, -10f, noise: 0f, hearing: 20f)));
+        }
+
         [Test]
         public void 보는_것이_듣는_것보다_우선한다()
         {
@@ -140,6 +190,111 @@ namespace Blob.Tests
 
             // 기계 눈이 야생 슬라임보다 좁을 이유가 없다.
             Assert.Greater(sentry, scav, "보안기가 스캐브보다 좁습니다.");
+        }
+
+        // ── 원형별 청각 · 추적 ────────────────────────────────────────
+
+        [Test]
+        public void 청각은_세_값만_쓴다()
+        {
+            // 값을 거칠게 두는 것이 「예측할 수 없다」는 반대 근거를 지우는 방법이다.
+            // 덕코프의 0(귀머거리)과 5·20(전 구역 감지)은 쓰지 않는다 —
+            // 0은 「소리로 유인한다」를 없애고, 20은 소리 관리를 무의미하게 만든다.
+            float[] allowed = { Perception.DullHearing, Perception.NormalHearing,
+                                Perception.KeenHearing };
+
+            foreach (EnemyArchetype a in (EnemyArchetype[])Enum.GetValues(typeof(EnemyArchetype)))
+            {
+                float hearing = EnemyArchetypeTable.Of(a).hearingScale;
+
+                Assert.IsTrue(allowed.Any(v => Mathf.Approximately(v, hearing)),
+                    $"{EnemyArchetypeTable.Name(a)}의 청각이 {hearing}입니다. " +
+                    "허용값은 0.75 · 1.0 · 2.0뿐입니다.");
+            }
+        }
+
+        [Test]
+        public void 잠복체가_가장_잘_듣고_기계형이_가장_둔하다()
+        {
+            float lurker = EnemyArchetypeTable.Of(EnemyArchetype.Lurker).hearingScale;
+            float sentry = EnemyArchetypeTable.Of(EnemyArchetype.Sentry).hearingScale;
+            float crusher = EnemyArchetypeTable.Of(EnemyArchetype.Crusher).hearingScale;
+
+            // 「먼저 감지하는 쪽」이 잠복체의 답(선제)이다.
+            Assert.AreEqual(Perception.KeenHearing, lurker, 0.001f, "잠복체");
+
+            // 기계 눈은 넓지만 귀는 둔하다 — 시야각으로 답하고 소리로 답하지 않는다.
+            Assert.AreEqual(Perception.DullHearing, sentry, 0.001f, "보안기");
+            Assert.AreEqual(Perception.DullHearing, crusher, 0.001f, "압착기");
+        }
+
+        [Test]
+        public void 모든_원형이_망각_시간을_갖는다()
+        {
+            // 0이면 감지를 잃는 즉시 놓는다 — 엄폐물 뒤로 한 걸음에 추적이 끊긴다.
+            foreach (EnemyArchetype a in (EnemyArchetype[])Enum.GetValues(typeof(EnemyArchetype)))
+            {
+                EnemyArchetypeStats stats = EnemyArchetypeTable.Of(a);
+
+                Assert.Greater(stats.forgetTime, 0f, EnemyArchetypeTable.Name(a));
+                Assert.LessOrEqual(stats.forgetTime, 30f,
+                    $"{EnemyArchetypeTable.Name(a)}의 망각 시간이 30초를 넘습니다. " +
+                    "덕코프의 120·180초는 보스급 소수라 쓰지 않기로 했습니다.");
+            }
+        }
+
+        [Test]
+        public void 강제_추격_거리는_덕코프의_세_값만_쓴다()
+        {
+            // 0 / 15 / 40. 60은 구역 하나와 맞먹어 「구역을 뜬다」 외의 수가 없어진다.
+            float[] allowed = { 0f, 15f, 40f };
+
+            foreach (EnemyArchetype a in (EnemyArchetype[])Enum.GetValues(typeof(EnemyArchetype)))
+            {
+                float range = EnemyArchetypeTable.Of(a).forcedChaseRange;
+
+                Assert.IsTrue(allowed.Any(v => Mathf.Approximately(v, range)),
+                    $"{EnemyArchetypeTable.Name(a)}의 강제 추격 거리가 {range}입니다.");
+            }
+        }
+
+        [Test]
+        public void 보안기가_가장_집요하다()
+        {
+            // 옛 chasesForever를 대신하는 축이다. 「끝까지」가 아니라 「멀리까지」로
+            // 바꾼 이유 — 도망이라는 선택지를 없애지 않으려는 것이다.
+            EnemyArchetypeStats sentry = EnemyArchetypeTable.Of(EnemyArchetype.Sentry);
+
+            foreach (EnemyArchetype a in (EnemyArchetype[])Enum.GetValues(typeof(EnemyArchetype)))
+            {
+                if (a == EnemyArchetype.Sentry)
+                    continue;
+
+                EnemyArchetypeStats other = EnemyArchetypeTable.Of(a);
+
+                Assert.LessOrEqual(other.forgetTime, sentry.forgetTime,
+                    $"{EnemyArchetypeTable.Name(a)}가 보안기보다 오래 기억합니다.");
+
+                Assert.LessOrEqual(other.forcedChaseRange, sentry.forcedChaseRange,
+                    $"{EnemyArchetypeTable.Name(a)}가 보안기보다 멀리서 강제 추격합니다.");
+            }
+
+            Assert.Greater(sentry.forcedChaseRange, 0f, "보안기가 강제 추격을 잃었습니다.");
+        }
+
+        [Test]
+        public void 잠복체는_귀가_밝은_대신_오래_쫓지_않는다()
+        {
+            // 【하나의 원형이 두 개의 답을 요구하게 만들지 않는다.】
+            // 잠복체의 답은 「선제」다. 귀가 밝은 것으로 이미 답했으므로
+            // 집요함까지 주면 답이 둘이 된다.
+            EnemyArchetypeStats lurker = EnemyArchetypeTable.Of(EnemyArchetype.Lurker);
+            EnemyArchetypeStats scav = EnemyArchetypeTable.Of(EnemyArchetype.Scav);
+
+            Assert.AreEqual(scav.forgetTime, lurker.forgetTime, 0.001f,
+                "잠복체가 귀도 밝고 집요하기까지 합니다. 요구하는 답이 둘이 됩니다.");
+
+            Assert.AreEqual(0f, lurker.forcedChaseRange, 0.001f, "잠복체");
         }
 
         [Test]

@@ -26,6 +26,12 @@ public struct PerceptionInput
 
     public float visionRange;
 
+    /// <summary>
+    /// 듣는 쪽의 귀가 얼마나 밝은가. 소리 반경에 곱한다.
+    /// 0 이하면 보통 귀(1.0)로 본다 — 값을 채우지 않은 구조체가 귀머거리가 되면 안 된다.
+    /// </summary>
+    public float listenerHearingScale;
+
     public Vector3 targetPosition;
 
     /// <summary>대상이 지금 내는 소리가 퍼지는 반경(m). 0이면 소리가 없다.</summary>
@@ -46,14 +52,7 @@ public struct PerceptionInput
 ///
 /// 축을 둘로 나눈다.
 ///   · 눈 — 시야각 안 · 사거리 안 · 시선이 트여 있을 것
-///   · 귀 — 대상이 낸 소리의 반경 안에 있을 것
-///
-/// 【귀 쪽에 「청력」 수치를 두지 않는 이유】
-/// 덕코프에서 소리는 「무기의 소리 범위만큼 퍼지고 그 안의 적이 듣는다」다.
-/// [확인됨 — research/duckov/08_전투_실측과_교전.md 3절]
-/// 듣는 쪽마다 청력을 두면 같은 총성이 누구에겐 들리고 누구에겐 안 들려,
-/// 유저가 「이 소리는 어디까지 갔나」를 예측할 수 없게 된다.
-/// 소리의 크기는 【내는 쪽】이 정한다.
+///   · 귀 — 대상이 낸 소리의 반경 × 듣는 쪽의 청각 안에 있을 것
 ///
 /// MonoBehaviour 의존이 없는 순수 클래스다. EditMode 테스트 대상.
 /// </summary>
@@ -77,6 +76,37 @@ public static class Perception
     /// </summary>
     public const float PointBlankRange = 1.5f;
 
+    // ── 청각 ──────────────────────────────────────────────────────────
+    //
+    // 【처음 결정을 뒤집었다. (2026-09-22)】
+    // 7-D에서는 「소리 크기는 내는 쪽만 정한다」로 두었다. 듣는 쪽마다 값이
+    // 다르면 같은 총성이 누구에겐 들리고 누구에겐 안 들려, 플레이어가
+    // 「이 소리가 어디까지 갔나」를 계산할 수 없다는 이유였다.
+    //
+    // 덕코프 생물 59종을 실측해 보니 듣는 쪽에 청각 능력이 있는데,
+    // 값이 대부분 두 개에 몰려 있다 — 0.75가 19종, 1.0이 29종.
+    // 즉 「듣는 쪽마다 다르다」를 넣으면서도 값을 거칠게 두어
+    // 예측 가능성을 지킨다. 내 반대 근거가 회피 가능한 것이었다.
+    // [확인됨 — docs/research/duckov/05_적_AI_실측치.md 3절]
+    //
+    // 세 값만 쓴다. 덕코프의 0(귀머거리)과 5·20(전 구역 감지)은 넣지 않는다 —
+    // 0은 「소리로 유인한다」를 없애고, 20은 소리 관리 자체를 무의미하게 만든다.
+
+    /// <summary>둔한 귀 — 기계형. 소리 반경의 4분의 3까지만 듣는다.</summary>
+    public const float DullHearing = 0.75f;
+
+    /// <summary>보통 귀. 대부분이 이 값이다.</summary>
+    public const float NormalHearing = 1f;
+
+    /// <summary>밝은 귀 — 잠복형. 소리 반경의 두 배까지 듣는다.</summary>
+    public const float KeenHearing = 2f;
+
+    /// <summary>
+    /// 청각 배율을 안전한 값으로 다듬는다.
+    /// 값을 채우지 않은 구조체(0)를 귀머거리로 만들지 않는다.
+    /// </summary>
+    public static float Hearing(float scale) => scale > 0f ? scale : NormalHearing;
+
     public static DetectionKind Detect(in PerceptionInput input)
     {
         Vector3 delta = input.targetPosition - input.viewerPosition;
@@ -90,7 +120,8 @@ public static class Perception
 
         // ── 귀 ────────────────────────────────────────────────────────
         // 소리는 벽을 넘는다. hasLineOfSight를 보지 않는다.
-        if (input.targetNoiseRadius > 0f && distance <= input.targetNoiseRadius)
+        if (input.targetNoiseRadius > 0f
+            && distance <= input.targetNoiseRadius * Hearing(input.listenerHearingScale))
             return DetectionKind.Heard;
 
         return DetectionKind.None;

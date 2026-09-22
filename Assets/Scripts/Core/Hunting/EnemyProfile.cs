@@ -41,8 +41,14 @@ public struct EnemyProfile
     /// <summary>발소리를 내는가. 원형이 정한다.</summary>
     public bool makesFootsteps;
 
-    /// <summary>한 번 물면 놓지 않는가. 보안기만 true다.</summary>
-    public bool chasesForever;
+    /// <summary>듣는 쪽의 청각 배율. 원형이 정한다.</summary>
+    public float hearingScale;
+
+    /// <summary>감지하지 못한 채 이만큼 흐르면 추적을 그만둔다(초).</summary>
+    public float forgetTime;
+
+    /// <summary>이 거리(m) 안에서는 대상을 잊지 않는다. 0이면 없음.</summary>
+    public float forcedChaseRange;
 
     /// <summary>붙은 속성. 표시와 잔향(사망 시 전달)이 읽는다.</summary>
     public EnemyAffix[] affixes;
@@ -67,7 +73,9 @@ public struct EnemyProfile
             faction = stats.faction,
             armourPenetration = stats.armourPenetration,
             makesFootsteps = stats.makesFootsteps,
-            chasesForever = stats.chasesForever,
+            hearingScale = stats.hearingScale,
+            forgetTime = stats.forgetTime,
+            forcedChaseRange = stats.forcedChaseRange,
             moveScale = 1f,
             resistances = stats.resistances,
             affixes = System.Array.Empty<EnemyAffix>()
