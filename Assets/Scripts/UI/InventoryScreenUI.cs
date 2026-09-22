@@ -54,7 +54,18 @@ public partial class InventoryScreenUI : MonoBehaviour
     private const float ColumnBottom = 0.10f;
     private const float FooterTop = ColumnBottom;
 
-    /// <summary>좌우 두 칸의 경계. 양쪽이 반 칸씩 물러나 사이가 한 칸이 된다.</summary>
+    /// <summary>
+    /// 장비·스킬 화면이 차지하는 폭.
+    ///
+    /// 【화면을 다 덮지 않는다.】
+    /// 가방을 열었다고 바깥이 사라지면, 지금 어디에 서 있고 무엇이 다가오는지가
+    /// 보이지 않는다. 추출 루팅에서 가방을 여는 순간은 대개 안전하지 않은
+    /// 순간이라 「짐을 보면서 바깥도 본다」가 성립해야 한다.
+    /// 왼쪽에 붙이고 나머지는 그대로 비춘다.
+    /// </summary>
+    private const float SidePanelRight = 0.55f;
+
+    /// <summary>패시브 화면만 폭을 다 쓴다. 트리를 접으면 볼 수가 없다.</summary>
     private const float ColumnSplit = 0.5f;
 
     /// <summary>
@@ -65,8 +76,8 @@ public partial class InventoryScreenUI : MonoBehaviour
     /// 올라와 글자를 반쯤 덮고 있었다. 세 칸은 서로 넘지 않는다.
     ///   0.04~0.22 글자 · 0.25~0.62 막대 · 0.64~0.96 숫자
     /// </summary>
-    private const float WeightBarLeft = 0.25f;
-    private const float WeightBarRight = 0.62f;
+    private const float WeightBarLeft = 0.27f;
+    private const float WeightBarRight = 0.60f;
 
     /// <summary>중량 막대의 위아래 여백. 아래줄 높이 기준 비율이다.</summary>
     private const float WeightBarInset = 0.24f;
@@ -77,13 +88,7 @@ public partial class InventoryScreenUI : MonoBehaviour
     /// 장비 탭은 폭을 다 쓰므로 여덟 열, 스킬 탭은 절반이라 여섯 열이다.
     /// 열 수를 고정해 두면 넓은 쪽에서 칸이 주먹만 해진다.
     /// </summary>
-    private int BagColumns => UsesFullWidth ? 8 : 6;
-
-    /// <summary>
-    /// 좌측 칸이 폭을 다 쓰는가.
-    /// 상세가 가운데에 뜨게 되면서 우측 패널은 패시브 트리만 쓴다.
-    /// </summary>
-    private bool UsesFullWidth => tab != Tab.Passive;
+    private const int BagColumns = 6;
 
     /// <summary>
     /// 한 번에 보이는 행. 【칸 크기의 기준】이다.
@@ -110,6 +115,9 @@ public partial class InventoryScreenUI : MonoBehaviour
 
     /// <summary>끼울 수 있는 젬이 있을 때 가방 버튼에 붙는 점.</summary>
     private Image socketDot;
+
+    /// <summary>뒤를 어둡게 덮는 판. 패시브 화면에서만 켠다.</summary>
+    private Image dim;
 
     private RectTransform leftColumn;
     private RectTransform equipmentGrid;
@@ -157,6 +165,9 @@ public partial class InventoryScreenUI : MonoBehaviour
     private Text bagTitleLabel;
     private Text weightLabel;
     private Image weightFill;
+
+    /// <summary>소지 중량 카드. 패시브 화면에서는 끈다.</summary>
+    private RectTransform weightCard;
 
     private readonly List<ItemStack> bagStacks = new();
 
@@ -244,7 +255,10 @@ public partial class InventoryScreenUI : MonoBehaviour
 
         // 덮개는 패널 안에 둔다. 패널이 꺼지면 같이 꺼져야 한다.
         // 안전 영역 밖까지 덮으려고 앵커를 넉넉히 넘긴다.
-        Image dim = UIFactory.CreatePanel("Dim", panel.transform, UIPalette.Dim,
+        // 어둡게 덮을지는 탭이 정한다. (Refresh에서 색만 바꾼다)
+        // 장비·스킬은 한쪽에만 뜨므로 나머지를 가리면
+        // 「바깥을 보면서 짐을 본다」가 성립하지 않는다.
+        dim = UIFactory.CreatePanel("Dim", panel.transform, UIPalette.Dim,
             new Vector2(-0.2f, -0.2f), new Vector2(1.2f, 1.2f));
 
         dim.raycastTarget = true;
@@ -290,8 +304,8 @@ public partial class InventoryScreenUI : MonoBehaviour
     private const float HudButtonHeight = 88f;
     private const float HudButtonGap = 10f;
 
-    /// <summary>퀵슬롯 한 칸의 변(px).</summary>
-    private const float QuickCellSize = 104f;
+    /// <summary>퀵슬롯 한 칸의 변(px). 줄 전체가 화면 가운데 0.30~0.70에 든다.</summary>
+    private const float QuickCellSize = 92f;
 
     private const float QuickCellGap = 8f;
 
@@ -531,14 +545,16 @@ public partial class InventoryScreenUI : MonoBehaviour
         // 여기서는 0~1을 그대로 쓴다. 칸 사이만 반 칸씩 띄운다.
         float half = UIFactory.Gap * 0.5f;
 
-        RectTransform weightCard = UIFactory.CreateSlice("WeightCard", footer,
-            Vector2.zero, new Vector2(0.40f, 1f), right: half);
+        // 【0.40 → 0.26으로 줄인다.】
+        // 가운데의 퀵슬롯 줄(0.30~0.70)과 겹쳐 1·2번 칸을 덮고 있었다.
+        weightCard = UIFactory.CreateSlice("WeightCard", footer,
+            Vector2.zero, new Vector2(0.26f, 1f), right: half);
 
         UIFactory.CreateGlass("Back", weightCard, UIPalette.Panel,
             Vector2.zero, Vector2.one, UIFactory.RadiusLarge);
 
-        UIFactory.CreateLabel(weightCard, "소지 중량", 23, FontStyle.Normal,
-            new Vector2(0.04f, 0f), new Vector2(0.22f, 1f),
+        UIFactory.CreateLabel(weightCard, "중량", 21, FontStyle.Normal,
+            new Vector2(0.05f, 0f), new Vector2(0.24f, 1f),
             TextAnchor.MiddleLeft, UIPalette.TextDim);
 
         UIFactory.CreatePanel("WeightTrack", weightCard, UIPalette.Inset,
@@ -549,8 +565,8 @@ public partial class InventoryScreenUI : MonoBehaviour
             new Vector2(WeightBarLeft, WeightBarInset),
             new Vector2(WeightBarLeft, 1f - WeightBarInset), radius: 6);
 
-        weightLabel = UIFactory.CreateLabel(weightCard, string.Empty, 24, FontStyle.Bold,
-            new Vector2(0.64f, 0f), new Vector2(0.96f, 1f),
+        weightLabel = UIFactory.CreateLabel(weightCard, string.Empty, 21, FontStyle.Bold,
+            new Vector2(0.62f, 0f), new Vector2(0.96f, 1f),
             TextAnchor.MiddleRight, UIPalette.TextDim);
 
         // 가운데(0.40~0.86)는 비워 둔다 — 화면에 늘 떠 있는 퀵슬롯 줄이
@@ -679,6 +695,10 @@ public partial class InventoryScreenUI : MonoBehaviour
 
         panel.SetActive(false);
 
+        // 패시브 화면에서 껐던 것을 도로 켠다 — 밖에서는 늘 떠 있어야 한다.
+        if (quickBar != null)
+            quickBar.gameObject.SetActive(true);
+
         RefreshToggle();
         RefreshQuickSlots();
 
@@ -709,23 +729,30 @@ public partial class InventoryScreenUI : MonoBehaviour
         RefreshQuickSlots();
 
         // 【탭마다 필요한 만큼만 쓴다.】
-        //   장비  — 좌측만. 상세는 눌렀을 때 가운데에 뜨므로 우측이 놀 이유가 없다.
-        //   스킬  — 좌 젬 목록 · 우 소켓판. 둘을 같이 봐야 어디에 끼울지 정한다.
-        //   패시브 — 우측만. 트리를 넓게 펴야 한다.
-        bool showLeft = tab != Tab.Passive;
-        bool showRight = tab == Tab.Passive;
+        //   장비 · 스킬 — 왼쪽 55%만. 나머지는 게임 화면이 그대로 비친다.
+        //   패시브      — 폭 전체 + 덮개. 트리를 접으면 볼 수가 없다.
+        bool passive = tab == Tab.Passive;
+
+        bool showLeft = !passive;
+        bool showRight = passive;
 
         float half = UIFactory.Gap * 0.5f;
 
         leftColumn.gameObject.SetActive(showLeft);
         rightPanel.gameObject.SetActive(showRight);
 
+        // 【덮개는 늘 켜 두고 색만 바꾼다.】
+        // 장비·스킬에서는 투명하게 둔다 — 뒤가 그대로 보이면서도,
+        // 패널 바깥을 눌렀을 때 그 터치가 조준 조이스틱까지 내려가지 않는다.
+        // 덮개를 아예 끄면 짐을 보는 동안 조준이 돌아가 버린다.
+        dim.color = passive ? UIPalette.Dim : Color.clear;
+        weightCard.gameObject.SetActive(!passive);
+        quickBar.gameObject.SetActive(!passive);
+
         if (showLeft)
         {
-            // 우측이 없으면 폭을 다 쓴다. 앵커만 옮기면 오른쪽에 반 칸이
-            // 남으므로 물러났던 여백도 같이 되돌린다.
-            leftColumn.anchorMax = new Vector2(showRight ? ColumnSplit : 1f, 1f);
-            leftColumn.offsetMax = new Vector2(showRight ? -half : 0f, 0f);
+            leftColumn.anchorMax = new Vector2(SidePanelRight, 1f);
+            leftColumn.offsetMax = new Vector2(-half, 0f);
 
             bool skillTab = tab == Tab.Socket;
 
