@@ -101,14 +101,28 @@ public static class EnemyArchetypeTable
 {
     public const int Count = 9;
 
-    /// <summary>시야 거리의 기본값(m). EnemyBrain의 detectDistance와 같은 선에서 출발한다.</summary>
+    /// <summary>
+    /// 시야 거리의 기본값(m).
+    /// 덕코프 생물 59종의 중앙값이 17m다 (15×7 · 17×14 · 18×7 · 21×7).
+    /// 기존 detectDistance 18m이 그 한복판이라 그대로 둔다.
+    /// [확인됨 — docs/research/duckov/05_적_AI_실측치.md]
+    /// </summary>
     public const float DefaultVisionRange = 18f;
 
-    /// <summary>「정면 넓고 측·후방 좁다」 — 자전체 · 검체. (문서 8절)</summary>
-    private const float FrontalCone = 100f;
+    // ── 시야각 ────────────────────────────────────────────────────────
+    // 【덕코프 실측 분포에 맞췄다. (2026-09-22)】
+    // 처음에는 문서의 「누가 더 좁은가」만 보고 80/100/120/150을 골랐다.
+    // 생물 59종을 실측해 보니 덕코프는 네 값으로 딱 갈린다 —
+    //   100×14 · 120×5 · 140×27 · 150×2   (그 외 360은 전방위, 음수는 특수)
+    // 80은 어디에도 없다. 문서가 요구하는 순서는 그대로 지키면서
+    // 실제로 출시된 게임이 쓰는 값으로 옮긴다.
+    // [확인됨 — docs/research/duckov/05_적_AI_실측치.md]
 
-    /// <summary>「시야는 좁지만 우회 추적」 — 스캐브. (문서 8절)</summary>
-    private const float NarrowCone = 80f;
+    /// <summary>「시야는 좁지만 우회 추적」 — 스캐브. 덕코프 최솟값.</summary>
+    private const float NarrowCone = 100f;
+
+    /// <summary>「정면 넓고 측·후방 좁다」 — 자전체 · 검체. 기본보다 좁다.</summary>
+    private const float FrontalCone = 120f;
 
     /// <summary>기계 눈 — 압착기 · 보안기. 좁을 이유가 없다.</summary>
     private const float MachineCone = 150f;
