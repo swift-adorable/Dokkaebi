@@ -321,12 +321,22 @@ public partial class InventoryScreenUI : MonoBehaviour
     // 화면에 늘 떠 있고, 누르면 그 화면이 바로 열린다. 같은 버튼을 다시
     // 누르면 닫힌다.
 
-    private const float HudButtonWidth = 150f;
-    private const float HudButtonHeight = 88f;
+    // 【디버그 버튼과 같은 크기로 맞춘다.】 네 개가 한 벌로 보여야 한다.
+    // PlaytestPanelUI에 같은 값이 있다 — 캔버스가 나뉘어 있어 함께 고쳐야 한다.
+    private const float HudButtonWidth = 132f;
+    private const float HudButtonHeight = 62f;
     private const float HudButtonGap = 10f;
 
     /// <summary>퀵슬롯 한 칸의 변(px). 줄 전체가 화면 가운데 0.30~0.70에 든다.</summary>
     private const float QuickCellSize = 92f;
+
+    /// <summary>
+    /// 칸 아래의 번호 띠 높이(픽셀).
+    ///
+    /// 번호를 칸 안에 넣었더니 아이템 이름·개수와 세 가지가 한 칸에서 겹쳤다.
+    /// 번호는 「이 칸을 부르는 이름」이라 칸의 내용이 아니다. 밖으로 뺀다.
+    /// </summary>
+    private const float QuickNumberBand = 26f;
 
     private const float QuickCellGap = 8f;
 
@@ -411,7 +421,7 @@ public partial class InventoryScreenUI : MonoBehaviour
 
         quickBar.sizeDelta = new Vector2(
             QuickSlots.Count * QuickCellSize + (QuickSlots.Count - 1) * QuickCellGap,
-            QuickCellSize);
+            QuickCellSize + QuickNumberBand);
 
         quickBar.anchoredPosition = new Vector2(0f, 12f);
     }
@@ -1311,10 +1321,17 @@ public partial class InventoryScreenUI : MonoBehaviour
 
         quick.Prune(inventory.Bag);
 
+        // 줄은 「칸 + 번호 띠」 두 층이다. 번호는 칸 밖 아래에 놓인다.
+        float bandHeight = QuickNumberBand / (QuickCellSize + QuickNumberBand);
+
         for (int i = 0; i < QuickSlots.Count; i++)
         {
             UIFactory.GetCellAnchors(i, QuickSlots.Count, 1, 0.006f,
                 out Vector2 min, out Vector2 max);
+
+            // 칸은 위층만 쓴다.
+            var cellMin = new Vector2(min.x, bandHeight);
+            var cellMax = new Vector2(max.x, 1f);
 
             ItemStack stack = quick.Get(i);
 
@@ -1323,7 +1340,7 @@ public partial class InventoryScreenUI : MonoBehaviour
             Color kind = empty ? UIPalette.Slot : UIPalette.ForItem(stack.Definition.Kind);
 
             Image cell = UIFactory.CreatePanel($"Quick_{i}", quickBar,
-                empty ? UIPalette.Inset : UIPalette.Glassify(kind, 0.34f), min, max);
+                empty ? UIPalette.Inset : UIPalette.Glassify(kind, 0.34f), cellMin, cellMax);
 
             UIFactory.CreateOutline(cell,
                 empty ? UIPalette.EdgeSoft : UIPalette.Brighten(kind),
@@ -1335,16 +1352,16 @@ public partial class InventoryScreenUI : MonoBehaviour
             int captured = i;
             button.onClick.AddListener(() => OnQuickSlotClicked(captured));
 
-            // 칸 번호는 왼쪽 위 구석으로. 아래는 이름 띠가 가져간다.
-            UIFactory.CreateLabel(cell.transform, (i + 1).ToString(), 19, FontStyle.Normal,
-                new Vector2(0.06f, 0.70f), new Vector2(0.40f, 0.96f),
-                TextAnchor.UpperLeft, UIPalette.TextDim);
+            // 【번호는 칸 바깥 아래.】 칸의 내용이 아니라 칸을 부르는 이름이다.
+            UIFactory.CreateLabel(quickBar, (i + 1).ToString(), 20, FontStyle.Normal,
+                new Vector2(min.x, 0f), new Vector2(max.x, bandHeight),
+                TextAnchor.MiddleCenter, UIPalette.TextDim);
 
             if (empty)
                 continue;
 
             Image glyph = UIFactory.CreatePanel("Glyph", cell.transform, UIPalette.GlyphTint,
-                new Vector2(0.20f, 0.34f), new Vector2(0.80f, 0.90f), radius: 0);
+                new Vector2(0.20f, 0.34f), new Vector2(0.80f, 0.92f), radius: 0);
 
             glyph.raycastTarget = false;
             glyph.preserveAspect = true;
@@ -1375,10 +1392,11 @@ public partial class InventoryScreenUI : MonoBehaviour
 
             ItemCell.WrapName(quickName, 16);
 
+            // 개수는 칸 안 오른쪽 위.
             if (stack.Count > 1)
             {
                 UIFactory.CreateBadge(cell.transform, stack.Count.ToString(),
-                    new Vector2(0.54f, 0.68f), new Vector2(0.96f, 0.97f), 20, Color.white);
+                    new Vector2(0.56f, 0.70f), new Vector2(0.96f, 0.97f), 20, Color.white);
             }
         }
     }
