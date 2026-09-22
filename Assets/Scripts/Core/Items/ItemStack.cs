@@ -54,7 +54,7 @@ public class ItemStack
     public float TotalWeight => Definition == null ? 0f : Definition.Weight * Count;
 
     /// <summary>이 칸이 차지하는 적재 칸 수.</summary>
-    public int TotalSlots => Definition == null ? 0 : Definition.SlotSize;
+    public int TotalSlots => Definition == null ? 0 : Definition.SlotCost;
 
     /// <summary>더 겹칠 수 있는 여유 개수.</summary>
     public int FreeSpace => Definition == null ? 0 : Definition.StackMax - Count;

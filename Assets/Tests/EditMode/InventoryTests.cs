@@ -151,21 +151,74 @@ namespace Blob.Tests
             Assert.Less(WeightCalculator.DashMultiplier(EncumbranceLevel.Overloaded), 1f);
         }
 
-        // ── 젬 · 장비 · 전리품이 같은 자원을 두고 경쟁한다 ──────────────
+        // ── 젬은 칸 밖에 있다 ─────────────────────────────────────────
 
         [Test]
-        public void 젬과_전리품이_같은_칸을_두고_경쟁한다()
+        public void 젬은_칸을_쓰지_않는다()
         {
-            // 이 게임의 핵심 결정 — "화력을 챙길까, 전리품 공간을 남길까"
+            // 젬은 "챙겨 오는 물건"이 아니라 빌드 그 자체다. 젬의 상한은
+            // 소켓 자리 수(= 각성 레벨)가 정한다. 가방이 두 번 제한하면
+            // 유저의 결정이 "화력이냐 전리품이냐"가 아니라
+            // "쓰지도 않을 젬을 버려야 하나"가 된다.
             var inv = new Inventory(slots: 4, weight: 100f);
 
             ItemDefinition gem = Create("gem_fire", ItemKind.SkillGem, weight: 0.3f);
             ItemDefinition loot = Create("loot", weight: 2f);
 
-            inv.TryAdd(gem, 3);
+            Assert.AreEqual(3, inv.TryAdd(gem, 3));
 
-            Assert.AreEqual(1, inv.FreeSlots, "젬을 3개 챙기면 전리품 칸이 1개만 남습니다.");
-            Assert.AreEqual(1, inv.TryAdd(loot, 3), "남은 1칸에만 들어갑니다.");
+            Assert.AreEqual(0, inv.UsedSlots, "젬은 칸을 잡지 않습니다.");
+            Assert.AreEqual(4, inv.FreeSlots, "전리품 칸은 그대로 4칸입니다.");
+            Assert.AreEqual(3, inv.TryAdd(loot, 3), "전리품은 영향을 받지 않습니다.");
+        }
+
+        [Test]
+        public void 가방이_꽉_차도_젬은_들어간다()
+        {
+            // 반대 방향도 막는다. 가방이 찼다고 젬을 못 받으면
+            // 전리품을 버려야 빌드를 바꿀 수 있게 된다.
+            var inv = new Inventory(slots: 2, weight: 100f);
+
+            ItemDefinition loot = Create("loot", weight: 1f);
+            ItemDefinition gem = Create("gem_fire", ItemKind.SkillGem, weight: 0.3f);
+
+            inv.TryAdd(loot, 2);
+
+            Assert.AreEqual(0, inv.FreeSlots, "먼저 칸을 다 채웁니다.");
+            Assert.IsTrue(inv.CanAdd(gem), "꽉 찬 가방에도 젬은 담을 수 있어야 합니다.");
+            Assert.AreEqual(1, inv.TryAdd(gem), "실제로도 담겨야 합니다.");
+            Assert.IsFalse(inv.CanAdd(loot), "전리품은 여전히 막힙니다.");
+        }
+
+        [Test]
+        public void 젬도_무게는_그대로_센다()
+        {
+            // 칸과 무게는 별개의 축이다. 칸에서 뺐다고 무게까지 빼지는 않는다.
+            // 무게는 넘어도 담을 수 있으므로(느려질 뿐) 젬이 잠기지는 않는다.
+            var inv = new Inventory(slots: 10, weight: 100f);
+
+            ItemDefinition gem = Create("gem_fire", ItemKind.SkillGem, weight: 0.5f);
+
+            inv.TryAdd(gem, 4);
+
+            Assert.AreEqual(2f, inv.TotalWeight, 0.001f);
+        }
+
+        [Test]
+        public void 개체를_그대로_넣을_때도_젬은_칸을_쓰지_않는다()
+        {
+            // TryAddStack 경로. 소켓에서 빠져나온 젬이 이 길로 돌아온다.
+            var inv = new Inventory(slots: 1, weight: 100f);
+
+            ItemDefinition loot = Create("loot", weight: 1f);
+            ItemDefinition gem = Create("gem_fire", ItemKind.SkillGem, weight: 0.3f);
+
+            inv.TryAdd(loot);
+
+            Assert.AreEqual(0, inv.FreeSlots);
+            Assert.IsTrue(inv.TryAddStack(new ItemStack(gem, 1)),
+                "가방이 꽉 차 있어도 소켓에서 뺀 젬은 돌아올 수 있어야 합니다.");
+            Assert.AreEqual(1, inv.UsedSlots, "여전히 전리품 한 칸만 쓴 상태입니다.");
         }
 
         // ── 사망 페널티 ───────────────────────────────────────────────
