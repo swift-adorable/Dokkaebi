@@ -34,15 +34,34 @@ public partial class InventoryScreenUI
     private SlotRef? detailSocket;
     private SkillDefinition detailSkill;
 
+    /// <summary>
+    /// 읽기만 하는 상세인가. 【남의 칸을 들여다볼 때】 켠다.
+    ///
+    /// 전리품·상점의 칸은 아직 내 물건이 아니다. 「버리기·장착·퀵슬롯」은
+    /// 내 물건에만 뜻이 있으므로, 그 화면에서는 아래 줄을 통째로 비운다.
+    /// 그래야 「상세를 보려면 먼저 주워야 하는가」라는 질문이 생기지 않는다.
+    /// </summary>
+    private bool detailReadOnly;
+
+    /// <summary>읽기 전용일 때 「어디에 있는가」에 적을 말.</summary>
+    private string detailWhere;
+
     private bool IsDetailOpen => detailPopup != null;
 
     // ── 상세 안의 세로 배치 ───────────────────────────────────────────
-    // 아래에서부터 닫기 줄 · 행동 줄 · 수치 표 · 설명.
+    // 【버튼 줄을 하나로 합쳤다.】
+    // 전에는 「장착」 한 줄과 「버리기 · 닫기」 한 줄, 둘이 아래에 쌓여 있었다.
+    // 세 버튼이 두 층으로 나뉘어 있으면 어느 것이 주된 일인지 알 수 없고,
+    // 수치 표가 쓸 자리도 두 줄만큼 줄어든다.
+    //
+    // 이제 아래는 한 줄이다 — 【버리기(좁게) · 주된 일(넓게)】.
+    // 닫는 일은 오른쪽 위 구석의 ✕가 맡는다. 창을 닫는 자리는 원래 거기다.
 
-    private const float DetailCloseBottom = 0.020f;
-    private const float DetailCloseTop = 0.098f;
-    private const float ActionRowBottom = 0.116f;
-    private const float ActionRowTop = 0.194f;
+    private const float ActionRowBottom = 0.022f;
+    private const float ActionRowTop = 0.108f;
+
+    /// <summary>「버리기」가 차지하는 폭. 되돌릴 수 없는 일은 작게 둔다.</summary>
+    private const float DiscardRight = 0.30f;
 
     /// <summary>퀵슬롯 줄. 소모품에만 나오므로 수치 표와 겹치지 않는다.</summary>
     private const float QuickRowBottom = 0.400f;
@@ -54,18 +73,27 @@ public partial class InventoryScreenUI
     // ── 열고 닫기 ─────────────────────────────────────────────────────
 
     /// <summary>
-    /// 바깥(전리품·창고 패널)에서 상세를 연다.
-    /// 그 칸의 물건은 이미 가방으로 옮겨진 뒤여야 한다.
+    /// 바깥(전리품·창고·상점 패널)에서 상세를 연다. 【읽기만 한다.】
+    /// 그 칸의 물건은 아직 내 것이 아니므로 옮기지 않는다.
     /// </summary>
-    public static void OpenDetailFor(ItemStack stack)
+    /// <param name="where">「어디에 있는가」에 적을 말. 예: 전리품</param>
+    public static void OpenReadOnlyDetail(ItemStack stack, string where)
     {
-        if (instance == null || stack?.Definition == null)
+        InventoryScreenUI screen = EnsureInstance();
+
+        if (screen == null || stack?.Definition == null)
             return;
 
-        if (!instance.IsOpen)
-            instance.Open((int)Tab.Bag);
+        screen.CloseItemDetail();
 
-        instance.OpenItemDetail(stack);
+        screen.detailStack = stack;
+        screen.detailEquipSlot = null;
+        screen.detailSocket = null;
+        screen.detailSkill = null;
+        screen.detailReadOnly = true;
+        screen.detailWhere = where;
+
+        screen.BuildDetailPopup();
     }
 
     /// <summary>
@@ -132,6 +160,9 @@ public partial class InventoryScreenUI
         detailSocket = null;
         detailSkill = null;
 
+        detailReadOnly = false;
+        detailWhere = null;
+
         // 상세가 닫히면 「자리 고르는 중」도 끝난다.
         // BeginPlacingGem은 이 함수를 먼저 부른 뒤에 다시 세운다.
         placingGem = null;
@@ -183,6 +214,21 @@ public partial class InventoryScreenUI
 
         UIFactory.CreateOutline(blocker, UIPalette.Rim, UIFactory.RadiusLarge, 2);
 
+        // 【닫는 자리는 오른쪽 위 구석이다.】 아래 줄에 「닫기」를 두면
+        // 그 줄이 「장착·버리기」와 섞여 어느 것이 주된 일인지 알 수 없다.
+        // 구석의 ✕는 어느 화면에서나 같은 뜻이라 읽을 필요가 없다.
+        Image close = UIFactory.CreatePanel("Close", box, UIPalette.Subtle,
+            new Vector2(0.855f, 0.905f), new Vector2(0.975f, 0.985f), UIFactory.Radius);
+
+        var closeButton = close.gameObject.AddComponent<Button>();
+        closeButton.targetGraphic = close;
+        closeButton.onClick.AddListener(CloseDetailAndRefresh);
+
+        UIFactory.CreateOutline(close, UIPalette.Rim, UIFactory.Radius, 2);
+
+        UIFactory.CreateLabel(close.transform, "✕", 26, FontStyle.Bold,
+            Vector2.zero, Vector2.one, TextAnchor.MiddleCenter, UIPalette.TextOnGlass);
+
         detailContent = UIFactory.Inset(
             UIFactory.CreateRegion("Content", box, Vector2.zero, Vector2.one),
             UIFactory.Gap);
@@ -224,9 +270,11 @@ public partial class InventoryScreenUI
 
         FitName(title, 34);
 
-        string where = detailEquipSlot.HasValue
-            ? $"{ItemKindName(definition.Kind)} · 착용 중 ({EquipmentSlotName(detailEquipSlot.Value)})"
-            : ItemKindName(definition.Kind);
+        string where = detailReadOnly
+            ? $"{ItemKindName(definition.Kind)} · {detailWhere}"
+            : detailEquipSlot.HasValue
+                ? $"{ItemKindName(definition.Kind)} · 착용 중 ({EquipmentSlotName(detailEquipSlot.Value)})"
+                : ItemKindName(definition.Kind);
 
         UIFactory.CreateLabel(detailContent, where, 22, FontStyle.Normal,
             new Vector2(0.18f, 0.875f), new Vector2(1f, 0.925f), TextAnchor.UpperLeft,
@@ -281,45 +329,35 @@ public partial class InventoryScreenUI
 
         SlotRef socket = detailSocket.Value;
 
+        if (detailReadOnly)
+            return;
+
         UIFactory.CreateButton(detailContent, "빼기",
             new Vector2(0f, ActionRowBottom), new Vector2(1f, ActionRowTop),
             UIPalette.Action, () => TakeGemOut(socket), 28);
-
-        UIFactory.CreateButton(detailContent, "닫기",
-            new Vector2(0f, DetailCloseBottom), new Vector2(1f, DetailCloseTop),
-            UIPalette.Subtle, CloseDetailAndRefresh, 26);
     }
 
     // ── 행동 ──────────────────────────────────────────────────────────
 
+    /// <summary>
+    /// 아래 한 줄. 【버리기(좁게) · 주된 일(넓게)】.
+    ///
+    /// 주된 일은 무엇을 눌렀느냐가 정한다 —
+    ///   착용 중  → 장착 해제
+    ///   젬       → 장착 (자리는 소켓판에서 고른다)
+    ///   장비     → 장착 / 교체 착용
+    ///   그 밖    → 없음 (버리기만 남는다)
+    ///
+    /// 읽기만 하는 상세(남의 칸)에는 아무 줄도 없다. 닫는 ✕만 있다.
+    /// </summary>
     private void DrawDetailActions(ItemDefinition definition)
     {
+        if (detailReadOnly)
+            return;
+
         ItemStack target = detailStack;
 
-        bool inBag = !detailEquipSlot.HasValue;
-
-        // 아래 줄 — 닫기, 그리고 가방에 있는 것만 버릴 수 있다.
-        if (inBag)
-        {
-            // 【버리기를 왼쪽에, 작게.】
-            // 둘이 같은 크기로 나란히 있으면 손가락이 어느 쪽인지 덜 가린다.
-            // 자주 누르는 「닫기」를 크게 두고, 되돌릴 수 없는 「버리기」를 줄인다.
-            UIFactory.CreateButton(detailContent, "버리기",
-                new Vector2(0f, DetailCloseBottom), new Vector2(0.30f, DetailCloseTop),
-                UIPalette.Subtle, () => OpenDiscardPopup(target), 24);
-
-            UIFactory.CreateButton(detailContent, "닫기",
-                new Vector2(0.33f, DetailCloseBottom), new Vector2(1f, DetailCloseTop),
-                UIPalette.Subtle, CloseDetailAndRefresh, 26);
-        }
-        else
-        {
-            UIFactory.CreateButton(detailContent, "닫기",
-                new Vector2(0f, DetailCloseBottom), new Vector2(1f, DetailCloseTop),
-                UIPalette.Subtle, CloseDetailAndRefresh, 26);
-        }
-
-        // 착용 중 — 벗는 것만 할 수 있다.
+        // 착용 중 — 벗는 것만 할 수 있다. 착용 중인 것은 가방에 없으니 버릴 수도 없다.
         if (detailEquipSlot.HasValue)
         {
             EquipmentSlot slot = detailEquipSlot.Value;
@@ -330,6 +368,13 @@ public partial class InventoryScreenUI
 
             return;
         }
+
+        // 【버리기를 왼쪽에, 작게.】
+        // 둘이 같은 크기로 나란히 있으면 손가락이 어느 쪽인지 덜 가린다.
+        // 되돌릴 수 없는 일은 줄여 둔다.
+        UIFactory.CreateButton(detailContent, "버리기",
+            new Vector2(0f, ActionRowBottom), new Vector2(DiscardRight, ActionRowTop),
+            UIPalette.Subtle, () => OpenDiscardPopup(target), 24);
 
         // 젬 — 「장착」 하나로 두고, 자리는 소켓판에서 고른다.
         if (definition.IsSkillGem && definition.Skill != null)
@@ -354,7 +399,7 @@ public partial class InventoryScreenUI
 
         Button equip = UIFactory.CreateButton(detailContent,
             loadout.Get(destination) != null ? "교체 착용" : "장착",
-            new Vector2(0f, ActionRowBottom), new Vector2(1f, ActionRowTop),
+            new Vector2(DiscardRight + 0.03f, ActionRowBottom), new Vector2(1f, ActionRowTop),
             UIPalette.Action, () => EquipFromDetail(target, destination), 28);
 
         equip.interactable = can;
@@ -469,7 +514,7 @@ public partial class InventoryScreenUI
         bool any = targets.Count > 0;
 
         Button equip = UIFactory.CreateButton(detailContent, "장착",
-            new Vector2(0f, ActionRowBottom), new Vector2(1f, ActionRowTop),
+            new Vector2(DiscardRight + 0.03f, ActionRowBottom), new Vector2(1f, ActionRowTop),
             UIPalette.Action, () => BeginPlacingGem(target), 28);
 
         equip.interactable = any;

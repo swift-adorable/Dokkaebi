@@ -765,6 +765,8 @@ public partial class InventoryScreenUI : MonoBehaviour
 
     private void Refresh()
     {
+        CloseQuickMenu();
+
         RefreshCredits();
         RefreshQuickSlots();
 
@@ -1269,11 +1271,70 @@ public partial class InventoryScreenUI : MonoBehaviour
         string name, Transform parent, Vector2 min, Vector2 max, ItemStack stack)
     {
         // 생김새는 ItemCell이 정한다 — 전리품·창고·상점이 같은 칸을 쓴다.
-        // 여기서는 「누르면 상세를 연다」만 정한다.
+        // 여기서는 「누르면 빠른 메뉴가 뜬다」만 정한다.
+        Image cell = ItemCell.Draw(name, parent, min, max, stack,
+            stack != null && stack == selected, null);
+
+        if (stack?.Definition == null)
+            return;
+
+        var button = cell.GetComponent<Button>();
+
+        if (button == null)
+            return;
+
+        RectTransform cellRect = cell.rectTransform;
         ItemStack captured = stack;
 
-        ItemCell.Draw(name, parent, min, max, stack,
-            stack != null && stack == selected, () => SelectStack(captured));
+        button.onClick.AddListener(() => OpenBagMenu(cellRect, captured));
+    }
+
+    /// <summary>
+    /// 가방 칸의 빠른 메뉴. 【아이템 성격이 줄을 정한다.】
+    ///
+    /// 「사용」은 아직 없다 — 소모품을 쓰는 시스템 자체가 8단계다.
+    /// 누르면 아무 일도 없는 버튼을 두는 것보다 없는 편이 낫다.
+    /// </summary>
+    private void OpenBagMenu(RectTransform cell, ItemStack stack)
+    {
+        ItemDefinition definition = stack.Definition;
+
+        bool equippable = definition is EquipmentDefinition
+                          || (definition.IsSkillGem && definition.Skill != null);
+
+        var entries = ItemActionMenu.ForBagItem(
+            definition,
+            equip: equippable ? () => EquipFromMenu(stack) : null,
+            use: null,
+            quick: definition.Kind == ItemKind.Consumable
+                ? () => OpenItemDetail(stack)
+                : null,
+            discard: () => OpenDiscardPopup(stack),
+            detail: () => OpenItemDetail(stack));
+
+        ItemActionMenu.Open(cell, entries);
+    }
+
+    /// <summary>
+    /// 빠른 메뉴의 「장착」. 장비는 자리를 알아서 고르고,
+    /// 젬은 소켓판에서 고르게 넘긴다 — 어디에 꽂느냐가 곧 빌드다.
+    /// </summary>
+    private void EquipFromMenu(ItemStack stack)
+    {
+        if (stack.Definition.IsSkillGem)
+        {
+            BeginPlacingGem(stack);
+            return;
+        }
+
+        if (stack.Definition is not EquipmentDefinition definition)
+            return;
+
+        EquipmentLoadout loadout = PlayerInventory.EnsureInstance().Loadout;
+
+        EquipFromDetail(stack, ResolveEquipSlot(loadout, definition));
+
+        Refresh();
     }
 
     private static void WrapName(Text label, int size) => ItemCell.WrapName(label, size);
@@ -1302,6 +1363,9 @@ public partial class InventoryScreenUI : MonoBehaviour
     /// 매번 그 줄을 읽어야 했다. 이제 상세 안에서 전부 끝낸다.
     /// </summary>
     private void SelectStack(ItemStack stack) => OpenItemDetail(stack);
+
+    /// <summary>다시 그리면 빠른 메뉴가 가리키던 칸이 사라진다.</summary>
+    private void CloseQuickMenu() => ItemActionMenu.Close();
 
     /// <summary>이 칸이 지금 탭에 속하는가.</summary>
     private bool BelongsToTab(ItemStack stack)
