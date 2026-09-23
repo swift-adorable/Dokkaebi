@@ -9,7 +9,7 @@ namespace Blob.Tests
     /// </summary>
     public class EnemyRewardTests
     {
-        // ── 경험치 · 크레딧 ───────────────────────────────────────────
+        // ── 경험치 · 골드 ───────────────────────────────────────────
 
         [Test]
         public void 경험치_배율이_문서와_같다()
@@ -21,7 +21,7 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 경험치와_크레딧은_서로_다른_축이다()
+        public void 경험치와_골드는_서로_다른_축이다()
         {
             // 【6-1절의 요지가 이것이다.】 두 보상이 같은 기울기면
             // 「소켓을 열려면 아래층, 벙커를 지으려면 위층」이 성립하지 않는다.
@@ -31,23 +31,23 @@ namespace Blob.Tests
             foreach (EnemyRarity r in (EnemyRarity[])Enum.GetValues(typeof(EnemyRarity)))
             {
                 if (Math.Abs(EnemyRewardTable.ExperienceMultiplier(r)
-                             - EnemyRewardTable.CreditMultiplier(r)) > 0.001f)
+                             - EnemyRewardTable.GoldMultiplier(r)) > 0.001f)
                     anyDifferent = true;
             }
 
             Assert.IsTrue(anyDifferent,
-                "경험치와 크레딧 배율이 모든 등급에서 같습니다. 축이 하나로 합쳐졌습니다.");
+                "경험치와 골드 배율이 모든 등급에서 같습니다. 축이 하나로 합쳐졌습니다.");
         }
 
         [Test]
         public void 강한_적일수록_경험치가_더_가파르게_오른다()
         {
-            // 「강한 적을 잡는 것」은 크레딧보다 경험치에 더 크게 답해야 한다.
+            // 「강한 적을 잡는 것」은 골드보다 경험치에 더 크게 답해야 한다.
             float xp = EnemyRewardTable.ExperienceMultiplier(EnemyRarity.Unique);
-            float credit = EnemyRewardTable.CreditMultiplier(EnemyRarity.Unique);
+            float gold = EnemyRewardTable.GoldMultiplier(EnemyRarity.Unique);
 
-            Assert.Greater(xp, credit,
-                $"고유의 경험치 배율 {xp}가 크레딧 배율 {credit}보다 크지 않습니다.");
+            Assert.Greater(xp, gold,
+                $"고유의 경험치 배율 {xp}가 골드 배율 {gold}보다 크지 않습니다.");
         }
 
         [Test]
@@ -63,8 +63,8 @@ namespace Blob.Tests
                 Assert.Greater(EnemyRewardTable.ExperienceMultiplier(order[i]),
                     EnemyRewardTable.ExperienceMultiplier(order[i - 1]), $"경험치 {order[i]}");
 
-                Assert.Greater(EnemyRewardTable.CreditMultiplier(order[i]),
-                    EnemyRewardTable.CreditMultiplier(order[i - 1]), $"크레딧 {order[i]}");
+                Assert.Greater(EnemyRewardTable.GoldMultiplier(order[i]),
+                    EnemyRewardTable.GoldMultiplier(order[i - 1]), $"골드 {order[i]}");
 
                 Assert.GreaterOrEqual(EnemyRewardTable.LootRolls(order[i]),
                     EnemyRewardTable.LootRolls(order[i - 1]), $"추첨 {order[i]}");
@@ -79,7 +79,7 @@ namespace Blob.Tests
 
             // 흡수 보너스가 곱해져도 음수나 예외가 나오지 않는다.
             Assert.AreEqual(0, EnemyRewardTable.Experience(10, EnemyRarity.Magic, -5f));
-            Assert.AreEqual(0, EnemyRewardTable.Credits(0, EnemyRarity.Unique));
+            Assert.AreEqual(0, EnemyRewardTable.Gold(0, EnemyRarity.Unique));
         }
 
         // ── 드롭 품질 ─────────────────────────────────────────────────

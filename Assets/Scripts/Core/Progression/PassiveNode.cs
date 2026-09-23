@@ -4,7 +4,7 @@ using UnityEngine;
 /// <summary>
 /// 배우는 데 드는 재료 한 줄. 덕코프 스킬 표의 「필요 재료」 열에 해당한다. [확인됨]
 ///
-/// 크레딧만 쓰면 시간을 들이면 전부 열린다. 결정이 없다.
+/// 골드만 쓰면 시간을 들이면 전부 열린다. 결정이 없다.
 /// 재료를 요구하면 "이 메모리 코어를 팔까, 패시브에 쓸까"가 생긴다.
 /// 파밍이 성장에 직접 닿는다. (docs/Blob_Passive_System.md 3절)
 /// </summary>
@@ -60,11 +60,11 @@ public class PassiveNode : ScriptableObject
     [UnityEngine.Serialization.FormerlySerializedAs("requiredAwakeningLevel")]
     [SerializeField] private int requiredLevel = 1;
 
-    [Tooltip("배우는 데 드는 크레딧.")]
+    [Tooltip("배우는 데 드는 골드.")]
     [Min(0)]
     [SerializeField] private int cost = 500;
 
-    [Tooltip("배우는 데 드는 재료. 비어 있으면 크레딧만 든다.")]
+    [Tooltip("배우는 데 드는 재료. 비어 있으면 골드만 든다.")]
     [SerializeField] private PassiveMaterial[] materials = new PassiveMaterial[0];
 
     [Tooltip("이것들을 전부 배운 뒤에야 배울 수 있다. 다른 계열의 id도 쓸 수 있다.")]

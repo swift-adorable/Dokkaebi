@@ -10,7 +10,7 @@ using UnityEngine.UI;
 ///   상단 : 계열 5개 (적응 / 대사 / 회수 / 중개 / 역행)
 ///          역행은 발견 전까지 「???」로 잠겨 있다
 ///   좌   : 고른 계열의 트리. 아래에서 위로 자란다
-///   우   : 고른 칸의 상세 — 효과 · 요구 레벨 · 크레딧 · 필요 재료 · 배우기
+///   우   : 고른 칸의 상세 — 효과 · 요구 레벨 · 골드 · 필요 재료 · 배우기
 ///
 /// 단일 트리가 아니라 계열을 나눈 이유는 1절 참조 —
 /// 단일 트리는 「위로 한 줄」뿐이라 고를 것이 순서밖에 없다.
@@ -93,7 +93,7 @@ public partial class InventoryScreenUI
     {
         // 【나가는 길은 오른쪽 위의 「닫기」 하나다.】
         // 왼쪽 위에 「←」를 따로 뒀더니 아래의 「닫기」와 둘이 되어,
-        // 어느 쪽이 무엇인지 매번 읽어야 했다. 크레딧을 왼쪽으로 물리고
+        // 어느 쪽이 무엇인지 매번 읽어야 했다. 골드를 왼쪽으로 물리고
         // 그 자리를 닫기가 가져간다 — 오른쪽 위는 원래 닫는 자리다.
         UIFactory.CreateLabel(rightContent,
             $"패시브    Lv.{manager.Level}", 32, FontStyle.Bold,
@@ -101,7 +101,7 @@ public partial class InventoryScreenUI
             TextAnchor.MiddleLeft, UIPalette.TextOnGlass);
 
         UIFactory.CreateLabel(rightContent,
-            $"₡ {manager.Credits:N0}", 30, FontStyle.Bold,
+            $"{manager.Gold:N0}골드", 30, FontStyle.Bold,
             new Vector2(0.55f, HeaderLine), new Vector2(0.86f, 1f),
             TextAnchor.MiddleRight, UIPalette.TextAccent);
 
@@ -192,9 +192,9 @@ public partial class InventoryScreenUI
         // 트리 위쪽 한 줄을 차지하면서 알려 주는 것이 없다.
 
         // 중개 계열은 레벨을 보지 않는다. 그 사실을 화면에 적어 둔다.
-        if (PassiveBranchInfo.UnlockKind(selectedBranch) == PassiveUnlockKind.CreditsOnly)
+        if (PassiveBranchInfo.UnlockKind(selectedBranch) == PassiveUnlockKind.GoldOnly)
         {
-            UIFactory.CreateLabel(area, "레벨과 무관 · 크레딧만", 22, FontStyle.Normal,
+            UIFactory.CreateLabel(area, "레벨과 무관 · 골드만", 22, FontStyle.Normal,
                 new Vector2(0.03f, 0.94f), new Vector2(0.97f, 0.99f),
                 TextAnchor.MiddleRight, UIPalette.TextAccent);
         }
@@ -396,13 +396,13 @@ public partial class InventoryScreenUI
             new Vector2(0.06f, 0.48f), new Vector2(0.94f, 0.70f), TextAnchor.UpperLeft,
             UIPalette.TextDim);
 
-        // 요구 조건 — 레벨 · 크레딧 · 필요 재료.
+        // 요구 조건 — 레벨 · 골드 · 필요 재료.
         var lines = new List<string>(3);
 
-        if (node.UnlockKind != PassiveUnlockKind.CreditsOnly)
+        if (node.UnlockKind != PassiveUnlockKind.GoldOnly)
             lines.Add($"요구 Lv.{node.RequiredLevel}");
 
-        lines.Add($"비용 ₡ {node.Cost:N0}");
+        lines.Add($"비용 {node.Cost:N0}골드");
 
         if (node.NeedsMaterials)
             lines.Add($"필요 재료 — {node.MaterialText}");

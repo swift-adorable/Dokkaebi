@@ -20,9 +20,9 @@ public class PassiveManager : Singleton<PassiveManager>
     [SerializeField] private PassiveTree tree;
 
     [Header("계정 — 세이브가 없을 때의 처음 값")]
-    [Tooltip("보유 크레딧. 패시브를 배우는 데 쓴다.")]
+    [Tooltip("보유 골드. 패시브를 배우는 데 쓴다.")]
     [Min(0)]
-    [SerializeField] private int credits = 5000;
+    [SerializeField] private int gold = 5000;
 
     [Tooltip("역행 계열을 발견했는지. 세이브가 있으면 SaveManager가 덮는다. " +
              "본래는 4장 관측실에서 「역행자」를 만나야 켜진다.")]
@@ -60,27 +60,27 @@ public class PassiveManager : Singleton<PassiveManager>
 
     private void RaiseChanged() => OnChanged?.Invoke();
 
-    /// <summary>보유 크레딧.</summary>
-    public int Credits
+    /// <summary>보유 골드.</summary>
+    public int Gold
     {
-        get => credits;
+        get => gold;
         set
         {
-            credits = Mathf.Max(0, value);
+            gold = Mathf.Max(0, value);
             OnChanged?.Invoke();
         }
     }
 
     /// <summary>
-    /// 크레딧을 더한다. 처치 보상이 이 경로로 들어온다. (Hunting 6-1절)
-    /// 대입(Credits = x)과 나눠 둔 이유 — 더하기는 경합이 없어야 한다.
+    /// 골드를 더한다. 처치 보상이 이 경로로 들어온다. (Hunting 6-1절)
+    /// 대입(Gold = x)과 나눠 둔 이유 — 더하기는 경합이 없어야 한다.
     /// </summary>
-    public void AddCredits(int amount)
+    public void AddGold(int amount)
     {
         if (amount <= 0)
             return;
 
-        Credits = credits + amount;
+        Gold = gold + amount;
     }
 
     /// <summary>
@@ -109,7 +109,7 @@ public class PassiveManager : Singleton<PassiveManager>
     /// <summary>지금 상태로 만든 판단 재료. 재료는 가방에서 꺼낸다.</summary>
     public PassiveContext Context => new(
         Level,
-        credits,
+        gold,
         PlayerInventory.HasInstance ? PlayerInventory.Instance.Bag : null,
         discoveredRegression);
 
@@ -149,7 +149,7 @@ public class PassiveManager : Singleton<PassiveManager>
         Apply();
     }
 
-    /// <summary>배운다. 크레딧이 차감된다.</summary>
+    /// <summary>배운다. 골드가 차감된다.</summary>
     public bool TryLearn(PassiveNode node)
     {
         PassiveContext context = Context;
@@ -166,7 +166,7 @@ public class PassiveManager : Singleton<PassiveManager>
         // "검사는 통과했는데 재료가 안 빠지는" 상태가 조용히 생긴다.
         int spent = state.TryLearn(node, in context);
 
-        credits -= spent;
+        gold -= spent;
 
         GameLogger.Log($"[PassiveManager] 배움: {node.DisplayName} (-{spent})");
 

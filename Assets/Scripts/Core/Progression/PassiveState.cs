@@ -13,8 +13,8 @@ public enum PassiveError
     /// <summary>레벨이 부족하다.</summary>
     LevelTooLow,
 
-    /// <summary>크레딧이 부족하다.</summary>
-    NotEnoughCredits,
+    /// <summary>골드가 부족하다.</summary>
+    NotEnoughGold,
 
     /// <summary>필요 재료가 부족하다.</summary>
     MissingMaterials,
@@ -29,8 +29,8 @@ public struct PassiveContext
     /// <summary>레벨. (결정 2-33 — 레벨과 합쳤다)</summary>
     public int level;
 
-    /// <summary>보유 크레딧.</summary>
-    public int credits;
+    /// <summary>보유 골드.</summary>
+    public int gold;
 
     /// <summary>재료를 꺼낼 곳. null이면 재료 검사를 생략한다.</summary>
     public Inventory materials;
@@ -38,11 +38,11 @@ public struct PassiveContext
     /// <summary>역행 계열을 발견했는지.</summary>
     public bool discoveredRegression;
 
-    public PassiveContext(int level, int credits,
+    public PassiveContext(int level, int gold,
                           Inventory materials = null, bool discoveredRegression = false)
     {
         this.level = level;
-        this.credits = credits;
+        this.gold = gold;
         this.materials = materials;
         this.discoveredRegression = discoveredRegression;
     }
@@ -82,7 +82,7 @@ public class PassiveState
     ///  1. 계열이 보이는가   (역행은 조우 전까지 존재 자체를 모른다)
     ///  2. 선행을 배웠는가   (「먼저 아래를 배우십시오」가 가장 쓸모 있는 안내다)
     ///  3. 레벨              (기다리면 해결된다)
-    ///  4. 크레딧            (팔면 해결된다)
+    ///  4. 골드            (팔면 해결된다)
     ///  5. 재료              (나가서 구해야 한다 — 가장 무거운 요구라 마지막)
     /// </summary>
     public PassiveError CanLearn(PassiveNode node, in PassiveContext context)
@@ -105,14 +105,14 @@ public class PassiveState
         }
 
         // 중개 계열은 레벨을 보지 않는다. 돈만 있으면 연다. (덕코프 블랙마켓과 같다)
-        if (node.UnlockKind != PassiveUnlockKind.CreditsOnly &&
+        if (node.UnlockKind != PassiveUnlockKind.GoldOnly &&
             context.level < node.RequiredLevel)
         {
             return PassiveError.LevelTooLow;
         }
 
-        if (context.credits < node.Cost)
-            return PassiveError.NotEnoughCredits;
+        if (context.gold < node.Cost)
+            return PassiveError.NotEnoughGold;
 
         if (!HasMaterials(node, context.materials))
             return PassiveError.MissingMaterials;
@@ -141,7 +141,7 @@ public class PassiveState
     }
 
     /// <summary>
-    /// 배운다. 실제로 든 크레딧을 돌려준다. 배우지 못하면 0.
+    /// 배운다. 실제로 든 골드를 돌려준다. 배우지 못하면 0.
     /// 【재료도 여기서 실제로 소모된다.】 검사와 소모가 갈라지면
     /// "검사는 통과했는데 재료가 안 빠지는" 상태가 조용히 생긴다.
     /// </summary>
@@ -262,7 +262,7 @@ public static class PassiveErrorText
             case PassiveError.AlreadyLearned:      return "이미 배웠습니다.";
             case PassiveError.MissingPrerequisite: return "선행 항목을 먼저 배워야 합니다.";
             case PassiveError.LevelTooLow:         return "레벨이 부족합니다.";
-            case PassiveError.NotEnoughCredits:    return "크레딧이 부족합니다.";
+            case PassiveError.NotEnoughGold:    return "골드가 부족합니다.";
             case PassiveError.MissingMaterials:    return "필요 재료가 부족합니다.";
             case PassiveError.BranchUndiscovered:  return "아직 발견하지 못한 계열입니다.";
             default:                               return "배울 수 없습니다.";

@@ -306,7 +306,7 @@ public partial class InventoryScreenUI
             $"{definition.Weight * detailStack.Count:0.0} kg", UIPalette.TextAccent);
 
         DrawChip(ChipWidth + ChipGap, 0.795f, ChipWidth,
-            $"₡ {definition.BaseValue * detailStack.Count:N0}", UIPalette.TextAccent);
+            $"{definition.BaseValue * detailStack.Count:N0}골드", UIPalette.TextAccent);
 
         if (detailStack.Count > 1)
         {

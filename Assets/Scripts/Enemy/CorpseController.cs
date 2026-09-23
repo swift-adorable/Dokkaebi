@@ -46,8 +46,8 @@ public class CorpseController : MonoBehaviour, IPoolable
     /// <summary>등급이 정한 경험치 배율. 정수로 깎지 않는다.</summary>
     public float ExperienceMultiplier => EnemyRewardTable.ExperienceMultiplier(Rarity);
 
-    /// <summary>등급이 정한 크레딧 배율.</summary>
-    public float CreditMultiplier => EnemyRewardTable.CreditMultiplier(Rarity);
+    /// <summary>등급이 정한 골드 배율.</summary>
+    public float GoldMultiplier => EnemyRewardTable.GoldMultiplier(Rarity);
 
     /// <summary>
     /// 죽은 적의 정보를 받는다. EnemyController가 사망 직후 부른다.

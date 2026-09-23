@@ -30,12 +30,12 @@ namespace Blob.Tests
                 Directory.Delete(folder, recursive: true);
         }
 
-        private static SaveData Sample(int level = 7, int credits = 1234)
+        private static SaveData Sample(int level = 7, int gold = 1234)
         {
             return new SaveData
             {
                 level = level,
-                credits = credits,
+                gold = gold,
                 discoveredRegression = true,
                 learnedPassives = new List<string> { "psv_a", "psv_b" },
                 codex = new List<string> { "skill_frost" },
@@ -57,7 +57,7 @@ namespace Blob.Tests
             Assert.AreEqual(SaveLoadResult.Main, SaveStore.Read(path, out SaveData data));
 
             Assert.AreEqual(7, data.level);
-            Assert.AreEqual(1234, data.credits);
+            Assert.AreEqual(1234, data.gold);
             Assert.IsTrue(data.discoveredRegression);
             CollectionAssert.AreEqual(new[] { "psv_a", "psv_b" }, data.learnedPassives);
             CollectionAssert.AreEqual(new[] { "skill_frost" }, data.codex);
@@ -190,7 +190,7 @@ namespace Blob.Tests
 
             Assert.AreEqual(6, data.level);
             Assert.AreEqual(0, data.experience);
-            Assert.AreEqual(900, data.credits);
+            Assert.AreEqual(900, data.gold);
         }
 
         [Test]
@@ -249,6 +249,17 @@ namespace Blob.Tests
         }
 
         [Test]
+        public void 판5의_옛_재화_키도_읽는다()
+        {
+            File.WriteAllText(path,
+                "{ \"version\": 5, \"level\": 4, \"credits\": 777 }");
+
+            Assert.AreEqual(SaveLoadResult.Main, SaveStore.Read(path, out SaveData data));
+            Assert.AreEqual(4, data.level);
+            Assert.AreEqual(777, data.gold);
+        }
+
+        [Test]
         public void 판3의_옛_키도_읽는다()
         {
             File.WriteAllText(path,
@@ -270,6 +281,8 @@ namespace Blob.Tests
             StringAssert.Contains("\"level\"", json);
             StringAssert.DoesNotContain("\"accountLevel\"", json);
             StringAssert.DoesNotContain("\"awakeningLevel\"", json);
+            StringAssert.DoesNotContain("\"credits\"", json);
+            StringAssert.Contains("\"gold\"", json);
         }
     }
 }

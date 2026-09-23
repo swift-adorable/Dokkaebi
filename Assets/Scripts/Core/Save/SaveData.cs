@@ -32,7 +32,8 @@ public class SaveData
     ///       1판의 값은 오르는 길이 없던 값이라 그대로 레벨로 쓴다.
     ///   5 — 창고(stash)와 잡화 상점 재고(shop)를 더했다. 4판에는 없어 비어 있는
     ///       창고 · 가득 찬 재고로 읽힌다.
-    public const int CurrentVersion = 5;
+    ///   6 — 재화 키 credits를 gold로 바꿨다(덕코프 이름). 옛 키는 Migrate가 바꾼다.
+    public const int CurrentVersion = 6;
 
     public int version = CurrentVersion;
 
@@ -50,7 +51,7 @@ public class SaveData
     /// <summary>다음 레벨을 향해 모은 경험치. 1판에는 없어 0으로 읽힌다.</summary>
     public int experience;
 
-    public int credits;
+    public int gold;
 
     /// <summary>역행 계열을 발견했는가. 4장 관측실에서 켜진다.</summary>
     public bool discoveredRegression;
