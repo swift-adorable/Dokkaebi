@@ -38,7 +38,7 @@ public class PlaytestPanelUI : MonoBehaviour
         ("가방 비우기",   PlaytestActions.ClearBag),
         ("창고 열기",     PlaytestActions.OpenStash),
         ("잡화 상점 열기", PlaytestActions.OpenShop),
-        ("크레딧 +5000",  PlaytestActions.GiveCredits),
+        ("골드 +5000",  PlaytestActions.GiveGold),
         ("상점 재고 채우기", PlaytestActions.RestockShop),
         ("지금 저장",     PlaytestActions.SaveNow),
         ("세이브 불러오기", PlaytestActions.LoadNow),
@@ -76,7 +76,7 @@ public class PlaytestPanelUI : MonoBehaviour
 
         // 【버튼은 가방 화면(1000)보다 아래, 패널은 맨 위.】
         //
-        // 버튼을 위에 두었더니 좌상단 크레딧 카드를 덮었다. 개발용 버튼이
+        // 버튼을 위에 두었더니 좌상단 골드 카드를 덮었다. 개발용 버튼이
         // 게임 UI를 가리면 정작 확인해야 할 것을 못 본다. 그래서 캔버스는
         // 900에 두고, 가방을 열면 버튼은 그 뒤로 숨는다 — 지급 메뉴가 끝나면
         // 가방이 자동으로 열리므로 흐름에는 지장이 없다.

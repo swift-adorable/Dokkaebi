@@ -57,10 +57,10 @@ namespace Blob.Tests
         }
 
         private static PassiveContext Ctx(
-            int level = 1, int credits = 100000,
+            int level = 1, int gold = 100000,
             Inventory materials = null, bool discovered = false)
         {
-            return new PassiveContext(level, credits, materials, discovered);
+            return new PassiveContext(level, gold, materials, discovered);
         }
 
         // ── 전투 수치 금지 ────────────────────────────────────────────────
@@ -106,7 +106,7 @@ namespace Blob.Tests
             Assert.AreEqual(PassiveUnlockKind.Level,
                 PassiveBranchInfo.UnlockKind(PassiveBranch.Adapt));
 
-            Assert.AreEqual(PassiveUnlockKind.CreditsOnly,
+            Assert.AreEqual(PassiveUnlockKind.GoldOnly,
                 PassiveBranchInfo.UnlockKind(PassiveBranch.Brokerage));
 
             Assert.AreEqual(PassiveUnlockKind.Discovery,
@@ -174,13 +174,13 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 크레딧이_모자라면_배울_수_없다()
+        public void 골드가_모자라면_배울_수_없다()
         {
             var state = new PassiveState();
             PassiveNode node = Node("pricey", cost: 5000);
 
-            Assert.AreEqual(PassiveError.NotEnoughCredits, state.CanLearn(node, Ctx(credits: 4999)));
-            Assert.AreEqual(0, state.TryLearn(node, Ctx(credits: 4999)));
+            Assert.AreEqual(PassiveError.NotEnoughGold, state.CanLearn(node, Ctx(gold: 4999)));
+            Assert.AreEqual(0, state.TryLearn(node, Ctx(gold: 4999)));
             Assert.IsFalse(state.IsLearned(node));
         }
 
@@ -202,7 +202,7 @@ namespace Blob.Tests
         public void 필요_재료가_모자라면_배울_수_없다()
         {
             // 덕코프 스킬 표의 「필요 재료」 열. [확인됨]
-            // 크레딧만 쓰면 시간을 들이면 전부 열린다. 결정이 없다.
+            // 골드만 쓰면 시간을 들이면 전부 열린다. 결정이 없다.
             ItemDefinition core = Item("memory_core");
 
             PassiveNode node = Node("needs", materials: new[] { new PassiveMaterial(core, 3) });
@@ -257,7 +257,7 @@ namespace Blob.Tests
 
             var state = new PassiveState();
 
-            Assert.AreEqual(0, state.TryLearn(node, Ctx(credits: 10, materials: bag)));
+            Assert.AreEqual(0, state.TryLearn(node, Ctx(gold: 10, materials: bag)));
             Assert.AreEqual(5, bag.CountOf(core), "배우지 못했는데 재료가 사라졌습니다.");
         }
 

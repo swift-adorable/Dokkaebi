@@ -34,7 +34,7 @@
 | 항목 | 출처 |
 |---|---|
 | **레벨 · 경험치** | `PlayerStats` — 이 게임의 유일한 레벨 (결정 2-33) |
-| 크레딧 | `PassiveManager.Credits` |
+| 골드 | `PassiveManager.Credits` |
 | 역행 계열 발견 | `PassiveManager.DiscoveredRegression` |
 | 배운 패시브 | `PassiveManager.State` |
 | 도감 | `SkillManager.Codex` |

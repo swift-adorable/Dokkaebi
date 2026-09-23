@@ -289,7 +289,7 @@ public static class PlaytestActions
 
         SaveData data = SaveManager.Capture();
 
-        return $"저장했습니다.\nLv.{data.level} · 크레딧 {data.credits} · "
+        return $"저장했습니다.\nLv.{data.level} · 골드 {data.gold} · "
                + $"패시브 {data.learnedPassives.Count} · 도감 {data.codex.Count}\n"
                + "게임에서는 사망할 때만 저장됩니다 — 파밍 중 종료는 롤백입니다.";
     }
@@ -316,7 +316,7 @@ public static class PlaytestActions
         SaveManager.Wipe();
 
         return "세이브와 백업을 지웠습니다.\n"
-               + "지금 화면의 레벨·크레딧은 그대로이고, 다음 실행부터 처음 상태로 시작합니다.";
+               + "지금 화면의 레벨·골드는 그대로이고, 다음 실행부터 처음 상태로 시작합니다.";
     }
 
     /// <summary>가방을 통째로 비운다. 과중량 실험을 되돌린다.</summary>
@@ -758,16 +758,16 @@ public static class PlaytestActions
     public static string OpenShop()
     {
         ExchangeWindowUI.EnsureInstance().OpenShop();
-        return $"{ShopTable.GeneralStoreName}을 열었습니다. 크레딧 {PassiveManager.EnsureInstance().Credits:N0}.\n"
+        return $"{ShopTable.GeneralStoreName}을 열었습니다. 골드 {PassiveManager.EnsureInstance().Gold:N0}.\n"
                + "가방 칸을 누르면 「판매」가, 상점 칸을 누르면 「구매」가 뜹니다.";
     }
 
-    public static string GiveCredits()
+    public static string GiveGold()
     {
-        PassiveManager.EnsureInstance().AddCredits(5000);
+        PassiveManager.EnsureInstance().AddGold(5000);
         InventoryScreenUI.RefreshIfOpen();
         ExchangeWindowUI.RefreshIfOpen();
-        return $"크레딧 +5,000 → {PassiveManager.Instance.Credits:N0}";
+        return $"골드 +5,000 → {PassiveManager.Instance.Gold:N0}";
     }
 
     public static string RestockShop()

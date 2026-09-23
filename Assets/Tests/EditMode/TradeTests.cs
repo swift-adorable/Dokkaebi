@@ -8,7 +8,7 @@ namespace Blob.Tests
     /// <summary>
     /// 창고 · 잡화 상점 계약. (로드맵 8-I · docs/Blob_Bunker_System.md 3절)
     ///
-    /// 【전부 아니면 전혀】 — 크레딧만 빠지거나 물건만 빠지는 거래가 한 번이라도
+    /// 【전부 아니면 전혀】 — 골드만 빠지거나 물건만 빠지는 거래가 한 번이라도
     /// 생기면 플레이어는 상점을 믿지 않는다. 그 계약을 여기서 강제한다.
     /// </summary>
     public class TradeTests
@@ -76,7 +76,7 @@ namespace Blob.Tests
         [Test]
         public void 흥정을_다_배워도_되팔아_남기지_못한다()
         {
-            // 사서 바로 팔면 이득이면 상점이 크레딧 샘이 된다.
+            // 사서 바로 팔면 이득이면 상점이 골드 샘이 된다.
             // 흥정 계열을 전부 더해도 판매 배율이 가격 계수 1.00보다 작아야 한다.
             float maxBonus = 100f;   // 넉넉하게 +100%까지 본다
             ItemDefinition item = Create("x", 999);
@@ -93,41 +93,41 @@ namespace Blob.Tests
         // ── 구매 ─────────────────────────────────────────────────────
 
         [Test]
-        public void 사면_크레딧과_재고가_빠지고_가방에_들어온다()
+        public void 사면_골드와_재고가_빠지고_가방에_들어온다()
         {
             ItemDefinition item = Create("x", 100, stackMax: 3);
             var entry = new ShopEntry("x", 2, 1.00f);
             var shop = new ShopState();
             shop.Restock(new[] { entry });
             var bag = new Inventory(5, 30f);
-            int credits = 250;
+            int gold = 250;
 
-            Assert.AreEqual(TradeError.None, TradeRules.Buy(shop, item, entry, bag, ref credits));
+            Assert.AreEqual(TradeError.None, TradeRules.Buy(shop, item, entry, bag, ref gold));
 
-            Assert.AreEqual(150, credits);
+            Assert.AreEqual(150, gold);
             Assert.AreEqual(1, shop.Remaining("x"));
             Assert.AreEqual(1, bag.CountOf(item));
         }
 
         [Test]
-        public void 크레딧이_모자라면_아무것도_움직이지_않는다()
+        public void 골드가_모자라면_아무것도_움직이지_않는다()
         {
             ItemDefinition item = Create("x", 100);
             var entry = new ShopEntry("x", 2, 1.00f);
             var shop = new ShopState();
             shop.Restock(new[] { entry });
             var bag = new Inventory(5, 30f);
-            int credits = 99;
+            int gold = 99;
 
-            Assert.AreEqual(TradeError.NotEnoughCredits, TradeRules.Buy(shop, item, entry, bag, ref credits));
+            Assert.AreEqual(TradeError.NotEnoughGold, TradeRules.Buy(shop, item, entry, bag, ref gold));
 
-            Assert.AreEqual(99, credits);
+            Assert.AreEqual(99, gold);
             Assert.AreEqual(2, shop.Remaining("x"));
             Assert.AreEqual(0, bag.CountOf(item));
         }
 
         [Test]
-        public void 가방이_차면_크레딧을_빼지_않는다()
+        public void 가방이_차면_골드를_빼지_않는다()
         {
             ItemDefinition item = Create("x", 100);
             ItemDefinition filler = Create("f", 1);
@@ -136,11 +136,11 @@ namespace Blob.Tests
             shop.Restock(new[] { entry });
             var bag = new Inventory(1, 30f);
             bag.TryAdd(filler);
-            int credits = 1000;
+            int gold = 1000;
 
-            Assert.AreEqual(TradeError.NoSpace, TradeRules.Buy(shop, item, entry, bag, ref credits));
+            Assert.AreEqual(TradeError.NoSpace, TradeRules.Buy(shop, item, entry, bag, ref gold));
 
-            Assert.AreEqual(1000, credits);
+            Assert.AreEqual(1000, gold);
             Assert.AreEqual(2, shop.Remaining("x"));
         }
 
@@ -152,28 +152,28 @@ namespace Blob.Tests
             var shop = new ShopState();
             shop.Restock(new[] { entry });
             var bag = new Inventory(5, 30f);
-            int credits = 1000;
+            int gold = 1000;
 
-            Assert.AreEqual(TradeError.None, TradeRules.Buy(shop, item, entry, bag, ref credits));
-            Assert.AreEqual(TradeError.OutOfStock, TradeRules.Buy(shop, item, entry, bag, ref credits));
-            Assert.AreEqual(990, credits);
+            Assert.AreEqual(TradeError.None, TradeRules.Buy(shop, item, entry, bag, ref gold));
+            Assert.AreEqual(TradeError.OutOfStock, TradeRules.Buy(shop, item, entry, bag, ref gold));
+            Assert.AreEqual(990, gold);
         }
 
         // ── 판매 ─────────────────────────────────────────────────────
 
         [Test]
-        public void 팔면_가방에서_빠지고_크레딧이_는다()
+        public void 팔면_가방에서_빠지고_골드가_는다()
         {
             ItemDefinition item = Create("x", 200, stackMax: 5);
             var bag = new Inventory(5, 30f);
             bag.TryAdd(item, 3);
             ItemStack stack = bag.Stacks[0];
-            int credits = 0;
+            int gold = 0;
 
-            Assert.AreEqual(TradeError.None, TradeRules.Sell(stack, bag, 0f, ref credits, out int earned));
+            Assert.AreEqual(TradeError.None, TradeRules.Sell(stack, bag, 0f, ref gold, out int earned));
 
             Assert.AreEqual(300, earned);
-            Assert.AreEqual(300, credits);
+            Assert.AreEqual(300, gold);
             Assert.AreEqual(0, bag.CountOf(item));
         }
 
@@ -182,11 +182,11 @@ namespace Blob.Tests
         {
             ItemDefinition item = Create("x", 200);
             var bag = new Inventory(5, 30f);
-            int credits = 0;
+            int gold = 0;
 
             Assert.AreNotEqual(TradeError.None,
-                TradeRules.Sell(new ItemStack(item), bag, 0f, ref credits, out _));
-            Assert.AreEqual(0, credits);
+                TradeRules.Sell(new ItemStack(item), bag, 0f, ref gold, out _));
+            Assert.AreEqual(0, gold);
         }
 
         // ── 재고 ─────────────────────────────────────────────────────

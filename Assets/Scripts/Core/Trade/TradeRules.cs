@@ -17,8 +17,8 @@ public enum TradeError
     /// <summary>재고가 없다.</summary>
     OutOfStock,
 
-    /// <summary>크레딧이 모자라다.</summary>
-    NotEnoughCredits,
+    /// <summary>골드가 모자라다.</summary>
+    NotEnoughGold,
 
     /// <summary>가방에 자리가 없다.</summary>
     NoSpace
@@ -27,8 +27,8 @@ public enum TradeError
 /// <summary>
 /// 【사고파는 값과 규칙.】 MonoBehaviour 없는 순수 클래스다. (docs/Blob_Bunker_System.md 3절)
 ///
-/// 【전부 아니면 전혀】 — 크레딧만 빠지고 물건이 안 들어오거나, 물건만 빠지고
-/// 크레딧이 안 들어오는 경우를 만들지 않는다. 모든 검사를 먼저 하고 옮긴다.
+/// 【전부 아니면 전혀】 — 골드만 빠지고 물건이 안 들어오거나, 물건만 빠지고
+/// 골드가 안 들어오는 경우를 만들지 않는다. 모든 검사를 먼저 하고 옮긴다.
 /// </summary>
 public static class TradeRules
 {
@@ -40,7 +40,7 @@ public static class TradeRules
 
     // ── 값 ───────────────────────────────────────────────────────────
 
-    /// <summary>하나를 사는 값. 올림 — 1 크레딧이라도 싸게 팔지 않는다.</summary>
+    /// <summary>하나를 사는 값. 올림 — 1 골드라도 싸게 팔지 않는다.</summary>
     public static int BuyPrice(ItemDefinition definition, ShopEntry entry)
     {
         if (definition == null)
@@ -89,7 +89,7 @@ public static class TradeRules
     }
 
     public static TradeError CanBuy(
-        ItemDefinition definition, ShopEntry entry, int remaining, int credits, Inventory bag)
+        ItemDefinition definition, ShopEntry entry, int remaining, int gold, Inventory bag)
     {
         if (definition == null || definition.Id != entry.ItemId)
             return TradeError.NotForSale;
@@ -97,8 +97,8 @@ public static class TradeRules
         if (remaining <= 0)
             return TradeError.OutOfStock;
 
-        if (credits < BuyPrice(definition, entry))
-            return TradeError.NotEnoughCredits;
+        if (gold < BuyPrice(definition, entry))
+            return TradeError.NotEnoughGold;
 
         if (bag == null || !bag.CanAdd(definition))
             return TradeError.NoSpace;
@@ -108,14 +108,14 @@ public static class TradeRules
 
     // ── 실행 ─────────────────────────────────────────────────────────
 
-    /// <summary>하나를 산다. 성공하면 크레딧이 줄고 재고가 하나 빠진다.</summary>
+    /// <summary>하나를 산다. 성공하면 골드가 줄고 재고가 하나 빠진다.</summary>
     public static TradeError Buy(
-        ShopState shop, ItemDefinition definition, ShopEntry entry, Inventory bag, ref int credits)
+        ShopState shop, ItemDefinition definition, ShopEntry entry, Inventory bag, ref int gold)
     {
         if (shop == null)
             return TradeError.NotForSale;
 
-        TradeError error = CanBuy(definition, entry, shop.Remaining(entry.ItemId), credits, bag);
+        TradeError error = CanBuy(definition, entry, shop.Remaining(entry.ItemId), gold, bag);
 
         if (error != TradeError.None)
             return error;
@@ -125,14 +125,14 @@ public static class TradeRules
             return TradeError.NoSpace;
 
         shop.TryConsume(entry.ItemId);
-        credits -= BuyPrice(definition, entry);
+        gold -= BuyPrice(definition, entry);
 
         return TradeError.None;
     }
 
-    /// <summary>칸을 통째로 판다. 성공하면 가방에서 빠지고 크레딧이 는다.</summary>
+    /// <summary>칸을 통째로 판다. 성공하면 가방에서 빠지고 골드가 는다.</summary>
     public static TradeError Sell(
-        ItemStack stack, Inventory bag, float sellBonusPercent, ref int credits, out int earned)
+        ItemStack stack, Inventory bag, float sellBonusPercent, ref int gold, out int earned)
     {
         earned = 0;
 
@@ -148,7 +148,7 @@ public static class TradeRules
             return TradeError.NotForSale;
 
         earned = price;
-        credits += price;
+        gold += price;
 
         return TradeError.None;
     }
@@ -162,7 +162,7 @@ public static class TradeRules
             case TradeError.Worthless:        return "값이 나가지 않는 물건입니다.";
             case TradeError.NotForSale:       return "이 상점은 팔지 않습니다.";
             case TradeError.OutOfStock:       return "재고가 없습니다. 다음 파밍이 끝나면 채워집니다.";
-            case TradeError.NotEnoughCredits: return "크레딧이 모자랍니다.";
+            case TradeError.NotEnoughGold: return "골드가 모자랍니다.";
             case TradeError.NoSpace:          return "가방에 자리가 없습니다.";
             default:                          return string.Empty;
         }

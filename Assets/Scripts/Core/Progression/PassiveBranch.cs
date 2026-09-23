@@ -30,11 +30,11 @@ public enum PassiveBranch
 /// </summary>
 public enum PassiveUnlockKind
 {
-    /// <summary>레벨 + 크레딧 + 필요 재료.</summary>
+    /// <summary>레벨 + 골드 + 필요 재료.</summary>
     Level = 0,
 
     /// <summary>레벨을 보지 않는다. 돈만 있으면 연다. (중개)</summary>
-    CreditsOnly = 1,
+    GoldOnly = 1,
 
     /// <summary>조우 전까지 계열 자체가 보이지 않는다. (역행)</summary>
     Discovery = 2
@@ -76,7 +76,7 @@ public static class PassiveBranchInfo
     {
         switch (branch)
         {
-            case PassiveBranch.Brokerage:  return PassiveUnlockKind.CreditsOnly;
+            case PassiveBranch.Brokerage:  return PassiveUnlockKind.GoldOnly;
             case PassiveBranch.Regression: return PassiveUnlockKind.Discovery;
             default:                       return PassiveUnlockKind.Level;
         }

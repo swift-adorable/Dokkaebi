@@ -25,18 +25,18 @@ public static class EnemyRewardTable
     }
 
     /// <summary>
-    /// 크레딧 배율.
+    /// 골드 배율.
     ///
     /// 【경험치와 같은 값을 쓰지 않는다 — 두 축을 나누는 것이 6-1절의 요지다.】
-    /// 문서는 「경험치는 저층이, 크레딧은 고층이 효율이 좋다」고 정했다.
+    /// 문서는 「경험치는 저층이, 골드는 고층이 효율이 좋다」고 정했다.
     /// 장(Stage) 축은 9단계에 오므로 지금은 구역 차이를 낼 수 없다.
     /// 대신 등급에 따른 기울기를 경험치보다 완만하게 두어,
-    /// 「강한 적을 잡는 것」이 크레딧보다 경험치에 더 크게 답하도록 한다.
+    /// 「강한 적을 잡는 것」이 골드보다 경험치에 더 크게 답하도록 한다.
     /// 구역 차이가 생기면 여기에 곱해진다.
     ///
-    /// 【불확실】 문서에 크레딧 배율 표가 없다.
+    /// 【불확실】 문서에 골드 배율 표가 없다.
     /// </summary>
-    public static float CreditMultiplier(EnemyRarity rarity)
+    public static float GoldMultiplier(EnemyRarity rarity)
     {
         switch (rarity)
         {
@@ -116,10 +116,10 @@ public static class EnemyRewardTable
             baseAmount * ExperienceMultiplier(rarity) * Mathf.Max(0f, bonusMultiplier)));
     }
 
-    /// <summary>최종 크레딧.</summary>
-    public static int Credits(int baseAmount, EnemyRarity rarity, float bonusMultiplier = 1f)
+    /// <summary>최종 골드.</summary>
+    public static int Gold(int baseAmount, EnemyRarity rarity, float bonusMultiplier = 1f)
     {
         return Mathf.Max(0, Mathf.RoundToInt(
-            baseAmount * CreditMultiplier(rarity) * Mathf.Max(0f, bonusMultiplier)));
+            baseAmount * GoldMultiplier(rarity) * Mathf.Max(0f, bonusMultiplier)));
     }
 }

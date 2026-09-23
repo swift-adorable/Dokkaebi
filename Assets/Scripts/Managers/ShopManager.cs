@@ -3,7 +3,7 @@
 ///
 /// MonoBehaviour가 아니다 — 재고는 화면이 아니라 세이브에 속한다.
 /// 사고파는 규칙은 TradeRules가, 무엇을 파는지는 ShopTable이 정한다.
-/// 여기는 둘을 이어 주고 크레딧을 PassiveManager에서 가져올 뿐이다.
+/// 여기는 둘을 이어 주고 골드를 PassiveManager에서 가져올 뿐이다.
 /// </summary>
 public static class ShopManager
 {
@@ -52,14 +52,14 @@ public static class ShopManager
             return TradeError.NotForSale;
 
         PassiveManager passive = PassiveManager.EnsureInstance();
-        int credits = passive.Credits;
+        int gold = passive.Gold;
 
         TradeError error = TradeRules.Buy(General, definition, entry,
-            PlayerInventory.EnsureInstance().Bag, ref credits);
+            PlayerInventory.EnsureInstance().Bag, ref gold);
 
         if (error == TradeError.None)
         {
-            passive.Credits = credits;
+            passive.Gold = gold;
             PlayerInventory.Instance.RefreshCapacity();
         }
 
@@ -70,14 +70,14 @@ public static class ShopManager
     public static TradeError Sell(ItemStack stack, out int earned)
     {
         PassiveManager passive = PassiveManager.EnsureInstance();
-        int credits = passive.Credits;
+        int gold = passive.Gold;
 
         TradeError error = TradeRules.Sell(stack, PlayerInventory.EnsureInstance().Bag,
-            SellBonusPercent, ref credits, out earned);
+            SellBonusPercent, ref gold, out earned);
 
         if (error == TradeError.None)
         {
-            passive.Credits = credits;
+            passive.Gold = gold;
             PlayerInventory.Instance.RefreshCapacity();
         }
 

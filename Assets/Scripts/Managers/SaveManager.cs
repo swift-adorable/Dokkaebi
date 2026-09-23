@@ -17,7 +17,7 @@ using UnityEngine.SceneManagement;
 ///
 /// 【파밍 중에는 저장하지 않는다.】 앱이 백그라운드로 가도, 강제로 꺼져도
 /// 마찬가지다. 그렇게 해야 「꺼 버리면 죽음을 무를 수 있다」가 생기지 않는다 —
-/// 끄면 그 파밍의 크레딧도 같이 사라진다. 덕코프와 같은 값을 치른다.
+/// 끄면 그 파밍의 골드도 같이 사라진다. 덕코프와 같은 값을 치른다.
 ///
 /// MonoBehaviour가 아니다. 부트스트랩(RuntimeInitializeOnLoadMethod)으로
 /// 씬 오브젝트의 Awake 뒤, Start 앞에 한 번 불린다 — SkillManager.Start가
@@ -97,7 +97,7 @@ public static class SaveManager
 
         Apply(data);
 
-        GameLogger.Log($"[Save] 불러옴 — Lv.{data.level} · 크레딧 {data.credits} · "
+        GameLogger.Log($"[Save] 불러옴 — Lv.{data.level} · 골드 {data.gold} · "
                        + $"패시브 {data.learnedPassives.Count} · 도감 {data.codex.Count} · "
                        + $"각인 {CountFilled(data.imprints)}");
 
@@ -123,7 +123,7 @@ public static class SaveManager
 
         SaveStore.Write(SavePath, data);
 
-        GameLogger.Log($"[Save] 저장 ({reason}) — Lv.{data.level} · 크레딧 {data.credits}");
+        GameLogger.Log($"[Save] 저장 ({reason}) — Lv.{data.level} · 골드 {data.gold}");
 
         return true;
     }
@@ -153,7 +153,7 @@ public static class SaveManager
         {
             PassiveManager passive = PassiveManager.Instance;
 
-            data.credits = passive.Credits;
+            data.gold = passive.Gold;
             data.discoveredRegression = passive.DiscoveredRegression;
             data.learnedPassives = new List<string>(passive.State.LearnedIds);
         }
@@ -209,7 +209,7 @@ public static class SaveManager
 
         PassiveManager passive = PassiveManager.EnsureInstance();
 
-        passive.Credits = data.credits;
+        passive.Gold = data.gold;
         passive.DiscoveredRegression = data.discoveredRegression;
         passive.State.Restore(data.learnedPassives);
 

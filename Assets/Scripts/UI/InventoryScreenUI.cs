@@ -8,7 +8,7 @@ using UnityEngine.UI;
 ///
 /// 화면 구성
 ///   상단 중앙 : 탭 (장비 / 스킬 / 패시브)
-///   좌상단    : 크레딧
+///   좌상단    : 골드
 ///   장비 탭   : 장비 8슬롯 · 가방 격자 (폭 전체)
 ///   스킬 탭   : 좌 스킬 젬 목록(분류별) · 우 소켓 화면
 ///   패시브 탭 : 계열 트리 (폭 전체)
@@ -50,8 +50,8 @@ public partial class InventoryScreenUI : MonoBehaviour
     // 알림으로 바꾸고(ShowToast), 그 줄은 본문이 가져간다.
 
     // 【상단 줄을 없앴다.】
-    // 크레딧 하나 때문에 화면 위 10%를 통째로 비워 두고 있었다.
-    // 크레딧은 패널 안 머리글 오른쪽으로 들어갔고, 본문이 그 자리를 가져간다.
+    // 골드 하나 때문에 화면 위 10%를 통째로 비워 두고 있었다.
+    // 골드는 패널 안 머리글 오른쪽으로 들어갔고, 본문이 그 자리를 가져간다.
     private const float ColumnTop = 1f;
     private const float ColumnBottom = 0.10f;
     private const float FooterTop = ColumnBottom;
@@ -174,7 +174,7 @@ public partial class InventoryScreenUI : MonoBehaviour
     /// </summary>
     private EquipmentSlot? selectedSlot;
 
-    private Text creditLabel;
+    private Text goldLabel;
 
     /// <summary>위 단의 머리글 — 「장비」 또는 「Lv.n」.</summary>
     private Text equipTitleLabel;
@@ -480,10 +480,10 @@ public partial class InventoryScreenUI : MonoBehaviour
         float titleBottom = titleTop - ListTitleHeight;
         float listTop = titleBottom - BandGap;
 
-        // 스킬 탭에서만 「다음 개방」이 뜬다. 그때는 크레딧을 접는다 —
+        // 스킬 탭에서만 「다음 개방」이 뜬다. 그때는 골드를 접는다 —
         // 젬을 끼우는 화면에서 돈은 쓸 일이 없다.
         topInfoLabel.gameObject.SetActive(skillTab);
-        creditLabel.gameObject.SetActive(!skillTab);
+        goldLabel.gameObject.SetActive(!skillTab);
 
         equipmentGrid.anchorMin = new Vector2(0f, bandBottom);
         equipmentGrid.anchorMax = new Vector2(1f, TopBandTop);
@@ -520,10 +520,10 @@ public partial class InventoryScreenUI : MonoBehaviour
             new Vector2(0f, TopBandTop + BandGap), new Vector2(0.55f, TitleTop),
             TextAnchor.MiddleLeft, UIPalette.TextDim);
 
-        // 【크레딧이 여기로 들어왔다.】
-        // 화면 위 10%를 크레딧 하나 때문에 비워 두고 있었다.
+        // 【골드가 여기로 들어왔다.】
+        // 화면 위 10%를 골드 하나 때문에 비워 두고 있었다.
         // 머리글 오른쪽은 어차피 비어 있던 자리다.
-        creditLabel = UIFactory.CreateLabel(content, "₡ 0", 28, FontStyle.Bold,
+        goldLabel = UIFactory.CreateLabel(content, "0골드", 28, FontStyle.Bold,
             new Vector2(0.45f, TopBandTop + BandGap), new Vector2(1f, TitleTop),
             TextAnchor.MiddleRight, UIPalette.TextAccent);
 
@@ -840,7 +840,7 @@ public partial class InventoryScreenUI : MonoBehaviour
     {
         CloseQuickMenu();
 
-        RefreshCredits();
+        RefreshGold();
         RefreshQuickSlots();
 
         // 【탭마다 필요한 만큼만 쓴다.】
@@ -948,14 +948,14 @@ public partial class InventoryScreenUI : MonoBehaviour
         instance.RefreshHudVisibility();
     }
 
-    private void RefreshCredits()
+    private void RefreshGold()
     {
-        if (creditLabel == null)
+        if (goldLabel == null)
             return;
 
-        int amount = PassiveManager.EnsureInstance().Credits;
+        int amount = PassiveManager.EnsureInstance().Gold;
 
-        creditLabel.text = $"₡ {amount:N0}";
+        goldLabel.text = $"{amount:N0}골드";
     }
 
     private void RefreshToggle()
@@ -1409,7 +1409,7 @@ public partial class InventoryScreenUI : MonoBehaviour
         bool sellable = TradeRules.CanSell(stack, bonus) == TradeError.None;
 
         string label = sellable
-            ? $"판매 +₡{TradeRules.SellPrice(stack, bonus):N0}"
+            ? $"판매 +{TradeRules.SellPrice(stack, bonus):N0}골드"
             : "판매 불가";
 
         return new ItemActionMenu.Entry(label, UIPalette.Gain,
