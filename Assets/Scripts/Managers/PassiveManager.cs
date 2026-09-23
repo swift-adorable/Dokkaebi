@@ -17,8 +17,8 @@ public class PassiveManager : Singleton<PassiveManager>
     [Tooltip("비워두면 Resources/PassiveTree 에셋을 자동으로 불러온다.")]
     [SerializeField] private PassiveTree tree;
 
-    [Header("계정 (세이브 연결 전 임시)")]
-    [Tooltip("계정 레벨. 패시브 해금 조건이 된다. ※ 세이브가 붙기 전까지 인스펙터 값이다.")]
+    [Header("계정 — 세이브가 없을 때의 처음 값")]
+    [Tooltip("계정 레벨. 패시브 해금 조건이 된다. 세이브가 있으면 SaveManager가 덮는다.")]
     [Min(1)]
     [SerializeField] private int accountLevel = 1;
 
@@ -26,7 +26,7 @@ public class PassiveManager : Singleton<PassiveManager>
     [Min(0)]
     [SerializeField] private int credits = 5000;
 
-    [Tooltip("역행 계열을 발견했는지. ※ 세이브가 붙기 전까지 인스펙터 값이다. " +
+    [Tooltip("역행 계열을 발견했는지. 세이브가 있으면 SaveManager가 덮는다. " +
              "본래는 4장 관측실에서 「역행자」를 만나야 켜진다.")]
     [SerializeField] private bool discoveredRegression = false;
 

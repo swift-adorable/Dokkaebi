@@ -104,6 +104,11 @@ public class BlobController : MonoBehaviour
 
         GameLogger.Log($"[BlobController] 가방 {lost}점을 잃었습니다. 각인은 남습니다.");
 
+        // 【출격이 끝났다 — 여기가 저장 지점이다.】 덕코프도 출격 전과 후에만
+        // 저장한다. 가방은 이미 떨어뜨렸으므로 남는 것(계정 · 크레딧 · 패시브 ·
+        // 도감 · 각인)만 디스크에 간다.
+        SaveManager.Commit("사망");
+
         if (gameManager != null)
             gameManager.GameOver();
     }
