@@ -292,6 +292,50 @@ public static class PlaytestActions
                + "체력·수분이 가득하면 그 줄은 뜨지 않습니다.";
     }
 
+    // ── 세이브 (8-F) ──────────────────────────────────────────────────
+    //
+    // 【게임에서는 출격 경계(사망)에서만 저장한다.】 덕코프와 같다.
+    // 아래 「지금 저장」은 그 규칙을 일부러 어기는 검증용 버튼이다 —
+    // 죽지 않고 저장·불러오기를 확인하려면 필요하다.
+
+    /// <summary>지금 상태를 저장한다. 게임 규칙상으로는 출격 중에 할 수 없는 일이다.</summary>
+    public static string SaveNow()
+    {
+        if (!SaveManager.Commit("디버그"))
+            return "저장하지 않았습니다 — 더 새 판의 세이브를 지키는 중입니다.";
+
+        SaveData data = SaveManager.Capture();
+
+        return $"저장했습니다.\n계정 Lv.{data.accountLevel} · 크레딧 {data.credits} · "
+               + $"패시브 {data.learnedPassives.Count} · 도감 {data.codex.Count}\n"
+               + "게임에서는 사망할 때만 저장됩니다 — 출격 중 종료는 롤백입니다.";
+    }
+
+    /// <summary>디스크에서 다시 읽어 적용한다.</summary>
+    public static string LoadNow()
+    {
+        SaveLoadResult result = SaveManager.Load();
+
+        switch (result)
+        {
+            case SaveLoadResult.None:    return "세이브가 없습니다.";
+            case SaveLoadResult.Main:    return "불러왔습니다.";
+            case SaveLoadResult.Backup:  return "본 파일이 깨져 백업에서 불러왔습니다.";
+            case SaveLoadResult.Corrupt: return "세이브와 백업이 모두 깨졌습니다. 옆으로 옮겨 두었습니다.";
+            case SaveLoadResult.TooNew:  return "더 새 판의 세이브입니다. 읽지 않았습니다.";
+            default:                     return result.ToString();
+        }
+    }
+
+    /// <summary>세이브를 지운다. 【이 실행의 상태는 그대로다】 — 다음 실행부터 처음이다.</summary>
+    public static string WipeSave()
+    {
+        SaveManager.Wipe();
+
+        return "세이브와 백업을 지웠습니다.\n"
+               + "지금 화면의 레벨·크레딧은 그대로이고, 다음 실행부터 처음 상태로 시작합니다.";
+    }
+
     /// <summary>가방을 통째로 비운다. 과중량 실험을 되돌린다.</summary>
     public static string ClearBag()
     {
