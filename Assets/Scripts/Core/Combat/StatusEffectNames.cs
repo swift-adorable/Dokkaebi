@@ -27,6 +27,11 @@ public static class StatusEffectNames
             case StatusEffectType.Bolster:  return "보강";
             case StatusEffectType.Regen:    return "재생";
             case StatusEffectType.Fatigue:  return "탈진";
+            case StatusEffectType.Overload: return "적재";
+            case StatusEffectType.WardFire: return "내화";
+            case StatusEffectType.WardCold: return "내한";
+            case StatusEffectType.WardLightning: return "절연";
+            case StatusEffectType.WardChaos:     return "내독";
             default:                        return "—";
         }
     }

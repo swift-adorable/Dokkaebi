@@ -67,16 +67,39 @@ public static class StatusEffectTable
 
     public const float BolsterSeconds = 120f;
 
-    /// <summary>보강이 곱하는 방어도 배율. 「방어도 +0.5」를 배율로 옮긴 것이다.</summary>
-    public const float BolsterArmourMultiplier = 1.25f;
+    /// <summary>
+    /// 보강이 더하는 방어도. 【덕코프 「강화」#1013의 「신체 방어구 +0.5」 그대로다.】
+    ///
+    /// 배율(×1.25)이 아니라 덧셈인 것이 중요하다. 방어 공식이
+    /// 2/(방어도−관통+2)이라 배율이면 이미 두꺼운 쪽이 더 이득을 본다.
+    /// 덧셈이면 얇은 쪽의 체감이 더 커서 「맨몸에 한 대 버틸 것을 준다」가 된다.
+    /// </summary>
+    public const float BolsterArmourBonus = 0.5f;
 
     /// <summary>보강의 대가. 부식과 같은 절반이다 — 대가가 가벼우면 안 쓸 이유가 없다.</summary>
     public const float BolsterHealingMultiplier = 0.5f;
 
     public const float RegenSeconds = 30f;
 
-    /// <summary>재생의 초당 회복량. 【불확실 — 덕코프 위키에 값이 없다.】</summary>
+    /// <summary>
+    /// 재생의 초당 회복량.
+    /// 【덕코프 「회복」#1018의 「1초마다 체력 2 회복」 그대로다.】 [확인됨]
+    /// </summary>
     public const float RegenPerSecond = 2f;
+
+    /// <summary>
+    /// 적재(확장제)가 곱하는 최대 소지 중량.
+    /// 【덕코프 「소지 중량 증가」#1012의 「최대 소지 중량 +50%」 그대로다.】 [확인됨]
+    /// </summary>
+    public const float OverloadSeconds = 240f;
+    public const float OverloadWeightMultiplier = 1.5f;
+
+    /// <summary>
+    /// 방호가 곱하는 「받는 피해」 배율.
+    /// 【덕코프 저항 buff의 「−25%」 그대로다.】 [확인됨 — #1072 · #1074 · #1075]
+    /// </summary>
+    public const float WardSeconds = 120f;
+    public const float WardMultiplier = 0.75f;
 
     public static StatusEffectSpec Get(StatusEffectType type)
     {
@@ -150,6 +173,22 @@ public static class StatusEffectTable
             case StatusEffectType.Fatigue:
                 return new StatusEffectSpec(0f, FatigueSeconds, 1, DamageElement.Physical);
 
+            case StatusEffectType.Overload:
+                return new StatusEffectSpec(0f, OverloadSeconds, 1, DamageElement.Physical);
+
+            // 방호 넷. Element는 「무엇을 막는가」를 담는 자리로 쓴다.
+            case StatusEffectType.WardFire:
+                return new StatusEffectSpec(0f, WardSeconds, 1, DamageElement.Fire);
+
+            case StatusEffectType.WardCold:
+                return new StatusEffectSpec(0f, WardSeconds, 1, DamageElement.Cold);
+
+            case StatusEffectType.WardLightning:
+                return new StatusEffectSpec(0f, WardSeconds, 1, DamageElement.Lightning);
+
+            case StatusEffectType.WardChaos:
+                return new StatusEffectSpec(0f, WardSeconds, 1, DamageElement.Chaos);
+
             default:
                 return new StatusEffectSpec(0f, 0f, 1, DamageElement.Physical);
         }
@@ -199,11 +238,25 @@ public static class StatusEffectTable
             case StatusEffectType.Haste:
             case StatusEffectType.Bolster:
             case StatusEffectType.Regen:
+            case StatusEffectType.Overload:
+            case StatusEffectType.WardFire:
+            case StatusEffectType.WardCold:
+            case StatusEffectType.WardLightning:
+            case StatusEffectType.WardChaos:
                 return true;
 
             default:
                 return false;
         }
+    }
+
+    /// <summary>방호가 막는 속성. 방호가 아니면 None을 뜻하는 Physical을 돌려준다.</summary>
+    public static bool IsWard(StatusEffectType type)
+    {
+        return type == StatusEffectType.WardFire
+               || type == StatusEffectType.WardCold
+               || type == StatusEffectType.WardLightning
+               || type == StatusEffectType.WardChaos;
     }
 
     /// <summary>행동 불능 상태인지. 이 상태에서는 이동도 공격도 하지 못한다.</summary>

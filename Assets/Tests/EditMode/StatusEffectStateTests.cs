@@ -532,17 +532,110 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 보강은_방어도를_올리고_회복량을_깎는다()
+        public void 보강은_방어도를_더하고_회복량을_깎는다()
         {
             var state = new StatusEffectState();
 
+            Assert.AreEqual(0f, state.ArmourBonus, 0.001f);
+
             state.Apply(StatusEffectType.Bolster, 1f);
 
-            Assert.AreEqual(StatusEffectTable.BolsterArmourMultiplier,
-                state.ArmourMultiplier, 0.001f);
+            // 배율이 아니라 덧셈이다 — 덕코프 「강화」의 「신체 방어구 +0.5」.
+            Assert.AreEqual(StatusEffectTable.BolsterArmourBonus,
+                state.ArmourBonus, 0.001f);
 
             Assert.AreEqual(StatusEffectTable.BolsterHealingMultiplier,
                 state.HealingMultiplier, 0.001f);
+        }
+
+        // ── 방호 (8-D) ────────────────────────────────────────────────
+
+        [Test]
+        public void 방호는_해당_속성만_깎는다()
+        {
+            var state = new StatusEffectState();
+
+            state.Apply(StatusEffectType.WardFire, 1f);
+
+            ElementalResistances resist = ElementalResistances.Default;
+
+            state.ApplyWards(ref resist);
+
+            Assert.AreEqual(StatusEffectTable.WardMultiplier,
+                resist.Get(DamageElement.Fire), 0.001f);
+
+            // 나머지는 그대로다. 하나로 전부 막히면 넷을 둘 이유가 없다.
+            Assert.AreEqual(1f, resist.Get(DamageElement.Cold), 0.001f);
+            Assert.AreEqual(1f, resist.Get(DamageElement.Lightning), 0.001f);
+            Assert.AreEqual(1f, resist.Get(DamageElement.Chaos), 0.001f);
+        }
+
+        [Test]
+        public void 방호는_장비_저항에_곱해진다()
+        {
+            var state = new StatusEffectState();
+
+            state.Apply(StatusEffectType.WardChaos, 1f);
+
+            ElementalResistances resist = ElementalResistances.Default;
+            resist.Set(DamageElement.Chaos, 0.5f);
+
+            state.ApplyWards(ref resist);
+
+            // 0.5 × 0.75 = 0.375. LowerTo의 바닥을 쓰면 0.5 그대로라
+            // 「내화 장비를 낀 사람에게 내화제가 아무 일도 안 한다」가 된다.
+            Assert.AreEqual(0.375f, resist.Get(DamageElement.Chaos), 0.001f);
+        }
+
+        [Test]
+        public void 방호는_약점을_저항으로_뒤집지_않는다()
+        {
+            // 압착기의 전기 2배가 방호 하나로 0.75가 되면
+            // 「얘는 전기로 잡아라」가 사라진다. LowerTo의 바닥 규칙이다.
+            var state = new StatusEffectState();
+
+            state.Apply(StatusEffectType.WardLightning, 1f);
+
+            ElementalResistances resist = ElementalResistances.Default;
+            resist.Set(DamageElement.Lightning, 2f);
+
+            state.ApplyWards(ref resist);
+
+            Assert.AreEqual(1.5f, resist.Get(DamageElement.Lightning), 0.001f);
+        }
+
+        [Test]
+        public void 방호_넷은_동시에_걸린다()
+        {
+            // 덕코프의 저항 buff는 비배타다. [확인됨]
+            var state = new StatusEffectState();
+
+            state.Apply(StatusEffectType.WardFire, 1f);
+            state.Apply(StatusEffectType.WardCold, 1f);
+            state.Apply(StatusEffectType.WardLightning, 1f);
+            state.Apply(StatusEffectType.WardChaos, 1f);
+
+            ElementalResistances resist = ElementalResistances.Default;
+
+            state.ApplyWards(ref resist);
+
+            Assert.AreEqual(0.75f, resist.Get(DamageElement.Fire), 0.001f);
+            Assert.AreEqual(0.75f, resist.Get(DamageElement.Cold), 0.001f);
+            Assert.AreEqual(0.75f, resist.Get(DamageElement.Lightning), 0.001f);
+            Assert.AreEqual(0.75f, resist.Get(DamageElement.Chaos), 0.001f);
+        }
+
+        [Test]
+        public void 적재는_소지_중량_배율을_올린다()
+        {
+            var state = new StatusEffectState();
+
+            Assert.AreEqual(1f, state.CarryWeightMultiplier, 0.001f);
+
+            state.Apply(StatusEffectType.Overload, 1f);
+
+            Assert.AreEqual(StatusEffectTable.OverloadWeightMultiplier,
+                state.CarryWeightMultiplier, 0.001f);
         }
 
         [Test]

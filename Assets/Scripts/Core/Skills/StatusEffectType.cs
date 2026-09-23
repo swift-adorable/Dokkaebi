@@ -61,7 +61,28 @@ public enum StatusEffectType
     Regen = 12,
 
     /// <summary>탈진 — 【대가.】 가속이 끝나면 저절로 걸린다. 이동 속도 감소.</summary>
-    Fatigue = 13
+    Fatigue = 13,
+
+    /// <summary>적재 — 확장제가 부여. 최대 소지 중량 증가.</summary>
+    Overload = 14,
+
+    // ── 방호 — 속성 저항 ──────────────────────────────────────────────
+    //
+    // 덕코프의 저항 buff 넷(#1072 · #1074 · #1075 …)과 같다.
+    // 「받는 해당 속성 피해 배율 −25%」 · 120초 · 비배타. [확인됨]
+    // 비배타이므로 넷을 동시에 걸 수 있다 — 다만 넷을 다 쓰면 수분이 −80이다.
+
+    /// <summary>내화 — 받는 화염 피해 감소.</summary>
+    WardFire = 15,
+
+    /// <summary>냉각 방호 — 받는 냉기 피해 감소.</summary>
+    WardCold = 16,
+
+    /// <summary>절연 — 받는 번개 피해 감소.</summary>
+    WardLightning = 17,
+
+    /// <summary>내독 — 받는 카오스 피해 감소.</summary>
+    WardChaos = 18
 }
 
 /// <summary>바닥에 남는 지형 상태 — v5 §5-2.</summary>

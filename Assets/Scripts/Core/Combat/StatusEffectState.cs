@@ -9,8 +9,8 @@ using System;
 /// </summary>
 public sealed class StatusEffectState
 {
-    // None 포함. 해로운 9종 + 이로운 3종 + 대가 1종.
-    private const int TypeCount = 14;
+    // None 포함. 해로운 9종 + 이로운 8종(가속·보강·재생·적재·방호 4) + 대가 1종.
+    private const int TypeCount = 19;
 
     private readonly double[] remaining = new double[TypeCount];
     private readonly int[] stacks = new int[TypeCount];
@@ -393,19 +393,61 @@ public sealed class StatusEffectState
     public bool IsIncapacitated
         => Has(StatusEffectType.Freeze) || Has(StatusEffectType.Paralyze);
 
-    /// <summary>부식과 보강이 겹친 방어도 배율.</summary>
+    /// <summary>부식이 적용된 방어도 배율. 부식 중이면 절반이다.</summary>
     public float ArmourMultiplier
+        => Has(StatusEffectType.Corrode) ? StatusEffectTable.CorrodeHalfRatio : 1f;
+
+    /// <summary>
+    /// 보강이 더하는 방어도. 【배율이 아니라 덧셈이다.】
+    ///
+    /// 방어 공식이 2/(방어도−관통+2)이라 배율이면 이미 두꺼운 쪽이 더
+    /// 이득을 본다. 덧셈이면 얇은 쪽의 체감이 커서 「맨몸에 한 대 버틸
+    /// 것을 준다」가 된다. 덕코프도 「신체 방어구 +0.5」다. [확인됨]
+    ///
+    /// 부식(절반)이 곱해진 **뒤에** 더해진다 — 대가를 치르고 얻은 것을
+    /// 남의 상태이상이 반으로 깎으면 응고제를 쓸 이유가 사라진다.
+    /// </summary>
+    public float ArmourBonus
+        => Has(StatusEffectType.Bolster) ? StatusEffectTable.BolsterArmourBonus : 0f;
+
+    /// <summary>적재(확장제)가 곱하는 최대 소지 중량 배율.</summary>
+    public float CarryWeightMultiplier
+        => Has(StatusEffectType.Overload)
+            ? StatusEffectTable.OverloadWeightMultiplier
+            : 1f;
+
+    /// <summary>
+    /// 걸려 있는 방호를 저항에 반영한다.
+    ///
+    /// 【장비 저항에 그냥 곱한다 — LowerTo를 쓰지 않는다.】
+    /// LowerTo에는 「이미 잘 막고 있으면 더 못 깎는다」는 바닥이 있다.
+    /// 그것은 **적의 속성을 합성할 때** 방어형 둘만으로 공략 불가가 되는
+    /// 것을 막는 규칙이고, 플레이어가 쓴 소모품에는 맞지 않는다.
+    /// 그 바닥을 그대로 쓰면 내화 장비를 낀 사람에게 내화제가 아무 일도
+    /// 하지 않는다 — 「썼는데 변화가 없다」가 된다.
+    ///
+    /// 곱해도 면역(0)에 닿지 않으므로 안전하다. 0.75는 0을 만들지 못한다.
+    /// 약점도 뒤집지 않는다 — 전기 2.0에 절연을 걸면 1.5가 된다.
+    /// 「얘는 전기로 잡아라」는 그대로 남는다.
+    ///
+    /// 방호 넷은 서로 다른 속성을 맡으므로 한 속성에 두 번 곱해지지 않는다.
+    /// </summary>
+    public void ApplyWards(ref ElementalResistances resistances)
     {
-        get
+        for (int i = 1; i < TypeCount; i++)
         {
-            float scale = Has(StatusEffectType.Corrode)
-                ? StatusEffectTable.CorrodeHalfRatio
-                : 1f;
+            if (remaining[i] <= 0f)
+                continue;
 
-            if (Has(StatusEffectType.Bolster))
-                scale *= StatusEffectTable.BolsterArmourMultiplier;
+            var type = (StatusEffectType)i;
 
-            return scale;
+            if (!StatusEffectTable.IsWard(type))
+                continue;
+
+            DamageElement element = StatusEffectTable.Get(type).Element;
+
+            resistances.Set(element,
+                resistances.Get(element) * StatusEffectTable.WardMultiplier);
         }
     }
 
