@@ -22,17 +22,19 @@ MonoBehaviour:
   icon: {fileID: 0}
   slotSize: 1
   stackMax: 1
-  maxDurability: 0
-  baseValue: 900
+  maxDurability: 400
+  baseValue: 1322
   noExtract: 0
   noRegister: 0
   noTrade: 0
   skill: {fileID: 0}
   consumable:
     category: 0
-    heal: 100
+    heal: 35
     water: 0
     energy: 0
     waterCost: 0
     energyCost: 0
-    cure: 0
+    cure: 5
+    cureStacks: 99
+    useCost: 40

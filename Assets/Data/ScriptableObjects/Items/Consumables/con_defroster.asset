@@ -35,3 +35,5 @@ MonoBehaviour:
     waterCost: 0
     energyCost: 0
     cure: 3
+    cureStacks: 99
+    useCost: 0

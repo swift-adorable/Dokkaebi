@@ -439,5 +439,47 @@ namespace Blob.Tests
 
             Assert.AreEqual(one * 3, three);
         }
+
+        // ── 중첩 단위 제거 — 소모품의 「출혈 2층 제거」 ────────────────
+
+        [Test]
+        public void 중첩을_지정한_수만큼만_덜어_낸다()
+        {
+            var state = new StatusEffectState();
+
+            for (int i = 0; i < 4; i++)
+                state.Apply(StatusEffectType.Poison, 10f);
+
+            Assert.AreEqual(4, state.StacksOf(StatusEffectType.Poison));
+
+            Assert.AreEqual(2, state.RemoveStacks(StatusEffectType.Poison, 2));
+            Assert.AreEqual(2, state.StacksOf(StatusEffectType.Poison));
+
+            // 아직 걸려 있다. 덜어 냈을 뿐이다.
+            Assert.IsTrue(state.Has(StatusEffectType.Poison));
+        }
+
+        [Test]
+        public void 남은_것보다_많이_덜어_내면_상태가_끝난다()
+        {
+            var state = new StatusEffectState();
+
+            state.Apply(StatusEffectType.Poison, 10f);
+
+            // 중첩 0인데 상태가 살아 있으면 「걸려 있는데 아무 일도
+            // 안 일어나는」 칸이 남는다.
+            Assert.AreEqual(1, state.RemoveStacks(StatusEffectType.Poison, 99));
+            Assert.IsFalse(state.Has(StatusEffectType.Poison));
+            Assert.AreEqual(0f, state.RemainingOf(StatusEffectType.Poison), 0.001f);
+        }
+
+        [Test]
+        public void 걸리지_않은_것은_덜어_낼_수_없다()
+        {
+            var state = new StatusEffectState();
+
+            Assert.AreEqual(0, state.RemoveStacks(StatusEffectType.Bleed, 2));
+            Assert.AreEqual(0, state.RemoveStacks(StatusEffectType.None, 2));
+        }
     }
 }

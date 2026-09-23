@@ -33,6 +33,9 @@ public static class ConsumableAssetGenerator
         public float waterCost;
         public float energyCost;
         public StatusEffectType cure;
+        public int cureStacks;
+        public int useCost;
+        public int maxDurability;
         public float weight;
         public int stackMax;
         public int value;
@@ -53,37 +56,61 @@ public static class ConsumableAssetGenerator
     {
         var list = new List<Row>(16);
 
-        // ── 회복 ──────────────────────────────────────────────────────
+        // ── 회복 — 【내구도(충전)형이다.】 ────────────────────────────
+        //
+        // 덕코프의 구급상자는 한 번 쓰고 사라지는 물건이 아니다.
+        // 소형 125/25 = 5회 · 구급상자 175/25 = 7회 · 대형 400/40 = 10회.
+        // [확인됨 — 아이템 #15 · #16 · #17]
+        //
+        // 회복량도 그대로 가져온다. Blob의 체력은 100 고정이고 덕코프
+        // 생명력의 기준값은 위키에 없지만(확인 불가), 12 / 20 / 35라는
+        // 값 자체가 「한 방에 다 채우지 못한다」를 뜻하므로 그 비율이
+        // 옮겨야 할 것이다. 한 번에 다 차면 「지금 쓸까 아꼈다 쓸까」가 없다.
+        //
+        // 【전부 출혈을 함께 지운다.】 그래서 체력이 가득해도 쓸 이유가 남는다.
 
-        list.Add(Heal("con_aspirin", "아스피린",
-            "머리가 덜 아프다. 대신 목이 마른다.", 10, 0.03f, 9, 40, waterCost: 15f));
+        list.Add(Kit("con_medkit_small", "소형 구급상자",
+            "한 번에 조금씩. 다섯 번 쓸 수 있다.",
+            heal: 12, useCost: 25, maxDurability: 125,
+            cure: StatusEffectType.Bleed, cureStacks: 1,
+            weight: 0.5f, value: 206));
 
-        list.Add(Heal("con_medkit_small", "소형 구급상자",
-            "한 번의 실수를 덮을 만큼.", 30, 0.5f, 1, 180));
+        list.Add(Kit("con_medkit", "구급상자",
+            "제대로 된 것. 출혈도 두 겹까지 잡는다.",
+            heal: 20, useCost: 25, maxDurability: 175,
+            cure: StatusEffectType.Bleed, cureStacks: 2,
+            weight: 0.75f, value: 807));
 
-        list.Add(Heal("con_medkit", "구급상자",
-            "제대로 된 것. 자리를 차지하는 만큼 값을 한다.", 60, 0.75f, 1, 420));
+        list.Add(Kit("con_medkit_large", "대형 구급상자",
+            "이걸 들고 나왔다면 무언가를 두고 온 것이다.",
+            heal: 35, useCost: 40, maxDurability: 400,
+            cure: StatusEffectType.Bleed, cureStacks: 99,
+            weight: 1.2f, value: 1322));
 
-        list.Add(Heal("con_medkit_large", "대형 구급상자",
-            "이걸 들고 나왔다면 무언가를 두고 온 것이다.", 100, 1.2f, 1, 900));
+        // ── 한 번 쓰고 사라지는 것 ────────────────────────────────────
+        //
+        // 가벼워서 겹쳐 들고 다닌다. 【싼 도구가 비싼 도구와 같은 일을
+        // 하면 안 된다】 — 붕대는 출혈 2층까지만, 구급상자는 회복을 겸한다.
 
-        // ── 해제 — 상태 하나에 도구 하나 ──────────────────────────────
-
-        // 지혈 붕대만 회복을 겸한다. 출혈이 가장 흔하기 때문이다. (문서 3절)
         list.Add(Cure("con_bandage", "지혈 붕대", "감고 나면 피는 멎는다.",
-            StatusEffectType.Bleed, heal: 8, weight: 0.05f, stackMax: 3, value: 60));
+            StatusEffectType.Bleed, cureStacks: 2,
+            heal: 5, weight: 0.05f, stackMax: 3, value: 240));
+
+        // 아스피린의 「수분 −15」는 덕코프 실제 값이다. [확인됨 — 아이템 #20]
+        list.Add(Heal("con_aspirin", "아스피린",
+            "머리가 덜 아프다. 대신 목이 마른다.", 10, 0.03f, 9, 96, waterCost: 15f));
 
         list.Add(Cure("con_antidote", "해독제", "속을 게워 내는 맛이 난다.",
-            StatusEffectType.Poison, 0, 0.1f, 3, 90));
+            StatusEffectType.Poison, 99, 0, 0.1f, 3, 90));
 
         list.Add(Cure("con_antacid", "소화제", "안에서 타는 것을 끈다.",
-            StatusEffectType.Ignite, 0, 0.1f, 3, 90));
+            StatusEffectType.Ignite, 99, 0, 0.1f, 3, 90));
 
         list.Add(Cure("con_relaxant", "이완제", "경련이 멎는다.",
-            StatusEffectType.Shock, 0, 0.1f, 3, 90));
+            StatusEffectType.Shock, 99, 0, 0.1f, 3, 90));
 
         list.Add(Cure("con_defroster", "해빙제", "안쪽부터 녹인다.",
-            StatusEffectType.Freeze, 0, 0.1f, 3, 90));
+            StatusEffectType.Freeze, 99, 0, 0.1f, 3, 90));
 
         // ── 음료 · 음식 ───────────────────────────────────────────────
         //
@@ -96,6 +123,7 @@ public static class ConsumableAssetGenerator
         list.Add(Food("con_soda", "미지근한 탄산", "김이 빠졌다. 그래도 물이다.",
             25f, 5f, 0.4f, 3, 45));
 
+        // 잭 오 랜턴 「에너지 25 · 수분 10」과 같은 결. [확인됨 — 아이템 #1261]
         list.Add(Food("con_canned", "통조림", "국물까지 마시면 물도 조금 는다.",
             10f, 30f, 0.5f, 2, 55));
 
@@ -129,6 +157,22 @@ public static class ConsumableAssetGenerator
                   + "「Blob/Playtest/검증 카탈로그 생성」도 다시 실행하십시오.");
     }
 
+    /// <summary>내구도를 깎아 여러 번 쓰는 구급상자.</summary>
+    private static Row Kit(string id, string name, string desc,
+                           int heal, int useCost, int maxDurability,
+                           StatusEffectType cure, int cureStacks,
+                           float weight, int value)
+    {
+        return new Row
+        {
+            id = id, name = name, desc = desc,
+            category = ConsumableCategory.Restore,
+            heal = heal, cure = cure, cureStacks = cureStacks,
+            useCost = useCost, maxDurability = maxDurability,
+            weight = weight, stackMax = 1, value = value
+        };
+    }
+
     private static Row Heal(string id, string name, string desc, int heal,
                             float weight, int stackMax, int value, float waterCost = 0f)
     {
@@ -137,19 +181,19 @@ public static class ConsumableAssetGenerator
             id = id, name = name, desc = desc,
             category = ConsumableCategory.Restore,
             heal = heal, waterCost = waterCost,
-            cure = StatusEffectType.None,
+            cure = StatusEffectType.None, cureStacks = 99,
             weight = weight, stackMax = stackMax, value = value
         };
     }
 
     private static Row Cure(string id, string name, string desc, StatusEffectType cure,
-                            int heal, float weight, int stackMax, int value)
+                            int cureStacks, int heal, float weight, int stackMax, int value)
     {
         return new Row
         {
             id = id, name = name, desc = desc,
             category = ConsumableCategory.Cure,
-            heal = heal, cure = cure,
+            heal = heal, cure = cure, cureStacks = cureStacks,
             weight = weight, stackMax = stackMax, value = value
         };
     }
@@ -164,7 +208,7 @@ public static class ConsumableAssetGenerator
             id = id, name = name, desc = desc,
             category = ConsumableCategory.Sustenance,
             water = water, energy = energy, waterCost = waterCost,
-            cure = StatusEffectType.None,
+            cure = StatusEffectType.None, cureStacks = 99,
             weight = weight, stackMax = stackMax, value = value
         };
     }
@@ -192,7 +236,7 @@ public static class ConsumableAssetGenerator
         so.FindProperty("weight").floatValue = row.weight;
         so.FindProperty("slotSize").intValue = 1;
         so.FindProperty("stackMax").intValue = row.stackMax;
-        so.FindProperty("maxDurability").intValue = 0;
+        so.FindProperty("maxDurability").intValue = row.maxDurability;
         so.FindProperty("baseValue").intValue = row.value;
 
         SerializedProperty effect = so.FindProperty("consumable");
@@ -204,6 +248,8 @@ public static class ConsumableAssetGenerator
         effect.FindPropertyRelative("waterCost").floatValue = row.waterCost;
         effect.FindPropertyRelative("energyCost").floatValue = row.energyCost;
         effect.FindPropertyRelative("cure").intValue = (int)row.cure;
+        effect.FindPropertyRelative("cureStacks").intValue = Mathf.Max(1, row.cureStacks);
+        effect.FindPropertyRelative("useCost").intValue = row.useCost;
 
         so.ApplyModifiedPropertiesWithoutUndo();
 

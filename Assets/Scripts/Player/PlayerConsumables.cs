@@ -29,7 +29,7 @@ public static class PlayerConsumables
         if (health == null)
             return "플레이어를 찾지 못했습니다.";
 
-        ConsumableSubject subject = Snapshot(health, definition);
+        ConsumableSubject subject = Snapshot(health, definition, stack.Durability);
 
         ConsumableOutcome outcome = ConsumableUse.Evaluate(definition, subject);
 
@@ -38,27 +38,28 @@ public static class PlayerConsumables
 
         Apply(health, outcome);
 
-        // 여기까지 와야 한 개를 뺀다.
-        PlayerInventory.EnsureInstance().Bag.Remove(definition, 1);
+        // 여기까지 와야 값을 치른다.
+        string spent = Spend(stack, outcome);
 
-        return Describe(definition, outcome);
+        return Describe(definition, outcome) + spent;
     }
 
-    /// <summary>화면이 「사용」 줄을 띄울지 정할 때 쓴다. 상태를 바꾸지 않는다.</summary>
+    /// <summary>
+    /// 「사용」 줄을 띄울 물건인가.
+    ///
+    /// 【지금 효과가 있는지는 보지 않는다.】 체력이 가득하다고 줄을 감추면
+    /// 있다가 없어지는 줄이 되어 고장인지 규칙인지 구분되지 않는다.
+    /// 덕코프도 막지 않는다 — 대신 회복 아이템에 부수 효과와 내구도를 두어
+    /// 「가득하면 쓸모없음」 자체가 거의 생기지 않게 만들었다. 우리도 같은 길로
+    /// 간다. 눌렀는데 채울 것이 없으면 그 사실을 알리고 **아무것도 닳지 않는다.**
+    /// </summary>
     public static bool CanUse(ItemDefinition definition)
     {
-        if (definition == null || !definition.IsUsable)
-            return false;
-
-        Health health = FindPlayerHealth();
-
-        if (health == null)
-            return false;
-
-        return ConsumableUse.Evaluate(definition, Snapshot(health, definition)).Ok;
+        return definition != null && definition.IsUsable;
     }
 
-    private static ConsumableSubject Snapshot(Health health, ItemDefinition definition)
+    private static ConsumableSubject Snapshot(Health health, ItemDefinition definition,
+                                              int durability = 0)
     {
         ConsumableEffect effect = definition.Consumable;
 
@@ -71,7 +72,7 @@ public static class PlayerConsumables
         if (!PlayerSurvival.HasInstance)
         {
             return new ConsumableSubject(health.Current, health.Max, health.IsDead,
-                1f, 1f, 1f, 1f, hasCureTarget);
+                1f, 1f, 1f, 1f, hasCureTarget, durability);
         }
 
         SurvivalState survival = PlayerSurvival.Instance.State;
@@ -79,7 +80,7 @@ public static class PlayerConsumables
         return new ConsumableSubject(health.Current, health.Max, health.IsDead,
             survival.Water, survival.MaxWater,
             survival.Energy, survival.MaxEnergy,
-            hasCureTarget);
+            hasCureTarget, durability);
     }
 
     private static void Apply(Health health, in ConsumableOutcome outcome)
@@ -88,7 +89,7 @@ public static class PlayerConsumables
             health.Heal(outcome.Heal);
 
         if (outcome.Cure != StatusEffectType.None)
-            health.Status.Clear(outcome.Cure);
+            health.Status.RemoveStacks(outcome.Cure, outcome.CureStacks);
 
         if (!PlayerSurvival.HasInstance)
             return;
@@ -99,6 +100,28 @@ public static class PlayerConsumables
         // 【대가는 채운 뒤에 뺀다.】 먼저 빼면 상한에 걸려 채움이 줄어든다.
         if (outcome.WaterCost > 0f || outcome.EnergyCost > 0f)
             PlayerSurvival.Instance.Drain(outcome.WaterCost, outcome.EnergyCost);
+    }
+
+    /// <summary>
+    /// 값을 치른다 — 내구도를 깎거나, 없으면 한 개를 뺀다.
+    ///
+    /// 【내구도가 있으면 아이템이 사라지지 않는다.】 구급상자는 여러 번
+    /// 쓰는 물건이다. 다 쓰면 빈 통이 가방에 남는데, 그것도 맞다 —
+    /// 버릴지 들고 나갈지가 무게 결정이 된다.
+    /// </summary>
+    private static string Spend(ItemStack stack, in ConsumableOutcome outcome)
+    {
+        if (outcome.UseCost <= 0)
+        {
+            PlayerInventory.EnsureInstance().Bag.Remove(stack.Definition, 1);
+
+            return string.Empty;
+        }
+
+        stack.Damage(outcome.UseCost);
+
+        return $"\n남은 충전 {stack.Durability}/{stack.MaxDurability}"
+               + (stack.Durability < outcome.UseCost ? " — 다음엔 쓸 수 없습니다." : string.Empty);
     }
 
     /// <summary>무엇이 들어갔는지 한 줄로. 숫자가 안 보이면 쓴 것 같지 않다.</summary>
@@ -116,7 +139,11 @@ public static class PlayerConsumables
             parts.Add($"에너지 +{outcome.Energy:0.#}");
 
         if (outcome.Cure != StatusEffectType.None)
-            parts.Add($"{StatusEffectNames.Of(outcome.Cure)} 해제");
+        {
+            parts.Add(outcome.CureStacks < 90
+                ? $"{StatusEffectNames.Of(outcome.Cure)} {outcome.CureStacks}중첩 제거"
+                : $"{StatusEffectNames.Of(outcome.Cure)} 해제");
+        }
 
         if (outcome.WaterCost > 0f)
             parts.Add($"수분 −{outcome.WaterCost:0.#}");
