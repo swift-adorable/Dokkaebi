@@ -18,7 +18,7 @@ public class SkillDefinition : ScriptableObject
     // ────────────────────────────────── 식별
 
     [Header("식별")]
-    [Tooltip("저장(도감·적재)과 비교에 쓰이는 고유 식별자. 중복되면 안 된다.")]
+    [Tooltip("저장(도감·장비 구성)과 비교에 쓰이는 고유 식별자. 중복되면 안 된다.")]
     [SerializeField] private string id = "mutation_id";
 
     [Tooltip("한글 표시명. v5 §6~§9 목록의 이름을 그대로 쓴다.")]
@@ -30,7 +30,7 @@ public class SkillDefinition : ScriptableObject
     [Header("분류")]
     [SerializeField] private SkillCategory category = SkillCategory.Core;
 
-    [Tooltip("핵심 젬일 때만 의미가 있다. 전달 / 적재 / 기폭")]
+    [Tooltip("핵심 젬일 때만 의미가 있다. 전달 / 칸 / 기폭")]
     [SerializeField] private CoreFamily coreFamily = CoreFamily.None;
 
     [Tooltip("이 레벨 미만에서는 선택지에 등장하지 않는다. v5 목록의 Lv 값.")]
@@ -39,7 +39,7 @@ public class SkillDefinition : ScriptableObject
 
     // ────────────────────────────────── 태그
 
-    [Header("태그 (10-2 [1] 태그 게이팅)")]
+    [Header("태그 (10-2 [1] 태그 조건)")]
     [Tooltip("이 Skill이 보유한 태그.")]
     [SerializeField] private SkillTag tags = SkillTag.None;
 
@@ -78,7 +78,7 @@ public class SkillDefinition : ScriptableObject
     [Header("대가 (10-3 — 4종만 사용, 피해 감소 금지)")]
     [SerializeField] private CostType costType = CostType.None;
 
-    [Tooltip("유저에게 보여줄 대가 문구.")]
+    [Tooltip("플레이어에게 보여줄 대가 문구.")]
     [SerializeField] private string costDescription = string.Empty;
 
     // ────────────────────────────────── 효과 — 투사체
@@ -104,12 +104,12 @@ public class SkillDefinition : ScriptableObject
     [Tooltip("추가 투사체 간 각도(도).")]
     [SerializeField] private float spreadAngle = 8f;
 
-    [Header("효과 — 배수 (전부 대가 4종 범위 안)")]
-    [Tooltip("발사 간격 배수. 1보다 크면 연사가 느려진다. → 탄막 밀도")]
+    [Header("효과 — 배율 (전부 대가 4종 범위 안)")]
+    [Tooltip("발사 간격 배율. 1보다 크면 연사가 느려진다. → 탄막 밀도")]
     [Min(0.1f)]
     [SerializeField] private float fireIntervalMultiplier = 1f;
 
-    [Tooltip("투사체 수명 배수. 1보다 작으면 사거리가 줄어든다. → 유효 사거리")]
+    [Tooltip("투사체 수명 배율. 1보다 작으면 사거리가 줄어든다. → 유효 사거리")]
     [Min(0.1f)]
     [SerializeField] private float lifetimeMultiplier = 1f;
 
@@ -120,7 +120,7 @@ public class SkillDefinition : ScriptableObject
     // 끼우면 손해만 보는 젬이었다. (docs/Blob_Audit.md D1)
     //
     // 전부 가산 합산이다. PoE의 「증가 / 더 증가」 2단 구조를 쓰지 않는다 —
-    // 모바일에서 유저가 곱연산 폭발을 예측할 수 없다.
+    // 모바일에서 플레이어가 곱연산 폭발을 예측할 수 없다.
 
     [Tooltip("기본 피해 증가율. 0.2 = +20%")]
     [SerializeField] private float damageIncrease = 0f;
@@ -128,15 +128,15 @@ public class SkillDefinition : ScriptableObject
     [Tooltip("상태이상 위력 증가율. 직접 피해와 분리된 축이다.")]
     [SerializeField] private float ailmentPower = 0f;
 
-    [Tooltip("상태이상·잔류물 지속시간 배수. 【투사체 수명과 다른 축이다.】")]
+    [Tooltip("상태이상·잔류물 지속시간 배율. 【투사체 수명과 다른 축이다.】")]
     [Min(0.1f)]
     [SerializeField] private float ailmentDurationMultiplier = 1f;
 
-    [Tooltip("유효 사거리 배수. 대가 「유효 사거리」가 여기를 깎는다.")]
+    [Tooltip("유효 사거리 배율. 대가 「유효 사거리」가 여기를 깎는다.")]
     [Min(0.1f)]
     [SerializeField] private float rangeMultiplier = 1f;
 
-    [Tooltip("잔류물 반경 배수. 【유효 사거리와 다른 축이다.】")]
+    [Tooltip("잔류물 반경 배율. 【유효 사거리와 다른 축이다.】")]
     [Min(0.1f)]
     [SerializeField] private float zoneRadiusMultiplier = 1f;
 
@@ -164,7 +164,7 @@ public class SkillDefinition : ScriptableObject
     [Tooltip("원래 속성을 유지한 채 이것을 추가로 부여한다. (융합)")]
     [SerializeField] private StatusEffectType ailmentAddition = StatusEffectType.None;
 
-    [Tooltip("투사체 속도 배수.")]
+    [Tooltip("투사체 속도 배율.")]
     [Min(0.1f)]
     [SerializeField] private float speedMultiplier = 1f;
 
@@ -210,7 +210,7 @@ public class SkillDefinition : ScriptableObject
     public float RangeMultiplier => Mathf.Max(0.1f, rangeMultiplier);
 
     /// <summary>
-    /// 잔류물 반경 배수.
+    /// 잔류물 반경 배율.
     ///
     /// 【rangeMultiplier와 나눠 둔 이유 — 같은 실수가 두 번 났다.】
     /// 문서 5-A는 이미 「ailmentDurationMultiplier와 lifetimeMultiplier는

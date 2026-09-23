@@ -102,7 +102,7 @@ public class BlobController : MonoBehaviour
         if (loadout != null)
             loadout.Refresh();
 
-        GameLogger.Log($"[BlobController] 소지품 {lost}점을 잃었습니다. 각인은 남습니다.");
+        GameLogger.Log($"[BlobController] 가방 {lost}점을 잃었습니다. 각인은 남습니다.");
 
         if (gameManager != null)
             gameManager.GameOver();

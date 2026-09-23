@@ -36,7 +36,7 @@ public readonly struct LoadoutSnapshot
     public readonly EncumbranceLevel Encumbrance;
 
     /// <summary>
-    /// 움직일 때 내는 소리의 반경 배수. 【작을수록 좋다.】
+    /// 움직일 때 내는 소리의 반경 배율. 【작을수록 좋다.】
     ///
     /// 덕코프에서 「안 뛰는 것만으로 기습을 피한다」가 성립하는 축이다.
     /// [확인됨 — research/duckov/08_전투_실측과_교전.md 3절]
@@ -45,7 +45,7 @@ public readonly struct LoadoutSnapshot
     public readonly float MoveSoundScale;
 
     /// <summary>
-    /// 소리를 듣는 거리 배수. 【클수록 좋다.】 이어폰 6종이 올린다.
+    /// 소리를 듣는 거리 배율. 【클수록 좋다.】 이어폰 6종이 올린다.
     /// 적이 아니라 【플레이어】가 듣는 거리다 — 소리의 크기는 내는 쪽이 정한다.
     /// </summary>
     public readonly float HearingScale;
@@ -125,7 +125,7 @@ public readonly struct LoadoutSnapshot
             1f + modifiers.Get(EquipmentStatType.MoveSoundRange), 0.2f, 3f);
 
         // 과중량은 소리도 키운다. 무겁게 들고 다니면 조용할 수 없다.
-        // 이동 배수의 역수를 그대로 쓰지 않는다 — 그러면 과중량 하나로
+        // 이동 배율의 역수를 그대로 쓰지 않는다 — 그러면 과중량 하나로
         // 느려지고 시끄러워지고 대시까지 짧아져 벌이 세 겹이 된다.
         if (encumbrance == EncumbranceLevel.Heavy)
             moveSound *= 1.15f;

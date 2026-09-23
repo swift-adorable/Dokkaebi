@@ -69,7 +69,7 @@ public static class SkillTagExtensions
         SkillTag.Chaos | SkillTag.Physical;
 
     /// <summary>
-    /// 태그 게이팅의 핵심 판정.
+    /// 태그 조건의 핵심 판정.
     /// required가 None이면 요구 조건이 없으므로 항상 true다.
     /// </summary>
     public static bool ContainsAll(this SkillTag tags, SkillTag required)

@@ -104,7 +104,7 @@ namespace Blob.Tests
         {
             var poison = new StatusEffectState();
 
-            // 9번까지는 쌓인다. 10번째에 임계(부식)로 전이하며 원본이 비워진다.
+            // 9번까지는 쌓인다. 10번째에 한계치(부식)로 전이하며 원본이 비워진다.
             for (int i = 0; i < 9; i++)
                 poison.Apply(StatusEffectType.Poison, 10f);
 
@@ -136,7 +136,7 @@ namespace Blob.Tests
 
             var state = new StatusEffectState();
 
-            // 임계 전이 직전(9중첩)에서 측정한다. 10번째는 부식으로 넘어간다.
+            // 한계치 전이 직전(9중첩)에서 측정한다. 10번째는 부식으로 넘어간다.
             for (int i = 0; i < 9; i++)
                 state.Apply(StatusEffectType.Poison, BaseDamage);
 
@@ -262,11 +262,11 @@ namespace Blob.Tests
             Assert.Less(state.SpeedMultiplier, one, "쌓을수록 느려져야 합니다.");
         }
 
-        // ── 임계 상태 ─────────────────────────────────────────────────
+        // ── 위험 상태 ─────────────────────────────────────────────────
 
         /// <summary>
-        /// 【최대 중첩 = 임계】 차는 순간 질적으로 다른 것이 된다.
-        /// 원본 중첩을 전부 소모하므로 임계가 끝나면 처음부터 다시 쌓아야 한다.
+        /// 【최대 중첩 = 한계치】 차는 순간 질적으로 다른 것이 된다.
+        /// 원본 중첩을 전부 소모하므로 한계치가 끝나면 처음부터 다시 쌓아야 한다.
         /// </summary>
         [Test]
         public void 냉각이_최대_중첩에_차면_동결로_전이한다()
@@ -316,11 +316,11 @@ namespace Blob.Tests
         }
 
         /// <summary>
-        /// 임계 상태 중에는 원본을 다시 쌓지 못한다.
+        /// 위험 상태 중에는 원본을 다시 쌓지 못한다.
         /// 그러지 않으면 행동 불능 중에 게이지가 다시 차 무한 제압이 된다.
         /// </summary>
         [Test]
-        public void 임계_상태_중에는_원본을_다시_쌓지_못한다()
+        public void 한계치_상태_중에는_원본을_다시_쌓지_못한다()
         {
             var state = new StatusEffectState();
 

@@ -14,7 +14,7 @@ using UnityEngine.UI;
 /// 창이 화면을 덮으면 무엇이 다가오는지 알 수 없다.
 ///
 /// 그래서 왼쪽은 **이미 있는 가방 화면(InventoryScreenUI)을 그대로 연다.**
-/// 같은 격자·같은 상세를 두 벌 만들 이유가 없고, 유저도 한 번만 배우면 된다.
+/// 같은 격자·같은 상세를 두 벌 만들 이유가 없고, 플레이어도 한 번만 배우면 된다.
 /// 이 컴포넌트는 오른쪽 한 칸만 맡는다.
 ///
 /// 【상점은 아직 이 패널을 쓰지 않는다.】 파는 값·재고·통화 흐름이
@@ -140,7 +140,7 @@ public class ExchangeWindowUI : MonoBehaviour
         Open(corpse.Loot, "전리품", Mode.Loot);
     }
 
-    /// <summary>임의의 컨테이너를 연다. 창고가 8단계에 이 길로 들어온다.</summary>
+    /// <summary>임의의 상자를 연다. 창고가 8단계에 이 길로 들어온다.</summary>
     public void Open(LootContainer container, string label, Mode windowMode)
     {
         if (container == null)

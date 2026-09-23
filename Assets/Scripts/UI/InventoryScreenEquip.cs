@@ -8,7 +8,7 @@ using UnityEngine;
 /// 가방의 장비를 누르면 「장착」, 착용 중인 것을 누르면 「장착 해제」가 나온다.
 ///
 /// 규칙을 세 탭에서 같게 두는 이유 — 모바일에서 조작 방식이 화면마다 다르면
-/// 유저가 매번 다시 배워야 한다.
+/// 플레이어가 매번 다시 배워야 한다.
 /// </summary>
 public partial class InventoryScreenUI
 {
@@ -162,13 +162,13 @@ public partial class InventoryScreenUI
         AfterLoadoutChanged(inventory);
     }
 
-    /// <summary>착용이 바뀌면 적재 한도와 실제 성능을 즉시 다시 계산한다.</summary>
+    /// <summary>착용이 바뀌면 칸 한도와 실제 성능을 즉시 다시 계산한다.</summary>
     private void AfterLoadoutChanged(PlayerInventory inventory)
     {
         inventory.RefreshCapacity();
 
-        // 가방을 바꾸면 적재 한도가 달라지고, 무기를 바꾸면 사격 성능이 달라진다.
-        // 다음 주기를 기다리면 유저가 화면을 닫을 때까지 반영되지 않는다.
+        // 가방을 바꾸면 칸 한도가 달라지고, 무기를 바꾸면 사격 성능이 달라진다.
+        // 다음 주기를 기다리면 플레이어가 화면을 닫을 때까지 반영되지 않는다.
         PlayerLoadout binder = Object.FindAnyObjectByType<PlayerLoadout>();
 
         if (binder != null)
@@ -177,7 +177,7 @@ public partial class InventoryScreenUI
         Refresh();
     }
 
-    /// <summary>왜 못 끼웠는지 한 줄로 알려준다. 이유를 모르면 유저는 버그로 받아들인다.</summary>
+    /// <summary>왜 못 끼웠는지 한 줄로 알려준다. 이유를 모르면 플레이어는 버그로 받아들인다.</summary>
     private static string DescribeEquipFailure(
         EquipmentLoadout loadout, EquipmentDefinition definition, EquipmentSlot slot)
     {
@@ -301,7 +301,7 @@ public partial class InventoryScreenUI
             case EquipmentStatType.XpAbsorbAmount:       return "경험치 획득";
             case EquipmentStatType.RareDropRate:         return "희귀 드롭";
             case EquipmentStatType.MaxCarryWeight:       return "소지 중량";
-            case EquipmentStatType.SlotCapacity:         return "적재 칸";
+            case EquipmentStatType.SlotCapacity:         return "칸";
             case EquipmentStatType.DamageIncrease:       return "피해";
             case EquipmentStatType.WeaponRangeIncrease:  return "사거리";
             case EquipmentStatType.FireIntervalIncrease: return "발사 간격";

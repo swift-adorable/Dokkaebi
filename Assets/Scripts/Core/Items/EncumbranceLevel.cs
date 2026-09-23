@@ -20,7 +20,7 @@ public enum EncumbranceLevel
 /// <summary>
 /// 무게 판정. MonoBehaviour 의존이 없는 순수 클래스다.
 ///
-/// 초반 병목은 적재 공간, 중반 이후 진짜 병목은 무게다. [확인됨 — 덕코프]
+/// 초반 병목은 가방 칸, 중반 이후 진짜 병목은 무게다. [확인됨 — 덕코프]
 /// 그래서 두 축을 분리해 두고 각각 다른 시점에 압박이 오게 한다.
 /// </summary>
 public static class WeightCalculator

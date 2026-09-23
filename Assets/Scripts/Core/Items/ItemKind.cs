@@ -14,7 +14,7 @@ public enum ItemKind
     /// <summary>방어구. 머리 / 몸통 / 얼굴 / 청각 슬롯에 들어간다.</summary>
     Armour = 2,
 
-    /// <summary>가방. 최대 소지 중량과 적재 공간을 준다.</summary>
+    /// <summary>가방. 최대 소지 중량과 가방 칸을 준다.</summary>
     Backpack = 3,
 
     /// <summary>각인. 2슬롯. 추출에 실패해도 잃지 않는다.</summary>

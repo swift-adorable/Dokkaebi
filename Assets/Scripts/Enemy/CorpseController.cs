@@ -4,7 +4,7 @@ using UnityEngine;
 /// 적 사망 후 남는 시체. 플레이어가 접근해 파밍한다.
 ///
 /// 파밍 = 【경험치 흡수 + 전리품 창】 한 동작이다.
-/// 경험치는 한 번만 들어오고, 전리품은 유저가 원하는 것만 집는다.
+/// 경험치는 한 번만 들어오고, 전리품은 플레이어가 원하는 것만 집는다.
 /// 다 집지 않아도 시체는 남으므로 나중에 돌아와 마저 집을 수 있다.
 ///
 /// 근접 여부 판정은 PlayerAbsorber의 OnTriggerEnter/Exit가 단독으로 담당한다.
@@ -12,7 +12,7 @@ using UnityEngine;
 public class CorpseController : MonoBehaviour, IPoolable
 {
     [Header("Reward")]
-    [Tooltip("적 등급 배수. 경험치와 전리품 추첨 횟수에 함께 곱한다.")]
+    [Tooltip("적 등급 배율. 경험치와 전리품 추첨 횟수에 함께 곱한다.")]
     [SerializeField] private int valueMultiplier = 1;
 
     [Header("Loot")]
@@ -36,17 +36,17 @@ public class CorpseController : MonoBehaviour, IPoolable
     public ConditionalDrop ConditionalDrops { get; private set; } = ConditionalDrop.None;
 
     /// <summary>
-    /// 경험치·추첨에 곱하는 배수.
+    /// 경험치·추첨에 곱하는 배율.
     ///
     /// 인스펙터 값은 EnemyRarity를 넘겨받지 못한 시체(씬에 직접 놓인 것 등)의
     /// 기본값으로만 남는다. 등급을 받으면 표가 이긴다.
     /// </summary>
     public int ValueMultiplier => Mathf.Max(1, valueMultiplier);
 
-    /// <summary>등급이 정한 경험치 배수. 정수로 깎지 않는다.</summary>
+    /// <summary>등급이 정한 경험치 배율. 정수로 깎지 않는다.</summary>
     public float ExperienceMultiplier => EnemyRewardTable.ExperienceMultiplier(Rarity);
 
-    /// <summary>등급이 정한 크레딧 배수.</summary>
+    /// <summary>등급이 정한 크레딧 배율.</summary>
     public float CreditMultiplier => EnemyRewardTable.CreditMultiplier(Rarity);
 
     /// <summary>
@@ -95,11 +95,11 @@ public class CorpseController : MonoBehaviour, IPoolable
     public void OnDespawned()
     {
         // 남은 전리품은 여기서 사라진다. 시체가 풀로 돌아가는 것은
-        // 유저가 전부 집었거나 멀어져 정리된 경우뿐이다.
+        // 플레이어가 전부 집었거나 멀어져 정리된 경우뿐이다.
         Loot.Clear();
     }
 
-    /// <summary>경험치를 한 번만 지급하기 위한 표식. PlayerAbsorber가 호출한다.</summary>
+    /// <summary>경험치를 한 번만 지급하기 위한 마커. PlayerAbsorber가 호출한다.</summary>
     public bool TryMarkAbsorbed()
     {
         if (IsAbsorbed)

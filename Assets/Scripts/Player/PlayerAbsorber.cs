@@ -11,7 +11,7 @@ public class PlayerAbsorber : MonoBehaviour
     [Tooltip("시체 1구 흡수 시 획득하는 기본 경험치")]
     [SerializeField] private int xpPerCorpse = 1;
 
-    [Tooltip("시체 하나가 주는 기본 크레딧. 등급 배수가 여기에 곱해진다.")]
+    [Tooltip("시체 하나가 주는 기본 크레딧. 등급 배율이 여기에 곱해진다.")]
     [Min(0)]
     [SerializeField] private int creditsPerCorpse = 4;
 
@@ -31,7 +31,7 @@ public class PlayerAbsorber : MonoBehaviour
     /// <summary>
     /// 파밍을 시도한다. 【경험치 흡수 + 전리품 창】이 한 동작이다.
     ///
-    /// 경험치는 한 번만 들어온다. 전리품은 유저가 원하는 것만 집는다.
+    /// 경험치는 한 번만 들어온다. 전리품은 플레이어가 원하는 것만 집는다.
     /// 다 집지 않아도 시체는 남으므로 나중에 돌아와 마저 집을 수 있다.
     ///
     /// 【이전 동작】 흡수 즉시 시체가 사라지고 젬이 가방에 자동으로 들어갔다.
@@ -103,7 +103,7 @@ public class PlayerAbsorber : MonoBehaviour
             Destroy(corpseObject);
     }
 
-    /// <summary>패시브 「경험치 획득 +n%」를 배수로 바꾼다.</summary>
+    /// <summary>패시브 「경험치 획득 +n%」를 배율로 바꾼다.</summary>
     private static float AbsorbMultiplier()
     {
         if (!PassiveManager.HasInstance)

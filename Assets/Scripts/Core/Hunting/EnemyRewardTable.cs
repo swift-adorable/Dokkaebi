@@ -12,7 +12,7 @@ using UnityEngine;
 /// </summary>
 public static class EnemyRewardTable
 {
-    /// <summary>경험치 배수. 문서 6절 표.</summary>
+    /// <summary>경험치 배율. 문서 6절 표.</summary>
     public static float ExperienceMultiplier(EnemyRarity rarity)
     {
         switch (rarity)
@@ -25,7 +25,7 @@ public static class EnemyRewardTable
     }
 
     /// <summary>
-    /// 크레딧 배수.
+    /// 크레딧 배율.
     ///
     /// 【경험치와 같은 값을 쓰지 않는다 — 두 축을 나누는 것이 6-1절의 요지다.】
     /// 문서는 「경험치는 저층이, 크레딧은 고층이 효율이 좋다」고 정했다.
@@ -34,7 +34,7 @@ public static class EnemyRewardTable
     /// 「강한 적을 잡는 것」이 크레딧보다 경험치에 더 크게 답하도록 한다.
     /// 구역 차이가 생기면 여기에 곱해진다.
     ///
-    /// 【불확실】 문서에 크레딧 배수 표가 없다.
+    /// 【불확실】 문서에 크레딧 배율 표가 없다.
     /// </summary>
     public static float CreditMultiplier(EnemyRarity rarity)
     {

@@ -291,7 +291,7 @@ public class Health : MonoBehaviour, IDamageable, IPoolable
     ///
     /// 소모품이 만능이 아니게 하는 유일한 장치다 —
     /// 회복약 하나로 모든 상황이 풀리면 가방을 그것만으로 채우게 된다.
-    /// (docs/Blob_Combat_Baseline.md 「임계 상태」)
+    /// (docs/Blob_Combat_Baseline.md 「위험 상태」)
     /// </summary>
     public int Heal(int amount)
     {

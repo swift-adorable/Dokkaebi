@@ -9,7 +9,7 @@ namespace Blob.Tests
     /// 6-C 장비 에셋의 계약 테스트.
     ///
     /// 문서에만 적힌 규칙은 언젠가 "방어력 +5 하나쯤이야"로 무너진다.
-    /// 그래서 규칙을 테스트로 고정한다 — 특히 【각인 순증 금지】.
+    /// 그래서 규칙을 테스트로 고정한다 — 특히 【각인 순수 증가 금지】.
     /// (docs/Blob_Imprint_System.md 0절 / Blob_Equipment_System.md 6절)
     /// </summary>
     public class EquipmentAssetTests
@@ -29,7 +29,7 @@ namespace Blob.Tests
         // ── 각인 — 이 게임의 뼈대를 지키는 테스트 ─────────────────────────
 
         /// <summary>
-        /// 각인은 사망해도 남는 유일한 장착품이다. 순증을 주면
+        /// 각인은 사망해도 남는 유일한 장착품이다. 순수 증가를 주면
         /// "죽어도 사라지지 않는 전투력"이 되어 「죽으면 들고 있던 것 전부」가 물러진다.
         /// </summary>
         [Test]
@@ -66,7 +66,7 @@ namespace Blob.Tests
 
         /// <summary>생성된 에셋도 같은 규칙을 지켜야 한다. 표만 맞고 에셋이 틀리면 의미가 없다.</summary>
         [Test]
-        public void 생성된_각인_에셋도_순증을_주지_않는다()
+        public void 생성된_각인_에셋도_순수_증가를_주지_않는다()
         {
             List<EquipmentDefinition> assets = Load<EquipmentDefinition>("Imprints");
 
@@ -80,7 +80,7 @@ namespace Blob.Tests
                 Assert.IsTrue(asset.SurvivesDeath, $"{asset.Id}가 사망 비유실이 아닙니다.");
 
                 Assert.IsTrue(asset.HasDrawback,
-                    $"{asset.Id}에 음수 옵션이 없습니다 — 순증 각인입니다.");
+                    $"{asset.Id}에 음수 옵션이 없습니다 — 순수 증가 각인입니다.");
 
                 Assert.IsTrue(asset.HasGain, $"{asset.Id}에 이득이 없습니다.");
             }
@@ -118,14 +118,14 @@ namespace Blob.Tests
         /// 경계가 무너지면 성장 축 넷 중 하나가 죽는다.
         /// </summary>
         [Test]
-        public void 각인은_적재_축을_건드리지_않는다()
+        public void 각인은_칸_축을_건드리지_않는다()
         {
             foreach (ImprintAssetGenerator.Spec spec in ImprintAssetGenerator.Table())
             {
                 foreach (EquipmentStat stat in spec.stats)
                 {
                     Assert.AreNotEqual(EquipmentStatType.SlotCapacity, stat.type,
-                        $"「{spec.familyLabel} {spec.tier}」가 적재 칸을 줍니다. 그것은 가방과 패시브의 몫입니다.");
+                        $"「{spec.familyLabel} {spec.tier}」가 칸을 줍니다. 그것은 가방과 패시브의 몫입니다.");
 
                     Assert.AreNotEqual(EquipmentStatType.MaxCarryWeight, stat.type,
                         $"「{spec.familyLabel} {spec.tier}」가 소지 중량을 줍니다.");
@@ -257,11 +257,11 @@ namespace Blob.Tests
         }
 
         /// <summary>
-        /// 【최고 티어일수록 적재가 준다】 — "방어 최대화 = 파밍량 최소화"가
+        /// 【최고 티어일수록 칸이 준다】 — "방어 최대화 = 파밍량 최소화"가
         /// 슬롯 구조에 박혀 있어야 방어구 선택이 결정이 된다.
         /// </summary>
         [Test]
-        public void 몸통_방어구는_티어가_오르면_적재가_준다()
+        public void 몸통_방어구는_티어가_오르면_칸이_준다()
         {
             List<EquipmentDefinition> normal = Load<EquipmentDefinition>("Armour")
                 .Where(a => a.Slot == EquipmentSlot.Body && !a.Id.Contains("_light") && !a.Id.Contains("_heavy"))
@@ -274,7 +274,7 @@ namespace Blob.Tests
             float last = normal.Last().GetStat(EquipmentStatType.SlotCapacity);
 
             Assert.Less(last, first,
-                "티어가 올라도 적재가 줄지 않습니다. 「방어 최대화 = 파밍량 최소화」가 성립하지 않습니다.");
+                "티어가 올라도 칸이 줄지 않습니다. 「방어 최대화 = 파밍량 최소화」가 성립하지 않습니다.");
 
             float bodyArmourFirst = normal.First().GetStat(EquipmentStatType.BodyArmour);
             float bodyArmourLast = normal.Last().GetStat(EquipmentStatType.BodyArmour);
@@ -282,7 +282,7 @@ namespace Blob.Tests
             Assert.Greater(bodyArmourLast, bodyArmourFirst, "티어가 올라도 방어도가 오르지 않습니다.");
         }
 
-        /// <summary>같은 티어에서 경량은 적재를, 중갑은 방어를 가져가야 선택이 생긴다.</summary>
+        /// <summary>같은 티어에서 경량은 칸을, 중갑은 방어를 가져가야 선택이 생긴다.</summary>
         [Test]
         public void 몸통_3변형이_서로_다른_것을_준다()
         {
@@ -295,10 +295,10 @@ namespace Blob.Tests
             EquipmentDefinition normal = body.First(a => !a.Id.Contains("_light") && !a.Id.Contains("_heavy"));
 
             Assert.Greater(light.GetStat(EquipmentStatType.SlotCapacity),
-                normal.GetStat(EquipmentStatType.SlotCapacity), "경량이 적재를 더 주지 않습니다.");
+                normal.GetStat(EquipmentStatType.SlotCapacity), "경량이 칸을 더 주지 않습니다.");
 
             Assert.AreEqual(0f, heavy.GetStat(EquipmentStatType.SlotCapacity), 0.001f,
-                "중갑의 적재가 0이 아닙니다.");
+                "중갑의 칸이 0이 아닙니다.");
 
             Assert.Greater(heavy.GetStat(EquipmentStatType.BodyArmour),
                 normal.GetStat(EquipmentStatType.BodyArmour), "중갑이 방어도를 더 주지 않습니다.");
@@ -370,16 +370,16 @@ namespace Blob.Tests
 
             // 맨몸으로도 한 판 돌 수 있어야 한다. 12칸은 너무 작았다.
             Assert.GreaterOrEqual(PlayerInventory.BaseSlots, 20,
-                "기본 적재가 20칸 미만이면 가방을 찾기 전에 아무것도 못 줍습니다.");
+                "기본 칸이 20칸 미만이면 가방을 찾기 전에 아무것도 못 줍습니다.");
         }
 
         /// <summary>
-        /// 【최고 티어일수록 적재가 준다.】 단 0까지는 가지 않는다 —
+        /// 【최고 티어일수록 칸이 준다.】 단 0까지는 가지 않는다 —
         /// 0으로 만들면 「최고 방어구를 입으면 아예 못 줍는다」가 되어
         /// 선택이 아니라 금지가 된다. 덕코프도 최상위에서 +2를 남긴다.
         /// </summary>
         [Test]
-        public void 몸통_일반_변형은_최상위에서도_적재가_0이_아니다()
+        public void 몸통_일반_변형은_최상위에서도_칸이_0이_아니다()
         {
             EquipmentDefinition top = Load<EquipmentDefinition>("Armour")
                 .Where(a => a.Slot == EquipmentSlot.Body
@@ -388,11 +388,11 @@ namespace Blob.Tests
                 .First();
 
             Assert.Greater(top.GetStat(EquipmentStatType.SlotCapacity), 0f,
-                "최고 티어 일반 몸통의 적재가 0입니다. 그것은 중갑 변형의 몫입니다.");
+                "최고 티어 일반 몸통의 칸이 0입니다. 그것은 중갑 변형의 몫입니다.");
         }
 
         /// <summary>
-        /// 「최대 소지 중량」과 「적재 공간」은 별도 자원이다.
+        /// 「최대 소지 중량」과 「가방 칸」은 별도 자원이다.
         /// 가방마다 배분이 달라야 "초반 병목은 칸, 후반 병목은 무게"가 선택으로 나타난다.
         /// </summary>
         [Test]
@@ -483,8 +483,8 @@ namespace Blob.Tests
             var modifiers = new EquipmentModifiers();
             modifiers.Add(imprint);
 
-            // 면역은 【걸리는 상태】를 막는다. 임계 상태(동결)가 아니라 원본(냉각)이다.
-            // 동결만 막으면 "내한 장비를 꼈는데 여전히 느려진다"가 되어 유저가 혼란스럽다.
+            // 면역은 【걸리는 상태】를 막는다. 위험 상태(동결)가 아니라 원본(냉각)이다.
+            // 동결만 막으면 "내한 장비를 꼈는데 여전히 느려진다"가 되어 플레이어가 혼란스럽다.
             Assert.IsTrue(modifiers.IsImmuneTo(StatusEffectType.Ignite), "점화 면역");
             Assert.IsTrue(modifiers.IsImmuneTo(StatusEffectType.Chill), "냉각 면역");
             Assert.IsTrue(modifiers.IsImmuneTo(StatusEffectType.Shock), "감전 면역");

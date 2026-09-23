@@ -58,7 +58,7 @@ namespace Blob.Tests
         [Test]
         public void id가_중복되지_않는다()
         {
-            // 중복은 도감·적재 저장을 조용히 망가뜨린다.
+            // 중복은 도감·장비 구성 저장을 조용히 망가뜨린다.
             var ids = All.Select(d => d.Id).ToList();
 
             CollectionAssert.AllItemsAreUnique(ids);
@@ -116,12 +116,12 @@ namespace Blob.Tests
             }
         }
 
-        // ── 태그 게이팅 — 버려지는 선택지가 없어야 한다 ────────────────────
+        // ── 태그 조건 — 버려지는 선택지가 없어야 한다 ────────────────────
 
         [Test]
         public void 모든_Support는_붙을_수_있는_Core가_존재한다()
         {
-            // ★ 태그 게이팅의 존재 이유 그 자체다.
+            // ★ 태그 조건의 존재 이유 그 자체다.
             // 요구 태그를 만족하는 핵심 젬이 없으면 그 보조 젬은 영원히 죽은 선택지가 된다.
             var coreTags = Of(SkillCategory.Core).Select(c => c.Tags).ToList();
 
@@ -187,7 +187,7 @@ namespace Blob.Tests
         /// <summary>
         /// 만들 수단이 없는 상태는 죽은 어휘다.
         ///
-        /// 【임계 상태는 제외한다.】 동결·마비·부식은 핵심 젬이 직접 걸지 않는다.
+        /// 【위험 상태는 제외한다.】 동결·마비·부식은 핵심 젬이 직접 걸지 않는다.
         /// 원본(냉각·감전·중독)이 최대 중첩에 차면 전이로만 생긴다.
         /// </summary>
         [Test]
@@ -200,13 +200,13 @@ namespace Blob.Tests
                 if (s == StatusEffectType.None)
                     continue;
 
-                // 임계 상태는 전이로만 생긴다.
+                // 위험 상태는 전이로만 생긴다.
                 if (s == StatusEffectType.Freeze
                     || s == StatusEffectType.Paralyze
                     || s == StatusEffectType.Corrode)
                 {
                     Assert.IsFalse(created.Contains(s),
-                        $"{s}는 임계 상태입니다. 핵심 젬이 직접 걸면 안 됩니다.");
+                        $"{s}는 위험 상태입니다. 핵심 젬이 직접 걸면 안 됩니다.");
 
                     continue;
                 }
@@ -215,9 +215,9 @@ namespace Blob.Tests
             }
         }
 
-        /// <summary>임계 상태 3종은 전부 전이 대상이 있어야 한다.</summary>
+        /// <summary>위험 상태 3종은 전부 전이 대상이 있어야 한다.</summary>
         [Test]
-        public void 임계_상태는_전부_전이_원본이_있다()
+        public void 한계치_상태는_전부_전이_원본이_있다()
         {
             Assert.AreEqual(StatusEffectType.Freeze,
                 StatusEffectTable.ThresholdOf(StatusEffectType.Chill));
@@ -228,7 +228,7 @@ namespace Blob.Tests
             Assert.AreEqual(StatusEffectType.Corrode,
                 StatusEffectTable.ThresholdOf(StatusEffectType.Poison));
 
-            // 임계 상태는 다시 임계로 전이하지 않는다.
+            // 위험 상태는 다시 한계치로 전이하지 않는다.
             Assert.AreEqual(StatusEffectType.None,
                 StatusEffectTable.ThresholdOf(StatusEffectType.Freeze));
         }

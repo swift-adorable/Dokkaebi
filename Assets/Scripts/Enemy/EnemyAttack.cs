@@ -62,7 +62,7 @@ public class EnemyAttack : MonoBehaviour
     [Tooltip("예비동작 중 표시할 오브젝트(선택). 없으면 표시하지 않는다.")]
     [SerializeField] private GameObject windupIndicator;
 
-    [Tooltip("원거리 예비동작 중의 이동 속도 배수. 0이면 완전히 멈춘다.")]
+    [Tooltip("원거리 예비동작 중의 이동 속도 배율. 0이면 완전히 멈춘다.")]
     [Range(0f, 1f)]
     [SerializeField] private float rangedWindupSpeedScale = 0.45f;
 
@@ -80,7 +80,7 @@ public class EnemyAttack : MonoBehaviour
 
     public float AttackRange => attackRange;
 
-    /// <summary>기본 피해. 프리팹 수치가 전투 정본과 맞는지 테스트가 읽는다.</summary>
+    /// <summary>기본 피해. 프리팹 수치가 전투 기준과 맞는지 테스트가 읽는다.</summary>
     public int Damage => damage;
 
     /// <summary>방어 관통 레벨.</summary>

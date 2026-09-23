@@ -46,9 +46,9 @@ public static class SkillAssetGenerator
         // ── 효과 ──────────────────────────────────────────────────────
         public float dmg;          // 기본 피해 증가율
         public float ailPower;     // 상태이상 위력 증가율
-        public float ailDuration;  // 상태이상·잔류물 지속시간 배수
-        public float range;        // 유효 사거리 배수
-        public float zoneRadius;   // 잔류물 반경 배수 — range와 다른 축이다
+        public float ailDuration;  // 상태이상·잔류물 지속시간 배율
+        public float range;        // 유효 사거리 배율
+        public float zoneRadius;   // 잔류물 반경 배율 — range와 다른 축이다
         public float spread;       // 추가 투사체 간 각도(도)
         public StatusEffectType ailOverride;
         public StatusEffectType ailAddition;
@@ -209,7 +209,7 @@ public static class SkillAssetGenerator
         r.creates = StatusEffectType.Poison;
         t.Add(r);
 
-        r = New("core_frost", "서리", "냉기를 누적시키고 임계치를 넘으면 동결시킨다.", SkillCategory.Core, 3);
+        r = New("core_frost", "서리", "냉기를 누적시키고 한계치를 넘으면 동결시킨다.", SkillCategory.Core, 3);
         r.family = CoreFamily.Ailment;
         r.tags = SkillTag.Projectile | SkillTag.Cold;
         // 부여하는 것은 냉각이다. 6중첩에서 동결로 전이한다.
@@ -360,7 +360,7 @@ public static class SkillAssetGenerator
         r.conditionStatus = StatusEffectType.Ignite; r.conditionalDmg = 0.80f;
         t.Add(r);
 
-        r = New("sup_frozen_malice", "얼어붙은 악의", "동결 임계치가 30% 낮아진다.", SkillCategory.Support, 5);
+        r = New("sup_frozen_malice", "얼어붙은 악의", "동결 한계치가 30% 낮아진다.", SkillCategory.Support, 5);
         r.requiredTags = SkillTag.Cold;
         r.cost = CostType.Duration; r.costDesc = "냉기 직접 피해가 지속 피해로 전환된다";
         r.ailPower = 0.30f;

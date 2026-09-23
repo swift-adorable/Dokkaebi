@@ -47,7 +47,7 @@ namespace Blob.Tests
         public void 동시_장착_상한은_11칸이다()
         {
             // 11 = 핵심 젬 2 + 보조 젬 6 + 발동 2 + 전령 1
-            // 적재(Loadout) 개념은 폐기되었으나 이 상한 자체는 그대로다.
+            // 장비 구성(Loadout) 개념은 폐기되었으나 이 상한 자체는 그대로다.
             // 가방 용량이 그 자리를 대신 맡는다. (Skill_System.md 11-1절)
             Assert.AreEqual(
                 11,

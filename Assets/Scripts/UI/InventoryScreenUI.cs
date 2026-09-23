@@ -10,7 +10,7 @@ using UnityEngine.UI;
 ///   상단 중앙 : 탭 (장비 / 스킬 / 패시브)
 ///   좌상단    : 크레딧
 ///   장비 탭   : 장비 8슬롯 · 가방 격자 (폭 전체)
-///   스킬 탭   : 좌 스킬 젬 목록(분류별) · 우 소켓판
+///   스킬 탭   : 좌 스킬 젬 목록(분류별) · 우 소켓 화면
 ///   패시브 탭 : 계열 트리 (폭 전체)
 ///   하단 중앙 : 퀵슬롯 1~8
 ///   하단 좌   : 소지 중량 막대
@@ -161,7 +161,7 @@ public partial class InventoryScreenUI : MonoBehaviour
     private RectTransform bodyRegion;
 
 
-    /// <summary>안전 영역 컨테이너. 화면 UI는 전부 이 아래에 붙는다.</summary>
+    /// <summary>안전 영역 상자. 화면 UI는 전부 이 아래에 붙는다.</summary>
     private RectTransform safeArea;
 
     /// <summary>
@@ -454,10 +454,10 @@ public partial class InventoryScreenUI : MonoBehaviour
     // 장비 탭과 스킬 탭이 【같은 네 단】을 쓴다.
     //
     //   장비 : 「장비」      · 장비 8칸 · 「가방 (n/m)」    · 아이템 격자
-    //   스킬 : 「각성 Lv.n」 · 소켓판   · 「스킬 젬 (n개)」 · 젬 목록
+    //   스킬 : 「각성 Lv.n」 · 소켓 화면   · 「스킬 젬 (n개)」 · 젬 목록
     //
     // 두 화면의 구조가 같아지면 「위는 끼우는 자리, 아래는 가진 것」이라는
-    // 한 가지만 배우면 된다. 소켓판이 장비 8칸보다 한 줄 많아 그만큼 더 준다.
+    // 한 가지만 배우면 된다. 소켓 화면이 장비 8칸보다 한 줄 많아 그만큼 더 준다.
 
     private const float TopBandTop = 0.905f;
     private const float TitleTop = 0.985f;
@@ -1135,7 +1135,7 @@ public partial class InventoryScreenUI : MonoBehaviour
     /// 스킬 탭의 젬 목록 — 【분류별로 끊어서】 보여 준다.
     ///
     /// 전에는 43개를 한 덩어리로 늘어놓아서, 어느 것이 핵심이고 어느 것이
-    /// 보조인지 하나씩 눌러 봐야 알 수 있었다. 오른쪽 소켓판은 이미
+    /// 보조인지 하나씩 눌러 봐야 알 수 있었다. 오른쪽 소켓 화면은 이미
     /// 「핵심 · 소켓 · 발동 · 전령」으로 나뉘어 있으니, 왼쪽도 같은 순서로
     /// 끊어 두면 「이 줄의 젬은 저 줄의 자리에 들어간다」가 바로 읽힌다.
     /// </summary>
@@ -1320,7 +1320,7 @@ public partial class InventoryScreenUI : MonoBehaviour
 
     /// <summary>
     /// 사이드 메뉴의 「장착」. 장비는 자리를 알아서 고르고,
-    /// 젬은 소켓판에서 고르게 넘긴다 — 어디에 꽂느냐가 곧 빌드다.
+    /// 젬은 소켓 화면에서 고르게 넘긴다 — 어디에 꽂느냐가 곧 빌드다.
     /// </summary>
     private void EquipFromMenu(ItemStack stack)
     {

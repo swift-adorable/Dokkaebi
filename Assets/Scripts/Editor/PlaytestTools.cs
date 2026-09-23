@@ -9,10 +9,10 @@ using UnityEngine;
 ///
 /// 그렇게 바꾼 이유 — 원래는 여기에 AssetDatabase로 에셋을 찾는 코드가 들어 있었다.
 /// MenuItem도 AssetDatabase도 **빌드에 존재하지 않는다.** 이 게임은 모바일이고
-/// 실기(iOS)에서 확인하는 것이 당연한데, 거기서는 장비를 얻을 방법이 하나도 없었다.
+/// 실제 기기(iOS)에서 확인하는 것이 당연한데, 거기서는 장비를 얻을 방법이 하나도 없었다.
 /// 검증 도구가 검증하는 자리에서 돌지 않으면 도구가 아니다.
 ///
-/// 실기에서는 화면 좌하단 「검증」 버튼(PlaytestPanelUI)이 같은 것을 부른다.
+/// 실제 기기에서는 화면 좌하단 「검증」 버튼(PlaytestPanelUI)이 같은 것을 부른다.
 /// </summary>
 public static class PlaytestTools
 {
@@ -25,12 +25,12 @@ public static class PlaytestTools
 
         EditorUtility.DisplayDialog("플레이 중에만 씁니다",
             "플레이 모드에서 실행하십시오. 가방은 실행 중에만 존재합니다.\n\n"
-            + "빌드(실기)에서는 화면 좌하단 「검증」 버튼을 쓰십시오.", "확인");
+            + "빌드(실제 기기)에서는 화면 좌하단 「검증」 버튼을 쓰십시오.", "확인");
 
         return false;
     }
 
-    /// <summary>결과를 콘솔과 가방 화면 양쪽에 남긴다. 실기에는 Console 창이 없다.</summary>
+    /// <summary>결과를 콘솔과 가방 화면 양쪽에 남긴다. 실제 기기에는 Console 창이 없다.</summary>
     private static void Run(System.Func<string> action)
     {
         if (!RequirePlayMode())

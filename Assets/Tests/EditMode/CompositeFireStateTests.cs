@@ -5,13 +5,13 @@ namespace Blob.Tests
     /// <summary>
     /// 합성 발사 테스트. (확정 기획 — 핵심 젬 2개는 한 발에 합쳐진다)
     ///
-    /// 핵심 규약: 적재 계열 핵심 젬이 2개여도 탄 수는 늘지 않고, 상태만 번갈아 실린다.
+    /// 핵심 규약: 칸 계열 핵심 젬이 2개여도 탄 수는 늘지 않고, 상태만 번갈아 실린다.
     /// 두 상태를 매 발사마다 동시에 걸면 보조 젬 「이차 주입」이 무가치해진다.
     /// </summary>
     public class CompositeFireStateTests
     {
         [Test]
-        public void 적재_Core가_없으면_부여할_상태가_없다()
+        public void 장착_Core가_없으면_부여할_상태가_없다()
         {
             var state = new CompositeFireState();
 
@@ -20,7 +20,7 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 적재_Core가_1개면_항상_그것만_부여한다()
+        public void 장착_Core가_1개면_항상_그것만_부여한다()
         {
             var state = new CompositeFireState();
 
@@ -29,7 +29,7 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 적재_Core가_2개면_발사마다_번갈아_부여한다()
+        public void 장착_Core가_2개면_발사마다_번갈아_부여한다()
         {
             var state = new CompositeFireState();
 
@@ -62,9 +62,9 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 런_도중_적재_Core가_늘어도_안전하다()
+        public void 출격_도중_장착_Core가_늘어도_안전하다()
         {
-            // 예외 상황: 1개로 쏘다가 레벨업으로 2번째 적재 핵심 젬을 얻는 경우.
+            // 예외 상황: 1개로 쏘다가 레벨업으로 2번째 칸 핵심 젬을 얻는 경우.
             var state = new CompositeFireState();
 
             state.NextAilmentIndex(1);
@@ -75,7 +75,7 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 런_도중_적재_Core가_줄어도_범위를_벗어나지_않는다()
+        public void 출격_도중_장착_Core가_줄어도_범위를_벗어나지_않는다()
         {
             var state = new CompositeFireState();
 

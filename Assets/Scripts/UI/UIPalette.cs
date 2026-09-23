@@ -95,7 +95,7 @@ public static class UIPalette
     // 색으로 구분한다 — 아트가 없는 지금은 이것이 유일한 구분이다.
 
     // ── 상태이상 (Combat_Baseline) ────────────────────────────────────
-    // 속성을 따른다. 임계 상태 셋은 붉은 계열로 묶어,
+    // 속성을 따른다. 위험 상태 셋은 붉은 계열로 묶어,
     // 「지금 움직일 수 없다」와 「조금 아프다」가 한눈에 구분되게 한다.
 
     public static Color ForStatus(StatusEffectType type)
@@ -109,7 +109,7 @@ public static class UIPalette
             case StatusEffectType.Shock:    return new Color(0.96f, 0.86f, 0.36f, 1f);
             case StatusEffectType.Congeal:  return new Color(0.72f, 0.56f, 0.94f, 1f);
 
-            // 임계 상태 — 붉게.
+            // 위험 상태 — 붉게.
             case StatusEffectType.Freeze:   return new Color(0.42f, 0.72f, 1f, 1f);
             case StatusEffectType.Paralyze: return new Color(1f, 0.74f, 0.24f, 1f);
             case StatusEffectType.Corrode:  return new Color(0.78f, 0.92f, 0.32f, 1f);

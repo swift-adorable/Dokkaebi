@@ -3,7 +3,7 @@ using UnityEngine;
 /// <summary>입력 소스 선택 방식.</summary>
 public enum InputSourceMode
 {
-    /// <summary>플랫폼에 따라 자동 선택. (에디터/PC: Desktop, 실기기: Touch)</summary>
+    /// <summary>플랫폼에 따라 자동 선택. (에디터/PC: Desktop, 실제 기기: Touch)</summary>
     Auto,
 
     /// <summary>강제로 키보드/마우스 사용.</summary>

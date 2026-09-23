@@ -1,11 +1,11 @@
 /// <summary>
 /// 상태이상의 한국어 이름과 색. 【화면에 띄우려면 이름이 필요하다.】
 ///
-/// enum 이름(Ignite·Chill)은 코드의 것이고, 유저가 보는 것은 「점화 · 냉각」이다.
+/// enum 이름(Ignite·Chill)은 코드의 것이고, 플레이어가 보는 것은 「점화 · 냉각」이다.
 /// (용어 기준표 — 코드 이름은 영어, 사람이 읽는 글은 한국어)
 ///
 /// 색은 속성을 따른다 — 불은 주황, 냉기는 하늘, 번개는 노랑, 독은 초록.
-/// 【임계 상태 셋(동결·마비·부식)은 붉은 계열로 묶는다.】
+/// 【위험 상태 셋(동결·마비·부식)은 붉은 계열로 묶는다.】
 /// 「지금 움직일 수 없다」와 「조금 아프다」는 한눈에 구분되어야 한다.
 /// </summary>
 public static class StatusEffectNames
@@ -27,7 +27,7 @@ public static class StatusEffectNames
         }
     }
 
-    /// <summary>【임계 상태인가.】 동결·마비는 행동 불능, 부식은 방어·회복 절반.</summary>
+    /// <summary>【위험 상태인가.】 동결·마비는 행동 불능, 부식은 방어·회복 절반.</summary>
     public static bool IsCritical(StatusEffectType type)
     {
         return type == StatusEffectType.Freeze

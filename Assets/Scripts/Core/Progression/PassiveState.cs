@@ -16,7 +16,7 @@ public enum PassiveError
     /// <summary>크레딧이 부족하다.</summary>
     NotEnoughCredits,
 
-    /// <summary>필요물품이 부족하다.</summary>
+    /// <summary>필요 재료가 부족하다.</summary>
     MissingMaterials,
 
     /// <summary>계열이 아직 발견되지 않았다. (역행)</summary>
@@ -120,7 +120,7 @@ public class PassiveState
         return PassiveError.None;
     }
 
-    /// <summary>필요물품을 전부 가지고 있는지. 재료 창고가 null이면 검사를 생략한다.</summary>
+    /// <summary>필요 재료를 전부 가지고 있는지. 재료 창고가 null이면 검사를 생략한다.</summary>
     public static bool HasMaterials(PassiveNode node, Inventory source)
     {
         if (node == null || !node.NeedsMaterials || source == null)
@@ -250,7 +250,7 @@ public class PassiveState
     public void Clear() => learned.Clear();
 }
 
-/// <summary>PassiveError를 유저에게 보여 줄 한국어 문구로 바꾼다.</summary>
+/// <summary>PassiveError를 플레이어에게 보여 줄 한국어 문구로 바꾼다.</summary>
 public static class PassiveErrorText
 {
     public static string Describe(PassiveError error)
@@ -263,7 +263,7 @@ public static class PassiveErrorText
             case PassiveError.MissingPrerequisite: return "선행 항목을 먼저 배워야 합니다.";
             case PassiveError.LevelTooLow:         return "계정 레벨이 부족합니다.";
             case PassiveError.NotEnoughCredits:    return "크레딧이 부족합니다.";
-            case PassiveError.MissingMaterials:    return "필요물품이 부족합니다.";
+            case PassiveError.MissingMaterials:    return "필요 재료가 부족합니다.";
             case PassiveError.BranchUndiscovered:  return "아직 발견하지 못한 계열입니다.";
             default:                               return "배울 수 없습니다.";
         }

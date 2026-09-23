@@ -10,7 +10,7 @@ namespace Blob.Tests
     ///
     /// 지켜야 할 것 하나 — 【아이템은 사라지지 않는다.】
     /// 가방에 자리가 없으면 전리품 칸에 그대로 남아야 한다.
-    /// 조용히 증발하면 유저는 "버그인가 원래 그런가"를 판단할 수 없다.
+    /// 조용히 증발하면 플레이어는 "버그인가 원래 그런가"를 판단할 수 없다.
     /// </summary>
     public class LootContainerTests
     {
@@ -33,10 +33,10 @@ namespace Blob.Tests
             return def;
         }
 
-        // ── 가방 → 컨테이너 (창고의 「넣기」) ─────────────────────────────
+        // ── 가방 → 상자 (창고의 「넣기」) ─────────────────────────────
 
         [Test]
-        public void 가방에서_컨테이너로_옮긴다()
+        public void 가방에서_상자로_옮긴다()
         {
             var loot = new LootContainer(4);
             var bag = new Inventory(slots: 4, weight: 100f);
@@ -55,7 +55,7 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 컨테이너가_꽉_차면_가방에_그대로_남는다()
+        public void 상자가_꽉_차면_가방에_그대로_남는다()
         {
             // 【아이템은 사라지지 않는다.】 반대 방향에서도 같은 규칙이다.
             var loot = new LootContainer(1);
@@ -72,7 +72,7 @@ namespace Blob.Tests
 
             Assert.AreEqual(1, bag.Stacks.Count, "가방에 그대로 있어야 합니다.");
             Assert.AreSame(stack, bag.Stacks[0]);
-            Assert.AreEqual(1, loot.UsedSlots, "컨테이너는 그대로여야 합니다.");
+            Assert.AreEqual(1, loot.UsedSlots, "상자는 그대로여야 합니다.");
         }
 
         [Test]

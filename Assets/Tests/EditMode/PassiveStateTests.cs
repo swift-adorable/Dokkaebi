@@ -196,12 +196,12 @@ namespace Blob.Tests
             Assert.AreEqual(0, state.TryLearn(node, Ctx()));
         }
 
-        // ── 필요물품 ──────────────────────────────────────────────────────
+        // ── 필요 재료 ──────────────────────────────────────────────────────
 
         [Test]
-        public void 필요물품이_모자라면_배울_수_없다()
+        public void 필요_재료가_모자라면_배울_수_없다()
         {
-            // 덕코프 스킬 표의 「필요물품」 열. [확인됨]
+            // 덕코프 스킬 표의 「필요 재료」 열. [확인됨]
             // 크레딧만 쓰면 시간을 들이면 전부 열린다. 결정이 없다.
             ItemDefinition core = Item("memory_core");
 
@@ -220,7 +220,7 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 배우면_필요물품이_실제로_소모된다()
+        public void 배우면_필요_재료가_실제로_소모된다()
         {
             // 검사와 소모가 갈라지면 「공짜로 배워지는」 상태가 조용히 생긴다.
             ItemDefinition core = Item("memory_core");
@@ -245,7 +245,7 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 배우지_못하면_필요물품도_소모되지_않는다()
+        public void 배우지_못하면_필요_재료도_소모되지_않는다()
         {
             ItemDefinition core = Item("memory_core");
 

@@ -45,7 +45,7 @@ public static class UIFactory
     }
 
     /// <summary>
-    /// 안전 영역에 맞춰지는 컨테이너를 만들어 돌려준다.
+    /// 안전 영역에 맞춰지는 상자를 만들어 돌려준다.
     /// 화면 UI는 캔버스가 아니라 **이것의 자식**으로 붙인다.
     /// 그래야 노치와 홈 인디케이터를 피한다. (SafeAreaFitter)
     /// </summary>

@@ -195,7 +195,7 @@ public class SocketedBuild
         if (definition.RequiredLevel > awakeningLevel)
             return SocketError.LevelTooHigh;
 
-        // 태그 게이팅. 핵심 젬이 요구 태그를 전부 가져야 한다. (10-2 [1])
+        // 태그 조건. 핵심 젬이 요구 태그를 전부 가져야 한다. (10-2 [1])
         if (!cores[coreIndex].Tags.ContainsAll(definition.RequiredTags))
             return SocketError.TagMismatch;
 
@@ -294,7 +294,7 @@ public class SocketedBuild
         return best;
     }
 
-    /// <summary>두 결과 중 유저에게 더 희망적인 쪽. None이면 무조건 None.</summary>
+    /// <summary>두 결과 중 플레이어에게 더 희망적인 쪽. None이면 무조건 None.</summary>
     private static SocketError Better(SocketError a, SocketError b)
     {
         if (a == SocketError.None || b == SocketError.None)
@@ -323,7 +323,7 @@ public class SocketedBuild
 
         cores[coreIndex] = definition;
 
-        // 핵심 젬이 바뀌면 태그 게이팅을 다시 통과하지 못하는 보조 젬이 생긴다.
+        // 핵심 젬이 바뀌면 태그 조건을 다시 통과하지 못하는 보조 젬이 생긴다.
         // 조용히 무효화하지 않고 가방으로 돌려보낸다. 아이템을 없애지 않기 위해서다.
         for (int s = 0; s < SocketsPerCore; s++)
         {
@@ -400,7 +400,7 @@ public class SocketedBuild
     /// <summary>
     /// 분류를 보고 첫 번째로 가능한 자리에 끼운다.
     /// 자동 획득이 아니라 UI의 「빠른 장착」 편의 기능이다.
-    /// 자리가 둘 이상 가능하면 유저가 직접 고르는 경로를 따로 둔다.
+    /// 자리가 둘 이상 가능하면 플레이어가 직접 고르는 경로를 따로 둔다.
     /// </summary>
     public bool TryEquipAuto(SkillDefinition definition, List<SkillDefinition> returned = null)
     {

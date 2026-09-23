@@ -9,7 +9,7 @@ namespace Blob.Tests
     /// 7단계 사냥 데이터 골격의 계약 테스트.
     ///
     /// 【여기서 강제하는 것】
-    ///   1. 유형 수치가 전투 정본(Combat_Baseline 5절) 표와 한 글자도 다르지 않다
+    ///   1. 유형 수치가 전투 기준(Combat_Baseline 5절) 표와 한 글자도 다르지 않다
     ///   2. 조합 금지 규칙이 실제로 막힌다
     ///   3. 저항이 곱해지지 않는다
     ///   4. 설계 규칙 — 한 유형이 두 개의 답을 요구하지 않는다
@@ -36,7 +36,7 @@ namespace Blob.Tests
         };
 
         [Test]
-        public void 유형_수치가_전투_정본과_같다()
+        public void 유형_수치가_전투_기준과_같다()
         {
             foreach (var row in Baseline)
             {
@@ -59,7 +59,7 @@ namespace Blob.Tests
                 "enum과 EnemyArchetypeTable.Count가 어긋났습니다.");
 
             Assert.AreEqual(all.Length, Baseline.Length,
-                "유형을 추가했는데 이 테스트의 정본 표를 갱신하지 않았습니다.");
+                "유형을 추가했는데 이 테스트의 기준 표를 갱신하지 않았습니다.");
 
             foreach (EnemyArchetype archetype in all)
             {
@@ -116,7 +116,7 @@ namespace Blob.Tests
         /// 【이전 판을 폐기했다 — 정정】
         /// 처음에는 「체력 60 이상 + 방어도 4 이상 금지」라는 기준을 내가 만들어
         /// 넣었고, 압착기(90 / 4)에서 실패했다. 그런데 압착기는 문서가
-        /// 「느리고 단단」하라고 직접 지정한 유형이다. 원문에 없는 임계값을
+        /// 「느리고 단단」하라고 직접 지정한 유형이다. 원문에 없는 한계치를
         /// 지어내 문서를 틀렸다고 판정한 셈이다. 문서의 열을 그대로 쓴다.
         /// </summary>
         private static readonly (EnemyArchetype archetype, EnemyAnswer answer)[] Answers =
@@ -450,7 +450,7 @@ namespace Blob.Tests
             {
                 Assert.IsTrue(covered.Contains(element),
                     $"{element} 피해에 저항하는 몬스터 속성이 없습니다. " +
-                    "그 속성으로 빌드한 유저만 「답을 바꾸는」 경험을 하지 않습니다.");
+                    "그 속성으로 빌드한 플레이어만 「답을 바꾸는」 경험을 하지 않습니다.");
             }
         }
 

@@ -6,7 +6,7 @@ using UnityEngine;
 ///
 /// 순수 클래스이므로 합산 규칙을 단위 테스트로 검증할 수 있다.
 ///
-/// ※ v5에는 중첩(stack)이 없으므로 중첩 배수 연산을 제거했다.
+/// ※ v5에는 중첩(stack)이 없으므로 중첩 배율 연산을 제거했다.
 ///    같은 스킬를 두 번 얻을 수 없다. (10-9)
 /// </summary>
 public class WeaponModifiers
@@ -26,13 +26,13 @@ public class WeaponModifiers
     /// <summary>추가 투사체 간 각도(도). 여러 Skill이 있으면 가장 큰 값을 쓴다.</summary>
     public float SpreadAngle { get; private set; }
 
-    /// <summary>발사 간격 배수. 1보다 크면 느려진다. (대가: 탄막 밀도)</summary>
+    /// <summary>발사 간격 배율. 1보다 크면 느려진다. (대가: 탄막 밀도)</summary>
     public float FireIntervalMultiplier { get; private set; } = 1f;
 
-    /// <summary>투사체 수명 배수. 1보다 작으면 사거리가 줄어든다. (대가: 유효 사거리)</summary>
+    /// <summary>투사체 수명 배율. 1보다 작으면 사거리가 줄어든다. (대가: 유효 사거리)</summary>
     public float LifetimeMultiplier { get; private set; } = 1f;
 
-    /// <summary>투사체 속도 배수.</summary>
+    /// <summary>투사체 속도 배율.</summary>
     public float SpeedMultiplier { get; private set; } = 1f;
 
     // ── 효과 축 ───────────────────────────────────────────────────────
@@ -45,14 +45,14 @@ public class WeaponModifiers
     public float AilmentPower { get; private set; }
 
     /// <summary>
-    /// 상태이상·잔류물 지속시간 배수. 【투사체 수명(LifetimeMultiplier)과 다른 축이다.】
+    /// 상태이상·잔류물 지속시간 배율. 【투사체 수명(LifetimeMultiplier)과 다른 축이다.】
     ///
     /// 두 축을 하나로 쓰던 동안 「유지되는 대지」(잔류물 +100%)가
     /// 투사체 사거리를 2배로 만들었다. (docs/Blob_Audit.md D2)
     /// </summary>
     public float AilmentDurationMultiplier { get; private set; } = 1f;
 
-    /// <summary>유효 사거리 배수. 대가 「유효 사거리」가 이것을 깎는다.</summary>
+    /// <summary>유효 사거리 배율. 대가 「유효 사거리」가 이것을 깎는다.</summary>
     public float RangeMultiplier { get; private set; } = 1f;
 
     /// <summary>
@@ -69,9 +69,9 @@ public class WeaponModifiers
     public int TotalProjectiles => 1 + Mathf.Max(0, ExtraProjectiles);
 
     /// <summary>
-    /// 합성 발사로 탄에 실리는 적재 속성 목록. (확정 기획 — 합성 발사)
+    /// 합성 발사로 탄에 실리는 칸 속성 목록. (확정 기획 — 합성 발사)
     ///
-    /// 적재 계열 핵심 젬이 생성하는 상태만 들어간다.
+    /// 칸 계열 핵심 젬이 생성하는 상태만 들어간다.
     /// 기능 배타(번제 등)로 유발이 차단된 상태는 여기에 들어오지 않는다.
     /// 2개가 되면 탄마다 번갈아 부여된다. CompositeFireState가 순번을 관리한다.
     /// </summary>
@@ -79,7 +79,7 @@ public class WeaponModifiers
 
     private readonly List<StatusEffectType> ailments = new(2);
 
-    /// <summary>적재 속성을 추가한다. None과 중복은 무시한다.</summary>
+    /// <summary>칸 속성을 추가한다. None과 중복은 무시한다.</summary>
     public void AddAilment(StatusEffectType status)
     {
         if (status == StatusEffectType.None)
@@ -137,7 +137,7 @@ public class WeaponModifiers
         LifetimeMultiplier *= definition.LifetimeMultiplier;
         SpeedMultiplier *= definition.SpeedMultiplier;
 
-        // 증가율은 더하고, 배수는 곱한다.
+        // 증가율은 더하고, 배율은 곱한다.
         DamageIncrease += definition.DamageIncrease;
         AilmentPower += definition.AilmentPower;
         AilmentDurationMultiplier *= definition.AilmentDurationMultiplier;
@@ -153,7 +153,7 @@ public class WeaponModifiers
     /// 조건이 맞는 것들의 피해 증가율 합. 명중 시점에 탄이 호출한다.
     ///
     /// 거리 기준을 유효 사거리의 절반으로 둔 이유 —
-    /// 사거리 보정이 걸리는 경계와 같아야 유저가 선 하나만 외우면 된다.
+    /// 사거리 보정이 걸리는 경계와 같아야 플레이어가 선 하나만 외우면 된다.
     /// (docs/Blob_Combat_Baseline.md 「사거리 보정」)
     /// </summary>
     public float ConditionalDamageIncrease(

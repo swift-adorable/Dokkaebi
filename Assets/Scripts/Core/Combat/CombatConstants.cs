@@ -70,7 +70,7 @@ public static class CombatConstants
     /// 치명타 기본 확률. 【0이다.】
     ///
     /// 모든 무기가 조금씩 크리가 뜨면 전 구간에 무작위성이 깔려
-    /// 유저가 자기 실력을 판단하기 어려워진다.
+    /// 플레이어가 자기 실력을 판단하기 어려워진다.
     /// 0으로 두면 크리는 「내가 정밀 각인을 골랐다」는 선택의 결과가 된다.
     /// </summary>
     public const float BaseCriticalChance = 0f;

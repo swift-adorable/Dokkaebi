@@ -13,7 +13,7 @@ using UnityEngine;
 public class PlayerInventory : Singleton<PlayerInventory>
 {
     /// <summary>
-    /// 가방을 착용하지 않았을 때의 기본 적재 칸.
+    /// 가방을 착용하지 않았을 때의 기본 칸.
     ///
     /// 【20이다.】 이전 12는 너무 작았다 —
     /// 덕코프는 벙커에서 장비를 갖춰 출격하므로 맨몸 상태가 사실상 없지만,

@@ -11,7 +11,7 @@ using UnityEngine;
 ///
 /// 구조는 덕코프 「스킬」에서 가져왔다 (research/duckov_스킬.md) —
 ///   · 독립 5계열                     [확인됨]
-///   · 필요물품(아이템) 요구          [확인됨 — 표에 열이 존재]
+///   · 필요 재료(아이템) 요구          [확인됨 — 표에 열이 존재]
 ///   · 다이아몬드 (갈라졌다 합류)     [확인됨 — 영양 관리 3→4·5→6]
 ///   · 교차 선행 (계열을 넘는 선행)   [확인됨 — 식이요법 = 낚시3 + 영양3]
 ///   · 계단형 단순 계열               [확인됨 — 블랙마켓 통신 I~V]
@@ -198,7 +198,7 @@ public static class PassiveAssetGenerator
             materials: new[] { ("memory_core", 3) }));
 
         rows.Add(N("reg_map", "누락된 지도",
-            "지도에 전리품 위치가 표시된다. 원래 없던 표식이다.",
+            "지도에 전리품 위치가 표시된다. 원래 없던 마커이다.",
             PassiveBranch.Regression, PassiveEffectType.MapLoot, 1, level: 1, cost: 8000,
             column: 1, row: 2, prereq: new[] { "reg_salvage", "reg_codex" },
             materials: new[] { ("memory_core", 4), ("cell_battery", 8) }));
