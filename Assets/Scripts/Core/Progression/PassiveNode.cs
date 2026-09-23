@@ -54,7 +54,7 @@ public class PassiveNode : ScriptableObject
     [SerializeField] private float value = 1f;
 
     [Header("조건")]
-    [Tooltip("이 계정 레벨 미만에서는 배울 수 없다. 중개 계열은 무시된다.")]
+    [Tooltip("이 각성 레벨 미만에서는 배울 수 없다. 중개 계열은 무시된다.")]
     [Min(1)]
     [SerializeField] private int requiredAccountLevel = 1;
 

@@ -211,6 +211,9 @@ public class SkillManager : Singleton<SkillManager>
         }
     }
 
+    /// <summary>세이브를 불러온 뒤 소켓 수를 레벨에 다시 맞춘다. 알림은 내지 않는다.</summary>
+    public void ResyncLevel() => SyncAwakeningLevel();
+
     private void SyncAwakeningLevel()
     {
         int level = PlayerStats.HasInstance ? PlayerStats.Instance.Level : 1;

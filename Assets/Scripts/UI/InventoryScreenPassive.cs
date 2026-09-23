@@ -96,7 +96,7 @@ public partial class InventoryScreenUI
         // 어느 쪽이 무엇인지 매번 읽어야 했다. 크레딧을 왼쪽으로 물리고
         // 그 자리를 닫기가 가져간다 — 오른쪽 위는 원래 닫는 자리다.
         UIFactory.CreateLabel(rightContent,
-            $"패시브    계정 Lv.{manager.AccountLevel}", 32, FontStyle.Bold,
+            $"패시브    각성 Lv.{manager.AccountLevel}", 32, FontStyle.Bold,
             new Vector2(0f, HeaderLine), new Vector2(0.55f, 1f),
             TextAnchor.MiddleLeft, UIPalette.TextOnGlass);
 
@@ -194,7 +194,7 @@ public partial class InventoryScreenUI
         // 중개 계열은 레벨을 보지 않는다. 그 사실을 화면에 적어 둔다.
         if (PassiveBranchInfo.UnlockKind(selectedBranch) == PassiveUnlockKind.CreditsOnly)
         {
-            UIFactory.CreateLabel(area, "계정 레벨과 무관 · 크레딧만", 22, FontStyle.Normal,
+            UIFactory.CreateLabel(area, "각성 레벨과 무관 · 크레딧만", 22, FontStyle.Normal,
                 new Vector2(0.03f, 0.94f), new Vector2(0.97f, 0.99f),
                 TextAnchor.MiddleRight, UIPalette.TextAccent);
         }
@@ -400,7 +400,7 @@ public partial class InventoryScreenUI
         var lines = new List<string>(3);
 
         if (node.UnlockKind != PassiveUnlockKind.CreditsOnly)
-            lines.Add($"요구 계정 Lv.{node.RequiredAccountLevel}");
+            lines.Add($"요구 각성 Lv.{node.RequiredAccountLevel}");
 
         lines.Add($"비용 ₡ {node.Cost:N0}");
 
