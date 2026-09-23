@@ -122,6 +122,11 @@ public static class PlayerConsumables
         if (outcome.Cure != StatusEffectType.None)
             health.Status.RemoveStacks(outcome.Cure, outcome.CureStacks);
 
+        // sourceDamage는 도트 계산용이라 이로운 상태에는 쓰이지 않지만,
+        // Health.ApplyStatus가 0 이하면 그대로 돌아가므로 1을 넘긴다.
+        if (outcome.Grant != StatusEffectType.None)
+            health.ApplyStatus(outcome.Grant, 1f);
+
         if (!PlayerSurvival.HasInstance)
             return;
 
@@ -178,6 +183,13 @@ public static class PlayerConsumables
 
         if (outcome.WaterCost > 0f)
             parts.Add($"수분 −{outcome.WaterCost:0.#}");
+
+        if (outcome.Grant != StatusEffectType.None)
+        {
+            float seconds = StatusEffectTable.Get(outcome.Grant).Duration;
+
+            parts.Add($"{StatusEffectNames.Of(outcome.Grant)} {seconds:0}초");
+        }
 
         if (outcome.EnergyCost > 0f)
             parts.Add($"에너지 −{outcome.EnergyCost:0.#}");

@@ -481,5 +481,121 @@ namespace Blob.Tests
             Assert.AreEqual(0, state.RemoveStacks(StatusEffectType.Bleed, 2));
             Assert.AreEqual(0, state.RemoveStacks(StatusEffectType.None, 2));
         }
+
+        // ── 이로운 상태 (8-C) ─────────────────────────────────────────
+
+        [Test]
+        public void 가속은_이동_속도를_올린다()
+        {
+            var state = new StatusEffectState();
+
+            Assert.AreEqual(1f, state.SpeedMultiplier, 0.001f);
+
+            state.Apply(StatusEffectType.Haste, 1f);
+
+            Assert.AreEqual(1f + StatusEffectTable.HasteSpeedBonus,
+                state.SpeedMultiplier, 0.001f);
+        }
+
+        [Test]
+        public void 가속과_냉각은_곱으로_겹친다()
+        {
+            // 더하기로 겹치면 「느려진 채로 빨라진」 상태가 나온다.
+            var state = new StatusEffectState();
+
+            state.Apply(StatusEffectType.Haste, 1f);
+
+            for (int i = 0; i < 6; i++)
+                state.Apply(StatusEffectType.Chill, 10f);
+
+            // 냉각 최대 중첩은 동결로 전이한다 — 행동 불능이면 0이다.
+            Assert.AreEqual(0f, state.SpeedMultiplier, 0.001f);
+        }
+
+        [Test]
+        public void 가속이_끝나면_탈진이_저절로_걸린다()
+        {
+            var state = new StatusEffectState();
+            var buffer = new System.Collections.Generic.List<DamageRequest>();
+
+            state.Apply(StatusEffectType.Haste, 1f);
+
+            Assert.IsFalse(state.Has(StatusEffectType.Fatigue));
+
+            state.Tick(StatusEffectTable.HasteSeconds + 0.1f, false, buffer);
+
+            Assert.IsFalse(state.Has(StatusEffectType.Haste));
+            Assert.IsTrue(state.Has(StatusEffectType.Fatigue));
+
+            // 【대가는 순수 손해다.】 각성제가 순수 증가가 되면 안 된다.
+            Assert.Less(state.SpeedMultiplier, 1f);
+        }
+
+        [Test]
+        public void 보강은_방어도를_올리고_회복량을_깎는다()
+        {
+            var state = new StatusEffectState();
+
+            state.Apply(StatusEffectType.Bolster, 1f);
+
+            Assert.AreEqual(StatusEffectTable.BolsterArmourMultiplier,
+                state.ArmourMultiplier, 0.001f);
+
+            Assert.AreEqual(StatusEffectTable.BolsterHealingMultiplier,
+                state.HealingMultiplier, 0.001f);
+        }
+
+        [Test]
+        public void 재생은_피해가_아니라_회복을_만든다()
+        {
+            var state = new StatusEffectState();
+            var buffer = new System.Collections.Generic.List<DamageRequest>();
+
+            state.Apply(StatusEffectType.Regen, 1f);
+
+            state.Tick(3f, false, buffer);
+
+            // 피해 목록에 섞이면 안 된다.
+            Assert.AreEqual(0, buffer.Count);
+
+            Assert.AreEqual((int)(StatusEffectTable.RegenPerSecond * 3f),
+                state.ConsumeHealing());
+
+            // 가져가면 비워진다. 두 번 회복되면 총량이 부푼다.
+            Assert.AreEqual(0, state.ConsumeHealing());
+        }
+
+        [Test]
+        public void 재생은_1_미만을_흘리지_않고_모은다()
+        {
+            // 초당 2로 60프레임이면 프레임당 0.033이다. 그대로 넘기면
+            // 매 프레임 0이 되어 영원히 회복되지 않는다.
+            var state = new StatusEffectState();
+            var buffer = new System.Collections.Generic.List<DamageRequest>();
+
+            state.Apply(StatusEffectType.Regen, 1f);
+
+            int total = 0;
+
+            for (int i = 0; i < 60; i++)
+            {
+                state.Tick(1f / 60f, false, buffer);
+                total += state.ConsumeHealing();
+            }
+
+            Assert.AreEqual((int)StatusEffectTable.RegenPerSecond, total);
+        }
+
+        [Test]
+        public void 이로운_상태는_중첩하지_않는다()
+        {
+            var state = new StatusEffectState();
+
+            state.Apply(StatusEffectType.Haste, 1f);
+            state.Apply(StatusEffectType.Haste, 1f);
+
+            // 다시 걸면 지속시간만 처음으로 돌아간다. (문서 6절 「덮어쓴다」)
+            Assert.AreEqual(1, state.StacksOf(StatusEffectType.Haste));
+        }
     }
 }

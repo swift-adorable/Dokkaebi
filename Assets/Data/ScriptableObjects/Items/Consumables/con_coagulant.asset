@@ -10,32 +10,32 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5f9766db0f8594e349438cc979f7b6fe, type: 3}
-  m_Name: con_relaxant
+  m_Name: con_coagulant
   m_EditorClassIdentifier: Blob.Runtime::ItemDefinition
-  id: con_relaxant
-  displayName: "\uC774\uC644\uC81C"
-  description: "\uACBD\uB828\uC774 \uBA4E\uB294\uB2E4."
+  id: con_coagulant
+  displayName: "\uC751\uACE0\uC81C"
+  description: "\uAD73\uC740 \uB9CC\uD07C \uC57D\uC774 \uC548 \uB4E3\uB294\uB2E4."
   kind: 6
   tier: 0
-  weight: 0.1
+  weight: 0.2
   icon: {fileID: 0}
   slotSize: 1
   stackMax: 3
   maxDurability: 0
-  baseValue: 90
+  baseValue: 648
   noExtract: 0
   noRegister: 0
   noTrade: 0
   skill: {fileID: 0}
   consumable:
-    category: 1
+    category: 3
     heal: 0
     water: 0
     energy: 0
-    waterCost: 0
-    energyCost: 0
-    cure: 4
+    waterCost: 5
+    energyCost: 5
+    cure: 0
     cureStacks: 99
     useCost: 0
-    castSeconds: 1
-    grant: 0
+    castSeconds: 0
+    grant: 11

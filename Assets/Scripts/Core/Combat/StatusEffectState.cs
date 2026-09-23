@@ -9,7 +9,8 @@ using System;
 /// </summary>
 public sealed class StatusEffectState
 {
-    private const int TypeCount = 10; // None 포함. 냉각 · 마비 · 부식까지.
+    // None 포함. 해로운 9종 + 이로운 3종 + 대가 1종.
+    private const int TypeCount = 14;
 
     private readonly double[] remaining = new double[TypeCount];
     private readonly int[] stacks = new int[TypeCount];
@@ -173,6 +174,8 @@ public sealed class StatusEffectState
         Array.Clear(stacks, 0, TypeCount);
         Array.Clear(sourceDamage, 0, TypeCount);
         Array.Clear(pending, 0, TypeCount);
+
+        pendingHeal = 0d;
     }
 
     /// <summary>
@@ -190,6 +193,12 @@ public sealed class StatusEffectState
 
         if (deltaTime <= 0f)
             return;
+
+        // 【대가는 이 순회가 끝난 뒤에 건다.】 루프 안에서 바로 걸면,
+        // 대가의 번호가 지금 번호보다 크면 같은 프레임에 다시 순회되어
+        // 같은 deltaTime으로 그 자리에서 만료된다. 탈진이 걸리자마자
+        // 사라져 「대가가 없는 각성제」가 됐다.
+        aftermathPending = 0;
 
         for (int i = 1; i < TypeCount; i++)
         {
@@ -216,6 +225,23 @@ public sealed class StatusEffectState
                 remaining[i] = 0f;
                 stacks[i] = 0;
             }
+
+            // 【재생은 피해가 아니라 회복이다.】 buffer는 피해 요청만 담으므로
+            // 여기서 따로 모아 두고 Health가 가져간다. 도트와 같은 소수 누적을
+            // 쓰는 이유도 같다 — 틱을 잘게 쪼갤수록 총량이 부풀면 안 된다.
+            if (type == StatusEffectType.Regen)
+            {
+                pendingHeal += StatusEffectTable.RegenPerSecond * elapsed;
+
+                if (expired)
+                    MarkAftermath(type);
+
+                continue;
+            }
+
+            // 가속이 끝나면 탈진이 온다. 대가를 별도 필드로 두지 않는다.
+            if (expired)
+                MarkAftermath(type);
 
             if (!spec.IsDamaging || buffer == null || sourceDamage[i] <= 0f)
             {
@@ -271,7 +297,61 @@ public sealed class StatusEffectState
                 bypassArmour = true
             });
         }
+
+        FlushAftermath();
     }
+
+    /// <summary>이번 순회에서 끝난 것들의 대가를 모아 두는 비트 자리.</summary>
+    private int aftermathPending;
+
+    private void MarkAftermath(StatusEffectType type)
+    {
+        StatusEffectType aftermath = StatusEffectTable.AftermathOf(type);
+
+        if (aftermath != StatusEffectType.None)
+            aftermathPending |= 1 << (int)aftermath;
+    }
+
+    private void FlushAftermath()
+    {
+        if (aftermathPending == 0)
+            return;
+
+        for (int i = 1; i < TypeCount; i++)
+        {
+            if ((aftermathPending & (1 << i)) == 0)
+                continue;
+
+            remaining[i] = StatusEffectTable.Get((StatusEffectType)i).Duration;
+            stacks[i] = 1;
+        }
+
+        aftermathPending = 0;
+    }
+
+    /// <summary>아직 정수로 떨어지지 않은 회복의 잔여분. 도트의 pending과 같은 이유다.</summary>
+    private double pendingHeal;
+
+    /// <summary>
+    /// 이번에 적용할 회복량을 가져가고 비운다. Health가 Tick 직후에 부른다.
+    ///
+    /// 【1 미만은 넘기지 않는다.】 초당 2로 60프레임이면 프레임당 0.033이라
+    /// 그대로 넘기면 매 프레임 0이 되어 영원히 회복되지 않는다.
+    /// </summary>
+    public int ConsumeHealing()
+    {
+        if (pendingHeal < 1d)
+            return 0;
+
+        int whole = (int)Math.Floor(pendingHeal);
+
+        pendingHeal -= whole;
+
+        return whole;
+    }
+
+    // 【대가는 면역으로 막히지 않는다.】 Apply를 거치지 않는 이유다.
+    // 「좋은 것만 받고 대가는 피한다」가 되면 강화 소모품이 순수 증가가 된다.
 
     /// <summary>감전이 적용된 "받는 피해" 배율. 중첩에 비례하며 최대 중첩에서 +20%다.</summary>
     public float DamageTakenMultiplier
@@ -291,9 +371,21 @@ public sealed class StatusEffectState
             if (IsIncapacitated)
                 return 0f;
 
-            return 1f - StatusEffectTable.ChillSlowRatio
-                      * StatusEffectTable.ControlRatio(
-                          StatusEffectType.Chill, StacksOf(StatusEffectType.Chill));
+            float scale = 1f - StatusEffectTable.ChillSlowRatio
+                             * StatusEffectTable.ControlRatio(
+                                 StatusEffectType.Chill, StacksOf(StatusEffectType.Chill));
+
+            // 【이로운 것과 해로운 것을 곱으로 겹친다.】 더하기로 겹치면
+            // 가속(+25%)과 냉각(−40%)이 −15%가 되어 「느려진 채로 빨라진」
+            // 상태가 된다. 곱이면 0.75 × 1.25 = 0.94로, 둘 다 걸려 있다는
+            // 사실이 수치에 남는다.
+            if (Has(StatusEffectType.Haste))
+                scale *= 1f + StatusEffectTable.HasteSpeedBonus;
+
+            if (Has(StatusEffectType.Fatigue))
+                scale *= 1f - StatusEffectTable.FatigueSpeedPenalty;
+
+            return scale;
         }
     }
 
@@ -301,13 +393,44 @@ public sealed class StatusEffectState
     public bool IsIncapacitated
         => Has(StatusEffectType.Freeze) || Has(StatusEffectType.Paralyze);
 
-    /// <summary>부식이 적용된 방어도 배율. 부식 중이면 절반이다.</summary>
+    /// <summary>부식과 보강이 겹친 방어도 배율.</summary>
     public float ArmourMultiplier
-        => Has(StatusEffectType.Corrode) ? StatusEffectTable.CorrodeHalfRatio : 1f;
+    {
+        get
+        {
+            float scale = Has(StatusEffectType.Corrode)
+                ? StatusEffectTable.CorrodeHalfRatio
+                : 1f;
 
-    /// <summary>부식이 적용된 회복량 배율. 소모품이 만능이 아니게 하는 장치다.</summary>
+            if (Has(StatusEffectType.Bolster))
+                scale *= StatusEffectTable.BolsterArmourMultiplier;
+
+            return scale;
+        }
+    }
+
+    /// <summary>
+    /// 회복량 배율. 소모품이 만능이 아니게 하는 장치다.
+    ///
+    /// 부식과 보강이 같은 방향으로 깎는다 — 둘 다 걸리면 0.25다.
+    /// 【보강을 쓰고 부식에 걸리면 회복이 거의 안 든다】가 맞는 결과다.
+    /// 방어를 택한 대가를 두 번 치르는 것이 아니라, 방어를 택했으니
+    /// 맞고 버티는 쪽이 아니라 안 맞는 쪽으로 풀라는 뜻이다.
+    /// </summary>
     public float HealingMultiplier
-        => Has(StatusEffectType.Corrode) ? StatusEffectTable.CorrodeHalfRatio : 1f;
+    {
+        get
+        {
+            float scale = Has(StatusEffectType.Corrode)
+                ? StatusEffectTable.CorrodeHalfRatio
+                : 1f;
+
+            if (Has(StatusEffectType.Bolster))
+                scale *= StatusEffectTable.BolsterHealingMultiplier;
+
+            return scale;
+        }
+    }
 
     /// <summary>점화가 깎는 방어도. 「점화가 다음 피해를 키운다」의 구현이다.</summary>
     public float ArmourReduction

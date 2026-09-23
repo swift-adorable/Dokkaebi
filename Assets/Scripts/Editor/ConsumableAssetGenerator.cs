@@ -37,6 +37,7 @@ public static class ConsumableAssetGenerator
         public int useCost;
         public int maxDurability;
         public float castSeconds;
+        public StatusEffectType grant;
         public float weight;
         public int stackMax;
         public int value;
@@ -121,6 +122,30 @@ public static class ConsumableAssetGenerator
         list.Add(Cure("con_defroster", "해빙제", "안쪽부터 녹인다.",
             StatusEffectType.Freeze, 99, 0, 0.1f, 3, 90, castSeconds: 1.0f));
 
+        // ── 강화 — 【전부 대가가 붙는다】 (문서 4절) ──────────────────
+        //
+        // 대가를 별도 필드로 두지 않는다. 각성제의 「끝나면 −15%」는
+        // 상태이상 표의 AftermathOf(가속) = 탈진이 알아서 건다.
+        //
+        // 주사약은 수분을 태운다 — 「버프를 쓸수록 물이 급해진다」가
+        // 소모품을 무한히 쓰지 못하게 하는 장치다. [확인됨 — 덕코프]
+        // 노란 주사약(이동 +25% 120초)이 에너지 −5 · 수분 −15다.
+
+        list.Add(Shot("con_stim", "각성제",
+            "빨라진다. 끝나면 그만큼 느려진다.",
+            StatusEffectType.Haste, waterCost: 15f, energyCost: 5f,
+            weight: 0.2f, value: 629));
+
+        list.Add(Shot("con_coagulant", "응고제",
+            "굳은 만큼 약이 안 듣는다.",
+            StatusEffectType.Bolster, waterCost: 5f, energyCost: 5f,
+            weight: 0.2f, value: 648));
+
+        list.Add(Shot("con_regen", "회복 주사약",
+            "천천히 아문다. 급할 때 쓰는 것이 아니다.",
+            StatusEffectType.Regen, waterCost: 7f, energyCost: 0f,
+            weight: 0.2f, value: 875));
+
         // ── 음료 · 음식 ───────────────────────────────────────────────
         //
         // 【체력을 채우지 않는다.】 먹어서 상처가 낫기 시작하면
@@ -180,6 +205,29 @@ public static class ConsumableAssetGenerator
             useCost = useCost, maxDurability = maxDurability,
             castSeconds = castSeconds,
             weight = weight, stackMax = 1, value = value
+        };
+    }
+
+    /// <summary>
+    /// 주사약. 【즉시 발동한다.】
+    ///
+    /// 회복은 시전 시간으로 묶지만 강화는 묶지 않는다. 문서 6절이
+    /// 「강화·방호는 즉시」로 정해 둔 것이며, 이유는 쓰임이 다르기
+    /// 때문이다 — 회복은 빠져서 쓰는 것이고 강화는 들어가면서 쓰는 것이다.
+    /// 강화에도 시전 시간을 붙이면 둘 다 「빠져서 쓰는 것」이 된다.
+    /// </summary>
+    private static Row Shot(string id, string name, string desc,
+                            StatusEffectType grant,
+                            float waterCost, float energyCost,
+                            float weight, int value)
+    {
+        return new Row
+        {
+            id = id, name = name, desc = desc,
+            category = ConsumableCategory.Boost,
+            grant = grant, waterCost = waterCost, energyCost = energyCost,
+            cure = StatusEffectType.None, cureStacks = 99,
+            weight = weight, stackMax = 3, value = value
         };
     }
 
@@ -265,6 +313,7 @@ public static class ConsumableAssetGenerator
         effect.FindPropertyRelative("cureStacks").intValue = Mathf.Max(1, row.cureStacks);
         effect.FindPropertyRelative("useCost").intValue = row.useCost;
         effect.FindPropertyRelative("castSeconds").floatValue = row.castSeconds;
+        effect.FindPropertyRelative("grant").intValue = (int)row.grant;
 
         so.ApplyModifiedPropertiesWithoutUndo();
 

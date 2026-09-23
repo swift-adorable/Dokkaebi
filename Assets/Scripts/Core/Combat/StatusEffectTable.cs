@@ -49,6 +49,35 @@ public static class StatusEffectTable
     /// <summary>응집이 넓히는 상태 전이 범위 배율.</summary>
     public const float CongealSpreadMultiplier = 2f;
 
+    // ── 이로운 상태의 수치 ────────────────────────────────────────────
+    //
+    // 문서 4절의 강화 소모품 표를 그대로 옮긴 것이다.
+    //   각성제 — 이동 +25%, 120초 → 끝나면 60초 동안 −15%
+    //   응고제 — 방어도 +0.5, 120초, 대가로 회복량 절반
+    // 재생은 덕코프의 회복 주사약 「초당 회복, 30초」를 따른다 [확인됨].
+    // 초당 회복량은 위키에 없으므로 우리가 정했다 [불확실] —
+    // 30초 × 2 = 60이면 구급상자 두 번보다 조금 많다. 다만 30초 동안
+    // 나눠 들어오므로 급할 때의 한 방을 대신하지 못한다.
+
+    public const float HasteSeconds = 120f;
+    public const float HasteSpeedBonus = 0.25f;
+
+    public const float FatigueSeconds = 60f;
+    public const float FatigueSpeedPenalty = 0.15f;
+
+    public const float BolsterSeconds = 120f;
+
+    /// <summary>보강이 곱하는 방어도 배율. 「방어도 +0.5」를 배율로 옮긴 것이다.</summary>
+    public const float BolsterArmourMultiplier = 1.25f;
+
+    /// <summary>보강의 대가. 부식과 같은 절반이다 — 대가가 가벼우면 안 쓸 이유가 없다.</summary>
+    public const float BolsterHealingMultiplier = 0.5f;
+
+    public const float RegenSeconds = 30f;
+
+    /// <summary>재생의 초당 회복량. 【불확실 — 덕코프 위키에 값이 없다.】</summary>
+    public const float RegenPerSecond = 2f;
+
     public static StatusEffectSpec Get(StatusEffectType type)
     {
         switch (type)
@@ -101,6 +130,26 @@ public static class StatusEffectTable
             case StatusEffectType.Corrode:
                 return new StatusEffectSpec(0f, 8f, 1, DamageElement.Chaos);
 
+            // ── 이로운 상태 ───────────────────────────────────────────
+            // 【중첩하지 않는다.】 소모품 문서 6절의 「같은 분류는 덮어쓴다」다.
+            // 각성제 두 개를 겹쳐 쓸 수 있으면 대가가 있는 의미가 사라진다.
+            // 다시 걸면 지속시간만 처음으로 돌아간다.
+
+            case StatusEffectType.Haste:
+                return new StatusEffectSpec(0f, HasteSeconds, 1, DamageElement.Physical);
+
+            case StatusEffectType.Bolster:
+                return new StatusEffectSpec(0f, BolsterSeconds, 1, DamageElement.Physical);
+
+            // 재생의 계수는 피해가 아니라 회복이다. IsDamaging에 걸리면 안 되므로
+            // 0으로 두고, 회복량은 RegenPerSecond가 따로 정한다.
+            case StatusEffectType.Regen:
+                return new StatusEffectSpec(0f, RegenSeconds, 1, DamageElement.Physical);
+
+            // 대가. 각성제가 끝나면 저절로 걸린다.
+            case StatusEffectType.Fatigue:
+                return new StatusEffectSpec(0f, FatigueSeconds, 1, DamageElement.Physical);
+
             default:
                 return new StatusEffectSpec(0f, 0f, 1, DamageElement.Physical);
         }
@@ -121,6 +170,39 @@ public static class StatusEffectTable
             case StatusEffectType.Shock: return StatusEffectType.Paralyze;
             case StatusEffectType.Poison: return StatusEffectType.Corrode;
             default: return StatusEffectType.None;
+        }
+    }
+
+    /// <summary>
+    /// 끝났을 때 저절로 걸리는 대가 상태. 없으면 None.
+    ///
+    /// 【대가를 별도 필드로 만들지 않는 이유】 「끝나면 −15%」는 결국
+    /// 「다른 상태가 걸린다」와 같은 말이다. 상태이상 하나로 표현하면
+    /// 화면도 그것을 그대로 보여 준다 — 플레이어는 탈진이 걸린 것을
+    /// 상태 줄에서 보고, 왜 느려졌는지 스스로 안다.
+    /// (docs/Blob_Consumable_System.md 8절)
+    /// </summary>
+    public static StatusEffectType AftermathOf(StatusEffectType type)
+    {
+        switch (type)
+        {
+            case StatusEffectType.Haste: return StatusEffectType.Fatigue;
+            default: return StatusEffectType.None;
+        }
+    }
+
+    /// <summary>이로운 상태인가. 화면이 줄의 자리와 색을 정할 때 본다.</summary>
+    public static bool IsBeneficial(StatusEffectType type)
+    {
+        switch (type)
+        {
+            case StatusEffectType.Haste:
+            case StatusEffectType.Bolster:
+            case StatusEffectType.Regen:
+                return true;
+
+            default:
+                return false;
         }
     }
 
