@@ -71,7 +71,11 @@ public class EnemyIdentity : MonoBehaviour, IPoolable
             EnemyAffixRoller.Roll(rarity, Rng, rolled);
         }
 
-        Apply(EnemyProfile.Build(archetype, rarity, rolled));
+        // 【이번 판의 조건을 마지막에 얹는다.】
+        // 원형·등급·속성은 「이 개체가 무엇인가」이고, 조건은 「이번 판이 어떤
+        // 판인가」다. 순서를 바꾸면 조건이 등급 배율에 다시 곱해져 두 번 먹는다.
+        Apply(RaidManager.Current.Apply(
+            EnemyProfile.Build(archetype, rarity, rolled)));
     }
 
     public void OnDespawned()

@@ -126,6 +126,12 @@ public struct EnemyArchetypeStats
     /// (문서 8절. 실제 감지 로직은 7-D에서 붙인다)
     /// </summary>
     public bool makesFootsteps;
+
+    /// <summary>
+    /// 유형 고유 기믹. 표가 아니라 EnemyGimmickTable이 정한다 —
+    /// 기믹 셋을 아홉 줄에 흩어 적으면 「누가 무슨 기믹인지」를 표에서 세어야 한다.
+    /// </summary>
+    public EnemyGimmick gimmick;
 }
 
 /// <summary>
@@ -231,6 +237,17 @@ public static class EnemyArchetypeTable
     }
 
     public static EnemyArchetypeStats Of(EnemyArchetype archetype)
+    {
+        EnemyArchetypeStats stats = Base(archetype);
+
+        // 기믹은 EnemyGimmickTable이 정한다. 여기서 한 번만 얹는다 —
+        // 아홉 줄에 흩어 적으면 「누가 무슨 기믹인지」를 표에서 세어야 한다.
+        stats.gimmick = EnemyGimmickTable.Of(archetype);
+
+        return stats;
+    }
+
+    private static EnemyArchetypeStats Base(EnemyArchetype archetype)
     {
         switch (archetype)
         {

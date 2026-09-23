@@ -123,9 +123,16 @@ public class EnemyAttack : MonoBehaviour
     }
 
     /// <summary>풀에서 재사용될 때 공격 상태를 초기화한다.</summary>
+    /// <summary>풀로 돌아갈 때 점사를 끊는다. 사라진 적이 총을 쏘면 안 된다.</summary>
+    private void StopBurst()
+    {
+        burstRemaining = 0;
+    }
+
     public void ResetState()
     {
         CancelWindup();
+        StopBurst();
         cooldown.Reset();
     }
 
@@ -133,6 +140,9 @@ public class EnemyAttack : MonoBehaviour
     {
         if (movement == null)
             return;
+
+        // 점사는 예비동작과 무관하게 흘러간다 — 이미 방아쇠가 당겨진 것이다.
+        UpdateBurst();
 
         if (IsWindingUp)
         {
@@ -261,7 +271,83 @@ public class EnemyAttack : MonoBehaviour
     /// 발사 시점의 방향으로 직선 비행하므로, 예비동작을 보고 옆으로 움직이면
     /// 빗나간다. 근접의 대시 회피와 같은 규칙이 원거리에도 적용된다.
     /// </summary>
+    /// <summary>
+    /// 유형 고유의 기믹. 프리팹 배선이 정한다. (EnemyGimmickTable)
+    /// None이면 평범하게 한 발 쏜다.
+    /// </summary>
+    [Header("Gimmick")]
+    [Tooltip("유형 고유 기믹. 화공체 8방향 · 보안기 3점사 · 정착체 중력·은신.")]
+    [SerializeField] private EnemyGimmick gimmick = EnemyGimmick.None;
+
+    public EnemyGimmick Gimmick => gimmick;
+
+    public void SetGimmick(EnemyGimmick value) => gimmick = value;
+
+    /// <summary>
+    /// 점사 중 남은 발수. 0이면 점사가 아니거나 끝났다.
+    /// 예비동작을 다시 거치지 않는다 — 【한 번 걸리면 세 방 맞는다】가 핵심이다.
+    /// </summary>
+    private int burstRemaining;
+    private float nextBurstTime;
+    private Vector3 burstDirection;
+
+    /// <summary>
+    /// 점사의 남은 발을 흘려보낸다. Update에서 매 프레임 부른다.
+    ///
+    /// 코루틴을 쓰지 않는 이유 — 적이 죽거나 풀로 돌아갈 때
+    /// 코루틴만 살아남아 사라진 적이 총을 쏘는 일이 생긴다.
+    /// </summary>
+    private void UpdateBurst()
+    {
+        if (burstRemaining <= 0 || Time.time < nextBurstTime)
+            return;
+
+        burstRemaining--;
+        nextBurstTime = Time.time + EnemyGimmickTable.Get(gimmick).BurstInterval;
+
+        Spray(burstDirection);
+    }
+
     private void FireProjectile(Vector3 toTarget)
+    {
+        if (projectilePrefab == null)
+            return;
+
+        GimmickSpec spec = EnemyGimmickTable.Get(gimmick);
+
+        // 첫 발은 지금 나간다. 나머지는 UpdateBurst가 간격을 두고 흘린다.
+        Spray(toTarget);
+
+        if (spec.BurstCount <= 1)
+            return;
+
+        burstRemaining = spec.BurstCount - 1;
+        burstDirection = toTarget;
+        nextBurstTime = Time.time + spec.BurstInterval;
+    }
+
+    /// <summary>
+    /// 한 번의 발사. 기믹이 여러 방향이면 그만큼 나간다.
+    /// 【화공체의 8방향이 여기서 갈린다.】
+    /// </summary>
+    private void Spray(Vector3 toTarget)
+    {
+        GimmickSpec spec = EnemyGimmickTable.Get(gimmick);
+
+        if (spec.ProjectilesPerShot <= 1)
+        {
+            LaunchOne(toTarget);
+            return;
+        }
+
+        for (int i = 0; i < spec.ProjectilesPerShot; i++)
+        {
+            LaunchOne(EnemyGimmickTable.SprayDirection(
+                toTarget, i, spec.ProjectilesPerShot));
+        }
+    }
+
+    private void LaunchOne(Vector3 toTarget)
     {
         if (projectilePrefab == null)
             return;

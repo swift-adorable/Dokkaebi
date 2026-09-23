@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c8c7a8950e3944aabb0d9e133abde6e, type: 3}
+  m_Name: EnemyPrefabCatalog
+  m_EditorClassIdentifier: Blob.Runtime::EnemyPrefabCatalog
+  prefabs:
+  - {fileID: 372103695842319712, guid: 3de03b7729aac4122a5489d88880ddcc, type: 3}
+  - {fileID: 3095889724310037528, guid: 6c24fe4ffbc56497f87eec16bc620f40, type: 3}
+  - {fileID: 1437810378520409102, guid: 03193a9ea1739479ba18b70000d5a181, type: 3}
+  - {fileID: 1230420625118803824, guid: 1d51914986b4147af902475e0e4e560a, type: 3}
+  - {fileID: 5555858953679118157, guid: 4a55feab07ce54998a77117927173eeb, type: 3}
+  - {fileID: 1646514159349565252, guid: a8a75faeae6b24ca2bf3a1f51a4fddb1, type: 3}
+  - {fileID: 2384107874444436115, guid: ac656233d241b45eda7bca41b40c54a7, type: 3}
+  - {fileID: 1639086506230621812, guid: 41a2dc2ee0c324637852c64b99280c6b, type: 3}
+  - {fileID: 4315201933595078754, guid: 44d8aa53fa9e54390b7ac5bf1ec35a23, type: 3}

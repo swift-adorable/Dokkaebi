@@ -29,6 +29,9 @@ public static class EnemyArchetypeWiring
     private const string Folder = "Assets/Prefabs";
 
     /// <summary>유형별 프리팹 이름. 이미 있는 둘은 이름이 달라 따로 잡는다.</summary>
+    /// <summary>카탈로그 생성기가 같은 경로 규칙을 쓰도록 열어 둔다.</summary>
+    public static string PrefabPathOf(EnemyArchetype archetype) => PathOf(archetype);
+
     private static string PathOf(EnemyArchetype archetype)
     {
         switch (archetype)
@@ -160,8 +163,30 @@ public static class EnemyArchetypeWiring
             if (stats.ranged)
                 so.FindProperty("preferredDistance").floatValue = stats.preferredDistance;
 
+            so.FindProperty("gimmick").intValue = (int)stats.gimmick;
+
             so.ApplyModifiedPropertiesWithoutUndo();
         }
+
+        WriteGimmickComponents(root, stats.gimmick);
+    }
+
+    /// <summary>
+    /// 기믹이 컴포넌트를 요구하면 붙이고, 아니면 뗀다.
+    ///
+    /// 【떼는 쪽도 해야 한다.】 유형을 바꿔 다시 만들었을 때 이전 기믹의
+    /// 컴포넌트가 남아 있으면, 표에는 없는 행동을 하는 적이 생긴다.
+    /// </summary>
+    private static void WriteGimmickComponents(GameObject root, EnemyGimmick gimmick)
+    {
+        var stealth = root.GetComponent<EnemyGravityStealth>();
+
+        bool wants = gimmick == EnemyGimmick.GravityStealth;
+
+        if (wants && stealth == null)
+            root.AddComponent<EnemyGravityStealth>();
+        else if (!wants && stealth != null)
+            Object.DestroyImmediate(stealth, allowDestroyingAssets: true);
     }
 
     /// <summary>

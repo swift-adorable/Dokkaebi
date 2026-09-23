@@ -20,6 +20,7 @@ GameObject:
   - component: {fileID: 6030417704084500759}
   - component: {fileID: 3212178190113686055}
   - component: {fileID: 6475441838265700462}
+  - component: {fileID: 5269122478944269634}
   m_Layer: 0
   m_Name: EnemySettled
   m_TagString: Untagged
@@ -219,6 +220,7 @@ MonoBehaviour:
   attackCooldown: 1.5
   windupIndicator: {fileID: 0}
   rangedWindupSpeedScale: 0.45
+  gimmick: 3
 --- !u!114 &6030417704084500759
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -274,3 +276,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: Blob.Runtime::EnemyAggro
   detectRange: 18
   reevaluateInterval: 0.4
+--- !u!114 &5269122478944269634
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2384107874444436115}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fd7d5900e80044e0ab7ed1ac59b421d3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Blob.Runtime::EnemyGravityStealth

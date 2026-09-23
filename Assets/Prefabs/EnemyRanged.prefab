@@ -219,6 +219,7 @@ MonoBehaviour:
   attackCooldown: 1.2
   windupIndicator: {fileID: 0}
   rangedWindupSpeedScale: 0.45
+  gimmick: 0
 --- !u!114 &6344458531488518079
 MonoBehaviour:
   m_ObjectHideFlags: 0
