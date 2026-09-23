@@ -34,10 +34,20 @@ public class EnemySpawner : MonoBehaviour
     [Tooltip("시작 시 미리 생성해둘 적 개수. 첫 스폰의 프레임 스파이크를 없앤다.")]
     [SerializeField] private int prewarmCount = 16;
 
+    [Header("Archetypes")]
+    [Tooltip("켜면 유형 9종 카탈로그에서 골라 낸다. 끄면 근접/원거리 둘만 나온다.")]
+    [SerializeField] private bool useArchetypes = true;
+
     private GameManager gameManager;
     private PoolManager poolManager;
     private EnemyManager enemyManager;
     private float nextSpawnTime;
+
+    /// <summary>유형 9종 프리팹. 비어 있으면 예전처럼 둘만 낸다.</summary>
+    private EnemyPrefabCatalog catalog;
+
+    /// <summary>이번 판의 조건. 무리 크기와 퍼짐이 여기서 온다.</summary>
+    private RaidConditions Conditions => RaidManager.Current;
 
     private void Start()
     {
@@ -72,6 +82,44 @@ public class EnemySpawner : MonoBehaviour
         // 원거리 풀도 미리 데운다. 첫 원거리 적에서 프레임이 튀지 않게.
         if (rangedEnemyPrefab != null)
             poolManager.Prewarm(rangedEnemyPrefab, Mathf.Max(4, prewarmCount / 2));
+
+        if (useArchetypes)
+            LoadArchetypes();
+    }
+
+    /// <summary>
+    /// 유형 9종을 불러 온다. 카탈로그가 없거나 비었으면 예전처럼 둘만 낸다 —
+    /// 카탈로그를 안 만들었다고 적이 하나도 안 나오면 안 된다.
+    /// </summary>
+    private void LoadArchetypes()
+    {
+        catalog = EnemyPrefabCatalog.Load();
+
+        if (catalog == null || catalog.FilledCount == 0)
+        {
+            GameLogger.Warning("[EnemySpawner] 유형 카탈로그가 없습니다. "
+                               + "「Blob/Enemy/유형 프리팹 카탈로그 생성」을 실행하십시오. "
+                               + "지금은 근접·원거리 둘만 나옵니다.");
+
+            catalog = null;
+            return;
+        }
+
+        // 조건을 여기서 한 번 굴려 둔다. 첫 적이 스폰될 때 굴리면
+        // 그 프레임에 로그와 계산이 몰린다.
+        RaidManager.EnsureInstance();
+
+        // 유형마다 풀을 조금씩 데운다. 아홉 종을 prewarmCount씩 데우면
+        // 시작할 때 프레임이 통째로 날아간다.
+        int each = Mathf.Max(2, prewarmCount / EnemyArchetypeTable.Count);
+
+        for (int i = 0; i < EnemyArchetypeTable.Count; i++)
+        {
+            GameObject prefab = catalog.Get((EnemyArchetype)i);
+
+            if (prefab != null)
+                poolManager.Prewarm(prefab, each);
+        }
     }
 
     private void Update()
@@ -106,23 +154,80 @@ public class EnemySpawner : MonoBehaviour
     /// </summary>
     private GameObject PickPrefab()
     {
+        // 카탈로그가 있으면 유형 9종에서 고른다.
+        if (catalog != null)
+        {
+            var archetype = (EnemyArchetype)Random.Range(0, EnemyArchetypeTable.Count);
+
+            GameObject picked = catalog.Get(archetype);
+
+            if (picked != null)
+                return picked;
+        }
+
         if (rangedEnemyPrefab == null || rangedRatio <= 0f)
             return enemyPrefab;
 
         return Random.value < rangedRatio ? rangedEnemyPrefab : enemyPrefab;
     }
 
+    /// <summary>
+    /// 한 번에 몇을 낼지. 【밀집·산개 특성이 여기서 보인다.】
+    ///
+    /// 표의 배율이 1.6이면 「가끔 둘이 같이 나온다」로 읽힌다 —
+    /// 1.6을 그대로 반올림하면 늘 둘이라 「밀집」이 상시가 되어 버린다.
+    /// 소수부를 확률로 쓴다.
+    /// </summary>
+    private int RollGroupSize()
+    {
+        float scale = Mathf.Max(0.1f, Conditions.GroupSizeScale);
+
+        int whole = Mathf.FloorToInt(scale);
+
+        if (Random.value < scale - whole)
+            whole++;
+
+        return Mathf.Max(1, whole);
+    }
+
     private void SpawnEnemy()
     {
-        Vector2 randomCircle = Random.insideUnitCircle;
+        int count = RollGroupSize();
+
+        // 퍼짐 배율 — 산개는 넓게, 밀집은 좁게 나온다.
+        float spread = spawnRadius * Mathf.Max(0.1f, Conditions.SpreadScale);
+
+        Vector3 origin = PickSpawnPoint(spread);
+
+        for (int i = 0; i < count; i++)
+        {
+            if (!enemyManager.CanSpawn)
+                return;
+
+            // 무리는 한 자리에 겹쳐 나오지 않는다. 첫 마리 주변에 흩는다.
+            Vector3 offset = i == 0
+                ? Vector3.zero
+                : RandomFlat(Random.insideUnitCircle * GroupSpacing);
+
+            poolManager.Spawn(PickPrefab(), origin + offset, Quaternion.identity);
+        }
+    }
+
+    /// <summary>무리가 흩어지는 반경(m). 겹쳐 나오면 한 마리처럼 보인다.</summary>
+    private const float GroupSpacing = 2.5f;
+
+    private Vector3 PickSpawnPoint(float radius)
+    {
+        Vector2 circle = Random.insideUnitCircle;
 
         if (spawnOnRingOnly)
-            randomCircle = randomCircle.normalized;
+            circle = circle.normalized;
 
-        randomCircle *= spawnRadius;
+        return player.position + RandomFlat(circle * radius);
+    }
 
-        Vector3 spawnPosition = player.position + new Vector3(randomCircle.x, 0f, randomCircle.y);
-
-        poolManager.Spawn(PickPrefab(), spawnPosition, Quaternion.identity);
+    private static Vector3 RandomFlat(Vector2 circle)
+    {
+        return new Vector3(circle.x, 0f, circle.y);
     }
 }

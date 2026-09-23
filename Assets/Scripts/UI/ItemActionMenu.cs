@@ -56,6 +56,16 @@ public class ItemActionMenu : MonoBehaviour
     /// <summary>지금 메뉴가 붙어 있는 칸. 같은 칸을 다시 누르면 닫는다.</summary>
     private RectTransform owner;
 
+    /// <summary>
+    /// 방금 이 칸 때문에 닫혔다 — 이번 프레임에는 다시 열지 않는다.
+    ///
+    /// 【토글이 안 먹던 이유】 덮개가 클릭을 뒤로 넘기는 구조라,
+    /// 같은 칸을 눌러도 「닫기 → 그 칸이 다시 연다」가 한 프레임에 일어났다.
+    /// 닫기 직전의 주인을 기억해 두고, 그 클릭이 낳은 열기 요청만 흘려보낸다.
+    /// </summary>
+    private static RectTransform suppressed;
+    private static int suppressedFrame = -1;
+
     public static bool IsOpen => instance != null && instance.shade != null
                                  && instance.shade.activeSelf;
 
@@ -101,8 +111,15 @@ public class ItemActionMenu : MonoBehaviour
 
         public void OnPointerClick(PointerEventData eventData)
         {
+            // 닫기 직전의 주인을 기억한다. 그 칸이 이 클릭으로 다시 열려고 하면
+            // 「같은 칸을 다시 누른 것」이므로 열지 않는다 — 그것이 토글이다.
+            RectTransform previous = instance != null ? instance.owner : null;
+
             // 먼저 닫는다. 이 판이 꺼져야 아래가 레이캐스트에 잡힌다.
             Close();
+
+            suppressed = previous;
+            suppressedFrame = Time.frameCount;
 
             if (EventSystem.current == null)
                 return;
@@ -123,8 +140,11 @@ public class ItemActionMenu : MonoBehaviour
                 ExecuteEvents.ExecuteHierarchy(
                     target, eventData, ExecuteEvents.pointerClickHandler);
 
-                return;
+                break;
             }
+
+            // 넘긴 클릭이 끝났다. 다음 클릭은 평소대로 열린다.
+            suppressed = null;
         }
     }
 
@@ -171,10 +191,19 @@ public class ItemActionMenu : MonoBehaviour
         if (cell == null || entries == null || entries.Count == 0)
             return;
 
-        ItemActionMenu menu = EnsureInstance();
-
         // 【같은 칸을 다시 누르면 닫는다.】 열고 닫는 데 쓰는 버튼이
         // 칸 자신이면, 메뉴를 치우려고 빈 곳을 찾을 필요가 없다.
+        //
+        // 덮개가 이미 닫은 뒤에 이 호출이 온다. 그래서 IsOpen이 아니라
+        // 「방금 이 칸 때문에 닫혔는가」를 본다.
+        if (cell == suppressed && Time.frameCount == suppressedFrame)
+        {
+            suppressed = null;
+            return;
+        }
+
+        ItemActionMenu menu = EnsureInstance();
+
         if (IsOpen && menu.owner == cell)
         {
             Close();

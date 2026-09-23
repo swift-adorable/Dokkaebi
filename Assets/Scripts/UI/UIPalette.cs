@@ -94,6 +94,30 @@ public static class UIPalette
     // ── 생존 게이지 (Survival_System 7절) ─────────────────────────────
     // 색으로 구분한다 — 아트가 없는 지금은 이것이 유일한 구분이다.
 
+    // ── 상태이상 (Combat_Baseline) ────────────────────────────────────
+    // 속성을 따른다. 임계 상태 셋은 붉은 계열로 묶어,
+    // 「지금 움직일 수 없다」와 「조금 아프다」가 한눈에 구분되게 한다.
+
+    public static Color ForStatus(StatusEffectType type)
+    {
+        switch (type)
+        {
+            case StatusEffectType.Ignite:   return new Color(0.96f, 0.52f, 0.22f, 1f);
+            case StatusEffectType.Poison:   return new Color(0.56f, 0.80f, 0.34f, 1f);
+            case StatusEffectType.Bleed:    return new Color(0.84f, 0.30f, 0.34f, 1f);
+            case StatusEffectType.Chill:    return new Color(0.52f, 0.80f, 0.95f, 1f);
+            case StatusEffectType.Shock:    return new Color(0.96f, 0.86f, 0.36f, 1f);
+            case StatusEffectType.Congeal:  return new Color(0.72f, 0.56f, 0.94f, 1f);
+
+            // 임계 상태 — 붉게.
+            case StatusEffectType.Freeze:   return new Color(0.42f, 0.72f, 1f, 1f);
+            case StatusEffectType.Paralyze: return new Color(1f, 0.74f, 0.24f, 1f);
+            case StatusEffectType.Corrode:  return new Color(0.78f, 0.92f, 0.32f, 1f);
+
+            default:                        return Text;
+        }
+    }
+
     /// <summary>체력. 붉은색.</summary>
     public static readonly Color HealthBar = new(0.86f, 0.28f, 0.32f, 0.95f);
 

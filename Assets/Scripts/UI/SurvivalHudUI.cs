@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -50,8 +51,47 @@ public class SurvivalHudUI : MonoBehaviour
 
     private Health health;
 
+    // ── 상태이상 줄 ───────────────────────────────────────────────────
+    // 체력 막대 **위에** 쌓는다. 덕코프도 같은 자리다.
+    // 아래에 두면 퀵슬롯과 겹치고, 옆에 두면 게이지가 밀린다.
+
+    private const float StatusRowHeight = 30f;
+    private const float StatusRowGap = 4f;
+    private const float StatusWidth = 176f;
+
+    /// <summary>한 번에 보여 주는 줄 수. 넘치면 오래된 것부터 잘린다.</summary>
+    private const int MaxStatusRows = 6;
+
+    private RectTransform statusColumn;
+
+    private readonly List<StatusRow> statusRows = new();
+
+    /// <summary>줄 하나를 이루는 조각들. 매 프레임 만들지 않고 재사용한다.</summary>
+    private readonly struct StatusRow
+    {
+        public readonly GameObject Root;
+        public readonly Image Back;
+        public readonly Image Fill;
+        public readonly Text Label;
+
+        public StatusRow(GameObject root, Image back, Image fill, Text label)
+        {
+            Root = root;
+            Back = back;
+            Fill = fill;
+            Label = label;
+        }
+    }
+
     /// <summary>가방·전리품 화면이 열려 있으면 감춘다.</summary>
     private bool hiddenByScreen;
+
+    /// <summary>StatusEffectType의 개수. None을 뺀 나머지를 훑는다.</summary>
+    private static readonly int StatusEffectCount =
+        System.Enum.GetValues(typeof(StatusEffectType)).Length;
+
+    /// <summary>이번 프레임에 보일 상태. 매 프레임 새로 만들지 않는다.</summary>
+    private readonly List<StatusEffectType> visible = new();
 
     public static SurvivalHudUI EnsureInstance()
     {
@@ -129,6 +169,64 @@ public class SurvivalHudUI : MonoBehaviour
 
         BuildGauge("Energy", cursor, UISprites.Glyph.Bolt, UIPalette.EnergyBar,
             out energyIcon, out energyFill, out energyLabel);
+
+        BuildStatusColumn();
+    }
+
+    /// <summary>
+    /// 상태이상 줄이 쌓이는 자리. 체력 막대 **바로 위**에서 위로 자란다.
+    ///
+    /// 【줄을 미리 만들어 두고 켰다 끈다.】 매 프레임 Destroy/Instantiate를
+    /// 하면 상태가 자주 바뀌는 교전 중에 쓰레기가 쏟아진다.
+    /// </summary>
+    private void BuildStatusColumn()
+    {
+        GameObject columnObject = UIFactory.CreateChild("Status", root);
+
+        statusColumn = columnObject.GetComponent<RectTransform>();
+        statusColumn.anchorMin = new Vector2(0f, 1f);
+        statusColumn.anchorMax = new Vector2(0f, 1f);
+        statusColumn.pivot = new Vector2(0f, 0f);
+        statusColumn.sizeDelta = new Vector2(StatusWidth, 0f);
+        statusColumn.anchoredPosition = new Vector2(0f, 6f);
+
+        for (int i = 0; i < MaxStatusRows; i++)
+            statusRows.Add(BuildStatusRow(i));
+    }
+
+    private StatusRow BuildStatusRow(int index)
+    {
+        GameObject rowObject = UIFactory.CreateChild($"Status_{index}", statusColumn);
+
+        var rect = rowObject.GetComponent<RectTransform>();
+        rect.anchorMin = new Vector2(0f, 0f);
+        rect.anchorMax = new Vector2(1f, 0f);
+        rect.pivot = new Vector2(0.5f, 0f);
+        rect.offsetMin = Vector2.zero;
+        rect.offsetMax = Vector2.zero;
+        rect.sizeDelta = new Vector2(0f, StatusRowHeight);
+        rect.anchoredPosition = new Vector2(0f, index * (StatusRowHeight + StatusRowGap));
+
+        var back = rowObject.AddComponent<Image>();
+        back.color = UIPalette.Inset;
+        back.sprite = UISprites.Rounded(UIFactory.Radius);
+        back.type = Image.Type.Sliced;
+        back.raycastTarget = false;
+
+        // 남은 시간은 채움으로 보여 준다. 숫자만 있으면 「곧 풀리는지」를
+        // 읽어야 알 수 있는데, 교전 중에는 읽을 겨를이 없다.
+        Image fill = UIFactory.CreatePanel("Fill", rowObject.transform,
+            UIPalette.Text, Vector2.zero, Vector2.one, UIFactory.Radius);
+
+        fill.raycastTarget = false;
+
+        Text label = UIFactory.CreateLabel(rowObject.transform, string.Empty, 19,
+            FontStyle.Bold, new Vector2(0.06f, 0f), new Vector2(0.94f, 1f),
+            TextAnchor.MiddleLeft, UIPalette.TextOnGlass);
+
+        rowObject.SetActive(false);
+
+        return new StatusRow(rowObject, back, fill, label);
     }
 
     /// <summary>표식 하나. 가로 위치는 픽셀, 세로는 가운데 정렬이다.</summary>
@@ -264,6 +362,90 @@ public class SurvivalHudUI : MonoBehaviour
 
         RefreshHealth();
         RefreshSurvival();
+        RefreshStatus();
+    }
+
+    /// <summary>
+    /// 걸려 있는 상태이상을 줄로 세운다.
+    ///
+    /// 【임계 상태를 맨 위로 올린다.】 동결·마비는 지금 못 움직인다는 뜻이고,
+    /// 부식은 회복약이 반만 듣는다는 뜻이다. 중독 3중첩보다 먼저 보여야 한다.
+    /// </summary>
+    private void RefreshStatus()
+    {
+        if (health == null)
+        {
+            HideStatusFrom(0);
+            return;
+        }
+
+        StatusEffectState state = health.Status;
+
+        visible.Clear();
+
+        for (int i = 1; i < StatusEffectCount; i++)
+        {
+            var type = (StatusEffectType)i;
+
+            if (state.Has(type))
+                visible.Add(type);
+        }
+
+        // 임계 상태 먼저, 그다음 남은 시간이 짧은 것 먼저 —
+        // 곧 풀릴 것이 위에 있어야 「기다릴까 약을 쓸까」를 정할 수 있다.
+        visible.Sort((a, b) =>
+        {
+            bool criticalA = StatusEffectNames.IsCritical(a);
+            bool criticalB = StatusEffectNames.IsCritical(b);
+
+            if (criticalA != criticalB)
+                return criticalA ? -1 : 1;
+
+            return state.RemainingOf(a).CompareTo(state.RemainingOf(b));
+        });
+
+        int count = Mathf.Min(visible.Count, MaxStatusRows);
+
+        for (int i = 0; i < count; i++)
+        {
+            StatusEffectType type = visible[i];
+
+            StatusRow row = statusRows[i];
+
+            row.Root.SetActive(true);
+
+            Color color = UIPalette.ForStatus(type);
+
+            int stacks = state.StacksOf(type);
+            float remaining = state.RemainingOf(type);
+
+            row.Label.text = stacks > 1
+                ? $"{StatusEffectNames.Of(type)} {stacks}    {remaining:0.0}s"
+                : $"{StatusEffectNames.Of(type)}    {remaining:0.0}s";
+
+            // 채움은 지속시간 기준으로 줄어든다. 갱신되면 다시 찬다.
+            float duration = Mathf.Max(0.01f, StatusEffectTable.Get(type).Duration);
+
+            row.Fill.rectTransform.anchorMax =
+                new Vector2(Mathf.Clamp01(remaining / duration), 1f);
+
+            // 임계 상태는 바탕까지 물들인다. 줄 하나가 아니라 띠로 보여야 한다.
+            row.Fill.color = UIPalette.Glassify(color, 0.55f);
+            row.Back.color = StatusEffectNames.IsCritical(type)
+                ? UIPalette.Glassify(color, 0.22f)
+                : UIPalette.Inset;
+        }
+
+        HideStatusFrom(count);
+    }
+
+    private void HideStatusFrom(int index)
+    {
+        for (int i = index; i < statusRows.Count; i++)
+        {
+            if (statusRows[i].Root.activeSelf)
+                statusRows[i].Root.SetActive(false);
+        }
     }
 
     private void RefreshHealth()
