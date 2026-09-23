@@ -90,11 +90,18 @@ public class Health : MonoBehaviour, IDamageable, IPoolable
         {
             float multiplier = Status.ArmourMultiplier;
             float reduction = Status.ArmourReduction;
+            float bonus = Status.ArmourBonus;
+
+            // 방호(내화제 등)는 장비 저항에 곱해진다. 원본을 건드리지 않으려고
+            // 복사본에 적용한다 — resistances는 장비가 넣어 준 값이다.
+            ElementalResistances warded = resistances;
+
+            Status.ApplyWards(ref warded);
 
             return DefenceProfile.Create(
-                Mathf.Max(0f, headArmour * multiplier - reduction),
-                Mathf.Max(0f, bodyArmour * multiplier - reduction),
-                resistances);
+                Mathf.Max(0f, headArmour * multiplier - reduction + bonus),
+                Mathf.Max(0f, bodyArmour * multiplier - reduction + bonus),
+                warded);
         }
     }
 

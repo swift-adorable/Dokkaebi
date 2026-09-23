@@ -146,6 +146,34 @@ public static class ConsumableAssetGenerator
             StatusEffectType.Regen, waterCost: 7f, energyCost: 0f,
             weight: 0.2f, value: 875));
 
+        list.Add(Shot("con_expander", "확장제",
+            "더 들고 갈 수 있다. 끝나면 그대로 주저앉는다.",
+            StatusEffectType.Overload, waterCost: 10f, energyCost: 0f,
+            weight: 0.21f, value: 648));
+
+        // ── 방호 — 장비를 대체하지 못한다 (문서 5절) ──────────────────
+        //
+        // 덕코프 저항 주사약 4종과 같다 — 「받는 해당 속성 피해 −25%」·120초·
+        // 수분 −20·무게 0.19·가치 648·스택 3. [확인됨 — 아이템 #408 · #1070~#1072]
+        //
+        // 【넷을 동시에 걸 수 있다.】 덕코프도 비배타다. 다만 넷을 다 쓰면
+        // 수분이 −80이라 그것이 곧 대가가 된다.
+        //
+        // 저항에 곱하므로 면역이 되지 않는다 — 0.75는 0을 만들지 못한다.
+        // 「소모품만으로 환경을 통과하게 두지 않는다」가 수식으로 지켜진다.
+
+        list.Add(Ward("con_ward_fire", "내화제", "타는 것이 덜 아프다.",
+            StatusEffectType.WardFire));
+
+        list.Add(Ward("con_ward_cold", "내한제", "언 것이 덜 아프다.",
+            StatusEffectType.WardCold));
+
+        list.Add(Ward("con_ward_shock", "절연제", "저리는 것이 덜하다.",
+            StatusEffectType.WardLightning));
+
+        list.Add(Ward("con_ward_toxin", "내독제", "삭는 것이 덜하다.",
+            StatusEffectType.WardChaos));
+
         // ── 음료 · 음식 ───────────────────────────────────────────────
         //
         // 【체력을 채우지 않는다.】 먹어서 상처가 낫기 시작하면
@@ -228,6 +256,19 @@ public static class ConsumableAssetGenerator
             grant = grant, waterCost = waterCost, energyCost = energyCost,
             cure = StatusEffectType.None, cureStacks = 99,
             weight = weight, stackMax = 3, value = value
+        };
+    }
+
+    /// <summary>방호 주사약. 수치는 덕코프 저항 주사약 4종 그대로다.</summary>
+    private static Row Ward(string id, string name, string desc, StatusEffectType grant)
+    {
+        return new Row
+        {
+            id = id, name = name, desc = desc,
+            category = ConsumableCategory.Ward,
+            grant = grant, waterCost = 20f,
+            cure = StatusEffectType.None, cureStacks = 99,
+            weight = 0.19f, stackMax = 3, value = 648
         };
     }
 
