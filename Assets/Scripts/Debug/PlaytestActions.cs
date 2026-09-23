@@ -412,7 +412,7 @@ public static class PlaytestActions
     private static string PrepareSelf(Health self)
     {
         if (self.IsDead)
-            return "플레이어가 죽어 있습니다 — 「부활」을 먼저 누르십시오.\n"
+            return "플레이어가 죽어 있습니다 — 「체력 회복」을 먼저 누르십시오.\n"
                    + "사망하면 timeScale이 0이 되어 화면 전체가 멈춥니다.";
 
         if (self.Current < self.Max)
@@ -422,26 +422,34 @@ public static class PlaytestActions
     }
 
     /// <summary>
-    /// 되살린다. 【사망 화면이 아직 없어서 죽으면 나올 길이 없다.】
+    /// 체력을 가득 채운다. 【죽어 있으면 되살린다.】
     ///
-    /// 사망은 GameManager를 GameOver로 보내고 timeScale을 0으로 만든다.
-    /// 그런데 GameState.GameOver를 듣는 화면이 하나도 없다 — 멈춘 채로
-    /// 아무것도 뜨지 않으므로 Play Mode를 껐다 켜는 것 말고는 방법이 없었다.
-    /// 사망 화면(추출 실패 → 벙커 복귀)은 벙커·정산과 함께 가는 일이라
-    /// 그때까지는 이 버튼이 유일한 출구다. (docs/Blob_Audit.md)
+    /// HealthPool.Heal은 IsDead면 0을 돌려준다 — 죽은 대상이 회복으로
+    /// 살아나면 「죽음」이 규칙이 아니게 되므로 맞는 설계다. 그래서
+    /// 죽은 상태에서는 회복이 아니라 스폰과 같은 경로로 되돌린다.
+    ///
+    /// 이 버튼이 필요한 이유 — 사망은 GameManager를 GameOver로 보내고
+    /// Time.timeScale을 0으로 만드는데, GameState.GameOver를 듣는 화면이
+    /// 아직 하나도 없다. 멈춘 채로 아무것도 뜨지 않아 Play Mode를 껐다
+    /// 켜는 것 말고는 나올 길이 없었다. (docs/Blob_Audit.md A12)
     ///
     /// 【되돌려 주지 않는 것】 가방은 죽는 순간 DropOnDeath로 이미 떨어졌고
     /// 각성 레벨과 소켓도 SkillManager.ResetRun으로 초기화되었다.
-    /// 그 둘은 규칙대로 사라진 것이므로 여기서 되살리지 않는다.
+    /// 규칙대로 사라진 것이므로 여기서 되살리지 않는다.
     /// </summary>
-    public static string ReviveSelf()
+    public static string HealSelf()
     {
         Health self = SelfHealth();
 
         if (self == null)
             return "플레이어를 찾지 못했습니다.";
 
-        bool wasDead = self.IsDead;
+        if (!self.IsDead)
+        {
+            int healed = self.Heal(self.Max - self.Current);
+
+            return $"체력 {self.Current}/{self.Max} (+{healed})";
+        }
 
         // 체력 가득 · 상태이상 해제 · 무적 초기화를 한 번에 한다.
         self.OnSpawned();
@@ -450,15 +458,95 @@ public static class PlaytestActions
         if (PlayerSurvival.HasInstance)
             PlayerSurvival.Instance.Refill();
 
+        // timeScale 0 → 1. 이것을 안 하면 살아나도 화면이 멈춘 채다.
         if (GameManager.HasInstance)
             GameManager.Instance.Resume();
 
-        if (!wasDead)
-            return $"죽어 있지 않았습니다. 체력·수분·에너지를 채우고 "
-                   + $"상태이상을 해제했습니다 — 체력 {self.Current}/{self.Max}";
-
-        return $"부활했습니다 — 체력 {self.Current}/{self.Max} · 시간이 다시 흐릅니다.\n"
+        return $"죽어 있어 되살렸습니다 — 체력 {self.Current}/{self.Max} · 시간이 다시 흐릅니다.\n"
                + "가방과 각성 레벨은 죽을 때 규칙대로 사라졌으므로 돌아오지 않습니다.";
+    }
+
+    // ── 적 ────────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// 적 생성을 다시 켠다.
+    ///
+    /// EnemySpawner는 Update에서 스스로 돌지만 두 가지에 막힌다 —
+    /// 컴포넌트가 꺼져 있거나(「적 생성 정지」를 눌렀을 때),
+    /// GameManager가 Playing이 아닐 때(사망·일시정지)다. 둘 다 푼다.
+    /// </summary>
+    public static string StartSpawning()
+    {
+        var spawners = Object.FindObjectsByType<EnemySpawner>(FindObjectsInactive.Include);
+
+        if (spawners.Length == 0)
+            return "씬에 EnemySpawner가 없습니다.";
+
+        foreach (EnemySpawner spawner in spawners)
+            spawner.enabled = true;
+
+        if (GameManager.HasInstance && !GameManager.Instance.IsPlaying)
+            GameManager.Instance.Resume();
+
+        int active = EnemyManager.HasInstance ? EnemyManager.Instance.ActiveCount : 0;
+
+        return $"적 생성을 켰습니다 (스포너 {spawners.Length}개) · 현재 적 {active}마리";
+    }
+
+    /// <summary>
+    /// 적 생성을 멈춘다. 이미 나와 있는 적은 그대로 둔다.
+    ///
+    /// 【「모든 적 제거」와 짝이다.】 생성이 계속 도는 동안에는 제거를
+    /// 눌러도 몇 초 만에 다시 차오른다. 화면을 비워 두고 UI를 보려면
+    /// 멈추는 쪽이 먼저 있어야 한다.
+    /// </summary>
+    public static string StopSpawning()
+    {
+        var spawners = Object.FindObjectsByType<EnemySpawner>(FindObjectsInactive.Include);
+
+        if (spawners.Length == 0)
+            return "씬에 EnemySpawner가 없습니다.";
+
+        foreach (EnemySpawner spawner in spawners)
+            spawner.enabled = false;
+
+        int active = EnemyManager.HasInstance ? EnemyManager.Instance.ActiveCount : 0;
+
+        return $"적 생성을 멈췄습니다 (스포너 {spawners.Length}개)\n"
+               + $"이미 나와 있는 {active}마리는 그대로입니다 — 「모든 적 제거」로 치웁니다.";
+    }
+
+    /// <summary>
+    /// 지금 나와 있는 적을 전부 풀로 되돌린다.
+    ///
+    /// 【죽이지 않고 되돌린다.】 처치로 처리하면 경험치·전리품·시체가
+    /// 쏟아져 화면을 비우려던 목적과 반대가 된다. EnemyManager가 멀어진
+    /// 적을 정리할 때 쓰는 것과 같은 경로다.
+    /// </summary>
+    public static string KillAllEnemies()
+    {
+        if (!EnemyManager.HasInstance)
+            return "EnemyManager가 없습니다 — 아직 적이 한 번도 나오지 않았습니다.";
+
+        var enemies = EnemyManager.Instance.ActiveEnemies;
+
+        int removed = 0;
+
+        // 뒤에서부터 도는 이유 — ReturnToPool이 목록에서 자기를 빼므로
+        // 앞에서부터 돌면 인덱스가 밀려 절반만 지워진다.
+        for (int i = enemies.Count - 1; i >= 0; i--)
+        {
+            EnemyController enemy = enemies[i];
+
+            if (enemy == null)
+                continue;
+
+            enemy.ReturnToPool();
+            removed++;
+        }
+
+        return $"적 {removed}마리를 치웠습니다 · 남은 적 {EnemyManager.Instance.ActiveCount}마리\n"
+               + "생성이 켜져 있으면 곧 다시 나옵니다 — 「적 생성 정지」와 같이 쓰십시오.";
     }
 
     /// <summary>나에게 한 종류를 여러 번 건다. 중첩 → 전이를 볼 때 쓴다.</summary>

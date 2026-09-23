@@ -36,6 +36,10 @@ public class PlaytestPanelUI : MonoBehaviour
         ("겹치는 재료",   PlaytestActions.GiveStackables),
         ("가방 채우기",   PlaytestActions.FillBag),
         ("가방 비우기",   PlaytestActions.ClearBag),
+        ("체력 회복",     PlaytestActions.HealSelf),
+        ("적 생성 시작",  PlaytestActions.StartSpawning),
+        ("적 생성 정지",  PlaytestActions.StopSpawning),
+        ("모든 적 제거",  PlaytestActions.KillAllEnemies),
         ("현재 능력치",   PlaytestActions.DumpStats),
         ("현재 젬 빌드",  PlaytestActions.DumpBuild),
         ("냉각 6 → 동결", () => PlaytestActions.StackOnNearest(StatusEffectType.Chill, 6)),
@@ -45,7 +49,6 @@ public class PlaytestPanelUI : MonoBehaviour
         // 위 셋은 【가장 가까운 적】에게 건다. 화면 좌상단의 상태이상 줄은
         // 【내】 상태를 보여 주므로, 적에게 걸어서는 줄이 뜨지 않는다.
         // 그 줄을 확인하려면 아래 둘을 쓴다.
-        ("부활 (시간 재개)",  PlaytestActions.ReviveSelf),
         ("내게 기본 6종",     PlaytestActions.StackAllOnSelf),
         ("내게 위험 상태 3종", PlaytestActions.CriticalOnSelf),
         ("내게 냉각 6 → 동결", () => PlaytestActions.StackOnSelf(StatusEffectType.Chill, 6)),
