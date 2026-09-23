@@ -175,5 +175,34 @@ namespace Blob.Tests
 
             Assert.AreEqual(SaveLoadResult.None, SaveStore.Read(path, out _));
         }
+
+        // ── 판 1 → 2 (결정 2-33 — 레벨이 하나가 됐다) ──────────────────
+
+        [Test]
+        public void 판1_세이브를_읽으면_레벨은_그대로이고_경험치는_0이다()
+        {
+            // 판 1에는 experience가 없다. accountLevel은 오르는 길이 없던 값이라
+            // 그대로 각성 레벨로 쓴다.
+            File.WriteAllText(path,
+                "{ \"version\": 1, \"accountLevel\": 6, \"credits\": 900 }");
+
+            Assert.AreEqual(SaveLoadResult.Main, SaveStore.Read(path, out SaveData data));
+
+            Assert.AreEqual(6, data.accountLevel);
+            Assert.AreEqual(0, data.experience);
+            Assert.AreEqual(900, data.credits);
+        }
+
+        [Test]
+        public void 경험치가_남는다()
+        {
+            SaveData data = Sample();
+            data.experience = 37;
+
+            SaveStore.Write(path, data);
+            SaveStore.Read(path, out SaveData read);
+
+            Assert.AreEqual(37, read.experience);
+        }
     }
 }

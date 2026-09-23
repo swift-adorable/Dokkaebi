@@ -30,7 +30,7 @@ public enum PassiveBranch
 /// </summary>
 public enum PassiveUnlockKind
 {
-    /// <summary>계정 레벨 + 크레딧 + 필요 재료.</summary>
+    /// <summary>각성 레벨 + 크레딧 + 필요 재료.</summary>
     AccountLevel = 0,
 
     /// <summary>레벨을 보지 않는다. 돈만 있으면 연다. (중개)</summary>

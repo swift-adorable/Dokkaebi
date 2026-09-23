@@ -8,7 +8,8 @@ using System.Collections.Generic;
 /// 출격 **전과 후에만** 저장하므로, 출격 중에 끄면 그 출격에서 얻은 것도
 /// 잃은 것도 없다(롤백). [커뮤니티 확인 — 개발사 공식 설명은 찾지 못했다]
 ///
-/// 그래서 여기에는 출격 안의 것(가방 · 착용 장비 · 각성 레벨 · 소켓)이 없다.
+/// 그래서 여기에는 출격 안의 것(가방 · 착용 장비 · 소켓에 꽂힌 젬)이 없다.
+/// 각성 레벨은 영구라 담는다 (결정 2-33).
 /// 그것들은 출격이 끝나야 의미가 정해진다 — 추출하면 남고 죽으면 잃는다.
 /// 추출이 생기면(9단계) 그때 가방·장비를 담는다.
 ///
@@ -23,7 +24,11 @@ public class SaveData
     /// 【더 새 판은 읽지 않는다.】 옛 빌드가 새 세이브를 열어 모르는 필드를
     /// 버린 채 저장하면 진행이 소리 없이 사라진다.
     /// </summary>
-    public const int CurrentVersion = 1;
+    ///   1 — 처음 판 (계정 레벨을 따로 담았다)
+    ///   2 — 레벨이 하나가 됐다. accountLevel이 곧 각성 레벨이고, 경험치를 함께 담는다.
+    ///       1판을 읽으면 경험치는 0이다. 1판의 accountLevel은 오르는 길이 없던
+    ///       값이라 그대로 각성 레벨로 쓴다.
+    public const int CurrentVersion = 2;
 
     public int version = CurrentVersion;
 
@@ -32,7 +37,15 @@ public class SaveData
 
     // ── 계정 ──────────────────────────────────────────────────────────
 
+    /// <summary>
+    /// 【각성 레벨】 — 이 게임의 유일한 레벨. (결정 2-33)
+    /// JSON 이름을 바꾸지 않는다. 1판 세이브가 그대로 읽혀야 한다.
+    /// </summary>
     public int accountLevel = 1;
+
+    /// <summary>다음 레벨을 향해 모은 경험치. 1판에는 없어 0으로 읽힌다.</summary>
+    public int experience;
+
     public int credits;
 
     /// <summary>역행 계열을 발견했는가. 4장 관측실에서 켜진다.</summary>

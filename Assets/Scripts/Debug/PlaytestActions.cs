@@ -153,10 +153,7 @@ public static class PlaytestActions
     /// </summary>
     public static string RaiseAwakeningLevel()
     {
-        if (!PlayerStats.HasInstance)
-            return "PlayerStats가 없습니다. 레이드 중에만 올릴 수 있습니다.";
-
-        PlayerStats stats = PlayerStats.Instance;
+        PlayerStats stats = PlayerStats.EnsureInstance();
 
         int before = stats.Level;
 
@@ -164,24 +161,10 @@ public static class PlaytestActions
 
         string opened = SocketUnlockTable.DescribeUnlock(stats.Level);
 
-        string message = $"각성 Lv.{before} → Lv.{stats.Level}";
+        // 소켓과 패시브가 같은 레벨에서 열린다 (결정 2-33).
+        string message = $"각성 Lv.{before} → Lv.{stats.Level} · 패시브 요구 레벨도 이 값이다";
 
         return string.IsNullOrEmpty(opened) ? message : $"{message} — {opened} 개방";
-    }
-
-    /// <summary>
-    /// 계정 레벨을 한 칸 올린다. 패시브 해금 조건이 이것이다.
-    /// 각성과 달리 런과 무관한 영구 축이라 그냥 올린다.
-    /// </summary>
-    public static string RaiseAccountLevel()
-    {
-        PassiveManager manager = PassiveManager.EnsureInstance();
-
-        int before = manager.AccountLevel;
-
-        manager.AccountLevel = before + 1;
-
-        return $"계정 Lv.{before} → Lv.{manager.AccountLevel}";
     }
 
     /// <summary>무게 상한의 1.6배까지 채운다. 「움직일 수 없음」 단계까지 간다.</summary>
@@ -306,7 +289,7 @@ public static class PlaytestActions
 
         SaveData data = SaveManager.Capture();
 
-        return $"저장했습니다.\n계정 Lv.{data.accountLevel} · 크레딧 {data.credits} · "
+        return $"저장했습니다.\n각성 Lv.{data.accountLevel} · 크레딧 {data.credits} · "
                + $"패시브 {data.learnedPassives.Count} · 도감 {data.codex.Count}\n"
                + "게임에서는 사망할 때만 저장됩니다 — 출격 중 종료는 롤백입니다.";
     }

@@ -5,8 +5,10 @@ using UnityEngine;
 /// 계정 축의 영구 성장 — 패시브. 【죽어도 잃지 않는다.】
 /// (docs/Blob_Progression_System.md — 각성 / 계정 2축)
 ///
-///   각성 레벨 : 런마다 초기화. 소켓을 연다.        → SocketUnlockTable
-///   계정 레벨 : 영구. 패시브를 연다.               → 여기
+///   각성 레벨 : 영구. 소켓과 패시브를 연다.   → PlayerStats (결정 2-33)
+///
+/// 예전에는 계정 레벨을 여기서 따로 들고 있었다. 오르는 길이 없어 디버그
+/// 버튼으로만 바뀌었다. 이제 레벨은 PlayerStats 하나뿐이고 여기는 읽기만 한다.
 ///
 /// 【패시브는 전투 수치를 주지 않는다.】 휴대 · 수집 · 벙커 해금만 건드린다.
 /// 방어도·피해·체력·이동·감지는 전부 장비의 몫이다. 이유는 PassiveEffectType 주석 참조.
@@ -18,10 +20,6 @@ public class PassiveManager : Singleton<PassiveManager>
     [SerializeField] private PassiveTree tree;
 
     [Header("계정 — 세이브가 없을 때의 처음 값")]
-    [Tooltip("계정 레벨. 패시브 해금 조건이 된다. 세이브가 있으면 SaveManager가 덮는다.")]
-    [Min(1)]
-    [SerializeField] private int accountLevel = 1;
-
     [Tooltip("보유 크레딧. 패시브를 배우는 데 쓴다.")]
     [Min(0)]
     [SerializeField] private int credits = 5000;
@@ -42,16 +40,25 @@ public class PassiveManager : Singleton<PassiveManager>
     /// </summary>
     public PassiveTree Tree => tree != null ? tree : (tree = PassiveTree.Load());
 
-    /// <summary>계정 레벨.</summary>
-    public int AccountLevel
+    /// <summary>
+    /// 패시브 요구 레벨과 비교하는 값 = 각성 레벨. (결정 2-33)
+    /// 식별자 이름은 옛 것을 둔다 — 패시브 에셋의 직렬화 필드가 이 이름을 쓴다.
+    /// </summary>
+    public int AccountLevel => PlayerStats.HasInstance ? PlayerStats.Instance.Level : 1;
+
+    private void OnEnable()
     {
-        get => accountLevel;
-        set
-        {
-            accountLevel = Mathf.Max(1, value);
-            OnChanged?.Invoke();
-        }
+        // 레벨이 오르면 패시브 화면의 「요구 Lv」 회색 처리가 바로 풀려야 한다.
+        PlayerStats.EnsureInstance().OnChanged += RaiseChanged;
     }
+
+    private void OnDisable()
+    {
+        if (PlayerStats.HasInstance)
+            PlayerStats.Instance.OnChanged -= RaiseChanged;
+    }
+
+    private void RaiseChanged() => OnChanged?.Invoke();
 
     /// <summary>보유 크레딧.</summary>
     public int Credits
@@ -101,7 +108,7 @@ public class PassiveManager : Singleton<PassiveManager>
 
     /// <summary>지금 상태로 만든 판단 재료. 재료는 가방에서 꺼낸다.</summary>
     public PassiveContext Context => new(
-        accountLevel,
+        AccountLevel,
         credits,
         PlayerInventory.HasInstance ? PlayerInventory.Instance.Bag : null,
         discoveredRegression);

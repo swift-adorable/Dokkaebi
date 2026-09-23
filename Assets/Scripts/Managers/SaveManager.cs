@@ -97,7 +97,7 @@ public static class SaveManager
 
         Apply(data);
 
-        GameLogger.Log($"[Save] 불러옴 — 계정 Lv.{data.accountLevel} · 크레딧 {data.credits} · "
+        GameLogger.Log($"[Save] 불러옴 — 각성 Lv.{data.accountLevel} · 크레딧 {data.credits} · "
                        + $"패시브 {data.learnedPassives.Count} · 도감 {data.codex.Count} · "
                        + $"각인 {CountFilled(data.imprints)}");
 
@@ -123,7 +123,7 @@ public static class SaveManager
 
         SaveStore.Write(SavePath, data);
 
-        GameLogger.Log($"[Save] 저장 ({reason}) — 계정 Lv.{data.accountLevel} · 크레딧 {data.credits}");
+        GameLogger.Log($"[Save] 저장 ({reason}) — 각성 Lv.{data.accountLevel} · 크레딧 {data.credits}");
 
         return true;
     }
@@ -143,11 +143,16 @@ public static class SaveManager
     {
         var data = new SaveData();
 
+        if (PlayerStats.HasInstance)
+        {
+            data.accountLevel = PlayerStats.Instance.Level;
+            data.experience = PlayerStats.Instance.CurrentXP;
+        }
+
         if (PassiveManager.HasInstance)
         {
             PassiveManager passive = PassiveManager.Instance;
 
-            data.accountLevel = passive.AccountLevel;
             data.credits = passive.Credits;
             data.discoveredRegression = passive.DiscoveredRegression;
             data.learnedPassives = new List<string>(passive.State.LearnedIds);
@@ -190,9 +195,10 @@ public static class SaveManager
         if (data == null)
             return;
 
+        PlayerStats.EnsureInstance().Restore(data.accountLevel, data.experience);
+
         PassiveManager passive = PassiveManager.EnsureInstance();
 
-        passive.AccountLevel = data.accountLevel;
         passive.Credits = data.credits;
         passive.DiscoveredRegression = data.discoveredRegression;
         passive.State.Restore(data.learnedPassives);
@@ -206,6 +212,9 @@ public static class SaveManager
             codex.Unlock(id);
 
         RestoreImprints(data.imprints);
+
+        // 레벨이 돌아왔으니 소켓 수도 맞춘다. 알림은 내지 않는다.
+        SkillManager.EnsureInstance().ResyncLevel();
 
         PlayerInventory.EnsureInstance().RefreshCapacity();
     }
