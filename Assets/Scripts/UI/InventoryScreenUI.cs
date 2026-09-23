@@ -338,6 +338,9 @@ public partial class InventoryScreenUI : MonoBehaviour
     /// </summary>
     private const float QuickNumberBand = 18f;
 
+    /// <summary>칸과 번호 사이 틈. 번호가 칸에 붙어 있으면 칸의 일부로 읽힌다.</summary>
+    private const float QuickNumberGap = 6f;
+
     private const float QuickCellGap = 8f;
 
     private readonly List<Button> hudButtons = new();
@@ -421,7 +424,7 @@ public partial class InventoryScreenUI : MonoBehaviour
 
         quickBar.sizeDelta = new Vector2(
             QuickSlots.Count * QuickCellSize + (QuickSlots.Count - 1) * QuickCellGap,
-            QuickCellSize + QuickNumberBand);
+            QuickCellSize + QuickNumberBand + QuickNumberGap);
 
         // 【화면 맨 아래에 붙인다.】 안전 영역 안이므로 홈 인디케이터에 닿지 않는다.
         // 12px 띄워 두었더니 왼쪽의 소지 중량 막대보다 위로 떠서,
@@ -1397,8 +1400,11 @@ public partial class InventoryScreenUI : MonoBehaviour
 
         quick.Prune(inventory.Bag);
 
-        // 줄은 「칸 + 번호 띠」 두 층이다. 번호는 칸 밖 아래에 놓인다.
-        float bandHeight = QuickNumberBand / (QuickCellSize + QuickNumberBand);
+        // 줄은 「칸 + 틈 + 번호 띠」 세 층이다. 번호는 칸 밖 아래에 놓인다.
+        float total = QuickCellSize + QuickNumberBand + QuickNumberGap;
+
+        float bandTop = QuickNumberBand / total;
+        float cellBottom = (QuickNumberBand + QuickNumberGap) / total;
 
         for (int i = 0; i < QuickSlots.Count; i++)
         {
@@ -1406,7 +1412,7 @@ public partial class InventoryScreenUI : MonoBehaviour
                 out Vector2 min, out Vector2 max);
 
             // 칸은 위층만 쓴다.
-            var cellMin = new Vector2(min.x, bandHeight);
+            var cellMin = new Vector2(min.x, cellBottom);
             var cellMax = new Vector2(max.x, 1f);
 
             ItemStack stack = quick.Get(i);
@@ -1430,7 +1436,7 @@ public partial class InventoryScreenUI : MonoBehaviour
 
             // 【번호는 칸 바깥 아래.】 칸의 내용이 아니라 칸을 부르는 이름이다.
             UIFactory.CreateLabel(quickBar, (i + 1).ToString(), 20, FontStyle.Normal,
-                new Vector2(min.x, 0f), new Vector2(max.x, bandHeight),
+                new Vector2(min.x, 0f), new Vector2(max.x, bandTop),
                 TextAnchor.MiddleCenter, UIPalette.TextDim);
 
             if (empty)
