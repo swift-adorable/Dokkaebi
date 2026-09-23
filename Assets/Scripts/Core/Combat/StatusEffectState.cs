@@ -136,6 +136,37 @@ public sealed class StatusEffectState
         pending[i] = 0f;
     }
 
+    /// <summary>
+    /// 중첩을 지정한 수만큼만 덜어 낸다. 【소모품의 「출혈 2층 제거」가 이 경로다.】
+    ///
+    /// 전부 지우는 Clear와 나눠 두는 이유 — 싼 도구가 비싼 도구와 같은 일을
+    /// 하면 비싼 쪽을 살 이유가 없다. 덕코프도 소형 구급상자는 출혈 1층,
+    /// 구급상자는 2층을 지운다. [확인됨 — 아이템 #17 · #16]
+    ///
+    /// 남은 중첩이 0이 되면 지속시간도 함께 끝난다 — 중첩 0인데 상태가
+    /// 살아 있으면 「걸려 있는데 아무 일도 안 일어나는」 칸이 남는다.
+    /// </summary>
+    /// <returns>실제로 덜어 낸 중첩 수.</returns>
+    public int RemoveStacks(StatusEffectType type, int count)
+    {
+        if (!IsValid(type) || count <= 0)
+            return 0;
+
+        int i = (int)type;
+
+        int removed = Mathf.Min(count, stacks[i]);
+
+        if (removed <= 0)
+            return 0;
+
+        stacks[i] -= removed;
+
+        if (stacks[i] <= 0)
+            Clear(type);
+
+        return removed;
+    }
+
     public void ClearAll()
     {
         Array.Clear(remaining, 0, TypeCount);

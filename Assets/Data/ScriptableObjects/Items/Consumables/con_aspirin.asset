@@ -23,7 +23,7 @@ MonoBehaviour:
   slotSize: 1
   stackMax: 9
   maxDurability: 0
-  baseValue: 40
+  baseValue: 96
   noExtract: 0
   noRegister: 0
   noTrade: 0
@@ -36,3 +36,5 @@ MonoBehaviour:
     waterCost: 15
     energyCost: 0
     cure: 0
+    cureStacks: 99
+    useCost: 0

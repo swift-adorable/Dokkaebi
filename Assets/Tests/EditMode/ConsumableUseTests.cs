@@ -19,6 +19,7 @@ namespace Blob.Tests
             int heal = 0, float water = 0f, float energy = 0f,
             float waterCost = 0f, float energyCost = 0f,
             StatusEffectType cure = StatusEffectType.None,
+            int cureStacks = 99, int useCost = 0, int maxDurability = 0,
             ItemKind kind = ItemKind.Consumable)
         {
             var def = ScriptableObject.CreateInstance<ItemDefinition>();
@@ -28,6 +29,7 @@ namespace Blob.Tests
             so.FindProperty("id").stringValue = id;
             so.FindProperty("displayName").stringValue = id;
             so.FindProperty("kind").intValue = (int)kind;
+            so.FindProperty("maxDurability").intValue = maxDurability;
 
             SerializedProperty effect = so.FindProperty("consumable");
             effect.FindPropertyRelative("category").intValue = (int)category;
@@ -37,6 +39,8 @@ namespace Blob.Tests
             effect.FindPropertyRelative("waterCost").floatValue = waterCost;
             effect.FindPropertyRelative("energyCost").floatValue = energyCost;
             effect.FindPropertyRelative("cure").intValue = (int)cure;
+            effect.FindPropertyRelative("cureStacks").intValue = cureStacks;
+            effect.FindPropertyRelative("useCost").intValue = useCost;
 
             so.ApplyModifiedPropertiesWithoutUndo();
 
@@ -44,9 +48,11 @@ namespace Blob.Tests
         }
 
         /// <summary>체력 절반 · 수분 에너지 절반 · 상태 없음.</summary>
-        private static ConsumableSubject Half(bool hasCureTarget = false, bool dead = false)
+        private static ConsumableSubject Half(bool hasCureTarget = false, bool dead = false,
+                                              int durability = 0)
         {
-            return new ConsumableSubject(50, 100, dead, 50f, 100f, 50f, 100f, hasCureTarget);
+            return new ConsumableSubject(50, 100, dead, 50f, 100f, 50f, 100f,
+                hasCureTarget, durability);
         }
 
         private static ConsumableSubject Full()
@@ -219,6 +225,74 @@ namespace Blob.Tests
         {
             Assert.IsTrue(Create("kit", heal: 10).IsUsable);
             Assert.IsFalse(Create("empty", ConsumableCategory.Ward).IsUsable);
+        }
+
+        // ── 충전(내구도)형 ────────────────────────────────────────────
+        //
+        // 덕코프의 구급상자는 한 번 쓰고 사라지지 않는다.
+        // 소형 125/25 = 5회 · 구급상자 175/25 = 7회 · 대형 400/40 = 10회.
+        // [확인됨 — 아이템 #15 · #16 · #17]
+
+        [Test]
+        public void 충전이_남아_있으면_쓸_수_있고_닳을_양이_실린다()
+        {
+            ItemDefinition kit = Create("medkit", heal: 20,
+                useCost: 25, maxDurability: 175);
+
+            ConsumableOutcome outcome = ConsumableUse.Evaluate(kit, Half(durability: 175));
+
+            Assert.IsTrue(outcome.Ok);
+            Assert.AreEqual(20, outcome.Heal);
+            Assert.AreEqual(25, outcome.UseCost);
+        }
+
+        [Test]
+        public void 충전이_모자라면_빈_통이다()
+        {
+            ItemDefinition kit = Create("medkit", heal: 20,
+                useCost: 25, maxDurability: 175);
+
+            // 24는 한 번 값(25)에 모자란다. 반만 쓰이게 두지 않는다 —
+            // 「조금 회복됐는데 왜 사라졌지」가 생긴다.
+            ConsumableOutcome outcome = ConsumableUse.Evaluate(kit, Half(durability: 24));
+
+            Assert.IsFalse(outcome.Ok);
+            Assert.AreEqual(ConsumableError.Empty, outcome.Error);
+        }
+
+        [Test]
+        public void 충전형이_아니면_닳을_양이_0이다()
+        {
+            // 0은 「아이템 하나가 통째로 사라진다」는 뜻이다.
+            ItemDefinition aspirin = Create("aspirin", heal: 10);
+
+            Assert.AreEqual(0, ConsumableUse.Evaluate(aspirin, Half()).UseCost);
+        }
+
+        // ── 중첩 단위 해제 ────────────────────────────────────────────
+
+        [Test]
+        public void 덜어_낼_중첩_수가_실린다()
+        {
+            // 소형은 출혈 1층, 구급상자는 2층. 싼 도구가 비싼 도구와
+            // 같은 일을 하면 비싼 쪽을 살 이유가 없다.
+            ItemDefinition small = Create("small", cure: StatusEffectType.Bleed, cureStacks: 1);
+            ItemDefinition big = Create("big", cure: StatusEffectType.Bleed, cureStacks: 2);
+
+            Assert.AreEqual(1, ConsumableUse.Evaluate(small, Half(hasCureTarget: true)).CureStacks);
+            Assert.AreEqual(2, ConsumableUse.Evaluate(big, Half(hasCureTarget: true)).CureStacks);
+        }
+
+        [Test]
+        public void 걸리지_않았으면_중첩_수도_0이다()
+        {
+            ItemDefinition small = Create("small", cure: StatusEffectType.Bleed,
+                cureStacks: 1, heal: 5);
+
+            ConsumableOutcome outcome = ConsumableUse.Evaluate(small, Half(hasCureTarget: false));
+
+            Assert.IsTrue(outcome.Ok);
+            Assert.AreEqual(0, outcome.CureStacks);
         }
     }
 }

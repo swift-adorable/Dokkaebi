@@ -14,25 +14,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Blob.Runtime::ItemDefinition
   id: con_medkit
   displayName: "\uAD6C\uAE09\uC0C1\uC790"
-  description: "\uC81C\uB300\uB85C \uB41C \uAC83. \uC790\uB9AC\uB97C \uCC28\uC9C0\uD558\uB294
-    \uB9CC\uD07C \uAC12\uC744 \uD55C\uB2E4."
+  description: "\uC81C\uB300\uB85C \uB41C \uAC83. \uCD9C\uD608\uB3C4 \uB450 \uACB9\uAE4C\uC9C0
+    \uC7A1\uB294\uB2E4."
   kind: 6
   tier: 0
   weight: 0.75
   icon: {fileID: 0}
   slotSize: 1
   stackMax: 1
-  maxDurability: 0
-  baseValue: 420
+  maxDurability: 175
+  baseValue: 807
   noExtract: 0
   noRegister: 0
   noTrade: 0
   skill: {fileID: 0}
   consumable:
     category: 0
-    heal: 60
+    heal: 20
     water: 0
     energy: 0
     waterCost: 0
     energyCost: 0
-    cure: 0
+    cure: 5
+    cureStacks: 2
+    useCost: 25

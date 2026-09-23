@@ -43,6 +43,14 @@ public class ConsumableEffect
     [Tooltip("푸는 상태이상 하나. None이면 해제 효과가 없다.")]
     [SerializeField] private StatusEffectType cure = StatusEffectType.None;
 
+    [Min(1)]
+    [Tooltip("몇 중첩을 덜어 내는가. 덕코프의 「출혈 2층 제거」가 이것이다.")]
+    [SerializeField] private int cureStacks = 99;
+
+    [Min(0)]
+    [Tooltip("한 번 쓸 때 닳는 내구도. 0이면 한 번 쓰고 사라지는 물건이다.")]
+    [SerializeField] private int useCost = 0;
+
     public ConsumableCategory Category => category;
 
     public int Heal => Mathf.Max(0, heal);
@@ -51,6 +59,22 @@ public class ConsumableEffect
     public float WaterCost => Mathf.Max(0f, waterCost);
     public float EnergyCost => Mathf.Max(0f, energyCost);
     public StatusEffectType Cure => cure;
+
+    /// <summary>덜어 내는 중첩 수. 크게 두면 사실상 전부 제거다.</summary>
+    public int CureStacks => Mathf.Max(1, cureStacks);
+
+    /// <summary>
+    /// 한 번 쓸 때 닳는 내구도. 0이면 아이템 하나가 통째로 사라진다.
+    ///
+    /// 【덕코프의 구급상자는 여러 번 쓰는 물건이다.】 소형 125/25 = 5회,
+    /// 구급상자 175/25 = 7회, 대형 400/40 = 10회. [확인됨 — 아이템 #15~#17]
+    /// 한 번에 다 채우는 물건이 아니라 조금씩 여러 번 쓰는 물건이라,
+    /// 「지금 쓸까 아꼈다 쓸까」가 전투 중에 계속 생긴다.
+    /// </summary>
+    public int UseCost => Mathf.Max(0, useCost);
+
+    /// <summary>내구도를 깎아 쓰는 물건인가.</summary>
+    public bool Charged => UseCost > 0;
 
     /// <summary>해제 효과가 있는가.</summary>
     public bool Cures => cure != StatusEffectType.None;

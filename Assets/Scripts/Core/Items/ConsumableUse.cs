@@ -15,7 +15,10 @@ public enum ConsumableError
     NothingToDo = 3,
 
     /// <summary>죽어 있다.</summary>
-    Dead = 4
+    Dead = 4,
+
+    /// <summary>내구도를 다 썼다. 빈 구급상자다.</summary>
+    Empty = 5
 }
 
 /// <summary>
@@ -36,11 +39,18 @@ public readonly struct ConsumableSubject
     /// <summary>이 소모품이 푸는 상태가 실제로 걸려 있는가.</summary>
     public readonly bool HasCureTarget;
 
+    /// <summary>
+    /// 지금 이 칸에 남은 내구도. 내구도가 없는 물건이면 그냥 0을 넣는다 —
+    /// 판정은 UseCost가 0인지로 갈리므로 이 값을 보지 않는다.
+    /// </summary>
+    public readonly int Durability;
+
     public ConsumableSubject(int health, int maxHealth, bool isDead,
                              float water, float maxWater,
                              float energy, float maxEnergy,
-                             bool hasCureTarget)
+                             bool hasCureTarget, int durability = 0)
     {
+        Durability = durability;
         Health = health;
         MaxHealth = maxHealth;
         IsDead = isDead;
@@ -60,6 +70,14 @@ public readonly struct ConsumableOutcome
     /// <summary>실제로 들어갈 회복량. 이미 가득한 만큼은 깎여 있다.</summary>
     public readonly int Heal;
 
+    /// <summary>덜어 낼 중첩 수. Cure가 None이면 0이다.</summary>
+    public readonly int CureStacks;
+
+    /// <summary>
+    /// 이번에 닳을 내구도. 0이면 아이템 하나가 통째로 없어진다는 뜻이다.
+    /// </summary>
+    public readonly int UseCost;
+
     public readonly float Water;
     public readonly float Energy;
     public readonly float WaterCost;
@@ -72,8 +90,11 @@ public readonly struct ConsumableOutcome
     public ConsumableOutcome(ConsumableError error, int heal = 0,
                              float water = 0f, float energy = 0f,
                              float waterCost = 0f, float energyCost = 0f,
-                             StatusEffectType cure = StatusEffectType.None)
+                             StatusEffectType cure = StatusEffectType.None,
+                             int cureStacks = 0, int useCost = 0)
     {
+        CureStacks = cureStacks;
+        UseCost = useCost;
         Error = error;
         Heal = heal;
         Water = water;
@@ -115,6 +136,10 @@ public static class ConsumableUse
         if (subject.IsDead)
             return new ConsumableOutcome(ConsumableError.Dead);
 
+        // 빈 구급상자. 무게만 먹고 있으므로 버리라고 말해 주는 편이 낫다.
+        if (effect.Charged && subject.Durability < effect.UseCost)
+            return new ConsumableOutcome(ConsumableError.Empty);
+
         int heal = Mathf.Clamp(effect.Heal, 0, Mathf.Max(0, subject.MaxHealth - subject.Health));
 
         float water = Mathf.Clamp(effect.Water, 0f, Mathf.Max(0f, subject.MaxWater - subject.Water));
@@ -129,7 +154,9 @@ public static class ConsumableUse
 
         return new ConsumableOutcome(ConsumableError.None, heal, water, energy,
             effect.WaterCost, effect.EnergyCost,
-            cures ? effect.Cure : StatusEffectType.None);
+            cures ? effect.Cure : StatusEffectType.None,
+            cures ? effect.CureStacks : 0,
+            effect.UseCost);
     }
 
     /// <summary>화면과 결과 줄이 함께 쓰는 한국어 사유.</summary>
@@ -142,6 +169,7 @@ public static class ConsumableUse
             case ConsumableError.NoEffect:      return "아직 효과가 들어 있지 않습니다.";
             case ConsumableError.NothingToDo:   return "지금은 써도 채울 것이 없습니다.";
             case ConsumableError.Dead:          return "죽어 있어 쓸 수 없습니다.";
+            case ConsumableError.Empty:         return "다 썼습니다. 빈 통입니다.";
             default:                            return "쓸 수 없습니다.";
         }
     }
