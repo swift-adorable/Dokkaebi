@@ -30,7 +30,9 @@ public class SaveData
     ///   4 — 키 이름을 level로 바꿨다(용어 통일). 옛 키 둘은 SaveStore.FromJson이
     ///       읽기 전에 바꿔 준다(Migrate). 1판에는 경험치가 없어 0으로 읽히고,
     ///       1판의 값은 오르는 길이 없던 값이라 그대로 레벨로 쓴다.
-    public const int CurrentVersion = 4;
+    ///   5 — 창고(stash)와 잡화 상점 재고(shop)를 더했다. 4판에는 없어 비어 있는
+    ///       창고 · 가득 찬 재고로 읽힌다.
+    public const int CurrentVersion = 5;
 
     public int version = CurrentVersion;
 
@@ -66,6 +68,22 @@ public class SaveData
     /// 비어 있는 칸은 id를 비워 둔다 — 자리 순서(A · B)가 의미를 갖는다.
     /// </summary>
     public List<SavedItem> imprints = new();
+
+    // ── 벙커 ──────────────────────────────────────────────────────────
+
+    /// <summary>창고. 【죽어도 잃지 않는다】 — 파밍에 들고 가지 않은 것이다.</summary>
+    public List<SavedItem> stash = new();
+
+    /// <summary>잡화 상점의 남은 재고. 비어 있으면 가득 찬 것으로 읽는다.</summary>
+    public List<SavedStock> shop = new();
+}
+
+/// <summary>상점 한 줄의 남은 재고.</summary>
+[Serializable]
+public class SavedStock
+{
+    public string id = string.Empty;
+    public int remaining;
 }
 
 /// <summary>저장된 아이템 한 줄. 정의는 id로만 가리킨다.</summary>

@@ -23,6 +23,13 @@ public class PlayerInventory : Singleton<PlayerInventory>
     /// </summary>
     public const int BaseSlots = 20;
 
+    /// <summary>
+    /// 창고의 기본 칸. 패시브 「창고 정리」(+20 · +20)로 는다.
+    /// 덕코프의 기본 창고 크기는 위키에 없다 [확인 불가] — 스킬 「창고 확장 Lv.1」이
+    /// +35다. 맨몸 가방(20)의 두 배로 두었다. 【창고에는 무게 제한이 없다.】
+    /// </summary>
+    public const int StashBaseSlots = 40;
+
     /// <summary>가방을 착용하지 않았을 때의 기본 소지 중량(kg).</summary>
     public const float BaseWeightLimit = 30f;
 
@@ -34,8 +41,15 @@ public class PlayerInventory : Singleton<PlayerInventory>
     [SerializeField] private float baseWeightLimit = BaseWeightLimit;
 
     private Inventory bag;
+    private Inventory stash;
     private EquipmentLoadout loadout;
     private QuickSlots quickSlots;
+
+    /// <summary>
+    /// 창고. 【죽어도 잃지 않는다.】 무게는 보지 않고 칸만 본다 —
+    /// 무게는 「들고 다닐 수 있는가」의 제한이고, 창고는 들고 다니지 않는다.
+    /// </summary>
+    public Inventory Stash => stash ??= new Inventory(StashBaseSlots, float.MaxValue);
 
     /// <summary>가방. 장비·젬·전리품이 전부 여기 들어간다.</summary>
     public Inventory Bag => bag ??= new Inventory(baseSlots, baseWeightLimit);
@@ -89,6 +103,13 @@ public class PlayerInventory : Singleton<PlayerInventory>
 
             passiveWeight = PassiveManager.Instance.Total(PassiveEffectType.CarryWeight);
         }
+
+        int stashSlots = PassiveManager.HasInstance
+            ? Mathf.RoundToInt(PassiveManager.Instance.Total(PassiveEffectType.StashSlots))
+            : 0;
+
+        // 【줄어도 안의 물건은 그대로다.】 칸이 모자라면 새로 넣지 못할 뿐이다.
+        Stash.SlotCapacity = StashBaseSlots + stashSlots;
 
         Bag.SlotCapacity = baseSlots
             + Mathf.RoundToInt(modifiers.Get(EquipmentStatType.SlotCapacity))

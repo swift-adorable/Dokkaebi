@@ -94,7 +94,7 @@ public class BlobController : MonoBehaviour
 
         int lost = PlayerInventory.EnsureInstance().DropOnDeath();
 
-        // 레벨과 소켓은 파밍 안의 것이다. 남은 젬은 이미 위에서 사라졌다.
+        // 소켓의 젬은 파밍 안의 것이다. 남은 젬은 이미 위에서 사라졌다. (레벨은 남는다 — 결정 2-33)
         if (SkillManager.HasInstance)
             SkillManager.Instance.ResetRun();
 
@@ -107,6 +107,8 @@ public class BlobController : MonoBehaviour
         // 【파밍이 끝났다 — 여기가 저장 지점이다.】 덕코프도 파밍 전과 후에만
         // 저장한다. 가방은 이미 떨어뜨렸으므로 남는 것(계정 · 크레딧 · 패시브 ·
         // 도감 · 각인)만 디스크에 간다.
+        ShopManager.RestockAfterRun();
+
         SaveManager.Commit("사망");
 
         if (gameManager != null)

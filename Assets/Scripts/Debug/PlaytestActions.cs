@@ -741,4 +741,39 @@ public static class PlaytestActions
         StatusEffectType.Paralyze,
         StatusEffectType.Corrode
     };
+
+    // ── 창고 · 잡화 상점 (8-I) ─────────────────────────────────────────
+    //
+    // 【벙커가 아직 없다.】 그래서 여기서 연다. 파밍 도중에 창고를 쓸 수 있는 것은
+    // 사실상 철수이므로 검증용이다 — 벙커가 생기면 보관고 · 잡화 상점 건물이 연다.
+
+    public static string OpenStash()
+    {
+        ExchangeWindowUI.EnsureInstance().OpenStash();
+        Inventory stash = PlayerInventory.EnsureInstance().Stash;
+        return $"창고를 열었습니다. {stash.UsedSlots}/{stash.SlotCapacity}칸.\n"
+               + "가방 칸을 누르면 「창고에 넣기」가 맨 위에 뜹니다.";
+    }
+
+    public static string OpenShop()
+    {
+        ExchangeWindowUI.EnsureInstance().OpenShop();
+        return $"{ShopTable.GeneralStoreName}을 열었습니다. 크레딧 {PassiveManager.EnsureInstance().Credits:N0}.\n"
+               + "가방 칸을 누르면 「판매」가, 상점 칸을 누르면 「구매」가 뜹니다.";
+    }
+
+    public static string GiveCredits()
+    {
+        PassiveManager.EnsureInstance().AddCredits(5000);
+        InventoryScreenUI.RefreshIfOpen();
+        ExchangeWindowUI.RefreshIfOpen();
+        return $"크레딧 +5,000 → {PassiveManager.Instance.Credits:N0}";
+    }
+
+    public static string RestockShop()
+    {
+        ShopManager.RestockAfterRun();
+        ExchangeWindowUI.RefreshIfOpen();
+        return "잡화 상점 재고를 채웠습니다. (원래는 파밍이 끝날 때 찬다)";
+    }
 }

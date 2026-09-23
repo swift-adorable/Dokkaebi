@@ -231,6 +231,46 @@ public class Inventory
         return removed;
     }
 
+    /// <summary>
+    /// 이 개체를 통째로 받을 수 있는지. 【TryAddStack이 성공할지와 같은 답이다.】
+    /// 겹치는 것은 기존 칸의 여유까지 센다.
+    /// </summary>
+    public bool CanAccept(ItemStack stack)
+    {
+        if (stack == null || stack.IsEmpty)
+            return false;
+
+        if (!stack.Definition.IsStackable)
+            return FreeSlots >= stack.TotalSlots;
+
+        return CanAdd(stack.Definition, stack.Count);
+    }
+
+    /// <summary>
+    /// 한 칸을 다른 인벤토리로 옮긴다. 창고 ↔ 가방이 이 길을 쓴다.
+    ///
+    /// 【전부 아니면 전혀】 — 받는 쪽에 자리가 없으면 아무것도 움직이지 않는다.
+    /// 먼저 검사하고, 빼고, 넣는다. 넣기가 어긋나면 도로 넣는다.
+    /// 이 함수는 아이템을 만들지도 없애지도 않는다.
+    /// </summary>
+    public static bool MoveStack(Inventory from, Inventory to, ItemStack stack)
+    {
+        if (from == null || to == null || from == to || stack == null || stack.IsEmpty)
+            return false;
+
+        if (!to.CanAccept(stack))
+            return false;
+
+        if (!from.RemoveStack(stack))
+            return false;
+
+        if (to.TryAddStack(stack))
+            return true;
+
+        from.TryAddStack(stack);
+        return false;
+    }
+
     /// <summary>특정 개체를 뺀다. 소켓에 끼울 때 쓴다.</summary>
     public bool RemoveStack(ItemStack stack)
     {
