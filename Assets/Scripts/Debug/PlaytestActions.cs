@@ -393,6 +393,25 @@ public static class PlaytestActions
         return player != null ? player.GetComponent<Health>() : null;
     }
 
+    /// <summary>
+    /// 상태이상 도트가 나를 죽이지 않도록 먼저 체력을 채운다.
+    ///
+    /// 【죽으면 조용히 아무 일도 일어나지 않는다.】 Health.ApplyStatus는
+    /// IsDead면 그대로 돌아가고 StatusEffectState는 비어 있으므로, 줄이
+    /// 하나도 안 뜨는데 원인이 화면에 드러나지 않는다. 표시를 보려고 누른
+    /// 버튼이 표시를 못 보게 만드는 셈이다. 그래서 걸기 전에 채운다.
+    /// </summary>
+    private static string PrepareSelf(Health self)
+    {
+        if (self.IsDead)
+            return "플레이어가 죽어 있습니다 — 상태이상이 걸리지 않습니다.";
+
+        if (self.Current < self.Max)
+            self.Heal(self.Max - self.Current);
+
+        return null;
+    }
+
     /// <summary>나에게 한 종류를 여러 번 건다. 중첩 → 전이를 볼 때 쓴다.</summary>
     public static string StackOnSelf(StatusEffectType type, int times)
     {
@@ -400,6 +419,11 @@ public static class PlaytestActions
 
         if (self == null)
             return "플레이어를 찾지 못했습니다.";
+
+        string blocked = PrepareSelf(self);
+
+        if (blocked != null)
+            return blocked;
 
         // 면역이면 아무 일도 일어나지 않는다. 그 사실을 먼저 알려야
         // 「UI가 고장 났나」를 의심하며 시간을 버리지 않는다.
@@ -411,7 +435,7 @@ public static class PlaytestActions
 
         StatusEffectType threshold = StatusEffectTable.ThresholdOf(type);
 
-        return $"내게 {StatusEffectNames.Of(type)} {times}회\n"
+        return $"내게 {StatusEffectNames.Of(type)} {times}회 · 체력 {self.Current}/{self.Max}\n"
                + $"중첩 {self.Status.StacksOf(type)} · "
                + $"{StatusEffectNames.Of(threshold)} {self.Status.Has(threshold)} · "
                + $"행동 불능 {self.Status.IsIncapacitated}\n"
@@ -419,11 +443,14 @@ public static class PlaytestActions
     }
 
     /// <summary>
-    /// 나에게 모든 상태이상을 한 번씩 건다.
+    /// 나에게 기본 상태이상 6종(점화 · 중독 · 감전 · 출혈 · 응집 · 냉각)을 한 번씩 건다.
     ///
-    /// 줄이 여섯 개까지만 뜨고 위험 상태(동결·마비·부식)가 맨 위로
-    /// 올라오는지, 남은 시간 순으로 정렬되는지를 한 번에 본다.
-    /// 동결·마비가 걸리므로 잠시 움직일 수 없다 — 「내 상태이상 해제」로 푼다.
+    /// 【위험 상태 셋을 여기서 같이 걸지 않는 이유】
+    /// StatusEffectState.Apply는 한계치 상태가 이미 걸려 있으면 원본을 쌓지
+    /// 않는다 — 행동 불능 중에 게이지가 다시 차 무한 제압이 되는 것을 막는
+    /// 장치다. 그래서 동결을 먼저 걸면 냉각이, 마비를 먼저 걸면 감전이,
+    /// 부식을 먼저 걸면 중독이 통째로 걸리지 않는다. 아홉을 한 번에 거는
+    /// 버튼은 【누를 때마다 다른 결과가 나오는】 도구였다. 둘로 나눈다.
     /// </summary>
     public static string StackAllOnSelf()
     {
@@ -432,14 +459,16 @@ public static class PlaytestActions
         if (self == null)
             return "플레이어를 찾지 못했습니다.";
 
+        string blocked = PrepareSelf(self);
+
+        if (blocked != null)
+            return blocked;
+
         int applied = 0;
         int immune = 0;
 
-        foreach (StatusEffectType type in System.Enum.GetValues(typeof(StatusEffectType)))
+        foreach (StatusEffectType type in BaseAilments)
         {
-            if (type == StatusEffectType.None)
-                continue;
-
             if (self.IsImmuneTo(type))
             {
                 immune++;
@@ -450,10 +479,30 @@ public static class PlaytestActions
             applied++;
         }
 
-        return $"내게 상태이상 {applied}종을 걸었습니다."
-               + (immune > 0 ? $" (면역 {immune}종은 걸리지 않음)" : string.Empty)
-               + "\n좌상단 게이지 아래에 줄이 쌓이고, 위험 상태(동결·마비·부식)가\n"
-               + "붉은 바탕으로 맨 위에 와야 합니다. 여섯 줄까지만 보입니다.\n"
+        return $"내게 기본 상태이상 {applied}종 · 체력 {self.Current}/{self.Max}"
+               + (immune > 0 ? $" (면역 {immune}종 제외)" : string.Empty)
+               + "\n좌상단 게이지 아래에 줄이 쌓이고, 남은 시간이 짧은 순으로\n"
+               + "정렬되어야 합니다. 위험 상태는 아래 버튼으로 따로 거십시오.";
+    }
+
+    /// <summary>한계치 상태로만 걸리는 셋. 전이를 거치지 않고 직접 건다.</summary>
+    public static string CriticalOnSelf()
+    {
+        Health self = SelfHealth();
+
+        if (self == null)
+            return "플레이어를 찾지 못했습니다.";
+
+        string blocked = PrepareSelf(self);
+
+        if (blocked != null)
+            return blocked;
+
+        foreach (StatusEffectType type in CriticalAilments)
+            self.ApplyStatus(type, 10f);
+
+        return $"내게 동결 · 마비 · 부식 · 체력 {self.Current}/{self.Max}\n"
+               + "붉은 바탕의 띠로 맨 위에 와야 합니다.\n"
                + "동결·마비로 움직일 수 없습니다 — 「내 상태이상 해제」로 푸십시오.";
     }
 
@@ -469,4 +518,23 @@ public static class PlaytestActions
 
         return "내 상태이상을 전부 해제했습니다. 좌상단의 줄이 사라져야 합니다.";
     }
+
+    /// <summary>전이 없이 스스로 걸리는 상태이상. 위험 상태 셋은 뺀다.</summary>
+    private static readonly StatusEffectType[] BaseAilments =
+    {
+        StatusEffectType.Ignite,
+        StatusEffectType.Poison,
+        StatusEffectType.Shock,
+        StatusEffectType.Bleed,
+        StatusEffectType.Congeal,
+        StatusEffectType.Chill
+    };
+
+    /// <summary>위험 상태 셋. 원래는 한계치 전이로만 걸린다.</summary>
+    private static readonly StatusEffectType[] CriticalAilments =
+    {
+        StatusEffectType.Freeze,
+        StatusEffectType.Paralyze,
+        StatusEffectType.Corrode
+    };
 }
