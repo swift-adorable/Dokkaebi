@@ -67,11 +67,17 @@ public class PlaytestPanelUI : MonoBehaviour
         if (instance != null)
             return instance;
 
-        // 【가방 화면(1000)보다 아래에 둔다.】
-        // 위에 두었더니 좌상단 크레딧 카드를 덮었다. 개발용 버튼이
-        // 게임 UI를 가리면 정작 확인해야 할 것을 못 본다.
-        // 가방을 열면 검증 버튼은 그 뒤로 숨는다 —
-        // 지급 메뉴가 끝나면 가방이 자동으로 열리므로 흐름에는 지장이 없다.
+        // 【버튼은 가방 화면(1000)보다 아래, 패널은 맨 위.】
+        //
+        // 버튼을 위에 두었더니 좌상단 크레딧 카드를 덮었다. 개발용 버튼이
+        // 게임 UI를 가리면 정작 확인해야 할 것을 못 본다. 그래서 캔버스는
+        // 900에 두고, 가방을 열면 버튼은 그 뒤로 숨는다 — 지급 메뉴가 끝나면
+        // 가방이 자동으로 열리므로 흐름에는 지장이 없다.
+        //
+        // 패널은 다르다. 열려 있는 동안에는 【무엇보다 위】여야 한다.
+        // 가방·전리품 위에서 아이템을 지급하고 결과 줄을 읽는 도구인데
+        // 그 판들 뒤에 깔리면 눌리지도, 읽히지도 않는다.
+        // 그래서 패널만 자기 캔버스로 2000에 올린다 (BuildPanelCanvas).
         Canvas canvas = UIFactory.CreateCanvas("PlaytestCanvas (Runtime)", 900);
 
         instance = canvas.gameObject.AddComponent<PlaytestPanelUI>();
@@ -99,6 +105,8 @@ public class PlaytestPanelUI : MonoBehaviour
             new Vector2(0.12f, 0.06f), new Vector2(0.88f, 0.94f),
             UIFactory.RadiusLarge).gameObject;
 
+        BuildPanelCanvas(panel);
+
         var box = (RectTransform)panel.transform;
 
         UIFactory.CreatePanel("Header", box, UIPalette.Header,
@@ -123,6 +131,32 @@ public class PlaytestPanelUI : MonoBehaviour
             TextAnchor.UpperLeft, UIPalette.TextAccent);
 
         panel.SetActive(false);
+    }
+
+    /// <summary>
+    /// 패널만 따로 맨 위로 올린다.
+    ///
+    /// 【부모 캔버스를 통째로 올리지 않는 이유】 그러면 닫혀 있을 때도
+    /// 디버그 버튼이 가방·전리품 위에 떠서 게임 화면을 가린다. 자식에
+    /// Canvas를 붙이고 overrideSorting을 켜면 그 가지만 순서를 새로 잡는다.
+    ///
+    /// 【GraphicRaycaster를 같이 붙여야 한다.】 overrideSorting을 켠 순간
+    /// 이 가지는 부모 캔버스의 레이캐스터가 아니라 자기 것을 쓴다.
+    /// 빼먹으면 화면에는 맨 위에 보이는데 버튼이 하나도 안 눌린다.
+    /// (상세 팝업 1100에서 같은 것을 빼먹어 한 번 겪었다)
+    ///
+    /// 2000은 지금 쓰는 가장 높은 값(버리기 창 1110)보다 넉넉히 위다.
+    /// </summary>
+    private const int PanelSortingOrder = 2000;
+
+    private static void BuildPanelCanvas(GameObject target)
+    {
+        var canvas = target.AddComponent<Canvas>();
+
+        canvas.overrideSorting = true;
+        canvas.sortingOrder = PanelSortingOrder;
+
+        target.AddComponent<UnityEngine.UI.GraphicRaycaster>();
     }
 
     /// <summary>
