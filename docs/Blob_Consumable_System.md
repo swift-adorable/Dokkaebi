@@ -117,7 +117,7 @@
 
 **잊지 말 것** — 이 셋은 소모품 시스템 없이는 만들 수 없어 미뤄 둔 것이다.
 
-1. **빠른 메뉴의 「사용」 줄** (`ItemActionMenu.ForBagItem` / `ForContainerItem`의
+1. **사이드 메뉴의 「사용」 줄** (`ItemActionMenu.ForBagItem` / `ForContainerItem`의
    `use` 인자). 지금은 null을 넘겨 줄이 생기지 않는다 — 인자만 채우면 된다.
 2. **음료·음식이 수분·에너지를 채우는 길.**
    `PlayerSurvival.Restore(water, energy)`가 입구다. (`Blob_Survival_System.md` 5절)

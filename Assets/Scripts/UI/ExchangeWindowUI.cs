@@ -104,9 +104,9 @@ public class ExchangeWindowUI : MonoBehaviour
 
         var box = window.rectTransform;
 
-        UIFactory.CreatePanel("Header", box, UIPalette.Header,
-            new Vector2(0f, 0.895f), new Vector2(1f, 1f), UIFactory.RadiusLarge);
-
+        // 【제목 뒤에 띠를 깔지 않는다.】 유리판 위에 색 띠를 하나 더 얹으면
+        // 판이 두 겹으로 보이고, 위쪽 광택과 겹쳐 모서리가 지저분해진다.
+        // 제목은 글자만으로 충분히 읽힌다.
         titleLabel = UIFactory.CreateLabel(box, "전리품", 28, FontStyle.Bold,
             new Vector2(0.04f, 0.895f), new Vector2(0.72f, 1f),
             TextAnchor.MiddleLeft, UIPalette.TextOnGlass);
@@ -242,7 +242,7 @@ public class ExchangeWindowUI : MonoBehaviour
         takeAllButton.interactable = !other.IsEmpty;
 
         // 칸 크기를 픽셀로 환산하려면 실제 크기가 확정되어 있어야 한다.
-        // 다시 그리면 빠른 메뉴가 가리키던 칸이 사라진다.
+        // 다시 그리면 사이드 메뉴가 가리키던 칸이 사라진다.
         ItemActionMenu.Close();
 
         Canvas.ForceUpdateCanvases();
@@ -271,7 +271,7 @@ public class ExchangeWindowUI : MonoBehaviour
 
             int captured = i;
 
-            // 【누르면 칸 옆에 빠른 메뉴가 뜬다.】 바로 줍지 않는다.
+            // 【누르면 칸 옆에 사이드 메뉴가 뜬다.】 바로 줍지 않는다.
             // 한 번 눌러 바로 줍게 해 뒀더니 「줍기」 말고는 아무것도 할 수
             // 없었다. 총을 주울지, 먼저 볼지, 그 자리에서 갈아 끼울지를
             // 고를 수 없으면 창이 버튼 하나짜리 목록이 된다.
@@ -293,10 +293,10 @@ public class ExchangeWindowUI : MonoBehaviour
         }
     }
 
-    // ────────────────────────────────── 빠른 메뉴
+    // ────────────────────────────────── 사이드 메뉴
 
     /// <summary>
-    /// 칸의 빠른 메뉴를 연다. 【무엇을 넣을지는 아이템 성격이 정한다.】
+    /// 칸의 사이드 메뉴를 연다. 【무엇을 넣을지는 아이템 성격이 정한다.】
     ///
     /// 「사용」은 아직 넣지 않는다 — 소모품을 쓰는 시스템 자체가 8단계다.
     /// 누르면 아무 일도 없는 버튼을 두는 것보다 없는 편이 낫다.

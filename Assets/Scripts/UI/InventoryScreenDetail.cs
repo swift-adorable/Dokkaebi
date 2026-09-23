@@ -57,6 +57,13 @@ public partial class InventoryScreenUI
     // 이제 아래는 한 줄이다 — 【버리기(좁게) · 주된 일(넓게)】.
     // 닫는 일은 오른쪽 위 구석의 ✕가 맡는다. 창을 닫는 자리는 원래 거기다.
 
+    /// <summary>
+    /// 상세의 정렬 순서. 가방(1000) · 전리품(1010)보다 위,
+    /// 사이드 메뉴(1200)보다 아래다 — 메뉴에서 「상세보기」를 누르면
+    /// 메뉴가 닫히므로 둘이 같이 떠 있을 일은 없지만, 순서는 뜻이 통해야 한다.
+    /// </summary>
+    private const int DetailSortingOrder = 1100;
+
     private const float ActionRowBottom = 0.022f;
     private const float ActionRowTop = 0.108f;
 
@@ -196,6 +203,17 @@ public partial class InventoryScreenUI
         shadeButton.onClick.AddListener(CloseDetailAndRefresh);
 
         detailPopup = shade.gameObject;
+
+        // 【상세는 무엇보다 위에 온다.】
+        // 가방 화면은 캔버스 1000, 전리품 패널은 1010이다. 상세가 가방 화면의
+        // 자식이라 전리품 패널 **뒤로** 깔렸다 — 읽으려고 연 것이 가려졌다.
+        // 정렬을 여기서 다시 잡아 화면 위로 올린다.
+        var sorting = shade.gameObject.AddComponent<Canvas>();
+        sorting.overrideSorting = true;
+        sorting.sortingOrder = DetailSortingOrder;
+
+        // 정렬을 갈아 끼운 캔버스는 자기 레이캐스터가 있어야 눌린다.
+        shade.gameObject.AddComponent<UnityEngine.UI.GraphicRaycaster>();
 
         // 덮개를 화면 끝까지 넘겼으므로 패널 크기로 되돌린 뒤 자리를 잡는다.
         RectTransform frame = UIFactory.CreateRegion("Frame", detailPopup.transform,

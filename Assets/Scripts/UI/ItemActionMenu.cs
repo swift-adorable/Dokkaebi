@@ -98,7 +98,15 @@ public class ItemActionMenu : MonoBehaviour
         shadeButton.transition = Selectable.Transition.None;
         shadeButton.onClick.AddListener(Close);
 
-        box = UIFactory.CreateRegion("Menu", shade.transform, Vector2.zero, Vector2.zero);
+        // 【앵커를 한가운데에 둔다.】
+        // ScreenPointToLocalPointInRectangle이 돌려주는 값은 **부모 한가운데를
+        // 원점으로 하는 좌표**다. 앵커가 왼쪽 아래(0,0)면 그 값을 그대로
+        // anchoredPosition에 넣는 순간 화면 절반만큼 어긋난다 —
+        // 메뉴가 엉뚱한 곳에 뜨던 원인이 이것이었다.
+        box = UIFactory.CreateRegion("Menu", shade.transform,
+            new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
+
+        // 왼쪽 위 모서리를 기준점으로 삼는다. 칸의 위쪽에 맞춰 내려 그린다.
         box.pivot = new Vector2(0f, 1f);
 
         shade.SetActive(false);
@@ -183,47 +191,78 @@ public class ItemActionMenu : MonoBehaviour
     /// 칸의 왼쪽 위에 맞춰 놓는다. 화면 밖으로 나가면 반대편으로 넘긴다.
     ///
     /// 【왼쪽을 기본으로 둔다.】 전리품 패널이 화면 오른쪽에 붙어 있어서
-    /// 오른쪽에 띄우면 거의 항상 화면 밖이다.
+    /// 오른쪽에 띄우면 거의 항상 화면 밖이다. 왼쪽이 모자라면 오른쪽으로,
+    /// 그것도 모자라면 화면 안으로 끌어당긴다 — 안 보이는 것보다 겹치는 편이 낫다.
+    ///
+    /// 좌표는 전부 **부모(shade) 한가운데를 원점으로 하는 국소 좌표**다.
+    /// box의 앵커도 한가운데라 값을 그대로 넣으면 된다. 원점이 어긋나면
+    /// 메뉴가 화면 절반만큼 밀려난다.
     /// </summary>
     private void Place(RectTransform cell, float height)
     {
         Canvas.ForceUpdateCanvases();
+
+        var parent = (RectTransform)box.parent;
 
         // 칸의 네 귀퉁이를 화면 좌표로 받는다. 캔버스가 달라도 이 값은 통한다.
         var corners = new Vector3[4];
         cell.GetWorldCorners(corners);
 
         // 0: 좌하 · 1: 좌상 · 2: 우상 · 3: 우하
-        Vector2 leftTop = corners[1];
-        Vector2 rightTop = corners[2];
+        Camera camera = CameraFor(cell);
+
+        Vector2 leftTop = RectTransformUtility.WorldToScreenPoint(camera, corners[1]);
+        Vector2 rightTop = RectTransformUtility.WorldToScreenPoint(camera, corners[2]);
+
+        Camera self = CameraFor(parent);
 
         RectTransformUtility.ScreenPointToLocalPointInRectangle(
-            safeArea, leftTop, null, out Vector2 localLeft);
+            parent, leftTop, self, out Vector2 localLeft);
 
         RectTransformUtility.ScreenPointToLocalPointInRectangle(
-            safeArea, rightTop, null, out Vector2 localRight);
+            parent, rightTop, self, out Vector2 localRight);
 
         float x = localLeft.x - ButtonWidth - CellGap;
         float y = localLeft.y;
 
-        Rect area = safeArea.rect;
+        Rect area = parent.rect;
 
         // 왼쪽이 모자라면 오른쪽으로 넘긴다.
         if (x < area.xMin)
             x = localRight.x + CellGap;
 
-        // 오른쪽도 모자라면 칸 위에 겹쳐 둔다 — 안 보이는 것보다 낫다.
+        // 오른쪽도 모자라면 화면 안으로 끌어당긴다.
         if (x + ButtonWidth > area.xMax)
             x = area.xMax - ButtonWidth;
 
-        // 아래로 넘치면 위로 올린다.
-        if (y - height < area.yMin)
-            y = area.yMin + height;
+        x = Mathf.Max(x, area.xMin);
+
+        // 아래로 넘치면 위로 올리고, 위로 넘치면 내린다.
+        y = Mathf.Min(y, area.yMax);
+        y = Mathf.Max(y, area.yMin + height);
 
         box.anchoredPosition = new Vector2(x, y);
     }
 
-    // ────────────────────────────────── 빠른 메뉴 만들기
+    /// <summary>
+    /// 이 사각형이 속한 캔버스의 카메라. Overlay 캔버스는 null이어야 하고,
+    /// Camera·World 캔버스는 그 카메라를 넘겨야 좌표가 맞는다.
+    /// </summary>
+    private static Camera CameraFor(RectTransform rect)
+    {
+        Canvas canvas = rect.GetComponentInParent<Canvas>();
+
+        if (canvas == null)
+            return null;
+
+        canvas = canvas.rootCanvas;
+
+        return canvas.renderMode == RenderMode.ScreenSpaceOverlay
+            ? null
+            : canvas.worldCamera;
+    }
+
+    // ────────────────────────────────── 사이드 메뉴 만들기
 
     /// <summary>
     /// 【컨테이너(전리품·창고·상점) 쪽 칸.】 아직 내 물건이 아니다.

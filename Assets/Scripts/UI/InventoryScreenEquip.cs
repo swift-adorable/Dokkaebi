@@ -34,7 +34,7 @@ public partial class InventoryScreenUI
     }
 
     /// <summary>
-    /// 착용 중인 자리의 빠른 메뉴. 벗는 것과 보는 것만 할 수 있다.
+    /// 착용 중인 자리의 사이드 메뉴. 벗는 것과 보는 것만 할 수 있다.
     /// 착용 중인 것은 가방에 없으므로 버릴 수도 없다.
     /// </summary>
     private void OpenEquipSlotMenu(EquipmentSlot slot, ItemStack current)
@@ -56,7 +56,7 @@ public partial class InventoryScreenUI
     }
 
     /// <summary>
-    /// 그 자리의 칸을 찾는다. 빠른 메뉴가 칸 옆에 붙으려면 칸이 필요하다.
+    /// 그 자리의 칸을 찾는다. 사이드 메뉴가 칸 옆에 붙으려면 칸이 필요하다.
     /// 이름으로 찾는 이유 — 슬롯 칸은 다시 그릴 때마다 새로 만들어져서
     /// 참조를 들고 있으면 금세 끊어진다.
     /// </summary>

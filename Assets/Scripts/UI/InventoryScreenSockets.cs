@@ -262,7 +262,7 @@ public partial class InventoryScreenUI
             return;
         }
 
-        // 꽂혀 있는 젬도 가방 칸과 같은 규칙이다 — 빠른 메뉴가 먼저 뜬다.
+        // 꽂혀 있는 젬도 가방 칸과 같은 규칙이다 — 사이드 메뉴가 먼저 뜬다.
         var entries = ItemActionMenu.ForEquippedItem(
             "빼기",
             remove: () => TakeGemOut(slot),

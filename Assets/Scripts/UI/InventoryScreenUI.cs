@@ -336,7 +336,7 @@ public partial class InventoryScreenUI : MonoBehaviour
     /// 번호를 칸 안에 넣었더니 아이템 이름·개수와 세 가지가 한 칸에서 겹쳤다.
     /// 번호는 「이 칸을 부르는 이름」이라 칸의 내용이 아니다. 밖으로 뺀다.
     /// </summary>
-    private const float QuickNumberBand = 26f;
+    private const float QuickNumberBand = 18f;
 
     private const float QuickCellGap = 8f;
 
@@ -426,7 +426,7 @@ public partial class InventoryScreenUI : MonoBehaviour
         // 【화면 맨 아래에 붙인다.】 안전 영역 안이므로 홈 인디케이터에 닿지 않는다.
         // 12px 띄워 두었더니 왼쪽의 소지 중량 막대보다 위로 떠서,
         // 아래줄이 두 층으로 보였다.
-        quickBar.anchoredPosition = new Vector2(0f, 2f);
+        quickBar.anchoredPosition = new Vector2(0f, 0f);
     }
 
     /// <summary>같은 버튼을 다시 누르면 닫는다.</summary>
@@ -1271,7 +1271,7 @@ public partial class InventoryScreenUI : MonoBehaviour
         string name, Transform parent, Vector2 min, Vector2 max, ItemStack stack)
     {
         // 생김새는 ItemCell이 정한다 — 전리품·창고·상점이 같은 칸을 쓴다.
-        // 여기서는 「누르면 빠른 메뉴가 뜬다」만 정한다.
+        // 여기서는 「누르면 사이드 메뉴가 뜬다」만 정한다.
         Image cell = ItemCell.Draw(name, parent, min, max, stack,
             stack != null && stack == selected, null);
 
@@ -1290,7 +1290,7 @@ public partial class InventoryScreenUI : MonoBehaviour
     }
 
     /// <summary>
-    /// 가방 칸의 빠른 메뉴. 【아이템 성격이 줄을 정한다.】
+    /// 가방 칸의 사이드 메뉴. 【아이템 성격이 줄을 정한다.】
     ///
     /// 「사용」은 아직 없다 — 소모품을 쓰는 시스템 자체가 8단계다.
     /// 누르면 아무 일도 없는 버튼을 두는 것보다 없는 편이 낫다.
@@ -1316,7 +1316,7 @@ public partial class InventoryScreenUI : MonoBehaviour
     }
 
     /// <summary>
-    /// 빠른 메뉴의 「장착」. 장비는 자리를 알아서 고르고,
+    /// 사이드 메뉴의 「장착」. 장비는 자리를 알아서 고르고,
     /// 젬은 소켓판에서 고르게 넘긴다 — 어디에 꽂느냐가 곧 빌드다.
     /// </summary>
     private void EquipFromMenu(ItemStack stack)
@@ -1364,7 +1364,7 @@ public partial class InventoryScreenUI : MonoBehaviour
     /// </summary>
     private void SelectStack(ItemStack stack) => OpenItemDetail(stack);
 
-    /// <summary>다시 그리면 빠른 메뉴가 가리키던 칸이 사라진다.</summary>
+    /// <summary>다시 그리면 사이드 메뉴가 가리키던 칸이 사라진다.</summary>
     private void CloseQuickMenu() => ItemActionMenu.Close();
 
     /// <summary>이 칸이 지금 탭에 속하는가.</summary>

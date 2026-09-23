@@ -214,8 +214,10 @@ public static class UIFactory
     {
         GameObject sheen = CreateChild("Sheen", body.transform);
 
+        // 판 전체를 덮되, 실제로 그려지는 것은 위쪽 띠뿐이다.
+        // 띠 높이는 스프라이트의 위 테두리가 정하므로 판이 얼마나 크든 같다.
         var rect = sheen.GetComponent<RectTransform>();
-        rect.anchorMin = new Vector2(0f, 0.5f);
+        rect.anchorMin = Vector2.zero;
         rect.anchorMax = Vector2.one;
         rect.offsetMin = Vector2.zero;
         rect.offsetMax = Vector2.zero;
