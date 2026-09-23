@@ -82,6 +82,13 @@ public partial class InventoryScreenUI
 
         discardPopup = shade.gameObject;
 
+        // 버리기는 상세 위에서 뜬다. 상세(1100)보다 한 칸 위.
+        var sorting = shade.gameObject.AddComponent<Canvas>();
+        sorting.overrideSorting = true;
+        sorting.sortingOrder = DetailSortingOrder + 10;
+
+        shade.gameObject.AddComponent<UnityEngine.UI.GraphicRaycaster>();
+
         // 덮개는 화면 끝까지 넘겼으므로, 팝업 자체는 패널 크기로 되돌린 뒤 잡는다.
         // 그러지 않으면 덮개가 커진 만큼 팝업도 같이 커진다.
         RectTransform frame = UIFactory.CreateRegion("Frame", discardPopup.transform,

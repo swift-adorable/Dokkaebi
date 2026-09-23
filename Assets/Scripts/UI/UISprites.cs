@@ -46,29 +46,30 @@ public static class UISprites
             return cached;
 
         int width = radius * 2 + 1;
-        const int Height = 96;
 
-        var texture = new Texture2D(width, Height, TextureFormat.RGBA32, mipChain: false)
+        // 위에서부터 BandHeight줄이 빛나는 띠, 그 아래 한 줄이 늘어나는 가운데,
+        // 맨 아래 한 줄이 아래쪽 테두리다.
+        int height = BandHeight + 2;
+
+        var texture = new Texture2D(width, height, TextureFormat.RGBA32, mipChain: false)
         {
             filterMode = FilterMode.Bilinear,
             wrapMode = TextureWrapMode.Clamp,
             hideFlags = HideFlags.HideAndDontSave
         };
 
-        var pixels = new Color32[width * Height];
+        var pixels = new Color32[width * height];
 
-        for (int y = 0; y < Height; y++)
+        for (int y = 0; y < height; y++)
         {
-            // y가 0이 아래, Height-1이 위다. 위쪽이 밝다.
-            float t = y / (float)(Height - 1);
+            // 띠 바깥(아래 두 줄)은 투명하다.
+            float band = y < 2 ? 0f : (y - 2) / (float)(BandHeight - 1);
 
-            // 위쪽에 몰아 준다. 전체에 깔면 그냥 밝은 판이 되어 버린다.
-            float gradient = Mathf.Pow(t, 2.2f);
+            float gradient = y < 2 ? 0f : Mathf.Pow(band, 2.2f);
 
             for (int x = 0; x < width; x++)
             {
-                // 위 두 모서리만 깎는다. 아래는 그러데이션이 이미 0이라 각져도 안 보인다.
-                float corner = TopCornerCoverage(x, y, width, Height, radius);
+                float corner = TopCornerCoverage(x, y, width, height, radius);
 
                 pixels[y * width + x] =
                     new Color32(255, 255, 255, (byte)(gradient * corner * 255f));
@@ -80,13 +81,18 @@ public static class UISprites
 
         var sprite = Sprite.Create(
             texture,
-            new Rect(0, 0, width, Height),
+            new Rect(0, 0, width, height),
             new Vector2(0.5f, 0.5f),
             pixelsPerUnit: 100f,
             extrude: 0,
             meshType: SpriteMeshType.FullRect,
-            // 가로만 자른다 — 위아래를 0으로 두어 세로 그러데이션을 지킨다.
-            border: new Vector4(radius, 0f, radius, 0f));
+            // 【위 띠를 테두리로 잡는다.】 (left, bottom, right, top)
+            // 9-슬라이스는 테두리를 늘이지 않는다. 띠 전체를 top 테두리로
+            // 두면 판이 얼마나 크든 띠가 원래 픽셀 크기 그대로 그려진다.
+            //
+            // 전에는 세로를 통째로 늘였다. 그래서 둥근 모서리가 위아래로
+            // 잡아 늘여져, 판의 모서리 곡선과 어긋난 밝은 쐐기가 생겼다.
+            border: new Vector4(radius, 1f, radius, BandHeight));
 
         sprite.hideFlags = HideFlags.HideAndDontSave;
 
@@ -94,6 +100,12 @@ public static class UISprites
 
         return sprite;
     }
+
+    /// <summary>
+    /// 광택 띠의 높이(픽셀). 【판 크기와 무관하게 늘 이만큼이다.】
+    /// 작은 카드(소지 중량 등)보다 낮아야 테두리가 찌그러지지 않는다.
+    /// </summary>
+    public const int BandHeight = 40;
 
     /// <summary>위쪽 두 모서리만 둥글게. 아래쪽은 그대로 둔다.</summary>
     private static float TopCornerCoverage(int x, int y, int width, int height, int radius)
