@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -17,8 +18,10 @@ using UnityEngine.UI;
 /// 같은 격자·같은 상세를 두 벌 만들 이유가 없고, 플레이어도 한 번만 배우면 된다.
 /// 이 컴포넌트는 오른쪽 한 칸만 맡는다.
 ///
-/// 【상점은 아직 이 패널을 쓰지 않는다.】 파는 값·재고·통화 흐름이
-/// 8단계 설계에 걸려 있다. 틀은 여기 있으므로 그때 Mode 하나를 더한다.
+/// 【창고 · 잡화 상점도 이 패널이다.】 (로드맵 8-I)
+/// 오른쪽 칸의 출처만 바뀐다 — 전리품은 LootContainer, 창고는 창고 Inventory,
+/// 상점은 ShopTable의 줄들. 가방 쪽에서 「창고에 넣기」 · 「판매」를 누르는 것은
+/// 가방 화면(InventoryScreenUI)의 사이드 메뉴가 이 패널의 모드를 보고 정한다.
 /// </summary>
 public class ExchangeWindowUI : MonoBehaviour
 {
@@ -29,7 +32,10 @@ public class ExchangeWindowUI : MonoBehaviour
         Loot = 0,
 
         /// <summary>창고. 양방향. 맡기고 찾는다.</summary>
-        Stash = 1
+        Stash = 1,
+
+        /// <summary>잡화 상점. 이쪽 칸은 사고, 가방 칸은 판다.</summary>
+        Shop = 2
     }
 
     private const int Columns = 5;
@@ -50,15 +56,21 @@ public class ExchangeWindowUI : MonoBehaviour
     private GameObject panel;
     private Text titleLabel;
     private Button takeAllButton;
+    private Text footLabel;
 
     private UIFactory.ScrollList grid;
 
     private Mode mode = Mode.Loot;
     private CorpseController source;
     private LootContainer other;
+    private Inventory stash;
     private string otherName = "전리품";
 
     public bool IsOpen => panel != null && panel.activeSelf;
+
+    /// <summary>이 모드로 열려 있는가. 가방 화면이 사이드 메뉴 줄을 고를 때 쓴다.</summary>
+    public static bool IsOpenIn(Mode windowMode)
+        => instance != null && instance.IsOpen && instance.mode == windowMode;
 
     public static ExchangeWindowUI EnsureInstance()
     {
@@ -124,6 +136,11 @@ public class ExchangeWindowUI : MonoBehaviour
             new Vector2(0.04f, 0.035f), new Vector2(0.96f, 0.130f),
             UIPalette.Action, TakeAll, 26);
 
+        // 상점에는 「전부」 버튼이 없다. 그 자리에 재고가 언제 차는지를 적는다.
+        footLabel = UIFactory.CreateLabel(box, "파밍이 끝나면 재고가 다시 찹니다.", 20,
+            FontStyle.Normal, new Vector2(0.04f, 0.035f), new Vector2(0.96f, 0.130f),
+            TextAnchor.MiddleCenter, UIPalette.Subtle);
+
         panel.SetActive(false);
     }
 
@@ -147,7 +164,36 @@ public class ExchangeWindowUI : MonoBehaviour
             return;
 
         other = container;
+        stash = null;
         otherName = string.IsNullOrEmpty(label) ? "상대" : label;
+
+        OpenPanel(windowMode);
+    }
+
+    /// <summary>창고를 연다. 벙커가 생기면(8단계 뒤쪽) 보관고가 이 길을 부른다.</summary>
+    public void OpenStash()
+    {
+        source = null;
+        other = null;
+        stash = PlayerInventory.EnsureInstance().Stash;
+        otherName = "창고";
+
+        OpenPanel(Mode.Stash);
+    }
+
+    /// <summary>잡화 상점을 연다.</summary>
+    public void OpenShop()
+    {
+        source = null;
+        other = null;
+        stash = null;
+        otherName = ShopTable.GeneralStoreName;
+
+        OpenPanel(Mode.Shop);
+    }
+
+    private void OpenPanel(Mode windowMode)
+    {
         mode = windowMode;
 
         panel.SetActive(true);
@@ -185,6 +231,7 @@ public class ExchangeWindowUI : MonoBehaviour
 
         source = null;
         other = null;
+        stash = null;
 
         // 왼쪽 패널도 같이 닫는다. 파밍이 끝났는데 가방만 남아 있으면
         // 「무엇을 닫는 중인지」가 헷갈린다.
@@ -227,19 +274,45 @@ public class ExchangeWindowUI : MonoBehaviour
             instance.Refresh();
     }
 
+    private bool HasSource
+        => mode switch
+        {
+            Mode.Loot => other != null,
+            Mode.Stash => stash != null,
+            _ => true
+        };
+
     private void Refresh()
     {
-        if (other == null)
+        if (!HasSource)
             return;
 
-        titleLabel.text = $"{otherName} ({other.UsedSlots}/{other.Capacity})";
+        switch (mode)
+        {
+            case Mode.Stash:
+                titleLabel.text = $"{otherName} ({stash.UsedSlots}/{stash.SlotCapacity})";
+                break;
+
+            case Mode.Shop:
+                titleLabel.text = $"{otherName} · ₡ {PassiveManager.EnsureInstance().Credits:N0}";
+                break;
+
+            default:
+                titleLabel.text = $"{otherName} ({other.UsedSlots}/{other.Capacity})";
+                break;
+        }
+
+        takeAllButton.gameObject.SetActive(mode != Mode.Shop);
+        footLabel.gameObject.SetActive(mode == Mode.Shop);
 
         var label = takeAllButton.GetComponentInChildren<Text>();
 
         if (label != null)
             label.text = mode == Mode.Stash ? "전부 꺼내기" : "전부 줍기";
 
-        takeAllButton.interactable = !other.IsEmpty;
+        takeAllButton.interactable = mode == Mode.Stash
+            ? stash.Stacks.Count > 0
+            : mode == Mode.Loot && !other.IsEmpty;
 
         // 칸 크기를 픽셀로 환산하려면 실제 크기가 확정되어 있어야 한다.
         // 다시 그리면 사이드 메뉴가 가리키던 칸이 사라진다.
@@ -254,7 +327,19 @@ public class ExchangeWindowUI : MonoBehaviour
     {
         UIFactory.ClearChildren(grid.Content);
 
-        int cells = Mathf.Max(0, other.Capacity);
+        if (mode == Mode.Shop)
+        {
+            DrawShopGrid();
+            return;
+        }
+
+        // 창고는 칸 수보다 물건 줄이 많을 수 있다 — 젬은 칸을 먹지 않고,
+        // 패시브가 줄어 칸이 모자라도 이미 든 것은 그대로다. 둘 다 보여야 한다.
+        IReadOnlyList<ItemStack> stashStacks = mode == Mode.Stash ? stash.Stacks : null;
+
+        int cells = mode == Mode.Stash
+            ? Mathf.Max(stash.SlotCapacity, stashStacks.Count)
+            : Mathf.Max(0, other.Capacity);
 
         UIFactory.SquareGridMetrics(grid.Viewport, Columns, cells, MinRows,
             out int rows, out float height, out float padX, out float padY);
@@ -267,7 +352,9 @@ public class ExchangeWindowUI : MonoBehaviour
             UIFactory.GetCellAnchors(i, Columns, rows, padX, padY,
                 out Vector2 min, out Vector2 max);
 
-            ItemStack stack = i < cells ? other.Get(i) : null;
+            ItemStack stack = mode == Mode.Stash
+                ? (i < stashStacks.Count ? stashStacks[i] : null)
+                : (i < cells ? other.Get(i) : null);
 
             int captured = i;
 
@@ -293,6 +380,60 @@ public class ExchangeWindowUI : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 상점 칸. 【팔지 않게 된 것도 자리를 지킨다】 — 품절이 되면 칸이 사라지는
+    /// 대신 흐려진다. 자리가 바뀌면 「아까 그거 어디 갔지」를 매번 다시 찾는다.
+    /// </summary>
+    private void DrawShopGrid()
+    {
+        ItemCatalog catalog = ItemCatalog.Load();
+        IReadOnlyList<ShopEntry> entries = ShopTable.General;
+
+        UIFactory.SquareGridMetrics(grid.Viewport, Columns, entries.Count, MinRows,
+            out int rows, out float height, out float padX, out float padY);
+
+        grid.Content.sizeDelta = new Vector2(0f, height);
+
+        for (int i = 0; i < rows * Columns; i++)
+        {
+            UIFactory.GetCellAnchors(i, Columns, rows, padX, padY,
+                out Vector2 min, out Vector2 max);
+
+            ItemDefinition definition = i < entries.Count && catalog != null
+                ? catalog.Find(entries[i].ItemId)
+                : null;
+
+            // 한 개짜리로 그린다 — 재고 수는 아래 표로 따로 붙인다.
+            // 겹치지 않는 물건(구급상자)은 개수를 셀 수 없어서다.
+            ItemStack shown = definition != null ? new ItemStack(definition) : null;
+
+            Image cell = ItemCell.Draw($"Shop_{i}", grid.Content, min, max, shown,
+                chosen: false, null);
+
+            if (definition == null)
+                continue;
+
+            ShopEntry entry = entries[i];
+            int remaining = ShopManager.General.Remaining(entry.ItemId);
+
+            UIFactory.CreateBadge(cell.transform, remaining > 0 ? $"×{remaining}" : "품절",
+                new Vector2(0.56f, 0.06f), new Vector2(0.96f, 0.30f), 20,
+                remaining > 0 ? Color.white : UIPalette.Warning);
+
+            if (remaining <= 0)
+                cell.gameObject.AddComponent<CanvasGroup>().alpha = 0.45f;
+
+            var button = cell.GetComponent<Button>();
+
+            if (button == null)
+                continue;
+
+            RectTransform cellRect = cell.rectTransform;
+
+            button.onClick.AddListener(() => OpenShopMenu(cellRect, definition, entry));
+        }
+    }
+
     // ────────────────────────────────── 사이드 메뉴
 
     /// <summary>
@@ -309,12 +450,51 @@ public class ExchangeWindowUI : MonoBehaviour
 
         var entries = ItemActionMenu.ForContainerItem(
             definition,
-            take: () => Take(index),
+            take: () => Take(index, stack),
             equip: equippable ? () => TakeAndEquip(index, stack) : null,
             use: null,
-            detail: () => InventoryScreenUI.OpenReadOnlyDetail(stack, otherName));
+            detail: () => InventoryScreenUI.OpenReadOnlyDetail(stack, otherName),
+            takeLabel: mode == Mode.Stash ? "꺼내기" : "줍기");
 
         ItemActionMenu.Open(cell, entries);
+    }
+
+    /// <summary>
+    /// 상점 칸의 사이드 메뉴 — 「구매」와 「상세보기」.
+    /// 【값을 줄에 적는다.】 누르기 전에 얼마가 빠지는지 알아야 한다.
+    /// 못 사는 이유가 있으면 줄을 흐리게 두고, 눌렀을 때 이유를 알린다.
+    /// </summary>
+    private void OpenShopMenu(RectTransform cell, ItemDefinition definition, ShopEntry entry)
+    {
+        int price = TradeRules.BuyPrice(definition, entry);
+
+        TradeError error = TradeRules.CanBuy(definition, entry,
+            ShopManager.General.Remaining(entry.ItemId),
+            PassiveManager.EnsureInstance().Credits,
+            PlayerInventory.EnsureInstance().Bag);
+
+        var entries = new List<ItemActionMenu.Entry>
+        {
+            new($"구매 ₡{price:N0}", UIPalette.Action, () => Buy(definition), error == TradeError.None),
+            new("상세보기", UIPalette.Subtle,
+                () => InventoryScreenUI.OpenReadOnlyDetail(new ItemStack(definition), otherName))
+        };
+
+        ItemActionMenu.Open(cell, entries);
+
+        if (error != TradeError.None)
+            InventoryScreenUI.ShowToastIfOpen(TradeRules.Explain(error));
+    }
+
+    private void Buy(ItemDefinition definition)
+    {
+        TradeError error = ShopManager.Buy(definition);
+
+        InventoryScreenUI.ShowToastIfOpen(error == TradeError.None
+            ? $"구매 — 「{definition.DisplayName}」"
+            : TradeRules.Explain(error));
+
+        AfterMove();
     }
 
     /// <summary>
@@ -326,7 +506,7 @@ public class ExchangeWindowUI : MonoBehaviour
     /// </summary>
     private void TakeAndEquip(int index, ItemStack stack)
     {
-        if (!TakeInto(index))
+        if (!TakeInto(index, stack))
             return;
 
         InventoryScreenUI.EquipFromOutside(stack);
@@ -335,12 +515,23 @@ public class ExchangeWindowUI : MonoBehaviour
     }
 
     /// <summary>가방으로 옮긴다. 자리가 없으면 알리고 false.</summary>
-    private bool TakeInto(int index)
+    private bool TakeInto(int index, ItemStack stack = null)
     {
+        Inventory bag = PlayerInventory.EnsureInstance().Bag;
+
+        if (mode == Mode.Stash)
+        {
+            if (stash != null && Inventory.MoveStack(stash, bag, stack))
+                return true;
+
+            InventoryScreenUI.ShowToastIfOpen("가방에 자리가 없습니다.");
+            return false;
+        }
+
         if (other == null || other.Get(index) == null)
             return false;
 
-        if (other.TryTakeTo(index, PlayerInventory.EnsureInstance().Bag))
+        if (other.TryTakeTo(index, bag))
             return true;
 
         // 못 옮기면 아이템은 있던 자리에 그대로 남는다. 사라지지 않는다.
@@ -351,18 +542,30 @@ public class ExchangeWindowUI : MonoBehaviour
 
     // ────────────────────────────────── 옮기기
 
-    private void Take(int index)
+    private void Take(int index, ItemStack stack)
     {
-        if (TakeInto(index))
+        if (TakeInto(index, stack))
             AfterMove();
     }
 
     private void TakeAll()
     {
-        if (other == null)
-            return;
+        Inventory bag = PlayerInventory.EnsureInstance().Bag;
+        int moved = 0;
 
-        int moved = other.TakeAllTo(PlayerInventory.EnsureInstance().Bag);
+        if (mode == Mode.Stash && stash != null)
+        {
+            // 뒤에서부터 — 옮기면 목록이 줄어든다.
+            for (int i = stash.Stacks.Count - 1; i >= 0; i--)
+            {
+                if (Inventory.MoveStack(stash, bag, stash.Stacks[i]))
+                    moved++;
+            }
+        }
+        else if (other != null)
+        {
+            moved = other.TakeAllTo(bag);
+        }
 
         GameLogger.Log($"[ExchangeWindowUI] {moved}칸 회수");
 
@@ -370,9 +573,48 @@ public class ExchangeWindowUI : MonoBehaviour
         AfterMove();
     }
 
+    /// <summary>
+    /// 가방 칸을 창고에 넣는다. 가방 화면의 사이드 메뉴 「창고에 넣기」가 부른다.
+    /// </summary>
+    public static void PutIntoStash(ItemStack stack)
+    {
+        Inventory bag = PlayerInventory.EnsureInstance().Bag;
+
+        if (!Inventory.MoveStack(bag, PlayerInventory.Instance.Stash, stack))
+            InventoryScreenUI.ShowToastIfOpen("창고에 자리가 없습니다.");
+
+        RefreshAfterBagChange();
+    }
+
+    /// <summary>가방 칸을 판다. 가방 화면의 사이드 메뉴 「판매」가 부른다.</summary>
+    public static void SellFromBag(ItemStack stack)
+    {
+        string name = stack?.Definition != null ? stack.Definition.DisplayName : string.Empty;
+
+        TradeError error = ShopManager.Sell(stack, out int earned);
+
+        InventoryScreenUI.ShowToastIfOpen(error == TradeError.None
+            ? $"판매 — 「{name}」 +₡{earned:N0}"
+            : TradeRules.Explain(error));
+
+        RefreshAfterBagChange();
+    }
+
+    private static void RefreshAfterBagChange()
+    {
+        if (instance != null && instance.IsOpen)
+        {
+            instance.AfterMove();
+            return;
+        }
+
+        PlayerInventory.EnsureInstance().RefreshCapacity();
+        InventoryScreenUI.RefreshIfOpen();
+    }
+
     private void AfterMove()
     {
-        PlayerInventory.Instance.RefreshCapacity();
+        PlayerInventory.EnsureInstance().RefreshCapacity();
 
         // 왼쪽 가방도 같이 갱신한다 — 방금 넣은 것이 바로 보여야 한다.
         InventoryScreenUI.RefreshIfOpen();

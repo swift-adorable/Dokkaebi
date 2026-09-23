@@ -367,7 +367,7 @@ public class ItemActionMenu : MonoBehaviour
     /// </summary>
     public static List<Entry> ForContainerItem(
         ItemDefinition definition,
-        Action take, Action equip, Action use, Action detail)
+        Action take, Action equip, Action use, Action detail, string takeLabel = "줍기")
     {
         var entries = new List<Entry>(4);
 
@@ -375,7 +375,7 @@ public class ItemActionMenu : MonoBehaviour
             return entries;
 
         // 가장 흔한 일을 맨 위에. 손가락이 칸에서 가장 가까운 줄이다.
-        entries.Add(new Entry("줍기", UIPalette.Action, take));
+        entries.Add(new Entry(takeLabel, UIPalette.Action, take));
 
         // 【바로 착용·사용은 「줍고 나서」가 아니라 그 자리에서 된다.】
         // 덕코프도 그렇다. 가방이 꽉 찼을 때 총 하나를 바꿔 끼우려고
@@ -399,12 +399,17 @@ public class ItemActionMenu : MonoBehaviour
     /// </summary>
     public static List<Entry> ForBagItem(
         ItemDefinition definition,
-        Action equip, Action use, Action quick, Action discard, Action detail)
+        Action equip, Action use, Action quick, Action discard, Action detail,
+        Entry? exchange = null)
     {
-        var entries = new List<Entry>(4);
+        var entries = new List<Entry>(5);
 
         if (definition == null)
             return entries;
+
+        // 【창고 · 상점이 열려 있으면 그 일이 맨 위다.】 그 패널을 연 이유가 그것이다.
+        if (exchange.HasValue)
+            entries.Add(exchange.Value);
 
         if (equip != null && (IsEquipment(definition.Kind) || definition.IsSkillGem))
             entries.Add(new Entry("장착", UIPalette.Action, equip));

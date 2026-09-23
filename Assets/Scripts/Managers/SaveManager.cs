@@ -170,7 +170,17 @@ public static class SaveManager
                 ToSaved(loadout.Get(EquipmentSlot.ImprintA)),
                 ToSaved(loadout.Get(EquipmentSlot.ImprintB))
             };
+
+            data.stash = new List<SavedItem>();
+
+            foreach (ItemStack stack in PlayerInventory.Instance.Stash.Stacks)
+            {
+                if (stack?.Definition != null && !stack.IsEmpty)
+                    data.stash.Add(ToSaved(stack));
+            }
         }
+
+        data.shop = ShopManager.General.Capture(ShopTable.General);
 
         return data;
     }
@@ -212,6 +222,8 @@ public static class SaveManager
             codex.Unlock(id);
 
         RestoreImprints(data.imprints);
+        RestoreStash(data.stash);
+        ShopManager.Restore(data.shop);
 
         // 레벨이 돌아왔으니 소켓 수도 맞춘다. 알림은 내지 않는다.
         SkillManager.EnsureInstance().ResyncLevel();
@@ -264,6 +276,50 @@ public static class SaveManager
             if (!loadout.TryEquip(stack, slots[i], out _))
                 GameLogger.Error($"[Save] 각인 「{item.id}」을 {slots[i]}에 끼우지 못했습니다.");
         }
+    }
+
+    /// <summary>
+    /// 창고를 되살린다. 【칸 수를 넘어도 넣는다】 — 패시브를 바꾸거나 표를 고쳐
+    /// 칸이 줄었을 때 물건이 사라지면 안 된다. 넘친 만큼은 새로 넣지 못할 뿐이다.
+    /// 못 찾은 id는 각인과 같은 이유로 건너뛴다.
+    /// </summary>
+    private static void RestoreStash(List<SavedItem> saved)
+    {
+        Inventory stash = PlayerInventory.EnsureInstance().Stash;
+
+        stash.Clear();
+
+        if (saved == null || saved.Count == 0)
+            return;
+
+        ItemCatalog catalog = ItemCatalog.Load();
+
+        if (catalog == null)
+        {
+            GameLogger.Error("[Save] Resources/ItemCatalog가 없어 창고를 되살리지 못했습니다.");
+            return;
+        }
+
+        int capacity = stash.SlotCapacity;
+        stash.SlotCapacity = int.MaxValue / 2;
+
+        foreach (SavedItem item in saved)
+        {
+            if (item == null || item.IsEmpty)
+                continue;
+
+            ItemDefinition definition = catalog.Find(item.id);
+
+            if (definition == null)
+            {
+                GameLogger.Error($"[Save] 창고의 「{item.id}」을 찾지 못해 건너뜁니다.");
+                continue;
+            }
+
+            stash.TryAddStack(new ItemStack(definition, item.count, item.durability));
+        }
+
+        stash.SlotCapacity = capacity;
     }
 
     private static int CountFilled(List<SavedItem> items)
