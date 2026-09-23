@@ -45,6 +45,37 @@ public static class PlayerConsumables
     }
 
     /// <summary>
+    /// 쓸 수 없는 이유. 쓸 수 있으면 null이다.
+    ///
+    /// 시전 시간이 있는 물건을 **시작하기 전에** 거르는 데 쓴다 —
+    /// 3초를 서 있다가 「채울 것이 없습니다」를 보는 것은 벌이지 안내가 아니다.
+    /// </summary>
+    public static string Blocked(ItemStack stack)
+    {
+        if (stack?.Definition == null)
+            return "쓸 물건이 없습니다.";
+
+        Health health = FindPlayerHealth();
+
+        if (health == null)
+            return "플레이어를 찾지 못했습니다.";
+
+        ConsumableOutcome outcome = ConsumableUse.Evaluate(
+            stack.Definition, Snapshot(health, stack.Definition, stack.Durability));
+
+        return outcome.Ok ? null : ConsumableUse.Explain(outcome.Error);
+    }
+
+    /// <summary>
+    /// 쓰기 시작한다. 시전 시간이 있으면 ConsumableCaster가 시간을 잰다.
+    /// 화면은 이 입구만 쓰면 된다 — 즉시인지 아닌지를 화면이 알 필요는 없다.
+    /// </summary>
+    public static void BeginUse(ItemStack stack, System.Action<string> onDone)
+    {
+        ConsumableCaster.EnsureInstance().Begin(stack, onDone);
+    }
+
+    /// <summary>
     /// 「사용」 줄을 띄울 물건인가.
     ///
     /// 【지금 효과가 있는지는 보지 않는다.】 체력이 가득하다고 줄을 감추면

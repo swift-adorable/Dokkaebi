@@ -36,6 +36,7 @@ public static class ConsumableAssetGenerator
         public int cureStacks;
         public int useCost;
         public int maxDurability;
+        public float castSeconds;
         public float weight;
         public int stackMax;
         public int value;
@@ -56,6 +57,13 @@ public static class ConsumableAssetGenerator
     {
         var list = new List<Row>(16);
 
+        // 【시전 시간】 구급상자는 클수록 길다 — 2.0 / 3.0 / 4.5초.
+        // 나무위키가 「이 등급부터 사용 시간이 길어져 전투 중에 쓰기 상당히
+        // 어렵다」고 적는 것을 따른 것이다 [확인됨]. 다만 **정확한 초는
+        // 어디에도 없으므로 아래 값은 우리가 정한 것이다** [불확실].
+        // 붕대 1.5 · 해제약 1.0 · 아스피린 0.8 · 음식 1.2 —
+        // 급할 때 쓰는 것일수록 짧다.
+        //
         // ── 회복 — 【내구도(충전)형이다.】 ────────────────────────────
         //
         // 덕코프의 구급상자는 한 번 쓰고 사라지는 물건이 아니다.
@@ -73,44 +81,45 @@ public static class ConsumableAssetGenerator
             "한 번에 조금씩. 다섯 번 쓸 수 있다.",
             heal: 12, useCost: 25, maxDurability: 125,
             cure: StatusEffectType.Bleed, cureStacks: 1,
-            weight: 0.5f, value: 206));
+            weight: 0.5f, value: 206, castSeconds: 2.0f));
 
         list.Add(Kit("con_medkit", "구급상자",
             "제대로 된 것. 출혈도 두 겹까지 잡는다.",
             heal: 20, useCost: 25, maxDurability: 175,
             cure: StatusEffectType.Bleed, cureStacks: 2,
-            weight: 0.75f, value: 807));
+            weight: 0.75f, value: 807, castSeconds: 3.0f));
 
         list.Add(Kit("con_medkit_large", "대형 구급상자",
             "이걸 들고 나왔다면 무언가를 두고 온 것이다.",
             heal: 35, useCost: 40, maxDurability: 400,
             cure: StatusEffectType.Bleed, cureStacks: 99,
-            weight: 1.2f, value: 1322));
+            weight: 1.2f, value: 1322, castSeconds: 4.5f));
 
         // ── 한 번 쓰고 사라지는 것 ────────────────────────────────────
         //
         // 가벼워서 겹쳐 들고 다닌다. 【싼 도구가 비싼 도구와 같은 일을
-        // 하면 안 된다】 — 붕대는 출혈 2층까지만, 구급상자는 회복을 겸한다.
+        // 하면 안 된다】 — 붕대는 출혈 2중첩까지만, 구급상자는 회복을 겸한다.
 
         list.Add(Cure("con_bandage", "지혈 붕대", "감고 나면 피는 멎는다.",
             StatusEffectType.Bleed, cureStacks: 2,
-            heal: 5, weight: 0.05f, stackMax: 3, value: 240));
+            heal: 5, weight: 0.05f, stackMax: 3, value: 240, castSeconds: 1.5f));
 
         // 아스피린의 「수분 −15」는 덕코프 실제 값이다. [확인됨 — 아이템 #20]
         list.Add(Heal("con_aspirin", "아스피린",
-            "머리가 덜 아프다. 대신 목이 마른다.", 10, 0.03f, 9, 96, waterCost: 15f));
+            "머리가 덜 아프다. 대신 목이 마른다.", 10, 0.03f, 9, 96,
+            waterCost: 15f, castSeconds: 0.8f));
 
         list.Add(Cure("con_antidote", "해독제", "속을 게워 내는 맛이 난다.",
-            StatusEffectType.Poison, 99, 0, 0.1f, 3, 90));
+            StatusEffectType.Poison, 99, 0, 0.1f, 3, 90, castSeconds: 1.0f));
 
         list.Add(Cure("con_antacid", "소화제", "안에서 타는 것을 끈다.",
-            StatusEffectType.Ignite, 99, 0, 0.1f, 3, 90));
+            StatusEffectType.Ignite, 99, 0, 0.1f, 3, 90, castSeconds: 1.0f));
 
         list.Add(Cure("con_relaxant", "이완제", "경련이 멎는다.",
-            StatusEffectType.Shock, 99, 0, 0.1f, 3, 90));
+            StatusEffectType.Shock, 99, 0, 0.1f, 3, 90, castSeconds: 1.0f));
 
         list.Add(Cure("con_defroster", "해빙제", "안쪽부터 녹인다.",
-            StatusEffectType.Freeze, 99, 0, 0.1f, 3, 90));
+            StatusEffectType.Freeze, 99, 0, 0.1f, 3, 90, castSeconds: 1.0f));
 
         // ── 음료 · 음식 ───────────────────────────────────────────────
         //
@@ -161,7 +170,7 @@ public static class ConsumableAssetGenerator
     private static Row Kit(string id, string name, string desc,
                            int heal, int useCost, int maxDurability,
                            StatusEffectType cure, int cureStacks,
-                           float weight, int value)
+                           float weight, int value, float castSeconds)
     {
         return new Row
         {
@@ -169,31 +178,35 @@ public static class ConsumableAssetGenerator
             category = ConsumableCategory.Restore,
             heal = heal, cure = cure, cureStacks = cureStacks,
             useCost = useCost, maxDurability = maxDurability,
+            castSeconds = castSeconds,
             weight = weight, stackMax = 1, value = value
         };
     }
 
     private static Row Heal(string id, string name, string desc, int heal,
-                            float weight, int stackMax, int value, float waterCost = 0f)
+                            float weight, int stackMax, int value,
+                            float waterCost = 0f, float castSeconds = 0f)
     {
         return new Row
         {
             id = id, name = name, desc = desc,
             category = ConsumableCategory.Restore,
-            heal = heal, waterCost = waterCost,
+            heal = heal, waterCost = waterCost, castSeconds = castSeconds,
             cure = StatusEffectType.None, cureStacks = 99,
             weight = weight, stackMax = stackMax, value = value
         };
     }
 
     private static Row Cure(string id, string name, string desc, StatusEffectType cure,
-                            int cureStacks, int heal, float weight, int stackMax, int value)
+                            int cureStacks, int heal, float weight, int stackMax, int value,
+                            float castSeconds = 0f)
     {
         return new Row
         {
             id = id, name = name, desc = desc,
             category = ConsumableCategory.Cure,
             heal = heal, cure = cure, cureStacks = cureStacks,
+            castSeconds = castSeconds,
             weight = weight, stackMax = stackMax, value = value
         };
     }
@@ -201,13 +214,14 @@ public static class ConsumableAssetGenerator
     private static Row Food(string id, string name, string desc,
                             float water, float energy,
                             float weight, int stackMax, int value,
-                            float waterCost = 0f)
+                            float waterCost = 0f, float castSeconds = 1.2f)
     {
         return new Row
         {
             id = id, name = name, desc = desc,
             category = ConsumableCategory.Sustenance,
             water = water, energy = energy, waterCost = waterCost,
+            castSeconds = castSeconds,
             cure = StatusEffectType.None, cureStacks = 99,
             weight = weight, stackMax = stackMax, value = value
         };
@@ -250,6 +264,7 @@ public static class ConsumableAssetGenerator
         effect.FindPropertyRelative("cure").intValue = (int)row.cure;
         effect.FindPropertyRelative("cureStacks").intValue = Mathf.Max(1, row.cureStacks);
         effect.FindPropertyRelative("useCost").intValue = row.useCost;
+        effect.FindPropertyRelative("castSeconds").floatValue = row.castSeconds;
 
         so.ApplyModifiedPropertiesWithoutUndo();
 

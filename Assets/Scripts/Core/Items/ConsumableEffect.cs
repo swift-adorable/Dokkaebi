@@ -44,12 +44,16 @@ public class ConsumableEffect
     [SerializeField] private StatusEffectType cure = StatusEffectType.None;
 
     [Min(1)]
-    [Tooltip("몇 중첩을 덜어 내는가. 덕코프의 「출혈 2층 제거」가 이것이다.")]
+    [Tooltip("몇 중첩을 덜어 내는가. 덕코프의 「출혈 2중첩 제거」가 이것이다.")]
     [SerializeField] private int cureStacks = 99;
 
     [Min(0)]
     [Tooltip("한 번 쓸 때 닳는 내구도. 0이면 한 번 쓰고 사라지는 물건이다.")]
     [SerializeField] private int useCost = 0;
+
+    [Min(0f)]
+    [Tooltip("쓰는 데 걸리는 시간(초). 움직이거나 맞으면 중단된다. 0이면 즉시.")]
+    [SerializeField] private float castSeconds = 0f;
 
     public ConsumableCategory Category => category;
 
@@ -75,6 +79,18 @@ public class ConsumableEffect
 
     /// <summary>내구도를 깎아 쓰는 물건인가.</summary>
     public bool Charged => UseCost > 0;
+
+    /// <summary>
+    /// 쓰는 데 걸리는 시간(초).
+    ///
+    /// 【이것이 회복의 균형추다.】 전투 중에 마실 수 없어야 「빠질까 버틸까」가
+    /// 생긴다. 즉시 회복이면 체력은 그냥 자원이고, 아무 때나 채우면 된다.
+    ///
+    /// 덕코프도 같다 — 나무위키가 구급상자를 두고 「이 등급부터 사용 시간이
+    /// 길어져 전투 중에 쓰기 상당히 어렵다」고 적는다. [확인됨]
+    /// 다만 **정확한 초는 어디에도 없다.** 아래 값은 우리가 정한 것이다. [불확실]
+    /// </summary>
+    public float CastSeconds => Mathf.Max(0f, castSeconds);
 
     /// <summary>해제 효과가 있는가.</summary>
     public bool Cures => cure != StatusEffectType.None;
