@@ -3,7 +3,8 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// 화면 좌상단의 체력 · 수분 · 에너지. (docs/Blob_Survival_System.md 7절)
+/// 화면 좌상단의 체력 · 수분 · 에너지, 그리고 그 아래의 상태 줄.
+/// (docs/Blob_Survival_System.md 7절)
 ///
 /// 【덕코프와 같은 모양으로 둔다.】
 ///   하트 + 긴 막대 하나 · 그 오른쪽에 물방울 · 번개 원형 게이지 둘.
@@ -64,8 +65,13 @@ public class SurvivalHudUI : MonoBehaviour
     private const float StatusRowGap = 4f;
     private const float StatusWidth = 176f;
 
-    /// <summary>한 번에 보여 주는 줄 수. 넘치면 오래된 것부터 잘린다.</summary>
-    private const int MaxStatusRows = 6;
+    /// <summary>
+    /// 한 번에 보여 주는 줄 수.
+    ///
+    /// 상태이상 9종에 지속 조건(과중량 · 탈수 · 허기) 셋이 더 붙으므로
+    /// 여섯 줄로는 위험한 것 몇 개만으로도 아래가 잘렸다. 여덟로 둔다.
+    /// </summary>
+    private const int MaxStatusRows = 8;
 
     private RectTransform statusColumn;
 
@@ -95,8 +101,39 @@ public class SurvivalHudUI : MonoBehaviour
     private static readonly int StatusEffectCount =
         System.Enum.GetValues(typeof(StatusEffectType)).Length;
 
-    /// <summary>이번 프레임에 보일 상태. 매 프레임 새로 만들지 않는다.</summary>
+    /// <summary>상태이상을 고르고 정렬할 때 쓰는 임시 목록. 매 프레임 새로 만들지 않는다.</summary>
     private readonly List<StatusEffectType> visible = new();
+
+    /// <summary>
+    /// 화면에 세울 줄 하나.
+    ///
+    /// 【상태이상과 지속 조건을 같은 모양으로 담는다.】 플레이어에게는
+    /// 「지금 나한테 뭐가 걸려 있나」 하나의 질문이다. 과중량은 무게 화면에,
+    /// 탈수는 게이지에, 중독은 상태 줄에 흩어져 있으면 그 답을 세 군데서
+    /// 모아야 한다. 출처가 달라도 읽는 자리는 한 곳이어야 한다.
+    /// </summary>
+    private readonly struct Condition
+    {
+        public readonly string Label;
+        public readonly Color Color;
+
+        /// <summary>채움 비율 0~1. 지속 조건은 시간 제한이 없으므로 늘 1이다.</summary>
+        public readonly float Fill;
+
+        /// <summary>바탕까지 물들일지. 지금 당장 위험한 것만 띠로 보인다.</summary>
+        public readonly bool Banded;
+
+        public Condition(string label, Color color, float fill, bool banded)
+        {
+            Label = label;
+            Color = color;
+            Fill = fill;
+            Banded = banded;
+        }
+    }
+
+    /// <summary>이번 프레임에 세울 줄들. 순서가 곧 화면 순서다.</summary>
+    private readonly List<Condition> conditions = new();
 
     public static SurvivalHudUI EnsureInstance()
     {
@@ -372,18 +409,58 @@ public class SurvivalHudUI : MonoBehaviour
     }
 
     /// <summary>
-    /// 걸려 있는 상태이상을 줄로 세운다.
+    /// 지금 걸려 있는 것을 전부 줄로 세운다. 상태이상만이 아니라
+    /// 과중량 · 탈수 · 허기도 같은 줄에 선다.
     ///
-    /// 【위험 상태를 맨 위로 올린다.】 동결·마비는 지금 못 움직인다는 뜻이고,
-    /// 부식은 회복약이 반만 듣는다는 뜻이다. 중독 3중첩보다 먼저 보여야 한다.
+    /// 【순서는 급한 순이다.】
+    ///   1. 위험 상태이상 (동결 · 마비 · 부식) — 지금 못 움직이거나 회복이 반만 든다
+    ///   2. 움직일 수 없음 (과중량 3단계) — 동결과 같은 급이다
+    ///   3. 탈수 · 허기 — 이동이 깎이고 허기는 계속 피해를 준다
+    ///   4. 과중량 · 심한 과중량 — 느려질 뿐 당장 죽지는 않는다
+    ///   5. 나머지 상태이상 — 남은 시간이 짧은 것 먼저
     /// </summary>
     private void RefreshStatus()
     {
-        if (health == null)
+        conditions.Clear();
+
+        CollectAilments(banded: true);
+        CollectImmobile();
+        CollectSurvival();
+        CollectEncumbrance();
+        CollectAilments(banded: false);
+
+        int count = Mathf.Min(conditions.Count, MaxStatusRows);
+
+        for (int i = 0; i < count; i++)
         {
-            HideStatusFrom(0);
-            return;
+            Condition condition = conditions[i];
+
+            StatusRow row = statusRows[i];
+
+            row.Root.SetActive(true);
+            row.Label.text = condition.Label;
+
+            row.Fill.rectTransform.anchorMax =
+                new Vector2(Mathf.Clamp01(condition.Fill), 1f);
+
+            row.Fill.color = UIPalette.Glassify(condition.Color, 0.55f);
+
+            row.Back.color = condition.Banded
+                ? UIPalette.Glassify(condition.Color, 0.22f)
+                : UIPalette.Inset;
         }
+
+        HideStatusFrom(count);
+    }
+
+    /// <summary>
+    /// 걸린 상태이상을 줄로 만든다. 위험한 것과 나머지를 나눠 두 번 불린다 —
+    /// 그 사이에 과중량·탈수·허기가 끼어들어야 하기 때문이다.
+    /// </summary>
+    private void CollectAilments(bool banded)
+    {
+        if (health == null)
+            return;
 
         StatusEffectState state = health.Status;
 
@@ -393,56 +470,86 @@ public class SurvivalHudUI : MonoBehaviour
         {
             var type = (StatusEffectType)i;
 
-            if (state.Has(type))
+            if (state.Has(type) && StatusEffectNames.IsCritical(type) == banded)
                 visible.Add(type);
         }
 
-        // 위험 상태 먼저, 그다음 남은 시간이 짧은 것 먼저 —
-        // 곧 풀릴 것이 위에 있어야 「기다릴까 약을 쓸까」를 정할 수 있다.
-        visible.Sort((a, b) =>
-        {
-            bool criticalA = StatusEffectNames.IsCritical(a);
-            bool criticalB = StatusEffectNames.IsCritical(b);
+        // 남은 시간이 짧은 것 먼저 — 곧 풀릴 것이 위에 있어야
+        // 「기다릴까 약을 쓸까」를 정할 수 있다.
+        visible.Sort((a, b) => state.RemainingOf(a).CompareTo(state.RemainingOf(b)));
 
-            if (criticalA != criticalB)
-                return criticalA ? -1 : 1;
-
-            return state.RemainingOf(a).CompareTo(state.RemainingOf(b));
-        });
-
-        int count = Mathf.Min(visible.Count, MaxStatusRows);
-
-        for (int i = 0; i < count; i++)
+        for (int i = 0; i < visible.Count; i++)
         {
             StatusEffectType type = visible[i];
-
-            StatusRow row = statusRows[i];
-
-            row.Root.SetActive(true);
-
-            Color color = UIPalette.ForStatus(type);
 
             int stacks = state.StacksOf(type);
             float remaining = state.RemainingOf(type);
 
-            row.Label.text = stacks > 1
-                ? $"{StatusEffectNames.Of(type)} {stacks}    {remaining:0.0}s"
-                : $"{StatusEffectNames.Of(type)}    {remaining:0.0}s";
-
             // 채움은 지속시간 기준으로 줄어든다. 갱신되면 다시 찬다.
             float duration = Mathf.Max(0.01f, StatusEffectTable.Get(type).Duration);
 
-            row.Fill.rectTransform.anchorMax =
-                new Vector2(Mathf.Clamp01(remaining / duration), 1f);
+            string label = stacks > 1
+                ? $"{StatusEffectNames.Of(type)} {stacks}    {remaining:0.0}s"
+                : $"{StatusEffectNames.Of(type)}    {remaining:0.0}s";
 
-            // 위험 상태는 바탕까지 물들인다. 줄 하나가 아니라 띠로 보여야 한다.
-            row.Fill.color = UIPalette.Glassify(color, 0.55f);
-            row.Back.color = StatusEffectNames.IsCritical(type)
-                ? UIPalette.Glassify(color, 0.22f)
-                : UIPalette.Inset;
+            conditions.Add(new Condition(label, UIPalette.ForStatus(type),
+                remaining / duration, banded));
         }
+    }
 
-        HideStatusFrom(count);
+    /// <summary>지금의 과중량 단계. 가방이 아직 없으면 정상으로 본다.</summary>
+    private static EncumbranceLevel CurrentEncumbrance()
+    {
+        return PlayerInventory.HasInstance
+            ? PlayerInventory.Instance.Encumbrance
+            : EncumbranceLevel.Normal;
+    }
+
+    /// <summary>
+    /// 【움직일 수 없음만 위로 뺀다.】 과중량 3단계는 달릴 수 없는 상태라
+    /// 동결·마비와 같은 급이다. 아래쪽 줄에 두면 「왜 안 움직이지」를
+    /// 상태 줄 맨 밑에서 찾아야 한다.
+    /// </summary>
+    private void CollectImmobile()
+    {
+        if (CurrentEncumbrance() == EncumbranceLevel.Immobile)
+            conditions.Add(new Condition("움직일 수 없음", UIPalette.Warning, 1f, true));
+    }
+
+    /// <summary>탈수 · 허기. 게이지가 0이 된 뒤부터가 진짜 상태다.</summary>
+    private void CollectSurvival()
+    {
+        if (!PlayerSurvival.HasInstance)
+            return;
+
+        SurvivalState survival = PlayerSurvival.Instance.State;
+
+        if (survival.IsDehydrated)
+            conditions.Add(new Condition("탈수", UIPalette.WaterBar, 1f, true));
+
+        if (!survival.IsStarving)
+            return;
+
+        int starvingStacks = survival.StarvingStacks;
+
+        conditions.Add(new Condition(
+            starvingStacks > 1 ? $"허기 {starvingStacks}" : "허기",
+            UIPalette.EnergyBar, 1f, true));
+    }
+
+    /// <summary>과중량 1·2단계. 3단계는 CollectImmobile이 이미 위로 뺐다.</summary>
+    private void CollectEncumbrance()
+    {
+        switch (CurrentEncumbrance())
+        {
+            case EncumbranceLevel.Heavy:
+                conditions.Add(new Condition("과중량", UIPalette.TextAccent, 1f, false));
+                break;
+
+            case EncumbranceLevel.Overloaded:
+                conditions.Add(new Condition("심한 과중량", UIPalette.Warning, 1f, false));
+                break;
+        }
     }
 
     private void HideStatusFrom(int index)
