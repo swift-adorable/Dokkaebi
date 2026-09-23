@@ -366,14 +366,7 @@ public class ExchangeWindowUI : MonoBehaviour
 
         GameLogger.Log($"[ExchangeWindowUI] {moved}칸 회수");
 
-        // 다 집었으면 창을 닫는다. 빈 창을 보고 있을 이유가 없다.
-        if (mode == Mode.Loot && other.IsEmpty)
-        {
-            AfterMove();
-            Close();
-            return;
-        }
-
+        // 다 집었으면 AfterMove가 알아서 닫는다.
         AfterMove();
     }
 
@@ -381,9 +374,17 @@ public class ExchangeWindowUI : MonoBehaviour
     {
         PlayerInventory.Instance.RefreshCapacity();
 
-        Refresh();
-
         // 왼쪽 가방도 같이 갱신한다 — 방금 넣은 것이 바로 보여야 한다.
         InventoryScreenUI.RefreshIfOpen();
+
+        // 【하나씩 주워 다 비워도 닫힌다.】 「전부 줍기」에만 있던 규칙이라,
+        // 마지막 한 칸을 손으로 집으면 빈 창이 남아 있었다.
+        if (mode == Mode.Loot && other != null && other.IsEmpty)
+        {
+            Close();
+            return;
+        }
+
+        Refresh();
     }
 }
