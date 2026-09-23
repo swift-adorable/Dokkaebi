@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// 화면 좌하단의 체력 · 수분 · 에너지. (docs/Blob_Survival_System.md 7절)
+/// 화면 좌상단의 체력 · 수분 · 에너지. (docs/Blob_Survival_System.md 7절)
 ///
 /// 【덕코프와 같은 모양으로 둔다.】
 ///   하트 + 긴 막대 하나 · 그 오른쪽에 물방울 · 번개 원형 게이지 둘.
@@ -11,6 +11,11 @@ using UnityEngine.UI;
 /// 처음에는 가로 막대 셋을 세로로 쌓고 왼쪽에 「체력 / 수분 / 에너지」를
 /// 글자로 적었다. 좁은 폭에서 글자가 두 줄로 접혔고, 그 자리는 막대가
 /// 써야 할 자리였다. **마커는 도형으로 둔다** — 한 번 배우면 글자보다 빠르다.
+///
+/// 【왜 좌상단인가】 처음에는 덕코프를 따라 좌하단에 뒀다. 모바일에서는
+/// 왼쪽 아래가 이동 조이스틱의 자리라, 엄지와 손바닥이 게이지를 통째로
+/// 가렸다. 정작 급할 때 체력이 안 보였다. 위쪽 두 구석 중 오른쪽은
+/// 장비·스킬·패시브 버튼줄이 쓰므로 왼쪽으로 올린다.
 ///
 /// 【체력만 길게 두는 이유】 체력은 초 단위로 변하고 수분·에너지는 십수 분에
 /// 걸쳐 변한다. 급한 축에 넓은 면적을 준다. 원형 게이지는 「얼마나 남았나」를
@@ -52,8 +57,8 @@ public class SurvivalHudUI : MonoBehaviour
     private Health health;
 
     // ── 상태이상 줄 ───────────────────────────────────────────────────
-    // 체력 막대 **위에** 쌓는다. 덕코프도 같은 자리다.
-    // 아래에 두면 퀵슬롯과 겹치고, 옆에 두면 게이지가 밀린다.
+    // 게이지 판 **바로 아래로** 쌓는다. 위로 쌓으면 화면 밖으로 나간다 —
+    // 판이 이미 화면 맨 위에 붙어 있기 때문이다. 옆에 두면 게이지가 밀린다.
 
     private const float StatusRowHeight = 30f;
     private const float StatusRowGap = 4f;
@@ -121,9 +126,9 @@ public class SurvivalHudUI : MonoBehaviour
     /// <summary>
     /// 화면(가방 · 전리품)이 열리고 닫힐 때 불린다.
     ///
-    /// 가방 화면은 좌하단에 소지 중량 카드를 둔다 — 같은 자리다.
-    /// 둘이 겹쳐서 어느 막대가 무엇인지 읽을 수 없었다.
-    /// 덕코프도 가방을 열면 생존 게이지 대신 소지 중량을 보여 준다.
+    /// 가방 화면은 판을 화면 전체에 깔고 자기 수치(소지 중량 · 크레딧)를
+    /// 띄운다. 그 위에 생존 게이지가 겹쳐 있으면 어느 막대가 무엇인지
+    /// 읽을 수 없다. 덕코프도 가방을 열면 생존 게이지를 걷어낸다.
     /// </summary>
     public static void SetHiddenByScreen(bool hidden)
     {
@@ -145,11 +150,11 @@ public class SurvivalHudUI : MonoBehaviour
         GameObject panel = UIFactory.CreateChild("SurvivalHud", safe);
 
         root = panel.GetComponent<RectTransform>();
-        root.anchorMin = Vector2.zero;
-        root.anchorMax = Vector2.zero;
-        root.pivot = Vector2.zero;
+        root.anchorMin = new Vector2(0f, 1f);
+        root.anchorMax = new Vector2(0f, 1f);
+        root.pivot = new Vector2(0f, 1f);
         root.sizeDelta = new Vector2(PanelWidth, PanelHeight);
-        root.anchoredPosition = new Vector2(Margin, Margin);
+        root.anchoredPosition = new Vector2(Margin, -Margin);
 
         float cursor = 0f;
 
@@ -174,7 +179,7 @@ public class SurvivalHudUI : MonoBehaviour
     }
 
     /// <summary>
-    /// 상태이상 줄이 쌓이는 자리. 체력 막대 **바로 위**에서 위로 자란다.
+    /// 상태이상 줄이 쌓이는 자리. 게이지 판 **바로 아래**에서 아래로 자란다.
     ///
     /// 【줄을 미리 만들어 두고 켰다 끈다.】 매 프레임 Destroy/Instantiate를
     /// 하면 상태가 자주 바뀌는 교전 중에 쓰레기가 쏟아진다.
@@ -183,12 +188,13 @@ public class SurvivalHudUI : MonoBehaviour
     {
         GameObject columnObject = UIFactory.CreateChild("Status", root);
 
+        // 판의 왼쪽 **아래** 모서리에 걸고, 위쪽을 기준점으로 삼아 아래로 자란다.
         statusColumn = columnObject.GetComponent<RectTransform>();
-        statusColumn.anchorMin = new Vector2(0f, 1f);
-        statusColumn.anchorMax = new Vector2(0f, 1f);
-        statusColumn.pivot = new Vector2(0f, 0f);
+        statusColumn.anchorMin = new Vector2(0f, 0f);
+        statusColumn.anchorMax = new Vector2(0f, 0f);
+        statusColumn.pivot = new Vector2(0f, 1f);
         statusColumn.sizeDelta = new Vector2(StatusWidth, 0f);
-        statusColumn.anchoredPosition = new Vector2(0f, 6f);
+        statusColumn.anchoredPosition = new Vector2(0f, -6f);
 
         for (int i = 0; i < MaxStatusRows; i++)
             statusRows.Add(BuildStatusRow(i));
@@ -199,13 +205,13 @@ public class SurvivalHudUI : MonoBehaviour
         GameObject rowObject = UIFactory.CreateChild($"Status_{index}", statusColumn);
 
         var rect = rowObject.GetComponent<RectTransform>();
-        rect.anchorMin = new Vector2(0f, 0f);
-        rect.anchorMax = new Vector2(1f, 0f);
-        rect.pivot = new Vector2(0.5f, 0f);
+        rect.anchorMin = new Vector2(0f, 1f);
+        rect.anchorMax = new Vector2(1f, 1f);
+        rect.pivot = new Vector2(0.5f, 1f);
         rect.offsetMin = Vector2.zero;
         rect.offsetMax = Vector2.zero;
         rect.sizeDelta = new Vector2(0f, StatusRowHeight);
-        rect.anchoredPosition = new Vector2(0f, index * (StatusRowHeight + StatusRowGap));
+        rect.anchoredPosition = new Vector2(0f, -index * (StatusRowHeight + StatusRowGap));
 
         var back = rowObject.AddComponent<Image>();
         back.color = UIPalette.Inset;

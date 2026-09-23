@@ -40,7 +40,14 @@ public class PlaytestPanelUI : MonoBehaviour
         ("현재 젬 빌드",  PlaytestActions.DumpBuild),
         ("냉각 6 → 동결", () => PlaytestActions.StackOnNearest(StatusEffectType.Chill, 6)),
         ("감전 6 → 마비", () => PlaytestActions.StackOnNearest(StatusEffectType.Shock, 6)),
-        ("중독 10 → 부식", () => PlaytestActions.StackOnNearest(StatusEffectType.Poison, 10))
+        ("중독 10 → 부식", () => PlaytestActions.StackOnNearest(StatusEffectType.Poison, 10)),
+
+        // 위 셋은 【가장 가까운 적】에게 건다. 화면 좌상단의 상태이상 줄은
+        // 【내】 상태를 보여 주므로, 적에게 걸어서는 줄이 뜨지 않는다.
+        // 그 줄을 확인하려면 아래 둘을 쓴다.
+        ("내게 상태이상 전부", PlaytestActions.StackAllOnSelf),
+        ("내게 냉각 6 → 동결", () => PlaytestActions.StackOnSelf(StatusEffectType.Chill, 6)),
+        ("내 상태이상 해제",  PlaytestActions.ClearStatusOnSelf)
     };
 
     private const int Columns = 3;
@@ -136,16 +143,20 @@ public class PlaytestPanelUI : MonoBehaviour
 
         toggle = image.gameObject;
 
-        // 【왼쪽 위.】 오른쪽 위는 장비·스킬·패시브가 쓴다.
-        // 개발용 버튼을 그 줄에 섞으면 출시 화면과 개발 화면이 같아 보인다.
-        // 반대편 구석에 두면 「이건 게임의 일부가 아니다」가 자리로 드러난다.
-        // 예전 자리(왼쪽 맨 아래)는 가방 화면의 소지 중량 카드와 겹쳤다.
+        // 【왼쪽 아래.】 오른쪽 위는 장비·스킬·패시브가, 왼쪽 위는 생존
+        // 게이지와 상태이상 줄이 쓴다. 개발용 버튼을 그 줄에 섞으면
+        // 출시 화면과 개발 화면이 같아 보인다. 남은 구석에 두면
+        // 「이건 게임의 일부가 아니다」가 자리로 드러난다.
+        //
+        // 가방을 열면 이 버튼은 가방 판(1000) 뒤로 숨는다. 이 캔버스가
+        // 900이기 때문이며, 의도한 것이다 — 지급이 끝나면 가방이 자동으로
+        // 열리므로 흐름에 지장이 없다.
         var rect = image.rectTransform;
-        rect.anchorMin = new Vector2(0f, 1f);
-        rect.anchorMax = new Vector2(0f, 1f);
-        rect.pivot = new Vector2(0f, 1f);
+        rect.anchorMin = new Vector2(0f, 0f);
+        rect.anchorMax = new Vector2(0f, 0f);
+        rect.pivot = new Vector2(0f, 0f);
         rect.sizeDelta = new Vector2(ButtonWidth, ButtonHeight);
-        rect.anchoredPosition = new Vector2(ButtonMargin, -ButtonMargin);
+        rect.anchoredPosition = new Vector2(ButtonMargin, ButtonMargin);
 
         var button = image.gameObject.AddComponent<Button>();
         button.targetGraphic = image;
