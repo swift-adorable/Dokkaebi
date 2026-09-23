@@ -1295,8 +1295,10 @@ public partial class InventoryScreenUI : MonoBehaviour
     /// <summary>
     /// 가방 칸의 사이드 메뉴. 【아이템 성격이 줄을 정한다.】
     ///
-    /// 「사용」은 아직 없다 — 소모품을 쓰는 시스템 자체가 8단계다.
-    /// 누르면 아무 일도 없는 버튼을 두는 것보다 없는 편이 낫다.
+    /// 「사용」은 **지금 쓸 수 있을 때만** 뜬다. 체력이 가득한데 구급상자
+    /// 줄이 보이면 눌러 보고 나서야 소용없다는 것을 알게 되고, 그 사이에
+    /// 한 개가 사라졌는지 아닌지도 알 수 없다. 강화·방호처럼 효과가 아직
+    /// 비어 있는 것도 여기서 걸러진다. (PlayerConsumables.CanUse)
     /// </summary>
     private void OpenBagMenu(RectTransform cell, ItemStack stack)
     {
@@ -1308,7 +1310,7 @@ public partial class InventoryScreenUI : MonoBehaviour
         var entries = ItemActionMenu.ForBagItem(
             definition,
             equip: equippable ? () => EquipFromMenu(stack) : null,
-            use: null,
+            use: PlayerConsumables.CanUse(definition) ? () => UseFromMenu(stack) : null,
             quick: definition.Kind == ItemKind.Consumable
                 ? () => OpenItemDetail(stack)
                 : null,
@@ -1316,6 +1318,21 @@ public partial class InventoryScreenUI : MonoBehaviour
             detail: () => OpenItemDetail(stack));
 
         ItemActionMenu.Open(cell, entries);
+    }
+
+    /// <summary>
+    /// 사이드 메뉴의 「사용」. 쓰고 나서 화면을 다시 그린다 —
+    /// 칸에서 하나가 줄었고 무게도 바뀌었다.
+    /// </summary>
+    private void UseFromMenu(ItemStack stack)
+    {
+        string result = PlayerConsumables.Use(stack);
+
+        PlayerInventory.EnsureInstance().RefreshCapacity();
+
+        Refresh();
+
+        ShowToast(result);
     }
 
     /// <summary>

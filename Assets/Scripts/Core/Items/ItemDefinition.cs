@@ -67,6 +67,9 @@ public class ItemDefinition : ScriptableObject
     [Tooltip("젬일 때 어떤 스킬인지. 다른 종류에서는 비워 둔다.")]
     [SerializeField] private SkillDefinition skill;
 
+    [Tooltip("소모품일 때 무엇을 하는지. 다른 종류에서는 비워 둔다.")]
+    [SerializeField] private ConsumableEffect consumable;
+
     public string Id => id;
     public string DisplayName => displayName;
     public string Description => description;
@@ -83,6 +86,17 @@ public class ItemDefinition : ScriptableObject
 
     /// <summary>젬이 가리키는 스킬 정의. 젬이 아니면 null.</summary>
     public SkillDefinition Skill => skill;
+
+    /// <summary>소모품 효과. 소모품이 아니면 null일 수 있다.</summary>
+    public ConsumableEffect Consumable => consumable;
+
+    /// <summary>
+    /// 쓸 수 있는 소모품인가 — 【종류만이 아니라 값까지 있어야 한다.】
+    /// 분류만 붙고 효과가 비어 있는 것(강화·방호)은 아직 쓸 수 없다.
+    /// </summary>
+    public bool IsUsable => kind == ItemKind.Consumable
+                            && consumable != null
+                            && !consumable.IsEmpty;
 
     /// <summary>
     /// 반출 불가.

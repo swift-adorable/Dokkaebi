@@ -45,7 +45,11 @@ public static class PlaytestCatalogBuilder
             Pick("Gems/gem_core_frost", "Gems/gem_core_laceration",
                  "Gems/gem_sup_deep_cuts", "Gems/gem_sup_far_shot"),
             One("Loot/scrap_metal"),
-            Folder("Loot").Where(i => i.StackMax > 1).OrderBy(i => i.Id).ToList());
+            Folder("Loot").Where(i => i.StackMax > 1).OrderBy(i => i.Id).ToList(),
+
+            // 쓸 수 있는 것만 담는다 — 효과가 빈 껍데기는 「사용」 줄이
+            // 뜨지 않으므로 지급해 봐야 확인할 것이 없다.
+            Folder("Consumables").Where(i => i.IsUsable).OrderBy(i => i.Id).ToList());
 
         EditorUtility.SetDirty(catalog);
 
@@ -56,7 +60,8 @@ public static class PlaytestCatalogBuilder
                   + $"티어1 {catalog.StarterKit.Count} · 티어6 {catalog.EndgameKit.Count} · "
                   + $"무기 {catalog.Weapons.Count} · 각인 {catalog.Imprints.Count} · "
                   + $"핵심 {catalog.CoreGems.Count} · 보조 {catalog.SupportGems.Count} · "
-                  + $"발동 {catalog.MetaGems.Count} · 전령 {catalog.HeraldGems.Count}");
+                  + $"발동 {catalog.MetaGems.Count} · 전령 {catalog.HeraldGems.Count} · "
+                  + $"소모품 {catalog.Consumables.Count}");
     }
 
     private static ItemDefinition One(string path)
