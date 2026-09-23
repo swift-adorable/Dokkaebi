@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 /// <summary>
@@ -80,6 +81,50 @@ public class ItemActionMenu : MonoBehaviour
             instance = null;
     }
 
+    /// <summary>
+    /// 메뉴 뒤를 덮는 판. 【누르면 메뉴를 닫고, 그 클릭을 뒤로 넘긴다.】
+    ///
+    /// 그냥 Button으로 두면 클릭이 여기서 끝난다. 메뉴가 떠 있는 동안
+    /// 옆 칸을 누르면 닫히기만 하고, 그 칸을 다시 눌러야 메뉴가 떴다.
+    /// 아이템을 하나씩 훑어보는 조작이 두 배로 느려진다.
+    ///
+    /// 닫은 뒤 같은 자리를 다시 레이캐스트해서, 밑에 있던 것에게
+    /// 클릭을 그대로 전달한다. 칸이었으면 그 칸의 메뉴가 바로 뜨고,
+    /// 빈 곳이었으면 아무 일도 일어나지 않는다 — 닫히기만 한다.
+    /// </summary>
+    private class PassThroughShade : MonoBehaviour, IPointerClickHandler
+    {
+        private static readonly List<RaycastResult> Results = new();
+
+        public void OnPointerClick(PointerEventData eventData)
+        {
+            // 먼저 닫는다. 이 판이 꺼져야 아래가 레이캐스트에 잡힌다.
+            Close();
+
+            if (EventSystem.current == null)
+                return;
+
+            Results.Clear();
+
+            EventSystem.current.RaycastAll(eventData, Results);
+
+            for (int i = 0; i < Results.Count; i++)
+            {
+                GameObject target = Results[i].gameObject;
+
+                if (target == null)
+                    continue;
+
+                // 맨 위에 있는 것 하나에만 넘긴다. 여럿에게 주면
+                // 겹쳐 있는 패널이 한 번의 터치로 둘 다 반응한다.
+                ExecuteEvents.ExecuteHierarchy(
+                    target, eventData, ExecuteEvents.pointerClickHandler);
+
+                return;
+            }
+        }
+    }
+
     private RectTransform safeArea;
 
     private void Build(Canvas canvas)
@@ -93,10 +138,10 @@ public class ItemActionMenu : MonoBehaviour
 
         shade = blocker.gameObject;
 
-        var shadeButton = shade.AddComponent<Button>();
-        shadeButton.targetGraphic = blocker;
-        shadeButton.transition = Selectable.Transition.None;
-        shadeButton.onClick.AddListener(Close);
+        // 【닫고 나서 그 클릭을 뒤로 넘긴다.】 Button으로 두면 클릭이 여기서
+        // 끝나 버려서, 메뉴가 떠 있는 동안 다른 칸을 눌러도 닫히기만 했다.
+        // 두 번 눌러야 옆 칸의 메뉴가 뜨는 것은 목록을 훑는 조작을 막는다.
+        shade.AddComponent<PassThroughShade>();
 
         // 【앵커를 한가운데에 둔다.】
         // ScreenPointToLocalPointInRectangle이 돌려주는 값은 **부모 한가운데를
