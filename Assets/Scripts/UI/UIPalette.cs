@@ -133,6 +133,9 @@ public static class UIPalette
             case StatusEffectType.WardLightning: return new Color(0.94f, 0.90f, 0.60f, 1f);
             case StatusEffectType.WardChaos:     return new Color(0.72f, 0.88f, 0.58f, 1f);
 
+            // 폭주 — 이롭지만 피를 깎는다. 초록 무리에서 튀도록 자홍으로 둔다.
+            case StatusEffectType.Frenzy:        return new Color(0.94f, 0.42f, 0.66f, 1f);
+
             default:                        return Text;
         }
     }

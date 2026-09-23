@@ -79,7 +79,23 @@ public class EnemyMovement : MonoBehaviour
         steering = GetComponent<IEnemySteering>();
 
         aggro = GetComponent<EnemyAggro>();
+
+        health = GetComponent<Health>();
     }
+
+    private Health health;
+
+    /// <summary>
+    /// 상태이상이 곱하는 속도. 행동 불능이면 0.
+    ///
+    /// 【6-K에서 상태이상을 다시 설계한 뒤로 이 곱셈이 없었다.】 냉각은 적을
+    /// 느리게 하지 못했고, 동결·마비는 적을 멈추지 못했다. 상태 판정과
+    /// 테스트는 전부 맞았는데 몸에 닿는 선 하나가 빠져 있었다.
+    /// </summary>
+    public float StatusScale => health != null ? health.Status.SpeedMultiplier : 1f;
+
+    /// <summary>동결·마비인가. 공격도 이 값을 본다.</summary>
+    public bool IsIncapacitated => health != null && health.Status.IsIncapacitated;
 
     private void Start()
     {
@@ -107,6 +123,13 @@ public class EnemyMovement : MonoBehaviour
 
         DistanceToTarget = toTarget.magnitude;
 
+        // 얼어붙은 적은 돌아서지도 않는다. 방향을 틀면 「멈춘 척」으로 보인다.
+        if (IsIncapacitated)
+        {
+            StopHorizontal();
+            return;
+        }
+
         FaceTowards(toTarget);
 
         if (IsHalted)
@@ -117,7 +140,8 @@ public class EnemyMovement : MonoBehaviour
 
         float speed = moveSpeed
                       * Mathf.Max(0f, BaseSpeedScale)
-                      * Mathf.Max(0f, SpeedScale);
+                      * Mathf.Max(0f, SpeedScale)
+                      * StatusScale;
         Vector3 direction;
 
         // 두뇌가 붙어 있으면 방향은 두뇌가 정한다. (EnemyBrain — 유지 거리·측면 이동·차례)

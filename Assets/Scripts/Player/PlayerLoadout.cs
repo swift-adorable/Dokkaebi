@@ -61,6 +61,13 @@ public class PlayerLoadout : MonoBehaviour
     {
         PlayerInventory inventory = PlayerInventory.EnsureInstance();
 
+        // 【확장제의 대가가 여기서 온다.】 한도는 RefreshCapacity가 계산하는데,
+        // 그것을 부르는 곳이 전부 화면(장착·줍기·버리기)이었다. 적재가 끝나도
+        // 아무도 다시 계산하지 않아 한도가 영영 ×1.5로 남았다 —
+        // 「끝나면 그대로 과중량」이라는 대가가 없었다.
+        // 가볍고 멱등이므로 주기 갱신에 함께 둔다.
+        inventory.RefreshCapacity();
+
         LoadoutSnapshot snapshot = LoadoutSnapshot.Create(
             inventory.Loadout, inventory.Encumbrance);
 
@@ -109,7 +116,12 @@ public class PlayerLoadout : MonoBehaviour
 
         // 최대 체력이 줄어드는 각인을 뺐을 때 회복시키지 않는다.
         // 상한만 되돌리고 현재 체력은 그대로 둔다 — 각인 교체가 회복 수단이 되면 안 된다.
-        if (health.Max != snapshot.MaxHealth)
-            health.SetMaxHealth(snapshot.MaxHealth);
+        //
+        // 폭주(흡수액)의 +10도 여기서 더한다. 끝나면 상한이 도로 줄고 넘친 체력은
+        // 잘린다 — 늘린 10을 회복약으로 채워 두고 끝난 뒤에도 가져가지 못한다.
+        int max = snapshot.MaxHealth + health.Status.MaxHealthBonus;
+
+        if (health.Max != max)
+            health.SetMaxHealth(max);
     }
 }

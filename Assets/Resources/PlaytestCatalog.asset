@@ -136,6 +136,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 3139cbbb43bcd4f0d9657cc111482330, type: 2}
   - {fileID: 11400000, guid: 3c837c4d52bb94bde9bf049e5661eaa1, type: 2}
   consumables:
+  - {fileID: 11400000, guid: ad4cf07cbadfa4f1abd32795d11b9385, type: 2}
   - {fileID: 11400000, guid: e9131b1fa56274e94b08579c35190961, type: 2}
   - {fileID: 11400000, guid: f9f4edea563b94a2cbc33e270fe46b20, type: 2}
   - {fileID: 11400000, guid: 24362eb1404af41b9831b661a53e79b0, type: 2}

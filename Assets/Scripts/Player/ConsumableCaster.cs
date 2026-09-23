@@ -13,6 +13,11 @@ using UnityEngine;
 /// 피격만 보면 쏘면서 걸어 다니며 회복할 수 있다. 둘 다 막아야
 /// 「안전한 자리를 먼저 찾는다」가 행동이 된다.
 ///
+/// 【피격은 「직접 맞은 것」만 센다.】 처음에는 체력이 줄었는지로 봤는데,
+/// 그러면 점화·중독 중에는 해제약조차 쓸 수 없다 — 도트가 매 초 끊는다.
+/// 폭주(흡수액)는 스스로 1초마다 피를 깎으므로 회복이 영영 불가능해진다.
+/// 덕코프의 타길라 약품은 「회복하면서 버틴다」가 전제다.
+///
 /// 중단되면 **아무것도 닳지 않는다.** 시간만 잃는다 —
 /// 실패에 아이템까지 잃으면 전투 중에는 아예 시도하지 않게 된다.
 /// </summary>
@@ -29,7 +34,8 @@ public class ConsumableCaster : MonoBehaviour
     private PlayerMovement movement;
     private Health health;
 
-    private int healthAtStart;
+    /// <summary>시전 중에 직접 맞았는가. Health.OnDirectHit가 켠다.</summary>
+    private bool hitDuringCast;
 
     /// <summary>끝났을 때(성공·중단 모두) 결과 문장을 받는 곳.</summary>
     private Action<string> report;
@@ -114,8 +120,14 @@ public class ConsumableCaster : MonoBehaviour
 
         movement = FindAnyObjectByType<PlayerMovement>(FindObjectsInactive.Exclude);
         health = FindPlayerHealth();
-        healthAtStart = health != null ? health.Current : 0;
+
+        hitDuringCast = false;
+
+        if (health != null)
+            health.OnDirectHit += MarkHit;
     }
+
+    private void MarkHit() => hitDuringCast = true;
 
     /// <summary>바깥에서 끊는다. 화면이 닫히거나 죽었을 때.</summary>
     public static void Cancel(string reason)
@@ -144,7 +156,7 @@ public class ConsumableCaster : MonoBehaviour
             return;
         }
 
-        if (health.Current < healthAtStart)
+        if (hitDuringCast)
         {
             Finish($"맞아서 중단했습니다 — {CastingName}은 그대로 남아 있습니다.");
             return;
@@ -161,14 +173,11 @@ public class ConsumableCaster : MonoBehaviour
         if (elapsed < duration)
             return;
 
-        ItemStack done = stack;
-
         // 먼저 비워야 Use 안에서 다시 들어오는 일이 없다.
-        ItemStack target = done;
+        ItemStack target = stack;
         Action<string> callback = report;
 
-        stack = null;
-        report = null;
+        Release();
 
         callback?.Invoke(PlayerConsumables.Use(target));
     }
@@ -177,10 +186,24 @@ public class ConsumableCaster : MonoBehaviour
     {
         Action<string> callback = report;
 
-        stack = null;
-        report = null;
+        Release();
 
         callback?.Invoke(message);
+    }
+
+    /// <summary>
+    /// 시전 상태를 비우고 구독을 푼다.
+    /// 【풀지 않으면】 다음 시전에서 두 번 구독되어, 끝난 시전의 콜백이
+    /// 새 시전의 피격 표시를 켠다.
+    /// </summary>
+    private void Release()
+    {
+        if (health != null)
+            health.OnDirectHit -= MarkHit;
+
+        stack = null;
+        report = null;
+        hitDuringCast = false;
     }
 
     private static Health FindPlayerHealth()

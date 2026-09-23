@@ -27,11 +27,29 @@ public class PlayerMovement : MonoBehaviour
     public float SpeedScale { get; set; } = 1f;
 
     /// <summary>배율이 적용된 실제 이동 속도.</summary>
-    public float EffectiveSpeed => moveSpeed * Mathf.Max(0f, SpeedScale);
+    /// <summary>
+    /// 실제 속도 = 기본 × 장비·생존(SpeedScale) × 상태이상.
+    ///
+    /// 【두 축을 나눠 둔다.】 SpeedScale은 PlayerLoadout이 0.25초마다
+    /// 장비·과중량·탈수를 합쳐 쓴다 — 드물게 바뀌는 것들이다.
+    /// 상태이상(냉각·가속·탈진·동결)은 초 단위로 바뀌므로 여기서 매 프레임
+    /// 읽는다. 한 축에 섞으면 냉각이 0.25초 늦게 풀리거나, 반대로 장비
+    /// 합산을 매 프레임 하게 된다.
+    ///
+    /// 이 곱셈이 없던 동안 냉각의 감속도 동결의 정지도, 8-C의 가속·탈진도
+    /// 플레이어에게 전혀 닿지 않았다. 상태 줄에만 떠 있었다.
+    /// </summary>
+    public float EffectiveSpeed => moveSpeed * Mathf.Max(0f, SpeedScale) * StatusScale;
+
+    /// <summary>상태이상이 곱하는 속도. 행동 불능이면 0이다.</summary>
+    public float StatusScale => health != null ? health.Status.SpeedMultiplier : 1f;
+
+    private Health health;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
+        health = GetComponent<Health>();
     }
 
     /// <summary>입력을 갱신한다. 실제 물리 적용은 FixedUpdate에서 일어난다.</summary>
