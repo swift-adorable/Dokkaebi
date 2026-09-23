@@ -16,7 +16,7 @@ public class PlayerInventory : Singleton<PlayerInventory>
     /// 가방을 착용하지 않았을 때의 기본 칸.
     ///
     /// 【20이다.】 이전 12는 너무 작았다 —
-    /// 덕코프는 벙커에서 장비를 갖춰 출격하므로 맨몸 상태가 사실상 없지만,
+    /// 덕코프는 벙커에서 장비를 갖춰 파밍하므로 맨몸 상태가 사실상 없지만,
     /// Blob은 벙커가 8단계라 맨몸이 곧 초반 경험이다.
     /// 가장 작은 가방(+8)을 끼기 전에도 한 판은 돌 수 있어야 한다.
     /// (docs/research/duckov/08_전투_실측과_교전.md 6절)
@@ -98,17 +98,17 @@ public class PlayerInventory : Singleton<PlayerInventory>
             + modifiers.Get(EquipmentStatType.MaxCarryWeight)
             + passiveWeight;
 
-        // 【확장제는 맨 마지막에 곱한다.】 장비·패시브를 다 더한 뒤라야
+        // 【중량 주사약은 맨 마지막에 곱한다.】 장비·패시브를 다 더한 뒤라야
         // 「지금 내 한도의 +50%」가 된다. 기본값에만 곱하면 가방을 좋은
-        // 것으로 바꿀수록 확장제가 초라해진다.
+        // 것으로 바꿀수록 중량 주사약이 초라해진다.
         Bag.WeightLimit = limit * CarryWeightMultiplier();
     }
 
     /// <summary>
-    /// 상태이상이 곱하는 소지 중량 배율. 지금은 적재(확장제)뿐이다.
+    /// 상태이상이 곱하는 소지 중량 배율. 지금은 소지 중량 증가(중량 주사약)뿐이다.
     ///
     /// 【상태가 끝날 때 다시 불러야 한다.】 배율이 사라지면 한도가 줄어
-    /// 과중량이 될 수 있다 — 그것이 확장제의 대가다. PlayerSurvival이
+    /// 과중량이 될 수 있다 — 그것이 중량 주사약의 대가다. PlayerSurvival이
     /// 탈수·허기가 바뀔 때 Refresh를 부르는 것과 같은 자리다.
     /// </summary>
     private static float CarryWeightMultiplier()

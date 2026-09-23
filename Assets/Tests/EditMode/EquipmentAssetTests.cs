@@ -484,7 +484,7 @@ namespace Blob.Tests
             modifiers.Add(imprint);
 
             // 면역은 【걸리는 상태】를 막는다. 위험 상태(동결)가 아니라 원본(냉각)이다.
-            // 동결만 막으면 "내한 장비를 꼈는데 여전히 느려진다"가 되어 플레이어가 혼란스럽다.
+            // 동결만 막으면 "냉기 저항 장비를 꼈는데 여전히 느려진다"가 되어 플레이어가 혼란스럽다.
             Assert.IsTrue(modifiers.IsImmuneTo(StatusEffectType.Ignite), "점화 면역");
             Assert.IsTrue(modifiers.IsImmuneTo(StatusEffectType.Chill), "냉각 면역");
             Assert.IsTrue(modifiers.IsImmuneTo(StatusEffectType.Shock), "감전 면역");

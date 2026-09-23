@@ -18,7 +18,7 @@ MonoBehaviour:
   branch: 0
   effect: 1
   value: 3
-  requiredAwakeningLevel: 4
+  requiredLevel: 4
   cost: 1800
   materials:
   - item: {fileID: 11400000, guid: 2cea37fa128934109856e90e89807614, type: 2}

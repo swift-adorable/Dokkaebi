@@ -127,9 +127,9 @@ public static class RaidTraitTable
             case RaidTrait.Dense:        return "밀집 서식";
             case RaidTrait.Scattered:    return "산개 순찰";
             case RaidTrait.Hardened:     return "경화 외피";
-            case RaidTrait.FireProof:    return "내화 피부";
+            case RaidTrait.FireProof:    return "화염 저항 피부";
             case RaidTrait.ColdAdapted:  return "저온 적응";
-            case RaidTrait.Insulated:    return "절연 피막";
+            case RaidTrait.Insulated:    return "전기 저항 피막";
             case RaidTrait.Antibody:     return "면역 항체";
             case RaidTrait.Regenerating: return "재생 조직";
             case RaidTrait.Congealed:    return "응고 혈액";
@@ -138,7 +138,7 @@ public static class RaidTraitTable
         }
     }
 
-    /// <summary>출격 전 화면에 적을 한 줄. 「무엇이 달라지는가」만 적는다.</summary>
+    /// <summary>파밍 전 화면에 적을 한 줄. 「무엇이 달라지는가」만 적는다.</summary>
     public static string Describe(RaidTrait trait)
     {
         switch (trait)

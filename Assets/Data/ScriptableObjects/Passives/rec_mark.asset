@@ -18,7 +18,7 @@ MonoBehaviour:
   branch: 2
   effect: 22
   value: 1
-  requiredAwakeningLevel: 6
+  requiredLevel: 6
   cost: 2200
   materials: []
   prerequisites:

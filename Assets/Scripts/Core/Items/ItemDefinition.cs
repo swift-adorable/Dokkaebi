@@ -54,7 +54,7 @@ public class ItemDefinition : ScriptableObject
     [SerializeField] private int baseValue = 0;
 
     [Header("Tags")]
-    [Tooltip("반출 불가. 출격 안에서만 쓰이고 철수해도 남지 않는다.")]
+    [Tooltip("반출 불가. 파밍 안에서만 쓰이고 철수해도 남지 않는다.")]
     [SerializeField] private bool noExtract = false;
 
     [Tooltip("등록 불가. 등록대에 넣을 수 없어 매번 들고 가야 한다. (최고 등급 열쇠)")]
@@ -92,7 +92,7 @@ public class ItemDefinition : ScriptableObject
 
     /// <summary>
     /// 쓸 수 있는 소모품인가 — 【종류만이 아니라 값까지 있어야 한다.】
-    /// 분류만 붙고 효과가 비어 있는 것(강화·방호)은 아직 쓸 수 없다.
+    /// 분류만 붙고 효과가 비어 있는 것(강화·저항)은 아직 쓸 수 없다.
     /// </summary>
     public bool IsUsable => kind == ItemKind.Consumable
                             && consumable != null
@@ -101,7 +101,7 @@ public class ItemDefinition : ScriptableObject
     /// <summary>
     /// 반출 불가.
     ///
-    /// 「출격 안에서만 사는 축」을 만드는 태그다. 덕코프의 「강화」가 그 자리인데
+    /// 「파밍 안에서만 사는 축」을 만드는 태그다. 덕코프의 「강화」가 그 자리인데
     /// Blob의 젬은 반출 가능하므로 이 축이 비어 있었다.
     /// 지금은 태그만 두고, 쓰는 아이템은 7단계 이후에 만든다.
     /// </summary>
@@ -131,7 +131,7 @@ public class ItemDefinition : ScriptableObject
     /// 젬은 "챙겨 오는 물건"이 아니라 빌드 그 자체다. 칸을 두고 전리품과
     /// 경쟁시키면 플레이어가 내리는 결정은 "화력이냐 전리품이냐"가 아니라
     /// "쓰지도 않을 젬을 버려야 하나"가 된다. 소켓 자리 수가 이미 젬의
-    /// 상한이고, 그 상한은 각성 레벨이 정한다 — 가방이 두 번 제한할 이유가 없다.
+    /// 상한이고, 그 상한은 레벨이 정한다 — 가방이 두 번 제한할 이유가 없다.
     /// 반대 방향도 막는다. 가방이 꽉 차 있다고 젬을 못 빼면,
     /// 전리품을 버려야 빌드를 바꿀 수 있게 된다.
     ///

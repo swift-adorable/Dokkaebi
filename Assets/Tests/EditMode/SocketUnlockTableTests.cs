@@ -3,7 +3,7 @@ using NUnit.Framework;
 namespace Blob.Tests
 {
     /// <summary>
-    /// 각성 레벨 → 소켓 개방 표가 문서(Skill_System.md 12-1절)와 일치하는지 고정한다.
+    /// 레벨 → 소켓 개방 표가 문서(Skill_System.md 12-1절)와 일치하는지 고정한다.
     ///
     /// 이 표는 「레벨업의 보상이 무엇인가」 그 자체다.
     /// 선택창을 없앤 뒤 레벨업을 계속 원하게 만드는 유일한 동력이므로
@@ -26,8 +26,8 @@ namespace Blob.Tests
         [Test]
         public void 레벨_0_이하도_레벨_1로_취급한다()
         {
-            // 각성 레벨이 0이 되는 경로는 없어야 하지만, 생겨도 아무것도 못 끼우는
-            // 상태로 출격이 시작되면 안 된다.
+            // 레벨이 0이 되는 경로는 없어야 하지만, 생겨도 아무것도 못 끼우는
+            // 상태로 파밍이 시작되면 안 된다.
             Assert.AreEqual(1, SocketUnlockTable.Evaluate(0).CoreSlots);
             Assert.AreEqual(1, SocketUnlockTable.Evaluate(-5).CoreSlots);
         }

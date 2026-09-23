@@ -21,8 +21,8 @@ public enum EnemyRarity
 /// 수치 출처는 docs/Blob_Combat_Baseline.md 5절 「등급 배율」이다.
 ///
 /// 【체력은 ×15까지 오르는데 피해는 ×1.8까지만 오른다. 의도된 비대칭이다.】
-/// 체력 배율은 출격 안에서 젬으로 대응하고,
-/// 피해 배율은 출격 사이에 장비로 대응한다.
+/// 체력 배율은 파밍 안에서 젬으로 대응하고,
+/// 피해 배율은 파밍 사이에 장비로 대응한다.
 /// 보스는 아프게가 아니라 단단하게 위협한다.
 /// </summary>
 public static class EnemyRarityTable

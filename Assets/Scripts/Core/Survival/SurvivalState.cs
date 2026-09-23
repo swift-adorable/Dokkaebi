@@ -193,7 +193,7 @@ public class SurvivalState
         energy = Mathf.Clamp(energy - Mathf.Max(0f, energyAmount), 0f, maxEnergy);
     }
 
-    /// <summary>출격할 때 가득 채운다. 판이 시작부터 불리하면 안 된다.</summary>
+    /// <summary>파밍할 때 가득 채운다. 판이 시작부터 불리하면 안 된다.</summary>
     public void Refill()
     {
         water = maxWater;

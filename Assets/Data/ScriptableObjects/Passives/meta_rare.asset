@@ -19,7 +19,7 @@ MonoBehaviour:
   branch: 1
   effect: 13
   value: 12
-  requiredAwakeningLevel: 11
+  requiredLevel: 11
   cost: 6800
   materials:
   - item: {fileID: 11400000, guid: abf245023c6dc4773a272254e9082cc0, type: 2}

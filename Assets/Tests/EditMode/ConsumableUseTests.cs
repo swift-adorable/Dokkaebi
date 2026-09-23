@@ -202,7 +202,7 @@ namespace Blob.Tests
         [Test]
         public void 효과가_비어_있으면_쓸_수_없다()
         {
-            // 강화·방호는 분류만 있고 값이 없다 — 담을 축이 아직 없기 때문이다.
+            // 강화·저항은 분류만 있고 값이 없다 — 담을 축이 아직 없기 때문이다.
             ItemDefinition stim = Create("stim", ConsumableCategory.Boost);
 
             Assert.AreEqual(ConsumableError.NoEffect,

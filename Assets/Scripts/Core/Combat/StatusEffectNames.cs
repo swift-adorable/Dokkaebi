@@ -24,14 +24,14 @@ public static class StatusEffectNames
             case StatusEffectType.Paralyze: return "마비";
             case StatusEffectType.Corrode:  return "부식";
             case StatusEffectType.Haste:    return "가속";
-            case StatusEffectType.Bolster:  return "보강";
-            case StatusEffectType.Regen:    return "재생";
-            case StatusEffectType.Fatigue:  return "탈진";
+            case StatusEffectType.Bolster:  return "강화";
+            case StatusEffectType.Regen:    return "회복";
+            case StatusEffectType.Fatigue:  return "쇠약";
             case StatusEffectType.Overload: return "적재";
-            case StatusEffectType.WardFire: return "내화";
-            case StatusEffectType.WardCold: return "내한";
-            case StatusEffectType.WardLightning: return "절연";
-            case StatusEffectType.WardChaos:     return "내독";
+            case StatusEffectType.WardFire: return "화염 저항";
+            case StatusEffectType.WardCold: return "냉기 저항";
+            case StatusEffectType.WardLightning: return "전기 저항";
+            case StatusEffectType.WardChaos:     return "독 저항";
             case StatusEffectType.Frenzy:        return "폭주";
             default:                        return "—";
         }

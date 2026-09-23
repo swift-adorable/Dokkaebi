@@ -183,7 +183,7 @@ namespace Blob.Tests
         public void 체력_배율이_피해_배율보다_훨씬_가파르다()
         {
             // 【의도된 비대칭이다.】 보스는 아프게가 아니라 단단하게 위협한다.
-            // 이 관계가 뒤집히면 「출격 안에서 젬 / 출격 사이에 장비」 분업이 무너진다.
+            // 이 관계가 뒤집히면 「파밍 안에서 젬 / 파밍 사이에 장비」 분업이 무너진다.
             float health = EnemyRarityTable.HealthMultiplier(EnemyRarity.Unique);
             float damage = EnemyRarityTable.DamageMultiplier(EnemyRarity.Unique);
 
@@ -359,7 +359,7 @@ namespace Blob.Tests
         public void 저항은_곱해지지_않고_가장_낮은_것_하나만_남는다()
         {
             // 정착체는 물리 0.66. 여기에 「경화」(물리 0.5)를 얹는다.
-            // 곱하면 0.33 — 물리 빌드는 출격을 버려야 한다. 그래서 곱하지 않는다.
+            // 곱하면 0.33 — 물리 빌드는 파밍을 버려야 한다. 그래서 곱하지 않는다.
             EnemyProfile profile = EnemyProfile.Build(
                 EnemyArchetype.Settled, EnemyRarity.Magic, new[] { EnemyAffix.Hardened });
 

@@ -46,24 +46,31 @@ public static class SaveStore
     public static string ToJson(SaveData data)
         => JsonUtility.ToJson(data, prettyPrint: true);
 
+    /// <summary>레벨을 담았던 옛 키들. 판 1·2 → 판 3 순서.</summary>
+    private static readonly string[] OldLevelKeys = { "\"accountLevel\"", "\"awakeningLevel\"" };
+
     /// <summary>
     /// 옛 판의 키 이름을 새 이름으로 바꾼다. JsonUtility가 읽기 전에 한다.
     ///
     /// 【문자열로 바꾸는 이유】 옛 키를 받을 필드를 SaveData에 남겨 두면 새로
     /// 저장할 때마다 쓸모없는 키가 같이 써지고, 두 이름이 한 파일에 공존한다.
-    /// 판 1·2의 "accountLevel"은 판 3의 "awakeningLevel"이다 (결정 2-33).
-    /// 새 키가 이미 있으면 건드리지 않는다.
+    /// 판 1·2의 "accountLevel"과 판 3의 "awakeningLevel"은 판 4의 "level"이다
+    /// (결정 2-33, 용어 통일 2026-09-23). 새 키가 이미 있으면 건드리지 않는다.
     /// </summary>
     public static string Migrate(string json)
     {
         if (string.IsNullOrEmpty(json))
             return json;
 
-        const string oldKey = "\"accountLevel\"";
-        const string newKey = "\"awakeningLevel\"";
+        const string newKey = "\"level\"";
+        if (json.Contains(newKey))
+            return json;
 
-        if (json.Contains(oldKey) && !json.Contains(newKey))
-            json = json.Replace(oldKey, newKey);
+        foreach (var oldKey in OldLevelKeys)
+        {
+            if (json.Contains(oldKey))
+                return json.Replace(oldKey, newKey);
+        }
 
         return json;
     }

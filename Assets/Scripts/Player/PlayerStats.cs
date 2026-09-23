@@ -2,10 +2,10 @@ using System;
 using UnityEngine;
 
 /// <summary>
-/// 【각성 레벨 — 이 게임의 유일한 레벨.】 (결정 2-33)
+/// 【레벨 — 이 게임의 유일한 레벨.】 (결정 2-33)
 ///
-/// 예전에는 레벨이 둘이었다 — 각성(출격마다 초기화, 소켓을 연다)과
-/// 계정(영구, 패시브를 연다). 계정 레벨은 오르는 길이 없었고, 각성 레벨은
+/// 예전에는 레벨이 둘이었다 — 각성(파밍마다 초기화, 소켓을 연다)과
+/// 계정(영구, 패시브를 연다). 계정 레벨은 오르는 길이 없었고, 레벨은
 /// 문서와 달리 실제로는 죽어도 초기화되지 않았다. 이제 하나로 합친다.
 ///
 /// 【영구다. 죽어도 잃지 않는다.】 덕코프의 캐릭터 레벨도 하나이고 스킬
@@ -33,14 +33,17 @@ public class PlayerStats : Singleton<PlayerStats>
     }
 
     [Header("Level")]
-    [Tooltip("레벨 1에서 2로 가는 데 필요한 경험치")]
-    [SerializeField] private int baseRequiredXP = 10;
+    // 【레벨 L → L+1 필요 경험치 = 계수 × L².】 (결정 2-34)
+    // 옛 곡선(10 + 5×(L−1))은 레벨이 파밍마다 초기화되던 때의 것이라, 영구 레벨로는
+    // 보통 플레이어가 파밍 5번 만에 소켓을 다 연다. 시뮬레이션 142개 곡선 × 5개
+    // 플레이어 유형으로 골랐다 — docs/Blob_Progression_System.md 3절.
+    // 필드 이름을 바꾼 이유: 씬에 저장된 옛 값(10 · 5)이 새 곡선에 섞이지 않게.
+    [Tooltip("레벨 L에서 L+1로 가는 데 필요한 경험치 = 이 값 × L²")]
+    [Min(1)]
+    [SerializeField] private int experienceCoefficient = 40;
 
-    [Tooltip("레벨업할 때마다 필요 경험치에 더해지는 값")]
-    [SerializeField] private int requiredXPGrowth = 5;
-
-    /// <summary>각성 레벨. 이 게임의 유일한 레벨이다 (결정 2-33).</summary>
-    public int AwakeningLevel { get; private set; } = 1;
+    /// <summary>레벨. 이 게임의 유일한 레벨이다 (결정 2-33).</summary>
+    public int Level { get; private set; } = 1;
 
     public int CurrentXP { get; private set; }
 
@@ -48,9 +51,8 @@ public class PlayerStats : Singleton<PlayerStats>
 
     protected override void OnSingletonAwake()
     {
-        // 0 이하로 설정되면 AddXP의 while 루프가 무한 루프가 되므로 방어한다.
-        RequiredXP = Mathf.Max(1, baseRequiredXP);
-        requiredXPGrowth = Mathf.Max(0, requiredXPGrowth);
+        // 0 이하로 설정되면 AddXP의 while 루프가 무한 루프가 되므로 RequiredXPAt이 1 이상을 보장한다.
+        RequiredXP = RequiredXPAt(Level);
     }
 
     public void AddXP(int amount)
@@ -69,26 +71,30 @@ public class PlayerStats : Singleton<PlayerStats>
         while (RequiredXP > 0 && CurrentXP >= RequiredXP)
         {
             CurrentXP -= RequiredXP;
-            AwakeningLevel++;
-            RequiredXP += requiredXPGrowth;
+            Level++;
+            RequiredXP = RequiredXPAt(Level);
             levelUpCount++;
         }
 
-        GameLogger.Log($"[PlayerStats] XP {CurrentXP}/{RequiredXP} (Lv.{AwakeningLevel})");
+        GameLogger.Log($"[PlayerStats] XP {CurrentXP}/{RequiredXP} (Lv.{Level})");
 
         OnChanged?.Invoke();
 
         if (levelUpCount <= 0)
             return;
 
-        GameLogger.Log($"[PlayerStats] LEVEL UP x{levelUpCount} -> Lv.{AwakeningLevel}");
+        GameLogger.Log($"[PlayerStats] LEVEL UP x{levelUpCount} -> Lv.{Level}");
 
         SkillManager.EnsureInstance().EnqueueLevelUp(levelUpCount);
     }
 
     /// <summary>이 레벨에서 다음 레벨까지 필요한 경험치.</summary>
     public int RequiredXPAt(int level)
-        => Mathf.Max(1, baseRequiredXP) + Mathf.Max(0, requiredXPGrowth) * (Mathf.Max(1, level) - 1);
+    {
+        long l = Mathf.Max(1, level);
+        long required = (long)Mathf.Max(1, experienceCoefficient) * l * l;
+        return (int)Math.Min(required, int.MaxValue);
+    }
 
     /// <summary>
     /// 세이브에서 되살린다. 【레벨업 알림을 내지 않는다.】
@@ -96,8 +102,8 @@ public class PlayerStats : Singleton<PlayerStats>
     /// </summary>
     public void Restore(int level, int experience)
     {
-        AwakeningLevel = Mathf.Max(1, level);
-        RequiredXP = RequiredXPAt(AwakeningLevel);
+        Level = Mathf.Max(1, level);
+        RequiredXP = RequiredXPAt(Level);
 
         // 필요량 이상이 저장돼 있으면 그대로 두면 다음 AddXP에서 레벨이 한꺼번에
         // 튄다. 곡선을 바꾼 뒤 옛 세이브를 열면 생긴다.

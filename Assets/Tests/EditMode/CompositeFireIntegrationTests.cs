@@ -17,7 +17,7 @@ namespace Blob.Tests
         private static SocketedBuild FullBuild()
         {
             var build = new SocketedBuild();
-            build.SetAwakeningLevel(SocketUnlockTable.FullyOpenLevel);
+            build.SetLevel(SocketUnlockTable.FullyOpenLevel);
 
             return build;
         }

@@ -94,7 +94,7 @@ public class BlobController : MonoBehaviour
 
         int lost = PlayerInventory.EnsureInstance().DropOnDeath();
 
-        // 각성 레벨과 소켓은 출격 안의 것이다. 남은 젬은 이미 위에서 사라졌다.
+        // 레벨과 소켓은 파밍 안의 것이다. 남은 젬은 이미 위에서 사라졌다.
         if (SkillManager.HasInstance)
             SkillManager.Instance.ResetRun();
 
@@ -104,7 +104,7 @@ public class BlobController : MonoBehaviour
 
         GameLogger.Log($"[BlobController] 가방 {lost}점을 잃었습니다. 각인은 남습니다.");
 
-        // 【출격이 끝났다 — 여기가 저장 지점이다.】 덕코프도 출격 전과 후에만
+        // 【파밍이 끝났다 — 여기가 저장 지점이다.】 덕코프도 파밍 전과 후에만
         // 저장한다. 가방은 이미 떨어뜨렸으므로 남는 것(계정 · 크레딧 · 패시브 ·
         // 도감 · 각인)만 디스크에 간다.
         SaveManager.Commit("사망");

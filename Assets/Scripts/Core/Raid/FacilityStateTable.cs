@@ -139,7 +139,7 @@ public static class FacilityStateTable
     }
 
     /// <summary>
-    /// 출격 전 화면에 적을 두 줄 — 손해와 기회.
+    /// 파밍 전 화면에 적을 두 줄 — 손해와 기회.
     /// 【들어가서 알게 하지 않는다.】(문서 5절)
     /// </summary>
     public static string Describe(FacilityState state)

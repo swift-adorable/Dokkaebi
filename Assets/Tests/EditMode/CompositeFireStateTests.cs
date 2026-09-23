@@ -62,7 +62,7 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 출격_도중_장착_Core가_늘어도_안전하다()
+        public void 파밍_도중_장착_Core가_늘어도_안전하다()
         {
             // 예외 상황: 1개로 쏘다가 레벨업으로 2번째 칸 핵심 젬을 얻는 경우.
             var state = new CompositeFireState();
@@ -75,7 +75,7 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 출격_도중_장착_Core가_줄어도_범위를_벗어나지_않는다()
+        public void 파밍_도중_장착_Core가_줄어도_범위를_벗어나지_않는다()
         {
             var state = new CompositeFireState();
 

@@ -127,7 +127,7 @@ namespace Blob.Tests
         public void 맨몸_기본치가_덕코프_기준을_지킨다()
         {
             Assert.GreaterOrEqual(PlayerInventory.BaseSlots, 20,
-                "맨몸 20칸 미만은 첫 출격에서 아무것도 못 줍습니다. " +
+                "맨몸 20칸 미만은 첫 파밍에서 아무것도 못 줍습니다. " +
                 "(덕코프 기본 가방 기준)");
 
             Assert.GreaterOrEqual(PlayerInventory.BaseWeightLimit, 30f,

@@ -6,18 +6,18 @@ using UnityEngine.SceneManagement;
 /// 세이브를 매니저들에 나눠 주고, 매니저들에서 모은다. (로드맵 8-F)
 ///
 /// 【언제 저장하는가 — 덕코프를 따른다.】
-/// 덕코프는 출격 **전과 후에만** 자동 저장한다. 출격 중에 끄면 그 출격에서
+/// 덕코프는 파밍 **전과 후에만** 자동 저장한다. 파밍 중에 끄면 그 파밍에서
 /// 얻은 것도 잃은 것도 없다 — 롤백이다. [커뮤니티 확인]
 ///
 ///   덕코프        Blob (지금)
-///   출격 전       게임 시작        ← 읽기만 한다. 디스크와 달라진 것이 없다
-///   출격 후       사망             ← 저장한다 (BlobController.HandleDied)
+///   파밍 전       게임 시작        ← 읽기만 한다. 디스크와 달라진 것이 없다
+///   파밍 후       사망             ← 저장한다 (BlobController.HandleDied)
 ///                 철수             ← 아직 없다 (9단계)
 ///   벙커에서의 일  —               ← 벙커가 아직 없다 (8단계 뒤쪽)
 ///
-/// 【출격 중에는 저장하지 않는다.】 앱이 백그라운드로 가도, 강제로 꺼져도
+/// 【파밍 중에는 저장하지 않는다.】 앱이 백그라운드로 가도, 강제로 꺼져도
 /// 마찬가지다. 그렇게 해야 「꺼 버리면 죽음을 무를 수 있다」가 생기지 않는다 —
-/// 끄면 그 출격의 크레딧도 같이 사라진다. 덕코프와 같은 값을 치른다.
+/// 끄면 그 파밍의 크레딧도 같이 사라진다. 덕코프와 같은 값을 치른다.
 ///
 /// MonoBehaviour가 아니다. 부트스트랩(RuntimeInitializeOnLoadMethod)으로
 /// 씬 오브젝트의 Awake 뒤, Start 앞에 한 번 불린다 — SkillManager.Start가
@@ -97,7 +97,7 @@ public static class SaveManager
 
         Apply(data);
 
-        GameLogger.Log($"[Save] 불러옴 — 각성 Lv.{data.awakeningLevel} · 크레딧 {data.credits} · "
+        GameLogger.Log($"[Save] 불러옴 — Lv.{data.level} · 크레딧 {data.credits} · "
                        + $"패시브 {data.learnedPassives.Count} · 도감 {data.codex.Count} · "
                        + $"각인 {CountFilled(data.imprints)}");
 
@@ -105,7 +105,7 @@ public static class SaveManager
     }
 
     /// <summary>
-    /// 지금 상태를 저장한다. 【출격 경계에서만 부른다.】
+    /// 지금 상태를 저장한다. 【파밍 경계에서만 부른다.】
     /// </summary>
     /// <param name="reason">로그에 남길 이유. 「사망」 「철수」 같은 것.</param>
     public static bool Commit(string reason)
@@ -123,7 +123,7 @@ public static class SaveManager
 
         SaveStore.Write(SavePath, data);
 
-        GameLogger.Log($"[Save] 저장 ({reason}) — 각성 Lv.{data.awakeningLevel} · 크레딧 {data.credits}");
+        GameLogger.Log($"[Save] 저장 ({reason}) — Lv.{data.level} · 크레딧 {data.credits}");
 
         return true;
     }
@@ -145,7 +145,7 @@ public static class SaveManager
 
         if (PlayerStats.HasInstance)
         {
-            data.awakeningLevel = PlayerStats.Instance.AwakeningLevel;
+            data.level = PlayerStats.Instance.Level;
             data.experience = PlayerStats.Instance.CurrentXP;
         }
 
@@ -195,7 +195,7 @@ public static class SaveManager
         if (data == null)
             return;
 
-        PlayerStats.EnsureInstance().Restore(data.awakeningLevel, data.experience);
+        PlayerStats.EnsureInstance().Restore(data.level, data.experience);
 
         PassiveManager passive = PassiveManager.EnsureInstance();
 

@@ -32,7 +32,7 @@ public struct CompositeFireState
     /// 이번 발사에 부여할 칸 속성의 인덱스를 돌려주고 커서를 넘긴다.
     /// 칸 계열 핵심 젬이 없으면 -1.
     ///
-    /// ailmentCount가 출격 도중 바뀌어도(2번째 칸 핵심 젬 획득) 안전하도록
+    /// ailmentCount가 파밍 도중 바뀌어도(2번째 칸 핵심 젬 획득) 안전하도록
     /// 매 호출마다 나머지 연산으로 보정한다.
     /// </summary>
     public int NextAilmentIndex(int ailmentCount)
@@ -50,7 +50,7 @@ public struct CompositeFireState
         return index;
     }
 
-    /// <summary>다음 발사가 첫 번째 상태부터 시작하도록 되돌린다. 출격 시작 시 호출한다.</summary>
+    /// <summary>다음 발사가 첫 번째 상태부터 시작하도록 되돌린다. 파밍 시작 시 호출한다.</summary>
     public void Reset()
     {
         ailmentCursor = 0;

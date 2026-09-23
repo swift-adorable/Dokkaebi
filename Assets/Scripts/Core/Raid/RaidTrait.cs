@@ -10,7 +10,7 @@
 ///    「경화 외피」 레이드(물리 ×0.5) + 「경화」 적(물리 ×0.5) → ×0.5다. ×0.25가 아니다.
 ///    곱연산이면 원천 두 개만으로 "이 속성으로는 못 잡는다"가 되고,
 ///    상태이상 피해에도 상성이 곱해지므로 방어도 무시라는 우회로까지 막힌다.
-///    철수 루팅에서 그건 출격을 버리라는 뜻이다. (문서 9절)
+///    철수 루팅에서 그건 파밍을 버리라는 뜻이다. (문서 9절)
 /// </summary>
 public enum RaidTrait
 {
@@ -32,13 +32,13 @@ public enum RaidTrait
     /// <summary>경화 외피 — 물리 ×0.5. 답은 속성 전환.</summary>
     Hardened = 3,
 
-    /// <summary>내화 피부 — 화염 ×0.5.</summary>
+    /// <summary>화염 저항 피부 — 화염 ×0.5.</summary>
     FireProof = 4,
 
     /// <summary>저온 적응 — 냉기 ×0.5.</summary>
     ColdAdapted = 5,
 
-    /// <summary>절연 피막 — 번개 ×0.5.</summary>
+    /// <summary>전기 저항 피막 — 번개 ×0.5.</summary>
     Insulated = 6,
 
     /// <summary>면역 항체 — 카오스 ×0.5.</summary>

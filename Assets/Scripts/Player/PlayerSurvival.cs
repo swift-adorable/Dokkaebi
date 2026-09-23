@@ -140,7 +140,7 @@ public class PlayerSurvival : MonoBehaviour
         OnChanged?.Invoke();
     }
 
-    /// <summary>출격할 때 가득 채운다. 판이 시작부터 불리하면 안 된다.</summary>
+    /// <summary>파밍할 때 가득 채운다. 판이 시작부터 불리하면 안 된다.</summary>
     public void Refill()
     {
         state.Refill();

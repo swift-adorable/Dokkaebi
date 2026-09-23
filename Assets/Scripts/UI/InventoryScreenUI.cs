@@ -176,7 +176,7 @@ public partial class InventoryScreenUI : MonoBehaviour
 
     private Text creditLabel;
 
-    /// <summary>위 단의 머리글 — 「장비」 또는 「각성 Lv.n」.</summary>
+    /// <summary>위 단의 머리글 — 「장비」 또는 「Lv.n」.</summary>
     private Text equipTitleLabel;
 
     /// <summary>머리글 오른쪽의 보조 정보 — 「다음 개방 Lv.3 (소켓 1)」.</summary>
@@ -455,7 +455,7 @@ public partial class InventoryScreenUI : MonoBehaviour
     // 장비 탭과 스킬 탭이 【같은 네 단】을 쓴다.
     //
     //   장비 : 「장비」      · 장비 8칸 · 「가방 (n/m)」    · 아이템 격자
-    //   스킬 : 「각성 Lv.n」 · 소켓 화면   · 「스킬 젬 (n개)」 · 젬 목록
+    //   스킬 : 「Lv.n」 · 소켓 화면   · 「스킬 젬 (n개)」 · 젬 목록
     //
     // 두 화면의 구조가 같아지면 「위는 끼우는 자리, 아래는 가진 것」이라는
     // 한 가지만 배우면 된다. 소켓 화면이 장비 8칸보다 한 줄 많아 그만큼 더 준다.
@@ -1367,7 +1367,7 @@ public partial class InventoryScreenUI : MonoBehaviour
     ///
     /// 「사용」은 **지금 쓸 수 있을 때만** 뜬다. 체력이 가득한데 구급상자
     /// 줄이 보이면 눌러 보고 나서야 소용없다는 것을 알게 되고, 그 사이에
-    /// 한 개가 사라졌는지 아닌지도 알 수 없다. 강화·방호처럼 효과가 아직
+    /// 한 개가 사라졌는지 아닌지도 알 수 없다. 강화·저항처럼 효과가 아직
     /// 비어 있는 것도 여기서 걸러진다. (PlayerConsumables.CanUse)
     /// </summary>
     private void OpenBagMenu(RectTransform cell, ItemStack stack)
@@ -1788,7 +1788,7 @@ public partial class InventoryScreenUI : MonoBehaviour
         var lines = new List<string>(5)
         {
             $"분류: {category}",
-            $"요구 각성: Lv{skill.RequiredLevel}"
+            $"요구 Lv{skill.RequiredLevel}"
         };
 
         if (skill.Category == SkillCategory.Support && skill.RequiredTags != SkillTag.None)

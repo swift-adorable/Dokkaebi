@@ -287,7 +287,7 @@ public partial class InventoryScreenUI
             case EquipmentStatType.ResistLightning:      return "번개 저항";
             case EquipmentStatType.ResistChaos:          return "카오스 저항";
             case EquipmentStatType.MaxHealth:            return "최대 체력";
-            case EquipmentStatType.HealthRegen:          return "체력 재생";
+            case EquipmentStatType.HealthRegen:          return "체력 회복";
             case EquipmentStatType.HealingReceived:      return "받는 회복량";
             case EquipmentStatType.MoveAbility:          return "이동";
             case EquipmentStatType.DashCooldown:         return "대시 쿨다운";

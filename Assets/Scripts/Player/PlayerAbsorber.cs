@@ -8,8 +8,12 @@ using UnityEngine;
 public class PlayerAbsorber : MonoBehaviour
 {
     [Header("Absorb")]
+    // 1이었을 때는 흡수 보너스 패시브(+10%·+20%)가 반올림에 먹혀 아무 일도 하지 않았다
+    // (1 × 1.1 → 1). 10이면 11 · 12로 살아난다. (결정 2-34)
+    // 필드 이름을 바꾼 이유: 씬에 저장된 옛 값 1이 새 기본값을 덮지 않게.
     [Tooltip("시체 1구 흡수 시 획득하는 기본 경험치")]
-    [SerializeField] private int xpPerCorpse = 1;
+    [Min(1)]
+    [SerializeField] private int experiencePerCorpse = 10;
 
     [Tooltip("시체 하나가 주는 기본 크레딧. 등급 배율이 여기에 곱해진다.")]
     [Min(0)]
@@ -47,7 +51,7 @@ public class PlayerAbsorber : MonoBehaviour
         // 경험치는 최초 1회만. 창을 여러 번 열어도 다시 들어오지 않는다.
         if (corpse.TryMarkAbsorbed())
         {
-            int baseAmount = Mathf.RoundToInt(xpPerCorpse * corpse.ValueMultiplier);
+            int baseAmount = Mathf.RoundToInt(experiencePerCorpse * corpse.ValueMultiplier);
 
             int gainedXP = EnemyRewardTable.Experience(
                 baseAmount, corpse.Rarity, AbsorbMultiplier());

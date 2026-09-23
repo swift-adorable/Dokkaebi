@@ -321,7 +321,7 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 출격하면_다시_가득_찬다()
+        public void 파밍하면_다시_가득_찬다()
         {
             var state = new SurvivalState();
 

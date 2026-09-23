@@ -2,10 +2,10 @@ using System;
 using UnityEngine;
 
 /// <summary>
-/// 계정 축의 영구 성장 — 패시브. 【죽어도 잃지 않는다.】
-/// (docs/Blob_Progression_System.md — 각성 / 계정 2축)
+/// 영구 성장 — 패시브. 【죽어도 잃지 않는다.】
+/// (docs/Blob_Progression_System.md 1절 — 레벨은 하나다)
 ///
-///   각성 레벨 : 영구. 소켓과 패시브를 연다.   → PlayerStats (결정 2-33)
+///   레벨 : 영구. 소켓과 패시브를 연다.   → PlayerStats (결정 2-33)
 ///
 /// 예전에는 「계정 레벨」을 여기서 따로 들고 있었다. 오르는 길이 없어 디버그
 /// 버튼으로만 바뀌었다. 이제 레벨은 PlayerStats 하나뿐이고 여기는 읽기만 한다.
@@ -41,10 +41,10 @@ public class PassiveManager : Singleton<PassiveManager>
     public PassiveTree Tree => tree != null ? tree : (tree = PassiveTree.Load());
 
     /// <summary>
-    /// 패시브 요구 레벨과 비교하는 값 = 각성 레벨. (결정 2-33)
+    /// 패시브 요구 레벨과 비교하는 값 = 레벨. (결정 2-33)
     /// 식별자 이름은 옛 것을 둔다 — 패시브 에셋의 직렬화 필드가 이 이름을 쓴다.
     /// </summary>
-    public int AwakeningLevel => PlayerStats.HasInstance ? PlayerStats.Instance.AwakeningLevel : 1;
+    public int Level => PlayerStats.HasInstance ? PlayerStats.Instance.Level : 1;
 
     private void OnEnable()
     {
@@ -108,7 +108,7 @@ public class PassiveManager : Singleton<PassiveManager>
 
     /// <summary>지금 상태로 만든 판단 재료. 재료는 가방에서 꺼낸다.</summary>
     public PassiveContext Context => new(
-        AwakeningLevel,
+        Level,
         credits,
         PlayerInventory.HasInstance ? PlayerInventory.Instance.Bag : null,
         discoveredRegression);

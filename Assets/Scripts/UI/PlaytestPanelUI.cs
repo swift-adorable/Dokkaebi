@@ -31,7 +31,7 @@ public class PlaytestPanelUI : MonoBehaviour
         ("수분·에너지 절반", PlaytestActions.HalveSurvival),
         ("탈수·허기 즉시",   PlaytestActions.EmptySurvival),
         ("수분·에너지 가득", PlaytestActions.RefillSurvival),
-        ("각성 Lv +1",    PlaytestActions.RaiseAwakeningLevel),
+        ("레벨 +1",  PlaytestActions.RaiseLevel),
         ("겹치는 재료",   PlaytestActions.GiveStackables),
         ("소모품 한 벌",  PlaytestActions.GiveConsumables),
         ("가방 채우기",   PlaytestActions.FillBag),

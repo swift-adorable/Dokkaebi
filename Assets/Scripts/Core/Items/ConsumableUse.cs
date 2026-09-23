@@ -8,7 +8,7 @@ public enum ConsumableError
     /// <summary>소모품이 아니다.</summary>
     NotConsumable = 1,
 
-    /// <summary>분류만 있고 값이 비어 있다. (강화·방호 — 아직 축이 없다)</summary>
+    /// <summary>분류만 있고 값이 비어 있다. (강화·저항 — 아직 축이 없다)</summary>
     NoEffect = 2,
 
     /// <summary>이미 가득하거나, 풀 상태가 걸려 있지 않다. 써도 버리는 셈이다.</summary>

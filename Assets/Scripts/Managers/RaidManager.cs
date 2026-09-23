@@ -8,8 +8,8 @@ using UnityEngine;
 /// 「이번 판은 안개가 짙다」 같은 판 전체의 성격이 생기지 않는다.
 /// 굴린 결과를 여기 들고 있고, 스포너와 적이 읽어 간다.
 ///
-/// 9단계에서 출격 전 화면이 생기면 그 화면이 이 값을 보여 주고,
-/// 「이 조건으로 들어갈까」가 출격 판단이 된다.
+/// 9단계에서 파밍 전 화면이 생기면 그 화면이 이 값을 보여 주고,
+/// 「이 조건으로 들어갈까」가 파밍 판단이 된다.
 /// </summary>
 public class RaidManager : Singleton<RaidManager>
 {
@@ -37,7 +37,7 @@ public class RaidManager : Singleton<RaidManager>
     }
 
     /// <summary>
-    /// 조건을 다시 굴린다. 출격할 때마다 한 번 부른다.
+    /// 조건을 다시 굴린다. 파밍할 때마다 한 번 부른다.
     /// 검증 도구도 이것으로 판을 바꿔 본다.
     /// </summary>
     public void Reroll()
@@ -60,7 +60,7 @@ public class RaidManager : Singleton<RaidManager>
     }
 
     /// <summary>
-    /// 조건을 직접 정한다. 출격 전 화면(9단계)과 검증 도구가 쓴다.
+    /// 조건을 직접 정한다. 파밍 전 화면(9단계)과 검증 도구가 쓴다.
     /// </summary>
     public void Set(RaidConditions value)
     {

@@ -25,6 +25,6 @@ public enum ConsumableCategory
     /// <summary>강화 — 일시적으로 세진다. 반드시 대가가 붙는다.</summary>
     Boost = 3,
 
-    /// <summary>방호 — 환경·속성을 버틴다. 장비를 대체하지 못한다.</summary>
+    /// <summary>저항 — 환경·속성을 버틴다. 장비를 대체하지 못한다.</summary>
     Ward = 4
 }
