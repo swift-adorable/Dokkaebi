@@ -119,7 +119,10 @@ public class Health : MonoBehaviour, IDamageable, IPoolable
             return;
 
         // 저항 장비가 면역을 주면 아예 걸리지 않는다. (막는 것은 장비의 몫)
-        if (IsImmuneTo(type))
+        // 【이로운 상태는 면역이 막지 않는다.】 면역은 해로운 것을 막으라고
+        // 붙인 것이다. 각인을 낀 대가로 각성제를 못 쓰게 되면 그것은 규칙이
+        // 아니라 사고다.
+        if (!StatusEffectTable.IsBeneficial(type) && IsImmuneTo(type))
             return;
 
         if (type == StatusEffectType.Ignite)
@@ -169,6 +172,13 @@ public class Health : MonoBehaviour, IDamageable, IPoolable
         bool moving = IsMoving != null && IsMoving();
 
         Status.Tick(deltaTime, moving, buffer);
+
+        // 【재생은 피해 목록에 섞이지 않는다.】 버퍼는 피해 요청만 담으므로
+        // 회복은 따로 가져온다. 피해보다 먼저 넣어 「회복 중에 죽는」 한 틱을 줄인다.
+        int healed = Status.ConsumeHealing();
+
+        if (healed > 0)
+            Heal(healed);
 
         for (int i = 0; i < buffer.Count; i++)
         {

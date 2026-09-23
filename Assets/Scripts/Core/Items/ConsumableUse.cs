@@ -85,14 +85,19 @@ public readonly struct ConsumableOutcome
 
     public readonly StatusEffectType Cure;
 
+    /// <summary>걸릴 이로운 상태. None이면 없다.</summary>
+    public readonly StatusEffectType Grant;
+
     public bool Ok => Error == ConsumableError.None;
 
     public ConsumableOutcome(ConsumableError error, int heal = 0,
                              float water = 0f, float energy = 0f,
                              float waterCost = 0f, float energyCost = 0f,
                              StatusEffectType cure = StatusEffectType.None,
-                             int cureStacks = 0, int useCost = 0)
+                             int cureStacks = 0, int useCost = 0,
+                             StatusEffectType grant = StatusEffectType.None)
     {
+        Grant = grant;
         CureStacks = cureStacks;
         UseCost = useCost;
         Error = error;
@@ -147,16 +152,21 @@ public static class ConsumableUse
 
         bool cures = effect.Cures && subject.HasCureTarget;
 
+        // 【이로운 상태는 늘 성립한다.】 이미 걸려 있어도 다시 걸면
+        // 지속시간이 처음으로 돌아간다 — 그것이 「덮어쓴다」(문서 6절)이다.
+        bool grants = effect.Grants;
+
         // 【들어갈 것이 하나도 없으면 쓰지 않는다.】 가방에서 한 개가
         // 사라졌는데 아무 일도 안 일어나면 그것은 버린 것이지 쓴 것이 아니다.
-        if (heal == 0 && water <= 0f && energy <= 0f && !cures)
+        if (heal == 0 && water <= 0f && energy <= 0f && !cures && !grants)
             return new ConsumableOutcome(ConsumableError.NothingToDo);
 
         return new ConsumableOutcome(ConsumableError.None, heal, water, energy,
             effect.WaterCost, effect.EnergyCost,
             cures ? effect.Cure : StatusEffectType.None,
             cures ? effect.CureStacks : 0,
-            effect.UseCost);
+            effect.UseCost,
+            effect.Grant);
     }
 
     /// <summary>화면과 결과 줄이 함께 쓰는 한국어 사유.</summary>

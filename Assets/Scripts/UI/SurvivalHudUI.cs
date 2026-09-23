@@ -417,17 +417,23 @@ public class SurvivalHudUI : MonoBehaviour
     ///   2. 움직일 수 없음 (과중량 3단계) — 동결과 같은 급이다
     ///   3. 탈수 · 허기 — 이동이 깎이고 허기는 계속 피해를 준다
     ///   4. 과중량 · 심한 과중량 — 느려질 뿐 당장 죽지는 않는다
-    ///   5. 나머지 상태이상 — 남은 시간이 짧은 것 먼저
+    ///   5. 나머지 해로운 상태이상 — 남은 시간이 짧은 것 먼저
+    ///   6. 이로운 상태 (가속 · 보강 · 재생) — 맨 아래
+    ///
+    /// 【이로운 것을 맨 아래 두는 이유】 급할 때 눈이 먼저 닿는 곳은 위다.
+    /// 「지금 나를 죽이는 것」이 위에 있어야 한다. 좋은 것은 이미 내가
+    /// 눌러서 건 것이라 확인이지 판단이 아니다.
     /// </summary>
     private void RefreshStatus()
     {
         conditions.Clear();
 
-        CollectAilments(banded: true);
+        CollectAilments(Group.Critical);
         CollectImmobile();
         CollectSurvival();
         CollectEncumbrance();
-        CollectAilments(banded: false);
+        CollectAilments(Group.Harmful);
+        CollectAilments(Group.Beneficial);
 
         int count = Mathf.Min(conditions.Count, MaxStatusRows);
 
@@ -453,11 +459,11 @@ public class SurvivalHudUI : MonoBehaviour
         HideStatusFrom(count);
     }
 
-    /// <summary>
-    /// 걸린 상태이상을 줄로 만든다. 위험한 것과 나머지를 나눠 두 번 불린다 —
-    /// 그 사이에 과중량·탈수·허기가 끼어들어야 하기 때문이다.
-    /// </summary>
-    private void CollectAilments(bool banded)
+    /// <summary>줄을 모으는 차례. 사이에 지속 조건이 끼어들어야 해서 나눈다.</summary>
+    private enum Group { Critical, Harmful, Beneficial }
+
+    /// <summary>걸린 상태이상을 줄로 만든다.</summary>
+    private void CollectAilments(Group group)
     {
         if (health == null)
             return;
@@ -470,7 +476,7 @@ public class SurvivalHudUI : MonoBehaviour
         {
             var type = (StatusEffectType)i;
 
-            if (state.Has(type) && StatusEffectNames.IsCritical(type) == banded)
+            if (state.Has(type) && GroupOf(type) == group)
                 visible.Add(type);
         }
 
@@ -493,8 +499,16 @@ public class SurvivalHudUI : MonoBehaviour
                 : $"{StatusEffectNames.Of(type)}    {remaining:0.0}s";
 
             conditions.Add(new Condition(label, UIPalette.ForStatus(type),
-                remaining / duration, banded));
+                remaining / duration, group == Group.Critical));
         }
+    }
+
+    private static Group GroupOf(StatusEffectType type)
+    {
+        if (StatusEffectNames.IsCritical(type))
+            return Group.Critical;
+
+        return StatusEffectNames.IsBeneficial(type) ? Group.Beneficial : Group.Harmful;
     }
 
     /// <summary>지금의 과중량 단계. 가방이 아직 없으면 정상으로 본다.</summary>

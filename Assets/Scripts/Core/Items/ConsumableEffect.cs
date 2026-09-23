@@ -55,6 +55,9 @@ public class ConsumableEffect
     [Tooltip("쓰는 데 걸리는 시간(초). 움직이거나 맞으면 중단된다. 0이면 즉시.")]
     [SerializeField] private float castSeconds = 0f;
 
+    [Tooltip("거는 이로운 상태. 지속시간은 상태이상 표가 정한다.")]
+    [SerializeField] private StatusEffectType grant = StatusEffectType.None;
+
     public ConsumableCategory Category => category;
 
     public int Heal => Mathf.Max(0, heal);
@@ -92,6 +95,17 @@ public class ConsumableEffect
     /// </summary>
     public float CastSeconds => Mathf.Max(0f, castSeconds);
 
+    /// <summary>
+    /// 거는 이로운 상태. None이면 없다.
+    ///
+    /// 【지속시간을 여기에 두지 않는다.】 상태이상 표(StatusEffectTable)가
+    /// 하나의 기준이어야 한다. 소모품마다 제 지속시간을 들고 있으면
+    /// 「각성제는 120초인데 표에는 90초」 같은 것이 생긴다.
+    /// </summary>
+    public StatusEffectType Grant => grant;
+
+    public bool Grants => grant != StatusEffectType.None;
+
     /// <summary>해제 효과가 있는가.</summary>
     public bool Cures => cure != StatusEffectType.None;
 
@@ -102,5 +116,5 @@ public class ConsumableEffect
     /// 「사용」 줄을 띄우기 전에 이것으로 걸러 낸다 — 눌러도 아무 일이
     /// 없는 버튼은 고장 난 것과 구분되지 않는다.
     /// </summary>
-    public bool IsEmpty => Heal == 0 && Water <= 0f && Energy <= 0f && !Cures;
+    public bool IsEmpty => Heal == 0 && Water <= 0f && Energy <= 0f && !Cures && !Grants;
 }

@@ -23,9 +23,17 @@ public static class StatusEffectNames
             case StatusEffectType.Chill:    return "냉각";
             case StatusEffectType.Paralyze: return "마비";
             case StatusEffectType.Corrode:  return "부식";
+            case StatusEffectType.Haste:    return "가속";
+            case StatusEffectType.Bolster:  return "보강";
+            case StatusEffectType.Regen:    return "재생";
+            case StatusEffectType.Fatigue:  return "탈진";
             default:                        return "—";
         }
     }
+
+    /// <summary>이로운 상태인가. 화면이 줄의 자리를 정할 때 본다.</summary>
+    public static bool IsBeneficial(StatusEffectType type)
+        => StatusEffectTable.IsBeneficial(type);
 
     /// <summary>【위험 상태인가.】 동결·마비는 행동 불능, 부식은 방어·회복 절반.</summary>
     public static bool IsCritical(StatusEffectType type)

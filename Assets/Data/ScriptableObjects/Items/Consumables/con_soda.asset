@@ -38,3 +38,4 @@ MonoBehaviour:
     cureStacks: 99
     useCost: 0
     castSeconds: 1.2
+    grant: 0

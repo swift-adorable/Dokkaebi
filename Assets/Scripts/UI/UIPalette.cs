@@ -114,6 +114,15 @@ public static class UIPalette
             case StatusEffectType.Paralyze: return new Color(1f, 0.74f, 0.24f, 1f);
             case StatusEffectType.Corrode:  return new Color(0.78f, 0.92f, 0.32f, 1f);
 
+            // 이로운 상태 — 초록 계열로 묶는다. 【해로운 것과 색으로 갈린다.】
+            // 줄을 읽지 않고 색만 봐도 좋은 것인지 나쁜 것인지 알아야 한다.
+            case StatusEffectType.Haste:    return new Color(0.46f, 0.88f, 0.62f, 1f);
+            case StatusEffectType.Bolster:  return new Color(0.40f, 0.78f, 0.72f, 1f);
+            case StatusEffectType.Regen:    return new Color(0.56f, 0.90f, 0.50f, 1f);
+
+            // 대가는 이로운 것이 아니다. 흐린 회색으로 둔다.
+            case StatusEffectType.Fatigue:  return new Color(0.62f, 0.60f, 0.66f, 1f);
+
             default:                        return Text;
         }
     }
