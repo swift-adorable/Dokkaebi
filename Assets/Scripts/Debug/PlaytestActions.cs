@@ -378,4 +378,95 @@ public static class PlaytestActions
                + $"{threshold} {target.Status.Has(threshold)} · "
                + $"행동 불능 {target.Status.IsIncapacitated}";
     }
+
+    // ── 내 상태이상 ───────────────────────────────────────────────────
+    //
+    // 【위의 StackOnNearest는 적에게 건다.】 화면 좌상단의 상태이상 줄은
+    // 【내】 상태(BlobController의 Health.Status)를 읽으므로, 적에게 걸어서는
+    // 그 줄이 뜨지 않는다. 줄 자체를 확인하려면 나에게 걸어야 한다.
+
+    /// <summary>플레이어의 Health. 없으면 null.</summary>
+    private static Health SelfHealth()
+    {
+        var player = Object.FindAnyObjectByType<BlobController>();
+
+        return player != null ? player.GetComponent<Health>() : null;
+    }
+
+    /// <summary>나에게 한 종류를 여러 번 건다. 중첩 → 전이를 볼 때 쓴다.</summary>
+    public static string StackOnSelf(StatusEffectType type, int times)
+    {
+        Health self = SelfHealth();
+
+        if (self == null)
+            return "플레이어를 찾지 못했습니다.";
+
+        // 면역이면 아무 일도 일어나지 않는다. 그 사실을 먼저 알려야
+        // 「UI가 고장 났나」를 의심하며 시간을 버리지 않는다.
+        if (self.IsImmuneTo(type))
+            return $"{StatusEffectNames.Of(type)}에 면역입니다 — 장비를 벗고 다시 하십시오.";
+
+        for (int i = 0; i < times; i++)
+            self.ApplyStatus(type, 10f);
+
+        StatusEffectType threshold = StatusEffectTable.ThresholdOf(type);
+
+        return $"내게 {StatusEffectNames.Of(type)} {times}회\n"
+               + $"중첩 {self.Status.StacksOf(type)} · "
+               + $"{StatusEffectNames.Of(threshold)} {self.Status.Has(threshold)} · "
+               + $"행동 불능 {self.Status.IsIncapacitated}\n"
+               + "좌상단 게이지 아래에 줄이 떠야 합니다.";
+    }
+
+    /// <summary>
+    /// 나에게 모든 상태이상을 한 번씩 건다.
+    ///
+    /// 줄이 여섯 개까지만 뜨고 위험 상태(동결·마비·부식)가 맨 위로
+    /// 올라오는지, 남은 시간 순으로 정렬되는지를 한 번에 본다.
+    /// 동결·마비가 걸리므로 잠시 움직일 수 없다 — 「내 상태이상 해제」로 푼다.
+    /// </summary>
+    public static string StackAllOnSelf()
+    {
+        Health self = SelfHealth();
+
+        if (self == null)
+            return "플레이어를 찾지 못했습니다.";
+
+        int applied = 0;
+        int immune = 0;
+
+        foreach (StatusEffectType type in System.Enum.GetValues(typeof(StatusEffectType)))
+        {
+            if (type == StatusEffectType.None)
+                continue;
+
+            if (self.IsImmuneTo(type))
+            {
+                immune++;
+                continue;
+            }
+
+            self.ApplyStatus(type, 10f);
+            applied++;
+        }
+
+        return $"내게 상태이상 {applied}종을 걸었습니다."
+               + (immune > 0 ? $" (면역 {immune}종은 걸리지 않음)" : string.Empty)
+               + "\n좌상단 게이지 아래에 줄이 쌓이고, 위험 상태(동결·마비·부식)가\n"
+               + "붉은 바탕으로 맨 위에 와야 합니다. 여섯 줄까지만 보입니다.\n"
+               + "동결·마비로 움직일 수 없습니다 — 「내 상태이상 해제」로 푸십시오.";
+    }
+
+    /// <summary>내게 걸린 상태이상을 전부 지운다.</summary>
+    public static string ClearStatusOnSelf()
+    {
+        Health self = SelfHealth();
+
+        if (self == null)
+            return "플레이어를 찾지 못했습니다.";
+
+        self.Status.ClearAll();
+
+        return "내 상태이상을 전부 해제했습니다. 좌상단의 줄이 사라져야 합니다.";
+    }
 }
