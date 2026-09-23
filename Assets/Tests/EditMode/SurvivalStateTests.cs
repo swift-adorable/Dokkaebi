@@ -180,7 +180,7 @@ namespace Blob.Tests
         [Test]
         public void 체력_회복에는_손대지_않는다()
         {
-            // 이 축의 존재 이유는 추출 압박이다. 회복약을 덜 듣게 만드는 것은
+            // 이 축의 존재 이유는 철수 압박이다. 회복약을 덜 듣게 만드는 것은
             // 전투 페널티라 방침에서 벗어난다. (Survival_System 6절)
             var state = new SurvivalState();
 

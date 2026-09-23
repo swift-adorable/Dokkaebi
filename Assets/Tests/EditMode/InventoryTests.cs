@@ -107,7 +107,7 @@ namespace Blob.Tests
         public void 무게는_상한을_넘어도_담을_수_있다()
         {
             // 중요 — 무게는 막지 않는다. 넘으면 느려질 뿐이다.
-            // 막으면 "무거운 걸 주웠을 때 들고 갈까 버릴까"라는 추출 판단이 사라진다.
+            // 막으면 "무거운 걸 주웠을 때 들고 갈까 버릴까"라는 철수 판단이 사라진다.
             var inv = new Inventory(slots: 10, weight: 5f);
             ItemDefinition heavy = Create("anvil", weight: 10f);
 

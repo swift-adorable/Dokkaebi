@@ -152,7 +152,7 @@ public class EquipmentLoadout
     }
 
     /// <summary>
-    /// 추출 실패 시 각인을 제외한 전부를 벗긴다. 잃은 장비를 반환한다.
+    /// 철수 실패 시 각인을 제외한 전부를 벗긴다. 잃은 장비를 반환한다.
     /// </summary>
     public List<ItemStack> DropOnDeath()
     {

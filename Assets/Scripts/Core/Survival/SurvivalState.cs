@@ -93,7 +93,7 @@ public class SurvivalState
     /// 지금 에너지가 차는 비율. 탈수면 덕코프대로 30%만 찬다.
     ///
     /// 【물부터 마셔야 음식이 제값을 한다.】 두 게이지가 따로 놀지 않고 엮인다.
-    /// 체력(HP) 회복에는 손대지 않는다 — 이 축은 추출 압박용이지 전투 페널티가 아니다.
+    /// 체력(HP) 회복에는 손대지 않는다 — 이 축은 철수 압박용이지 전투 페널티가 아니다.
     /// </summary>
     public float EnergyRestoreMultiplier
         => IsDehydrated ? SurvivalTable.DehydratedEnergyRestoreScale : 1f;

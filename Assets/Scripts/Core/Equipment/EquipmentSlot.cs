@@ -22,7 +22,7 @@ public enum EquipmentSlot
     /// <summary>가방 — 최대 소지 중량 + 가방 칸.</summary>
     Backpack = 5,
 
-    /// <summary>각인 1 — 추출 실패에도 유실되지 않는다.</summary>
+    /// <summary>각인 1 — 철수 실패에도 유실되지 않는다.</summary>
     ImprintA = 6,
 
     /// <summary>각인 2.</summary>

@@ -78,7 +78,7 @@ public class Inventory
     ///
     /// 무게는 상한을 넘어도 【담을 수 있다】. 넘으면 느려질 뿐이다.
     /// 덕코프도 그렇다 — 무거운 걸 주웠을 때 "못 줍는다"가 아니라
-    /// "느려지지만 들고 갈 수는 있다"여야 추출 판단이 생긴다.
+    /// "느려지지만 들고 갈 수는 있다"여야 철수 판단이 생긴다.
     /// </summary>
     public EncumbranceLevel Encumbrance => WeightCalculator.Evaluate(TotalWeight, weightLimit);
 
@@ -256,7 +256,7 @@ public class Inventory
     public bool Contains(ItemDefinition definition) => CountOf(definition) > 0;
 
     /// <summary>
-    /// 추출에 실패했을 때 잃는 것을 비운다.
+    /// 철수에 실패했을 때 잃는 것을 비운다.
     ///
     /// 각인만 남는다. 플레이어가 배울 규칙은 하나여야 하므로 예외를 늘리지 않는다.
     /// 젬도 장비와 똑같이 잃는다. (docs/Blob_Progression_System.md 6절)

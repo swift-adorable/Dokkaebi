@@ -65,7 +65,7 @@ public struct EnemyProfile
     /// 【저항을 곱하지 않는 이유】(문서 9절)
     /// 곱연산이면 원천 두 개만으로 「이 속성으로는 못 잡는다」가 된다.
     /// 상태이상 피해에도 상성이 곱해지므로 방어도 무시라는 우회로까지 같이 막힌다.
-    /// 추출 루팅에서 그건 출격을 버리라는 뜻이다.
+    /// 철수 루팅에서 그건 출격을 버리라는 뜻이다.
     /// </summary>
     public static EnemyProfile Build(
         EnemyArchetype archetype, EnemyRarity rarity, IReadOnlyList<EnemyAffix> affixes)

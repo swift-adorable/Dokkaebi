@@ -128,13 +128,13 @@ public static class PassiveAssetGenerator
             PassiveBranch.Recovery, PassiveEffectType.SafeSlots, 1, level: 5, cost: 2500,
             column: 1, row: 0, materials: new[] { ("wire_bundle", 8) }));
 
-        rows.Add(N("rec_mark", "추출 좌표",
-            "지도에 추출 지점이 상시 표시된다.",
+        rows.Add(N("rec_mark", "철수 좌표",
+            "지도에 철수 지점이 상시 표시된다.",
             PassiveBranch.Recovery, PassiveEffectType.ExtractMark, 1, level: 6, cost: 2200,
             column: 0, row: 1, prereq: new[] { "rec_safe_1" }));
 
         rows.Add(N("rec_corpse", "회수 계약",
-            "추출에 실패해도 내 시체에서 한 번은 되찾아 올 수 있다.",
+            "철수에 실패해도 내 시체에서 한 번은 되찾아 올 수 있다.",
             PassiveBranch.Recovery, PassiveEffectType.CorpseRecovery, 1, level: 9, cost: 5500,
             column: 2, row: 1, prereq: new[] { "rec_safe_1" },
             materials: new[] { ("cell_battery", 6) }));

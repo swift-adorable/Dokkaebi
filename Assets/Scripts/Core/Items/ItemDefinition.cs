@@ -54,7 +54,7 @@ public class ItemDefinition : ScriptableObject
     [SerializeField] private int baseValue = 0;
 
     [Header("Tags")]
-    [Tooltip("반출 불가. 출격 안에서만 쓰이고 추출해도 남지 않는다.")]
+    [Tooltip("반출 불가. 출격 안에서만 쓰이고 철수해도 남지 않는다.")]
     [SerializeField] private bool noExtract = false;
 
     [Tooltip("등록 불가. 등록대에 넣을 수 없어 매번 들고 가야 한다. (최고 등급 열쇠)")]
@@ -102,7 +102,7 @@ public class ItemDefinition : ScriptableObject
     /// 반출 불가.
     ///
     /// 「출격 안에서만 사는 축」을 만드는 태그다. 덕코프의 「강화」가 그 자리인데
-    /// Blob의 젬은 추출 가능하므로 이 축이 비어 있었다.
+    /// Blob의 젬은 반출 가능하므로 이 축이 비어 있었다.
     /// 지금은 태그만 두고, 쓰는 아이템은 7단계 이후에 만든다.
     /// </summary>
     public bool NoExtract => noExtract;
@@ -152,7 +152,7 @@ public class ItemDefinition : ScriptableObject
     public float WeightCost => IsCargo ? weight : 0f;
 
     /// <summary>
-    /// 추출에 실패해도 잃지 않는 아이템인지.
+    /// 철수에 실패해도 잃지 않는 아이템인지.
     ///
     /// 각인만 해당한다. 플레이어가 배울 규칙은 하나여야 하므로 예외를 늘리지 않는다.
     /// (docs/Blob_Progression_System.md 6절)

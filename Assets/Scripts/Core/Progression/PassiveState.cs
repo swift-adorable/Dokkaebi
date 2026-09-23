@@ -26,8 +26,8 @@ public enum PassiveError
 /// <summary>배울 수 있는지 판단하는 데 필요한 바깥 상태 전부.</summary>
 public struct PassiveContext
 {
-    /// <summary>각성 레벨. (결정 2-33 — 계정 레벨과 합쳤다)</summary>
-    public int accountLevel;
+    /// <summary>각성 레벨. (결정 2-33 — 각성 레벨과 합쳤다)</summary>
+    public int awakeningLevel;
 
     /// <summary>보유 크레딧.</summary>
     public int credits;
@@ -38,10 +38,10 @@ public struct PassiveContext
     /// <summary>역행 계열을 발견했는지.</summary>
     public bool discoveredRegression;
 
-    public PassiveContext(int accountLevel, int credits,
+    public PassiveContext(int awakeningLevel, int credits,
                           Inventory materials = null, bool discoveredRegression = false)
     {
-        this.accountLevel = accountLevel;
+        this.awakeningLevel = awakeningLevel;
         this.credits = credits;
         this.materials = materials;
         this.discoveredRegression = discoveredRegression;
@@ -106,7 +106,7 @@ public class PassiveState
 
         // 중개 계열은 레벨을 보지 않는다. 돈만 있으면 연다. (덕코프 블랙마켓과 같다)
         if (node.UnlockKind != PassiveUnlockKind.CreditsOnly &&
-            context.accountLevel < node.RequiredAccountLevel)
+            context.awakeningLevel < node.RequiredAwakeningLevel)
         {
             return PassiveError.LevelTooLow;
         }

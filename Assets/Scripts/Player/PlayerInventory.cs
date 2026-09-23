@@ -121,7 +121,7 @@ public class PlayerInventory : Singleton<PlayerInventory>
     }
 
     /// <summary>
-    /// 추출 실패(사망) 처리. 각인을 제외한 가방·장비를 전부 잃는다.
+    /// 철수 실패(사망) 처리. 각인을 제외한 가방·장비를 전부 잃는다.
     /// 규칙은 하나다 — 죽으면 들고 있던 것 전부.
     /// </summary>
     public int DropOnDeath()

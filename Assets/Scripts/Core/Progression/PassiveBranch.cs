@@ -31,7 +31,7 @@ public enum PassiveBranch
 public enum PassiveUnlockKind
 {
     /// <summary>각성 레벨 + 크레딧 + 필요 재료.</summary>
-    AccountLevel = 0,
+    AwakeningLevel = 0,
 
     /// <summary>레벨을 보지 않는다. 돈만 있으면 연다. (중개)</summary>
     CreditsOnly = 1,
@@ -78,7 +78,7 @@ public static class PassiveBranchInfo
         {
             case PassiveBranch.Brokerage:  return PassiveUnlockKind.CreditsOnly;
             case PassiveBranch.Regression: return PassiveUnlockKind.Discovery;
-            default:                       return PassiveUnlockKind.AccountLevel;
+            default:                       return PassiveUnlockKind.AwakeningLevel;
         }
     }
 

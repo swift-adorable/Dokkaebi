@@ -39,7 +39,8 @@ public class PlayerStats : Singleton<PlayerStats>
     [Tooltip("레벨업할 때마다 필요 경험치에 더해지는 값")]
     [SerializeField] private int requiredXPGrowth = 5;
 
-    public int Level { get; private set; } = 1;
+    /// <summary>각성 레벨. 이 게임의 유일한 레벨이다 (결정 2-33).</summary>
+    public int AwakeningLevel { get; private set; } = 1;
 
     public int CurrentXP { get; private set; }
 
@@ -68,19 +69,19 @@ public class PlayerStats : Singleton<PlayerStats>
         while (RequiredXP > 0 && CurrentXP >= RequiredXP)
         {
             CurrentXP -= RequiredXP;
-            Level++;
+            AwakeningLevel++;
             RequiredXP += requiredXPGrowth;
             levelUpCount++;
         }
 
-        GameLogger.Log($"[PlayerStats] XP {CurrentXP}/{RequiredXP} (Lv.{Level})");
+        GameLogger.Log($"[PlayerStats] XP {CurrentXP}/{RequiredXP} (Lv.{AwakeningLevel})");
 
         OnChanged?.Invoke();
 
         if (levelUpCount <= 0)
             return;
 
-        GameLogger.Log($"[PlayerStats] LEVEL UP x{levelUpCount} -> Lv.{Level}");
+        GameLogger.Log($"[PlayerStats] LEVEL UP x{levelUpCount} -> Lv.{AwakeningLevel}");
 
         SkillManager.EnsureInstance().EnqueueLevelUp(levelUpCount);
     }
@@ -95,8 +96,8 @@ public class PlayerStats : Singleton<PlayerStats>
     /// </summary>
     public void Restore(int level, int experience)
     {
-        Level = Mathf.Max(1, level);
-        RequiredXP = RequiredXPAt(Level);
+        AwakeningLevel = Mathf.Max(1, level);
+        RequiredXP = RequiredXPAt(AwakeningLevel);
 
         // 필요량 이상이 저장돼 있으면 그대로 두면 다음 AddXP에서 레벨이 한꺼번에
         // 튄다. 곡선을 바꾼 뒤 옛 세이브를 열면 생긴다.

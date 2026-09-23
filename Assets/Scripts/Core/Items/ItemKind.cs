@@ -17,7 +17,7 @@ public enum ItemKind
     /// <summary>가방. 최대 소지 중량과 가방 칸을 준다.</summary>
     Backpack = 3,
 
-    /// <summary>각인. 2슬롯. 추출에 실패해도 잃지 않는다.</summary>
+    /// <summary>각인. 2슬롯. 철수에 실패해도 잃지 않는다.</summary>
     Imprint = 4,
 
     /// <summary>젬 — 실물이 된 스킬. 소켓에 끼운다.</summary>

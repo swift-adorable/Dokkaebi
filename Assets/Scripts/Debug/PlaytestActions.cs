@@ -155,14 +155,14 @@ public static class PlaytestActions
     {
         PlayerStats stats = PlayerStats.EnsureInstance();
 
-        int before = stats.Level;
+        int before = stats.AwakeningLevel;
 
         stats.AddXP(stats.RequiredXP);
 
-        string opened = SocketUnlockTable.DescribeUnlock(stats.Level);
+        string opened = SocketUnlockTable.DescribeUnlock(stats.AwakeningLevel);
 
         // 소켓과 패시브가 같은 레벨에서 열린다 (결정 2-33).
-        string message = $"각성 Lv.{before} → Lv.{stats.Level} · 패시브 요구 레벨도 이 값이다";
+        string message = $"각성 Lv.{before} → Lv.{stats.AwakeningLevel} · 패시브 요구 레벨도 이 값이다";
 
         return string.IsNullOrEmpty(opened) ? message : $"{message} — {opened} 개방";
     }
@@ -289,7 +289,7 @@ public static class PlaytestActions
 
         SaveData data = SaveManager.Capture();
 
-        return $"저장했습니다.\n각성 Lv.{data.accountLevel} · 크레딧 {data.credits} · "
+        return $"저장했습니다.\n각성 Lv.{data.awakeningLevel} · 크레딧 {data.credits} · "
                + $"패시브 {data.learnedPassives.Count} · 도감 {data.codex.Count}\n"
                + "게임에서는 사망할 때만 저장됩니다 — 출격 중 종료는 롤백입니다.";
     }

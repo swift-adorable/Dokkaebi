@@ -216,7 +216,7 @@ public class SkillManager : Singleton<SkillManager>
 
     private void SyncAwakeningLevel()
     {
-        int level = PlayerStats.HasInstance ? PlayerStats.Instance.Level : 1;
+        int level = PlayerStats.HasInstance ? PlayerStats.Instance.AwakeningLevel : 1;
 
         build.SetAwakeningLevel(level);
     }
@@ -253,7 +253,7 @@ public class SkillManager : Singleton<SkillManager>
     /// 젬 드롭을 굴려 【아이템 정의만】 돌려준다. 시체가 자기 전리품 칸에 담는다.
     /// luckMultiplier는 적 등급 배율다. 희귀한 적일수록 잘 나온다.
     ///
-    /// 가방에 바로 넣지 않는 이유 — 「무엇을 들고 갈지 고른다」가 추출 루팅의 결정이다.
+    /// 가방에 바로 넣지 않는 이유 — 「무엇을 들고 갈지 고른다」가 철수 루팅의 결정이다.
     /// 자동으로 들어가면 그 결정이 사라진다. (전리품 창 도입, 확정 기획)
     /// </summary>
     public ItemDefinition RollGemDropItem(int luckMultiplier = 1)
@@ -500,7 +500,7 @@ public class SkillManager : Singleton<SkillManager>
     /// <summary>
     /// 출격 종료 시 소켓을 비운다.
     ///
-    /// 【젬을 여기서 없애지 않는다.】 추출 성공이면 그대로 창고로 가고,
+    /// 【젬을 여기서 없애지 않는다.】 철수 성공이면 그대로 창고로 가고,
     /// 사망이면 PlayerInventory.DropOnDeath가 규칙 하나로 처리한다.
     /// </summary>
     public void ResetRun()

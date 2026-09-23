@@ -14,11 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Blob.Runtime::PassiveNode
   id: brok_refresh_1
   displayName: "\uAC70\uB798\uC120 1"
-  description: "\uC0C1\uC810 \uAC31\uC2E0 \uCFE8\uD0C0\uC784 \u221210%."
+  description: "\uC0C1\uC810 \uAC31\uC2E0 \uCFE8\uB2E4\uC6B4 \u221210%."
   branch: 3
   effect: 32
   value: 10
-  requiredAccountLevel: 1
+  requiredAwakeningLevel: 1
   cost: 3000
   materials: []
   prerequisites:
