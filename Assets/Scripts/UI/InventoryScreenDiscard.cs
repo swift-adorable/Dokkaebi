@@ -95,9 +95,17 @@ public partial class InventoryScreenUI
             new Vector2(1f / 7f, 1f / 7f), new Vector2(6f / 7f, 6f / 7f));
 
         RectTransform box = UIFactory.CreateRegion("Box", frame,
-            new Vector2(0.30f, 0.26f), new Vector2(0.70f, 0.74f));
+            new Vector2(0.295f, 0.26f), new Vector2(0.705f, 0.74f));
 
-        UIFactory.CreatePanel("Back", box, UIPalette.Panel, Vector2.zero, Vector2.one);
+        // 【다른 패널과 같은 유리판을 쓴다.】 전에는 각진 판에 색 띠를 얹어
+        // 이 창만 결이 달랐다. 화면마다 결이 다르면 같은 게임으로 안 보인다.
+        UIFactory.CreateGlass("Back", box, UIPalette.Panel,
+            Vector2.zero, Vector2.one, UIFactory.RadiusLarge);
+
+        var blocker = box.gameObject.AddComponent<Image>();
+        blocker.color = new Color(0f, 0f, 0f, 0f);
+
+        UIFactory.CreateOutline(blocker, UIPalette.Rim, UIFactory.RadiusLarge, 2);
 
         BuildDiscardHeader(box, definition);
         BuildDiscardAmount(box);
@@ -109,11 +117,13 @@ public partial class InventoryScreenUI
     /// <summary>상단 — 아이콘 · 이름 · 보유 개수.</summary>
     private void BuildDiscardHeader(RectTransform box, ItemDefinition definition)
     {
-        UIFactory.CreatePanel("Header", box, UIPalette.Header,
-            new Vector2(0f, 0.74f), new Vector2(1f, 1f));
+        // 제목 뒤에 띠를 깔지 않는다 — 전리품 패널과 같은 규칙이다.
+        Color kind = UIPalette.ForItem(definition.Kind);
 
-        Image icon = UIFactory.CreatePanel("Icon", box, UIPalette.ForItem(definition.Kind),
-            new Vector2(0.05f, 0.775f), new Vector2(0.22f, 0.965f));
+        Image icon = UIFactory.CreatePanel("Icon", box, UIPalette.Darken(kind, 0.34f),
+            new Vector2(0.05f, 0.775f), new Vector2(0.22f, 0.965f), UIFactory.Radius);
+
+        UIFactory.CreateOutline(icon, UIPalette.Brighten(kind), UIFactory.Radius, 2);
 
         // 아트가 들어오면 색 판 대신 그린다. 지금은 종류 색이 아이콘 역할을 한다.
         if (definition.Icon != null)
@@ -123,8 +133,8 @@ public partial class InventoryScreenUI
             icon.preserveAspect = true;
         }
 
-        UIFactory.CreateLabel(box, definition.DisplayName, 37, FontStyle.Bold,
-            new Vector2(0.26f, 0.87f), new Vector2(0.95f, 0.965f), TextAnchor.LowerLeft);
+        UIFactory.CreateLabel(box, definition.DisplayName, 34, FontStyle.Bold,
+            new Vector2(0.26f, 0.87f), new Vector2(0.83f, 0.965f), TextAnchor.LowerLeft);
 
         UIFactory.CreateLabel(box,
             $"보유 {discardTarget.Count}개    {definition.Weight * discardTarget.Count:0.0} kg",
@@ -159,14 +169,26 @@ public partial class InventoryScreenUI
     }
 
     /// <summary>하단 — 취소 · 버리기.</summary>
+    /// <summary>
+    /// 아래 한 줄 — 「버리기」 하나. 상세 패널과 같은 규칙이다.
+    /// 취소는 오른쪽 위 구석의 ✕가 맡는다.
+    /// </summary>
     private void BuildDiscardFooter(RectTransform box)
     {
-        UIFactory.CreateButton(box, "취소",
-            new Vector2(0.05f, 0.06f), new Vector2(0.48f, 0.22f),
-            UIPalette.Subtle, CloseDiscardPopup);
+        Image close = UIFactory.CreatePanel("Close", box, UIPalette.Subtle,
+            new Vector2(0.855f, 0.905f), new Vector2(0.975f, 0.985f), UIFactory.Radius);
+
+        var closeButton = close.gameObject.AddComponent<Button>();
+        closeButton.targetGraphic = close;
+        closeButton.onClick.AddListener(CloseDiscardPopup);
+
+        UIFactory.CreateOutline(close, UIPalette.Rim, UIFactory.Radius, 2);
+
+        UIFactory.CreateLabel(close.transform, "✕", 26, FontStyle.Bold,
+            Vector2.zero, Vector2.one, TextAnchor.MiddleCenter, UIPalette.TextOnGlass);
 
         UIFactory.CreateButton(box, "버리기",
-            new Vector2(0.52f, 0.06f), new Vector2(0.95f, 0.22f),
+            new Vector2(0.05f, 0.06f), new Vector2(0.95f, 0.22f),
             UIPalette.Warning, ConfirmDiscard);
     }
 

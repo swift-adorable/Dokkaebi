@@ -60,14 +60,8 @@ public static class PlaytestTools
     [MenuItem(Menu + "각인 — 진격Ⅱ · 중장Ⅲ · 경량Ⅲ · 정밀Ⅲ")]
     public static void GiveKeyImprints() => Run(PlaytestActions.GiveKeyImprints);
 
-    [MenuItem(Menu + "젬 — 핵심 젬 전부")]
-    public static void GiveCoreGems() => Run(PlaytestActions.GiveCoreGems);
-
-    [MenuItem(Menu + "젬 — 보조 젬 전부")]
-    public static void GiveSupportGems() => Run(PlaytestActions.GiveSupportGems);
-
-    [MenuItem(Menu + "젬 — 서리 핵심 젬 · 깊은 상처 · 원거리 사격")]
-    public static void GiveChecklistGems() => Run(PlaytestActions.GiveChecklistGems);
+    [MenuItem(Menu + "젬 — 전부 (핵심 · 보조 · 발동 · 전령)")]
+    public static void GiveAllGems() => Run(PlaytestActions.GiveAllGems);
 
     [MenuItem(Menu + "겹치는 재료 지급 — 개수 배지 확인")]
     public static void GiveStackables() => Run(PlaytestActions.GiveStackables);

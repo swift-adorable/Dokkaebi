@@ -72,20 +72,26 @@ public static class PlaytestActions
     public static string GiveKeyImprints()
         => Catalog == null ? NoCatalog : Give(Catalog.KeyImprints, "대표 각인");
 
-    public static string GiveCoreGems()
-        => Catalog == null ? NoCatalog : Give(Catalog.CoreGems, "핵심 젬");
+    /// <summary>
+    /// 젬 네 범주를 한 번에. 【젬은 이제 적재를 먹지 않는다(2-31).】
+    /// 나눠 줄 이유가 사라졌다 — 다 받아도 가방이 그대로다.
+    /// </summary>
+    public static string GiveAllGems()
+    {
+        if (Catalog == null)
+            return NoCatalog;
 
-    public static string GiveSupportGems()
-        => Catalog == null ? NoCatalog : Give(Catalog.SupportGems, "보조 젬");
+        var all = new List<ItemDefinition>(
+            Catalog.CoreGems.Count + Catalog.SupportGems.Count
+            + Catalog.MetaGems.Count + Catalog.HeraldGems.Count);
 
-    public static string GiveChecklistGems()
-        => Catalog == null ? NoCatalog : Give(Catalog.ChecklistGems, "검증용 젬");
+        all.AddRange(Catalog.CoreGems);
+        all.AddRange(Catalog.SupportGems);
+        all.AddRange(Catalog.MetaGems);
+        all.AddRange(Catalog.HeraldGems);
 
-    public static string GiveMetaGems()
-        => Catalog == null ? NoCatalog : Give(Catalog.MetaGems, "발동 젬");
-
-    public static string GiveHeraldGems()
-        => Catalog == null ? NoCatalog : Give(Catalog.HeraldGems, "전령 젬");
+        return Give(all, "젬");
+    }
 
     // ── 생존 ──────────────────────────────────────────────────────────
 

@@ -53,6 +53,9 @@ public class ItemActionMenu : MonoBehaviour
     private GameObject shade;
     private RectTransform box;
 
+    /// <summary>지금 메뉴가 붙어 있는 칸. 같은 칸을 다시 누르면 닫는다.</summary>
+    private RectTransform owner;
+
     public static bool IsOpen => instance != null && instance.shade != null
                                  && instance.shade.activeSelf;
 
@@ -170,17 +173,32 @@ public class ItemActionMenu : MonoBehaviour
 
         ItemActionMenu menu = EnsureInstance();
 
+        // 【같은 칸을 다시 누르면 닫는다.】 열고 닫는 데 쓰는 버튼이
+        // 칸 자신이면, 메뉴를 치우려고 빈 곳을 찾을 필요가 없다.
+        if (IsOpen && menu.owner == cell)
+        {
+            Close();
+            return;
+        }
+
         menu.Show(cell, entries);
     }
 
     public static void Close()
     {
-        if (instance != null && instance.shade != null)
+        if (instance == null)
+            return;
+
+        instance.owner = null;
+
+        if (instance.shade != null)
             instance.shade.SetActive(false);
     }
 
     private void Show(RectTransform cell, IReadOnlyList<Entry> entries)
     {
+        owner = cell;
+
         shade.SetActive(true);
 
         UIFactory.ClearChildren(box);
