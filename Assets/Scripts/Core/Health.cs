@@ -35,6 +35,15 @@ public class Health : MonoBehaviour, IDamageable, IPoolable
     /// <summary>체력이 0이 되었을 때. 한 번만 발행된다.</summary>
     public event Action OnDied;
 
+    /// <summary>
+    /// 총알·적 공격에 【직접】 맞았을 때. 상태이상 도트와 허기는 여기 오지 않는다.
+    ///
+    /// 소모품 시전이 이것을 듣는다. HP가 줄었는지로 판정하면 점화 중에는
+    /// 붕대를 감을 수 없고, 폭주(흡수액) 중에는 회복이 아예 불가능해진다 —
+    /// 폭주는 스스로 1초마다 피를 깎기 때문이다.
+    /// </summary>
+    public event Action OnDirectHit;
+
     /// <summary>이 대상의 소속.</summary>
     public Team Team => team;
 
@@ -269,6 +278,11 @@ public class Health : MonoBehaviour, IDamageable, IPoolable
         // 【0 피해는 기록하지 않는다.】 빗나간 타격이 「마지막 타격」이 되면
         // 조건부 드롭의 판정이 실제로 죽인 공격과 어긋난다.
         LastHitWasCritical = request.isCritical;
+
+        // bypassArmour는 상태이상 틱만 켠다(StatusEffectState.Tick). 그래서
+        // 이것이 꺼져 있으면 누군가 실제로 쏘거나 때린 것이다.
+        if (!request.bypassArmour)
+            OnDirectHit?.Invoke();
 
         return ApplyRaw(computed, skipInvulnerability: request.bypassArmour);
     }

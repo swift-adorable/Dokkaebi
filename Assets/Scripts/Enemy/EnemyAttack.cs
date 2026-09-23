@@ -141,6 +141,21 @@ public class EnemyAttack : MonoBehaviour
         if (movement == null)
             return;
 
+        // 【동결·마비면 예비동작도 점사도 끊는다.】 점사는 「이미 방아쇠가
+        // 당겨진 것」이라 평소에는 흘려보내지만, 얼어붙은 손가락은 방아쇠를
+        // 당기지 못한다. 동결을 건 보람이 여기서 나온다.
+        //
+        // 쿨다운은 되돌리지 않는다 — 풀리자마자 쏘면 동결이 공격을 「미룬」
+        // 것에 그치지만, 한 번을 통째로 날리면 「막은」 것이 된다.
+        if (movement.IsIncapacitated)
+        {
+            if (IsWindingUp)
+                CancelWindup();
+
+            StopBurst();
+            return;
+        }
+
         // 점사는 예비동작과 무관하게 흘러간다 — 이미 방아쇠가 당겨진 것이다.
         UpdateBurst();
 

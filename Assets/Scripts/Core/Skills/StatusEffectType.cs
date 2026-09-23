@@ -82,7 +82,15 @@ public enum StatusEffectType
     WardLightning = 17,
 
     /// <summary>내독 — 받는 카오스 피해 감소.</summary>
-    WardChaos = 18
+    WardChaos = 18,
+
+    /// <summary>
+    /// 폭주 — 흡수액(보스 약품)이 부여. 방어도·이동·최대 체력이 오르는 대신
+    /// 【1초마다 체력이 깎인다.】 덕코프 「타길라의 힘」#1206과 같다.
+    ///
+    /// 이름을 「흡수」로 두지 않는다 — 흡수는 슬라임의 기본 행동(흡수 범위)이다.
+    /// </summary>
+    Frenzy = 19
 }
 
 /// <summary>바닥에 남는 지형 상태 — v5 §5-2.</summary>

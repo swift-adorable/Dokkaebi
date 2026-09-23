@@ -690,5 +690,64 @@ namespace Blob.Tests
             // 다시 걸면 지속시간만 처음으로 돌아간다. (문서 6절 「덮어쓴다」)
             Assert.AreEqual(1, state.StacksOf(StatusEffectType.Haste));
         }
+
+        // ── 폭주 — 덕코프 「타길라의 힘」 (8-E) ───────────────────────
+
+        [Test]
+        public void 폭주는_방어도_이동_최대체력을_올린다()
+        {
+            var state = new StatusEffectState();
+
+            state.Apply(StatusEffectType.Frenzy, 1f);
+
+            Assert.AreEqual(StatusEffectTable.FrenzyArmourBonus, state.ArmourBonus, 0.001f);
+            Assert.AreEqual(1f + StatusEffectTable.FrenzySpeedBonus, state.SpeedMultiplier, 0.001f);
+            Assert.AreEqual(StatusEffectTable.FrenzyMaxHealthBonus, state.MaxHealthBonus);
+        }
+
+        [Test]
+        public void 폭주는_1초마다_2씩_깎는다()
+        {
+            var state = new StatusEffectState();
+            var buffer = new List<DamageRequest>();
+
+            state.Apply(StatusEffectType.Frenzy, 1f);
+
+            int total = 0;
+
+            for (int i = 0; i < 10; i++)
+            {
+                state.Tick(1f, false, buffer);
+
+                foreach (DamageRequest request in buffer)
+                    total += request.baseDamage;
+            }
+
+            Assert.AreEqual(20, total);
+        }
+
+        [Test]
+        public void 폭주를_끝까지_버티면_최대체력보다_많이_잃는다()
+        {
+            // 【살아 나오려고 쓰는 약이다.】 회복 없이 버티면 죽는다.
+            float total = StatusEffectTable.FrenzySelfDamagePerSecond
+                          * StatusEffectTable.FrenzySeconds;
+
+            Assert.Greater(total, 100 + StatusEffectTable.FrenzyMaxHealthBonus);
+        }
+
+        [Test]
+        public void 폭주의_자해는_방어도를_무시한다()
+        {
+            // 방어도를 올려 주는 상태가 제 자해를 방어도로 막으면 대가가 줄어든다.
+            var state = new StatusEffectState();
+            var buffer = new List<DamageRequest>();
+
+            state.Apply(StatusEffectType.Frenzy, 1f);
+            state.Tick(1f, false, buffer);
+
+            Assert.IsTrue(buffer.Count > 0);
+            Assert.IsTrue(buffer[0].bypassArmour);
+        }
     }
 }

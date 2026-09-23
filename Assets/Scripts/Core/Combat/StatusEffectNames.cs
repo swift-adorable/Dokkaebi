@@ -32,6 +32,7 @@ public static class StatusEffectNames
             case StatusEffectType.WardCold: return "내한";
             case StatusEffectType.WardLightning: return "절연";
             case StatusEffectType.WardChaos:     return "내독";
+            case StatusEffectType.Frenzy:        return "폭주";
             default:                        return "—";
         }
     }

@@ -101,6 +101,26 @@ public static class StatusEffectTable
     public const float WardSeconds = 120f;
     public const float WardMultiplier = 0.75f;
 
+    // ── 폭주 — 덕코프 「타길라의 힘」#1206 ───────────────────────────
+    //
+    //   신체 방어구 +1 · 이동 능력 +0.1 · 최대 생명력 +10 ·
+    //   1초마다 2 피해를 받음 · 90초 · 배타 태그 Tagilla   [확인됨]
+    //
+    // 시야 거리 +4 · 감지 거리 +1 · 체력(스태미나) +15 · 근접 +0.1은 옮기지 않는다.
+    // Blob에는 플레이어 시야·스태미나·근접 축이 없다.
+    //
+    // 【90초 × 2 = 180 피해다.】 최대 체력 110보다 많다. 회복 없이 끝까지
+    // 버티면 죽는다 — 덕코프가 그렇게 만들었다. 「이기려고 쓰는 것이 아니라
+    // 살아 나오려고 쓰는 것」(소모품 문서 4-2)이 이 숫자로 성립한다.
+
+    public const float FrenzySeconds = 90f;
+    public const float FrenzyArmourBonus = 1f;
+    public const float FrenzySpeedBonus = 0.1f;
+    public const int FrenzyMaxHealthBonus = 10;
+
+    /// <summary>폭주의 초당 자해 피해. 계수로 쓰므로 부여 시 기준 피해는 1로 넘긴다.</summary>
+    public const float FrenzySelfDamagePerSecond = 2f;
+
     public static StatusEffectSpec Get(StatusEffectType type)
     {
         switch (type)
@@ -189,6 +209,13 @@ public static class StatusEffectTable
             case StatusEffectType.WardChaos:
                 return new StatusEffectSpec(0f, WardSeconds, 1, DamageElement.Chaos);
 
+            // 폭주 — 이로운 상태 중 유일하게 피해를 준다. 기준 피해 1 × 계수 2 = 초당 2.
+            // 물리로 두되 상태이상 틱이므로 방어도를 무시한다 — 방어도를 올려 주는
+            // 상태가 제 자해를 방어도로 막으면 대가가 줄어든다.
+            case StatusEffectType.Frenzy:
+                return new StatusEffectSpec(FrenzySelfDamagePerSecond, FrenzySeconds, 1,
+                    DamageElement.Physical);
+
             default:
                 return new StatusEffectSpec(0f, 0f, 1, DamageElement.Physical);
         }
@@ -243,6 +270,7 @@ public static class StatusEffectTable
             case StatusEffectType.WardCold:
             case StatusEffectType.WardLightning:
             case StatusEffectType.WardChaos:
+            case StatusEffectType.Frenzy:
                 return true;
 
             default:

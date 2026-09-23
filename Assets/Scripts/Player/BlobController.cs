@@ -122,6 +122,15 @@ public class BlobController : MonoBehaviour
             return;
         }
 
+        // 【동결·마비 — 이동도 공격도 못 한다.】 이동은 속도 0으로 이미 막히지만
+        // 사격·대시·흡수는 속도와 무관하게 돌아간다. 여기서 끊지 않으면
+        // 얼어붙은 채로 총을 쏘는 그림이 나온다.
+        if (health != null && health.Status.IsIncapacitated)
+        {
+            movement.SetInput(Vector2.zero);
+            return;
+        }
+
         movement.SetInput(input.MoveInput);
         aiming.SetAim(input.AimInput);
 

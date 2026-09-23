@@ -9,8 +9,8 @@ using System;
 /// </summary>
 public sealed class StatusEffectState
 {
-    // None 포함. 해로운 9종 + 이로운 8종(가속·보강·재생·적재·방호 4) + 대가 1종.
-    private const int TypeCount = 19;
+    // None 포함. 해로운 9종 + 이로운 9종(가속·보강·재생·적재·방호 4·폭주) + 대가 1종.
+    private const int TypeCount = 20;
 
     private readonly double[] remaining = new double[TypeCount];
     private readonly int[] stacks = new int[TypeCount];
@@ -385,6 +385,9 @@ public sealed class StatusEffectState
             if (Has(StatusEffectType.Fatigue))
                 scale *= 1f - StatusEffectTable.FatigueSpeedPenalty;
 
+            if (Has(StatusEffectType.Frenzy))
+                scale *= 1f + StatusEffectTable.FrenzySpeedBonus;
+
             return scale;
         }
     }
@@ -408,7 +411,18 @@ public sealed class StatusEffectState
     /// 남의 상태이상이 반으로 깎으면 응고제를 쓸 이유가 사라진다.
     /// </summary>
     public float ArmourBonus
-        => Has(StatusEffectType.Bolster) ? StatusEffectTable.BolsterArmourBonus : 0f;
+        => (Has(StatusEffectType.Bolster) ? StatusEffectTable.BolsterArmourBonus : 0f)
+         + (Has(StatusEffectType.Frenzy) ? StatusEffectTable.FrenzyArmourBonus : 0f);
+
+    /// <summary>
+    /// 상태이상이 더하는 최대 체력. 지금은 폭주(+10)뿐이다.
+    ///
+    /// 끝나면 상한이 도로 줄고, 넘치는 체력은 잘린다 — 그것도 대가다.
+    /// 「폭주로 늘린 10을 회복약으로 채워 두고 끝나면 그대로 남는다」가
+    /// 되면 최대 체력을 사서 쌓는 방법이 생긴다.
+    /// </summary>
+    public int MaxHealthBonus
+        => Has(StatusEffectType.Frenzy) ? StatusEffectTable.FrenzyMaxHealthBonus : 0;
 
     /// <summary>적재(확장제)가 곱하는 최대 소지 중량 배율.</summary>
     public float CarryWeightMultiplier

@@ -151,6 +151,29 @@ public static class ConsumableAssetGenerator
             StatusEffectType.Overload, waterCost: 10f, energyCost: 0f,
             weight: 0.21f, value: 648));
 
+        // ── 흡수액 — 보스 약품 (문서 4-2) ─────────────────────────────
+        //
+        // 덕코프 「타길라의 약품」#1400 그대로다 — 에너지 +15 · 수분 −50 ·
+        // 무게 0.2 · 가치 2280 · 스택 3 → 「타길라의 힘」 90초. [확인됨]
+        //
+        // 【90초를 버티면 180을 잃는다.】 최대 체력 110보다 많다.
+        // 회복 없이 끝까지 가면 죽는다. 살아 나오려고 쓰는 약이다.
+        //
+        // 미노타우로스 약품(에너지 +25 · 수분 −75)은 넣지 않는다. 위키의
+        // 「미노타우로스의 힘」 buff 수치가 타길라와 한 글자도 다르지 않게
+        // 적혀 있어, 설명(「극대」·「대량의 생명력」)과 어긋난다. [불확실]
+        // 그대로 넣으면 수분만 더 먹는 하위 호환이 된다.
+        list.Add(new Row
+        {
+            id = "con_absorbent", name = "흡수액",
+            desc = "몸이 제 것이 아닌 것처럼 움직인다. 그 대가로 안에서부터 삭는다.",
+            category = ConsumableCategory.Boost,
+            grant = StatusEffectType.Frenzy,
+            energy = 15f, waterCost = 50f,
+            cure = StatusEffectType.None, cureStacks = 99,
+            weight = 0.2f, stackMax = 3, value = 2280
+        });
+
         // ── 방호 — 장비를 대체하지 못한다 (문서 5절) ──────────────────
         //
         // 덕코프 저항 주사약 4종과 같다 — 「받는 해당 속성 피해 −25%」·120초·

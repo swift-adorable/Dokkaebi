@@ -36,6 +36,7 @@
 | ~~A8~~ | ~~저항 「가장 낮은 것 하나만」~~ | **해결 (7-B)** — `EnemyProfile.Build`가 몬스터 속성을 저항에 합성한다. 다만 합성 경로는 `TakeLowest`가 아니라 새로 만든 `ElementalResistances.LowerTo`다 (아래 주) | `Core/Hunting/EnemyProfile.cs` |
 | ~~A+~~ | ~~상태이상 면역~~ | **해결 (6-I)** — `Health.IsImmuneTo`가 항상 false였다. 역치 각인 3종 + 얼굴 마스크 15종이 이제 작동한다 | `Player/PlayerLoadout.cs` |
 | ~~A11~~ | ~~소리 축~~ | **해결 (7-D)** — `LoadoutSnapshot`이 세 축을 합산하고, `PlayerNoise`가 소리를 내고, `Perception`이 그 소리를 듣는다 | `Core/AI/Perception.cs` · `Player/PlayerNoise.cs` |
+| ~~A13~~ | ~~상태이상이 몸에 닿지 않는다~~ | **해결 (8-E)** — 6-K 재설계 뒤로 `StatusEffectState.SpeedMultiplier`와 `IsIncapacitated`를 **읽는 곳이 하나도 없었다.** 냉각은 적을 느리게 하지 못했고, 동결·마비는 적도 플레이어도 멈추지 못했다. 판정과 테스트는 전부 맞았는데 몸에 닿는 선 하나가 빠져 있었다. 8-C의 가속·탈진도 같은 이유로 플레이어에게 닿지 않았다. 확장제는 끝나도 한도가 되돌아가지 않았다 | `PlayerMovement` · `EnemyMovement` · `EnemyAttack` · `BlobController` · `PlayerLoadout` |
 | **A12** | **사망 화면** | `Managers/GameManager.cs` — `GameOver()`가 `GameState.GameOver`로 보내고 `Time.timeScale = 0`을 건다 | **`GameState.GameOver`를 듣는 화면이 하나도 없다.** 죽으면 화면이 통째로 멈춘 채 아무것도 뜨지 않고, Play Mode를 껐다 켜는 것 말고는 나올 길이 없다. 디버그 「체력 회복」이 죽어 있으면 되살리고 시간을 다시 흐르게 한다 — 임시 출구다 (7-K). 제대로 된 사망 화면(추출 실패 → 벙커 복귀 → 정산)은 벙커·정산과 함께 가야 하므로 9단계다 |
 | **A9** | **패시브 효과 17종 중 13종** | `Core/Progression/PassiveEffectType.cs` | 실제로 읽히는 것은 `CarrySlots` · `CarryWeight` · `AbsorbAmount` · `LootRolls` **4종뿐** |
 | ~~A10~~ | ~~장비 에셋 82종~~ | **해결 (6-H)** — `PlayerWeapon.ApplyProfile` → 탄에 `SetWeaponBase` | `Player/PlayerLoadout.cs` |
