@@ -12,7 +12,7 @@ using UnityEngine.SceneManagement;
 ///   덕코프        Blob (지금)
 ///   출격 전       게임 시작        ← 읽기만 한다. 디스크와 달라진 것이 없다
 ///   출격 후       사망             ← 저장한다 (BlobController.HandleDied)
-///                 추출             ← 아직 없다 (9단계)
+///                 철수             ← 아직 없다 (9단계)
 ///   벙커에서의 일  —               ← 벙커가 아직 없다 (8단계 뒤쪽)
 ///
 /// 【출격 중에는 저장하지 않는다.】 앱이 백그라운드로 가도, 강제로 꺼져도
@@ -97,7 +97,7 @@ public static class SaveManager
 
         Apply(data);
 
-        GameLogger.Log($"[Save] 불러옴 — 각성 Lv.{data.accountLevel} · 크레딧 {data.credits} · "
+        GameLogger.Log($"[Save] 불러옴 — 각성 Lv.{data.awakeningLevel} · 크레딧 {data.credits} · "
                        + $"패시브 {data.learnedPassives.Count} · 도감 {data.codex.Count} · "
                        + $"각인 {CountFilled(data.imprints)}");
 
@@ -107,7 +107,7 @@ public static class SaveManager
     /// <summary>
     /// 지금 상태를 저장한다. 【출격 경계에서만 부른다.】
     /// </summary>
-    /// <param name="reason">로그에 남길 이유. 「사망」 「추출」 같은 것.</param>
+    /// <param name="reason">로그에 남길 이유. 「사망」 「철수」 같은 것.</param>
     public static bool Commit(string reason)
     {
         if (!Enabled)
@@ -123,7 +123,7 @@ public static class SaveManager
 
         SaveStore.Write(SavePath, data);
 
-        GameLogger.Log($"[Save] 저장 ({reason}) — 각성 Lv.{data.accountLevel} · 크레딧 {data.credits}");
+        GameLogger.Log($"[Save] 저장 ({reason}) — 각성 Lv.{data.awakeningLevel} · 크레딧 {data.credits}");
 
         return true;
     }
@@ -145,7 +145,7 @@ public static class SaveManager
 
         if (PlayerStats.HasInstance)
         {
-            data.accountLevel = PlayerStats.Instance.Level;
+            data.awakeningLevel = PlayerStats.Instance.AwakeningLevel;
             data.experience = PlayerStats.Instance.CurrentXP;
         }
 
@@ -195,7 +195,7 @@ public static class SaveManager
         if (data == null)
             return;
 
-        PlayerStats.EnsureInstance().Restore(data.accountLevel, data.experience);
+        PlayerStats.EnsureInstance().Restore(data.awakeningLevel, data.experience);
 
         PassiveManager passive = PassiveManager.EnsureInstance();
 

@@ -45,10 +45,10 @@ public enum PassiveEffectType
     /// </summary>
     SafeSlots = 20,
 
-    /// <summary>【해금】 추출 실패 시 내 시체에서 1회 회수.</summary>
+    /// <summary>【해금】 철수 실패 시 내 시체에서 1회 회수.</summary>
     CorpseRecovery = 21,
 
-    /// <summary>【해금】 지도에 추출 지점 상시 표시.</summary>
+    /// <summary>【해금】 지도에 철수 지점 상시 표시.</summary>
     ExtractMark = 22,
 
     // ── 중개 : 벙커 경제 ──────────────────────────────────────────────
@@ -157,7 +157,7 @@ public static class PassiveEffectInfo
             case PassiveEffectType.RareDropRate:   return "희귀 드롭";
             case PassiveEffectType.SafeSlots:      return "보존 칸";
             case PassiveEffectType.CorpseRecovery: return "시체 회수";
-            case PassiveEffectType.ExtractMark:    return "추출 지점 표시";
+            case PassiveEffectType.ExtractMark:    return "철수 지점 표시";
             case PassiveEffectType.SellPrice:      return "판매가";
             case PassiveEffectType.StashSlots:     return "창고 칸";
             case PassiveEffectType.ShopRefresh:    return "상점 갱신 쿨다운";

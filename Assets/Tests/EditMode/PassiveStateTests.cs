@@ -103,7 +103,7 @@ namespace Blob.Tests
         public void 계열마다_해금_방식이_정해져_있다()
         {
             // 덕코프 구조 — 블랙마켓은 레벨 없이 돈만, 이상한 개조는 조우로. [확인됨]
-            Assert.AreEqual(PassiveUnlockKind.AccountLevel,
+            Assert.AreEqual(PassiveUnlockKind.AwakeningLevel,
                 PassiveBranchInfo.UnlockKind(PassiveBranch.Adapt));
 
             Assert.AreEqual(PassiveUnlockKind.CreditsOnly,

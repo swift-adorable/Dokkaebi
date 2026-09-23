@@ -56,7 +56,8 @@ public class PassiveNode : ScriptableObject
     [Header("조건")]
     [Tooltip("이 각성 레벨 미만에서는 배울 수 없다. 중개 계열은 무시된다.")]
     [Min(1)]
-    [SerializeField] private int requiredAccountLevel = 1;
+    [UnityEngine.Serialization.FormerlySerializedAs("requiredAccountLevel")]
+    [SerializeField] private int requiredAwakeningLevel = 1;
 
     [Tooltip("배우는 데 드는 크레딧.")]
     [Min(0)]
@@ -87,7 +88,7 @@ public class PassiveNode : ScriptableObject
     public PassiveEffectType Effect => effect;
     public float Value => value;
 
-    public int RequiredAccountLevel => Mathf.Max(1, requiredAccountLevel);
+    public int RequiredAwakeningLevel => Mathf.Max(1, requiredAwakeningLevel);
     public int Cost => Mathf.Max(0, cost);
 
     public IReadOnlyList<PassiveMaterial> Materials => materials;
@@ -137,7 +138,7 @@ public class PassiveNode : ScriptableObject
         branch = nodeBranch;
         effect = effectType;
         value = effectValue;
-        requiredAccountLevel = level;
+        requiredAwakeningLevel = level;
         cost = nodeCost;
         materials = nodeMaterials ?? new PassiveMaterial[0];
         prerequisites = prereq ?? new string[0];

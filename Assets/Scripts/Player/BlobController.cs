@@ -77,14 +77,14 @@ public class BlobController : MonoBehaviour
     }
 
     /// <summary>
-    /// 추출 실패(사망) 처리.
+    /// 철수 실패(사망) 처리.
     ///
     /// 【죽으면 들고 있던 것 전부.】 각인만 남는다.
     /// 규칙 자체는 PlayerInventory·EquipmentLoadout에 있고 여기서는 부르기만 한다.
     /// (docs/Blob_Progression_System.md 6절)
     ///
     /// 이 호출이 없던 동안에는 죽어도 아무것도 잃지 않았다 —
-    /// 추출 루팅 게임의 뼈대가 실행 경로에서 빠져 있었다. (docs/Blob_Audit.md A2)
+    /// 철수 루팅 게임의 뼈대가 실행 경로에서 빠져 있었다. (docs/Blob_Audit.md A2)
     /// </summary>
     private void HandleDied()
     {

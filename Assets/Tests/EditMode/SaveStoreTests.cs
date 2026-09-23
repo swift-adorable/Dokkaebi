@@ -34,7 +34,7 @@ namespace Blob.Tests
         {
             return new SaveData
             {
-                accountLevel = level,
+                awakeningLevel = level,
                 credits = credits,
                 discoveredRegression = true,
                 learnedPassives = new List<string> { "psv_a", "psv_b" },
@@ -56,7 +56,7 @@ namespace Blob.Tests
 
             Assert.AreEqual(SaveLoadResult.Main, SaveStore.Read(path, out SaveData data));
 
-            Assert.AreEqual(7, data.accountLevel);
+            Assert.AreEqual(7, data.awakeningLevel);
             Assert.AreEqual(1234, data.credits);
             Assert.IsTrue(data.discoveredRegression);
             CollectionAssert.AreEqual(new[] { "psv_a", "psv_b" }, data.learnedPassives);
@@ -98,7 +98,7 @@ namespace Blob.Tests
             Assert.IsTrue(File.Exists(path + ".bak"));
 
             // 백업은 【직전】 저장이다.
-            Assert.AreEqual(1, SaveStore.FromJson(File.ReadAllText(path + ".bak")).accountLevel);
+            Assert.AreEqual(1, SaveStore.FromJson(File.ReadAllText(path + ".bak")).awakeningLevel);
         }
 
         [Test]
@@ -108,10 +108,10 @@ namespace Blob.Tests
             SaveStore.Write(path, Sample(level: 4));
 
             // 쓰다 만 파일 — 모바일에서 저장 중에 앱이 죽으면 이렇게 된다.
-            File.WriteAllText(path, "{ \"accountLevel\": 4, \"cred");
+            File.WriteAllText(path, "{ \"awakeningLevel\": 4, \"cred");
 
             Assert.AreEqual(SaveLoadResult.Backup, SaveStore.Read(path, out SaveData data));
-            Assert.AreEqual(3, data.accountLevel);
+            Assert.AreEqual(3, data.awakeningLevel);
         }
 
         [Test]
@@ -181,14 +181,14 @@ namespace Blob.Tests
         [Test]
         public void 판1_세이브를_읽으면_레벨은_그대로이고_경험치는_0이다()
         {
-            // 판 1에는 experience가 없다. accountLevel은 오르는 길이 없던 값이라
-            // 그대로 각성 레벨로 쓴다.
+            // 판 1에는 experience가 없고, 레벨은 옛 키 accountLevel에 있다.
+            // 오르는 길이 없던 값이라 그대로 각성 레벨로 쓴다.
             File.WriteAllText(path,
                 "{ \"version\": 1, \"accountLevel\": 6, \"credits\": 900 }");
 
             Assert.AreEqual(SaveLoadResult.Main, SaveStore.Read(path, out SaveData data));
 
-            Assert.AreEqual(6, data.accountLevel);
+            Assert.AreEqual(6, data.awakeningLevel);
             Assert.AreEqual(0, data.experience);
             Assert.AreEqual(900, data.credits);
         }
@@ -203,6 +203,29 @@ namespace Blob.Tests
             SaveStore.Read(path, out SaveData read);
 
             Assert.AreEqual(37, read.experience);
+        }
+
+        [Test]
+        public void 판2의_옛_키도_읽는다()
+        {
+            File.WriteAllText(path,
+                "{ \"version\": 2, \"accountLevel\": 9, \"experience\": 12 }");
+
+            Assert.AreEqual(SaveLoadResult.Main, SaveStore.Read(path, out SaveData data));
+            Assert.AreEqual(9, data.awakeningLevel);
+            Assert.AreEqual(12, data.experience);
+        }
+
+        [Test]
+        public void 새로_쓴_파일에는_옛_키가_없다()
+        {
+            // 두 이름이 한 파일에 공존하면 어느 쪽이 맞는지 알 수 없다.
+            SaveStore.Write(path, Sample());
+
+            string json = File.ReadAllText(path);
+
+            StringAssert.Contains("\"awakeningLevel\"", json);
+            StringAssert.DoesNotContain("\"accountLevel\"", json);
         }
     }
 }

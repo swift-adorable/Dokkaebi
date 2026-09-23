@@ -517,7 +517,7 @@ public class SocketedBuild
         return removed;
     }
 
-    /// <summary>전부 뺀다. 뺀 젬은 returned에 담긴다. 추출 정산에 쓴다.</summary>
+    /// <summary>전부 뺀다. 뺀 젬은 returned에 담긴다. 철수 정산에 쓴다.</summary>
     public void UnequipAll(List<SkillDefinition> returned = null)
     {
         for (int c = 0; c < MaxCores; c++)

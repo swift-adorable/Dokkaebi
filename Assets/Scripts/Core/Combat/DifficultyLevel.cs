@@ -13,7 +13,7 @@ public enum DifficultyLevel
     Balanced = 2,
     /// <summary>서바이벌 — 모든 기획 수치의 기준값.</summary>
     Survival = 3,
-    /// <summary>극한 — 추출 실패 시 회수 불가.</summary>
+    /// <summary>극한 — 철수 실패 시 회수 불가.</summary>
     Extreme = 4,
     /// <summary>폭주 — 변경 불가. 골절·중상 상태이상이 추가된다.</summary>
     Frenzy = 5

@@ -114,7 +114,7 @@ public class CorpseController : MonoBehaviour, IPoolable
     /// 전리품을 채운다. 표에서 뽑은 것에 더해 젬 드롭을 굴린다.
     ///
     /// 젬을 가방에 바로 넣지 않고 여기 담는 이유 —
-    /// 「무엇을 들고 갈지 고른다」가 추출 루팅의 결정이다.
+    /// 「무엇을 들고 갈지 고른다」가 철수 루팅의 결정이다.
     /// 자동으로 가방에 들어가면 그 결정이 사라진다.
     /// </summary>
     private void FillLoot()

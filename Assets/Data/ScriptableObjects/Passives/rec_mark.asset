@@ -13,12 +13,12 @@ MonoBehaviour:
   m_Name: rec_mark
   m_EditorClassIdentifier: Blob.Runtime::PassiveNode
   id: rec_mark
-  displayName: "\uCD94\uCD9C \uC88C\uD45C"
-  description: "\uC9C0\uB3C4\uC5D0 \uCD94\uCD9C \uC9C0\uC810\uC774 \uC0C1\uC2DC \uD45C\uC2DC\uB41C\uB2E4."
+  displayName: "\uCCA0\uC218 \uC88C\uD45C"
+  description: "\uC9C0\uB3C4\uC5D0 \uCCA0\uC218 \uC9C0\uC810\uC774 \uC0C1\uC2DC \uD45C\uC2DC\uB41C\uB2E4."
   branch: 2
   effect: 22
   value: 1
-  requiredAccountLevel: 6
+  requiredAwakeningLevel: 6
   cost: 2200
   materials: []
   prerequisites:

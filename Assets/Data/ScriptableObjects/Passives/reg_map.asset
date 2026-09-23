@@ -15,11 +15,11 @@ MonoBehaviour:
   id: reg_map
   displayName: "\uB204\uB77D\uB41C \uC9C0\uB3C4"
   description: "\uC9C0\uB3C4\uC5D0 \uC804\uB9AC\uD488 \uC704\uCE58\uAC00 \uD45C\uC2DC\uB41C\uB2E4.
-    \uC6D0\uB798 \uC5C6\uB358 \uD45C\uC2DD\uC774\uB2E4."
+    \uC6D0\uB798 \uC5C6\uB358 \uB9C8\uCEE4\uC774\uB2E4."
   branch: 4
   effect: 43
   value: 1
-  requiredAccountLevel: 1
+  requiredAwakeningLevel: 1
   cost: 8000
   materials:
   - item: {fileID: 11400000, guid: abf245023c6dc4773a272254e9082cc0, type: 2}

@@ -29,7 +29,7 @@ namespace Blob.Tests
         {
             stats.Restore(level: 8, experience: 3);
 
-            Assert.AreEqual(8, stats.Level);
+            Assert.AreEqual(8, stats.AwakeningLevel);
             Assert.AreEqual(3, stats.CurrentXP);
             Assert.AreEqual(stats.RequiredXPAt(8), stats.RequiredXP);
         }
@@ -49,7 +49,7 @@ namespace Blob.Tests
         {
             stats.Restore(level: 0, experience: -5);
 
-            Assert.AreEqual(1, stats.Level);
+            Assert.AreEqual(1, stats.AwakeningLevel);
             Assert.AreEqual(0, stats.CurrentXP);
         }
 
