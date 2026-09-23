@@ -252,6 +252,46 @@ public static class PlaytestActions
                + $"({bag.UsedSlots}/{bag.SlotCapacity}칸, {bag.TotalWeight:0.0}/{bag.WeightLimit:0.0}kg)";
     }
 
+    /// <summary>
+    /// 소모품을 한 벌 지급한다. 회복 · 해제 · 음료와 음식이 전부 들어온다.
+    ///
+    /// 【쓸 수 있는 것만 카탈로그에 들어 있다.】 강화·방호는 담을 축이
+    /// 아직 없어 효과가 비어 있고, 그런 것은 사이드 메뉴에 「사용」 줄이
+    /// 뜨지 않으므로 지급해도 확인할 것이 없다.
+    /// </summary>
+    public static string GiveConsumables()
+    {
+        if (Catalog == null)
+            return NoCatalog;
+
+        IReadOnlyList<ItemDefinition> items = Catalog.Consumables;
+
+        if (items == null || items.Count == 0)
+            return "소모품이 카탈로그에 없습니다.\n"
+                   + "「Blob/Items/소모품 에셋 생성」 다음에 "
+                   + "「Blob/Playtest/검증 카탈로그 생성」을 실행하십시오.";
+
+        Inventory bag = PlayerInventory.EnsureInstance().Bag;
+
+        int given = 0;
+
+        foreach (ItemDefinition item in items)
+        {
+            if (item == null)
+                continue;
+
+            // 겹치는 것은 두 개씩. 쓰고 나서 개수가 줄어드는지 봐야 한다.
+            given += bag.TryAdd(item, item.StackMax > 1 ? 2 : 1);
+        }
+
+        PlayerInventory.Instance.RefreshCapacity();
+
+        return $"소모품 {given}개 지급 ({items.Count}종)\n"
+               + $"({bag.UsedSlots}/{bag.SlotCapacity}칸, {bag.TotalWeight:0.0}/{bag.WeightLimit:0.0}kg)\n"
+               + "가방에서 칸을 눌러 「사용」 줄을 확인하십시오 — "
+               + "체력·수분이 가득하면 그 줄은 뜨지 않습니다.";
+    }
+
     /// <summary>가방을 통째로 비운다. 과중량 실험을 되돌린다.</summary>
     public static string ClearBag()
     {

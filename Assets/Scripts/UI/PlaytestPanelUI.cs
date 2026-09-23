@@ -34,6 +34,7 @@ public class PlaytestPanelUI : MonoBehaviour
         ("각성 Lv +1",    PlaytestActions.RaiseAwakeningLevel),
         ("계정 Lv +1",    PlaytestActions.RaiseAccountLevel),
         ("겹치는 재료",   PlaytestActions.GiveStackables),
+        ("소모품 한 벌",  PlaytestActions.GiveConsumables),
         ("가방 채우기",   PlaytestActions.FillBag),
         ("가방 비우기",   PlaytestActions.ClearBag),
         ("체력 회복",     PlaytestActions.HealSelf),

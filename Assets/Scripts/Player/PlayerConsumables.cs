@@ -1,0 +1,136 @@
+using UnityEngine;
+
+/// <summary>
+/// 소모품을 실제로 쓰는 곳. 【계산은 ConsumableUse가 한다.】
+/// 여기는 지금 상태를 모아 넘기고, 나온 결과를 적용하고, 한 개를 뺀다.
+/// (docs/Blob_Consumable_System.md)
+///
+/// MonoBehaviour로 두지 않는 이유 — 쓰는 순간에만 필요한 일이라
+/// 매 프레임 도는 것이 없다. 화면이 부르는 함수 하나면 충분하다.
+/// </summary>
+public static class PlayerConsumables
+{
+    /// <summary>
+    /// 가방의 한 칸에서 하나를 쓴다. 결과 문장을 돌려준다.
+    ///
+    /// 【순서가 중요하다.】 값을 먼저 정하고(Evaluate) → 적용하고 →
+    /// 마지막에 가방에서 뺀다. 빼는 것을 앞에 두면 중간에 실패했을 때
+    /// 아이템만 사라진다.
+    /// </summary>
+    public static string Use(ItemStack stack)
+    {
+        if (stack == null || stack.Definition == null)
+            return "쓸 물건이 없습니다.";
+
+        ItemDefinition definition = stack.Definition;
+
+        Health health = FindPlayerHealth();
+
+        if (health == null)
+            return "플레이어를 찾지 못했습니다.";
+
+        ConsumableSubject subject = Snapshot(health, definition);
+
+        ConsumableOutcome outcome = ConsumableUse.Evaluate(definition, subject);
+
+        if (!outcome.Ok)
+            return ConsumableUse.Explain(outcome.Error);
+
+        Apply(health, outcome);
+
+        // 여기까지 와야 한 개를 뺀다.
+        PlayerInventory.EnsureInstance().Bag.Remove(definition, 1);
+
+        return Describe(definition, outcome);
+    }
+
+    /// <summary>화면이 「사용」 줄을 띄울지 정할 때 쓴다. 상태를 바꾸지 않는다.</summary>
+    public static bool CanUse(ItemDefinition definition)
+    {
+        if (definition == null || !definition.IsUsable)
+            return false;
+
+        Health health = FindPlayerHealth();
+
+        if (health == null)
+            return false;
+
+        return ConsumableUse.Evaluate(definition, Snapshot(health, definition)).Ok;
+    }
+
+    private static ConsumableSubject Snapshot(Health health, ItemDefinition definition)
+    {
+        ConsumableEffect effect = definition.Consumable;
+
+        bool hasCureTarget = effect != null
+                             && effect.Cures
+                             && health.Status.Has(effect.Cure);
+
+        // 생존 축은 아직 없을 수 있다 — 그때는 「가득」으로 보아
+        // 음료·음식이 NothingToDo로 걸리게 둔다. 없는 축을 채울 수는 없다.
+        if (!PlayerSurvival.HasInstance)
+        {
+            return new ConsumableSubject(health.Current, health.Max, health.IsDead,
+                1f, 1f, 1f, 1f, hasCureTarget);
+        }
+
+        SurvivalState survival = PlayerSurvival.Instance.State;
+
+        return new ConsumableSubject(health.Current, health.Max, health.IsDead,
+            survival.Water, survival.MaxWater,
+            survival.Energy, survival.MaxEnergy,
+            hasCureTarget);
+    }
+
+    private static void Apply(Health health, in ConsumableOutcome outcome)
+    {
+        if (outcome.Heal > 0)
+            health.Heal(outcome.Heal);
+
+        if (outcome.Cure != StatusEffectType.None)
+            health.Status.Clear(outcome.Cure);
+
+        if (!PlayerSurvival.HasInstance)
+            return;
+
+        if (outcome.Water > 0f || outcome.Energy > 0f)
+            PlayerSurvival.Instance.Restore(outcome.Water, outcome.Energy);
+
+        // 【대가는 채운 뒤에 뺀다.】 먼저 빼면 상한에 걸려 채움이 줄어든다.
+        if (outcome.WaterCost > 0f || outcome.EnergyCost > 0f)
+            PlayerSurvival.Instance.Drain(outcome.WaterCost, outcome.EnergyCost);
+    }
+
+    /// <summary>무엇이 들어갔는지 한 줄로. 숫자가 안 보이면 쓴 것 같지 않다.</summary>
+    private static string Describe(ItemDefinition definition, in ConsumableOutcome outcome)
+    {
+        var parts = new System.Collections.Generic.List<string>(4);
+
+        if (outcome.Heal > 0)
+            parts.Add($"체력 +{outcome.Heal}");
+
+        if (outcome.Water > 0f)
+            parts.Add($"수분 +{outcome.Water:0.#}");
+
+        if (outcome.Energy > 0f)
+            parts.Add($"에너지 +{outcome.Energy:0.#}");
+
+        if (outcome.Cure != StatusEffectType.None)
+            parts.Add($"{StatusEffectNames.Of(outcome.Cure)} 해제");
+
+        if (outcome.WaterCost > 0f)
+            parts.Add($"수분 −{outcome.WaterCost:0.#}");
+
+        if (outcome.EnergyCost > 0f)
+            parts.Add($"에너지 −{outcome.EnergyCost:0.#}");
+
+        return $"{definition.DisplayName} — {string.Join(" · ", parts)}";
+    }
+
+    private static Health FindPlayerHealth()
+    {
+        var player = Object.FindAnyObjectByType<BlobController>(FindObjectsInactive.Exclude);
+
+        return player != null ? player.GetComponent<Health>() : null;
+    }
+}

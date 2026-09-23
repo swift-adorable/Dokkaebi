@@ -38,6 +38,9 @@ public class PlaytestCatalog : ScriptableObject
     [Header("스택 확인용 — 겹치는 재료·소모품")]
     [SerializeField] private List<ItemDefinition> stackables = new();
 
+    [Header("소모품 — 회복 · 해제 · 음료와 음식")]
+    [SerializeField] private List<ItemDefinition> consumables = new();
+
     public IReadOnlyList<ItemDefinition> StarterKit => starterKit;
     public IReadOnlyList<ItemDefinition> EndgameKit => endgameKit;
     public IReadOnlyList<ItemDefinition> Weapons => weapons;
@@ -55,6 +58,9 @@ public class PlaytestCatalog : ScriptableObject
     public ItemDefinition BulkMaterial => bulkMaterial;
     public IReadOnlyList<ItemDefinition> Stackables => stackables;
 
+    /// <summary>쓸 수 있는 소모품. 사이드 메뉴의 「사용」을 확인할 때 쓴다.</summary>
+    public IReadOnlyList<ItemDefinition> Consumables => consumables;
+
     public static PlaytestCatalog Load() => Resources.Load<PlaytestCatalog>(ResourcePath);
 
 #if UNITY_EDITOR
@@ -64,7 +70,8 @@ public class PlaytestCatalog : ScriptableObject
         List<ItemDefinition> keyImprintList, List<ItemDefinition> cores,
         List<ItemDefinition> supports, List<ItemDefinition> metas,
         List<ItemDefinition> heralds, List<ItemDefinition> checklist,
-        ItemDefinition bulk, List<ItemDefinition> stackableList)
+        ItemDefinition bulk, List<ItemDefinition> stackableList,
+        List<ItemDefinition> consumableList)
     {
         starterKit = starter;
         endgameKit = endgame;
@@ -78,6 +85,7 @@ public class PlaytestCatalog : ScriptableObject
         checklistGems = checklist;
         bulkMaterial = bulk;
         stackables = stackableList;
+        consumables = consumableList;
     }
 #endif
 }

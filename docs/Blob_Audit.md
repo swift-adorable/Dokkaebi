@@ -214,7 +214,7 @@
 >
 > 이 작업으로 **KnownGaps 2종(화염 조율·원소 융합)도 함께 비었다.**
 
-### D4. 소모품 분류를 담을 필드가 없다 — **8단계로 이월 (결정)**
+### ~~D4. 소모품 분류를 담을 필드가 없다~~ — 해결 (8-A) `ConsumableCategory` + `ConsumableEffect`
 
 `ItemKind.Consumable` 하나뿐이라 「같은 분류는 덮어쓴다」를 판정할 수 없다.
 
