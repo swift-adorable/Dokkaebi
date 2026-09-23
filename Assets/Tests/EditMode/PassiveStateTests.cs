@@ -6,7 +6,7 @@ using UnityEngine;
 namespace Blob.Tests
 {
     /// <summary>
-    /// 패시브 — 계정 축의 영구 성장. (docs/Blob_Passive_System.md)
+    /// 패시브 — 영구 성장. (docs/Blob_Passive_System.md)
     ///
     /// 【이 파일이 지키는 것 두 가지】
     ///  1. 패시브가 전투 수치를 주지 않는다. 문서에만 적어 두면
@@ -103,7 +103,7 @@ namespace Blob.Tests
         public void 계열마다_해금_방식이_정해져_있다()
         {
             // 덕코프 구조 — 블랙마켓은 레벨 없이 돈만, 이상한 개조는 조우로. [확인됨]
-            Assert.AreEqual(PassiveUnlockKind.AwakeningLevel,
+            Assert.AreEqual(PassiveUnlockKind.Level,
                 PassiveBranchInfo.UnlockKind(PassiveBranch.Adapt));
 
             Assert.AreEqual(PassiveUnlockKind.CreditsOnly,

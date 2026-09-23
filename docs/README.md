@@ -14,10 +14,10 @@ Unity 6 Mobile · Top-Down Shooter + Roguelite + Extraction Looting
 | [Equipment_System](Blob_Equipment_System.md) | 장비 · 무기 | 무엇을 입고 가는가 |
 | [Hunting_System](Blob_Hunting_System.md) | 적 | 무엇을 상대하는가 |
 | [Progression_System](Blob_Progression_System.md) | 진행 | 왜 다시 들어가는가 |
-| [Passive_System](Blob_Passive_System.md) | 패시브 · 계정 5계열 | **출격을 넘어 무엇이 남는가** |
+| [Passive_System](Blob_Passive_System.md) | 패시브 · 계정 5계열 | **파밍을 넘어 무엇이 남는가** |
 | [Imprint_System](Blob_Imprint_System.md) | 각인 8계열 | **죽어도 남는 것 — 전부 교환이다** |
 | [Consumable_System](Blob_Consumable_System.md) | 소모품 4분류 | 가방 한 칸을 무엇에 쓰는가 |
-| [Bunker_System](Blob_Bunker_System.md) | 벙커 · 제작 · 상점 · 퀘스트 | **출격과 출격 사이에 무엇을 하는가** |
+| [Bunker_System](Blob_Bunker_System.md) | 벙커 · 제작 · 상점 · 퀘스트 | **파밍과 파밍 사이에 무엇을 하는가** |
 | [Save_System](Blob_Save_System.md) | 저장 · 롤백 · 백업 | **무엇이 언제 남는가** |
 | [Audit](Blob_Audit.md) | 문서 ↔ 코드 대조 | **지금 무엇이 어긋나 있는가** |
 | [Decisions](Blob_Decisions.md) | 결정 대기 | **아직 근거 없이 굴러가는 값** |

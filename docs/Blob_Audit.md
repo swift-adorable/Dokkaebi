@@ -28,7 +28,7 @@
 |---|---|---|---|
 | ~~A1~~ | ~~장비 착용~~ | **해결 (6-H)** — 가방 화면에서 장비를 골라 8슬롯에 착용·해제한다 | `UI/InventoryScreenEquip.cs` |
 | ~~A2~~ | ~~사망 시 가방 소실~~ | **해결 (6-H)** — `BlobController.HandleDied`가 호출한다 | `Player/BlobController.cs` |
-| ~~A3~~ | ~~출격 초기화~~ | **해결 (6-H)** — 사망 처리에서 함께 호출한다 | `Player/BlobController.cs` |
+| ~~A3~~ | ~~파밍 초기화~~ | **해결 (6-H)** — 사망 처리에서 함께 호출한다 | `Player/BlobController.cs` |
 | ~~A4~~ | ~~과중량 페널티~~ | **해결 (6-H)** — `PlayerMovement.SpeedScale` · `PlayerDash.DistanceScale` | `Core/Equipment/LoadoutSnapshot.cs` |
 | **A5** | **기폭(원소 작렬)** | `Core/Combat/DetonationResolver.cs` | **테스트뿐.** 기폭 핵심 젬 3종이 아무 효과도 내지 않는다 |
 | **A6** | **잔류물 5종** | `Core/Combat/GroundEffectTable.cs` | **여전히 없음.** 다만 7-A 조사 중 **3종 모두에서 별개의 결함**이 나와 먼저 고쳤다 (아래 주) |
@@ -36,7 +36,7 @@
 | ~~A8~~ | ~~저항 「가장 낮은 것 하나만」~~ | **해결 (7-B)** — `EnemyProfile.Build`가 몬스터 속성을 저항에 합성한다. 다만 합성 경로는 `TakeLowest`가 아니라 새로 만든 `ElementalResistances.LowerTo`다 (아래 주) | `Core/Hunting/EnemyProfile.cs` |
 | ~~A+~~ | ~~상태이상 면역~~ | **해결 (6-I)** — `Health.IsImmuneTo`가 항상 false였다. 역치 각인 3종 + 얼굴 마스크 15종이 이제 작동한다 | `Player/PlayerLoadout.cs` |
 | ~~A11~~ | ~~소리 축~~ | **해결 (7-D)** — `LoadoutSnapshot`이 세 축을 합산하고, `PlayerNoise`가 소리를 내고, `Perception`이 그 소리를 듣는다 | `Core/AI/Perception.cs` · `Player/PlayerNoise.cs` |
-| ~~A13~~ | ~~상태이상이 몸에 닿지 않는다~~ | **해결 (8-E)** — 6-K 재설계 뒤로 `StatusEffectState.SpeedMultiplier`와 `IsIncapacitated`를 **읽는 곳이 하나도 없었다.** 냉각은 적을 느리게 하지 못했고, 동결·마비는 적도 플레이어도 멈추지 못했다. 판정과 테스트는 전부 맞았는데 몸에 닿는 선 하나가 빠져 있었다. 8-C의 가속·탈진도 같은 이유로 플레이어에게 닿지 않았다. 확장제는 끝나도 한도가 되돌아가지 않았다 | `PlayerMovement` · `EnemyMovement` · `EnemyAttack` · `BlobController` · `PlayerLoadout` |
+| ~~A13~~ | ~~상태이상이 몸에 닿지 않는다~~ | **해결 (8-E)** — 6-K 재설계 뒤로 `StatusEffectState.SpeedMultiplier`와 `IsIncapacitated`를 **읽는 곳이 하나도 없었다.** 냉각은 적을 느리게 하지 못했고, 동결·마비는 적도 플레이어도 멈추지 못했다. 판정과 테스트는 전부 맞았는데 몸에 닿는 선 하나가 빠져 있었다. 8-C의 가속·쇠약도 같은 이유로 플레이어에게 닿지 않았다. 중량 주사약은 끝나도 한도가 되돌아가지 않았다 | `PlayerMovement` · `EnemyMovement` · `EnemyAttack` · `BlobController` · `PlayerLoadout` |
 | **A12** | **사망 화면** | `Managers/GameManager.cs` — `GameOver()`가 `GameState.GameOver`로 보내고 `Time.timeScale = 0`을 건다 | **`GameState.GameOver`를 듣는 화면이 하나도 없다.** 죽으면 화면이 통째로 멈춘 채 아무것도 뜨지 않고, Play Mode를 껐다 켜는 것 말고는 나올 길이 없다. 디버그 「체력 회복」이 죽어 있으면 되살리고 시간을 다시 흐르게 한다 — 임시 출구다 (7-K). 제대로 된 사망 화면(철수 실패 → 벙커 복귀 → 정산)은 벙커·정산과 함께 가야 하므로 9단계다 |
 | **A9** | **패시브 효과 17종 중 13종** | `Core/Progression/PassiveEffectType.cs` | 실제로 읽히는 것은 `CarrySlots` · `CarryWeight` · `AbsorbAmount` · `LootRolls` **4종뿐** |
 | ~~A10~~ | ~~장비 에셋 82종~~ | **해결 (6-H)** — `PlayerWeapon.ApplyProfile` → 탄에 `SetWeaponBase` | `Player/PlayerLoadout.cs` |
@@ -104,7 +104,7 @@
 |---|---|
 | `Passive_System.md` 0절 | 체력 · 시야는 **패시브 금지** |
 | `Progression_System.md` 2절 | 해금 트리에 「조직 강화 +30 체력」 「시야 확장 +15」 |
-| `Combat_Baseline.md` 1절 | 「체력은 장비와 **각성 레벨**로만 오른다」 |
+| `Combat_Baseline.md` 1절 | 「체력은 장비와 **레벨**로만 오른다」 |
 
 코드는 `Passive` 편을 들었고(테스트가 `Health`를 막는다), 그 결과
 `CombatConstants.PlayerHealthCap = 180`의 **「계정 트리 30」이 근거 없는 30으로 남았다.**
@@ -151,7 +151,7 @@
 | ~~C2~~ | ~~점화 최대 중첩~~ — **해결 (갱신형으로 확정)** | 3 | **1** (갱신형) | `StatusEffectTable.cs:53` |
 | ~~C3~~ | ~~감전 최대 중첩~~ — **해결 (6)** | 6 | **1** | `StatusEffectTable.cs:66` |
 | ~~C4~~ | ~~냉각 최대 중첩~~ — **해결 (6)** | 6 | **1** | `StatusEffectTable.cs:70` |
-| ~~C5~~ | ~~시체 회수 해금~~ — **해소.** Lv10을 주장하던 Progression 2절이 B1에서 삭제됐다 | 각성 Lv10 | Lv **9** + 선행 `rec_safe_1` | `Editor/PassiveAssetGenerator.cs:136-140` |
+| ~~C5~~ | ~~시체 회수 해금~~ — **해소.** Lv10을 주장하던 Progression 2절이 B1에서 삭제됐다 | Lv10 | Lv **9** + 선행 `rec_safe_1` | `Editor/PassiveAssetGenerator.cs:136-140` |
 | ~~C6~~ | ~~흡수 범위 단위~~ — **해소.** 같은 이유 | +20% | **미터** (+1.5m) | `PassiveEffectType.cs:32`, `PassiveAssetGenerator.cs:104` |
 | ~~C7~~ | ~~얼굴 방어구 티어~~ — **해결 (6-L)** 문서를 4단계(1·2·4·6)로 확정 | 1~6 전 티어 | **1 · 2 · 4 · 6만.** 3 · 5가 없다 | `Editor/ArmourAssetGenerator.cs:293-314` |
 | ~~C8~~ | ~~몸통 일반 칸~~ — **해결 (6-L)** 문서를 실제 값으로 | +2~3 | 3,3,2,2,**1,0** — 티어 5·6이 범위 밖 | `ArmourAssetGenerator.cs:44-52` |
@@ -289,10 +289,10 @@
   플레이어 탄은 예전대로 Team만 보고, 적 탄만 진영을 본다 —
   플레이어가 무엇을 쏠지는 진영이 아니라 플레이어가 정한다)
 - 시설 상태 3종, 레이드 특성 10종 — 표·규칙·적용 경로는 있으나
-  **스포너가 아직 읽지 않는다**. 출격 전 표시 화면도 없다 (7-G 잔여)
+  **스포너가 아직 읽지 않는다**. 파밍 전 표시 화면도 없다 (7-G 잔여)
 - 적 유형 프리팹 9종은 있으나 **기믹 3종이 없다** (7-F 잔여)
   화공체 8방향 장판 · 보안기 3점사 × 2~4 · 정착체 중력/은신
-- ~~각성 레벨 경험치 · 정산 · 세이브~~ — **해결 (8-F · 8-G)** 레벨을 각성 하나로 합쳤고 세이브에 담긴다
+- ~~레벨 경험치 · 정산 · 세이브~~ — **해결 (8-F · 8-G)** 레벨을 하나로 합쳤고 세이브에 담긴다
 - 벙커 전부 (건물 · NPC · 상점 · 제작 · 퀘스트)
 - 소모품 22종 중 19종, 소모품 사용 API, 퀵슬롯 기능
 - 장 · 한계치 · 마커 · 레코더 · 업적 · 엔딩

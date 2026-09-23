@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Blob.Tests
 {
     /// <summary>
-    /// 출격 조건 계약 테스트. (docs/Blob_Hunting_System.md 5·9절)
+    /// 파밍 조건 계약 테스트. (docs/Blob_Hunting_System.md 5·9절)
     ///
     /// 【여기서 강제하는 것】
     ///   1. 저항은 곱해지지 않는다 — 가장 낮은 배율 하나만
@@ -42,13 +42,13 @@ namespace Blob.Tests
             EnemyProfile both = With(FacilityState.Normal, RaidTrait.Hardened).Apply(hardened);
 
             Assert.AreEqual(0.5f, both.resistances.physical, 0.001f,
-                "레이드 특성이 곱해졌습니다. 0.25가 되면 그 빌드는 출격을 버려야 합니다.");
+                "레이드 특성이 곱해졌습니다. 0.25가 되면 그 빌드는 파밍을 버려야 합니다.");
         }
 
         [Test]
         public void 약점이_저항으로_뒤집히지_않는다()
         {
-            // 압착기는 전기에 2배로 약하다. 「절연 피막」이 걸려도 약점이 줄 뿐
+            // 압착기는 전기에 2배로 약하다. 「전기 저항 피막」이 걸려도 약점이 줄 뿐
             // 강점이 되어서는 안 된다 — 유형이 요구하던 답이 지워진다.
             EnemyProfile crusher = Profile(EnemyArchetype.Crusher);
 
@@ -267,7 +267,7 @@ namespace Blob.Tests
         // ── 표시 ──────────────────────────────────────────────────────
 
         [Test]
-        public void 출격_전에_걸린_것을_전부_적는다()
+        public void 파밍_전에_걸린_것을_전부_적는다()
         {
             // 문서 5절 — "들어가서 알게 하지 않는다."
             RaidConditions raid = With(FacilityState.Flooded,

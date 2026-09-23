@@ -129,7 +129,7 @@ public static class PlaytestActions
                + $"음식 ×{state.EnergyRestoreMultiplier:0.00} · 허기 {state.StarvingStacks}중첩";
     }
 
-    /// <summary>출격 상태로 되돌린다.</summary>
+    /// <summary>파밍 상태로 되돌린다.</summary>
     public static string RefillSurvival()
     {
         PlayerSurvival survival = PlayerSurvival.EnsureInstance();
@@ -145,24 +145,24 @@ public static class PlaytestActions
     // ── 레벨 ──────────────────────────────────────────────────────────
 
     /// <summary>
-    /// 각성 레벨을 한 칸 올린다. 【소켓이 열리는 것을 보려고 쓴다.】
+    /// 레벨을 한 칸 올린다. 【소켓이 열리는 것을 보려고 쓴다.】
     ///
     /// Level을 직접 밀어 넣지 않고 모자란 경험치를 그대로 채운다.
     /// 실제 레벨업 경로(AddXP → EnqueueLevelUp → SocketUnlockTable)를 똑같이 타야
     /// 「검증에서는 열렸는데 게임에서는 안 열린다」가 생기지 않는다.
     /// </summary>
-    public static string RaiseAwakeningLevel()
+    public static string RaiseLevel()
     {
         PlayerStats stats = PlayerStats.EnsureInstance();
 
-        int before = stats.AwakeningLevel;
+        int before = stats.Level;
 
         stats.AddXP(stats.RequiredXP);
 
-        string opened = SocketUnlockTable.DescribeUnlock(stats.AwakeningLevel);
+        string opened = SocketUnlockTable.DescribeUnlock(stats.Level);
 
         // 소켓과 패시브가 같은 레벨에서 열린다 (결정 2-33).
-        string message = $"각성 Lv.{before} → Lv.{stats.AwakeningLevel} · 패시브 요구 레벨도 이 값이다";
+        string message = $"Lv.{before} → Lv.{stats.Level} · 패시브 요구 레벨도 이 값이다";
 
         return string.IsNullOrEmpty(opened) ? message : $"{message} — {opened} 개방";
     }
@@ -238,7 +238,7 @@ public static class PlaytestActions
     /// <summary>
     /// 소모품을 한 벌 지급한다. 회복 · 해제 · 음료와 음식이 전부 들어온다.
     ///
-    /// 【쓸 수 있는 것만 카탈로그에 들어 있다.】 강화·방호는 담을 축이
+    /// 【쓸 수 있는 것만 카탈로그에 들어 있다.】 강화·저항은 담을 축이
     /// 아직 없어 효과가 비어 있고, 그런 것은 사이드 메뉴에 「사용」 줄이
     /// 뜨지 않으므로 지급해도 확인할 것이 없다.
     /// </summary>
@@ -277,11 +277,11 @@ public static class PlaytestActions
 
     // ── 세이브 (8-F) ──────────────────────────────────────────────────
     //
-    // 【게임에서는 출격 경계(사망)에서만 저장한다.】 덕코프와 같다.
+    // 【게임에서는 파밍 경계(사망)에서만 저장한다.】 덕코프와 같다.
     // 아래 「지금 저장」은 그 규칙을 일부러 어기는 검증용 버튼이다 —
     // 죽지 않고 저장·불러오기를 확인하려면 필요하다.
 
-    /// <summary>지금 상태를 저장한다. 게임 규칙상으로는 출격 중에 할 수 없는 일이다.</summary>
+    /// <summary>지금 상태를 저장한다. 게임 규칙상으로는 파밍 중에 할 수 없는 일이다.</summary>
     public static string SaveNow()
     {
         if (!SaveManager.Commit("디버그"))
@@ -289,9 +289,9 @@ public static class PlaytestActions
 
         SaveData data = SaveManager.Capture();
 
-        return $"저장했습니다.\n각성 Lv.{data.awakeningLevel} · 크레딧 {data.credits} · "
+        return $"저장했습니다.\nLv.{data.level} · 크레딧 {data.credits} · "
                + $"패시브 {data.learnedPassives.Count} · 도감 {data.codex.Count}\n"
-               + "게임에서는 사망할 때만 저장됩니다 — 출격 중 종료는 롤백입니다.";
+               + "게임에서는 사망할 때만 저장됩니다 — 파밍 중 종료는 롤백입니다.";
     }
 
     /// <summary>디스크에서 다시 읽어 적용한다.</summary>
@@ -362,7 +362,7 @@ public static class PlaytestActions
 
         var lines = new List<string>(6)
         {
-            $"각성 Lv{build.AwakeningLevel} · 장착 {build.EquippedCount}개"
+            $"Lv{build.Level} · 장착 {build.EquippedCount}개"
         };
 
         for (int c = 0; c < SocketedBuild.MaxCores; c++)
@@ -501,7 +501,7 @@ public static class PlaytestActions
     /// 켜는 것 말고는 나올 길이 없었다. (docs/Blob_Audit.md A12)
     ///
     /// 【되돌려 주지 않는 것】 가방은 죽는 순간 DropOnDeath로 이미 떨어졌고
-    /// 각성 레벨과 소켓도 SkillManager.ResetRun으로 초기화되었다.
+    /// 레벨과 소켓도 SkillManager.ResetRun으로 초기화되었다.
     /// 규칙대로 사라진 것이므로 여기서 되살리지 않는다.
     /// </summary>
     public static string HealSelf()
@@ -530,7 +530,7 @@ public static class PlaytestActions
             GameManager.Instance.Resume();
 
         return $"죽어 있어 되살렸습니다 — 체력 {self.Current}/{self.Max} · 시간이 다시 흐릅니다.\n"
-               + "가방과 각성 레벨은 죽을 때 규칙대로 사라졌으므로 돌아오지 않습니다.";
+               + "가방과 레벨은 죽을 때 규칙대로 사라졌으므로 돌아오지 않습니다.";
     }
 
     // ── 적 ────────────────────────────────────────────────────────────

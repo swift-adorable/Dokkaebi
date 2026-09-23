@@ -264,7 +264,7 @@ namespace Blob.Tests
         public void 번제를_낀_Core는_점화를_걸_수_없다()
         {
             var build = new SocketedBuild();
-            build.SetAwakeningLevel(15);
+            build.SetLevel(15);
 
             Assert.IsTrue(build.TryEquipCore(Find("core_fire"), 0), "화염 핵심 젬 장착");
             Assert.IsTrue(build.TryEquipSupport(Find("sup_burnt_offering"), 0, 0), "번제 장착");
@@ -281,7 +281,7 @@ namespace Blob.Tests
         public void 다른_Core가_점화를_공급하면_번제가_성립한다()
         {
             var build = new SocketedBuild();
-            build.SetAwakeningLevel(15);
+            build.SetLevel(15);
 
             build.TryEquipCore(Find("core_fire"), 0);
             build.TryEquipSupport(Find("sup_burnt_offering"), 0, 0);
@@ -306,7 +306,7 @@ namespace Blob.Tests
         public void 차단은_다른_Core에_번지지_않는다()
         {
             var build = new SocketedBuild();
-            build.SetAwakeningLevel(15);
+            build.SetLevel(15);
 
             build.TryEquipCore(Find("core_fire"), 0);
             build.TryEquipSupport(Find("sup_burnt_offering"), 0, 0);
@@ -324,7 +324,7 @@ namespace Blob.Tests
         public void 원소_융합은_속성을_추가한다()
         {
             var build = new SocketedBuild();
-            build.SetAwakeningLevel(15);
+            build.SetLevel(15);
 
             build.TryEquipCore(Find("core_fire"), 0);
             build.TryEquipSupport(Find("sup_elemental_fusion"), 0, 0);

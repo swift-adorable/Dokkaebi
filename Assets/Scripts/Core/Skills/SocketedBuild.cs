@@ -9,7 +9,7 @@ using System.Collections.Generic;
 ///   · 「획득」이 없다. 줍는 것은 가방이 하고, 여기는 【끼운 것】만 안다.
 ///   · 자리를 지정해 끼운다. 자동 배치를 하지 않는다.
 ///   · 뺄 수 있다. 뺀 젬은 사라지지 않고 호출부(가방)로 돌아간다.
-///   · 슬롯 수는 각성 레벨이 정한다. (SocketUnlockTable)
+///   · 슬롯 수는 레벨이 정한다. (SocketUnlockTable)
 ///
 /// 뺀 젬을 여기서 버리지 않고 호출부에 돌려주는 이유 —
 /// 젬은 실물 아이템이므로 조작 도중에 소멸하면 안 된다.
@@ -32,7 +32,7 @@ public class SocketedBuild
     private readonly List<SkillDefinition> equipped = new();
     private readonly WeaponModifiers modifiers = new();
 
-    private int awakeningLevel = 1;
+    private int level = 1;
     private SocketCapacity capacity = SocketUnlockTable.Evaluate(1);
 
     private bool isDirty = true;
@@ -43,8 +43,8 @@ public class SocketedBuild
 
     // ────────────────────────────────── 상태 조회
 
-    /// <summary>각성 레벨. 슬롯 개방은 전부 이 값에서 나온다.</summary>
-    public int AwakeningLevel => awakeningLevel;
+    /// <summary>레벨. 슬롯 개방은 전부 이 값에서 나온다.</summary>
+    public int Level => level;
 
     /// <summary>지금 열려 있는 슬롯 구성.</summary>
     public SocketCapacity Capacity => capacity;
@@ -125,20 +125,20 @@ public class SocketedBuild
         return false;
     }
 
-    // ────────────────────────────────── 각성 레벨
+    // ────────────────────────────────── 레벨
 
     /// <summary>
-    /// 각성 레벨을 올린다. 자리가 열릴 뿐이고 끼워진 것은 건드리지 않는다.
-    /// 레벨은 출격 중에 내려가지 않으므로 축소에 따른 탈착은 다루지 않는다.
+    /// 레벨을 올린다. 자리가 열릴 뿐이고 끼워진 것은 건드리지 않는다.
+    /// 레벨은 파밍 중에 내려가지 않으므로 축소에 따른 탈착은 다루지 않는다.
     /// </summary>
-    public void SetAwakeningLevel(int level)
+    public void SetLevel(int value)
     {
-        int clamped = SocketUnlockTable.ClampLevel(level);
+        int clamped = SocketUnlockTable.ClampLevel(value);
 
-        if (clamped == awakeningLevel)
+        if (clamped == level)
             return;
 
-        awakeningLevel = clamped;
+        level = clamped;
         capacity = SocketUnlockTable.Evaluate(clamped);
 
         OnChanged?.Invoke();
@@ -161,7 +161,7 @@ public class SocketedBuild
         if (coreIndex >= capacity.CoreSlots)
             return SocketError.SlotLocked;
 
-        if (definition.RequiredLevel > awakeningLevel)
+        if (definition.RequiredLevel > level)
             return SocketError.LevelTooHigh;
 
         // 같은 핵심 젬을 두 자리에 넣는 것은 수치 중첩이므로 막는다. (14절 5번)
@@ -192,7 +192,7 @@ public class SocketedBuild
         if (cores[coreIndex] == null)
             return SocketError.NoCore;
 
-        if (definition.RequiredLevel > awakeningLevel)
+        if (definition.RequiredLevel > level)
             return SocketError.LevelTooHigh;
 
         // 태그 조건. 핵심 젬이 요구 태그를 전부 가져야 한다. (10-2 [1])
@@ -225,7 +225,7 @@ public class SocketedBuild
         if (slot >= capacity.MetaSlots)
             return SocketError.SlotLocked;
 
-        if (definition.RequiredLevel > awakeningLevel)
+        if (definition.RequiredLevel > level)
             return SocketError.LevelTooHigh;
 
         for (int i = 0; i < MaxMetas; i++)
@@ -249,7 +249,7 @@ public class SocketedBuild
         if (capacity.HeraldSlots <= 0)
             return SocketError.SlotLocked;
 
-        if (definition.RequiredLevel > awakeningLevel)
+        if (definition.RequiredLevel > level)
             return SocketError.LevelTooHigh;
 
         return SocketError.None;
@@ -538,7 +538,7 @@ public class SocketedBuild
     }
 
     /// <summary>
-    /// 출격 종료 시 초기화한다. 【여기서 젬을 없애지 않는다.】
+    /// 파밍 종료 시 초기화한다. 【여기서 젬을 없애지 않는다.】
     /// 사망 시의 소멸은 Inventory.DropOnDeath가 담당한다. 규칙을 한 곳에만 둔다.
     /// </summary>
     public void Clear()
@@ -548,7 +548,7 @@ public class SocketedBuild
         Array.Clear(sockets, 0, sockets.Length);
 
         herald = null;
-        awakeningLevel = 1;
+        level = 1;
         capacity = SocketUnlockTable.Evaluate(1);
 
         MarkChanged();

@@ -61,7 +61,7 @@ namespace Blob.Tests
         [Test]
         public void 드롭_풀은_요구_레벨로_거르지_않는다()
         {
-            // 11-3절 — "각성 레벨에 미달하는 젬은 주울 수는 있으나 끼울 수 없다".
+            // 11-3절 — "레벨에 미달하는 젬은 주울 수는 있으나 끼울 수 없다".
             // 여기서 걸러 버리면 "레벨을 올려야 끼운다"는 압박이 생기지 않는다.
             var late = SkillTestFactory.CreateSupport("sup_late", SkillTag.Projectile,
                 requiredLevel: 13);

@@ -52,10 +52,9 @@ public static class StatusEffectTable
     // ── 이로운 상태의 수치 ────────────────────────────────────────────
     //
     // 문서 4절의 강화 소모품 표를 그대로 옮긴 것이다.
-    //   각성제 — 이동 +25%, 120초 → 끝나면 60초 동안 −15%
-    //   응고제 — 방어도 +0.5, 120초, 대가로 회복량 절반
-    // 재생은 덕코프의 회복 주사약 「초당 회복, 30초」를 따른다 [확인됨].
-    // 초당 회복량은 위키에 없으므로 우리가 정했다 [불확실] —
+    //   노란 주사약 — 이동 +25%, 120초 → 끝나면 60초 동안 −15%
+    //   강화 주사약 — 방어도 +0.5, 120초, 대가로 회복량 절반
+    // 「회복」 상태는 덕코프 「회복」#1018 「1초마다 체력 2 회복, 30초」 그대로다 [확인됨].
     // 30초 × 2 = 60이면 구급상자 두 번보다 조금 많다. 다만 30초 동안
     // 나눠 들어오므로 급할 때의 한 방을 대신하지 못한다.
 
@@ -68,7 +67,7 @@ public static class StatusEffectTable
     public const float BolsterSeconds = 120f;
 
     /// <summary>
-    /// 보강이 더하는 방어도. 【덕코프 「강화」#1013의 「신체 방어구 +0.5」 그대로다.】
+    /// 강화가 더하는 방어도. 【덕코프 「강화」#1013의 「신체 방어구 +0.5」 그대로다.】
     ///
     /// 배율(×1.25)이 아니라 덧셈인 것이 중요하다. 방어 공식이
     /// 2/(방어도−관통+2)이라 배율이면 이미 두꺼운 쪽이 더 이득을 본다.
@@ -76,26 +75,26 @@ public static class StatusEffectTable
     /// </summary>
     public const float BolsterArmourBonus = 0.5f;
 
-    /// <summary>보강의 대가. 부식과 같은 절반이다 — 대가가 가벼우면 안 쓸 이유가 없다.</summary>
+    /// <summary>강화의 대가. 부식과 같은 절반이다 — 대가가 가벼우면 안 쓸 이유가 없다.</summary>
     public const float BolsterHealingMultiplier = 0.5f;
 
     public const float RegenSeconds = 30f;
 
     /// <summary>
-    /// 재생의 초당 회복량.
+    /// 「회복」 상태의 초당 회복량.
     /// 【덕코프 「회복」#1018의 「1초마다 체력 2 회복」 그대로다.】 [확인됨]
     /// </summary>
     public const float RegenPerSecond = 2f;
 
     /// <summary>
-    /// 적재(확장제)가 곱하는 최대 소지 중량.
+    /// 소지 중량 증가(중량 주사약)가 곱하는 최대 소지 중량.
     /// 【덕코프 「소지 중량 증가」#1012의 「최대 소지 중량 +50%」 그대로다.】 [확인됨]
     /// </summary>
     public const float OverloadSeconds = 240f;
     public const float OverloadWeightMultiplier = 1.5f;
 
     /// <summary>
-    /// 방호가 곱하는 「받는 피해」 배율.
+    /// 저항이 곱하는 「받는 피해」 배율.
     /// 【덕코프 저항 buff의 「−25%」 그대로다.】 [확인됨 — #1072 · #1074 · #1075]
     /// </summary>
     public const float WardSeconds = 120f;
@@ -175,7 +174,7 @@ public static class StatusEffectTable
 
             // ── 이로운 상태 ───────────────────────────────────────────
             // 【중첩하지 않는다.】 소모품 문서 6절의 「같은 분류는 덮어쓴다」다.
-            // 각성제 두 개를 겹쳐 쓸 수 있으면 대가가 있는 의미가 사라진다.
+            // 노란 주사약 두 개를 겹쳐 쓸 수 있으면 대가가 있는 의미가 사라진다.
             // 다시 걸면 지속시간만 처음으로 돌아간다.
 
             case StatusEffectType.Haste:
@@ -184,19 +183,19 @@ public static class StatusEffectTable
             case StatusEffectType.Bolster:
                 return new StatusEffectSpec(0f, BolsterSeconds, 1, DamageElement.Physical);
 
-            // 재생의 계수는 피해가 아니라 회복이다. IsDamaging에 걸리면 안 되므로
-            // 0으로 두고, 회복량은 RegenPerSecond가 따로 정한다.
+            // 「회복」 상태는 피해를 주지 않는다. 계수를 두면 IsDamaging에 걸리므로
+            // 0으로 두고, 초당 회복량은 RegenPerSecond가 따로 정한다.
             case StatusEffectType.Regen:
                 return new StatusEffectSpec(0f, RegenSeconds, 1, DamageElement.Physical);
 
-            // 대가. 각성제가 끝나면 저절로 걸린다.
+            // 대가. 노란 주사약이 끝나면 저절로 걸린다.
             case StatusEffectType.Fatigue:
                 return new StatusEffectSpec(0f, FatigueSeconds, 1, DamageElement.Physical);
 
             case StatusEffectType.Overload:
                 return new StatusEffectSpec(0f, OverloadSeconds, 1, DamageElement.Physical);
 
-            // 방호 넷. Element는 「무엇을 막는가」를 담는 자리로 쓴다.
+            // 저항 넷. Element는 「무엇을 막는가」를 담는 자리로 쓴다.
             case StatusEffectType.WardFire:
                 return new StatusEffectSpec(0f, WardSeconds, 1, DamageElement.Fire);
 
@@ -244,7 +243,7 @@ public static class StatusEffectTable
     ///
     /// 【대가를 별도 필드로 만들지 않는 이유】 「끝나면 −15%」는 결국
     /// 「다른 상태가 걸린다」와 같은 말이다. 상태이상 하나로 표현하면
-    /// 화면도 그것을 그대로 보여 준다 — 플레이어는 탈진이 걸린 것을
+    /// 화면도 그것을 그대로 보여 준다 — 플레이어는 쇠약이 걸린 것을
     /// 상태 줄에서 보고, 왜 느려졌는지 스스로 안다.
     /// (docs/Blob_Consumable_System.md 8절)
     /// </summary>
@@ -278,7 +277,7 @@ public static class StatusEffectTable
         }
     }
 
-    /// <summary>방호가 막는 속성. 방호가 아니면 None을 뜻하는 Physical을 돌려준다.</summary>
+    /// <summary>저항이 막는 속성. 저항이 아니면 None을 뜻하는 Physical을 돌려준다.</summary>
     public static bool IsWard(StatusEffectType type)
     {
         return type == StatusEffectType.WardFire

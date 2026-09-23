@@ -18,7 +18,7 @@ public class PlaytestCatalog : ScriptableObject
 {
     public const string ResourcePath = "PlaytestCatalog";
 
-    [Header("출격 한 벌")]
+    [Header("파밍 한 벌")]
     [SerializeField] private List<ItemDefinition> starterKit = new();
     [SerializeField] private List<ItemDefinition> endgameKit = new();
 

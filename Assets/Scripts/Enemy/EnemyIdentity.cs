@@ -10,7 +10,7 @@ using UnityEngine;
 /// MCP로 PlayMode를 돌릴 수 없으므로 검증 가능한 쪽에 계산을 둔다.
 ///
 /// 프리팹에는 유형만 지정한다. 등급과 속성은 스폰 때마다 다시 뽑는다 —
-/// 「매 출격마다 무작위 재배치」가 문서 7절의 요구다.
+/// 「매 파밍마다 무작위 재배치」가 문서 7절의 요구다.
 /// </summary>
 [RequireComponent(typeof(Health))]
 public class EnemyIdentity : MonoBehaviour, IPoolable

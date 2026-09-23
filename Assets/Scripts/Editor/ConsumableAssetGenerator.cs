@@ -6,7 +6,7 @@ using UnityEngine;
 /// 소모품 에셋 생성. (로드맵 8-A · docs/Blob_Consumable_System.md)
 ///
 /// 【이번에 만드는 것은 셋뿐이다 — 회복 · 해제 · 음료와 음식.】
-/// 강화와 방호는 「이동 +25%, 120초」처럼 이로운 상태를 걸어야 하는데
+/// 강화와 저항은 「이동 +25%, 120초」처럼 이로운 상태를 걸어야 하는데
 /// StatusEffectType에 그것을 담을 자리가 아직 없다. 빈 껍데기 에셋을
 /// 미리 만들어 두면 가방에 들어가고 무게를 먹으면서 아무 일도 하지
 /// 않는 물건이 된다 — 그쪽이 없는 것보다 나쁘다.
@@ -124,19 +124,19 @@ public static class ConsumableAssetGenerator
 
         // ── 강화 — 【전부 대가가 붙는다】 (문서 4절) ──────────────────
         //
-        // 대가를 별도 필드로 두지 않는다. 각성제의 「끝나면 −15%」는
-        // 상태이상 표의 AftermathOf(가속) = 탈진이 알아서 건다.
+        // 대가를 별도 필드로 두지 않는다. 노란 주사약의 「끝나면 −15%」는
+        // 상태이상 표의 AftermathOf(가속) = 쇠약이 알아서 건다.
         //
         // 주사약은 수분을 태운다 — 「버프를 쓸수록 물이 급해진다」가
         // 소모품을 무한히 쓰지 못하게 하는 장치다. [확인됨 — 덕코프]
         // 노란 주사약(이동 +25% 120초)이 에너지 −5 · 수분 −15다.
 
-        list.Add(Shot("con_stim", "각성제",
+        list.Add(Shot("con_stim", "노란 주사약",
             "빨라진다. 끝나면 그만큼 느려진다.",
             StatusEffectType.Haste, waterCost: 15f, energyCost: 5f,
             weight: 0.2f, value: 629));
 
-        list.Add(Shot("con_coagulant", "응고제",
+        list.Add(Shot("con_coagulant", "강화 주사약",
             "굳은 만큼 약이 안 듣는다.",
             StatusEffectType.Bolster, waterCost: 5f, energyCost: 5f,
             weight: 0.2f, value: 648));
@@ -146,7 +146,7 @@ public static class ConsumableAssetGenerator
             StatusEffectType.Regen, waterCost: 7f, energyCost: 0f,
             weight: 0.2f, value: 875));
 
-        list.Add(Shot("con_expander", "확장제",
+        list.Add(Shot("con_expander", "중량 주사약",
             "더 들고 갈 수 있다. 끝나면 그대로 주저앉는다.",
             StatusEffectType.Overload, waterCost: 10f, energyCost: 0f,
             weight: 0.21f, value: 648));
@@ -174,7 +174,7 @@ public static class ConsumableAssetGenerator
             weight = 0.2f, stackMax = 3, value = 2280
         });
 
-        // ── 방호 — 장비를 대체하지 못한다 (문서 5절) ──────────────────
+        // ── 저항 — 장비를 대체하지 못한다 (문서 5절) ──────────────────
         //
         // 덕코프 저항 주사약 4종과 같다 — 「받는 해당 속성 피해 −25%」·120초·
         // 수분 −20·무게 0.19·가치 648·스택 3. [확인됨 — 아이템 #408 · #1070~#1072]
@@ -185,16 +185,16 @@ public static class ConsumableAssetGenerator
         // 저항에 곱하므로 면역이 되지 않는다 — 0.75는 0을 만들지 못한다.
         // 「소모품만으로 환경을 통과하게 두지 않는다」가 수식으로 지켜진다.
 
-        list.Add(Ward("con_ward_fire", "내화제", "타는 것이 덜 아프다.",
+        list.Add(Ward("con_ward_fire", "화염 저항 주사약", "타는 것이 덜 아프다.",
             StatusEffectType.WardFire));
 
-        list.Add(Ward("con_ward_cold", "내한제", "언 것이 덜 아프다.",
+        list.Add(Ward("con_ward_cold", "냉기 저항 주사약", "언 것이 덜 아프다.",
             StatusEffectType.WardCold));
 
-        list.Add(Ward("con_ward_shock", "절연제", "저리는 것이 덜하다.",
+        list.Add(Ward("con_ward_shock", "전기 저항 주사약", "저리는 것이 덜하다.",
             StatusEffectType.WardLightning));
 
-        list.Add(Ward("con_ward_toxin", "내독제", "삭는 것이 덜하다.",
+        list.Add(Ward("con_ward_toxin", "독 저항 주사약", "삭는 것이 덜하다.",
             StatusEffectType.WardChaos));
 
         // ── 음료 · 음식 ───────────────────────────────────────────────
@@ -202,7 +202,7 @@ public static class ConsumableAssetGenerator
         // 【체력을 채우지 않는다.】 먹어서 상처가 낫기 시작하면
         // 수분·에너지 두 축이 체력에 흡수된다. (결정 2-32)
 
-        list.Add(Food("con_water", "정수 물통", "맛은 없지만 안전하다.",
+        list.Add(Food("con_water", "생수", "맛은 없지만 안전하다.",
             water: 40f, energy: 0f, weight: 0.5f, stackMax: 3, value: 30));
 
         list.Add(Food("con_soda", "미지근한 탄산", "김이 빠졌다. 그래도 물이다.",
@@ -263,7 +263,7 @@ public static class ConsumableAssetGenerator
     /// 주사약. 【즉시 발동한다.】
     ///
     /// 회복은 시전 시간으로 묶지만 강화는 묶지 않는다. 문서 6절이
-    /// 「강화·방호는 즉시」로 정해 둔 것이며, 이유는 쓰임이 다르기
+    /// 「강화·저항은 즉시」로 정해 둔 것이며, 이유는 쓰임이 다르기
     /// 때문이다 — 회복은 빠져서 쓰는 것이고 강화는 들어가면서 쓰는 것이다.
     /// 강화에도 시전 시간을 붙이면 둘 다 「빠져서 쓰는 것」이 된다.
     /// </summary>
@@ -282,7 +282,7 @@ public static class ConsumableAssetGenerator
         };
     }
 
-    /// <summary>방호 주사약. 수치는 덕코프 저항 주사약 4종 그대로다.</summary>
+    /// <summary>저항 주사약. 수치는 덕코프 저항 주사약 4종 그대로다.</summary>
     private static Row Ward(string id, string name, string desc, StatusEffectType grant)
     {
         return new Row

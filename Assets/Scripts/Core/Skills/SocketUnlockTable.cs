@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// 지금 열려 있는 슬롯의 수. 각성 레벨 하나로 전부 결정된다.
+/// 지금 열려 있는 슬롯의 수. 레벨 하나로 전부 결정된다.
 /// </summary>
 public struct SocketCapacity
 {
@@ -35,7 +35,7 @@ public struct SocketCapacity
 }
 
 /// <summary>
-/// 각성 레벨 → 개방된 슬롯. (docs/Blob_Skill_System.md 12-1절)
+/// 레벨 → 개방된 슬롯. (docs/Blob_Skill_System.md 12-1절)
 ///
 /// 레벨업의 보상이 「스킬 선택」에서 「소켓 개방」으로 바뀌었다.
 /// 선택창은 뜨지 않는다. 자리가 하나 열릴 뿐이고, 무엇을 끼울지는
@@ -95,18 +95,18 @@ public static class SocketUnlockTable
     /// <summary>index번째 행의 레벨.</summary>
     public static int LevelAt(int index) => Rows[index, ColLevel];
 
-    /// <summary>해당 각성 레벨에서 열려 있는 슬롯 구성.</summary>
-    public static SocketCapacity Evaluate(int awakeningLevel)
+    /// <summary>해당 레벨에서 열려 있는 슬롯 구성.</summary>
+    public static SocketCapacity Evaluate(int level)
     {
-        // 각성 레벨이 0이 되는 경로는 없어야 하지만, 생겨도 아무것도 끼우지 못하는
-        // 상태로 출격이 시작되면 안 된다. 여기서 한 번 잘라 둔다.
-        int level = ClampLevel(awakeningLevel);
+        // 레벨이 0이 되는 경로는 없어야 하지만, 생겨도 아무것도 끼우지 못하는
+        // 상태로 파밍이 시작되면 안 된다. 여기서 한 번 잘라 둔다.
+        int clamped = ClampLevel(level);
 
         var capacity = new SocketCapacity();
 
         for (int i = 0; i < Rows.GetLength(0); i++)
         {
-            if (Rows[i, ColLevel] > level)
+            if (Rows[i, ColLevel] > clamped)
                 break;
 
             capacity.CoreSlots = Rows[i, ColCore];
@@ -123,27 +123,27 @@ public static class SocketUnlockTable
     /// 그 레벨에 새로 열리는 자리가 몇 개인지. 레벨업 연출이 이 값으로 판단한다.
     /// 개방이 없는 레벨(2·4·6…)은 0이다.
     /// </summary>
-    public static int SlotsOpenedAt(int awakeningLevel)
+    public static int SlotsOpenedAt(int level)
     {
-        if (awakeningLevel <= 1)
-            return awakeningLevel == 1 ? Evaluate(1).TotalSlots : 0;
+        if (level <= 1)
+            return level == 1 ? Evaluate(1).TotalSlots : 0;
 
-        return Evaluate(awakeningLevel).TotalSlots - Evaluate(awakeningLevel - 1).TotalSlots;
+        return Evaluate(level).TotalSlots - Evaluate(level - 1).TotalSlots;
     }
 
     /// <summary>
     /// 그 레벨에 열린 것을 한국어로 설명한다. 열린 것이 없으면 빈 문자열.
     /// UI 토스트가 그대로 출력한다.
     /// </summary>
-    public static string DescribeUnlock(int awakeningLevel)
+    public static string DescribeUnlock(int level)
     {
-        if (awakeningLevel <= 0)
+        if (level <= 0)
             return string.Empty;
 
-        SocketCapacity now = Evaluate(awakeningLevel);
-        SocketCapacity before = awakeningLevel <= 1
+        SocketCapacity now = Evaluate(level);
+        SocketCapacity before = level <= 1
             ? new SocketCapacity()
-            : Evaluate(awakeningLevel - 1);
+            : Evaluate(level - 1);
 
         var text = new System.Text.StringBuilder();
 
@@ -167,11 +167,11 @@ public static class SocketUnlockTable
     }
 
     /// <summary>다음으로 무언가 열리는 레벨. 더 없으면 0.</summary>
-    public static int NextUnlockLevel(int awakeningLevel)
+    public static int NextUnlockLevel(int level)
     {
         for (int i = 0; i < Rows.GetLength(0); i++)
         {
-            if (Rows[i, ColLevel] > awakeningLevel)
+            if (Rows[i, ColLevel] > level)
                 return Rows[i, ColLevel];
         }
 
@@ -179,5 +179,5 @@ public static class SocketUnlockTable
     }
 
     /// <summary>레벨을 유효 범위로 자른다.</summary>
-    public static int ClampLevel(int awakeningLevel) => Mathf.Max(1, awakeningLevel);
+    public static int ClampLevel(int level) => Mathf.Max(1, level);
 }

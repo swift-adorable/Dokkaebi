@@ -358,13 +358,13 @@ namespace Blob.Tests
             foreach (SkillDefinition d in All)
                 Assert.GreaterOrEqual(d.RequiredLevel, 1, $"{d.Id}의 요구 레벨이 1 미만입니다.");
 
-            // Lv1에 고를 수 있는 핵심 젬이 없으면 출격이 시작되지 않는다.
+            // Lv1에 고를 수 있는 핵심 젬이 없으면 파밍이 시작되지 않는다.
             Assert.IsTrue(Of(SkillCategory.Core).Any(d => d.RequiredLevel == 1),
                 "요구 레벨 1인 핵심 젬이 하나도 없습니다.");
         }
 
         [Test]
-        public void 초반_각성_레벨에서_끼울_수_있는_젬이_충분하다()
+        public void 초반_레벨에서_끼울_수_있는_젬이_충분하다()
         {
             // 예외 상황 — 요구 레벨이 전부 높으면 초반에 주운 젬을 하나도
             // 끼우지 못한다. Lv3 시점에 열리는 자리는 핵심 젬 1 + 소켓 2 = 3개이므로

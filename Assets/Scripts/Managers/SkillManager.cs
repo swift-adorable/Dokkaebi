@@ -9,7 +9,7 @@ using UnityEngine;
 /// 흐름:
 ///   도감(해금 기록) → 드롭 풀 → 적을 흡수하면 젬이 가방에 들어온다
 ///   → 플레이어가 직접 소켓에 끼운다 → 즉시 작동
-///   → 각성 레벨이 오르면 【선택창이 아니라 소켓이 열린다】
+///   → 레벨이 오르면 【선택창이 아니라 소켓이 열린다】
 ///
 /// 【이전 구조와의 차이】
 ///   레벨업 시 3장을 제시하고 하나를 고르게 하던 경로를 전부 걷어냈다.
@@ -65,7 +65,7 @@ public class SkillManager : Singleton<SkillManager>
     public event Action<SkillDefinition> OnGemGained;
 
     /// <summary>
-    /// 각성 레벨이 올라 자리가 열렸을 때 발행된다. (레벨, "소켓 1" 같은 설명)
+    /// 레벨이 올라 자리가 열렸을 때 발행된다. (레벨, "소켓 1" 같은 설명)
     /// 선택창을 여는 이벤트가 아니다. 안내만 한다.
     /// </summary>
     public event Action<int, string> OnSocketsOpened;
@@ -113,7 +113,7 @@ public class SkillManager : Singleton<SkillManager>
 
         RebuildDropPool();
 
-        SyncAwakeningLevel();
+        SyncLevel();
 
         // 가방 화면(장비 · 가방 · 젬 소켓 · 패시브)을 보장한다.
         InventoryScreenUI.EnsureInstance();
@@ -177,7 +177,7 @@ public class SkillManager : Singleton<SkillManager>
         GameLogger.Log($"[SkillManager] 드롭 풀 {dropPool.Count}종 (도감 {codex.Count}종 해금)");
     }
 
-    // ────────────────────────────────── 각성 레벨 = 소켓 개방
+    // ────────────────────────────────── 레벨 = 소켓 개방
 
     /// <summary>
     /// 레벨업을 반영한다. PlayerStats가 호출한다.
@@ -193,32 +193,32 @@ public class SkillManager : Singleton<SkillManager>
             return;
         }
 
-        int before = build.AwakeningLevel;
+        int before = build.Level;
 
-        SyncAwakeningLevel();
+        SyncLevel();
 
         // 한 번에 여러 레벨이 올라도 각 레벨의 개방을 빠짐없이 알린다.
-        for (int level = before + 1; level <= build.AwakeningLevel; level++)
+        for (int level = before + 1; level <= build.Level; level++)
         {
             string opened = SocketUnlockTable.DescribeUnlock(level);
 
             if (string.IsNullOrEmpty(opened))
                 continue;
 
-            GameLogger.Log($"[SkillManager] 각성 Lv.{level} — {opened} 개방");
+            GameLogger.Log($"[SkillManager] Lv.{level} — {opened} 개방");
 
             OnSocketsOpened?.Invoke(level, opened);
         }
     }
 
     /// <summary>세이브를 불러온 뒤 소켓 수를 레벨에 다시 맞춘다. 알림은 내지 않는다.</summary>
-    public void ResyncLevel() => SyncAwakeningLevel();
+    public void ResyncLevel() => SyncLevel();
 
-    private void SyncAwakeningLevel()
+    private void SyncLevel()
     {
-        int level = PlayerStats.HasInstance ? PlayerStats.Instance.AwakeningLevel : 1;
+        int level = PlayerStats.HasInstance ? PlayerStats.Instance.Level : 1;
 
-        build.SetAwakeningLevel(level);
+        build.SetLevel(level);
     }
 
     // ────────────────────────────────── 드롭 · 획득
@@ -495,10 +495,10 @@ public class SkillManager : Singleton<SkillManager>
         returned.Clear();
     }
 
-    // ────────────────────────────────── 출격 종료
+    // ────────────────────────────────── 파밍 종료
 
     /// <summary>
-    /// 출격 종료 시 소켓을 비운다.
+    /// 파밍 종료 시 소켓을 비운다.
     ///
     /// 【젬을 여기서 없애지 않는다.】 철수 성공이면 그대로 창고로 가고,
     /// 사망이면 PlayerInventory.DropOnDeath가 규칙 하나로 처리한다.

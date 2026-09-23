@@ -2,10 +2,10 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// 이번 출격의 조건 — 시설 상태 하나 + 레이드 특성 0~2개.
+/// 이번 파밍의 조건 — 시설 상태 하나 + 레이드 특성 0~2개.
 /// (docs/Blob_Hunting_System.md 5·9절)
 ///
-/// 【출격 전 화면에 전부 표시한다.】(문서 5절)
+/// 【파밍 전 화면에 전부 표시한다.】(문서 5절)
 /// 들어가서 알게 하면 조건이 아니라 사고가 된다. 빌드를 바꿔서 대응하라는
 /// 축인데, 들어간 뒤에는 바꿀 수가 없다.
 ///
@@ -100,10 +100,10 @@ public struct RaidConditions
     // ── 적에게 적용 ───────────────────────────────────────────────────
 
     /// <summary>
-    /// 이미 만들어진 개체 수치에 출격 조건을 얹는다.
+    /// 이미 만들어진 개체 수치에 파밍 조건을 얹는다.
     ///
     /// 【EnemyProfile.Build를 건드리지 않은 이유】
-    /// 원형 · 등급 · 속성은 개체가 무엇인지를 정하고, 출격 조건은
+    /// 원형 · 등급 · 속성은 개체가 무엇인지를 정하고, 파밍 조건은
     /// 「이번 판이 어떤 판인가」다. 둘을 한 함수에 넣으면 같은 원형이
     /// 판마다 다른 것이 되어, 도감과 퀘스트가 무엇을 가리키는지 흐려진다.
     ///
@@ -143,7 +143,7 @@ public struct RaidConditions
         return profile;
     }
 
-    /// <summary>출격 전 화면에 적을 줄들. 시설 상태가 먼저다.</summary>
+    /// <summary>파밍 전 화면에 적을 줄들. 시설 상태가 먼저다.</summary>
     public List<string> Describe()
     {
         var lines = new List<string>(MaxTraits + 1);

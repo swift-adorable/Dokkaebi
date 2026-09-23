@@ -59,7 +59,7 @@ namespace Blob.Tests
             Assert.AreEqual(
                 11,
                 SocketUnlockTable.Evaluate(SocketUnlockTable.FullyOpenLevel).TotalSlots,
-                "각성 최고 레벨에서 열리는 자리 수가 동시 장착 상한과 달라졌습니다.");
+                "최고 레벨에서 열리는 자리 수가 동시 장착 상한과 달라졌습니다.");
         }
 
         [Test]

@@ -45,9 +45,9 @@ public partial class InventoryScreenUI
         SocketedBuild build = manager.Build;
         SocketCapacity capacity = build.Capacity;
 
-        equipTitleLabel.text = $"각성 Lv.{build.AwakeningLevel}";
+        equipTitleLabel.text = $"Lv.{build.Level}";
 
-        int next = SocketUnlockTable.NextUnlockLevel(build.AwakeningLevel);
+        int next = SocketUnlockTable.NextUnlockLevel(build.Level);
 
         // 【고르는 중에는 안내가 우선이다.】 밝아진 칸만으로는
         // "지금 무엇을 기다리는 중인지"와 "어떻게 그만두는지"를 알 수 없다.

@@ -16,7 +16,7 @@ namespace Blob.Tests
         private static SocketedBuild At(int level)
         {
             var build = new SocketedBuild();
-            build.SetAwakeningLevel(level);
+            build.SetLevel(level);
 
             return build;
         }
@@ -68,7 +68,7 @@ namespace Blob.Tests
             build.TryEquipCore(core, 0);
             build.TryEquipSupport(Support("sup_a"), 0, 0);
 
-            build.SetAwakeningLevel(7);
+            build.SetLevel(7);
 
             Assert.AreSame(core, build.GetCore(0));
             Assert.IsTrue(build.TryEquipCore(Core("core_b"), 1));
@@ -308,7 +308,7 @@ namespace Blob.Tests
             build.Clear();
 
             Assert.AreEqual(0, build.EquippedCount);
-            Assert.AreEqual(1, build.AwakeningLevel, "출격이 끝나면 각성 레벨도 초기화됩니다.");
+            Assert.AreEqual(1, build.Level, "파밍이 끝나면 레벨도 초기화됩니다.");
         }
 
         [Test]

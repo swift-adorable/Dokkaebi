@@ -126,7 +126,7 @@ public static class UIPalette
             // 적재 — 가방 계열이라 노란 쪽.
             case StatusEffectType.Overload: return new Color(0.88f, 0.80f, 0.44f, 1f);
 
-            // 방호 넷은 【막는 속성의 색】을 옅게 쓴다. 내화가 주황이면
+            // 저항 넷은 【막는 속성의 색】을 옅게 쓴다. 화염 저항이 주황이면
             // 「불에 강하다」가 색만 보고도 읽힌다.
             case StatusEffectType.WardFire:      return new Color(0.94f, 0.68f, 0.48f, 1f);
             case StatusEffectType.WardCold:      return new Color(0.66f, 0.86f, 0.96f, 1f);

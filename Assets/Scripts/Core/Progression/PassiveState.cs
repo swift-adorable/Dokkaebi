@@ -10,7 +10,7 @@ public enum PassiveError
     /// <summary>선행 칸을 아직 배우지 않았다.</summary>
     MissingPrerequisite,
 
-    /// <summary>각성 레벨이 부족하다.</summary>
+    /// <summary>레벨이 부족하다.</summary>
     LevelTooLow,
 
     /// <summary>크레딧이 부족하다.</summary>
@@ -26,8 +26,8 @@ public enum PassiveError
 /// <summary>배울 수 있는지 판단하는 데 필요한 바깥 상태 전부.</summary>
 public struct PassiveContext
 {
-    /// <summary>각성 레벨. (결정 2-33 — 각성 레벨과 합쳤다)</summary>
-    public int awakeningLevel;
+    /// <summary>레벨. (결정 2-33 — 레벨과 합쳤다)</summary>
+    public int level;
 
     /// <summary>보유 크레딧.</summary>
     public int credits;
@@ -38,10 +38,10 @@ public struct PassiveContext
     /// <summary>역행 계열을 발견했는지.</summary>
     public bool discoveredRegression;
 
-    public PassiveContext(int awakeningLevel, int credits,
+    public PassiveContext(int level, int credits,
                           Inventory materials = null, bool discoveredRegression = false)
     {
-        this.awakeningLevel = awakeningLevel;
+        this.level = level;
         this.credits = credits;
         this.materials = materials;
         this.discoveredRegression = discoveredRegression;
@@ -55,11 +55,11 @@ public struct PassiveContext
 }
 
 /// <summary>
-/// 배운 패시브의 상태. 【계정 축의 영구 성장이다. 죽어도 잃지 않는다.】
+/// 배운 패시브의 상태. 【영구 성장이다. 죽어도 잃지 않는다.】
 /// (docs/Blob_Passive_System.md)
 ///
-/// 각성 레벨은 런마다 초기화되고 소켓을 연다.
-/// 각성 레벨이 소켓과 패시브를 함께 연다. 레벨은 하나뿐이다. (결정 2-33)
+/// 레벨은 런마다 초기화되고 소켓을 연다.
+/// 레벨이 소켓과 패시브를 함께 연다. 레벨은 하나뿐이다. (결정 2-33)
 ///
 /// MonoBehaviour 의존이 없는 순수 클래스다. EditMode 테스트 대상.
 /// </summary>
@@ -106,7 +106,7 @@ public class PassiveState
 
         // 중개 계열은 레벨을 보지 않는다. 돈만 있으면 연다. (덕코프 블랙마켓과 같다)
         if (node.UnlockKind != PassiveUnlockKind.CreditsOnly &&
-            context.awakeningLevel < node.RequiredAwakeningLevel)
+            context.level < node.RequiredLevel)
         {
             return PassiveError.LevelTooLow;
         }
@@ -261,7 +261,7 @@ public static class PassiveErrorText
             case PassiveError.NoSuchNode:          return "없는 항목입니다.";
             case PassiveError.AlreadyLearned:      return "이미 배웠습니다.";
             case PassiveError.MissingPrerequisite: return "선행 항목을 먼저 배워야 합니다.";
-            case PassiveError.LevelTooLow:         return "각성 레벨이 부족합니다.";
+            case PassiveError.LevelTooLow:         return "레벨이 부족합니다.";
             case PassiveError.NotEnoughCredits:    return "크레딧이 부족합니다.";
             case PassiveError.MissingMaterials:    return "필요 재료가 부족합니다.";
             case PassiveError.BranchUndiscovered:  return "아직 발견하지 못한 계열입니다.";

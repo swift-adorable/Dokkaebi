@@ -61,7 +61,7 @@ public class PlayerLoadout : MonoBehaviour
     {
         PlayerInventory inventory = PlayerInventory.EnsureInstance();
 
-        // 【확장제의 대가가 여기서 온다.】 한도는 RefreshCapacity가 계산하는데,
+        // 【중량 주사약의 대가가 여기서 온다.】 한도는 RefreshCapacity가 계산하는데,
         // 그것을 부르는 곳이 전부 화면(장착·줍기·버리기)이었다. 적재가 끝나도
         // 아무도 다시 계산하지 않아 한도가 영영 ×1.5로 남았다 —
         // 「끝나면 그대로 과중량」이라는 대가가 없었다.

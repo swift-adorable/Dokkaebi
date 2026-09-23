@@ -73,7 +73,7 @@ public class StatusEffectSystem : Singleton<StatusEffectSystem>
         }
     }
 
-    /// <summary>씬 전환·출격 종료 시 전부 비운다.</summary>
+    /// <summary>씬 전환·파밍 종료 시 전부 비운다.</summary>
     public void Clear()
     {
         tracked.Clear();

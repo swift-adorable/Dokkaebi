@@ -45,10 +45,10 @@ public static class PlaytestTools
 
     // ── 지급 ──────────────────────────────────────────────────────────
 
-    [MenuItem(Menu + "출격 장비 — 티어 1 한 벌")]
+    [MenuItem(Menu + "파밍 장비 — 티어 1 한 벌")]
     public static void GiveStarterKit() => Run(PlaytestActions.GiveStarterKit);
 
-    [MenuItem(Menu + "출격 장비 — 티어 6 한 벌")]
+    [MenuItem(Menu + "파밍 장비 — 티어 6 한 벌")]
     public static void GiveEndgameKit() => Run(PlaytestActions.GiveEndgameKit);
 
     [MenuItem(Menu + "무기 6종 전부")]

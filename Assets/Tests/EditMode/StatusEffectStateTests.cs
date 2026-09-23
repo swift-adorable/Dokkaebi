@@ -374,7 +374,7 @@ namespace Blob.Tests
         [Test]
         public void ClearAll은_전부_초기화한다()
         {
-            // 풀 재사용 시 이전 출격의 상태가 남으면 안 된다.
+            // 풀 재사용 시 이전 파밍의 상태가 남으면 안 된다.
             var state = new StatusEffectState();
             state.Apply(StatusEffectType.Ignite, 10f);
             state.Apply(StatusEffectType.Shock, 10f);
@@ -513,7 +513,7 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 가속이_끝나면_탈진이_저절로_걸린다()
+        public void 가속이_끝나면_쇠약이_저절로_걸린다()
         {
             var state = new StatusEffectState();
             var buffer = new System.Collections.Generic.List<DamageRequest>();
@@ -527,12 +527,12 @@ namespace Blob.Tests
             Assert.IsFalse(state.Has(StatusEffectType.Haste));
             Assert.IsTrue(state.Has(StatusEffectType.Fatigue));
 
-            // 【대가는 순수 손해다.】 각성제가 순수 증가가 되면 안 된다.
+            // 【대가는 순수 손해다.】 노란 주사약이 순수 증가가 되면 안 된다.
             Assert.Less(state.SpeedMultiplier, 1f);
         }
 
         [Test]
-        public void 보강은_방어도를_더하고_회복량을_깎는다()
+        public void 강화는_방어도를_더하고_회복량을_깎는다()
         {
             var state = new StatusEffectState();
 
@@ -548,10 +548,10 @@ namespace Blob.Tests
                 state.HealingMultiplier, 0.001f);
         }
 
-        // ── 방호 (8-D) ────────────────────────────────────────────────
+        // ── 저항 (8-D) ────────────────────────────────────────────────
 
         [Test]
-        public void 방호는_해당_속성만_깎는다()
+        public void 저항_주사약은_해당_속성만_깎는다()
         {
             var state = new StatusEffectState();
 
@@ -571,7 +571,7 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 방호는_장비_저항에_곱해진다()
+        public void 저항_주사약은_장비_저항에_곱해진다()
         {
             var state = new StatusEffectState();
 
@@ -583,14 +583,14 @@ namespace Blob.Tests
             state.ApplyWards(ref resist);
 
             // 0.5 × 0.75 = 0.375. LowerTo의 바닥을 쓰면 0.5 그대로라
-            // 「내화 장비를 낀 사람에게 내화제가 아무 일도 안 한다」가 된다.
+            // 「화염 저항 장비를 낀 사람에게 화염 저항 주사약이 아무 일도 안 한다」가 된다.
             Assert.AreEqual(0.375f, resist.Get(DamageElement.Chaos), 0.001f);
         }
 
         [Test]
-        public void 방호는_약점을_저항으로_뒤집지_않는다()
+        public void 저항_주사약은_약점을_저항으로_뒤집지_않는다()
         {
-            // 압착기의 전기 2배가 방호 하나로 0.75가 되면
+            // 압착기의 전기 2배가 저항 하나로 0.75가 되면
             // 「얘는 전기로 잡아라」가 사라진다. LowerTo의 바닥 규칙이다.
             var state = new StatusEffectState();
 
@@ -605,7 +605,7 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 방호_넷은_동시에_걸린다()
+        public void 저항_넷은_동시에_걸린다()
         {
             // 덕코프의 저항 buff는 비배타다. [확인됨]
             var state = new StatusEffectState();
@@ -626,7 +626,7 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 적재는_소지_중량_배율을_올린다()
+        public void 소지_중량_증가는_소지_중량_배율을_올린다()
         {
             var state = new StatusEffectState();
 
@@ -639,7 +639,7 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 재생은_피해가_아니라_회복을_만든다()
+        public void 회복은_피해가_아니라_회복을_만든다()
         {
             var state = new StatusEffectState();
             var buffer = new System.Collections.Generic.List<DamageRequest>();
@@ -659,7 +659,7 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 재생은_1_미만을_흘리지_않고_모은다()
+        public void 회복은_1_미만을_흘리지_않고_모은다()
         {
             // 초당 2로 60프레임이면 프레임당 0.033이다. 그대로 넘기면
             // 매 프레임 0이 되어 영원히 회복되지 않는다.

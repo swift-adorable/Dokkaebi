@@ -19,10 +19,10 @@ public enum SocketError
     /// <summary>존재하지 않는 자리다.</summary>
     NoSuchSlot,
 
-    /// <summary>아직 각성 레벨이 열지 않은 자리다.</summary>
+    /// <summary>아직 레벨이 열지 않은 자리다.</summary>
     SlotLocked,
 
-    /// <summary>젬의 요구 레벨이 각성 레벨보다 높다. 주울 수는 있으나 끼울 수 없다.</summary>
+    /// <summary>젬의 요구 레벨이 레벨보다 높다. 주울 수는 있으나 끼울 수 없다.</summary>
     LevelTooHigh,
 
     /// <summary>그 핵심 젬에 아직 아무것도 끼워지지 않아 소켓이 작동하지 않는다.</summary>
@@ -47,7 +47,7 @@ public static class SocketErrorText
             case SocketError.WrongCategory: return "이 자리에 들어갈 분류가 아닙니다.";
             case SocketError.NoSuchSlot:    return "없는 자리입니다.";
             case SocketError.SlotLocked:    return "아직 열리지 않은 자리입니다.";
-            case SocketError.LevelTooHigh:  return "각성 레벨이 부족합니다.";
+            case SocketError.LevelTooHigh:  return "레벨이 부족합니다.";
             case SocketError.NoCore:        return "핵심 스킬을 먼저 끼워야 합니다.";
             case SocketError.TagMismatch:   return "핵심 스킬이 요구 태그를 만족하지 않습니다.";
             case SocketError.Duplicate:     return "같은 젬이 이미 끼워져 있습니다.";

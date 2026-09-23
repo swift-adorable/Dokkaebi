@@ -101,7 +101,7 @@ public class Health : MonoBehaviour, IDamageable, IPoolable
             float reduction = Status.ArmourReduction;
             float bonus = Status.ArmourBonus;
 
-            // 방호(내화제 등)는 장비 저항에 곱해진다. 원본을 건드리지 않으려고
+            // 저항(화염 저항 주사약 등)는 장비 저항에 곱해진다. 원본을 건드리지 않으려고
             // 복사본에 적용한다 — resistances는 장비가 넣어 준 값이다.
             ElementalResistances warded = resistances;
 
@@ -136,7 +136,7 @@ public class Health : MonoBehaviour, IDamageable, IPoolable
 
         // 저항 장비가 면역을 주면 아예 걸리지 않는다. (막는 것은 장비의 몫)
         // 【이로운 상태는 면역이 막지 않는다.】 면역은 해로운 것을 막으라고
-        // 붙인 것이다. 각인을 낀 대가로 각성제를 못 쓰게 되면 그것은 규칙이
+        // 붙인 것이다. 각인을 낀 대가로 노란 주사약을 못 쓰게 되면 그것은 규칙이
         // 아니라 사고다.
         if (!StatusEffectTable.IsBeneficial(type) && IsImmuneTo(type))
             return;
@@ -189,7 +189,7 @@ public class Health : MonoBehaviour, IDamageable, IPoolable
 
         Status.Tick(deltaTime, moving, buffer);
 
-        // 【재생은 피해 목록에 섞이지 않는다.】 버퍼는 피해 요청만 담으므로
+        // 【회복은 피해 목록에 섞이지 않는다.】 버퍼는 피해 요청만 담으므로
         // 회복은 따로 가져온다. 피해보다 먼저 넣어 「회복 중에 죽는」 한 틱을 줄인다.
         int healed = Status.ConsumeHealing();
 
@@ -229,7 +229,7 @@ public class Health : MonoBehaviour, IDamageable, IPoolable
         invulnerability.Reset();
 
         // 상태이상도 반드시 함께 초기화한다.
-        // 남겨 두면 재사용된 개체가 이전 출격의 점화를 그대로 들고 나온다.
+        // 남겨 두면 재사용된 개체가 이전 파밍의 점화를 그대로 들고 나온다.
         Status.ClearAll();
 
         // 처치 조건의 이력도 같이 지운다. 안 지우면 이전에 태웠던 개체가
