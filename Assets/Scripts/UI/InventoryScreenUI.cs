@@ -351,6 +351,7 @@ public partial class InventoryScreenUI : MonoBehaviour
     {
         BuildHudButtons(parent);
         BuildQuickBar(parent);
+        BuildCastBar(parent);
     }
 
     private void BuildHudButtons(Transform parent)
@@ -675,6 +676,75 @@ public partial class InventoryScreenUI : MonoBehaviour
     {
         if (toast != null && toast.activeSelf && Time.unscaledTime >= toastHideAt)
             toast.SetActive(false);
+
+        RefreshCastBar();
+    }
+
+    // ── 시전 막대 ─────────────────────────────────────────────────────
+    //
+    // 【퀵슬롯 바로 위에 둔다.】 쓰기 시작한 손가락이 있던 자리다.
+    // 화면 가운데나 캐릭터 머리 위에 두면 눈이 두 번 움직인다.
+    //
+    // 채움이 없으면 3초가 「멈춘 것」과 구분되지 않는다. 남은 시간을
+    // 숫자로도 적는다 — 「조금만 더」인지 「포기할까」인지가 여기서 갈린다.
+
+    private const float CastBarWidth = 420f;
+    private const float CastBarHeight = 44f;
+
+    private RectTransform castBar;
+    private Image castFill;
+    private Text castLabel;
+
+    private void BuildCastBar(Transform parent)
+    {
+        GameObject barObject = UIFactory.CreateChild("CastBar", parent);
+
+        castBar = barObject.GetComponent<RectTransform>();
+        castBar.anchorMin = new Vector2(0.5f, 0f);
+        castBar.anchorMax = new Vector2(0.5f, 0f);
+        castBar.pivot = new Vector2(0.5f, 0f);
+        castBar.sizeDelta = new Vector2(CastBarWidth, CastBarHeight);
+
+        // 퀵슬롯 줄 바로 위.
+        castBar.anchoredPosition = new Vector2(
+            0f, QuickCellSize + QuickNumberBand + QuickNumberGap + 10f);
+
+        var back = barObject.AddComponent<Image>();
+        back.color = UIPalette.Inset;
+        back.sprite = UISprites.Rounded(UIFactory.Radius);
+        back.type = Image.Type.Sliced;
+        back.raycastTarget = false;
+
+        castFill = UIFactory.CreatePanel("Fill", barObject.transform,
+            UIPalette.Gain, Vector2.zero, new Vector2(0f, 1f), UIFactory.Radius);
+
+        castFill.raycastTarget = false;
+
+        castLabel = UIFactory.CreateLabel(barObject.transform, string.Empty, 24,
+            FontStyle.Bold, new Vector2(0.04f, 0f), new Vector2(0.96f, 1f),
+            TextAnchor.MiddleCenter, UIPalette.TextOnGlass);
+
+        barObject.SetActive(false);
+    }
+
+    private void RefreshCastBar()
+    {
+        if (castBar == null)
+            return;
+
+        bool casting = ConsumableCaster.IsCasting;
+
+        if (castBar.gameObject.activeSelf != casting)
+            castBar.gameObject.SetActive(casting);
+
+        if (!casting)
+            return;
+
+        float progress = ConsumableCaster.Progress;
+
+        castFill.rectTransform.anchorMax = new Vector2(progress, 1f);
+
+        castLabel.text = $"{ConsumableCaster.CastingName}  {progress * 100f:0}%";
     }
 
     // ────────────────────────────────── 열고 닫기
@@ -1326,13 +1396,14 @@ public partial class InventoryScreenUI : MonoBehaviour
     /// </summary>
     private void UseFromMenu(ItemStack stack)
     {
-        string result = PlayerConsumables.Use(stack);
+        PlayerConsumables.BeginUse(stack, result =>
+        {
+            PlayerInventory.EnsureInstance().RefreshCapacity();
 
-        PlayerInventory.EnsureInstance().RefreshCapacity();
+            Refresh();
 
-        Refresh();
-
-        ShowToast(result);
+            ShowToast(result);
+        });
     }
 
     /// <summary>
@@ -1518,10 +1589,23 @@ public partial class InventoryScreenUI : MonoBehaviour
         if (stack?.Definition == null)
             return;
 
-        // 【소모품 사용은 아직 없다.】 (docs/Blob_Consumable_System.md · 9단계)
-        // 여기에 쓰는 동작을 붙이는 순간 「무엇을 얼마나 회복하는가」를
-        // 정하는 셈이 된다. 그건 UI가 정할 일이 아니다.
-        ShowToast($"「{stack.Definition.DisplayName}」 — 소모품 사용은 아직 없습니다.");
+        // 【여기가 전투 중에 쓰는 유일한 길이다.】 가방을 열고 쓰는 것과
+        // 달리 시전 중에 움직이거나 맞으면 중단된다 — 그래서 「안전한 자리를
+        // 먼저 찾는다」가 행동이 된다. (docs/Blob_Consumable_System.md 6절)
+        if (!PlayerConsumables.CanUse(stack.Definition))
+        {
+            ShowToast($"「{stack.Definition.DisplayName}」 — 쓸 수 있는 물건이 아닙니다.");
+            return;
+        }
+
+        PlayerConsumables.BeginUse(stack, result =>
+        {
+            PlayerInventory.EnsureInstance().RefreshCapacity();
+
+            RefreshQuickSlots();
+
+            ShowToast(result);
+        });
     }
 
     private void RefreshWeight()

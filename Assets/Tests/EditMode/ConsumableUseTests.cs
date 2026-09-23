@@ -274,7 +274,7 @@ namespace Blob.Tests
         [Test]
         public void 덜어_낼_중첩_수가_실린다()
         {
-            // 소형은 출혈 1층, 구급상자는 2층. 싼 도구가 비싼 도구와
+            // 소형은 출혈 1중첩, 구급상자는 2중첩. 싼 도구가 비싼 도구와
             // 같은 일을 하면 비싼 쪽을 살 이유가 없다.
             ItemDefinition small = Create("small", cure: StatusEffectType.Bleed, cureStacks: 1);
             ItemDefinition big = Create("big", cure: StatusEffectType.Bleed, cureStacks: 2);
