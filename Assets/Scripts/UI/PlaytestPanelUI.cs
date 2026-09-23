@@ -45,6 +45,7 @@ public class PlaytestPanelUI : MonoBehaviour
         // 위 셋은 【가장 가까운 적】에게 건다. 화면 좌상단의 상태이상 줄은
         // 【내】 상태를 보여 주므로, 적에게 걸어서는 줄이 뜨지 않는다.
         // 그 줄을 확인하려면 아래 둘을 쓴다.
+        ("부활 (시간 재개)",  PlaytestActions.ReviveSelf),
         ("내게 기본 6종",     PlaytestActions.StackAllOnSelf),
         ("내게 위험 상태 3종", PlaytestActions.CriticalOnSelf),
         ("내게 냉각 6 → 동결", () => PlaytestActions.StackOnSelf(StatusEffectType.Chill, 6)),

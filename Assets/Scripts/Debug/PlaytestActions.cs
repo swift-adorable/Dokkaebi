@@ -394,22 +394,71 @@ public static class PlaytestActions
     }
 
     /// <summary>
-    /// 상태이상 도트가 나를 죽이지 않도록 먼저 체력을 채운다.
+    /// 표시를 확인할 때 쓰는 기준 피해.
     ///
-    /// 【죽으면 조용히 아무 일도 일어나지 않는다.】 Health.ApplyStatus는
-    /// IsDead면 그대로 돌아가고 StatusEffectState는 비어 있으므로, 줄이
-    /// 하나도 안 뜨는데 원인이 화면에 드러나지 않는다. 표시를 보려고 누른
-    /// 버튼이 표시를 못 보게 만드는 셈이다. 그래서 걸기 전에 채운다.
+    /// 【1로 둔다.】 처음에는 10으로 뒀는데, 점화 0.25 · 출혈 0.20 ·
+    /// 중독 0.05의 계수가 겹쳐 여섯 종이면 20~30 피해가 들어갔다.
+    /// 두세 번 누르면 죽었고, 죽으면 Health.ApplyStatus가 IsDead에서
+    /// 조용히 돌아가 줄이 하나도 뜨지 않았다. 게다가 사망은 timeScale을
+    /// 0으로 만들어 화면이 통째로 멈춘다 — 표시를 보려고 누른 버튼이
+    /// 표시를 못 보게 만든 셈이다.
+    ///
+    /// 여기서 확인하려는 것은 【줄이 뜨는가】이지 피해량이 아니다.
+    /// 피해량 검증은 EditMode의 StatusEffectStateTests가 이미 한다.
     /// </summary>
+    private const float TestDamage = 1f;
+
+    /// <summary>걸기 전 상태 점검. 죽어 있으면 이유를 돌려준다.</summary>
     private static string PrepareSelf(Health self)
     {
         if (self.IsDead)
-            return "플레이어가 죽어 있습니다 — 상태이상이 걸리지 않습니다.";
+            return "플레이어가 죽어 있습니다 — 「부활」을 먼저 누르십시오.\n"
+                   + "사망하면 timeScale이 0이 되어 화면 전체가 멈춥니다.";
 
         if (self.Current < self.Max)
             self.Heal(self.Max - self.Current);
 
         return null;
+    }
+
+    /// <summary>
+    /// 되살린다. 【사망 화면이 아직 없어서 죽으면 나올 길이 없다.】
+    ///
+    /// 사망은 GameManager를 GameOver로 보내고 timeScale을 0으로 만든다.
+    /// 그런데 GameState.GameOver를 듣는 화면이 하나도 없다 — 멈춘 채로
+    /// 아무것도 뜨지 않으므로 Play Mode를 껐다 켜는 것 말고는 방법이 없었다.
+    /// 사망 화면(추출 실패 → 벙커 복귀)은 벙커·정산과 함께 가는 일이라
+    /// 그때까지는 이 버튼이 유일한 출구다. (docs/Blob_Audit.md)
+    ///
+    /// 【되돌려 주지 않는 것】 가방은 죽는 순간 DropOnDeath로 이미 떨어졌고
+    /// 각성 레벨과 소켓도 SkillManager.ResetRun으로 초기화되었다.
+    /// 그 둘은 규칙대로 사라진 것이므로 여기서 되살리지 않는다.
+    /// </summary>
+    public static string ReviveSelf()
+    {
+        Health self = SelfHealth();
+
+        if (self == null)
+            return "플레이어를 찾지 못했습니다.";
+
+        bool wasDead = self.IsDead;
+
+        // 체력 가득 · 상태이상 해제 · 무적 초기화를 한 번에 한다.
+        self.OnSpawned();
+
+        // 수분·에너지가 0이면 살려도 허기 피해로 곧 다시 죽는다.
+        if (PlayerSurvival.HasInstance)
+            PlayerSurvival.Instance.Refill();
+
+        if (GameManager.HasInstance)
+            GameManager.Instance.Resume();
+
+        if (!wasDead)
+            return $"죽어 있지 않았습니다. 체력·수분·에너지를 채우고 "
+                   + $"상태이상을 해제했습니다 — 체력 {self.Current}/{self.Max}";
+
+        return $"부활했습니다 — 체력 {self.Current}/{self.Max} · 시간이 다시 흐릅니다.\n"
+               + "가방과 각성 레벨은 죽을 때 규칙대로 사라졌으므로 돌아오지 않습니다.";
     }
 
     /// <summary>나에게 한 종류를 여러 번 건다. 중첩 → 전이를 볼 때 쓴다.</summary>
@@ -431,7 +480,7 @@ public static class PlaytestActions
             return $"{StatusEffectNames.Of(type)}에 면역입니다 — 장비를 벗고 다시 하십시오.";
 
         for (int i = 0; i < times; i++)
-            self.ApplyStatus(type, 10f);
+            self.ApplyStatus(type, TestDamage);
 
         StatusEffectType threshold = StatusEffectTable.ThresholdOf(type);
 
@@ -475,7 +524,7 @@ public static class PlaytestActions
                 continue;
             }
 
-            self.ApplyStatus(type, 10f);
+            self.ApplyStatus(type, TestDamage);
             applied++;
         }
 
@@ -499,7 +548,7 @@ public static class PlaytestActions
             return blocked;
 
         foreach (StatusEffectType type in CriticalAilments)
-            self.ApplyStatus(type, 10f);
+            self.ApplyStatus(type, TestDamage);
 
         return $"내게 동결 · 마비 · 부식 · 체력 {self.Current}/{self.Max}\n"
                + "붉은 바탕의 띠로 맨 위에 와야 합니다.\n"
