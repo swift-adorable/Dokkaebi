@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: con_ward_fire
   m_EditorClassIdentifier: Blob.Runtime::ItemDefinition
   id: con_ward_fire
-  displayName: "\uB0B4\uD654\uC81C"
+  displayName: "\uD654\uC5FC \uC800\uD56D \uC8FC\uC0AC\uC57D"
   description: "\uD0C0\uB294 \uAC83\uC774 \uB35C \uC544\uD504\uB2E4."
   kind: 6
   tier: 0
