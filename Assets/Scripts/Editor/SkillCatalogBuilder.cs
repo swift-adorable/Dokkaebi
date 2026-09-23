@@ -35,7 +35,7 @@ public static class SkillCatalogBuilder
             if (definition == null)
                 continue;
 
-            // id 중복은 도감/적재 저장을 조용히 망가뜨리므로 임포트 시점에 잡는다.
+            // id 중복은 도감/장비 구성 저장을 조용히 망가뜨리므로 임포트 시점에 잡는다.
             if (!seenIds.Add(definition.Id))
             {
                 Debug.LogError(

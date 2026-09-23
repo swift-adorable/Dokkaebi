@@ -66,7 +66,7 @@ public static class ConditionalDropTable
     }
 
     /// <summary>
-    /// 유저에게 미리 보여 줄 문구. 【사전 고지가 규칙이다.】
+    /// 플레이어에게 미리 보여 줄 문구. 【사전 고지가 규칙이다.】
     /// </summary>
     public static string Describe(ConditionalDrop drop)
     {

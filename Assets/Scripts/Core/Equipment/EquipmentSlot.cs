@@ -10,7 +10,7 @@ public enum EquipmentSlot
     /// <summary>머리 — 머리 방어도(원거리 피격) + 감각 페널티.</summary>
     Head = 1,
 
-    /// <summary>몸통 — 몸통 방어도(근접 피격) + 적재 공간.</summary>
+    /// <summary>몸통 — 몸통 방어도(근접 피격) + 가방 칸.</summary>
     Body = 2,
 
     /// <summary>얼굴 — 속성 저항 · 상태이상 면역 + 시야·감지.</summary>
@@ -19,7 +19,7 @@ public enum EquipmentSlot
     /// <summary>청각 — 소리 · 위치 파악.</summary>
     Ears = 4,
 
-    /// <summary>가방 — 최대 소지 중량 + 적재 공간.</summary>
+    /// <summary>가방 — 최대 소지 중량 + 가방 칸.</summary>
     Backpack = 5,
 
     /// <summary>각인 1 — 추출 실패에도 유실되지 않는다.</summary>

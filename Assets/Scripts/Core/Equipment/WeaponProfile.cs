@@ -27,7 +27,7 @@ public readonly struct WeaponProfile
     /// <summary>치명타 배율.</summary>
     public readonly float CriticalMultiplier;
 
-    /// <summary>상태이상 위력 배수. 직접 피해와 분리된 축이다.</summary>
+    /// <summary>상태이상 위력 배율. 직접 피해와 분리된 축이다.</summary>
     public readonly float AilmentPower;
 
     private WeaponProfile(

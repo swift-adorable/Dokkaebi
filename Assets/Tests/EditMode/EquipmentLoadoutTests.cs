@@ -210,7 +210,7 @@ namespace Blob.Tests
         [Test]
         public void 내구도가_0이면_방어_옵션만_정지한다()
         {
-            // 탐지·수집·적재 옵션은 계속 작동한다.
+            // 탐지·수집·보관 옵션은 계속 작동한다.
             var loadout = new EquipmentLoadout();
 
             EquipmentDefinition helmet = Create("helmet", EquipmentSlot.Head, maxDurability: 100,
@@ -244,7 +244,7 @@ namespace Blob.Tests
             Assert.AreEqual(3f, loadout.Modifiers.Get(EquipmentStatType.HeadArmour), 0.001f);
         }
 
-        // ── 누적 문턱 ───────────────────────────────────────────────
+        // ── 누적 한계치 ───────────────────────────────────────────────
 
         [Test]
         public void 격리_방호는_장비와_소모품을_합쳐_계산된다()

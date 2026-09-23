@@ -6,7 +6,7 @@ using UnityEngine;
 ///
 /// 【왜 카탈로그 에셋인가】
 /// 지급 메뉴는 원래 에디터의 AssetDatabase로 에셋을 찾았다.
-/// AssetDatabase는 **빌드에 존재하지 않는다.** 그래서 실기(iOS) 빌드에서는
+/// AssetDatabase는 **빌드에 존재하지 않는다.** 그래서 실제 기기(iOS) 빌드에서는
 /// 검증 도구가 통째로 없는 것과 같았고, 「장비가 지급되지 않는다」로 나타났다.
 ///
 /// 아이템은 Assets/Data/... 아래에 있어 Resources.LoadAll이 닿지 않는다.

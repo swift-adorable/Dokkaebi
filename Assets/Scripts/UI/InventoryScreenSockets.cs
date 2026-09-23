@@ -30,9 +30,9 @@ public partial class InventoryScreenUI
     }
 
     /// <summary>
-    /// 소켓판을 주어진 칸에 그린다. 【장비 8칸과 같은 자리】다.
+    /// 소켓 화면을 주어진 칸에 그린다. 【장비 8칸과 같은 자리】다.
     ///
-    /// 전에는 화면 오른쪽 절반을 혼자 썼다. 왼쪽에 젬 목록, 오른쪽에 소켓판이라
+    /// 전에는 화면 오른쪽 절반을 혼자 썼다. 왼쪽에 젬 목록, 오른쪽에 소켓 화면이라
     /// 장비 화면(위 슬롯 · 아래 목록)과 구조가 달랐다. 이제 둘을 맞춘다 —
     /// 위가 끼우는 자리, 아래가 가진 것.
     /// </summary>
@@ -161,7 +161,7 @@ public partial class InventoryScreenUI
     private ItemStack placingGem;
 
     /// <summary>
-    /// 지금 소켓판이 밝혀 줘야 할 젬. 자리를 고르는 중이면 그것, 아니면 상세의 것.
+    /// 지금 소켓 화면이 밝혀 줘야 할 젬. 자리를 고르는 중이면 그것, 아니면 상세의 것.
     /// </summary>
     private SkillDefinition PickedSkill()
     {
@@ -173,7 +173,7 @@ public partial class InventoryScreenUI
     }
 
     /// <summary>
-    /// 상세를 닫고 소켓판에서 자리를 고르게 한다. 「장착」 버튼이 부른다.
+    /// 상세를 닫고 소켓 화면에서 자리를 고르게 한다. 「장착」 버튼이 부른다.
     ///
     /// 상세가 화면 가운데를 덮고 있어서, 밝아진 자리를 보려면 먼저 치워야 한다.
     /// </summary>
@@ -189,7 +189,7 @@ public partial class InventoryScreenUI
         selected = stack;
         selectedSlot = null;
 
-        // 소켓판이 보이는 탭이어야 밝혀 봐야 소용이 있다.
+        // 소켓 화면이 보이는 탭이어야 밝혀 봐야 소용이 있다.
         tab = Tab.Socket;
 
         Refresh();

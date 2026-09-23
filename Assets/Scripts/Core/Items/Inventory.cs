@@ -5,7 +5,7 @@ using UnityEngine;
 /// 가방. 장비 · 젬 · 전리품이 전부 여기에 들어간다.
 ///
 /// 두 개의 독립된 자원으로 제한된다.
-///   적재 공간 — 칸 수.  초반의 병목
+///   가방 칸 — 초반의 병목
 ///   최대 소지 중량 — kg. 중반 이후의 진짜 병목
 ///
 /// 두 축을 분리한 이유 — 가방마다 배분이 달라서 "이번 출격에 무엇을 노리는가"에 따라
@@ -29,7 +29,7 @@ public class Inventory
 
     public IReadOnlyList<ItemStack> Stacks => stacks;
 
-    /// <summary>적재 공간(칸 수).</summary>
+    /// <summary>가방 칸 수.</summary>
     public int SlotCapacity
     {
         get => slotCapacity;
@@ -88,7 +88,7 @@ public class Inventory
     /// 담을 수 있는지. 칸 수만 본다. 무게는 막지 않는다.
     ///
     /// 겹칠 수 있는 아이템은 기존 칸에 들어가므로 칸을 쓰지 않을 수 있다.
-    /// 젬은 적재에 잡히지 않으므로(ItemDefinition.IsCargo) 늘 담을 수 있다.
+    /// 젬은 칸에 잡히지 않으므로(ItemDefinition.IsCargo) 늘 담을 수 있다.
     /// </summary>
     public bool CanAdd(ItemDefinition definition, int count = 1)
     {
@@ -115,7 +115,7 @@ public class Inventory
         return newStacks * definition.SlotCost <= FreeSlots;
     }
 
-    /// <summary>담는다. 실제로 담긴 개수를 반환한다. 부분 적재를 허용한다.</summary>
+    /// <summary>담는다. 실제로 담긴 개수를 반환한다. 부분 담기를 허용한다.</summary>
     public int TryAdd(ItemDefinition definition, int count = 1, int durability = -1)
     {
         if (definition == null || count <= 0)
@@ -161,7 +161,7 @@ public class Inventory
     /// 【겹치는 아이템은 먼저 기존 칸에 합친다.】
     /// 예전에는 무조건 새 칸에 붙였다. 그래서 전리품 창에서 고철을 세 번 주우면
     /// 스택 상한이 20인데도 세 칸을 잡아먹었다. 가방이 금방 차서
-    /// 적재 설계(칸 수·무게)가 전부 헛돌았다.
+    /// 가방 설계(칸 수·무게)가 전부 헛돌았다.
     ///
     /// 【전부 아니면 전혀】 계약은 그대로다. 먼저 CanAdd로 전량이 들어가는지
     /// 확인한 뒤에만 옮기기 시작한다. 그래야 전리품 한 칸이 반만 옮겨져
@@ -258,7 +258,7 @@ public class Inventory
     /// <summary>
     /// 추출에 실패했을 때 잃는 것을 비운다.
     ///
-    /// 각인만 남는다. 유저가 배울 규칙은 하나여야 하므로 예외를 늘리지 않는다.
+    /// 각인만 남는다. 플레이어가 배울 규칙은 하나여야 하므로 예외를 늘리지 않는다.
     /// 젬도 장비와 똑같이 잃는다. (docs/Blob_Progression_System.md 6절)
     /// </summary>
     public int DropOnDeath()

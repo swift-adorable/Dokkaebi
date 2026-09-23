@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Blob.Tests
 {
     /// <summary>
-    /// 적 프리팹이 전투 정본의 수치를 쓰고 있는가.
+    /// 적 프리팹이 전투 기준의 수치를 쓰고 있는가.
     ///
     /// 【이 테스트가 없어서 놓쳤다】
     /// 감사는 「문서 ↔ 코드」만 비교했다. 프리팹에 직렬화된 값은
@@ -40,27 +40,27 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 적_프리팹의_체력이_정본과_같다()
+        public void 적_프리팹의_체력이_기준과_같다()
         {
             var health = LoadEnemy().GetComponent<Health>();
 
             Assert.IsNotNull(health, "Enemy 프리팹에 Health가 없습니다.");
 
             Assert.AreEqual(ScavHealth, health.Max,
-                "적 체력이 정본(스캐브 20)과 다릅니다. "
+                "적 체력이 기준(스캐브 20)과 다릅니다. "
                 + "한 발에 죽으면 무기 티어도 상태이상도 체감되지 않습니다. "
                 + "(docs/Blob_Combat_Baseline.md 5절)");
         }
 
         [Test]
-        public void 적_프리팹의_피해가_정본과_같다()
+        public void 적_프리팹의_피해가_기준과_같다()
         {
             var attack = LoadEnemy().GetComponent<EnemyAttack>();
 
             Assert.IsNotNull(attack, "Enemy 프리팹에 EnemyAttack이 없습니다.");
 
             Assert.AreEqual(ScavDamage, attack.Damage,
-                "적 피해가 정본(스캐브 8)과 다릅니다. "
+                "적 피해가 기준(스캐브 8)과 다릅니다. "
                 + "피해가 낮으면 플레이어가 사실상 죽지 않아 "
                 + "「죽으면 잃는다」는 이 게임의 뼈대를 확인할 수 없습니다. "
                 + "(docs/Blob_Combat_Baseline.md 5절)");
@@ -70,7 +70,7 @@ namespace Blob.Tests
         }
 
         /// <summary>
-        /// 정본의 검증 문장을 그대로 계산한다 —
+        /// 기준의 검증 문장을 그대로 계산한다 —
         /// 「무방어로 1장 적 피해 10을 10대 맞으면 죽는다」(1절).
         /// 스캐브는 8이므로 무방어 13대. 100대와 13대는 전혀 다른 게임이다.
         /// </summary>
@@ -107,7 +107,7 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 원거리_적이_정본_수치를_쓴다()
+        public void 원거리_적이_기준_수치를_쓴다()
         {
             GameObject go = LoadRanged();
 

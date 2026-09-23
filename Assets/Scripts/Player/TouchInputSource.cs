@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// 실기기(Android/iOS)용 입력 소스. 듀얼 가상 조이스틱 + 액션 버튼.
+/// 실제 기기(Android/iOS)용 입력 소스. 듀얼 가상 조이스틱 + 액션 버튼.
 ///
 /// 이 컴포넌트는 모바일 입력 Canvas 루트에 붙는다.
 /// 비활성 플랫폼에서는 GameObject 자체가 꺼지므로 UI가 화면에 그려지지 않는다.

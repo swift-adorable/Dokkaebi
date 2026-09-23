@@ -1,7 +1,7 @@
 /// <summary>
 /// 젬을 소켓에 끼우지 못한 이유. UI가 그대로 문구로 바꿔 보여준다.
 ///
-/// bool 하나로 돌려주면 "왜 안 되는지"를 유저에게 말해 줄 수 없다.
+/// bool 하나로 돌려주면 "왜 안 되는지"를 플레이어에게 말해 줄 수 없다.
 /// 파밍으로 획득 방식이 바뀌면서 "주웠는데 못 끼운다"가 흔한 상황이 되었으므로
 /// 이유를 반드시 구분해야 한다.
 /// </summary>
@@ -28,14 +28,14 @@ public enum SocketError
     /// <summary>그 핵심 젬에 아직 아무것도 끼워지지 않아 소켓이 작동하지 않는다.</summary>
     NoCore,
 
-    /// <summary>핵심 젬이 이 보조 젬의 요구 태그를 만족하지 않는다. (태그 게이팅)</summary>
+    /// <summary>핵심 젬이 이 보조 젬의 요구 태그를 만족하지 않는다. (태그 조건)</summary>
     TagMismatch,
 
     /// <summary>같은 젬이 이미 그 자리 무리 안에 있다.</summary>
     Duplicate
 }
 
-/// <summary>SocketError를 유저에게 보여 줄 한국어 문구로 바꾼다.</summary>
+/// <summary>SocketError를 플레이어에게 보여 줄 한국어 문구로 바꾼다.</summary>
 public static class SocketErrorText
 {
     public static string Describe(SocketError error)

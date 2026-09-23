@@ -27,7 +27,7 @@ public class LootTable : ScriptableObject
     public int MaxRolls => Mathf.Max(MinRolls, maxRolls);
 
     /// <summary>
-    /// 이 표로 컨테이너를 채운다. luckMultiplier는 적 등급 배수다.
+    /// 이 표로 상자를 채운다. luckMultiplier는 적 등급 배율다.
     /// 추첨 횟수에만 곱한다 — 등급이 높으면 더 많이 나오되 표 자체는 같다.
     /// </summary>
     public int Fill(LootContainer into, System.Random random, int luckMultiplier = 1)

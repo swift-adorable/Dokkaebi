@@ -40,7 +40,7 @@ public static class GameLogger
         Debug.LogWarning(message, context);
     }
 
-    /// <summary>에러는 릴리즈 빌드에서도 유지한다. (실기기 크래시 원인 추적용)</summary>
+    /// <summary>에러는 릴리즈 빌드에서도 유지한다. (실제 기기 크래시 원인 추적용)</summary>
     public static void Error(string message)
     {
         Debug.LogError(message);

@@ -60,7 +60,7 @@ public struct EngagementPlan
 /// </summary>
 public static class EngagementPlanner
 {
-    /// <summary>차례가 아닐 때 유지하려는 추가 거리 배수. 뒤로 한 발 빼고 돈다.</summary>
+    /// <summary>차례가 아닐 때 유지하려는 추가 거리 배율. 뒤로 한 발 빼고 돈다.</summary>
     public const float RepositionDistanceScale = 1.25f;
 
     public static EngagementPlan Plan(in EngagementInput input)

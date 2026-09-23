@@ -6,12 +6,12 @@ using UnityEngine;
 ///
 /// 【왜 런타임으로 옮겼나】
 /// 원래는 Editor의 MenuItem이었다. MenuItem은 빌드에 컴파일되지 않으므로
-/// 실기(iOS) 빌드에서는 지급·출력 수단이 아예 없었다.
-/// 모바일 게임을 실기에서 확인하는 것은 당연한 일이고,
+/// 실제 기기(iOS) 빌드에서는 지급·출력 수단이 아예 없었다.
+/// 모바일 게임을 실제 기기에서 확인하는 것은 당연한 일이고,
 /// 검증 도구가 거기서 동작하지 않으면 도구가 아니다.
 ///
 /// 결과를 문자열로 돌려주는 이유 — 부르는 쪽이 콘솔에 찍든 화면에 띄우든
-/// 고를 수 있어야 한다. 실기에는 Console 창이 없다.
+/// 고를 수 있어야 한다. 실제 기기에는 Console 창이 없다.
 /// </summary>
 public static class PlaytestActions
 {
@@ -73,7 +73,7 @@ public static class PlaytestActions
         => Catalog == null ? NoCatalog : Give(Catalog.KeyImprints, "대표 각인");
 
     /// <summary>
-    /// 젬 네 범주를 한 번에. 【젬은 이제 적재를 먹지 않는다(2-31).】
+    /// 젬 네 범주를 한 번에. 【젬은 이제 칸을 먹지 않는다(2-31).】
     /// 나눠 줄 이유가 사라졌다 — 다 받아도 가방이 그대로다.
     /// </summary>
     public static string GiveAllGems()

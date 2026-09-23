@@ -58,7 +58,7 @@ public class ItemStack
     /// </summary>
     public float TotalWeight => Definition == null ? 0f : Definition.WeightCost * Count;
 
-    /// <summary>이 칸이 차지하는 적재 칸 수.</summary>
+    /// <summary>이 칸이 차지하는 칸 수.</summary>
     public int TotalSlots => Definition == null ? 0 : Definition.SlotCost;
 
     /// <summary>더 겹칠 수 있는 여유 개수.</summary>
@@ -72,7 +72,7 @@ public class ItemStack
         => Definition != null && Definition.HasDurability
            && Durability <= Mathf.CeilToInt(MaxDurability * WornThreshold);
 
-    /// <summary>방어 옵션이 정지했는지. 탐지·수집·적재 옵션은 계속 작동한다.</summary>
+    /// <summary>방어 옵션이 정지했는지. 탐지·수집·보관 옵션은 계속 작동한다.</summary>
     public bool IsBroken => Definition != null && Definition.HasDurability && Durability <= 0;
 
     public const float WornThreshold = 0.33f;

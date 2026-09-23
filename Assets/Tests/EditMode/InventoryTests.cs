@@ -35,7 +35,7 @@ namespace Blob.Tests
             return def;
         }
 
-        // ── 적재 공간 ──────────────────────────────────────────────────
+        // ── 가방 칸 ──────────────────────────────────────────────────
 
         [Test]
         public void 칸이_가득_차면_더_담을_수_없다()
@@ -78,7 +78,7 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 부분_적재를_허용한다()
+        public void 부분_담기를_허용한다()
         {
             // 예외 상황 — 공간이 모자라면 들어갈 만큼만 넣는다.
             // 전부 실패시키면 "한 칸 남았는데 아무것도 못 줍는" 상황이 된다.
@@ -144,7 +144,7 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 대시는_과적재부터_줄어든다()
+        public void 대시는_과적부터_줄어든다()
         {
             // Heavy까지는 대시가 온전하다. 마지막 탈출 수단을 초반부터 뺏지 않는다.
             Assert.AreEqual(1f, WeightCalculator.DashMultiplier(EncumbranceLevel.Heavy), 0.001f);
@@ -158,7 +158,7 @@ namespace Blob.Tests
         {
             // 젬은 "챙겨 오는 물건"이 아니라 빌드 그 자체다. 젬의 상한은
             // 소켓 자리 수(= 각성 레벨)가 정한다. 가방이 두 번 제한하면
-            // 유저의 결정이 "화력이냐 전리품이냐"가 아니라
+            // 플레이어의 결정이 "화력이냐 전리품이냐"가 아니라
             // "쓰지도 않을 젬을 버려야 하나"가 된다.
             var inv = new Inventory(slots: 4, weight: 100f);
 
@@ -194,7 +194,7 @@ namespace Blob.Tests
         public void 젬은_무게도_잡지_않는다()
         {
             // 칸과 무게를 따로 두면 「칸은 안 먹는데 무게는 먹는다」처럼
-            // 반쪽만 적용된 상태가 생기고, 그 차이를 유저가 배울 방법이 없다.
+            // 반쪽만 적용된 상태가 생기고, 그 차이를 플레이어가 배울 방법이 없다.
             var inv = new Inventory(slots: 10, weight: 10f);
 
             ItemDefinition gem = Create("gem_fire", ItemKind.SkillGem, weight: 0.5f);
@@ -241,7 +241,7 @@ namespace Blob.Tests
         [Test]
         public void 죽으면_각인만_남고_전부_잃는다()
         {
-            // 유저가 배울 규칙은 하나여야 한다 — 죽으면 들고 있던 것 전부.
+            // 플레이어가 배울 규칙은 하나여야 한다 — 죽으면 들고 있던 것 전부.
             var inv = new Inventory(slots: 10, weight: 100f);
 
             ItemDefinition gem = Create("gem", ItemKind.SkillGem);
@@ -377,7 +377,7 @@ namespace Blob.Tests
         }
 
         /// <summary>
-        /// 전리품 한 칸이 반만 옮겨지면 유저가 무엇을 가져왔는지 알 수 없다.
+        /// 전리품 한 칸이 반만 옮겨지면 플레이어가 무엇을 가져왔는지 알 수 없다.
         /// 들어갈 자리가 없으면 원본을 건드리지 않고 통째로 거절해야 한다.
         /// </summary>
         [Test]

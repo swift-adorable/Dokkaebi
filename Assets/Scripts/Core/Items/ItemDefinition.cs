@@ -3,7 +3,7 @@ using UnityEngine;
 /// <summary>
 /// 모든 아이템의 공통 정의. 장비·젬·전리품이 이것을 공유한다.
 ///
-/// 무게와 적재 공간을 여기에 두는 이유 —
+/// 무게와 가방 칸을 여기에 두는 이유 —
 /// 젬이 실물 아이템이 되면서 장비·전리품과 같은 인벤토리를 쓰게 되었다.
 /// "젬을 많이 챙겨 화력을 확보할까, 가방을 비워 전리품 공간을 남길까"라는
 /// 결정이 성립하려면 셋이 같은 자원을 두고 경쟁해야 한다.
@@ -35,7 +35,7 @@ public class ItemDefinition : ScriptableObject
     [Tooltip("아이콘. 비워 두면 UI가 종류별 색 판으로 대신 그린다.")]
     [SerializeField] private Sprite icon;
 
-    [Tooltip("차지하는 적재 칸 수. 대부분 1이다.")]
+    [Tooltip("차지하는 칸 수. 대부분 1이다.")]
     [Min(1)]
     [SerializeField] private int slotSize = 1;
 
@@ -111,11 +111,11 @@ public class ItemDefinition : ScriptableObject
     public bool IsSkillGem => kind == ItemKind.SkillGem && skill != null;
 
     /// <summary>
-    /// 적재물인가 — 【가방의 칸과 무게를 잡아먹는가】. 스킬 젬만 아니다.
+    /// 짐인가 — 【가방의 칸과 무게를 잡아먹는가】. 스킬 젬만 아니다.
     ///
-    /// 【왜 젬을 적재에서 빼는가】 (결정 2-31)
-    /// 젬은 "챙겨 오는 물건"이 아니라 빌드 그 자체다. 적재를 두고 전리품과
-    /// 경쟁시키면 유저가 내리는 결정은 "화력이냐 전리품이냐"가 아니라
+    /// 【왜 젬을 칸에서 빼는가】 (결정 2-31)
+    /// 젬은 "챙겨 오는 물건"이 아니라 빌드 그 자체다. 칸을 두고 전리품과
+    /// 경쟁시키면 플레이어가 내리는 결정은 "화력이냐 전리품이냐"가 아니라
     /// "쓰지도 않을 젬을 버려야 하나"가 된다. 소켓 자리 수가 이미 젬의
     /// 상한이고, 그 상한은 각성 레벨이 정한다 — 가방이 두 번 제한할 이유가 없다.
     /// 반대 방향도 막는다. 가방이 꽉 차 있다고 젬을 못 빼면,
@@ -124,10 +124,10 @@ public class ItemDefinition : ScriptableObject
     /// 【칸과 무게를 한 낱말로 묶는 이유】
     /// 둘은 원래 별개의 축이지만, 젬에 대해서는 같은 답이어야 한다.
     /// 따로 두면 「칸은 안 먹는데 무게는 먹는다」처럼 반쪽만 적용된 상태가
-    /// 생기고, 그 차이를 유저가 배울 방법이 없다.
+    /// 생기고, 그 차이를 플레이어가 배울 방법이 없다.
     ///
     /// IsSkillGem이 아니라 종류만 보는 이유 — 스킬 참조가 비어 있는
-    /// 잘못된 에셋이 갑자기 적재를 먹기 시작하면 원인을 찾기 어렵다.
+    /// 잘못된 에셋이 갑자기 칸을 먹기 시작하면 원인을 찾기 어렵다.
     /// </summary>
     public bool IsCargo => kind != ItemKind.SkillGem;
 
@@ -140,7 +140,7 @@ public class ItemDefinition : ScriptableObject
     /// <summary>
     /// 추출에 실패해도 잃지 않는 아이템인지.
     ///
-    /// 각인만 해당한다. 유저가 배울 규칙은 하나여야 하므로 예외를 늘리지 않는다.
+    /// 각인만 해당한다. 플레이어가 배울 규칙은 하나여야 하므로 예외를 늘리지 않는다.
     /// (docs/Blob_Progression_System.md 6절)
     /// </summary>
     public bool SurvivesDeath => kind == ItemKind.Imprint;

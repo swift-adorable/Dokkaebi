@@ -4,7 +4,7 @@ using UnityEngine;
 /// 패시브 계열. 【단일 트리를 쓰지 않는다.】
 /// (docs/Blob_Passive_System.md 1절 / 덕코프 조사 — 스킬은 독립 5계열 [확인됨])
 ///
-/// 단일 트리는 「위로 한 줄」뿐이라 유저가 고를 것이 순서밖에 없다.
+/// 단일 트리는 「위로 한 줄」뿐이라 플레이어가 고를 것이 순서밖에 없다.
 /// 계열이 갈리면 출격 성향이 갈린다.
 /// </summary>
 public enum PassiveBranch
@@ -30,7 +30,7 @@ public enum PassiveBranch
 /// </summary>
 public enum PassiveUnlockKind
 {
-    /// <summary>계정 레벨 + 크레딧 + 필요물품.</summary>
+    /// <summary>계정 레벨 + 크레딧 + 필요 재료.</summary>
     AccountLevel = 0,
 
     /// <summary>레벨을 보지 않는다. 돈만 있으면 연다. (중개)</summary>

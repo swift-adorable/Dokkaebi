@@ -140,7 +140,7 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 상태이상_지속시간_배수는_곱으로_합쳐진다()
+        public void 상태이상_지속시간_배율은_곱으로_합쳐진다()
         {
             var modifiers = new WeaponModifiers();
 
@@ -228,10 +228,10 @@ namespace Blob.Tests
             Assert.AreEqual(0f, modifiers.ConditionalDamageIncrease(3f, 10f, null), 0.001f);
         }
 
-        // ── 지속시간 배수가 실제로 걸리는가 ───────────────────────────────
+        // ── 지속시간 배율이 실제로 걸리는가 ───────────────────────────────
 
         [Test]
-        public void 지속시간_배수가_상태이상에_실제로_적용된다()
+        public void 지속시간_배율이_상태이상에_실제로_적용된다()
         {
             var normal = new StatusEffectState();
             normal.Apply(StatusEffectType.Bleed, 10f);
@@ -241,7 +241,7 @@ namespace Blob.Tests
 
             Assert.Greater(doubled.RemainingOf(StatusEffectType.Bleed),
                 normal.RemainingOf(StatusEffectType.Bleed),
-                "지속시간 배수가 적용되지 않았습니다.");
+                "지속시간 배율이 적용되지 않았습니다.");
         }
 
         // ── 배타형이 실제로 성립하는가 (D3) ───────────────────────────────

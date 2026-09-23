@@ -115,7 +115,7 @@ namespace Blob.Tests
         [Test]
         public void 서리_장판은_동결을_바로_걸지_않는다()
         {
-            // 장판 하나로 무리 전체가 굳어 버리면 동결의 임계치 설계가 무의미해진다.
+            // 장판 하나로 무리 전체가 굳어 버리면 동결의 한계치 설계가 무의미해진다.
             Assert.AreEqual(StatusEffectType.None, GroundEffectTable.AppliesStatus(GroundEffectType.FrostField));
 
             // 나머지 잔류물은 진입 시 상태를 건다.

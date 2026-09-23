@@ -10,7 +10,7 @@ using UnityEngine.UI;
 ///
 /// 처음에는 가로 막대 셋을 세로로 쌓고 왼쪽에 「체력 / 수분 / 에너지」를
 /// 글자로 적었다. 좁은 폭에서 글자가 두 줄로 접혔고, 그 자리는 막대가
-/// 써야 할 자리였다. **표식은 도형으로 둔다** — 한 번 배우면 글자보다 빠르다.
+/// 써야 할 자리였다. **마커는 도형으로 둔다** — 한 번 배우면 글자보다 빠르다.
 ///
 /// 【체력만 길게 두는 이유】 체력은 초 단위로 변하고 수분·에너지는 십수 분에
 /// 걸쳐 변한다. 급한 축에 넓은 면적을 준다. 원형 게이지는 「얼마나 남았나」를
@@ -229,7 +229,7 @@ public class SurvivalHudUI : MonoBehaviour
         return new StatusRow(rowObject, back, fill, label);
     }
 
-    /// <summary>표식 하나. 가로 위치는 픽셀, 세로는 가운데 정렬이다.</summary>
+    /// <summary>마커 하나. 가로 위치는 픽셀, 세로는 가운데 정렬이다.</summary>
     private Image BuildIcon(string name, float left, float size,
                             UISprites.Glyph glyph, Color color)
     {
@@ -326,7 +326,7 @@ public class SurvivalHudUI : MonoBehaviour
         fill.color = color;
         fill.raycastTarget = false;
 
-        // 표식은 고리 안쪽 가운데.
+        // 마커는 고리 안쪽 가운데.
         GameObject iconObject = UIFactory.CreateChild("Icon", go.transform);
 
         var iconRect = iconObject.GetComponent<RectTransform>();
@@ -341,7 +341,7 @@ public class SurvivalHudUI : MonoBehaviour
         icon.preserveAspect = true;
         icon.raycastTarget = false;
 
-        // 숫자는 아래쪽에 작게. 고리와 표식을 가리지 않는다.
+        // 숫자는 아래쪽에 작게. 고리와 마커를 가리지 않는다.
         label = UIFactory.CreateLabel(go.transform, string.Empty, 16, FontStyle.Bold,
             new Vector2(0.10f, 0.04f), new Vector2(0.90f, 0.30f), TextAnchor.MiddleCenter,
             UIPalette.TextOnGlass);
@@ -368,7 +368,7 @@ public class SurvivalHudUI : MonoBehaviour
     /// <summary>
     /// 걸려 있는 상태이상을 줄로 세운다.
     ///
-    /// 【임계 상태를 맨 위로 올린다.】 동결·마비는 지금 못 움직인다는 뜻이고,
+    /// 【위험 상태를 맨 위로 올린다.】 동결·마비는 지금 못 움직인다는 뜻이고,
     /// 부식은 회복약이 반만 듣는다는 뜻이다. 중독 3중첩보다 먼저 보여야 한다.
     /// </summary>
     private void RefreshStatus()
@@ -391,7 +391,7 @@ public class SurvivalHudUI : MonoBehaviour
                 visible.Add(type);
         }
 
-        // 임계 상태 먼저, 그다음 남은 시간이 짧은 것 먼저 —
+        // 위험 상태 먼저, 그다음 남은 시간이 짧은 것 먼저 —
         // 곧 풀릴 것이 위에 있어야 「기다릴까 약을 쓸까」를 정할 수 있다.
         visible.Sort((a, b) =>
         {
@@ -429,7 +429,7 @@ public class SurvivalHudUI : MonoBehaviour
             row.Fill.rectTransform.anchorMax =
                 new Vector2(Mathf.Clamp01(remaining / duration), 1f);
 
-            // 임계 상태는 바탕까지 물들인다. 줄 하나가 아니라 띠로 보여야 한다.
+            // 위험 상태는 바탕까지 물들인다. 줄 하나가 아니라 띠로 보여야 한다.
             row.Fill.color = UIPalette.Glassify(color, 0.55f);
             row.Back.color = StatusEffectNames.IsCritical(type)
                 ? UIPalette.Glassify(color, 0.22f)

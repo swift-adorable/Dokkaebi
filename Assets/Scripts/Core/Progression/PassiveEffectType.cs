@@ -19,7 +19,7 @@ public enum PassiveEffectType
     None = 0,
 
     // ── 적응 : 휴대 ───────────────────────────────────────────────────
-    /// <summary>가방 적재 칸 +n. 장비(가방)와 겹치므로 총합에 상한을 둔다.</summary>
+    /// <summary>가방 칸 +n. 장비(가방)와 겹치므로 총합에 상한을 둔다.</summary>
     CarrySlots = 1,
 
     /// <summary>최대 소지 중량 +n kg. 같은 이유로 상한을 둔다.</summary>

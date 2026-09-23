@@ -6,7 +6,7 @@ using UnityEditor;
 namespace Blob.Tests
 {
     /// <summary>
-    /// 적재 축(칸·중량)의 계약 테스트.
+    /// 칸 축(칸·중량)의 계약 테스트.
     ///
     /// 가방 칸과 소지 중량은 【장비】와 【패시브】 두 곳에서 동시에 늘어나는
     /// 유일한 축이다. 겹치는 축은 방치하면 한쪽이 다른 쪽을 삼킨다 —
@@ -78,7 +78,7 @@ namespace Blob.Tests
         // ── 상한 ──────────────────────────────────────────────────────────
 
         [Test]
-        public void 패시브_적재칸은_장비_최대치의_절반을_넘지_않는다()
+        public void 패시브_가방칸은_장비_최대치의_절반을_넘지_않는다()
         {
             float passive = PassiveTotal(PassiveEffectType.CarrySlots);
             float equipment = EquipmentBest(EquipmentStatType.SlotCapacity);
@@ -108,10 +108,10 @@ namespace Blob.Tests
 
         // ── 하한 ──────────────────────────────────────────────────────────
         // 상한만 두면 "0으로 만들면 언제나 통과"가 된다.
-        // 패시브가 적재를 늘릴 수 있다는 것 자체가 설계다.
+        // 패시브가 칸을 늘릴 수 있다는 것 자체가 설계다.
 
         [Test]
-        public void 패시브는_적재_두_축을_실제로_늘린다()
+        public void 패시브는_칸_두_축을_실제로_늘린다()
         {
             Assert.Greater(PassiveTotal(PassiveEffectType.CarrySlots), 0f,
                 "패시브에 CarrySlots가 하나도 없습니다.");

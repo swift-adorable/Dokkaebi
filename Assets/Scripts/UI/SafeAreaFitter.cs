@@ -15,7 +15,7 @@ using UnityEngine;
 ///
 /// 【에디터에서도 돈다】
 /// Game 뷰의 해상도를 바꾸거나 Device Simulator로 기기를 바꾸면 즉시 따라간다.
-/// 그래야 실기에 올리기 전에 잘리는지 확인할 수 있다.
+/// 그래야 실제 기기에 올리기 전에 잘리는지 확인할 수 있다.
 /// </summary>
 [RequireComponent(typeof(RectTransform))]
 [DisallowMultipleComponent]

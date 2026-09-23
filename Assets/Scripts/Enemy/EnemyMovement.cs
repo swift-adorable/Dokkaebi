@@ -37,7 +37,7 @@ public class EnemyMovement : MonoBehaviour
     private IEnemySteering steering;
     private EnemyAggro aggro;
 
-    /// <summary>이동 속도 배수. 예비동작·과중량 같은 일시적 감속에 쓴다.</summary>
+    /// <summary>이동 속도 배율. 예비동작·과중량 같은 일시적 감속에 쓴다.</summary>
     public float SpeedScale { get; set; } = 1f;
 
     /// <summary>프리팹에 적힌 기본 이동 속도(m/s). 유형 표와 같은지 테스트가 본다.</summary>

@@ -362,7 +362,7 @@ public partial class InventoryScreenUI
     ///
     /// 주된 일은 무엇을 눌렀느냐가 정한다 —
     ///   착용 중  → 장착 해제
-    ///   젬       → 장착 (자리는 소켓판에서 고른다)
+    ///   젬       → 장착 (자리는 소켓 화면에서 고른다)
     ///   장비     → 장착 / 교체 착용
     ///   그 밖    → 없음 (버리기만 남는다)
     ///
@@ -394,7 +394,7 @@ public partial class InventoryScreenUI
             new Vector2(0f, ActionRowBottom), new Vector2(DiscardRight, ActionRowTop),
             UIPalette.Subtle, () => OpenDiscardPopup(target), 24);
 
-        // 젬 — 「장착」 하나로 두고, 자리는 소켓판에서 고른다.
+        // 젬 — 「장착」 하나로 두고, 자리는 소켓 화면에서 고른다.
         if (definition.IsSkillGem && definition.Skill != null)
         {
             DrawGemEquipButton(definition.Skill, target);
@@ -436,7 +436,7 @@ public partial class InventoryScreenUI
     ///
     /// 소모품에만 붙인다. 장비는 착용하는 것이고 젬은 끼우는 것이라
     /// 급할 때 한 번 누를 일이 없다. 여덟 칸을 다 보여 주는 이유 —
-    /// 「몇 번에 걸까」는 손가락이 기억하는 것이라 유저가 직접 골라야 한다.
+    /// 「몇 번에 걸까」는 손가락이 기억하는 것이라 플레이어가 직접 골라야 한다.
     /// 이미 걸린 칸을 다시 누르면 뺀다.
     /// </summary>
     private void DrawQuickSlotRow(ItemStack target)
@@ -515,13 +515,13 @@ public partial class InventoryScreenUI
     ///
     /// 【자리 목록을 상세 안에 깔지 않는 이유】
     /// 「핵심 1 / 1-소켓 2 / 발동 1」 같은 이름만 나열하면, 그 이름이
-    /// 소켓판의 어느 칸인지 머릿속에서 맞춰 봐야 한다. 최대 열 칸이 넘어
-    /// 상세의 절반을 먹기도 했다. 이제 누르면 상세가 닫히고 소켓판에서
+    /// 소켓 화면의 어느 칸인지 머릿속에서 맞춰 봐야 한다. 최대 열 칸이 넘어
+    /// 상세의 절반을 먹기도 했다. 이제 누르면 상세가 닫히고 소켓 화면에서
     /// 들어갈 수 있는 칸이 직접 밝아진다 — 이름 대신 자리를 보고 고른다.
     ///
     /// 【그래도 자동으로 넣지는 않는다.】
     /// 보조 젬은 소켓 여섯 자리 중 어디에 꽂느냐가 곧 빌드다.
-    /// 게임이 대신 정하면 유저가 고를 것이 사라진다.
+    /// 게임이 대신 정하면 플레이어가 고를 것이 사라진다.
     /// </summary>
     private void DrawGemEquipButton(SkillDefinition skill, ItemStack target)
     {

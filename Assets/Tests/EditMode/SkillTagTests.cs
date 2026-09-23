@@ -6,7 +6,7 @@ namespace Blob.Tests
     /// <summary>
     /// SkillTag 테스트.
     ///
-    /// 태그 게이팅은 Skill 시스템 전체의 토대이므로(마스터 프롬프트 10-2 [1]),
+    /// 태그 조건은 Skill 시스템 전체의 토대이므로(마스터 프롬프트 10-2 [1]),
     /// 비트 정의가 깨지면 "죽은 선택지"가 조용히 살아난다. 정의 자체를 검증한다.
     /// </summary>
     public class SkillTagTests

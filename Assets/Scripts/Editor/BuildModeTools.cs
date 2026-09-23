@@ -13,7 +13,7 @@ using UnityEngine;
 /// 이 값이 정하는 것 —
 ///   DEVELOPMENT_BUILD 심볼 → PlaytestPanelUI · DebugOnly 자폭 · DebugManager 치트
 ///   BuildOptions.Development → DebugOnlyStripper가 씬을 훑을지 말지
-/// 즉 【DEBUG 버튼이 실기에 보이는지】가 여기서 갈린다.
+/// 즉 【DEBUG 버튼이 실제 기기에 보이는지】가 여기서 갈린다.
 /// </summary>
 public static class BuildModeTools
 {
@@ -28,7 +28,7 @@ public static class BuildModeTools
                + $"Development Build : {(dev ? "켜짐 (ON)" : "꺼짐 (OFF)")}\n"
                + $"스크립트 디버깅 : {(EditorUserBuildSettings.allowDebugging ? "켜짐" : "꺼짐")}\n\n"
                + (dev
-                   ? "→ 개발 빌드입니다. DEBUG 버튼과 검증 패널이 실기에 보입니다."
+                   ? "→ 개발 빌드입니다. DEBUG 버튼과 검증 패널이 실제 기기에 보입니다."
                    : "→ 출시 빌드입니다. DebugOnlyStripper가 DEBUG 버튼과 디버그 패널을 제거하고,\n"
                      + "   DebugUIManager · DebugManager 컴포넌트도 떼어 냅니다.");
     }

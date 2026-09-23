@@ -76,8 +76,8 @@ public static class StatusEffectTable
                 return new StatusEffectSpec(0.05f, 6f, 10, DamageElement.Chaos);
 
             // ── 통제형 ────────────────────────────────────────────────
-            // 피해가 없다. 중첩은 효과의 세기이자 임계까지의 게이지다.
-            // 최대 중첩에서 문서 수치에 도달하고, 그 순간 임계 상태로 전이한다.
+            // 피해가 없다. 중첩은 효과의 세기이자 한계치까지의 게이지다.
+            // 최대 중첩에서 문서 수치에 도달하고, 그 순간 위험 상태로 전이한다.
 
             case StatusEffectType.Shock:
                 return new StatusEffectSpec(0f, 6f, 6, DamageElement.Lightning);
@@ -89,7 +89,7 @@ public static class StatusEffectTable
             case StatusEffectType.Congeal:
                 return new StatusEffectSpec(0f, 1.5f, 1, DamageElement.Physical);
 
-            // ── 임계 상태 ─────────────────────────────────────────────
+            // ── 위험 상태 ─────────────────────────────────────────────
             // 직접 부여되지 않는다. 전이로만 생기고 중첩하지 않는다.
 
             case StatusEffectType.Freeze:
@@ -109,8 +109,8 @@ public static class StatusEffectTable
     /// <summary>
     /// 최대 중첩에 도달했을 때 전이하는 상태. 없으면 None.
     ///
-    /// 【최대 중첩 = 임계】로 통일한 이유 — 규칙이 한 줄이 된다.
-    /// 전이 시 원본 중첩을 전부 소모하므로, 임계 상태가 끝나면
+    /// 【최대 중첩 = 한계치】로 통일한 이유 — 규칙이 한 줄이 된다.
+    /// 전이 시 원본 중첩을 전부 소모하므로, 위험 상태가 끝나면
     /// 처음부터 다시 쌓아야 한다. 무한 제압이 막힌다.
     /// </summary>
     public static StatusEffectType ThresholdOf(StatusEffectType type)

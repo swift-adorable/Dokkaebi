@@ -10,7 +10,7 @@ using UnityEngine.UI;
 ///   상단 : 계열 5개 (적응 / 대사 / 회수 / 중개 / 역행)
 ///          역행은 발견 전까지 「???」로 잠겨 있다
 ///   좌   : 고른 계열의 트리. 아래에서 위로 자란다
-///   우   : 고른 칸의 상세 — 효과 · 요구 레벨 · 크레딧 · 필요물품 · 배우기
+///   우   : 고른 칸의 상세 — 효과 · 요구 레벨 · 크레딧 · 필요 재료 · 배우기
 ///
 /// 단일 트리가 아니라 계열을 나눈 이유는 1절 참조 —
 /// 단일 트리는 「위로 한 줄」뿐이라 고를 것이 순서밖에 없다.
@@ -360,7 +360,7 @@ public partial class InventoryScreenUI
 
         // 【「물품 필요」를 칸에 적지 않는다.】
         // 무엇이 몇 개 필요한지는 적지 못하면서 자리만 차지했다.
-        // 필요물품은 오른쪽 상세에 정확히 적혀 있고, 모자라서 못 배우는 경우는
+        // 필요 재료는 오른쪽 상세에 정확히 적혀 있고, 모자라서 못 배우는 경우는
         // 「배우기」 버튼이 꺼지고 그 위에 이유가 뜬다.
     }
 
@@ -396,7 +396,7 @@ public partial class InventoryScreenUI
             new Vector2(0.06f, 0.48f), new Vector2(0.94f, 0.70f), TextAnchor.UpperLeft,
             UIPalette.TextDim);
 
-        // 요구 조건 — 레벨 · 크레딧 · 필요물품.
+        // 요구 조건 — 레벨 · 크레딧 · 필요 재료.
         var lines = new List<string>(3);
 
         if (node.UnlockKind != PassiveUnlockKind.CreditsOnly)
@@ -405,7 +405,7 @@ public partial class InventoryScreenUI
         lines.Add($"비용 ₡ {node.Cost:N0}");
 
         if (node.NeedsMaterials)
-            lines.Add($"필요물품 — {node.MaterialText}");
+            lines.Add($"필요 재료 — {node.MaterialText}");
 
         UIFactory.CreateLabel(area, string.Join("\n", lines), 22, FontStyle.Normal,
             new Vector2(0.06f, 0.24f), new Vector2(0.94f, 0.46f), TextAnchor.UpperLeft);

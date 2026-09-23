@@ -64,7 +64,7 @@ public sealed class StatusEffectState
     /// <param name="type">거는 상태</param>
     /// <param name="baseDamage">부여 시점의 기본 피해. 초당 피해의 기준이 된다.</param>
     /// <param name="durationScale">
-    /// 지속시간 배수. 보조 젬 「치명적인 중독」·「깊은 상처」 같은 것이 여기를 건드린다.
+    /// 지속시간 배율. 보조 젬 「치명적인 중독」·「깊은 상처」 같은 것이 여기를 건드린다.
     /// 【투사체 수명과 다른 축이다.】 (docs/Blob_Audit.md D2)
     /// </param>
     public void Apply(StatusEffectType type, float baseDamage, float durationScale = 1f)
@@ -79,7 +79,7 @@ public sealed class StatusEffectState
 
         int i = (int)type;
 
-        // 이미 임계 상태에 걸려 있으면 원본을 다시 쌓지 않는다.
+        // 이미 위험 상태에 걸려 있으면 원본을 다시 쌓지 않는다.
         // 그러지 않으면 행동 불능 중에 게이지가 다시 차 무한 제압이 된다.
         StatusEffectType threshold = StatusEffectTable.ThresholdOf(type);
 
@@ -97,8 +97,8 @@ public sealed class StatusEffectState
         if (baseDamage > sourceDamage[i])
             sourceDamage[i] = baseDamage;
 
-        // 【최대 중첩 = 임계】 차는 순간 질적으로 다른 것이 된다.
-        // 원본 중첩을 전부 소모하므로 임계가 끝나면 처음부터 다시 쌓아야 한다.
+        // 【최대 중첩 = 한계치】 차는 순간 질적으로 다른 것이 된다.
+        // 원본 중첩을 전부 소모하므로 한계치가 끝나면 처음부터 다시 쌓아야 한다.
         if (threshold != StatusEffectType.None && stacks[i] >= spec.MaxStacks)
         {
             Clear(type);
@@ -107,8 +107,8 @@ public sealed class StatusEffectState
     }
 
     /// <summary>
-    /// 임계 상태를 건다. 전이로만 호출되며 중첩하지 않는다.
-    /// Apply를 거치지 않는 이유 — 임계 상태는 다시 임계로 전이하지 않는다.
+    /// 위험 상태를 건다. 전이로만 호출되며 중첩하지 않는다.
+    /// Apply를 거치지 않는 이유 — 위험 상태는 다시 한계치로 전이하지 않는다.
     /// </summary>
     private void ApplyThreshold(StatusEffectType type, float baseDamage)
     {

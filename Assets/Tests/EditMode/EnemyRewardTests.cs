@@ -12,7 +12,7 @@ namespace Blob.Tests
         // ── 경험치 · 크레딧 ───────────────────────────────────────────
 
         [Test]
-        public void 경험치_배수가_문서와_같다()
+        public void 경험치_배율이_문서와_같다()
         {
             Assert.AreEqual(1f, EnemyRewardTable.ExperienceMultiplier(EnemyRarity.Normal), 0.001f);
             Assert.AreEqual(1.5f, EnemyRewardTable.ExperienceMultiplier(EnemyRarity.Magic), 0.001f);
@@ -36,7 +36,7 @@ namespace Blob.Tests
             }
 
             Assert.IsTrue(anyDifferent,
-                "경험치와 크레딧 배수가 모든 등급에서 같습니다. 축이 하나로 합쳐졌습니다.");
+                "경험치와 크레딧 배율이 모든 등급에서 같습니다. 축이 하나로 합쳐졌습니다.");
         }
 
         [Test]
@@ -47,11 +47,11 @@ namespace Blob.Tests
             float credit = EnemyRewardTable.CreditMultiplier(EnemyRarity.Unique);
 
             Assert.Greater(xp, credit,
-                $"고유의 경험치 배수 {xp}가 크레딧 배수 {credit}보다 크지 않습니다.");
+                $"고유의 경험치 배율 {xp}가 크레딧 배율 {credit}보다 크지 않습니다.");
         }
 
         [Test]
-        public void 배수가_등급을_따라_단조_증가한다()
+        public void 배율이_등급을_따라_단조_증가한다()
         {
             var order = new[]
             {

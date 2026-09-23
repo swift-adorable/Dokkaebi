@@ -9,7 +9,7 @@ using static EquipmentAssetWriter;
 /// 티어 대역은 docs/Blob_Equipment_System.md 3절 표를 따른다.
 ///
 /// 이 생성기가 지켜야 하는 세 가지
-///  1. 【최고 티어일수록 적재가 준다】 — "방어 최대화 = 파밍량 최소화"
+///  1. 【최고 티어일수록 칸이 준다】 — "방어 최대화 = 파밍량 최소화"
 ///  2. 【성능 상단에는 음수 옵션이 하나 이상 붙는다】 (티어 4 이상)
 ///  3. 【얼굴은 속성 대응 전담】 — 방어도를 거의 주지 않고 저항·면역만 준다
 /// </summary>
@@ -40,8 +40,8 @@ public static class ArmourAssetGenerator
     };
 
     // ── 몸통 ──────────────────────────────────────────────────────────────
-    // 근접·접촉·폭발 피격에 적용된다. 적재 공간을 겸하므로 티어가 오르면 적재가 준다.
-    // 적재는 티어가 오르면 줄지만 0까지는 가지 않는다.
+    // 근접·접촉·폭발 피격에 적용된다. 가방 칸을 겸하므로 티어가 오르면 칸이 준다.
+    // 칸은 티어가 오르면 줄지만 0까지는 가지 않는다.
     // 덕코프도 최상위(Lv.5 방탄복)에서 +2를 남긴다 — 0으로 만들면
     // 「최고 방어구를 입으면 아예 못 줍는다」가 되어 선택이 아니라 금지가 된다.
     private static readonly (float armour, float weight, int dur, int value, int slots)[] BodyTable =
@@ -179,7 +179,7 @@ public static class ArmourAssetGenerator
         switch (variant)
         {
             case BodyVariant.Light:
-                // 방어를 조금 내주고 적재를 크게 얻는다. 파밍용이다.
+                // 방어를 조금 내주고 칸을 크게 얻는다. 파밍용이다.
                 armour -= 0.1f;
                 weight *= 0.85f;
                 dur = Mathf.RoundToInt(dur * 0.85f);
@@ -190,7 +190,7 @@ public static class ArmourAssetGenerator
                 break;
 
             case BodyVariant.Heavy:
-                // 적재를 전부 내주고 방어와 내구를 얻는다. 버티러 갈 때다.
+                // 칸을 전부 내주고 방어와 내구를 얻는다. 버티러 갈 때다.
                 // 일반 변형이 최소 1칸을 남기므로, 「0칸」은 중갑을 고른 대가다.
                 armour += 0.3f;
                 weight *= 1.5f;
@@ -214,7 +214,7 @@ public static class ArmourAssetGenerator
             stats.Add(S(EquipmentStatType.SlotCapacity, slots));
 
         // 성능 상단(티어 4 이상)에는 음수 옵션을 하나 이상 붙인다.
-        // 중갑은 적재 0이 이미 대가이므로 추가 페널티를 얹지 않는다.
+        // 중갑은 칸 0이 이미 대가이므로 추가 페널티를 얹지 않는다.
         if (tier >= 4 && variant != BodyVariant.Heavy)
             stats.Add(S(EquipmentStatType.MoveAbility, tier == 6 ? -0.10f : -0.05f));
 
@@ -354,7 +354,7 @@ public static class ArmourAssetGenerator
 
     private static int GenerateBackpacks()
     {
-        // 「최대 소지 중량」(kg)과 「적재 공간」(칸)은 별도 자원이다.
+        // 「최대 소지 중량」(kg)과 「가방 칸」은 별도 자원이다.
         // 가방마다 배분이 달라야 "초반 병목은 칸, 후반 병목은 무게"가 선택으로 나타난다.
         // 덕코프 가방 5티어의 곡선을 그대로 가져왔다 —
         // 일반 티어는 중량과 칸이 거의 1:1로 같이 오르고,

@@ -59,7 +59,7 @@ public static class LootRoller
     }
 
     /// <summary>
-    /// rolls번 뽑아 컨테이너에 담는다. 실제로 담은 칸 수를 돌려준다.
+    /// rolls번 뽑아 상자에 담는다. 실제로 담은 칸 수를 돌려준다.
     /// 칸이 차면 더 담지 않는다. 「빈손」 줄은 칸을 쓰지 않는다.
     /// </summary>
     public static int Roll(

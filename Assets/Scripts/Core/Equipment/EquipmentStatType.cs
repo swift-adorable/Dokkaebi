@@ -18,7 +18,7 @@ public enum EquipmentStatType
     /// <summary>방어 관통 — 적의 방어도를 뚫는다. Pierce(관통)와 다른 개념이다.</summary>
     ArmourPenetration = 3,
 
-    /// <summary>격리 방호 — 누적 수치 문턱. 1 이상이면 1단계, 2 이상이면 2단계 차단.</summary>
+    /// <summary>격리 방호 — 누적 수치 한계치. 1 이상이면 1단계, 2 이상이면 2단계 차단.</summary>
     ContainmentWard = 4,
 
     // 속성 저항 배율에 더해지는 값. 음수가 저항 강화다. (0.12 = 저항 ×0.88)
@@ -60,7 +60,7 @@ public enum EquipmentStatType
     XpAbsorbAmount = 61,
     RareDropRate = 62,
 
-    // ── 적재 ──────────────────────────────────────────────────────────
+    // ── 칸 ──────────────────────────────────────────────────────────
     MaxCarryWeight = 70,
     SlotCapacity = 71,
 
@@ -95,7 +95,7 @@ public enum EquipmentStatType
 ///
 /// 이 클래스가 필요한 이유 —
 /// 「발사 간격 +150%」와 「대시 쿨다운 +99초」는 양수인데 페널티다.
-/// 부호만 보고 대가를 판정하면 각인 「중장 Ⅲ」이 순증으로 통과한다.
+/// 부호만 보고 대가를 판정하면 각인 「중장 Ⅲ」이 순수 증가로 통과한다.
 /// 실제로 EquipmentAssetTests가 그 버그를 잡았다.
 ///
 /// 규약을 enum 이름에 맡기지 않고 여기에 명시한 이유는,

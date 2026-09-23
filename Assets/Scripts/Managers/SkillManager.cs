@@ -8,7 +8,7 @@ using UnityEngine;
 ///
 /// 흐름:
 ///   도감(해금 기록) → 드롭 풀 → 적을 흡수하면 젬이 가방에 들어온다
-///   → 유저가 직접 소켓에 끼운다 → 즉시 작동
+///   → 플레이어가 직접 소켓에 끼운다 → 즉시 작동
 ///   → 각성 레벨이 오르면 【선택창이 아니라 소켓이 열린다】
 ///
 /// 【이전 구조와의 차이】
@@ -38,7 +38,7 @@ public class SkillManager : Singleton<SkillManager>
              "끄면 아무것도 쏘지 못하는 상태로 시작한다.")]
     [SerializeField] private bool grantFirstCore = true;
 
-    [Tooltip("첫 핵심 젬을 자동으로 1번 슬롯에 끼운다. 끄면 유저가 직접 끼운다.")]
+    [Tooltip("첫 핵심 젬을 자동으로 1번 슬롯에 끼운다. 끄면 플레이어가 직접 끼운다.")]
     [SerializeField] private bool autoEquipFirstCore = true;
 
     private readonly SocketedBuild build = new();
@@ -123,7 +123,7 @@ public class SkillManager : Singleton<SkillManager>
         SurvivalHudUI.EnsureInstance();
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        // 검증 패널. 실기 빌드에서 장비를 얻을 유일한 경로다.
+        // 검증 패널. 실제 기기 빌드에서 장비를 얻을 유일한 경로다.
         // 출시 빌드에는 컴파일되지 않는다.
         PlaytestPanelUI.EnsureInstance();
 #endif
@@ -248,7 +248,7 @@ public class SkillManager : Singleton<SkillManager>
 
     /// <summary>
     /// 젬 드롭을 굴려 【아이템 정의만】 돌려준다. 시체가 자기 전리품 칸에 담는다.
-    /// luckMultiplier는 적 등급 배수다. 희귀한 적일수록 잘 나온다.
+    /// luckMultiplier는 적 등급 배율다. 희귀한 적일수록 잘 나온다.
     ///
     /// 가방에 바로 넣지 않는 이유 — 「무엇을 들고 갈지 고른다」가 추출 루팅의 결정이다.
     /// 자동으로 들어가면 그 결정이 사라진다. (전리품 창 도입, 확정 기획)
@@ -341,7 +341,7 @@ public class SkillManager : Singleton<SkillManager>
 
     public bool TryEquipCore(SkillDefinition skill, int coreIndex)
     {
-        // 【자리 검사를 하지 않는다.】 젬은 적재에 잡히지 않는다.
+        // 【자리 검사를 하지 않는다.】 젬은 칸에 잡히지 않는다.
         // (ItemDefinition.IsCargo) 핵심 젬을 갈아 끼우면 소켓의 보조 젬까지
         // 최대 4개가 한꺼번에 돌아오는데, 예전에는 그만큼의 빈 칸이 없으면
         // 교체 자체가 막혔다. 이제 돌아올 곳은 늘 있다.
