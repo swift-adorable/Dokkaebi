@@ -272,7 +272,7 @@ public class EnemyAttack : MonoBehaviour
     /// 빗나간다. 근접의 대시 회피와 같은 규칙이 원거리에도 적용된다.
     /// </summary>
     /// <summary>
-    /// 유형 고유의 기믹. 프리팹 배선이 정한다. (EnemyGimmickTable)
+    /// 유형 고유의 기믹. 프리팹 연결이 정한다. (EnemyGimmickTable)
     /// None이면 평범하게 한 발 쏜다.
     /// </summary>
     [Header("Gimmick")]

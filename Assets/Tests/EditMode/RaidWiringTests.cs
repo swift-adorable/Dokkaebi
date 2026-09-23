@@ -4,9 +4,9 @@ using UnityEngine;
 namespace Blob.Tests
 {
     /// <summary>
-    /// 스폰기가 유형 9종과 출격 조건을 실제로 읽는지. (로드맵 7-G)
+    /// 스포너가 유형 9종과 출격 조건을 실제로 읽는지. (로드맵 7-G)
     ///
-    /// 【표를 만들어 놓고 배선을 안 하는 것이 이 프로젝트의 반복된 실패다.】
+    /// 【표를 만들어 놓고 연결을 안 하는 것이 이 프로젝트의 반복된 실패다.】
     /// 7-B의 등급·속성, 7-G의 시설 상태·레이드 특성이 모두 계산은 있는데
     /// 스폰 경로에 닿지 않아 「스폰이 전부 Normal이었다」가 되었다.
     /// 여기서는 「닿는가」만 본다 — 수치는 각자의 테스트가 본다.
@@ -41,7 +41,7 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 카탈로그의_프리팹이_제_유형으로_배선되어_있다()
+        public void 카탈로그의_프리팹이_제_유형으로_연결되어_있다()
         {
             EnemyPrefabCatalog catalog = LoadCatalog();
 
@@ -57,7 +57,7 @@ namespace Blob.Tests
                     $"{EnemyArchetypeTable.Name(archetype)}에 EnemyIdentity가 없습니다.");
 
                 Assert.AreEqual(archetype, identity.Archetype,
-                    $"{prefab.name}이 다른 유형으로 배선되어 있습니다.");
+                    $"{prefab.name}이 다른 유형으로 연결되어 있습니다.");
             }
         }
 
@@ -92,7 +92,7 @@ namespace Blob.Tests
                     .GetComponent<EnemyGravityStealth>() != null;
 
                 Assert.AreEqual(archetype == EnemyArchetype.Settled, has,
-                    $"{EnemyArchetypeTable.Name(archetype)}의 중력·은신 배선이 틀렸습니다.");
+                    $"{EnemyArchetypeTable.Name(archetype)}의 중력·은신 연결이 틀렸습니다.");
             }
         }
 

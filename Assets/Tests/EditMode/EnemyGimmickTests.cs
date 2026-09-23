@@ -43,7 +43,7 @@ namespace Blob.Tests
         [Test]
         public void 유형표가_기믹을_들고_있다()
         {
-            // 프리팹 배선(EnemyArchetypeWiring)이 이 값을 베껴 넣는다.
+            // 프리팹 연결(EnemyArchetypeWiring)이 이 값을 베껴 넣는다.
             Assert.AreEqual(EnemyGimmick.RadialSpray,
                 EnemyArchetypeTable.Of(EnemyArchetype.Chemic).gimmick);
 

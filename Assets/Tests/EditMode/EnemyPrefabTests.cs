@@ -157,7 +157,7 @@ namespace Blob.Tests
                 + "적이 영원히 쏘지 못합니다.");
         }
     
-        // ── 유형·진영 배선 (7-F) ──────────────────────────────────────
+        // ── 유형·진영 연결 (7-F) ──────────────────────────────────────
         //
         // 【프리팹과 표가 갈라지지 않게 강제한다.】
         // 런타임 수치는 EnemyIdentity가 EnemyArchetypeTable에서 가져오므로
@@ -167,7 +167,7 @@ namespace Blob.Tests
 
         private static readonly (string path, EnemyArchetype archetype)[] Wired =
         {
-            // 이미 있던 둘은 이름이 다르다. 씬과 스폰기가 이 경로를 참조하므로 바꾸지 않는다.
+            // 이미 있던 둘은 이름이 다르다. 씬과 스포너가 이 경로를 참조하므로 바꾸지 않는다.
             ("Assets/Prefabs/Enemy.prefab",         EnemyArchetype.Scav),
             ("Assets/Prefabs/EnemyRanged.prefab",   EnemyArchetype.Dynamo),
 
@@ -188,7 +188,7 @@ namespace Blob.Tests
                 var go = AssetDatabase.LoadAssetAtPath<GameObject>(row.path);
 
                 Assert.IsNotNull(go,
-                    $"{row.path}이 없습니다. 「Blob/Enemy/유형·진영 배선」을 실행하십시오.");
+                    $"{row.path}이 없습니다. 「Blob/Enemy/유형·진영 연결」을 실행하십시오.");
 
                 var identity = go.GetComponent<EnemyIdentity>();
 
@@ -247,13 +247,13 @@ namespace Blob.Tests
         public void 유형_아홉이_모두_프리팹을_갖는다()
         {
             Assert.AreEqual(EnemyArchetypeTable.Count, Wired.Length,
-                "유형 표는 9종인데 배선된 프리팹 수가 다릅니다.");
+                "유형 표는 9종인데 연결된 프리팹 수가 다릅니다.");
 
             var seen = new System.Collections.Generic.HashSet<EnemyArchetype>();
 
             foreach (var row in Wired)
             {
-                Assert.IsTrue(seen.Add(row.archetype), $"{row.archetype}이 두 번 배선됐습니다.");
+                Assert.IsTrue(seen.Add(row.archetype), $"{row.archetype}이 두 번 연결됐습니다.");
 
                 Assert.IsNotNull(AssetDatabase.LoadAssetAtPath<GameObject>(row.path), row.path);
             }
@@ -298,7 +298,7 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 배선된_프리팹이_서로_다른_진영을_덮는다()
+        public void 연결된_프리팹이_서로_다른_진영을_덮는다()
         {
             // 【세 진영이 없으면 난전을 눈으로 볼 수 없다.】
             // 전부 같은 소속이면 적끼리는 영원히 싸우지 않는다.
@@ -308,7 +308,7 @@ namespace Blob.Tests
                 factions.Add(EnemyArchetypeTable.Of(row.archetype).faction);
 
             Assert.GreaterOrEqual(factions.Count, 3,
-                $"배선된 프리팹이 진영 {factions.Count}종만 덮습니다. "
+                $"연결된 프리팹이 진영 {factions.Count}종만 덮습니다. "
                 + "서로 적대하는 셋이 있어야 난전을 확인할 수 있습니다.");
         }
     }

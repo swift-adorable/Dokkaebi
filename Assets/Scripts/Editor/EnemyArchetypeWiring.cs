@@ -42,10 +42,10 @@ public static class EnemyArchetypeWiring
         }
     }
 
-    [MenuItem("Blob/Enemy/유형·진영 배선")]
+    [MenuItem("Blob/Enemy/유형·진영 연결")]
     public static void Wire()
     {
-        // 이미 있는 둘 — 이름을 바꾸지 않는다. 씬과 스폰기가 이 경로를 참조한다.
+        // 이미 있는 둘 — 이름을 바꾸지 않는다. 씬과 스포너가 이 경로를 참조한다.
         Attach(MeleePath, EnemyArchetype.Scav);
         Attach(RangedPath, EnemyArchetype.Dynamo);
 
@@ -65,7 +65,7 @@ public static class EnemyArchetypeWiring
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
 
-        Debug.Log($"[EnemyArchetypeWiring] 배선 완료 — 유형 {EnemyArchetypeTable.Count}종");
+        Debug.Log($"[EnemyArchetypeWiring] 연결 완료 — 유형 {EnemyArchetypeTable.Count}종");
     }
 
     /// <summary>프리팹에 EnemyIdentity·EnemyAggro를 붙이고 유형을 지정한다.</summary>
