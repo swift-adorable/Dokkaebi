@@ -118,4 +118,19 @@ public static class PlaytestTools
 
     [MenuItem(Menu + "벙커 — 잡화 상점 열기")]
     public static void OpenShop() => Run(PlaytestActions.OpenShop);
+
+    [MenuItem(Menu + "벙커 — 건물 넷 짓고 놓기 (검증)")]
+    public static void BuildAll()
+    {
+        if (!Application.isPlaying) { Debug.LogError("[Playtest] 플레이 중에만 씁니다."); return; }
+        Debug.Log("[Playtest] " + PlaytestActions.BuildAllForTest());
+    }
+
+    [MenuItem(Menu + "벙커 — 무기 상점 열기")]
+    public static void OpenWeaponShop()
+    {
+        if (!Application.isPlaying) { Debug.LogError("[Playtest] 플레이 중에만 씁니다."); return; }
+        ExchangeWindowUI.EnsureInstance().OpenShop(ShopKind.Weapon);
+        Debug.Log($"[Playtest] 무기 상점 — 판매 줄 {(ExchangeWindowUI.IsBuyingShopOpen ? "뜬다" : "안 뜬다")}");
+    }
 }

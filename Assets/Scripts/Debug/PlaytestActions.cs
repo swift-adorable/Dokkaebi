@@ -757,7 +757,7 @@ public static class PlaytestActions
 
     public static string OpenShop()
     {
-        ExchangeWindowUI.EnsureInstance().OpenShop();
+        ExchangeWindowUI.EnsureInstance().OpenShop(ShopKind.General);
         return $"{ShopTable.GeneralStoreName}을 열었습니다. 골드 {PassiveManager.EnsureInstance().Gold:N0}.\n"
                + "가방 칸을 누르면 「판매」가, 상점 칸을 누르면 「구매」가 뜹니다.";
     }
@@ -790,5 +790,80 @@ public static class PlaytestActions
 
         SceneFlow.Extract();
         return "철수합니다. 가방과 장비를 들고 벙커로 돌아갑니다.";
+    }
+
+    // ── 건설 (8-K) ───────────────────────────────────────────────────
+
+    /// <summary>건물 넷을 다 지을 만큼의 골드 · 재료를 창고에 넣는다.</summary>
+    public static string GiveBuildingMaterials()
+    {
+        ItemCatalog catalog = ItemCatalog.Load();
+
+        if (catalog == null)
+            return "Resources/ItemCatalog가 없습니다.";
+
+        Inventory stash = PlayerInventory.EnsureInstance().Stash;
+        int added = 0;
+
+        foreach ((string id, int count) in new[] { ("scrap_metal", 20), ("cell_battery", 6), ("wire_bundle", 3) })
+        {
+            ItemDefinition definition = catalog.Find(id);
+
+            if (definition != null)
+                added += stash.TryAdd(definition, count);
+        }
+
+        PassiveManager.EnsureInstance().AddGold(400);
+
+        return $"창고에 건설 재료 {added}개 · 400골드를 넣었습니다. 설계도 테이블(「건설」)에서 지으십시오.";
+    }
+
+    public static string OpenBuildingScreen()
+    {
+        if (!SceneFlow.InBunker)
+            return "벙커에서만 지을 수 있습니다.";
+
+        BuildingScreenUI.Open();
+        return "건물 목록을 열었습니다.";
+    }
+
+    /// <summary>
+    /// 【검증용】 재료를 주고 건물 넷을 전부 지어 정해진 자리에 놓는다.
+    /// 화면을 누르지 않고 「짓기 → 배치 → 상점 열기」 길을 한 번에 지나가 본다.
+    /// </summary>
+    public static string BuildAllForTest()
+    {
+        if (!SceneFlow.InBunker)
+            return "벙커에서만 지을 수 있습니다.";
+
+        GiveBuildingMaterials();
+
+        var spots = new System.Collections.Generic.Dictionary<string, BuildingPose>
+        {
+            [BuildingTable.Workbench]    = new BuildingPose(-7f, -1f, 0),
+            [BuildingTable.GeneralStore] = new BuildingPose(7f, 3f, 0),
+            [BuildingTable.WeaponShop]   = new BuildingPose(7f, 0f, 0),
+            [BuildingTable.ArmourShop]   = new BuildingPose(7f, -3f, 0),
+        };
+
+        var log = new System.Text.StringBuilder();
+
+        foreach (BuildingDefinition definition in BuildingTable.All)
+        {
+            BuildError error = BuildingManager.State.Owns(definition.Id)
+                ? BuildError.None
+                : BuildingManager.Build(definition);
+
+            bool placed = error == BuildError.None
+                          && spots.TryGetValue(definition.Id, out BuildingPose pose)
+                          && BuildingManager.Place(definition.Id, pose);
+
+            log.AppendLine($"{definition.Name} — {(error == BuildError.None ? "지음" : BuildingState.Explain(error))}"
+                           + (placed ? " · 놓음" : string.Empty));
+        }
+
+        SaveManager.Commit("건설 (검증)");
+
+        return log.ToString().TrimEnd();
     }
 }

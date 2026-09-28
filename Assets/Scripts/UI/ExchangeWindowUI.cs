@@ -64,11 +64,19 @@ public class ExchangeWindowUI : MonoBehaviour
     private CorpseController source;
     private LootContainer other;
     private Inventory stash;
+    private ShopKind shopKind = ShopKind.General;
     private string otherName = "전리품";
 
     public bool IsOpen => panel != null && panel.activeSelf;
 
     /// <summary>이 모드로 열려 있는가. 가방 화면이 사이드 메뉴 줄을 고를 때 쓴다.</summary>
+    /// <summary>
+    /// 물건을 사 주는 상점이 열려 있는가 — 잡화 상점뿐이다(ShopTable.BuysFromPlayer).
+    /// 가방 칸의 「판매」 줄이 이것을 본다.
+    /// </summary>
+    public static bool IsBuyingShopOpen
+        => IsOpenIn(Mode.Shop) && ShopTable.BuysFromPlayer(instance.shopKind);
+
     public static bool IsOpenIn(Mode windowMode)
         => instance != null && instance.IsOpen && instance.mode == windowMode;
 
@@ -181,13 +189,14 @@ public class ExchangeWindowUI : MonoBehaviour
         OpenPanel(Mode.Stash);
     }
 
-    /// <summary>잡화 상점을 연다.</summary>
-    public void OpenShop()
+    /// <summary>상점을 연다. 【종류별로 나뉜다】 — 잡화 · 무기 · 방어구 (8-K).</summary>
+    public void OpenShop(ShopKind kind = ShopKind.General)
     {
         source = null;
         other = null;
         stash = null;
-        otherName = ShopTable.GeneralStoreName;
+        shopKind = kind;
+        otherName = ShopTable.NameOf(kind);
 
         OpenPanel(Mode.Shop);
     }
@@ -387,7 +396,7 @@ public class ExchangeWindowUI : MonoBehaviour
     private void DrawShopGrid()
     {
         ItemCatalog catalog = ItemCatalog.Load();
-        IReadOnlyList<ShopEntry> entries = ShopTable.General;
+        IReadOnlyList<ShopEntry> entries = ShopTable.For(shopKind);
 
         UIFactory.SquareGridMetrics(grid.Viewport, Columns, entries.Count, MinRows,
             out int rows, out float height, out float padX, out float padY);
@@ -414,7 +423,7 @@ public class ExchangeWindowUI : MonoBehaviour
                 continue;
 
             ShopEntry entry = entries[i];
-            int remaining = ShopManager.General.Remaining(entry.ItemId);
+            int remaining = ShopManager.Of(shopKind).Remaining(entry.ItemId);
 
             UIFactory.CreateBadge(cell.transform, remaining > 0 ? $"×{remaining}" : "품절",
                 new Vector2(0.56f, 0.06f), new Vector2(0.96f, 0.30f), 20,
@@ -469,7 +478,7 @@ public class ExchangeWindowUI : MonoBehaviour
         int price = TradeRules.BuyPrice(definition, entry);
 
         TradeError error = TradeRules.CanBuy(definition, entry,
-            ShopManager.General.Remaining(entry.ItemId),
+            ShopManager.Of(shopKind).Remaining(entry.ItemId),
             PassiveManager.EnsureInstance().Gold,
             PlayerInventory.EnsureInstance().Bag);
 
@@ -488,7 +497,7 @@ public class ExchangeWindowUI : MonoBehaviour
 
     private void Buy(ItemDefinition definition)
     {
-        TradeError error = ShopManager.Buy(definition);
+        TradeError error = ShopManager.Buy(shopKind, definition);
 
         InventoryScreenUI.ShowToastIfOpen(error == TradeError.None
             ? $"구매 — 「{definition.DisplayName}」"

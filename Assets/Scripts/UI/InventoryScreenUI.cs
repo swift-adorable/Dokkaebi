@@ -1407,7 +1407,8 @@ public partial class InventoryScreenUI : MonoBehaviour
             return new ItemActionMenu.Entry("창고에 넣기", UIPalette.Action,
                 () => ExchangeWindowUI.PutIntoStash(stack));
 
-        if (!ExchangeWindowUI.IsOpenIn(ExchangeWindowUI.Mode.Shop))
+        // 【무기 상점 · 방어구 상점은 사 주지 않는다】 — 덕코프에서 파는 곳은 잡화 상점이다.
+        if (!ExchangeWindowUI.IsBuyingShopOpen)
             return null;
 
         float bonus = ShopManager.SellBonusPercent;

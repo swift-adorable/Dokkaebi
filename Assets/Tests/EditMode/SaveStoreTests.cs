@@ -257,6 +257,28 @@ namespace Blob.Tests
         }
 
         [Test]
+        public void 건물과_상점_종류가_왕복한다()
+        {
+            SaveData data = Sample();
+            data.buildings = new List<SavedBuilding>
+            {
+                new SavedBuilding { id = "workbench", placed = true, x = 2.5f, z = -1f, turns = 3 },
+                new SavedBuilding { id = "general_store", placed = false }
+            };
+            data.shop = new List<SavedStock> { new SavedStock { shop = "Weapon", id = "wpn_t1_pipe", remaining = 0 } };
+
+            SaveStore.Write(path, data);
+            Assert.AreEqual(SaveLoadResult.Main, SaveStore.Read(path, out SaveData read));
+
+            Assert.AreEqual(2, read.buildings.Count);
+            Assert.IsTrue(read.buildings[0].placed);
+            Assert.AreEqual(2.5f, read.buildings[0].x, 1e-4f);
+            Assert.AreEqual(3, read.buildings[0].turns);
+            Assert.IsFalse(read.buildings[1].placed);
+            Assert.AreEqual("Weapon", read.shop[0].shop);
+        }
+
+        [Test]
         public void 판4_세이브는_빈_창고로_읽힌다()
         {
             File.WriteAllText(path, "{ \"version\": 4, \"level\": 3 }");
