@@ -818,6 +818,11 @@ public partial class InventoryScreenUI : MonoBehaviour
         // 파밍 중이었다면 오른쪽 전리품 패널도 같이 닫힌다. 둘은 한 벌이다.
         ExchangeWindowUI.CloseIfOpen();
 
+        // 【벙커에서는 닫을 때 저장한다.】 창고에 넣고 · 사고팔고 · 갈아입은 것이
+        // 앱을 꺼도 남아야 한다. 파밍 중에는 저장하지 않는다 (SaveManager 머리말).
+        if (SceneFlow.InBunker)
+            SaveManager.Commit("벙커");
+
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         PlaytestPanelUI.SetHiddenByScreen(false);
 #endif

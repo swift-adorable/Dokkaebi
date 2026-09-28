@@ -33,7 +33,9 @@ public class SaveData
     ///   5 — 창고(stash)와 잡화 상점 재고(shop)를 더했다. 4판에는 없어 비어 있는
     ///       창고 · 가득 찬 재고로 읽힌다.
     ///   6 — 재화 키 credits를 gold로 바꿨다(덕코프 이름). 옛 키는 Migrate가 바꾼다.
-    public const int CurrentVersion = 6;
+    ///   7 — 벙커가 생겼다. 파밍 전 저장에 【들고 가는 것】(가방 · 착용 장비)을 담는다.
+    ///       6판에는 없어 빈 가방 · 맨몸으로 읽힌다.
+    public const int CurrentVersion = 7;
 
     public int version = CurrentVersion;
 
@@ -70,6 +72,18 @@ public class SaveData
     /// </summary>
     public List<SavedItem> imprints = new();
 
+    // ── 들고 가는 것 ─────────────────────────────────────────────────
+    //
+    // 【파밍 전에 저장되고, 파밍 중에는 저장되지 않는다.】 그래서 파밍 도중에
+    // 끄면 들고 들어간 그대로 돌아온다(롤백). 죽으면 떨어뜨린 뒤 저장되므로
+    // 빈 가방이 남는다. 덕코프와 같다.
+
+    /// <summary>가방.</summary>
+    public List<SavedItem> bag = new();
+
+    /// <summary>착용 장비 — 각인을 뺀 여섯 자리. 각인은 imprints가 따로 맡는다.</summary>
+    public List<SavedEquip> equipment = new();
+
     // ── 벙커 ──────────────────────────────────────────────────────────
 
     /// <summary>창고. 【죽어도 잃지 않는다】 — 파밍에 들고 가지 않은 것이다.</summary>
@@ -77,6 +91,14 @@ public class SaveData
 
     /// <summary>잡화 상점의 남은 재고. 비어 있으면 가득 찬 것으로 읽는다.</summary>
     public List<SavedStock> shop = new();
+}
+
+/// <summary>착용 장비 한 자리. 자리 번호는 EquipmentSlot의 값이다.</summary>
+[Serializable]
+public class SavedEquip
+{
+    public int slot;
+    public SavedItem item = new();
 }
 
 /// <summary>상점 한 줄의 남은 재고.</summary>

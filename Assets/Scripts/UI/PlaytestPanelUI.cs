@@ -36,6 +36,7 @@ public class PlaytestPanelUI : MonoBehaviour
         ("소모품 한 벌",  PlaytestActions.GiveConsumables),
         ("가방 채우기",   PlaytestActions.FillBag),
         ("가방 비우기",   PlaytestActions.ClearBag),
+        ("즉시 철수",     PlaytestActions.ExtractNow),
         ("창고 열기",     PlaytestActions.OpenStash),
         ("잡화 상점 열기", PlaytestActions.OpenShop),
         ("골드 +5000",  PlaytestActions.GiveGold),

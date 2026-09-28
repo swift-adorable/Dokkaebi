@@ -1,0 +1,109 @@
+using UnityEngine;
+using UnityEngine.SceneManagement;
+
+/// <summary>
+/// 벙커 ↔ 파밍 구역을 오간다. (로드맵 8-J · docs/Blob_Bunker_System.md 0절)
+///
+/// 【건너는 길은 세이브 하나다.】 떠나기 전에 저장하고, 도착한 씬에서
+/// SaveManager가 다시 읽는다. 매니저를 DontDestroyOnLoad로 끌고 다니지 않는다 —
+/// 씬 오브젝트를 가리키는 매니저가 다른 씬으로 넘어가면 끊어진 참조가 남는다.
+///
+/// 【파밍 중에는 저장하지 않는다】는 규칙은 그대로다. 저장은 셋뿐이다 —
+/// 파밍 출발(들고 가는 것까지) · 사망 · 철수.
+/// </summary>
+public static class SceneFlow
+{
+    /// <summary>벙커 씬 이름. 「Blob/Bunker/벙커 씬 생성」이 만든다.</summary>
+    public const string BunkerScene = "Bunker";
+
+    /// <summary>파밍 구역 씬 이름. 6장 구조(9단계)가 생기면 구역마다 나뉜다.</summary>
+    public const string RaidScene = "SampleScene";
+
+    /// <summary>지금 벙커에 있는가. 벙커에서는 쏘지 않고 수분·에너지가 줄지 않는다.</summary>
+    public static bool InBunker => SceneManager.GetActiveScene().name == BunkerScene;
+
+    /// <summary>빌드 설정에 벙커 씬이 들어 있는가. 없으면 사망 후 구역을 다시 연다.</summary>
+    public static bool HasBunker => Application.CanStreamedLevelBeLoaded(BunkerScene);
+
+    private static bool loading;
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    private static void ResetStatics() => loading = false;
+
+    /// <summary>
+    /// 【파밍 출발】 — 벙커의 출발 지점이 부른다. 들고 가는 것까지 저장한 뒤 구역으로 간다.
+    /// 이 저장이 있어서 파밍 도중에 꺼도 들고 들어간 그대로 돌아온다.
+    /// </summary>
+    public static void Depart()
+    {
+        if (loading || !InBunker)
+            return;
+
+        SaveManager.Commit("파밍 출발");
+        Load(RaidScene);
+    }
+
+    /// <summary>
+    /// 【철수】 — 가방과 장비를 그대로 들고 벙커로 돌아간다.
+    /// 소켓의 젬은 가방으로 돌아온다 (SkillManager.ResetRun). 젬은 칸을 먹지 않으므로
+    /// 가방이 가득 차 있어도 잃지 않는다.
+    ///
+    /// 철수 지점은 9단계다. 지금은 디버그 「즉시 철수」만 이 길을 부른다.
+    /// </summary>
+    public static void Extract()
+    {
+        if (loading || InBunker)
+            return;
+
+        if (SkillManager.HasInstance)
+            SkillManager.Instance.ResetRun();
+
+        ShopManager.RestockAfterRun();
+        SaveManager.Commit("철수");
+
+        ReturnToBunker();
+    }
+
+    /// <summary>
+    /// 벙커로 돌아간다. 사망 화면의 버튼이 부른다 — 사망 저장은 이미 끝났다.
+    /// 벙커 씬이 빌드에 없으면 구역을 다시 연다.
+    /// </summary>
+    public static void ReturnToBunker()
+    {
+        if (loading)
+            return;
+
+        Load(HasBunker ? BunkerScene : RaidScene);
+    }
+
+    private static void Load(string scene)
+    {
+        if (!Application.CanStreamedLevelBeLoaded(scene))
+        {
+            GameLogger.Error($"[SceneFlow] 빌드 설정에 「{scene}」 씬이 없습니다. "
+                             + "「Blob/Bunker/벙커 씬 생성」을 실행하십시오.");
+            return;
+        }
+
+        loading = true;
+
+        // 사망 화면은 시간을 멈춘 채다. 멈춘 채 넘어가면 새 씬이 움직이지 않는다.
+        Time.timeScale = 1f;
+
+        ItemActionMenu.Close();
+
+        GameLogger.Log($"[SceneFlow] → {scene}");
+
+        // 불러오기는 다음 프레임에 끝난다. 그 사이의 두 번째 누름을 막는다.
+        SceneManager.sceneLoaded -= HandleLoaded;
+        SceneManager.sceneLoaded += HandleLoaded;
+
+        SceneManager.LoadScene(scene, LoadSceneMode.Single);
+    }
+
+    private static void HandleLoaded(Scene scene, LoadSceneMode mode)
+    {
+        SceneManager.sceneLoaded -= HandleLoaded;
+        loading = false;
+    }
+}

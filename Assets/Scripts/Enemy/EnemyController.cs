@@ -106,10 +106,13 @@ public class EnemyController : MonoBehaviour, IPoolable
 
     public void OnDespawned()
     {
+        // 【씬을 닫는 중이면 새로 만들지 않는다.】 풀이 치워지면서 반납이 불리는데,
+        // 그때 EnemyManager는 이미 사라졌다. EnsureInstance로 새로 만들면 닫히는 씬에
+        // 「EnemyManager (Runtime)」이 남는다 — 벙커로 철수할 때 실제로 났다.
         if (enemyManager != null)
             enemyManager.Unregister(this);
-        else
-            EnemyManager.EnsureInstance().Unregister(this);
+        else if (EnemyManager.HasInstance)
+            EnemyManager.Instance.Unregister(this);
     }
 
     /// <summary>외부(EnemyManager 등)에서 즉시 반납시킬 때 호출한다.</summary>

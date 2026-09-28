@@ -776,4 +776,19 @@ public static class PlaytestActions
         ExchangeWindowUI.RefreshIfOpen();
         return "잡화 상점 재고를 채웠습니다. (원래는 파밍이 끝날 때 찬다)";
     }
+
+    // ── 벙커 (8-J) ───────────────────────────────────────────────────
+
+    /// <summary>철수 지점이 9단계라 여기서 대신 철수한다. 가방·장비를 들고 벙커로 간다.</summary>
+    public static string ExtractNow()
+    {
+        if (SceneFlow.InBunker)
+            return "벙커에서는 철수할 수 없습니다.";
+
+        if (!SceneFlow.HasBunker)
+            return "빌드 설정에 벙커 씬이 없습니다. 「Blob/Bunker/벙커 씬 생성」을 실행하십시오.";
+
+        SceneFlow.Extract();
+        return "철수합니다. 가방과 장비를 들고 벙커로 돌아갑니다.";
+    }
 }

@@ -99,7 +99,7 @@ public class PlayerSurvival : MonoBehaviour
     /// 지금 판이 돌고 있는가. GameManager가 없으면(테스트 씬 등) 돈다고 본다.
     /// </summary>
     private static bool IsRaidRunning()
-        => !GameManager.HasInstance || GameManager.Instance.IsPlaying;
+        => !SceneFlow.InBunker && (!GameManager.HasInstance || GameManager.Instance.IsPlaying);
 
     /// <summary>
     /// 이동 배율은 PlayerLoadout이 한꺼번에 적용한다(SpeedScale의 주인이 하나여야 한다).

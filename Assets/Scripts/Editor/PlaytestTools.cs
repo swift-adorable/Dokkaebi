@@ -93,4 +93,29 @@ public static class PlaytestTools
     [MenuItem(Menu + "가까운 적에게 중독 10중첩 (→ 부식)")]
     public static void PoisonNearest()
         => Run(() => PlaytestActions.StackOnNearest(StatusEffectType.Poison, 10));
+
+    // ── 벙커 (8-J) ───────────────────────────────────────────────────
+    //
+    // 씬을 넘기는 것이라 가방 화면에 결과를 띄우지 않는다 — 곧 사라진다.
+    // 플레이 중이 아니면 창을 띄우지 않고 로그만 남긴다 (외부 도구가 누를 때 멈추지 않게).
+
+    [MenuItem(Menu + "벙커 — 파밍 출발")]
+    public static void Depart()
+    {
+        if (!Application.isPlaying) { Debug.LogError("[Playtest] 플레이 중에만 씁니다."); return; }
+        SceneFlow.Depart();
+    }
+
+    [MenuItem(Menu + "벙커 — 즉시 철수")]
+    public static void Extract()
+    {
+        if (!Application.isPlaying) { Debug.LogError("[Playtest] 플레이 중에만 씁니다."); return; }
+        Debug.Log("[Playtest] " + PlaytestActions.ExtractNow());
+    }
+
+    [MenuItem(Menu + "벙커 — 창고 열기")]
+    public static void OpenStash() => Run(PlaytestActions.OpenStash);
+
+    [MenuItem(Menu + "벙커 — 잡화 상점 열기")]
+    public static void OpenShop() => Run(PlaytestActions.OpenShop);
 }
