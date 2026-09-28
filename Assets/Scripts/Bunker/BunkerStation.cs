@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// 벙커의 한 자리 — 가까이 가면 버튼이 뜨고, 누르면 그 일을 한다. (로드맵 8-J)
+/// 벙커의 한 자리 — 가까이 가면 버튼이 뜨고, 누르면 그 일을 한다. (로드맵 8-J · 8-K)
 ///
 /// 【덕코프처럼 걸어 다니는 벙커다.】 덕코프의 벙커는 건물을 지어 두고 그 앞으로
 /// 걸어가서 쓰는 공간이다 [확인됨]. 메뉴 화면 하나로 두면 빠르지만,
@@ -13,6 +13,9 @@ using UnityEngine;
 /// </summary>
 public class BunkerStation : MonoBehaviour
 {
+    /// <summary>
+    /// 자리의 종류. 【값을 바꾸지 않는다】 — 벙커 씬에 숫자로 저장돼 있다.
+    /// </summary>
     public enum Kind
     {
         /// <summary>창고 (보관고).</summary>
@@ -22,7 +25,19 @@ public class BunkerStation : MonoBehaviour
         GeneralStore = 1,
 
         /// <summary>파밍 출발 지점.</summary>
-        Departure = 2
+        Departure = 2,
+
+        /// <summary>건물 설계도 테이블 — 건설.</summary>
+        Blueprint = 3,
+
+        /// <summary>무기 상점.</summary>
+        WeaponShop = 4,
+
+        /// <summary>방어구 상점.</summary>
+        ArmourShop = 5,
+
+        /// <summary>여는 것이 없다 (작업대 — 제작은 다음 단계).</summary>
+        None = 99
     }
 
     [SerializeField] private Kind kind = Kind.Stash;
@@ -44,13 +59,16 @@ public class BunkerStation : MonoBehaviour
         {
             case Kind.Stash:        return "창고";
             case Kind.GeneralStore: return ShopTable.GeneralStoreName;
+            case Kind.WeaponShop:   return ShopTable.WeaponShopName;
+            case Kind.ArmourShop:   return ShopTable.ArmourShopName;
             case Kind.Departure:    return "파밍 출발";
+            case Kind.Blueprint:    return "건설";
             default:                return string.Empty;
         }
     }
 
-    /// <summary>에디터 생성기가 쓴다.</summary>
-    public void EditorSetup(Kind stationKind, float stationRadius)
+    /// <summary>에디터 생성기와 건물 세우기(BunkerBuildings)가 쓴다.</summary>
+    public void Setup(Kind stationKind, float stationRadius)
     {
         kind = stationKind;
         radius = stationRadius;
@@ -74,7 +92,7 @@ public class BunkerStation : MonoBehaviour
         {
             BunkerStation station = all[i];
 
-            if (station == null)
+            if (station == null || station.kind == Kind.None)
                 continue;
 
             Vector3 offset = station.transform.position - position;
@@ -102,7 +120,19 @@ public class BunkerStation : MonoBehaviour
                 break;
 
             case Kind.GeneralStore:
-                ExchangeWindowUI.EnsureInstance().OpenShop();
+                ExchangeWindowUI.EnsureInstance().OpenShop(ShopKind.General);
+                break;
+
+            case Kind.WeaponShop:
+                ExchangeWindowUI.EnsureInstance().OpenShop(ShopKind.Weapon);
+                break;
+
+            case Kind.ArmourShop:
+                ExchangeWindowUI.EnsureInstance().OpenShop(ShopKind.Armour);
+                break;
+
+            case Kind.Blueprint:
+                BuildingScreenUI.Open();
                 break;
 
             case Kind.Departure:

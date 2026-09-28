@@ -31,13 +31,13 @@ public static class BunkerSceneGenerator
         "Debug Object", "Canvas", "EventSystem", "Game Manager Object"
     };
 
-    // 방 크기 (m). 【한 화면 안에 세 자리가 다 보이는 크기】 — 벙커 체류는 3분 이내다.
-    private const float RoomWidth = 22f;
-    private const float RoomDepth = 14f;
+    // 방 크기 (m) — 배치 모드와 같은 값을 쓴다 (BunkerLayout).
+    private const float RoomWidth = BunkerLayout.RoomWidth;
+    private const float RoomDepth = BunkerLayout.RoomDepth;
     private const float WallHeight = 2f;
     private const float WallThickness = 0.5f;
 
-    private static readonly Vector3 SpawnPoint = new(0f, 0f, 0f);
+    private static readonly Vector3 SpawnPoint = BunkerLayout.Spawn;
 
     [MenuItem("Blob/Bunker/벙커 씬 생성")]
     public static void Generate()
@@ -123,18 +123,20 @@ public static class BunkerSceneGenerator
 
         BuildRoom(floorMaterial, wallMaterial);
 
-        // 세 자리 — 창고와 상점은 안쪽 벽에 붙이고, 출발 지점은 반대편 문 자리에 둔다.
-        float back = RoomDepth * 0.5f - 2f;
-        float front = -RoomDepth * 0.5f + 2f;
-
+        // 고정 자리 셋 — 창고 · 파밍 출발 · 설계도 테이블.
+        // 【상점은 고정 자리가 아니다】 — 덕코프처럼 지어야 생긴다 (8-K).
+        // 설계도 테이블은 덕코프처럼 스폰 지점 오른쪽이다 [확인됨 — 위키 가이드].
         Camera camera = copies.TryGetValue("Main Camera", out GameObject cam) ? cam.GetComponent<Camera>() : null;
 
-        CreateStation(BunkerStation.Kind.Stash, new Vector3(-6f, 0f, back),
+        CreateStation(BunkerStation.Kind.Stash, BunkerLayout.StashPosition,
             new Color(0.30f, 0.55f, 0.85f), camera);
-        CreateStation(BunkerStation.Kind.GeneralStore, new Vector3(6f, 0f, back),
-            new Color(0.90f, 0.70f, 0.25f), camera);
-        CreateStation(BunkerStation.Kind.Departure, new Vector3(0f, 0f, front),
+        CreateStation(BunkerStation.Kind.Departure, BunkerLayout.DeparturePosition,
             new Color(0.35f, 0.85f, 0.45f), camera);
+        CreateStation(BunkerStation.Kind.Blueprint, BunkerLayout.BlueprintPosition,
+            new Color(0.75f, 0.75f, 0.80f), camera);
+
+        // 지은 건물을 세우는 자리. 건물은 세이브에서 오므로 씬에는 이것만 둔다.
+        new GameObject("Bunker Buildings").AddComponent<BunkerBuildings>();
     }
 
     /// <summary>원본과 복사본의 같은 자리에 있는 오브젝트 · 컴포넌트를 짝짓는다.</summary>
@@ -270,7 +272,7 @@ public static class BunkerSceneGenerator
         body.transform.localScale = new Vector3(1.6f, 1.2f, 1.2f);
         body.GetComponent<Renderer>().sharedMaterial = MaterialFor($"Bunker_{kind}", color);
 
-        station.AddComponent<BunkerStation>().EditorSetup(kind, 2.6f);
+        station.AddComponent<BunkerStation>().Setup(kind, 2.6f);
 
         // 이름표 — 멀리서도 무엇인지 보이게. 카메라를 향해 눕힌다.
         GameObject tag = new("Label");

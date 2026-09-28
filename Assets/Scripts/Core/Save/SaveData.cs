@@ -35,7 +35,9 @@ public class SaveData
     ///   6 — 재화 키 credits를 gold로 바꿨다(덕코프 이름). 옛 키는 Migrate가 바꾼다.
     ///   7 — 벙커가 생겼다. 파밍 전 저장에 【들고 가는 것】(가방 · 착용 장비)을 담는다.
     ///       6판에는 없어 빈 가방 · 맨몸으로 읽힌다.
-    public const int CurrentVersion = 7;
+    ///   8 — 벙커 건물(buildings)과 상점 종류(shop 줄의 shop)를 더했다. 7판에는 없어
+    ///       빈 벙커 · 잡화 상점 줄로 읽힌다.
+    public const int CurrentVersion = 8;
 
     public int version = CurrentVersion;
 
@@ -91,6 +93,22 @@ public class SaveData
 
     /// <summary>잡화 상점의 남은 재고. 비어 있으면 가득 찬 것으로 읽는다.</summary>
     public List<SavedStock> shop = new();
+
+    /// <summary>지은 건물과 놓은 자리. 놓지 않은 건물은 placed가 false다.</summary>
+    public List<SavedBuilding> buildings = new();
+}
+
+/// <summary>벙커 건물 하나.</summary>
+[Serializable]
+public class SavedBuilding
+{
+    public string id = string.Empty;
+    public bool placed;
+    public float x;
+    public float z;
+
+    /// <summary>90도 단위 회전 (0~3).</summary>
+    public int turns;
 }
 
 /// <summary>착용 장비 한 자리. 자리 번호는 EquipmentSlot의 값이다.</summary>
@@ -105,6 +123,9 @@ public class SavedEquip
 [Serializable]
 public class SavedStock
 {
+    /// <summary>어느 상점인가 (ShopKind 이름). 비어 있으면 잡화 상점 — 판 5~7.</summary>
+    public string shop = string.Empty;
+
     public string id = string.Empty;
     public int remaining;
 }

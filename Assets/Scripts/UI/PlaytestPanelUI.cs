@@ -37,6 +37,8 @@ public class PlaytestPanelUI : MonoBehaviour
         ("가방 채우기",   PlaytestActions.FillBag),
         ("가방 비우기",   PlaytestActions.ClearBag),
         ("즉시 철수",     PlaytestActions.ExtractNow),
+        ("건설 재료 지급", PlaytestActions.GiveBuildingMaterials),
+        ("건물 목록 열기", PlaytestActions.OpenBuildingScreen),
         ("창고 열기",     PlaytestActions.OpenStash),
         ("잡화 상점 열기", PlaytestActions.OpenShop),
         ("골드 +5000",  PlaytestActions.GiveGold),

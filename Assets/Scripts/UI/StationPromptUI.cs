@@ -72,7 +72,9 @@ public class StationPromptUI : MonoBehaviour
 
         bool covered = (InventoryScreenUI.HasInstance && InventoryScreenUI.Instance.IsOpen)
                        || ExchangeWindowUI.IsOpenIn(ExchangeWindowUI.Mode.Stash)
-                       || ExchangeWindowUI.IsOpenIn(ExchangeWindowUI.Mode.Shop);
+                       || ExchangeWindowUI.IsOpenIn(ExchangeWindowUI.Mode.Shop)
+                       || BuildingScreenUI.IsOpen
+                       || BunkerBuildings.IsPlacing;
 
         current = player != null && !covered ? BunkerStation.NearestTo(player.position) : null;
 
