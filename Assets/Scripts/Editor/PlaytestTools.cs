@@ -131,6 +131,6 @@ public static class PlaytestTools
     {
         if (!Application.isPlaying) { Debug.LogError("[Playtest] 플레이 중에만 씁니다."); return; }
         ExchangeWindowUI.EnsureInstance().OpenShop(ShopKind.Weapon);
-        Debug.Log($"[Playtest] 무기 상점 — 판매 줄 {(ExchangeWindowUI.IsBuyingShopOpen ? "뜬다" : "안 뜬다")}");
+        Debug.Log($"[Playtest] 무기 상점 — 가방 칸의 판매 줄 {(ExchangeWindowUI.IsBuyingShopOpen ? "뜬다" : "안 뜬다")}");
     }
 }

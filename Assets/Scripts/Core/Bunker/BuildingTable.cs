@@ -93,14 +93,14 @@ public static class BuildingTable
             opens: BunkerStation.Kind.GeneralStore),
 
         // 덕코프 무기 상점: 100 · 볼트 ×2 · 못 ×2 · 절전형 전구 ×1 · MD40 ×1 · 작업대
-        new(WeaponShop, ShopTable.WeaponShopName, "무기를 판다.",
+        new(WeaponShop, ShopTable.WeaponShopName, "무기를 사고판다.",
             gold: 100,
             materials: new[] { new MaterialCost(Scrap, 4), new MaterialCost(Battery, 2) },
             requiredBuildings: new[] { Workbench }, width: 2f, depth: 1.4f,
             opens: BunkerStation.Kind.WeaponShop),
 
         // 덕코프 방어구 상점: 100 · 너트 ×2 · 금속 조각 ×2 · 전구 ×1 · 로프 ×1 · 작업대
-        new(ArmourShop, ShopTable.ArmourShopName, "헬멧 · 방어구 · 가방을 판다.",
+        new(ArmourShop, ShopTable.ArmourShopName, "헬멧 · 방어구 · 가방을 사고판다.",
             gold: 100,
             materials: new[] { new MaterialCost(Scrap, 4), new MaterialCost(Battery, 1), new MaterialCost(Wire, 1) },
             requiredBuildings: new[] { Workbench }, width: 2f, depth: 1.4f,
