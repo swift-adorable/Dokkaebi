@@ -73,7 +73,7 @@ public static class ShopManager
         return error;
     }
 
-    /// <summary>가방의 한 칸을 통째로 판다. 【잡화 상점만 사 준다.】</summary>
+    /// <summary>가방의 한 칸을 통째로 판다. 어느 상점에서 팔든 값은 같다.</summary>
     public static TradeError Sell(ItemStack stack, out int earned)
     {
         PassiveManager passive = PassiveManager.EnsureInstance();

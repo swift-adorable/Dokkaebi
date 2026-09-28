@@ -218,11 +218,11 @@ namespace Blob.Tests
         }
 
         [Test]
-        public void 물건을_사_주는_곳은_잡화_상점뿐이다()
+        public void 세_상점_모두_물건을_사_준다()
         {
-            Assert.IsTrue(ShopTable.BuysFromPlayer(ShopKind.General));
-            Assert.IsFalse(ShopTable.BuysFromPlayer(ShopKind.Weapon));
-            Assert.IsFalse(ShopTable.BuysFromPlayer(ShopKind.Armour));
+            // 결정 2-37 — 무기 상점 · 방어구 상점에서도 판다.
+            foreach (ShopKind kind in ShopTable.All)
+                Assert.IsTrue(ShopTable.BuysFromPlayer(kind), kind.ToString());
         }
     }
 }

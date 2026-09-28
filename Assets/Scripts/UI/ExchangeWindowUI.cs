@@ -71,7 +71,7 @@ public class ExchangeWindowUI : MonoBehaviour
 
     /// <summary>이 모드로 열려 있는가. 가방 화면이 사이드 메뉴 줄을 고를 때 쓴다.</summary>
     /// <summary>
-    /// 물건을 사 주는 상점이 열려 있는가 — 잡화 상점뿐이다(ShopTable.BuysFromPlayer).
+    /// 물건을 사 주는 상점이 열려 있는가 — 지금은 세 상점 모두다(ShopTable.BuysFromPlayer).
     /// 가방 칸의 「판매」 줄이 이것을 본다.
     /// </summary>
     public static bool IsBuyingShopOpen

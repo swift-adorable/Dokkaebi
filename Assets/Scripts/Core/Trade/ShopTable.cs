@@ -3,7 +3,7 @@ using System.Collections.Generic;
 /// <summary>어느 상점인가. 【덕코프처럼 종류별로 나뉜다】 [확인됨 — 덕코프 건물 목록]</summary>
 public enum ShopKind
 {
-    /// <summary>잡화 상점 — 약품 · 잡화. 【물건을 사 주는 곳은 여기뿐이다.】</summary>
+    /// <summary>잡화 상점 — 약품 · 잡화.</summary>
     General = 0,
 
     /// <summary>무기 상점 — 무기.</summary>
@@ -39,8 +39,9 @@ public readonly struct ShopEntry
 ///   잡화 상점  「각종 약품과 잡화를 구매하거나 물건을 팔아 돈으로 바꾼다」
 ///   무기 상점  「무기, 탄약 그리고 살인과 약탈에 사용하는 물건들이 있다」
 ///   방어구 상점 「각종 헬멧과 방어구를 판매한다」 (가방도 판다)
-/// 【물건을 사 주는 곳은 잡화 상점뿐이다】 — 설명에 「팔아 돈으로 바꾼다」가 있는 건물이
-/// 그것 하나다. 다른 상점에서도 팔 수 있는지는 위키에 없다 [확인 불가].
+/// 【세 상점 모두 플레이어의 물건을 사 준다】 (결정 2-37, 사용자 결정 2026-09-29).
+/// 덕코프는 설명에 「팔아 돈으로 바꾼다」가 적힌 건물이 잡화 상점뿐이고, 다른 상점에서도
+/// 팔 수 있는지는 위키에 없다 [확인 불가]. 판매가는 어느 상점이든 같다 (TradeRules.SellPrice).
 ///
 /// 【잡화 상점】 재고와 가격 계수는 덕코프 아이템 페이지의 상점 표 그대로다 [확인됨].
 /// 주사약은 덕코프에서 머드(헬스장을 지으면 입주)가 판다. Blob에는 헬스장이 없어
@@ -139,8 +140,8 @@ public static class ShopTable
         }
     }
 
-    /// <summary>플레이어의 물건을 사 주는가. 잡화 상점뿐이다.</summary>
-    public static bool BuysFromPlayer(ShopKind kind) => kind == ShopKind.General;
+    /// <summary>플레이어의 물건을 사 주는가. 【셋 다 사 준다】 (결정 2-37).</summary>
+    public static bool BuysFromPlayer(ShopKind kind) => true;
 
     /// <summary>이 상점의 이 아이템 줄. 팔지 않는 것이면 false.</summary>
     public static bool TryFind(ShopKind kind, string itemId, out ShopEntry entry)
