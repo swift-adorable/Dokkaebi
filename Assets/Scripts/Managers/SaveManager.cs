@@ -10,10 +10,15 @@ using UnityEngine.SceneManagement;
 /// 얻은 것도 잃은 것도 없다 — 롤백이다. [커뮤니티 확인]
 ///
 ///   덕코프        Blob (지금)
-///   파밍 전       게임 시작        ← 읽기만 한다. 디스크와 달라진 것이 없다
+///   파밍 전       벙커 → 파밍 출발  ← 저장한다 (SceneFlow.Depart) — 들고 가는 것까지
 ///   파밍 후       사망             ← 저장한다 (BlobController.HandleDied)
-///                 철수             ← 아직 없다 (9단계)
-///   벙커에서의 일  —               ← 벙커가 아직 없다 (8단계 뒤쪽)
+///                 철수             ← 저장한다 (SceneFlow.Extract — 지금은 디버그 「즉시 철수」)
+///   벙커에서의 일  창고·상점·가방을 닫을 때 ← 저장한다 (벙커에서만)
+///
+/// 【씬이 바뀔 때마다 다시 읽는다.】 매니저들은 씬 안에 산다(DontDestroyOnLoad를
+/// 쓰지 않는다). 씬을 떠나기 전에 저장하고, 새 씬이 뜨면 Awake 뒤 · Start 앞에
+/// 읽어서 나눠 준다. 저장 경로 하나로 씬 사이를 건너므로, 건너는 길이 곧 세이브
+/// 검증이다.
 ///
 /// 【파밍 중에는 저장하지 않는다.】 앱이 백그라운드로 가도, 강제로 꺼져도
 /// 마찬가지다. 그렇게 해야 「꺼 버리면 죽음을 무를 수 있다」가 생기지 않는다 —
@@ -62,6 +67,21 @@ public static class SaveManager
             GameLogger.Log("[Save] 테스트 씬 — 세이브를 읽지도 쓰지도 않습니다.");
             return;
         }
+
+        Load();
+
+        SceneManager.sceneLoaded -= HandleSceneLoaded;
+        SceneManager.sceneLoaded += HandleSceneLoaded;
+    }
+
+    /// <summary>
+    /// 두 번째 씬부터. 첫 씬은 Bootstrap이 읽었다 — sceneLoaded는 AfterSceneLoad보다
+    /// 먼저 불리므로 첫 씬에서는 여기로 오지 않는다.
+    /// </summary>
+    private static void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (!Enabled || mode != LoadSceneMode.Single)
+            return;
 
         Load();
     }
@@ -171,6 +191,24 @@ public static class SaveManager
                 ToSaved(loadout.Get(EquipmentSlot.ImprintB))
             };
 
+            data.bag = new List<SavedItem>();
+
+            foreach (ItemStack stack in PlayerInventory.Instance.Bag.Stacks)
+            {
+                if (stack?.Definition != null && !stack.IsEmpty)
+                    data.bag.Add(ToSaved(stack));
+            }
+
+            data.equipment = new List<SavedEquip>();
+
+            foreach (EquipmentSlot slot in CarriedSlots)
+            {
+                ItemStack worn = loadout.Get(slot);
+
+                if (worn?.Definition != null)
+                    data.equipment.Add(new SavedEquip { slot = (int)slot, item = ToSaved(worn) });
+            }
+
             data.stash = new List<SavedItem>();
 
             foreach (ItemStack stack in PlayerInventory.Instance.Stash.Stacks)
@@ -184,6 +222,13 @@ public static class SaveManager
 
         return data;
     }
+
+    /// <summary>각인을 뺀 착용 자리. 각인은 죽어도 남아 따로 저장한다.</summary>
+    private static readonly EquipmentSlot[] CarriedSlots =
+    {
+        EquipmentSlot.Weapon, EquipmentSlot.Head, EquipmentSlot.Body,
+        EquipmentSlot.Face, EquipmentSlot.Ears, EquipmentSlot.Backpack
+    };
 
     private static SavedItem ToSaved(ItemStack stack)
     {
@@ -222,13 +267,23 @@ public static class SaveManager
             codex.Unlock(id);
 
         RestoreImprints(data.imprints);
-        RestoreStash(data.stash);
+        RestoreEquipment(data.equipment);
+        RestoreInto(PlayerInventory.EnsureInstance().Bag, data.bag, "가방");
+        RestoreInto(PlayerInventory.Instance.Stash, data.stash, "창고");
         ShopManager.Restore(data.shop);
 
         // 레벨이 돌아왔으니 소켓 수도 맞춘다. 알림은 내지 않는다.
         SkillManager.EnsureInstance().ResyncLevel();
 
         PlayerInventory.EnsureInstance().RefreshCapacity();
+
+        // 장비가 바뀌었으니 사격 성능 · 방어도 · 이동 배율도 다시 잰다.
+        // 씬이 막 떴을 때는 PlayerLoadout.Start가 어차피 다시 재지만,
+        // 같은 씬에서 불러올 때(디버그)는 여기서 해야 한다.
+        var playerLoadout = Object.FindAnyObjectByType<PlayerLoadout>(FindObjectsInactive.Exclude);
+
+        if (playerLoadout != null)
+            playerLoadout.Refresh();
     }
 
     /// <summary>
@@ -279,15 +334,13 @@ public static class SaveManager
     }
 
     /// <summary>
-    /// 창고를 되살린다. 【칸 수를 넘어도 넣는다】 — 패시브를 바꾸거나 표를 고쳐
+    /// 가방 · 창고를 되살린다. 【칸 수를 넘어도 넣는다】 — 패시브를 바꾸거나 표를 고쳐
     /// 칸이 줄었을 때 물건이 사라지면 안 된다. 넘친 만큼은 새로 넣지 못할 뿐이다.
     /// 못 찾은 id는 각인과 같은 이유로 건너뛴다.
     /// </summary>
-    private static void RestoreStash(List<SavedItem> saved)
+    private static void RestoreInto(Inventory target, List<SavedItem> saved, string where)
     {
-        Inventory stash = PlayerInventory.EnsureInstance().Stash;
-
-        stash.Clear();
+        target.Clear();
 
         if (saved == null || saved.Count == 0)
             return;
@@ -296,12 +349,12 @@ public static class SaveManager
 
         if (catalog == null)
         {
-            GameLogger.Error("[Save] Resources/ItemCatalog가 없어 창고를 되살리지 못했습니다.");
+            GameLogger.Error($"[Save] Resources/ItemCatalog가 없어 {where}를 되살리지 못했습니다.");
             return;
         }
 
-        int capacity = stash.SlotCapacity;
-        stash.SlotCapacity = int.MaxValue / 2;
+        int capacity = target.SlotCapacity;
+        target.SlotCapacity = int.MaxValue / 2;
 
         foreach (SavedItem item in saved)
         {
@@ -312,14 +365,53 @@ public static class SaveManager
 
             if (definition == null)
             {
-                GameLogger.Error($"[Save] 창고의 「{item.id}」을 찾지 못해 건너뜁니다.");
+                GameLogger.Error($"[Save] {where}의 「{item.id}」을 찾지 못해 건너뜁니다.");
                 continue;
             }
 
-            stash.TryAddStack(new ItemStack(definition, item.count, item.durability));
+            target.TryAddStack(new ItemStack(definition, item.count, item.durability));
         }
 
-        stash.SlotCapacity = capacity;
+        target.SlotCapacity = capacity;
+    }
+
+    /// <summary>
+    /// 착용 장비를 되살린다. 【먼저 전부 벗긴다】 — 씬이 바뀌어 새로 만든 장비 칸은
+    /// 비어 있지만, 같은 씬에서 「세이브 불러오기」를 누르면 입은 채로 온다.
+    /// </summary>
+    private static void RestoreEquipment(List<SavedEquip> saved)
+    {
+        EquipmentLoadout loadout = PlayerInventory.EnsureInstance().Loadout;
+
+        foreach (EquipmentSlot slot in CarriedSlots)
+            loadout.Unequip(slot);
+
+        if (saved == null || saved.Count == 0)
+            return;
+
+        ItemCatalog catalog = ItemCatalog.Load();
+
+        if (catalog == null)
+            return;
+
+        foreach (SavedEquip row in saved)
+        {
+            if (row?.item == null || row.item.IsEmpty)
+                continue;
+
+            ItemDefinition definition = catalog.Find(row.item.id);
+
+            if (definition == null)
+            {
+                GameLogger.Error($"[Save] 장비 「{row.item.id}」을 찾지 못해 건너뜁니다.");
+                continue;
+            }
+
+            var stack = new ItemStack(definition, 1, row.item.durability);
+
+            if (!loadout.TryEquip(stack, (EquipmentSlot)row.slot, out _))
+                GameLogger.Error($"[Save] 장비 「{row.item.id}」을 {(EquipmentSlot)row.slot}에 입히지 못했습니다.");
+        }
     }
 
     private static int CountFilled(List<SavedItem> items)

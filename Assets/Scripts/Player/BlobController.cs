@@ -113,6 +113,8 @@ public class BlobController : MonoBehaviour
 
         if (gameManager != null)
             gameManager.GameOver();
+
+        RunEndUI.ShowDeath(lost);
     }
 
     private void Start()

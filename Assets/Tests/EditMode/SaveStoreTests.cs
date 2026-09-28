@@ -238,6 +238,25 @@ namespace Blob.Tests
         }
 
         [Test]
+        public void 들고_가는_것이_왕복한다()
+        {
+            SaveData data = Sample();
+            data.bag = new List<SavedItem> { new SavedItem { id = "con_bandage", count = 2 } };
+            data.equipment = new List<SavedEquip>
+            {
+                new SavedEquip { slot = (int)EquipmentSlot.Weapon, item = new SavedItem { id = "wpn_x", durability = 12 } }
+            };
+
+            SaveStore.Write(path, data);
+            Assert.AreEqual(SaveLoadResult.Main, SaveStore.Read(path, out SaveData read));
+
+            Assert.AreEqual("con_bandage", read.bag[0].id);
+            Assert.AreEqual(2, read.bag[0].count);
+            Assert.AreEqual((int)EquipmentSlot.Weapon, read.equipment[0].slot);
+            Assert.AreEqual(12, read.equipment[0].item.durability);
+        }
+
+        [Test]
         public void 판4_세이브는_빈_창고로_읽힌다()
         {
             File.WriteAllText(path, "{ \"version\": 4, \"level\": 3 }");
@@ -246,6 +265,8 @@ namespace Blob.Tests
             Assert.IsNotNull(data.stash);
             Assert.AreEqual(0, data.stash.Count);
             Assert.AreEqual(0, data.shop.Count);
+            Assert.AreEqual(0, data.bag.Count, "6판 이전은 빈 가방");
+            Assert.AreEqual(0, data.equipment.Count, "6판 이전은 맨몸");
         }
 
         [Test]

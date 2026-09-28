@@ -128,11 +128,35 @@ public class SkillManager : Singleton<SkillManager>
         PlaytestPanelUI.EnsureInstance();
 #endif
 
-        if (grantFirstCore)
+        // 【벙커에서는 주지 않는다】 — 소켓은 파밍 안의 것이다.
+        if (grantFirstCore && !SceneFlow.InBunker)
             GrantFirstCore();
     }
 
     private void HandleBuildChanged() => OnBuildChanged?.Invoke();
+
+    /// <summary>가방이나 창고에 핵심 젬이 하나라도 있는가.</summary>
+    private static bool OwnsCoreGem()
+    {
+        if (!PlayerInventory.HasInstance)
+            return false;
+
+        return HasCore(PlayerInventory.Instance.Bag) || HasCore(PlayerInventory.Instance.Stash);
+
+        static bool HasCore(Inventory inventory)
+        {
+            foreach (ItemStack stack in inventory.Stacks)
+            {
+                ItemDefinition definition = stack?.Definition;
+
+                if (definition != null && definition.IsSkillGem
+                    && definition.Skill.Category == SkillCategory.Core)
+                    return true;
+            }
+
+            return false;
+        }
+    }
 
     // ────────────────────────────────── 카탈로그 · 도감
 
@@ -230,6 +254,13 @@ public class SkillManager : Singleton<SkillManager>
     public bool GrantFirstCore()
     {
         if (build.HasCore)
+            return false;
+
+        // 【이미 핵심 젬을 가지고 있으면 주지 않는다.】 벙커와 철수가 생기기 전에는
+        // 파밍마다 맨몸으로 시작했으므로 늘 줬다. 이제는 가방이 이어지므로 매번 주면
+        // 철수할 때마다 공짜 젬이 창고에 쌓인다. 없을 때만 준다 — 젬 없이
+        // 들어가 싸울 수 없는 상태를 막는 안전판이다.
+        if (OwnsCoreGem())
             return false;
 
         SkillDefinition core = SkillGemDropTable.DrawFirstCore(dropPool, random);

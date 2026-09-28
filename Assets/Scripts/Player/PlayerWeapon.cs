@@ -86,6 +86,10 @@ public class PlayerWeapon : MonoBehaviour
     /// <summary>발사를 시도한다. 연사 간격에 걸리거나 참조가 없으면 false.</summary>
     public bool TryFire()
     {
+        // 【벙커에서는 쏘지 않는다.】 덕코프의 벙커도 전투 공간이 아니다.
+        if (SceneFlow.InBunker)
+            return false;
+
         if (!IsConfigured)
             return false;
 

@@ -19,7 +19,7 @@ public static class MobileInputUIFactory
     private const float HandleRange = 110f;
 
     private const float DashButtonSize = 190f;
-    private const float AbsorbPromptSize = 150f;
+    public const float AbsorbPromptSize = 150f;
     /// <summary>
     /// 모서리에서 들이는 거리. 안전 영역이 노치·홈 인디케이터를 이미 잘라 냈으므로
     /// 여기서는 「엄지가 화면 끝에 걸리지 않을 만큼」만 들이면 된다.
@@ -42,7 +42,7 @@ public static class MobileInputUIFactory
     /// 왼쪽이 아니라 위인 이유 — 왼쪽은 우측 조이스틱(조준) 영역과 겹친다.
     /// 조준 중에 흡수 버튼을 잘못 누르면 조준이 끊긴다.
     /// </summary>
-    private static readonly Vector2 AbsorbButtonPosition = new Vector2(
+    public static readonly Vector2 AbsorbButtonPosition = new Vector2(
         DashButtonPosition.x,
         DashButtonPosition.y + DashButtonSize * 0.5f + AbsorbPromptSize * 0.5f + ButtonGap);
 
