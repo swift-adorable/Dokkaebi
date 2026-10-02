@@ -119,17 +119,17 @@ public class PlayerInventory : Singleton<PlayerInventory>
             + modifiers.Get(EquipmentStatType.MaxCarryWeight)
             + passiveWeight;
 
-        // 【중량 주사약은 맨 마지막에 곱한다.】 장비·패시브를 다 더한 뒤라야
+        // 【공진단은 맨 마지막에 곱한다.】 장비·패시브를 다 더한 뒤라야
         // 「지금 내 한도의 +50%」가 된다. 기본값에만 곱하면 가방을 좋은
-        // 것으로 바꿀수록 중량 주사약이 초라해진다.
+        // 것으로 바꿀수록 공진단이 초라해진다.
         Bag.WeightLimit = limit * CarryWeightMultiplier();
     }
 
     /// <summary>
-    /// 상태이상이 곱하는 소지 중량 배율. 지금은 소지 중량 증가(중량 주사약)뿐이다.
+    /// 상태이상이 곱하는 소지 중량 배율. 지금은 소지 중량 증가(공진단)뿐이다.
     ///
     /// 【상태가 끝날 때 다시 불러야 한다.】 배율이 사라지면 한도가 줄어
-    /// 과중량이 될 수 있다 — 그것이 중량 주사약의 대가다. PlayerSurvival이
+    /// 과중량이 될 수 있다 — 그것이 공진단의 대가다. PlayerSurvival이
     /// 탈수·허기가 바뀔 때 Refresh를 부르는 것과 같은 자리다.
     /// </summary>
     private static float CarryWeightMultiplier()

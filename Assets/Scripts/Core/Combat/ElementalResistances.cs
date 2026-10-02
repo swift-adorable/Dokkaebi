@@ -34,7 +34,7 @@ public struct ElementalResistances
         }
     }
 
-    /// <summary>정착체 · 데이터체 — 물리 0.66배, 화염 1.5배.</summary>
+    /// <summary>허깨비 · 무주귀 — 물리 0.66배, 화염 1.5배.</summary>
     public static ElementalResistances Settled
     {
         get
@@ -76,7 +76,7 @@ public struct ElementalResistances
     /// 【TakeLowest로 대신할 수 없다.】
     /// 몬스터 속성 「경화」는 물리 하나만 0.5로 만든다. 이걸 구현하려고
     /// Default(전부 1.0)를 만들어 TakeLowest에 넣으면, 손대지 않아야 할
-    /// 다른 속성까지 1.0으로 눌린다 — 압착기의 전기 2배, 정착체의 화염 1.5배가
+    /// 다른 속성까지 1.0으로 눌린다 — 절굿공이귀의 전기 2배, 허깨비의 화염 1.5배가
     /// 속성 하나 붙었다는 이유로 사라진다. 유형이 요구하던 답이 지워진다.
     ///
     /// TakeLowest는 【묶음 대 묶음】(레이드 특성 vs 개체)을 겹칠 때 쓴다.
@@ -87,7 +87,7 @@ public struct ElementalResistances
         float current = Get(element);
 
         // 【약점을 저항으로 뒤집지 않는다.】
-        // 그냥 multiplier로 덮으면 압착기의 전기 2배가 0.5배가 되어,
+        // 그냥 multiplier로 덮으면 절굿공이귀의 전기 2배가 0.5배가 되어,
         // 「얘는 전기로 잡아라」라는 유형의 답이 속성 하나로 사라진다.
         // 전기 들고 간 사람에게는 공략법이 없어지는 것과 같다.
         //

@@ -10,16 +10,16 @@
 /// </summary>
 public enum Faction
 {
-    /// <summary>야생 — 스캐브 · 잠복체 · 화공체.</summary>
+    /// <summary>떠돌이(옛 야생) — 잡귀 · 수귀 · 왕지네.</summary>
     Wild = 0,
 
-    /// <summary>시설 — 압착기 · 보안기.</summary>
+    /// <summary>부리던 것(옛 시설) — 절굿공이귀 · 순라귀.</summary>
     Facility = 1,
 
-    /// <summary>실험체 — 자전체 · 검체.</summary>
+    /// <summary>살(옛 실험체) — 번개귀 · 침귀.</summary>
     Subject = 2,
 
-    /// <summary>정착 — 정착체 · 데이터체. 나머지 네 진영 전부와 적대한다.</summary>
+    /// <summary>헛것(옛 정착) — 허깨비 · 무주귀. 나머지 네 진영 전부와 적대한다.</summary>
     Settled = 3,
 
     /// <summary>우호 — 구역 내 수집기(상인) · 중립 개체. 플레이어를 공격하지 않는다.</summary>
@@ -49,7 +49,7 @@ public static class FactionTable
     /// 【정착의 「모든 생명체와 적대」는 해결됐다. (2026-09-22)】
     /// 덕코프는 「모든 것과 적대」를 【전용 진영】(그 종 혼자만 있는 진영)으로
     /// 표현한다. [확인됨 — research/duckov_적.md 1절]
-    /// 정착체와 데이터체는 한 진영에 묶여 있으므로 전용 진영이 아니다.
+    /// 허깨비와 무주귀는 한 진영에 묶여 있으므로 전용 진영이 아니다.
     /// 문서 4절의 문장을 「나머지 네 진영 전부와 적대」로 고쳤다.
     /// </summary>
     public static bool IsHostile(Faction a, Faction b)

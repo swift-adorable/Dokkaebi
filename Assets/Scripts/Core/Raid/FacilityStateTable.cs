@@ -1,6 +1,6 @@
 using UnityEngine;
 
-/// <summary>시설 상태 하나가 하는 일.</summary>
+/// <summary>밤 상태 하나가 하는 일.</summary>
 public struct FacilityStateEffect
 {
     /// <summary>이 상태에서 추가로 나오는 유형.</summary>
@@ -9,7 +9,7 @@ public struct FacilityStateEffect
     /// <summary>시야 거리 배율. 적과 플레이어 양쪽에 걸린다.</summary>
     public float visionScale;
 
-    /// <summary>보안기가 멈추는가. (정전)</summary>
+    /// <summary>순라귀가 멈추는가. (그믐)</summary>
     public bool disablesSentry;
 
     /// <summary>이동 속도 배율. 적과 플레이어 양쪽에 걸린다.</summary>
@@ -28,7 +28,7 @@ public struct FacilityStateEffect
 }
 
 /// <summary>
-/// 시설 상태 3종의 고정 표. (docs/Blob_Hunting_System.md 5절)
+/// 밤 상태 3종의 고정 표. (docs/Blob_Hunting_System.md 5절)
 ///
 /// 【한 번 나온 개체는 상태가 풀려도 사라지지 않는다.】(문서 5절)
 /// 그래서 이 표는 「스폰할 때 무엇을 더 섞을까」만 정하고,
@@ -46,33 +46,33 @@ public static class FacilityStateTable
     // 관계는 테스트가 강제한다.
 
     /// <summary>
-    /// 정전의 시야 배율. 「대폭 감소」라 절반 아래로 둔다.
+    /// 그믐의 시야 배율. 「대폭 감소」라 절반 아래로 둔다.
     /// 0.45면 기본 시야 18m가 8m가 된다 — 총성(22m)보다 짧아져
-    /// 「보기 전에 듣는다」가 뒤집힌다. 그것이 정전의 정체다.
+    /// 「보기 전에 듣는다」가 뒤집힌다. 그것이 그믐의 정체다.
     /// </summary>
     public const float BlackoutVisionScale = 0.45f;
 
-    /// <summary>침수의 이동 배율. 「감소」이지 「못 움직인다」가 아니다.</summary>
+    /// <summary>큰물의 이동 배율. 「감소」이지 「못 움직인다」가 아니다.</summary>
     public const float FloodedMoveScale = 0.75f;
 
-    /// <summary>침수에서 감전 피해 배율. 문서에 「2배」로 적혀 있다. [확인됨]</summary>
+    /// <summary>큰물에서 감전 피해 배율. 문서에 「2배」로 적혀 있다. [확인됨]</summary>
     public const float FloodedLightningMultiplier = 2f;
 
     /// <summary>
-    /// 소독 사이클의 초당 화학 피해.
+    /// 독안개의 초당 화학 피해.
     /// 방어구 없이 버틸 수는 있되 오래 머물면 죽는 선으로 둔다 —
     /// 기본 체력 100 기준 100초면 「환경 장비를 갖춰 오라」는 뜻이 된다.
     /// </summary>
     public const float DecontaminationDamagePerSecond = 1f;
 
-    /// <summary>소독 사이클에서 화공체가 강해지는 배율. 【불확실】</summary>
+    /// <summary>독안개에서 왕지네가 강해지는 배율. 【불확실】</summary>
     public const float EmpowerScale = 1.3f;
 
     public static FacilityStateEffect Of(FacilityState state)
     {
         switch (state)
         {
-            // 시야를 줄이는 대신 보안기를 멈춘다 — 양날의 본보기다.
+            // 시야를 줄이는 대신 순라귀를 멈춘다 — 양날의 본보기다.
             case FacilityState.Blackout:
                 return new FacilityStateEffect
                 {
@@ -99,7 +99,7 @@ public static class FacilityStateTable
                     empowerScale = 1f
                 };
 
-            // 계속 깎이는 대신 화공체가 몰려 나와 처치 밀도가 높다.
+            // 계속 깎이는 대신 왕지네가 몰려 나와 처치 밀도가 높다.
             case FacilityState.Decontamination:
                 return new FacilityStateEffect
                 {
@@ -131,10 +131,10 @@ public static class FacilityStateTable
     {
         switch (state)
         {
-            case FacilityState.Blackout:        return "정전";
-            case FacilityState.Flooded:         return "침수";
-            case FacilityState.Decontamination: return "소독 사이클";
-            default:                            return "평시";
+            case FacilityState.Blackout:        return "그믐";
+            case FacilityState.Flooded:         return "큰물";
+            case FacilityState.Decontamination: return "독안개";
+            default:                            return "여느 밤";
         }
     }
 
@@ -147,13 +147,13 @@ public static class FacilityStateTable
         switch (state)
         {
             case FacilityState.Blackout:
-                return "시야가 크게 줄어든다 · 보안기가 멈춘다";
+                return "시야가 크게 줄어든다 · 순라귀가 멈춘다";
 
             case FacilityState.Flooded:
                 return "느려진다 · 감전 피해 2배";
 
             case FacilityState.Decontamination:
-                return "계속 화학 피해를 받는다 · 화공체가 몰려 있다";
+                return "계속 화학 피해를 받는다 · 왕지네가 몰려 있다";
 
             default:
                 return string.Empty;
@@ -171,7 +171,7 @@ public static class FacilityStateTable
     /// <summary>
     /// 이 유형이 이 상태에서 움직이는가.
     ///
-    /// 정전에 보안기가 멈추는 것은 【기회】다 — 위험을 하나 감수하고
+    /// 그믐에 순라귀가 멈추는 것은 【기회】다 — 위험을 하나 감수하고
     /// 다른 하나를 지운다. 이 한 줄이 「위험하지만 갈 만하다」를 만든다.
     /// </summary>
     public static bool IsActive(FacilityState state, EnemyArchetype archetype)

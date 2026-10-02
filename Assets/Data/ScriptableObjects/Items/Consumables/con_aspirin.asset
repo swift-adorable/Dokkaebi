@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: con_aspirin
   m_EditorClassIdentifier: Blob.Runtime::ItemDefinition
   id: con_aspirin
-  displayName: "\uC544\uC2A4\uD53C\uB9B0"
+  displayName: "\uC30D\uD654\uD0D5"
   description: "\uBA38\uB9AC\uAC00 \uB35C \uC544\uD504\uB2E4. \uB300\uC2E0 \uBAA9\uC774
     \uB9C8\uB978\uB2E4."
   kind: 6

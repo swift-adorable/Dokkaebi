@@ -17,7 +17,7 @@ public enum ConsumableError
     /// <summary>죽어 있다.</summary>
     Dead = 4,
 
-    /// <summary>내구도를 다 썼다. 빈 구급상자다.</summary>
+    /// <summary>내구도를 다 썼다. 빈 환단다.</summary>
     Empty = 5
 }
 
@@ -115,7 +115,7 @@ public readonly struct ConsumableOutcome
 /// MonoBehaviour 의존이 없는 순수 클래스다.
 /// (docs/Blob_Consumable_System.md)
 ///
-/// 【적용과 계산을 나누는 이유】 「이미 체력이 가득한데 구급상자를 썼다」가
+/// 【적용과 계산을 나누는 이유】 「이미 체력이 가득한데 환단을 썼다」가
 /// 가장 흔한 사고다. 계산을 먼저 끝내 두면 그 경우를 쓰기 전에 막을 수
 /// 있고, 같은 판정을 화면(회색 처리)과 실행이 나눠 쓸 수 있다.
 /// </summary>
@@ -141,7 +141,7 @@ public static class ConsumableUse
         if (subject.IsDead)
             return new ConsumableOutcome(ConsumableError.Dead);
 
-        // 빈 구급상자. 무게만 먹고 있으므로 버리라고 말해 주는 편이 낫다.
+        // 빈 환단. 무게만 먹고 있으므로 버리라고 말해 주는 편이 낫다.
         if (effect.Charged && subject.Durability < effect.UseCost)
             return new ConsumableOutcome(ConsumableError.Empty);
 

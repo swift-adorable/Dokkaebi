@@ -52,10 +52,10 @@ public static class StatusEffectTable
     // ── 이로운 상태의 수치 ────────────────────────────────────────────
     //
     // 문서 4절의 강화 소모품 표를 그대로 옮긴 것이다.
-    //   노란 주사약 — 이동 +25%, 120초 → 끝나면 60초 동안 −15%
-    //   강화 주사약 — 방어도 +0.5, 120초, 대가로 회복량 절반
+    //   축지환 — 이동 +25%, 120초 → 끝나면 60초 동안 −15%
+    //   녹용 — 방어도 +0.5, 120초, 대가로 회복량 절반
     // 「회복」 상태는 덕코프 「회복」#1018 「1초마다 체력 2 회복, 30초」 그대로다 [확인됨].
-    // 30초 × 2 = 60이면 구급상자 두 번보다 조금 많다. 다만 30초 동안
+    // 30초 × 2 = 60이면 환단 두 번보다 조금 많다. 다만 30초 동안
     // 나눠 들어오므로 급할 때의 한 방을 대신하지 못한다.
 
     public const float HasteSeconds = 120f;
@@ -87,7 +87,7 @@ public static class StatusEffectTable
     public const float RegenPerSecond = 2f;
 
     /// <summary>
-    /// 소지 중량 증가(중량 주사약)가 곱하는 최대 소지 중량.
+    /// 소지 중량 증가(공진단)가 곱하는 최대 소지 중량.
     /// 【덕코프 「소지 중량 증가」#1012의 「최대 소지 중량 +50%」 그대로다.】 [확인됨]
     /// </summary>
     public const float OverloadSeconds = 240f;
@@ -174,7 +174,7 @@ public static class StatusEffectTable
 
             // ── 이로운 상태 ───────────────────────────────────────────
             // 【중첩하지 않는다.】 소모품 문서 6절의 「같은 분류는 덮어쓴다」다.
-            // 노란 주사약 두 개를 겹쳐 쓸 수 있으면 대가가 있는 의미가 사라진다.
+            // 축지환 두 개를 겹쳐 쓸 수 있으면 대가가 있는 의미가 사라진다.
             // 다시 걸면 지속시간만 처음으로 돌아간다.
 
             case StatusEffectType.Haste:
@@ -188,7 +188,7 @@ public static class StatusEffectTable
             case StatusEffectType.Regen:
                 return new StatusEffectSpec(0f, RegenSeconds, 1, DamageElement.Physical);
 
-            // 대가. 노란 주사약이 끝나면 저절로 걸린다.
+            // 대가. 축지환이 끝나면 저절로 걸린다.
             case StatusEffectType.Fatigue:
                 return new StatusEffectSpec(0f, FatigueSeconds, 1, DamageElement.Physical);
 

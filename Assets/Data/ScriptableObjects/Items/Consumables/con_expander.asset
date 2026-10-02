@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: con_expander
   m_EditorClassIdentifier: Blob.Runtime::ItemDefinition
   id: con_expander
-  displayName: "\uC911\uB7C9 \uC8FC\uC0AC\uC57D"
+  displayName: "\uACF5\uC9C4\uB2E8"
   description: "\uB354 \uB4E4\uACE0 \uAC08 \uC218 \uC788\uB2E4. \uB05D\uB098\uBA74
     \uADF8\uB300\uB85C \uC8FC\uC800\uC549\uB294\uB2E4."
   kind: 6

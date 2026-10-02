@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: adapt_frame
   m_EditorClassIdentifier: Blob.Runtime::PassiveNode
   id: adapt_frame
-  displayName: "\uC678\uACE8\uACA9 \uD504\uB808\uC784"
+  displayName: "\uBA5C\uBE75"
   description: "\uBAB8 \uBC16\uC5D0 \uBF08\uB300\uB97C \uD558\uB098 \uB354 \uC5B9\uC5C8\uB2E4.
     \uBB34\uAC8C\uC640 \uACF5\uAC04\uC744 \uD568\uAED8 \uBC88\uB2E4."
   branch: 0

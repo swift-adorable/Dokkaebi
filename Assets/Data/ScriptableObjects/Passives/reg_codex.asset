@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: reg_codex
   m_EditorClassIdentifier: Blob.Runtime::PassiveNode
   id: reg_codex
-  displayName: "\uAE30\uB85D \uC5ED\uC0B0"
+  displayName: "\uD55C\uB208\uC5D0 \uC54C\uC544\uBCF4\uAE30"
   description: "\uCC98\uCE58\uB9CC \uD574\uB3C4 \uB3C4\uAC10\uC5D0 \uB4F1\uB85D\uB41C\uB2E4.
     \uBCC0\uC774 \uC0D8\uD50C\uC744 \uD761\uC218\uD560 \uD544\uC694\uAC00 \uC5C6\uC5B4\uC9C4\uB2E4."
   branch: 4

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: scrap_metal
   m_EditorClassIdentifier: Blob.Runtime::ItemDefinition
   id: scrap_metal
-  displayName: "\uACE0\uCCA0"
+  displayName: "\uC1E0\uBD99\uC774"
   description: "\uC5B4\uB514\uC5D0\uB098 \uAD74\uB7EC\uB2E4\uB2CC\uB2E4. \uBB34\uAC81\uACE0
     \uC2F8\uB2E4."
   kind: 0

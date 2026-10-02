@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: con_canned
   m_EditorClassIdentifier: Blob.Runtime::ItemDefinition
   id: con_canned
-  displayName: "\uD1B5\uC870\uB9BC"
+  displayName: "\uB204\uB8FD\uC9C0"
   description: "\uAD6D\uBB3C\uAE4C\uC9C0 \uB9C8\uC2DC\uBA74 \uBB3C\uB3C4 \uC870\uAE08
     \uB294\uB2E4."
   kind: 6

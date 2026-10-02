@@ -64,7 +64,7 @@ public struct EnemyArchetypeStats
     /// 감지하지 못한 채 이만큼 흐르면 추적을 그만둔다(초).
     ///
     /// 【불리언 chasesForever를 대신한다.】
-    /// 전에는 보안기만 「끝까지 쫓는다」였고 나머지는 거리로 떨어졌다.
+    /// 전에는 순라귀만 「끝까지 쫓는다」였고 나머지는 거리로 떨어졌다.
     /// 켜짐·꺼짐 두 단계뿐이라 중간이 없었다. 덕코프는 초 단위 숫자로
     /// 집요함을 표현한다 — 8×35 · 22×16 · 30×4.
     /// [확인됨 — docs/research/duckov/05_적_AI_실측치.md 2절]
@@ -82,8 +82,8 @@ public struct EnemyArchetypeStats
     /// 시야각 【전체】(도). 이 각도 밖에서 다가오면 보지 못한다.
     ///
     /// 【불확실 — 문서에 숫자가 없다.】
-    /// 문서 8절은 「자전체·검체는 정면 넓고 측·후방 좁다」,
-    /// 「스캐브는 시야가 좁다」처럼 말로만 적었다.
+    /// 문서 8절은 「번개귀·침귀는 정면 넓고 측·후방 좁다」,
+    /// 「잡귀는 시야가 좁다」처럼 말로만 적었다.
     /// 그 서술이 지키는 관계만 지키도록 값을 골랐고, 관계는 테스트가 강제한다.
     /// </summary>
     public float visionConeDegrees;
@@ -121,7 +121,7 @@ public struct EnemyArchetypeStats
     /// <summary>
     /// 발소리를 내는가.
     ///
-    /// false면 플레이어가 먼저 감지할 수 없다 — 잠복체 · 데이터체.
+    /// false면 플레이어가 먼저 감지할 수 없다 — 수귀 · 무주귀.
     /// 「먼저 감지당하는가 / 먼저 감지하는가」가 이 게임의 핵심 긴장이다.
     /// (문서 8절. 실제 감지 로직은 7-D에서 붙인다)
     /// </summary>
@@ -164,13 +164,13 @@ public static class EnemyArchetypeTable
     // 실제로 출시된 게임이 쓰는 값으로 옮긴다.
     // [확인됨 — docs/research/duckov/05_적_AI_실측치.md]
 
-    /// <summary>「시야는 좁지만 우회 추적」 — 스캐브. 덕코프 최솟값.</summary>
+    /// <summary>「시야는 좁지만 우회 추적」 — 잡귀. 덕코프 최솟값.</summary>
     private const float NarrowCone = 100f;
 
-    /// <summary>「정면 넓고 측·후방 좁다」 — 자전체 · 검체. 기본보다 좁다.</summary>
+    /// <summary>「정면 넓고 측·후방 좁다」 — 번개귀 · 침귀. 기본보다 좁다.</summary>
     private const float FrontalCone = 120f;
 
-    /// <summary>기계 눈 — 압착기 · 보안기. 좁을 이유가 없다.</summary>
+    /// <summary>기계 눈 — 절굿공이귀 · 순라귀. 좁을 이유가 없다.</summary>
     private const float MachineCone = 150f;
 
     // ── 청각 ──────────────────────────────────────────────────────────
@@ -179,7 +179,7 @@ public static class EnemyArchetypeTable
     /// <summary>둔한 귀 — 기계형. 눈은 넓지만 귀로는 잘 못 찾는다.</summary>
     private const float DullEar = Perception.DullHearing;
 
-    /// <summary>밝은 귀 — 잠복체. 「먼저 찾는 쪽」이라는 정체성이 이 값이다.</summary>
+    /// <summary>밝은 귀 — 수귀. 「먼저 찾는 쪽」이라는 정체성이 이 값이다.</summary>
     private const float KeenEar = Perception.KeenHearing;
 
     // ── 추적을 그만두는 시간 ──────────────────────────────────────────
@@ -189,41 +189,41 @@ public static class EnemyArchetypeTable
     /// <summary>보통 — 시야에서 사라지면 8초 뒤 포기한다.</summary>
     private const float ShortMemory = 8f;
 
-    /// <summary>끈질김 — 자전체 · 검체.</summary>
+    /// <summary>끈질김 — 번개귀 · 침귀.</summary>
     private const float LongMemory = 22f;
 
-    /// <summary>집요함 — 보안기. 옛 chasesForever의 자리다.</summary>
+    /// <summary>집요함 — 순라귀. 옛 chasesForever의 자리다.</summary>
     private const float RelentlessMemory = 30f;
 
     // ── 강제 추적 거리 ────────────────────────────────────────────────
 
-    /// <summary>한 번 물면 조금 끈질기다 — 자전체 · 검체.</summary>
+    /// <summary>한 번 물면 조금 끈질기다 — 번개귀 · 침귀.</summary>
     private const float NearForcedChase = 15f;
 
-    /// <summary>이 거리 안에서는 사실상 떼어낼 수 없다 — 보안기.</summary>
+    /// <summary>이 거리 안에서는 사실상 떼어낼 수 없다 — 순라귀.</summary>
     private const float FarForcedChase = 40f;
 
     // ── 행동 기준값 ───────────────────────────────────────────────────
-    // 스캐브가 기준이다. 나머지는 「스캐브보다 느리다/빠르다」로만 말한다.
+    // 잡귀가 기준이다. 나머지는 「잡귀보다 느리다/빠르다」로만 말한다.
 
     public const float BaseMoveSpeed = 2.5f;
     public const float BaseWindup = 0.35f;
     public const float BaseCooldown = 1.2f;
 
-    /// <summary>원거리형이 유지하려는 거리(m). 「거리가 답」인 화공체만 더 멀다.</summary>
+    /// <summary>원거리형이 유지하려는 거리(m). 「거리가 답」인 왕지네만 더 멀다.</summary>
     private const float RangedDistance = 7f;
     private const float LongDistance = 9f;
 
-    /// <summary>전기 2배 · 카오스 면역. 기계형(압착기 · 보안기)이 쓴다.</summary>
+    /// <summary>전기 2배 · 카오스 면역. 기계형(절굿공이귀 · 순라귀)이 쓴다.</summary>
     private static ElementalResistances Mechanical => ElementalResistances.Mechanical;
 
-    /// <summary>물리 0.66 · 화염 1.5. 정착체 전용이다.</summary>
+    /// <summary>물리 0.66 · 화염 1.5. 허깨비 전용이다.</summary>
     private static ElementalResistances Settled => ElementalResistances.Settled;
 
     /// <summary>
-    /// 물리 0.66만. 데이터체 전용.
+    /// 물리 0.66만. 무주귀 전용.
     ///
-    /// 정착체와 나눠 둔 이유 — 문서 1절은 데이터체에 화염 1.5를 주지 않았다.
+    /// 허깨비와 나눠 둔 이유 — 문서 1절은 무주귀에 화염 1.5를 주지 않았다.
     /// 「정착 계열이니 같겠지」로 묶으면 원문에 없는 전제를 만드는 것이다.
     /// </summary>
     private static ElementalResistances Incorporeal
@@ -288,7 +288,7 @@ public static class EnemyArchetypeTable
                             speed: 1.9f, ranged: true, status: StatusEffectType.Corrode,
                             distance: LongDistance, windup: 0.50f, cooldown: 2.0f);
 
-            // 자전체와 같은 계열 — 끈질기다. 엄폐로 사선을 끊어도 계속 찾아온다.
+            // 번개귀와 같은 계열 — 끈질기다. 엄폐로 사선을 끊어도 계속 찾아온다.
             case EnemyArchetype.Specimen:
                 return Make(60, 14, 3, 1f, Faction.Subject, ElementalResistances.Default, true,
                             EnemyAnswer.Cover, cone: FrontalCone,
@@ -333,15 +333,15 @@ public static class EnemyArchetypeTable
     {
         switch (archetype)
         {
-            case EnemyArchetype.Scav:     return "스캐브";
-            case EnemyArchetype.Crusher:  return "압착기";
-            case EnemyArchetype.Dynamo:   return "자전체";
-            case EnemyArchetype.Lurker:   return "잠복체";
-            case EnemyArchetype.Chemic:   return "화공체";
-            case EnemyArchetype.Specimen: return "검체";
-            case EnemyArchetype.Settled:  return "정착체";
-            case EnemyArchetype.Sentry:   return "보안기";
-            case EnemyArchetype.Wraith:   return "데이터체";
+            case EnemyArchetype.Scav:     return "잡귀";
+            case EnemyArchetype.Crusher:  return "절굿공이귀";
+            case EnemyArchetype.Dynamo:   return "번개귀";
+            case EnemyArchetype.Lurker:   return "수귀";
+            case EnemyArchetype.Chemic:   return "왕지네";
+            case EnemyArchetype.Specimen: return "침귀";
+            case EnemyArchetype.Settled:  return "허깨비";
+            case EnemyArchetype.Sentry:   return "순라귀";
+            case EnemyArchetype.Wraith:   return "무주귀";
             default:                      return string.Empty;
         }
     }

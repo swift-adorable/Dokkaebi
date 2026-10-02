@@ -6,7 +6,7 @@ public enum EnemyAttackKind
     /// <summary>근접 — 사거리 안에서 직접 판정한다. 포자충 · 사냥개</summary>
     Melee = 0,
 
-    /// <summary>원거리 — 투사체를 발사한다. 자전체 · 검체 · 감시자</summary>
+    /// <summary>원거리 — 투사체를 발사한다. 번개귀 · 침귀 · 감시자</summary>
     Ranged = 1
 }
 
@@ -291,7 +291,7 @@ public class EnemyAttack : MonoBehaviour
     /// None이면 평범하게 한 발 쏜다.
     /// </summary>
     [Header("Gimmick")]
-    [Tooltip("유형 고유 기믹. 화공체 8방향 · 보안기 3점사 · 정착체 중력·은신.")]
+    [Tooltip("유형 고유 기믹. 왕지네 8방향 · 순라귀 3점사 · 허깨비 중력·은신.")]
     [SerializeField] private EnemyGimmick gimmick = EnemyGimmick.None;
 
     public EnemyGimmick Gimmick => gimmick;
@@ -343,7 +343,7 @@ public class EnemyAttack : MonoBehaviour
 
     /// <summary>
     /// 한 번의 발사. 기믹이 여러 방향이면 그만큼 나간다.
-    /// 【화공체의 8방향이 여기서 갈린다.】
+    /// 【왕지네의 8방향이 여기서 갈린다.】
     /// </summary>
     private void Spray(Vector3 toTarget)
     {

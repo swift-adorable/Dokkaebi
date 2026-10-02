@@ -36,7 +36,7 @@ public static class ArmourAssetGenerator
 
     private static readonly string[] HeadNames =
     {
-        "천 두건", "작업 헬멧", "방탄 헬멧", "격리 헬멧", "복합 장갑 투구", "진압용 폐쇄 투구"
+        "전립", "죽전립", "첨주형 투구", "간주형 투구", "종장판주", "면제 투구"
     };
 
     // ── 몸통 ──────────────────────────────────────────────────────────────
@@ -56,7 +56,7 @@ public static class ArmourAssetGenerator
 
     private static readonly string[] BodyNames =
     {
-        "누더기 조끼", "작업복", "방탄복", "격리 방호복", "복합 장갑복", "진압용 중장갑"
+        "지갑", "피갑", "쇄자갑", "유엽갑", "두정갑", "면제배갑"
     };
 
     // ── 청각 ──────────────────────────────────────────────────────────────
@@ -73,7 +73,7 @@ public static class ArmourAssetGenerator
 
     private static readonly string[] EarsNames =
     {
-        "귀덮개", "청음기", "지향성 집음기", "전술 헤드셋", "음향 해석기", "전역 청음 배열"
+        "지남침", "선추", "휴대용 윤도", "칠층 윤도", "풍수지남반", "이십사층 윤도"
     };
 
     // ── 얼굴 ──────────────────────────────────────────────────────────────
@@ -83,17 +83,18 @@ public static class ArmourAssetGenerator
     {
         public string key;
         public string label;
+        public string color;   // 오방색 — 화염 붉은 · 냉기 검은 · 전기 푸른 · 독 누런 · 물리 흰 (Blob_Naming.md 0절 5번)
         public EquipmentStatType resist;
         public StatusEffectType status;
     }
 
     private static readonly FaceElement[] FaceElements =
     {
-        new() { key = "fire",      label = "화염 저항",  resist = EquipmentStatType.ResistFire,      status = StatusEffectType.Ignite },
-        new() { key = "cold",      label = "냉기 저항",  resist = EquipmentStatType.ResistCold,      status = StatusEffectType.Chill },
-        new() { key = "lightning", label = "전기 저항",  resist = EquipmentStatType.ResistLightning, status = StatusEffectType.Shock  },
-        new() { key = "chaos",     label = "방독",  resist = EquipmentStatType.ResistChaos,     status = StatusEffectType.Poison },
-        new() { key = "physical",  label = "방탄",  resist = EquipmentStatType.ResistPhysical,  status = StatusEffectType.Bleed  }
+        new() { key = "fire",      label = "화염 저항", color = "붉은", resist = EquipmentStatType.ResistFire,      status = StatusEffectType.Ignite },
+        new() { key = "cold",      label = "냉기 저항", color = "검은", resist = EquipmentStatType.ResistCold,      status = StatusEffectType.Chill },
+        new() { key = "lightning", label = "전기 저항", color = "푸른", resist = EquipmentStatType.ResistLightning, status = StatusEffectType.Shock  },
+        new() { key = "chaos",     label = "방독", color = "누런", resist = EquipmentStatType.ResistChaos,     status = StatusEffectType.Poison },
+        new() { key = "physical",  label = "방탄", color = "흰", resist = EquipmentStatType.ResistPhysical,  status = StatusEffectType.Bleed  }
     };
 
     [MenuItem("Blob/Equipment/방어구 · 가방 에셋 생성")]
@@ -274,7 +275,7 @@ public static class ArmourAssetGenerator
         Write(new Row
         {
             id = "arm_face_t1",
-            name = "천 마스크",
+            name = "하회탈",
             desc = "먼지를 막는다. 그 이상은 기대할 수 없다.",
             kind = ItemKind.Armour,
             slot = EquipmentSlot.Face,
@@ -299,20 +300,20 @@ public static class ArmourAssetGenerator
             // 티어 2 — 수치 대응
             WriteFace(e, tier: 2, resist: 0.15f, immunity: StatusEffectType.None,
                 weight: 0.3f, dur: 55, value: 500,
-                name: $"{e.label} 마스크",
-                desc: "해당 속성 피해를 조금 덜 받는다.");
+                name: $"{e.color} 오방신장탈",
+                desc: $"{e.label}. 해당 속성 피해를 조금 덜 받는다.");
 
             // 티어 4 — 질적 도약. 상태이상 자체를 막는다.
             WriteFace(e, tier: 4, resist: 0f, immunity: e.status,
                 weight: 0.5f, dur: 100, value: 3600,
-                name: $"{e.label} 차단 마스크",
-                desc: "상태이상 자체를 막는다. 다만 피해는 그대로 들어온다.");
+                name: $"{e.color} 방상시탈",
+                desc: $"{e.label}. 상태이상 자체를 막는다. 다만 피해는 그대로 들어온다.");
 
             // 티어 6 — 면역 + 저항. 시야를 대가로 받는다.
             WriteFace(e, tier: 6, resist: 0.30f, immunity: e.status,
                 weight: 0.8f, dur: 150, value: 15000,
-                name: $"{e.label} 완전 차단면",
-                desc: "막고 덜 받는다. 대신 앞이 잘 보이지 않는다.");
+                name: $"{e.color} 처용탈",
+                desc: $"{e.label}. 막고 덜 받는다. 대신 앞이 잘 보이지 않는다.");
 
             made += 3;
         }
@@ -365,17 +366,17 @@ public static class ArmourAssetGenerator
         (string id, string name, int tier, float carryWeight, int slots,
          float weight, int value, string desc)[] table =
         {
-            ("bag_t1_sack",   "낡은 자루",        1,  5f,  8, 0.45f,   150,
+            ("bag_t1_sack",   "봇짐",        1,  5f,  8, 0.45f,   150,
                 "구멍이 몇 개 나 있지만 담긴다."),
-            ("bag_t2_vest",   "수납 조끼",        2, 10f, 12, 1.1f,    480,
+            ("bag_t2_vest",   "망태기",        2, 10f, 12, 1.1f,    480,
                 "가슴팍에 주머니가 여럿 달려 있다."),
-            ("bag_t3_pack",   "작업 배낭",        3, 15f, 17, 2.2f,   1500,
+            ("bag_t3_pack",   "바랑",        3, 15f, 17, 2.2f,   1500,
                 "균형이 잡혀 있다. 무엇을 담아도 무리가 없다."),
-            ("bag_t4_frame",  "운반 프레임",      4, 30f, 10, 2.6f,   4000,
+            ("bag_t4_frame",  "지게",      4, 30f, 10, 2.6f,   4000,
                 "무거운 것을 지고 나르는 용도다. 칸은 적다."),
-            ("bag_t5_module", "구획 배낭",        5, 12f, 24, 2.0f,   9500,
+            ("bag_t5_module", "발채 지게",        5, 12f, 24, 2.0f,   9500,
                 "칸이 많다. 작고 값비싼 것을 긁어올 때 쓴다."),
-            ("bag_t6_haul",   "반출용 대형 배낭",  6, 30f, 30, 3.9f,  22000,
+            ("bag_t6_haul",   "큰 지게",  6, 30f, 30, 3.9f,  22000,
                 "한 번에 다 가져갈 수 있다. 다만 뛸 수 없다.")
         };
 

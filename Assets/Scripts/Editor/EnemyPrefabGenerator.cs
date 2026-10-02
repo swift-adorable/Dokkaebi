@@ -20,7 +20,7 @@ public static class EnemyPrefabGenerator
     private const string RangedPath = "Assets/Prefabs/EnemyRanged.prefab";
     private const string BulletPath = "Assets/Prefabs/Bullet.prefab";
 
-    // 자전체 — Combat_Baseline 5절 3행. 요구하는 답은 「각도」다.
+    // 번개귀 — Combat_Baseline 5절 3행. 요구하는 답은 「각도」다.
     public const int SpitterHealth = 30;
     public const int SpitterDamage = 10;
     public const int SpitterArmourPenetration = 1;
@@ -58,7 +58,7 @@ public static class EnemyPrefabGenerator
 
             AssetDatabase.SaveAssets();
 
-            Debug.Log($"[EnemyPrefab] 자전체(원거리)를 만들었습니다 — "
+            Debug.Log($"[EnemyPrefab] 번개귀(원거리)를 만들었습니다 — "
                       + $"체력 {SpitterHealth} · 피해 {SpitterDamage} · 관통 {SpitterArmourPenetration} "
                       + $"· 사거리 {SpitterAttackRange}m → {RangedPath}");
         }

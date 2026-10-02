@@ -15,7 +15,7 @@ using UnityEngine;
 ///   · 체력은 100 고정이므로 회복량을 그 자릿수에 맞춘다. (마스터 프롬프트)
 ///   · 무게와 스택은 문서 2절 표 그대로. **가벼운 것은 여럿, 무거운 것은 하나.**
 ///   · 아스피린의 「수분 −15」는 덕코프 실제 값이다. [확인됨 — research 07]
-///   · 에너지 바의 「배고픔은 해결되나 갈증을 유발한다」도 같은 출처다.
+///   · 곶감의 「배고픔은 해결되나 갈증을 유발한다」도 같은 출처다.
 /// </summary>
 public static class ConsumableAssetGenerator
 {
@@ -46,29 +46,29 @@ public static class ConsumableAssetGenerator
     /// <summary>
     /// 표.
     ///
-    /// 【회복은 무게가 곧 회복량이다.】 아스피린은 9개를 한 칸에 겹칠 수
-    /// 있고 대형 구급상자는 한 칸을 통째로 먹는다. 그래야 「가볍게 여러 번
+    /// 【회복은 무게가 곧 회복량이다.】 쌍화탕은 9개를 한 칸에 겹칠 수
+    /// 있고 대환단은 한 칸을 통째로 먹는다. 그래야 「가볍게 여러 번
     /// 조금씩」과 「한 번에 크게」가 서로 다른 선택이 된다.
     ///
     /// 【해제는 값이 같다.】 어떤 상태가 더 위험한지는 상황이 정하지
-    /// 도구가 정하지 않는다. 해독제가 해빙제보다 비싸면 플레이어는
+    /// 도구가 정하지 않는다. 감초가 생강보다 비싸면 플레이어는
     /// 「중독이 더 무서운 것」이라고 잘못 배운다.
     /// </summary>
     private static List<Row> Table()
     {
         var list = new List<Row>(16);
 
-        // 【시전 시간】 구급상자는 클수록 길다 — 2.0 / 3.0 / 4.5초.
+        // 【시전 시간】 환단은 클수록 길다 — 2.0 / 3.0 / 4.5초.
         // 나무위키가 「이 등급부터 사용 시간이 길어져 전투 중에 쓰기 상당히
         // 어렵다」고 적는 것을 따른 것이다 [확인됨]. 다만 **정확한 초는
         // 어디에도 없으므로 아래 값은 우리가 정한 것이다** [불확실].
-        // 붕대 1.5 · 해제약 1.0 · 아스피린 0.8 · 음식 1.2 —
+        // 붕대 1.5 · 해제약 1.0 · 쌍화탕 0.8 · 음식 1.2 —
         // 급할 때 쓰는 것일수록 짧다.
         //
         // ── 회복 — 【내구도(충전)형이다.】 ────────────────────────────
         //
         // 덕코프의 구급상자는 한 번 쓰고 사라지는 물건이 아니다.
-        // 소형 125/25 = 5회 · 구급상자 175/25 = 7회 · 대형 400/40 = 10회.
+        // 소형 125/25 = 5회 · 환단 175/25 = 7회 · 대형 400/40 = 10회.
         // [확인됨 — 아이템 #15 · #16 · #17]
         //
         // 회복량도 그대로 가져온다. Blob의 체력은 100 고정이고 덕코프
@@ -78,19 +78,19 @@ public static class ConsumableAssetGenerator
         //
         // 【전부 출혈을 함께 지운다.】 그래서 체력이 가득해도 쓸 이유가 남는다.
 
-        list.Add(Kit("con_medkit_small", "소형 구급상자",
+        list.Add(Kit("con_medkit_small", "소환단",
             "한 번에 조금씩. 다섯 번 쓸 수 있다.",
             heal: 12, useCost: 25, maxDurability: 125,
             cure: StatusEffectType.Bleed, cureStacks: 1,
             weight: 0.5f, value: 206, castSeconds: 2.0f));
 
-        list.Add(Kit("con_medkit", "구급상자",
+        list.Add(Kit("con_medkit", "환단",
             "제대로 된 것. 출혈도 두 겹까지 잡는다.",
             heal: 20, useCost: 25, maxDurability: 175,
             cure: StatusEffectType.Bleed, cureStacks: 2,
             weight: 0.75f, value: 807, castSeconds: 3.0f));
 
-        list.Add(Kit("con_medkit_large", "대형 구급상자",
+        list.Add(Kit("con_medkit_large", "대환단",
             "이걸 들고 나왔다면 무언가를 두고 온 것이다.",
             heal: 35, useCost: 40, maxDurability: 400,
             cure: StatusEffectType.Bleed, cureStacks: 99,
@@ -99,59 +99,59 @@ public static class ConsumableAssetGenerator
         // ── 한 번 쓰고 사라지는 것 ────────────────────────────────────
         //
         // 가벼워서 겹쳐 들고 다닌다. 【싼 도구가 비싼 도구와 같은 일을
-        // 하면 안 된다】 — 붕대는 출혈 2중첩까지만, 구급상자는 회복을 겸한다.
+        // 하면 안 된다】 — 붕대는 출혈 2중첩까지만, 환단은 회복을 겸한다.
 
-        list.Add(Cure("con_bandage", "지혈 붕대", "감고 나면 피는 멎는다.",
+        list.Add(Cure("con_bandage", "쑥", "감고 나면 피는 멎는다.",
             StatusEffectType.Bleed, cureStacks: 2,
             heal: 5, weight: 0.05f, stackMax: 3, value: 240, castSeconds: 1.5f));
 
         // 아스피린의 「수분 −15」는 덕코프 실제 값이다. [확인됨 — 아이템 #20]
-        list.Add(Heal("con_aspirin", "아스피린",
+        list.Add(Heal("con_aspirin", "쌍화탕",
             "머리가 덜 아프다. 대신 목이 마른다.", 10, 0.03f, 9, 96,
             waterCost: 15f, castSeconds: 0.8f));
 
-        list.Add(Cure("con_antidote", "해독제", "속을 게워 내는 맛이 난다.",
+        list.Add(Cure("con_antidote", "감초", "속을 게워 내는 맛이 난다.",
             StatusEffectType.Poison, 99, 0, 0.1f, 3, 90, castSeconds: 1.0f));
 
-        list.Add(Cure("con_antacid", "소화제", "안에서 타는 것을 끈다.",
+        list.Add(Cure("con_antacid", "황련", "안에서 타는 것을 끈다.",
             StatusEffectType.Ignite, 99, 0, 0.1f, 3, 90, castSeconds: 1.0f));
 
-        list.Add(Cure("con_relaxant", "이완제", "경련이 멎는다.",
+        list.Add(Cure("con_relaxant", "우황청심원", "경련이 멎는다.",
             StatusEffectType.Shock, 99, 0, 0.1f, 3, 90, castSeconds: 1.0f));
 
-        list.Add(Cure("con_defroster", "해빙제", "안쪽부터 녹인다.",
+        list.Add(Cure("con_defroster", "생강", "안쪽부터 녹인다.",
             StatusEffectType.Freeze, 99, 0, 0.1f, 3, 90, castSeconds: 1.0f));
 
         // ── 강화 — 【전부 대가가 붙는다】 (문서 4절) ──────────────────
         //
-        // 대가를 별도 필드로 두지 않는다. 노란 주사약의 「끝나면 −15%」는
+        // 대가를 별도 필드로 두지 않는다. 축지환의 「끝나면 −15%」는
         // 상태이상 표의 AftermathOf(가속) = 쇠약이 알아서 건다.
         //
         // 주사약은 수분을 태운다 — 「버프를 쓸수록 물이 급해진다」가
         // 소모품을 무한히 쓰지 못하게 하는 장치다. [확인됨 — 덕코프]
-        // 노란 주사약(이동 +25% 120초)이 에너지 −5 · 수분 −15다.
+        // 축지환(이동 +25% 120초)이 에너지 −5 · 수분 −15다.
 
-        list.Add(Shot("con_stim", "노란 주사약",
+        list.Add(Shot("con_stim", "축지환",
             "빨라진다. 끝나면 그만큼 느려진다.",
             StatusEffectType.Haste, waterCost: 15f, energyCost: 5f,
             weight: 0.2f, value: 629));
 
-        list.Add(Shot("con_coagulant", "강화 주사약",
+        list.Add(Shot("con_coagulant", "녹용",
             "굳은 만큼 약이 안 듣는다.",
             StatusEffectType.Bolster, waterCost: 5f, energyCost: 5f,
             weight: 0.2f, value: 648));
 
-        list.Add(Shot("con_regen", "회복 주사약",
+        list.Add(Shot("con_regen", "경옥고",
             "천천히 아문다. 급할 때 쓰는 것이 아니다.",
             StatusEffectType.Regen, waterCost: 7f, energyCost: 0f,
             weight: 0.2f, value: 875));
 
-        list.Add(Shot("con_expander", "중량 주사약",
+        list.Add(Shot("con_expander", "공진단",
             "더 들고 갈 수 있다. 끝나면 그대로 주저앉는다.",
             StatusEffectType.Overload, waterCost: 10f, energyCost: 0f,
             weight: 0.21f, value: 648));
 
-        // ── 흡수액 — 보스 약품 (문서 4-2) ─────────────────────────────
+        // ── 부자탕 — 보스 약품 (문서 4-2) ─────────────────────────────
         //
         // 덕코프 「타길라의 약품」#1400 그대로다 — 에너지 +15 · 수분 −50 ·
         // 무게 0.2 · 가치 2280 · 스택 3 → 「타길라의 힘」 90초. [확인됨]
@@ -165,7 +165,7 @@ public static class ConsumableAssetGenerator
         // 그대로 넣으면 수분만 더 먹는 하위 호환이 된다.
         list.Add(new Row
         {
-            id = "con_absorbent", name = "흡수액",
+            id = "con_absorbent", name = "부자탕",
             desc = "몸이 제 것이 아닌 것처럼 움직인다. 그 대가로 안에서부터 삭는다.",
             category = ConsumableCategory.Boost,
             grant = StatusEffectType.Frenzy,
@@ -185,16 +185,16 @@ public static class ConsumableAssetGenerator
         // 저항에 곱하므로 면역이 되지 않는다 — 0.75는 0을 만들지 못한다.
         // 「소모품만으로 환경을 통과하게 두지 않는다」가 수식으로 지켜진다.
 
-        list.Add(Ward("con_ward_fire", "화염 저항 주사약", "타는 것이 덜 아프다.",
+        list.Add(Ward("con_ward_fire", "석고환", "타는 것이 덜 아프다.",
             StatusEffectType.WardFire));
 
-        list.Add(Ward("con_ward_cold", "냉기 저항 주사약", "언 것이 덜 아프다.",
+        list.Add(Ward("con_ward_cold", "계피환", "언 것이 덜 아프다.",
             StatusEffectType.WardCold));
 
-        list.Add(Ward("con_ward_shock", "전기 저항 주사약", "저리는 것이 덜하다.",
+        list.Add(Ward("con_ward_shock", "벽조환", "저리는 것이 덜하다.",
             StatusEffectType.WardLightning));
 
-        list.Add(Ward("con_ward_toxin", "독 저항 주사약", "삭는 것이 덜하다.",
+        list.Add(Ward("con_ward_toxin", "녹두환", "삭는 것이 덜하다.",
             StatusEffectType.WardChaos));
 
         // ── 음료 · 음식 ───────────────────────────────────────────────
@@ -202,24 +202,24 @@ public static class ConsumableAssetGenerator
         // 【체력을 채우지 않는다.】 먹어서 상처가 낫기 시작하면
         // 수분·에너지 두 축이 체력에 흡수된다. (결정 2-32)
 
-        list.Add(Food("con_water", "생수", "맛은 없지만 안전하다.",
+        list.Add(Food("con_water", "샘물", "맛은 없지만 안전하다.",
             water: 40f, energy: 0f, weight: 0.5f, stackMax: 3, value: 30));
 
-        list.Add(Food("con_soda", "미지근한 탄산", "김이 빠졌다. 그래도 물이다.",
+        list.Add(Food("con_soda", "식혜", "김이 빠졌다. 그래도 물이다.",
             25f, 5f, 0.4f, 3, 45));
 
         // 잭 오 랜턴 「에너지 25 · 수분 10」과 같은 결. [확인됨 — 아이템 #1261]
-        list.Add(Food("con_canned", "통조림", "국물까지 마시면 물도 조금 는다.",
+        list.Add(Food("con_canned", "누룽지", "국물까지 마시면 물도 조금 는다.",
             10f, 30f, 0.5f, 2, 55));
 
-        list.Add(Food("con_ration", "압축 식량", "씹는 데 시간이 걸린다.",
+        list.Add(Food("con_ration", "미숫가루", "씹는 데 시간이 걸린다.",
             0f, 40f, 0.3f, 3, 60));
 
         // 배고픔은 해결되나 갈증을 유발한다. [확인됨 — 덕코프]
-        list.Add(Food("con_energy_bar", "에너지 바", "삼키고 나면 물을 찾게 된다.",
+        list.Add(Food("con_energy_bar", "곶감", "삼키고 나면 물을 찾게 된다.",
             0f, 25f, 0.15f, 5, 40, waterCost: 10f));
 
-        list.Add(Food("con_whisky", "위스키", "몸이 데워지는 대신 물이 마른다.",
+        list.Add(Food("con_whisky", "막걸리", "몸이 데워지는 대신 물이 마른다.",
             0f, 10f, 0.6f, 2, 70, waterCost: 15f));
 
         return list;
@@ -242,7 +242,7 @@ public static class ConsumableAssetGenerator
                   + "「Blob/Playtest/검증 카탈로그 생성」도 다시 실행하십시오.");
     }
 
-    /// <summary>내구도를 깎아 여러 번 쓰는 구급상자.</summary>
+    /// <summary>내구도를 깎아 여러 번 쓰는 환단.</summary>
     private static Row Kit(string id, string name, string desc,
                            int heal, int useCost, int maxDurability,
                            StatusEffectType cure, int cureStacks,

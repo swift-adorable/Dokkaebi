@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: brok_slots_2
   m_EditorClassIdentifier: Blob.Runtime::PassiveNode
   id: brok_slots_2
-  displayName: "\uC815\uBCF4\uC6A9\uB7C9 2"
+  displayName: "\uB2E8\uACE8 2"
   description: "\uC0C1\uC810 \uAC31\uC2E0 \uD69F\uC218 +1."
   branch: 3
   effect: 33

@@ -25,7 +25,7 @@ public static class CombatConstants
     /// <summary>
     /// 각인이 깎고 난 뒤의 최저 체력.
     ///
-    /// 「경량 Ⅱ + 포식 Ⅱ」처럼 깎는 각인을 두 개 끼우면 −36이다.
+    /// 「경량 Ⅱ + 먹성 Ⅱ」처럼 깎는 각인을 두 개 끼우면 −36이다.
     /// 0이 되어 즉사하는 조합이 생기지 않도록 바닥을 둔다.
     /// </summary>
     public const int PlayerMinHealth = 40;

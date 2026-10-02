@@ -166,7 +166,7 @@ namespace Blob.Tests
         [Test]
         public void 강제_추적_거리_안에서는_잊지_않는다()
         {
-            // 보안기 — 40m 안에서는 보지 못해도 놓지 않는다.
+            // 순라귀 — 40m 안에서는 보지 못해도 놓지 않는다.
             // 옛 chasesForever 불리언을 대신하는 축이다. 「끝까지」가 아니라
             // 「여기까지」라서, 플레이어에게 도망이라는 선택지가 남는다.
             var near = new List<AggroCandidate> { Enemy(1, Faction.Subject, 30f, detected: false) };

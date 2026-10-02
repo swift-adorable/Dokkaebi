@@ -13,9 +13,8 @@ MonoBehaviour:
   m_Name: arm_face_cold_t2
   m_EditorClassIdentifier: Blob.Runtime::EquipmentDefinition
   id: arm_face_cold_t2
-  displayName: "\uB0B4\uD55C \uB9C8\uC2A4\uD06C"
-  description: "\uD574\uB2F9 \uC18D\uC131 \uD53C\uD574\uB97C \uC870\uAE08 \uB35C
-    \uBC1B\uB294\uB2E4."
+  displayName: "\uAC80\uC740 \uC624\uBC29\uC2E0\uC7A5\uD0C8"
+  description: "\uB0C9\uAE30 \uC800\uD56D. \uD574\uB2F9 \uC18D\uC131 \uD53C\uD574\uB97C \uC870\uAE08 \uB35C \uBC1B\uB294\uB2E4."
   kind: 2
   tier: 2
   weight: 0.3

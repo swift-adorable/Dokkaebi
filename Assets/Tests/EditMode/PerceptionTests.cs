@@ -124,7 +124,7 @@ namespace Blob.Tests
             Assert.AreEqual(DetectionKind.None,
                 Perception.Detect(At(0f, -10f, noise: 8f, hearing: Perception.NormalHearing)));
 
-            // 같은 소리를 잠복체(2.0)는 듣는다. 「먼저 찾는 쪽」이라는 정체성이다.
+            // 같은 소리를 수귀(2.0)는 듣는다. 「먼저 찾는 쪽」이라는 정체성이다.
             Assert.AreEqual(DetectionKind.Heard,
                 Perception.Detect(At(0f, -10f, noise: 8f, hearing: Perception.KeenHearing)));
         }
@@ -181,15 +181,15 @@ namespace Blob.Tests
             float specimen = EnemyArchetypeTable.Of(EnemyArchetype.Specimen).visionConeDegrees;
             float sentry = EnemyArchetypeTable.Of(EnemyArchetype.Sentry).visionConeDegrees;
 
-            // 「스캐브는 시야가 좁다」 (문서 8절)
-            Assert.Less(scav, Perception.DefaultConeDegrees, "스캐브가 기본보다 넓습니다.");
+            // 「잡귀는 시야가 좁다」 (문서 8절)
+            Assert.Less(scav, Perception.DefaultConeDegrees, "잡귀가 기본보다 넓습니다.");
 
-            // 「자전체·검체는 정면 넓고 측·후방 좁다」 → 기본보다 좁아야 측면이 성립한다.
-            Assert.Less(dynamo, Perception.DefaultConeDegrees, "자전체");
-            Assert.AreEqual(dynamo, specimen, 0.01f, "자전체와 검체는 같은 서술을 받았습니다.");
+            // 「번개귀·침귀는 정면 넓고 측·후방 좁다」 → 기본보다 좁아야 측면이 성립한다.
+            Assert.Less(dynamo, Perception.DefaultConeDegrees, "번개귀");
+            Assert.AreEqual(dynamo, specimen, 0.01f, "번개귀와 침귀는 같은 서술을 받았습니다.");
 
             // 기계 눈이 야생 슬라임보다 좁을 이유가 없다.
-            Assert.Greater(sentry, scav, "보안기가 스캐브보다 좁습니다.");
+            Assert.Greater(sentry, scav, "순라귀가 잡귀보다 좁습니다.");
         }
 
         // ── 유형별 청각 · 추적 ────────────────────────────────────────
@@ -220,12 +220,12 @@ namespace Blob.Tests
             float sentry = EnemyArchetypeTable.Of(EnemyArchetype.Sentry).hearingScale;
             float crusher = EnemyArchetypeTable.Of(EnemyArchetype.Crusher).hearingScale;
 
-            // 「먼저 감지하는 쪽」이 잠복체의 답(선제)이다.
-            Assert.AreEqual(Perception.KeenHearing, lurker, 0.001f, "잠복체");
+            // 「먼저 감지하는 쪽」이 수귀의 답(선제)이다.
+            Assert.AreEqual(Perception.KeenHearing, lurker, 0.001f, "수귀");
 
             // 기계 눈은 넓지만 귀는 둔하다 — 시야각으로 답하고 소리로 답하지 않는다.
-            Assert.AreEqual(Perception.DullHearing, sentry, 0.001f, "보안기");
-            Assert.AreEqual(Perception.DullHearing, crusher, 0.001f, "압착기");
+            Assert.AreEqual(Perception.DullHearing, sentry, 0.001f, "순라귀");
+            Assert.AreEqual(Perception.DullHearing, crusher, 0.001f, "절굿공이귀");
         }
 
         [Test]
@@ -273,28 +273,28 @@ namespace Blob.Tests
                 EnemyArchetypeStats other = EnemyArchetypeTable.Of(a);
 
                 Assert.LessOrEqual(other.forgetTime, sentry.forgetTime,
-                    $"{EnemyArchetypeTable.Name(a)}가 보안기보다 오래 기억합니다.");
+                    $"{EnemyArchetypeTable.Name(a)}가 순라귀보다 오래 기억합니다.");
 
                 Assert.LessOrEqual(other.forcedChaseRange, sentry.forcedChaseRange,
-                    $"{EnemyArchetypeTable.Name(a)}가 보안기보다 멀리서 강제 추적합니다.");
+                    $"{EnemyArchetypeTable.Name(a)}가 순라귀보다 멀리서 강제 추적합니다.");
             }
 
-            Assert.Greater(sentry.forcedChaseRange, 0f, "보안기가 강제 추적을 잃었습니다.");
+            Assert.Greater(sentry.forcedChaseRange, 0f, "순라귀가 강제 추적을 잃었습니다.");
         }
 
         [Test]
         public void 잠복체는_귀가_밝은_대신_오래_쫓지_않는다()
         {
             // 【하나의 유형이 두 개의 답을 요구하게 만들지 않는다.】
-            // 잠복체의 답은 「선제」다. 귀가 밝은 것으로 이미 답했으므로
+            // 수귀의 답은 「선제」다. 귀가 밝은 것으로 이미 답했으므로
             // 집요함까지 주면 답이 둘이 된다.
             EnemyArchetypeStats lurker = EnemyArchetypeTable.Of(EnemyArchetype.Lurker);
             EnemyArchetypeStats scav = EnemyArchetypeTable.Of(EnemyArchetype.Scav);
 
             Assert.AreEqual(scav.forgetTime, lurker.forgetTime, 0.001f,
-                "잠복체가 귀도 밝고 집요하기까지 합니다. 요구하는 답이 둘이 됩니다.");
+                "수귀가 귀도 밝고 집요하기까지 합니다. 요구하는 답이 둘이 됩니다.");
 
-            Assert.AreEqual(0f, lurker.forcedChaseRange, 0.001f, "잠복체");
+            Assert.AreEqual(0f, lurker.forcedChaseRange, 0.001f, "수귀");
         }
 
         [Test]

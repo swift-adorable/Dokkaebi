@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: imp_devour_t3
   m_EditorClassIdentifier: Blob.Runtime::EquipmentDefinition
   id: imp_devour_t3
-  displayName: "\uD3EC\uC2DD \u2162"
+  displayName: "\uBA39\uC131 \u2162"
   description: "\uC0BC\uD0A4\uB294 \uAC83\uC73C\uB85C\uB9CC \uC0B4\uC544\uAC04\uB2E4.
     \uC57D\uC740 \uB4E3\uC9C0 \uC54A\uB294\uB2E4."
   kind: 4

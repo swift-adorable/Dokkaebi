@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: arm_body_t6_heavy
   m_EditorClassIdentifier: Blob.Runtime::EquipmentDefinition
   id: arm_body_t6_heavy
-  displayName: "\uC9C4\uC555\uC6A9 \uC911\uC7A5\uAC11 (\uC911\uAC11)"
+  displayName: "\uBA74\uC81C\uBC30\uAC11 (\uC911\uAC11)"
   description: "\uD310\uC744 \uACB9\uCCD0 \uB367\uB314\uB2E4. \uC544\uBB34\uAC83\uB3C4
     \uBABB \uB4E4\uACE0 \uC624\uC9C0\uB9CC \uC624\uB798 \uBC84\uD2F4\uB2E4."
   kind: 2

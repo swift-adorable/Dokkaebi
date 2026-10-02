@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: bag_t2_vest
   m_EditorClassIdentifier: Blob.Runtime::EquipmentDefinition
   id: bag_t2_vest
-  displayName: "\uC218\uB0A9 \uC870\uB07C"
+  displayName: "\uB9DD\uD0DC\uAE30"
   description: "\uAC00\uC2B4\uD30D\uC5D0 \uC8FC\uBA38\uB2C8\uAC00 \uC5EC\uB7FF \uB2EC\uB824
     \uC788\uB2E4."
   kind: 3

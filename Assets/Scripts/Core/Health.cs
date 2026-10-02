@@ -39,7 +39,7 @@ public class Health : MonoBehaviour, IDamageable, IPoolable
     /// 총알·적 공격에 【직접】 맞았을 때. 상태이상 도트와 허기는 여기 오지 않는다.
     ///
     /// 소모품 시전이 이것을 듣는다. HP가 줄었는지로 판정하면 점화 중에는
-    /// 붕대를 감을 수 없고, 폭주(흡수액) 중에는 회복이 아예 불가능해진다 —
+    /// 붕대를 감을 수 없고, 폭주(부자탕) 중에는 회복이 아예 불가능해진다 —
     /// 폭주는 스스로 1초마다 피를 깎기 때문이다.
     /// </summary>
     public event Action OnDirectHit;
@@ -101,7 +101,7 @@ public class Health : MonoBehaviour, IDamageable, IPoolable
             float reduction = Status.ArmourReduction;
             float bonus = Status.ArmourBonus;
 
-            // 저항(화염 저항 주사약 등)는 장비 저항에 곱해진다. 원본을 건드리지 않으려고
+            // 저항(석고환 등)는 장비 저항에 곱해진다. 원본을 건드리지 않으려고
             // 복사본에 적용한다 — resistances는 장비가 넣어 준 값이다.
             ElementalResistances warded = resistances;
 
@@ -136,7 +136,7 @@ public class Health : MonoBehaviour, IDamageable, IPoolable
 
         // 저항 장비가 면역을 주면 아예 걸리지 않는다. (막는 것은 장비의 몫)
         // 【이로운 상태는 면역이 막지 않는다.】 면역은 해로운 것을 막으라고
-        // 붙인 것이다. 각인을 낀 대가로 노란 주사약을 못 쓰게 되면 그것은 규칙이
+        // 붙인 것이다. 각인을 낀 대가로 축지환을 못 쓰게 되면 그것은 규칙이
         // 아니라 사고다.
         if (!StatusEffectTable.IsBeneficial(type) && IsImmuneTo(type))
             return;

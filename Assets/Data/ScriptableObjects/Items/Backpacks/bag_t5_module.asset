@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: bag_t5_module
   m_EditorClassIdentifier: Blob.Runtime::EquipmentDefinition
   id: bag_t5_module
-  displayName: "\uAD6C\uD68D \uBC30\uB0AD"
+  displayName: "\uBC1C\uCC44 \uC9C0\uAC8C"
   description: "\uCE78\uC774 \uB9CE\uB2E4. \uC791\uACE0 \uAC12\uBE44\uC2FC \uAC83\uC744
     \uAE01\uC5B4\uC62C \uB54C \uC4F4\uB2E4."
   kind: 3

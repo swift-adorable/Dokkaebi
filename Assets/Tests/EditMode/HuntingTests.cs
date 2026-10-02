@@ -71,7 +71,7 @@ namespace Blob.Tests
         [Test]
         public void 유형_저항이_문서와_같다()
         {
-            // 압착기 · 보안기 — 기계형. 전기 2배 / 카오스 면역.
+            // 절굿공이귀 · 순라귀 — 기계형. 전기 2배 / 카오스 면역.
             foreach (EnemyArchetype mech in new[] { EnemyArchetype.Crusher, EnemyArchetype.Sentry })
             {
                 ElementalResistances r = EnemyArchetypeTable.Of(mech).resistances;
@@ -80,19 +80,19 @@ namespace Blob.Tests
                 Assert.AreEqual(0f, r.chaos, 0.001f, $"{EnemyArchetypeTable.Name(mech)} 카오스");
             }
 
-            // 정착체 — 물리 0.66 / 화염 1.5.
+            // 허깨비 — 물리 0.66 / 화염 1.5.
             ElementalResistances settled = EnemyArchetypeTable.Of(EnemyArchetype.Settled).resistances;
 
-            Assert.AreEqual(0.66f, settled.physical, 0.001f, "정착체 물리");
-            Assert.AreEqual(1.5f, settled.fire, 0.001f, "정착체 화염");
+            Assert.AreEqual(0.66f, settled.physical, 0.001f, "허깨비 물리");
+            Assert.AreEqual(1.5f, settled.fire, 0.001f, "허깨비 화염");
 
-            // 데이터체 — 물리 0.66만. 【화염 1.5를 주지 않는다.】
-            // 문서 1절은 데이터체에 화염 배율을 적지 않았다.
+            // 무주귀 — 물리 0.66만. 【화염 1.5를 주지 않는다.】
+            // 문서 1절은 무주귀에 화염 배율을 적지 않았다.
             ElementalResistances wraith = EnemyArchetypeTable.Of(EnemyArchetype.Wraith).resistances;
 
-            Assert.AreEqual(0.66f, wraith.physical, 0.001f, "데이터체 물리");
+            Assert.AreEqual(0.66f, wraith.physical, 0.001f, "무주귀 물리");
             Assert.AreEqual(1f, wraith.fire, 0.001f,
-                "데이터체에 화염 1.5가 붙었습니다. 문서 1절에 없는 값입니다.");
+                "무주귀에 화염 1.5가 붙었습니다. 문서 1절에 없는 값입니다.");
         }
 
         [Test]
@@ -115,7 +115,7 @@ namespace Blob.Tests
         ///
         /// 【이전 판을 폐기했다 — 정정】
         /// 처음에는 「체력 60 이상 + 방어도 4 이상 금지」라는 기준을 내가 만들어
-        /// 넣었고, 압착기(90 / 4)에서 실패했다. 그런데 압착기는 문서가
+        /// 넣었고, 절굿공이귀(90 / 4)에서 실패했다. 그런데 절굿공이귀는 문서가
         /// 「느리고 단단」하라고 직접 지정한 유형이다. 원문에 없는 한계치를
         /// 지어내 문서를 틀렸다고 판정한 셈이다. 문서의 열을 그대로 쓴다.
         /// </summary>
@@ -341,7 +341,7 @@ namespace Blob.Tests
             Assert.AreEqual(17, rare.damage, "12 × 1.4 = 16.8 → 17");
 
             Assert.AreEqual(3f, normal.armour, 0.001f);
-            Assert.AreEqual(5f, rare.armour, 0.001f, "보안기 3 + 희귀 보너스 2");
+            Assert.AreEqual(5f, rare.armour, 0.001f, "순라귀 3 + 희귀 보너스 2");
         }
 
         [Test]
@@ -358,7 +358,7 @@ namespace Blob.Tests
         [Test]
         public void 저항은_곱해지지_않고_가장_낮은_것_하나만_남는다()
         {
-            // 정착체는 물리 0.66. 여기에 「경화」(물리 0.5)를 얹는다.
+            // 허깨비는 물리 0.66. 여기에 「경화」(물리 0.5)를 얹는다.
             // 곱하면 0.33 — 물리 빌드는 파밍을 버려야 한다. 그래서 곱하지 않는다.
             EnemyProfile profile = EnemyProfile.Build(
                 EnemyArchetype.Settled, EnemyRarity.Magic, new[] { EnemyAffix.Hardened });
@@ -374,14 +374,14 @@ namespace Blob.Tests
         [Test]
         public void 저항_속성이_유형의_약점을_뒤집지_않는다()
         {
-            // 【압착기는 「전기로 잡아라」가 정체성이다.】
+            // 【절굿공이귀는 「전기로 잡아라」가 정체성이다.】
             // 절연성이 붙었다고 전기가 오히려 덜 아프게 되면
             // 전기 빌드에게는 공략법이 사라진다.
             EnemyProfile insulated = EnemyProfile.Build(
                 EnemyArchetype.Crusher, EnemyRarity.Magic, new[] { EnemyAffix.Insulated });
 
             Assert.AreEqual(1f, insulated.resistances.lightning, 0.001f,
-                "압착기 + 절연성의 전기 배율이 1.0이 아닙니다. " +
+                "절굿공이귀 + 절연성의 전기 배율이 1.0이 아닙니다. " +
                 "2.0이면 속성이 안 먹은 것이고, 0.5면 약점이 뒤집힌 것입니다.");
 
             // 손대지 않은 속성은 그대로다.
@@ -391,7 +391,7 @@ namespace Blob.Tests
         [Test]
         public void 이미_저항이_높은_적이_속성_때문에_물러지지_않는다()
         {
-            // 정착체의 물리 0.66에 경화(0.5)를 얹으면 0.5다.
+            // 허깨비의 물리 0.66에 경화(0.5)를 얹으면 0.5다.
             // 0.33(곱연산)도 아니고, 0.66보다 커져서도 안 된다.
             EnemyProfile hardened = EnemyProfile.Build(
                 EnemyArchetype.Settled, EnemyRarity.Magic, new[] { EnemyAffix.Hardened });
@@ -479,10 +479,10 @@ namespace Blob.Tests
                 .ToDictionary(g => g.Key, g => g.Count());
 
             // 문서 4절 — 야생 3 · 시설 2 · 실험체 2 · 정착 2.
-            Assert.AreEqual(3, byFaction[Faction.Wild], "야생: 스캐브 · 잠복체 · 화공체");
-            Assert.AreEqual(2, byFaction[Faction.Facility], "시설: 압착기 · 보안기");
-            Assert.AreEqual(2, byFaction[Faction.Subject], "실험체: 자전체 · 검체");
-            Assert.AreEqual(2, byFaction[Faction.Settled], "정착: 정착체 · 데이터체");
+            Assert.AreEqual(3, byFaction[Faction.Wild], "떠돌이: 잡귀 · 수귀 · 왕지네");
+            Assert.AreEqual(2, byFaction[Faction.Facility], "부리던 것: 절굿공이귀 · 순라귀");
+            Assert.AreEqual(2, byFaction[Faction.Subject], "살: 번개귀 · 침귀");
+            Assert.AreEqual(2, byFaction[Faction.Settled], "헛것: 허깨비 · 무주귀");
 
             Assert.IsFalse(byFaction.ContainsKey(Faction.Friendly),
                 "우호는 적 유형이 아닙니다.");

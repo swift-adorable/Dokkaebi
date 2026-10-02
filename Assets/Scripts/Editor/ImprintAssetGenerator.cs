@@ -139,18 +139,18 @@ public static class ImprintAssetGenerator
             S(EquipmentStatType.CriticalMultiplier, 0.8f),
             S(EquipmentStatType.FireIntervalIncrease, 1.50f)));
 
-        // ── 포식 — 성장을 얻고 몸을 잃는다 ─────────────────────────────────
-        list.Add(New("devour", "포식", 1, "삼키는 쪽으로 새겼다.",
+        // ── 먹성 — 성장을 얻고 몸을 잃는다 ─────────────────────────────────
+        list.Add(New("devour", "먹성", 1, "많이 먹는 쪽으로 새겼다.",
             S(EquipmentStatType.XpAbsorbAmount, 0.15f),
             S(EquipmentStatType.MaxHealth, -8f)));
 
-        list.Add(New("devour", "포식", 2, "멀리 있는 것까지 끌어와 삼킨다.",
+        list.Add(New("devour", "먹성", 2, "멀리 있는 것까지 끌어와 삼킨다.",
             S(EquipmentStatType.XpAbsorbAmount, 0.35f),
             S(EquipmentStatType.XpAbsorbRange, 1.5f),
             S(EquipmentStatType.MaxHealth, -18f)));
 
         // 「회복량 0」 — 받는 회복량 −100%.
-        list.Add(New("devour", "포식", 3, "삼키는 것으로만 살아간다. 약은 듣지 않는다.",
+        list.Add(New("devour", "먹성", 3, "삼키는 것으로만 살아간다. 약은 듣지 않는다.",
             S(EquipmentStatType.XpAbsorbAmount, 0.60f),
             S(EquipmentStatType.XpAbsorbRange, 3f),
             S(EquipmentStatType.HealingReceived, -1.0f)));

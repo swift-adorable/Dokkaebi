@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: con_medkit
   m_EditorClassIdentifier: Blob.Runtime::ItemDefinition
   id: con_medkit
-  displayName: "\uAD6C\uAE09\uC0C1\uC790"
+  displayName: "\uD658\uB2E8"
   description: "\uC81C\uB300\uB85C \uB41C \uAC83. \uCD9C\uD608\uB3C4 \uB450 \uACB9\uAE4C\uC9C0
     \uC7A1\uB294\uB2E4."
   kind: 6

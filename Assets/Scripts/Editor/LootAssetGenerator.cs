@@ -31,8 +31,8 @@ public static class LootAssetGenerator
 
     /// <summary>
     /// 표. 가치와 무게의 비(価/kg)가 곧 「들고 갈 가치가 있는가」다.
-    /// 고철은 무겁고 싸다 — 가방이 넉넉할 때만 담는다.
-    /// 메모리 코어는 가볍고 비싸다 — 보이면 무조건 담는다.
+    /// 쇠붙이는 무겁고 싸다 — 가방이 넉넉할 때만 담는다.
+    /// 노리개는 가볍고 비싸다 — 보이면 무조건 담는다.
     /// 이 대비가 없으면 전리품 창은 「전부 줍기」 버튼 하나로 끝난다.
     /// </summary>
     private static List<Row> BuildTable()
@@ -40,29 +40,29 @@ public static class LootAssetGenerator
         return new List<Row>
         {
             //     id              이름            설명
-            New("scrap_metal",   "고철",         "어디에나 굴러다닌다. 무겁고 싸다.",
+            New("scrap_metal",   "쇠붙이",         "어디에나 굴러다닌다. 무겁고 싸다.",
                 ItemKind.Material, weight: 1.2f, stackMax: 20, value: 12, tableWeight: 30, 1, 4),
 
-            New("wire_bundle",   "전선 뭉치",     "제작에 쓰인다. 부피에 비해 쓸모가 있다.",
+            New("wire_bundle",   "새끼 뭉치",     "제작에 쓰인다. 부피에 비해 쓸모가 있다.",
                 ItemKind.Material, weight: 0.4f, stackMax: 20, value: 30, tableWeight: 22, 1, 3),
 
-            New("cell_battery",  "전지",         "아직 전하가 남아 있다. 동력 구역에서 쓰인다.",
+            New("cell_battery",  "숯",           "아직 불기가 남아 있다. 가마에서 쓰인다.",
                 ItemKind.Material, weight: 0.6f, stackMax: 10, value: 70, tableWeight: 14, 1, 2),
 
-            New("bio_sample",    "조직 샘플",     "굳지 않은 조직. 연구동에서 값이 오른다.",
+            New("bio_sample",    "약재",     "말린 약재. 약방골에서 값이 오른다.",
                 ItemKind.Material, weight: 0.3f, stackMax: 10, value: 110, tableWeight: 10, 1, 2),
 
-            New("memory_core",   "메모리 코어",   "가볍고 비싸다. 보이면 담는다.",
+            New("memory_core",   "노리개",   "가볍고 비싸다. 보이면 담는다.",
                 ItemKind.Material, weight: 0.2f, stackMax: 5,  value: 420, tableWeight: 4,  1, 1),
 
             // 가벼운 것은 여러 개, 무거운 것은 한 개. 스택 수가 곧 무게의 반대다.
-            New("med_bandage",   "지혈 붕대",     "출혈을 멈춘다. 잠시 출혈에 걸리지 않는다.",
+            New("med_bandage",   "쑥",     "출혈을 멈춘다. 잠시 출혈에 걸리지 않는다.",
                 ItemKind.Consumable, weight: 0.05f, stackMax: 3, value: 45, tableWeight: 12, 1, 2),
 
-            New("med_stim",      "진통제",       "잠시 아픔을 잊는다.",
+            New("med_stim",      "현호색",       "잠시 아픔을 잊는다.",
                 ItemKind.Consumable, weight: 0.1f, stackMax: 5, value: 60, tableWeight: 8, 1, 2),
 
-            New("water_bottle",  "정제수",       "마실 수 있는 물. 이 구역에서는 귀하다.",
+            New("water_bottle",  "맑은 물",       "마실 수 있는 물. 밤길에서는 귀하다.",
                 ItemKind.Consumable, weight: 0.5f, stackMax: 5, value: 35, tableWeight: 10, 1, 1)
         };
     }

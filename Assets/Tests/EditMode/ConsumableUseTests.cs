@@ -116,7 +116,7 @@ namespace Blob.Tests
         [Test]
         public void 해제와_회복이_같이_있으면_하나만_되어도_쓸_수_있다()
         {
-            // 지혈 붕대 — 출혈 해제 + 소량 회복.
+            // 쑥 — 출혈 해제 + 소량 회복.
             ItemDefinition bandage = Create("bandage", ConsumableCategory.Cure,
                 heal: 10, cure: StatusEffectType.Bleed);
 
@@ -230,7 +230,7 @@ namespace Blob.Tests
         // ── 충전(내구도)형 ────────────────────────────────────────────
         //
         // 덕코프의 구급상자는 한 번 쓰고 사라지지 않는다.
-        // 소형 125/25 = 5회 · 구급상자 175/25 = 7회 · 대형 400/40 = 10회.
+        // 소형 125/25 = 5회 · 환단 175/25 = 7회 · 대형 400/40 = 10회.
         // [확인됨 — 아이템 #15 · #16 · #17]
 
         [Test]
@@ -274,7 +274,7 @@ namespace Blob.Tests
         [Test]
         public void 덜어_낼_중첩_수가_실린다()
         {
-            // 소형은 출혈 1중첩, 구급상자는 2중첩. 싼 도구가 비싼 도구와
+            // 소형은 출혈 1중첩, 환단은 2중첩. 싼 도구가 비싼 도구와
             // 같은 일을 하면 비싼 쪽을 살 이유가 없다.
             ItemDefinition small = Create("small", cure: StatusEffectType.Bleed, cureStacks: 1);
             ItemDefinition big = Create("big", cure: StatusEffectType.Bleed, cureStacks: 2);

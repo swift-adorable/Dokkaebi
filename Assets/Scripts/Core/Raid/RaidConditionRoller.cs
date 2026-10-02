@@ -11,7 +11,7 @@ using System.Collections.Generic;
 public static class RaidConditionRoller
 {
     /// <summary>
-    /// 시설 상태가 걸릴 확률.
+    /// 밤 상태가 걸릴 확률.
     ///
     /// 【불확실 — 문서에 수치가 없다.】
     /// 절반이 넘으면 평시가 오히려 특별해진다. 셋 중 하나쯤이

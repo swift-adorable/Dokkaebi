@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// 이번 파밍의 조건 — 시설 상태 하나 + 레이드 특성 0~2개.
+/// 이번 파밍의 조건 — 밤 상태 하나 + 레이드 특성 0~2개.
 /// (docs/Blob_Hunting_System.md 5·9절)
 ///
 /// 【파밍 전 화면에 전부 표시한다.】(문서 5절)
@@ -57,18 +57,18 @@ public struct RaidConditions
 
     // ── 그 외 ─────────────────────────────────────────────────────────
 
-    /// <summary>출혈이 걸리지 않는가. (응고 혈액)</summary>
+    /// <summary>출혈이 걸리지 않는가. (피 없는 잡귀)</summary>
     public bool BlocksBleed => Has(RaidTrait.Congealed);
 
-    /// <summary>장비 내구도 소모 배율. (부식 대기)</summary>
+    /// <summary>장비 내구도 소모 배율. (눅눅한 밤)</summary>
     public float DurabilityLossScale => Fold(e => e.durabilityLossScale);
 
-    /// <summary>플레이어가 초당 받는 환경 피해. (소독 사이클)</summary>
+    /// <summary>플레이어가 초당 받는 환경 피해. (독안개)</summary>
     public float EnvironmentDamagePerSecond
         => FacilityStateTable.Of(facility).chemicalDamagePerSecond;
 
     /// <summary>
-    /// 이 속성의 피해에 걸리는 배율. 침수에서 번개가 2배다.
+    /// 이 속성의 피해에 걸리는 배율. 큰물에서 번개가 2배다.
     ///
     /// 【이것만은 곱한다.】 저항은 「가장 낮은 하나」지만, 이쪽은 반대 방향이다.
     /// 환경이 특정 빌드에게 기회를 주는 자리라 지워지면 안 된다.
@@ -132,7 +132,7 @@ public struct RaidConditions
 
         FacilityStateEffect state = FacilityStateTable.Of(facility);
 
-        // 소독 사이클은 화공체를 강하게 만든다. 「그 상태에서 만나면 다르다」가
+        // 독안개는 왕지네를 강하게 만든다. 「그 상태에서 만나면 다르다」가
         // 없으면 추가 스폰은 그냥 숫자가 느는 것에 지나지 않는다.
         if (state.empowerScale > 1f && profile.archetype == state.empoweredArchetype)
         {
@@ -143,7 +143,7 @@ public struct RaidConditions
         return profile;
     }
 
-    /// <summary>파밍 전 화면에 적을 줄들. 시설 상태가 먼저다.</summary>
+    /// <summary>파밍 전 화면에 적을 줄들. 밤 상태가 먼저다.</summary>
     public List<string> Describe()
     {
         var lines = new List<string>(MaxTraits + 1);

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: con_soda
   m_EditorClassIdentifier: Blob.Runtime::ItemDefinition
   id: con_soda
-  displayName: "\uBBF8\uC9C0\uADFC\uD55C \uD0C4\uC0B0"
+  displayName: "\uC2DD\uD61C"
   description: "\uAE40\uC774 \uBE60\uC84C\uB2E4. \uADF8\uB798\uB3C4 \uBB3C\uC774\uB2E4."
   kind: 6
   tier: 0

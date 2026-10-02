@@ -25,7 +25,7 @@ namespace Blob.Tests
     {
         private const string EnemyPrefab = "Assets/Prefabs/Enemy.prefab";
 
-        // 스캐브 — Combat_Baseline 5절 1행.
+        // 잡귀 — Combat_Baseline 5절 1행.
         private const int ScavHealth = 20;
         private const int ScavDamage = 8;
         private const int ScavArmourPenetration = 0;
@@ -47,7 +47,7 @@ namespace Blob.Tests
             Assert.IsNotNull(health, "Enemy 프리팹에 Health가 없습니다.");
 
             Assert.AreEqual(ScavHealth, health.Max,
-                "적 체력이 기준(스캐브 20)과 다릅니다. "
+                "적 체력이 기준(잡귀 20)과 다릅니다. "
                 + "한 발에 죽으면 무기 티어도 상태이상도 체감되지 않습니다. "
                 + "(docs/Blob_Combat_Baseline.md 5절)");
         }
@@ -60,19 +60,19 @@ namespace Blob.Tests
             Assert.IsNotNull(attack, "Enemy 프리팹에 EnemyAttack이 없습니다.");
 
             Assert.AreEqual(ScavDamage, attack.Damage,
-                "적 피해가 기준(스캐브 8)과 다릅니다. "
+                "적 피해가 기준(잡귀 8)과 다릅니다. "
                 + "피해가 낮으면 플레이어가 사실상 죽지 않아 "
                 + "「죽으면 잃는다」는 이 게임의 뼈대를 확인할 수 없습니다. "
                 + "(docs/Blob_Combat_Baseline.md 5절)");
 
             Assert.AreEqual(ScavArmourPenetration, attack.ArmourPenetration,
-                "스캐브는 방어 관통 0입니다. 방어구가 의미를 갖는 첫 적입니다.");
+                "잡귀는 방어 관통 0입니다. 방어구가 의미를 갖는 첫 적입니다.");
         }
 
         /// <summary>
         /// 기준의 검증 문장을 그대로 계산한다 —
         /// 「무방어로 1장 적 피해 10을 10대 맞으면 죽는다」(1절).
-        /// 스캐브는 8이므로 무방어 13대. 100대와 13대는 전혀 다른 게임이다.
+        /// 잡귀는 8이므로 무방어 13대. 100대와 13대는 전혀 다른 게임이다.
         /// </summary>
         [Test]
         public void 무방어_플레이어가_납득할_횟수에_죽는다()
@@ -91,7 +91,7 @@ namespace Blob.Tests
                 + "5대 미만은 회피를 배울 틈이 없습니다.");
         }
 
-        // ── 원거리 — 자전체 ───────────────────────────────────────────
+        // ── 원거리 — 번개귀 ───────────────────────────────────────────
         // 근접만 있으면 전투가 「붙는다 / 뺀다」 두 동작으로 끝난다.
 
         private const string RangedPrefab = "Assets/Prefabs/EnemyRanged.prefab";
@@ -118,7 +118,7 @@ namespace Blob.Tests
             Assert.AreEqual(EnemyPrefabGenerator.SpitterDamage, attack.Damage);
             Assert.AreEqual(EnemyPrefabGenerator.SpitterArmourPenetration,
                 attack.ArmourPenetration,
-                "자전체는 방어 관통 1입니다. (Combat_Baseline 5절)");
+                "번개귀는 방어 관통 1입니다. (Combat_Baseline 5절)");
         }
 
         /// <summary>
@@ -162,7 +162,7 @@ namespace Blob.Tests
         // 【프리팹과 표가 갈라지지 않게 강제한다.】
         // 런타임 수치는 EnemyIdentity가 EnemyArchetypeTable에서 가져오므로
         // 프리팹에 적힌 값은 사실 쓰이지 않는다. 그래도 검사하는 이유는,
-        // 인스펙터를 연 사람이 압착기 프리팹에서 체력 20을 읽으면
+        // 인스펙터를 연 사람이 절굿공이귀 프리팹에서 체력 20을 읽으면
         // 틀린 정보를 사실로 믿게 되기 때문이다.
 
         private static readonly (string path, EnemyArchetype archetype)[] Wired =

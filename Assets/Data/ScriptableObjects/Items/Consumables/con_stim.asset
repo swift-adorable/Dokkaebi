@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: con_stim
   m_EditorClassIdentifier: Blob.Runtime::ItemDefinition
   id: con_stim
-  displayName: "\uB178\uB780 \uC8FC\uC0AC\uC57D"
+  displayName: "\uCD95\uC9C0\uD658"
   description: "\uBE68\uB77C\uC9C4\uB2E4. \uB05D\uB098\uBA74 \uADF8\uB9CC\uD07C \uB290\uB824\uC9C4\uB2E4."
   kind: 6
   tier: 0

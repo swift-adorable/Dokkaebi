@@ -13,9 +13,8 @@ MonoBehaviour:
   m_Name: wpn_t2_coil
   m_EditorClassIdentifier: Blob.Runtime::WeaponDefinition
   id: wpn_t2_coil
-  displayName: "\uCF54\uC77C \uCE74\uBE48"
-  description: "\uACE0\uC804\uC555 \uBC30\uD130\uB9AC\uB85C \uD0C4\uC744 \uBC00\uC5B4\uB0B8\uB2E4.
-    \uAE09\uC870\uD488\uBCF4\uB2E4 \uC870\uC6A9\uD558\uACE0 \uBE60\uB974\uB2E4."
+  displayName: "\uC8FD\uAD81"
+  description: "\uB300\uB098\uBB34\uB85C \uB9CC\uB4E0 \uD65C. \uD1B5\uB098\uBB34 \uD65C\uBCF4\uB2E4 \uC870\uC6A9\uD558\uACE0 \uBE60\uB974\uB2E4."
   kind: 1
   tier: 2
   weight: 2.6
@@ -40,4 +39,4 @@ MonoBehaviour:
   effectiveRange: 12
   projectileSpeed: 24
   attachmentSlots: 1
-  weaponFamily: "\uC804\uAE30"
+  weaponFamily: "\uD65C"
