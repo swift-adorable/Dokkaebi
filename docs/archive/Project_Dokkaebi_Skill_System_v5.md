@@ -1,4 +1,4 @@
-# PROJECT BLOB — Skill System v5
+# PROJECT DOKKAEBI — Skill System v5
 
 > v4 전수 재검토 + 도감(Codex) 시스템 도입 + 소환 계열 제거 + poe2db 기반 한글 명명
 > 대상: 로드맵 5단계 (Skill 시스템) 구현 확정안

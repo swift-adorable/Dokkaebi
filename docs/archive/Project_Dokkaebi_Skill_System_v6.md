@@ -1,4 +1,4 @@
-# PROJECT BLOB — Skill System v6
+# PROJECT DOKKAEBI — Skill System v6
 
 > v5 전수 재검토 + Mutation → Skill 개명 + poe2db 한글 명명 전수 적용 + 전달 계열 재배치
 > 대상: 로드맵 5단계 (Skill 시스템) 구현 확정안

@@ -1,4 +1,4 @@
-# BLOB — Master Prompt
+# DOKKAEBI — Master Prompt
 
 **Unity 6 Mobile (Android / iOS) · Top-Down Shooter + Roguelite + Extraction Looting**
 게임 타이틀 《도깨비》 / 코드네임 **Dokkaebi** (세계관 교체 2026-10-02 · 결정 2-39. 이전 타이틀 《젤리바디: 에어리어 0》)
@@ -38,7 +38,7 @@
 
 | 항목 | 값 |
 |---|---|
-| 번들 ID | com.sensei.lee.blob |
+| 번들 ID | com.sensei.lee.dokkaebi |
 | 저장소 | https://github.com/swift-adorable/Dokkaebis.git |
 | Unity | 6000.4.11f1 / URP 17.4.0 / Input System 1.19.0 |
 | 플랫폼 | Android · iOS (가로 고정) |

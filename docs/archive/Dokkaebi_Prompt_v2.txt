@@ -1,4 +1,4 @@
-# BLOB PROJECT MASTER PROMPT
+# DOKKAEBI PROJECT MASTER PROMPT
 # Unity 6 Mobile (Android / iOS) Top-Down Shooter + Roguelite Project
 # 최종 갱신: 2026-09-17 (Skill System v6 확정 반영 — poe2db 명명 / 전달 계열 재배치)
 
@@ -33,7 +33,7 @@ Unity 6 (6000.x 이상)을 기준으로 실제 앱스토어/플레이스토어 �
 - 프로젝트명: Dokkaebi
 - 장르: Top-Down Shooter + Roguelite + Extraction Looting
 - 플랫폼: Android, iOS (가로 고정)
-- 번들 ID: com.sensei.lee.blob
+- 번들 ID: com.sensei.lee.dokkaebi
 - 저장소: https://github.com/swift-adorable/Dokkaebis.git
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
