@@ -1,6 +1,7 @@
 # Blob — 기획 문서
 
-게임 타이틀 **《젤리바디: 에어리어 0》** / 코드네임 **Blob**
+게임 타이틀 **《도깨비》** / 코드네임 **Blob**
+(2026-10-02 세계관 교체 — 이전 《젤리바디: 에어리어 0》 문서는 [`archive/`](archive/))
 Unity 6 Mobile · Top-Down Shooter + Roguelite + Extraction Looting
 
 ## 문서
@@ -8,7 +9,9 @@ Unity 6 Mobile · Top-Down Shooter + Roguelite + Extraction Looting
 | 문서 | 담당 | 한 줄 |
 |---|---|---|
 | [Master_Prompt](Blob_Master_Prompt.md) | 최상위 규약 | 어떻게 일하는가 |
-| [Story](Blob_Story.md) | 스토리 · 6장 · 단서 | **왜 그렇게 되었는가** |
+| [Story](Blob_Story.md) | 스토리 설계 · 6장 · 단서 | **왜 그렇게 되었는가** |
+| [Story_Script](Blob_Story_Script.txt) | 스토리 본문 v2.2 | 프롤로그 ~ 6장 끝 (엔딩) |
+| [Naming](Blob_Naming.md) | 이름 · 화면 표기 | **무엇이라 부르는가** |
 | [Combat_Baseline](Blob_Combat_Baseline.md) | 수치 | **얼마나 아픈가** |
 | [Skill_System](Blob_Skill_System.md) | 스킬 53종 | 무엇으로 죽이는가 |
 | [Equipment_System](Blob_Equipment_System.md) | 장비 · 무기 | 무엇을 입고 가는가 |
