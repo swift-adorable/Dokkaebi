@@ -1,4 +1,4 @@
-# BLOB PROJECT MASTER PROMPT v3
+# DOKKAEBI PROJECT MASTER PROMPT v3
 # Unity 6 Mobile (Android / iOS) Top-Down Shooter + Roguelite + Extraction Looting
 # 최종 갱신: 2026-09-17
 # 변경 요약: Mutation System → Skill System 개명 / poe2db 한글 명명 전수 적용 /
@@ -61,7 +61,7 @@ Unity 6 (6000.x 이상)을 기준으로 실제 앱스토어/플레이스토어 �
 - 프로젝트명 : Dokkaebi
 - 장르       : Top-Down Shooter + Roguelite + Extraction Looting
 - 플랫폼     : Android, iOS (가로 고정)
-- 번들 ID    : com.sensei.lee.blob
+- 번들 ID    : com.sensei.lee.dokkaebi
 - 저장소     : https://github.com/swift-adorable/Dokkaebis.git
 - Unity      : 6000.4.11f1 / URP 17.4.0 / Input System 1.19.0
 
