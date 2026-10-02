@@ -305,6 +305,44 @@ namespace Dokkaebi.Tests
             List<string> pages = p[StoryTable.BossEvent("gumiho")].Pages;
 
             Assert.AreEqual("(끝)", pages[pages.Count - 1]);
+            StringAssert.Contains("오는 동안 이미 내 이야기가 생겼네", pages[pages.Count - 2],
+                "엔딩은 그 한 줄 뒤에서 여백을 두고 끝난다 (결정 2-48).");
+        }
+
+        [Test]
+        public void 사신패는_싸운_직후에_받는다()
+        {
+            Dictionary<string, StoryPassage> p = StoryScriptParser.Parse(ScriptText());
+
+            foreach (BossDefinition b in StoryTable.Bosses)
+            {
+                if (b.Tablet.Length == 0)
+                    continue;
+
+                string after = string.Join("\n", p[StoryTable.BossEvent(b.Id)].Pages);
+                StringAssert.Contains(b.Tablet, after, $"{b.Name}을 쓰러뜨린 뒤 이야기에 {b.Tablet}이 없습니다.");
+            }
+        }
+
+        [Test]
+        public void 기억의_조각은_세계관_설명이_아니라_프롤로그의_기억이다()
+        {
+            Dictionary<string, StoryPassage> p = StoryScriptParser.Parse(ScriptText());
+
+            StringAssert.Contains("오늘이", p[StoryTable.PieceEvent("piece_5")].Pages[0]);
+
+            foreach (PieceDefinition piece in StoryTable.Pieces)
+                StringAssert.DoesNotContain("세 갈래", p[StoryTable.PieceEvent(piece.Id)].Pages[0], piece.Id);
+        }
+
+        [Test]
+        public void 옛_설정의_잔재가_본문에_없다()
+        {
+            string body = ScriptText();
+            body = body.Substring(0, body.IndexOf("부록 1"));
+
+            foreach (string old in new[] { "방위", "기운", "너도 데려가", "사람이 될 수도 있어", "사신들", "숨겼" })
+                StringAssert.DoesNotContain(old, body, $"본문에 「{old}」가 남았습니다.");
         }
 
         [Test]
