@@ -342,8 +342,13 @@ namespace Dokkaebi.Tests
             string body = ScriptText();
             body = body.Substring(0, body.IndexOf("부록 1"));
 
-            foreach (string old in new[] { "방위", "기운", "너도 데려가", "사람이 될 수도 있어", "사신들", "숨겼" })
+            // v2.5 (결정 2-50) — 「보내서 생긴다」 · 「살아온 만큼」 · 새색시 탈을 걷어 냈다.
+            foreach (string old in new[] { "방위", "기운", "너도 데려가", "사람이 될 수도 있어", "사신들", "숨겼",
+                                           "새색시 탈", "아직 시작되지 않음", "할머니의 이야기 속에 있다", "살아온 만큼" })
                 StringAssert.DoesNotContain(old, body, $"본문에 「{old}」가 남았습니다.");
+
+            StringAssert.Contains("완성된 이야기만 적힌다", body, "5-3 해태의 두루마리 규칙 (결정 2-50)");
+            StringAssert.Contains("오는 동안 이미 내 이야기가 생겼네", body);
         }
 
         [Test]
