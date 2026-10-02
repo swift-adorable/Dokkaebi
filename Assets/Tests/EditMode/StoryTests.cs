@@ -305,8 +305,9 @@ namespace Dokkaebi.Tests
             List<string> pages = p[StoryTable.BossEvent("gumiho")].Pages;
 
             Assert.AreEqual("(끝)", pages[pages.Count - 1]);
-            StringAssert.Contains("오는 동안 이미 내 이야기가 생겼네", pages[pages.Count - 2],
-                "엔딩은 그 한 줄 뒤에서 여백을 두고 끝난다 (결정 2-48).");
+            Assert.IsTrue(pages.Skip(pages.Count - 4).Any(x => x.Contains("오는 동안 이미 내 이야기가 생겼네")),
+                "엔딩은 그 한 줄 가까이에서 끝난다 (결정 2-48 · 2-49).");
+            StringAssert.Contains("봉오리", pages[pages.Count - 2], "빈 꽃대의 봉오리가 마지막 그림이다 (결정 2-49).");
         }
 
         [Test]

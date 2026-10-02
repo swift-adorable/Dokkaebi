@@ -10,7 +10,7 @@ Unity 6 Mobile · Top-Down Shooter + Roguelite + Extraction Looting
 |---|---|---|
 | [Master_Prompt](Dokkaebi_Master_Prompt.md) | 최상위 규약 | 어떻게 일하는가 |
 | [Story](Dokkaebi_Story.md) | 스토리 설계 · 6장 · 단서 | **왜 그렇게 되었는가** |
-| [Story_Script](Dokkaebi_Story_Script.txt) | 스토리 본문 v2.3 | 프롤로그 ~ 6장 끝 (엔딩) |
+| [Story_Script](Dokkaebi_Story_Script.txt) | 스토리 본문 v2.4 | 프롤로그 ~ 6장 끝 (엔딩) |
 | [Naming](Dokkaebi_Naming.md) | 이름 · 화면 표기 | **무엇이라 부르는가** |
 | [Combat_Baseline](Dokkaebi_Combat_Baseline.md) | 수치 | **얼마나 아픈가** |
 | [Skill_System](Dokkaebi_Skill_System.md) | 스킬 53종 | 무엇으로 죽이는가 |
