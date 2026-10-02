@@ -1,5 +1,5 @@
 /// <summary>
-/// 진영 5종. (docs/Blob_Hunting_System.md 4절)
+/// 진영 5종. (docs/Dokkaebi_Hunting_System.md 4절)
 ///
 /// 【적 수를 늘리지 않고 전투 다양성을 키우는 가장 싼 방법이다.】
 /// 어부지리 · 뒤통수 · 3장 이후 난전의 정체성이 여기서 나온다.

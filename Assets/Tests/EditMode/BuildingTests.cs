@@ -3,10 +3,10 @@ using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
 
-namespace Blob.Tests
+namespace Dokkaebi.Tests
 {
     /// <summary>
-    /// 벙커 건설 계약. (로드맵 8-K · docs/Blob_Bunker_System.md 3-4절)
+    /// 벙커 건설 계약. (로드맵 8-K · docs/Dokkaebi_Bunker_System.md 3-4절)
     /// </summary>
     public class BuildingTests
     {

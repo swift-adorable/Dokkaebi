@@ -11,7 +11,7 @@ using UnityEngine;
 ///  · 표가 코드에 있으면 문서와의 대조가 diff 한 번으로 끝난다.
 ///
 /// 이미 있는 에셋은 덮어쓴다. GUID는 보존되므로 참조가 끊기지 않는다.
-/// 출처: docs/Blob_Skill_System.md 5~8절
+/// 출처: docs/Dokkaebi_Skill_System.md 5~8절
 /// </summary>
 public static class SkillAssetGenerator
 {
@@ -79,7 +79,7 @@ public static class SkillAssetGenerator
         };
     }
 
-    [MenuItem("Blob/Skill/정의 에셋 53종 생성")]
+    [MenuItem("Dokkaebi/Skill/정의 에셋 53종 생성")]
     public static void Generate()
     {
         List<Row> rows = BuildTable();
@@ -185,7 +185,7 @@ public static class SkillAssetGenerator
     }
 
     // ══════════════════════════════════════════════════════════════════════
-    //  표 — docs/Blob_Skill_System.md 5~8절과 1:1로 대응한다.
+    //  표 — docs/Dokkaebi_Skill_System.md 5~8절과 1:1로 대응한다.
     //  문서를 고치면 이 표도 고친다. SkillCatalogTests가 개수·구조를 고정한다.
     // ══════════════════════════════════════════════════════════════════════
     private static List<Row> BuildTable()
@@ -194,7 +194,7 @@ public static class SkillAssetGenerator
         Row r;
 
         // ── 핵심 젬 부여 계열 5 ──────────────────────────────────────────────
-        // 전부 투사체 태그를 가진다. Blob의 기본 동사가 사격이므로
+        // 전부 투사체 태그를 가진다. Dokkaebi의 기본 동사가 사격이므로
         // 투사체 보조 젬이 붙을 곳이 항상 존재해야 한다.
 
         r = New("core_fire", "화염", "적중한 적을 점화시킨다.", SkillCategory.Core, 1);
@@ -453,7 +453,7 @@ public static class SkillAssetGenerator
         // 남겨 두면 다음 사람이 어느 쪽이 의도인지 알 수 없다.
         //
         // 참고 — PoE2 유지형 젬 Ground는 단계마다 +50%다.
-        // Blob은 +100% 한 단계로 두되 대가를 붙인다. (수치는 Blob의 결정)
+        // Dokkaebi는 +100% 한 단계로 두되 대가를 붙인다. (수치는 Dokkaebi의 결정)
         // [확인됨 — docs/research/poe2/04_잔류물_계열.md]
         r = New("sup_lasting_ground", "유지되는 대지", "잔류물 지속시간이 100% 늘어난다.", SkillCategory.Support, 7);
         r.requiredTags = SkillTag.Zone;

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 /// <summary>
 /// 도감 — 「이 젬이 존재한다는 것을 안다」는 영구 기록.
-/// (docs/Blob_Skill_System.md 11-2절)
+/// (docs/Dokkaebi_Skill_System.md 11-2절)
 ///
 /// 【도감은 보유 목록이 아니다.】 해금 기록이다.
 ///   도감에 있다  →  드롭 풀에 들어온다 · 제작할 수 있다.  영구.

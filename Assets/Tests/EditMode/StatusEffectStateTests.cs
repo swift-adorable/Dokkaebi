@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 using NUnit.Framework;
 
-namespace Blob.Tests
+namespace Dokkaebi.Tests
 {
     /// <summary>
-    /// 상태이상 상태 기계 테스트. (docs/Blob_Combat_Baseline.md 7절)
+    /// 상태이상 상태 기계 테스트. (docs/Dokkaebi_Combat_Baseline.md 7절)
     ///
     /// 시간을 주입받는 순수 클래스이므로 EditMode에서 전수 검증한다.
     /// </summary>

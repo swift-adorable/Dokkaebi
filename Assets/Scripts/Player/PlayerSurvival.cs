@@ -3,7 +3,7 @@ using UnityEngine;
 
 /// <summary>
 /// 수분 · 에너지를 실제로 흘리고 페널티를 물린다.
-/// (docs/Blob_Survival_System.md · 결정 2-32)
+/// (docs/Dokkaebi_Survival_System.md · 결정 2-32)
 ///
 /// 【계산은 SurvivalState가 한다.】 여기는 시간을 넘겨주고, 나온 피해를
 /// Health에 물리고, 이동·회복 배율을 바깥에 연결하는 일만 한다.
@@ -47,7 +47,7 @@ public class PlayerSurvival : MonoBehaviour
         if (instance != null)
             return instance;
 
-        var player = FindAnyObjectByType<BlobController>(FindObjectsInactive.Include);
+        var player = FindAnyObjectByType<DokkaebiController>(FindObjectsInactive.Include);
 
         if (player == null)
             return null;

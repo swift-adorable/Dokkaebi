@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ea17f4877b7bf48069bd560938e26492, type: 3}
   m_Name: meta_rare
-  m_EditorClassIdentifier: Blob.Runtime::PassiveNode
+  m_EditorClassIdentifier: Dokkaebi.Runtime::PassiveNode
   id: meta_rare
   displayName: "\uAC10\uC815\uC548"
   description: "\uD76C\uADC0\uD55C \uAC83\uC774 \uB354 \uC790\uC8FC \uB208\uC5D0

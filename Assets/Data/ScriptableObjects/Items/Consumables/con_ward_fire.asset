@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5f9766db0f8594e349438cc979f7b6fe, type: 3}
   m_Name: con_ward_fire
-  m_EditorClassIdentifier: Blob.Runtime::ItemDefinition
+  m_EditorClassIdentifier: Dokkaebi.Runtime::ItemDefinition
   id: con_ward_fire
   displayName: "\uC11D\uACE0\uD658"
   description: "\uD0C0\uB294 \uAC83\uC774 \uB35C \uC544\uD504\uB2E4."

@@ -4,7 +4,7 @@ using UnityEngine;
 
 /// <summary>
 /// 젬(Gem) 관리자 — 파밍 · 도감 · 소켓 장착.
-/// (docs/Blob_Skill_System.md 0·11·12절)
+/// (docs/Dokkaebi_Skill_System.md 0·11·12절)
 ///
 /// 흐름:
 ///   도감(해금 기록) → 드롭 풀 → 적을 흡수하면 젬이 가방에 들어온다
@@ -170,7 +170,7 @@ public class SkillManager : Singleton<SkillManager>
             {
                 GameLogger.Error(
                     $"[SkillManager] Resources/{SkillCatalog.ResourcePath} 에셋이 없습니다. " +
-                    "메뉴 Blob > Skill > 카탈로그 다시 만들기 를 실행하십시오.", this);
+                    "메뉴 Dokkaebi > Skill > 카탈로그 다시 만들기 를 실행하십시오.", this);
             }
         }
 
@@ -182,7 +182,7 @@ public class SkillManager : Singleton<SkillManager>
             {
                 GameLogger.Error(
                     $"[SkillManager] Resources/{SkillGemCatalog.ResourcePath} 에셋이 없습니다. " +
-                    "메뉴 Blob > Skill > 젬 아이템 에셋 생성 을 실행하십시오.", this);
+                    "메뉴 Dokkaebi > Skill > 젬 아이템 에셋 생성 을 실행하십시오.", this);
             }
         }
     }

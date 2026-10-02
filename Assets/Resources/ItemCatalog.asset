@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bba50eb986def499b94b7ad7c4cc20e9, type: 3}
   m_Name: ItemCatalog
-  m_EditorClassIdentifier: Blob.Runtime::ItemCatalog
+  m_EditorClassIdentifier: Dokkaebi.Runtime::ItemCatalog
   items:
   - {fileID: 11400000, guid: a25a937bba8914d77af2cd7e368dcbe6, type: 2}
   - {fileID: 11400000, guid: 86f1b9210a05c4478bed6f431805b30e, type: 2}

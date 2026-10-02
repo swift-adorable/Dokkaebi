@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using Random = System.Random;
 
 /// <summary>
-/// 젬 드롭 추첨. (docs/Blob_Skill_System.md 11-3절)
+/// 젬 드롭 추첨. (docs/Dokkaebi_Skill_System.md 11-3절)
 ///
 /// 난수원을 인자로 받으므로 고정 시드로 결정적 검증이 가능하다.
 /// 등급(Rarity) 개념이 없으므로 가중치를 쓰지 않고 균등 추첨한다.

@@ -167,7 +167,7 @@ public class BulletController : MonoBehaviour, IPoolable
     /// 플레이어 탄과 같은 BulletController를 쓰는 이유 —
     /// 사거리 보정·방어도·속성 상성이 양쪽에 똑같이 적용되어야
     /// "적 피해가 반감되는 거리에서 교전한다"가 플레이어의 방어 기술이 된다.
-    /// (docs/Blob_Combat_Baseline.md 4절)
+    /// (docs/Dokkaebi_Combat_Baseline.md 4절)
     /// </summary>
     public void ConfigureAsEnemyShot(
         int shotDamage, float range, int penetration, StatusEffectType status, Vector3 origin,

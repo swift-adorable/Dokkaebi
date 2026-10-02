@@ -66,8 +66,8 @@ public class StationPromptUI : MonoBehaviour
     {
         if (player == null)
         {
-            var blob = FindAnyObjectByType<BlobController>(FindObjectsInactive.Exclude);
-            player = blob != null ? blob.transform : null;
+            var dokkaebi = FindAnyObjectByType<DokkaebiController>(FindObjectsInactive.Exclude);
+            player = dokkaebi != null ? dokkaebi.transform : null;
         }
 
         bool covered = (InventoryScreenUI.HasInstance && InventoryScreenUI.Instance.IsOpen)

@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5f9766db0f8594e349438cc979f7b6fe, type: 3}
   m_Name: gem_sup_overflowing_charge
-  m_EditorClassIdentifier: Blob.Runtime::ItemDefinition
+  m_EditorClassIdentifier: Dokkaebi.Runtime::ItemDefinition
   id: gem_sup_overflowing_charge
   displayName: "\uB118\uCE58\uB294 \uCDA9\uC804"
   description: "\uAC10\uC804 \uC99D\uD3ED\uB960\uC774 15%p \uC624\uB978\uB2E4. (\uCD1D

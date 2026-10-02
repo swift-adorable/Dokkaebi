@@ -8,7 +8,7 @@ using UnityEngine.UI;
 /// 디버그 「체력 회복」 말고는 빠져나갈 길이 없었다. 이제 벙커로 돌아간다.
 ///
 /// 【무엇을 잃고 무엇이 남는지를 적는다.】 덕코프도 사망 뒤 결산을 보여 준다.
-/// 저장은 이 화면이 뜨기 전에 이미 끝났다 (BlobController.HandleDied) —
+/// 저장은 이 화면이 뜨기 전에 이미 끝났다 (DokkaebiController.HandleDied) —
 /// 여기서 앱을 꺼도 결과는 같다.
 /// </summary>
 public class RunEndUI : MonoBehaviour

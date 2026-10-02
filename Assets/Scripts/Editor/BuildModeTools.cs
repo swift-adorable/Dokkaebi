@@ -17,7 +17,7 @@ using UnityEngine;
 /// </summary>
 public static class BuildModeTools
 {
-    private const string Menu = "Blob/Build/";
+    private const string Menu = "Dokkaebi/Build/";
 
     /// <summary>현재 설정을 문장으로. 대화상자를 띄우지 않는다.</summary>
     public static string Describe()

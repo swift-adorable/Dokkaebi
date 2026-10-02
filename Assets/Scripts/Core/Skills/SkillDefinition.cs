@@ -12,7 +12,7 @@ using UnityEngine;
 /// - 티어(I/II/III)를 두지 않는다. 중첩 필드가 없다. 모든 Skill은 단일 정의다.
 /// - 소환수 계열을 두지 않는다. 태그에 소환수가 없다.
 /// </summary>
-[CreateAssetMenu(fileName = "Skill_", menuName = "Blob/Skill Definition")]
+[CreateAssetMenu(fileName = "Skill_", menuName = "Dokkaebi/Skill Definition")]
 public class SkillDefinition : ScriptableObject
 {
     // ────────────────────────────────── 식별
@@ -117,7 +117,7 @@ public class SkillDefinition : ScriptableObject
     // 여기부터가 「이 보조 젬이 무엇을 해 주는가」다.
     //
     // 이 축이 없던 동안 보조 젬 35종 중 21종은 대가만 적용되고 효과가 없었다.
-    // 끼우면 손해만 보는 젬이었다. (docs/Blob_Audit.md D1)
+    // 끼우면 손해만 보는 젬이었다. (docs/Dokkaebi_Audit.md D1)
     //
     // 전부 가산 합산이다. PoE의 「증가 / 더 증가」 2단 구조를 쓰지 않는다 —
     // 모바일에서 플레이어가 곱연산 폭발을 예측할 수 없다.
@@ -156,7 +156,7 @@ public class SkillDefinition : ScriptableObject
     // 이 축이 배타형 보조 젬을 살린다 —
     // 「번제」가 화염 핵심 젬의 점화를 끄면, 「화염 조율」을 낀 다른 핵심 젬이
     // 점화를 대신 공급한다. 그래야 「점화된 적에게 큰 피해」가 성립한다.
-    // (docs/Blob_Audit.md D3)
+    // (docs/Dokkaebi_Audit.md D3)
 
     [Tooltip("이 보조 젬이 꽂힌 핵심 젬의 부여 속성을 이것으로 바꾼다. (전환)")]
     [SerializeField] private StatusEffectType ailmentOverride = StatusEffectType.None;

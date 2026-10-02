@@ -2,10 +2,10 @@ using System;
 using System.Linq;
 using NUnit.Framework;
 
-namespace Blob.Tests
+namespace Dokkaebi.Tests
 {
     /// <summary>
-    /// 드롭과 보상의 계약 테스트. (docs/Blob_Hunting_System.md 6절)
+    /// 드롭과 보상의 계약 테스트. (docs/Dokkaebi_Hunting_System.md 6절)
     /// </summary>
     public class EnemyRewardTests
     {

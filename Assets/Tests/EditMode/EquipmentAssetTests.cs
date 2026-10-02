@@ -3,14 +3,14 @@ using System.Linq;
 using NUnit.Framework;
 using UnityEditor;
 
-namespace Blob.Tests
+namespace Dokkaebi.Tests
 {
     /// <summary>
     /// 6-C 장비 에셋의 계약 테스트.
     ///
     /// 문서에만 적힌 규칙은 언젠가 "방어력 +5 하나쯤이야"로 무너진다.
     /// 그래서 규칙을 테스트로 고정한다 — 특히 【각인 순수 증가 금지】.
-    /// (docs/Blob_Imprint_System.md 0절 / Blob_Equipment_System.md 6절)
+    /// (docs/Dokkaebi_Imprint_System.md 0절 / Dokkaebi_Equipment_System.md 6절)
     /// </summary>
     public class EquipmentAssetTests
     {
@@ -71,7 +71,7 @@ namespace Blob.Tests
             List<EquipmentDefinition> assets = Load<EquipmentDefinition>("Imprints");
 
             Assert.AreEqual(24, assets.Count,
-                "각인 에셋이 24종이 아닙니다. 「Blob/Equipment/각인 에셋 생성」을 실행하십시오.");
+                "각인 에셋이 24종이 아닙니다. 「Dokkaebi/Equipment/각인 에셋 생성」을 실행하십시오.");
 
             foreach (EquipmentDefinition asset in assets)
             {
@@ -152,7 +152,7 @@ namespace Blob.Tests
                     $"{ItemRoot}/Weapons/{spec.id}.asset");
 
                 Assert.IsNotNull(asset,
-                    $"{spec.id} 에셋이 없습니다. 「Blob/Equipment/무기 에셋 생성」을 실행하십시오.");
+                    $"{spec.id} 에셋이 없습니다. 「Dokkaebi/Equipment/무기 에셋 생성」을 실행하십시오.");
 
                 Assert.AreEqual(spec.tier, asset.Tier, $"{spec.id} 티어");
                 Assert.AreEqual(spec.damage, asset.BaseDamage, 0.001f, $"{spec.id} 기본 피해");
@@ -333,7 +333,7 @@ namespace Blob.Tests
             }
         }
 
-        /// <summary>청각 슬롯은 내구도가 없다. (docs/Blob_Equipment_System.md 1절)</summary>
+        /// <summary>청각 슬롯은 내구도가 없다. (docs/Dokkaebi_Equipment_System.md 1절)</summary>
         [Test]
         public void 청각과_가방은_내구도가_없다()
         {

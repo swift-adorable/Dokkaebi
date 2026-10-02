@@ -2,10 +2,10 @@ using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
 
-namespace Blob.Tests
+namespace Dokkaebi.Tests
 {
     /// <summary>
-    /// 소모품 판정. (docs/Blob_Consumable_System.md)
+    /// 소모품 판정. (docs/Dokkaebi_Consumable_System.md)
     ///
     /// 이 표의 핵심은 「썼는데 아무 일도 안 일어났다」를 만들지 않는 것이다.
     /// 가방에서 한 개가 사라졌는데 화면에 변화가 없으면 플레이어는 그것이

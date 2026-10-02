@@ -20,7 +20,7 @@ public static class PlaytestActions
     private static PlaytestCatalog Catalog => cached != null ? cached : cached = PlaytestCatalog.Load();
 
     private const string NoCatalog =
-        "검증 카탈로그가 없습니다. 에디터에서 「Blob/Playtest/검증 카탈로그 생성」을 실행한 뒤 다시 빌드하십시오.";
+        "검증 카탈로그가 없습니다. 에디터에서 「Dokkaebi/Playtest/검증 카탈로그 생성」을 실행한 뒤 다시 빌드하십시오.";
 
     // ── 지급 ──────────────────────────────────────────────────────────
 
@@ -251,8 +251,8 @@ public static class PlaytestActions
 
         if (items == null || items.Count == 0)
             return "소모품이 카탈로그에 없습니다.\n"
-                   + "「Blob/Items/소모품 에셋 생성」 다음에 "
-                   + "「Blob/Playtest/검증 카탈로그 생성」을 실행하십시오.";
+                   + "「Dokkaebi/Items/소모품 에셋 생성」 다음에 "
+                   + "「Dokkaebi/Playtest/검증 카탈로그 생성」을 실행하십시오.";
 
         Inventory bag = PlayerInventory.EnsureInstance().Bag;
 
@@ -410,7 +410,7 @@ public static class PlaytestActions
 
     public static string StackOnNearest(StatusEffectType type, int times)
     {
-        var player = Object.FindAnyObjectByType<BlobController>();
+        var player = Object.FindAnyObjectByType<DokkaebiController>();
 
         if (player == null)
             return "플레이어를 찾지 못했습니다.";
@@ -449,13 +449,13 @@ public static class PlaytestActions
     // ── 내 상태이상 ───────────────────────────────────────────────────
     //
     // 【위의 StackOnNearest는 적에게 건다.】 화면 좌상단의 상태이상 줄은
-    // 【내】 상태(BlobController의 Health.Status)를 읽으므로, 적에게 걸어서는
+    // 【내】 상태(DokkaebiController의 Health.Status)를 읽으므로, 적에게 걸어서는
     // 그 줄이 뜨지 않는다. 줄 자체를 확인하려면 나에게 걸어야 한다.
 
     /// <summary>플레이어의 Health. 없으면 null.</summary>
     private static Health SelfHealth()
     {
-        var player = Object.FindAnyObjectByType<BlobController>();
+        var player = Object.FindAnyObjectByType<DokkaebiController>();
 
         return player != null ? player.GetComponent<Health>() : null;
     }
@@ -498,7 +498,7 @@ public static class PlaytestActions
     /// 이 버튼이 필요한 이유 — 사망은 GameManager를 GameOver로 보내고
     /// Time.timeScale을 0으로 만드는데, GameState.GameOver를 듣는 화면이
     /// 아직 하나도 없다. 멈춘 채로 아무것도 뜨지 않아 Play Mode를 껐다
-    /// 켜는 것 말고는 나올 길이 없었다. (docs/Blob_Audit.md A12)
+    /// 켜는 것 말고는 나올 길이 없었다. (docs/Dokkaebi_Audit.md A12)
     ///
     /// 【되돌려 주지 않는 것】 가방은 죽는 순간 DropOnDeath로 이미 떨어졌고
     /// 레벨과 소켓도 SkillManager.ResetRun으로 초기화되었다.
@@ -786,7 +786,7 @@ public static class PlaytestActions
             return "벙커에서는 철수할 수 없습니다.";
 
         if (!SceneFlow.HasBunker)
-            return "빌드 설정에 벙커 씬이 없습니다. 「Blob/Bunker/벙커 씬 생성」을 실행하십시오.";
+            return "빌드 설정에 벙커 씬이 없습니다. 「Dokkaebi/Bunker/벙커 씬 생성」을 실행하십시오.";
 
         SceneFlow.Extract();
         return "철수합니다. 가방과 장비를 들고 벙커로 돌아갑니다.";

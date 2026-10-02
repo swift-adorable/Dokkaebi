@@ -42,7 +42,7 @@ public static class EnemyArchetypeWiring
         }
     }
 
-    [MenuItem("Blob/Enemy/유형·진영 연결")]
+    [MenuItem("Dokkaebi/Enemy/유형·진영 연결")]
     public static void Wire()
     {
         // 이미 있는 둘 — 이름을 바꾸지 않는다. 씬과 스포너가 이 경로를 참조한다.

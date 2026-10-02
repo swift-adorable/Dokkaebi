@@ -24,7 +24,7 @@ public class ItemStack
     /// ※ 현재 감소량은 0이다. 수리 비용과 경제가 8단계에 오므로
     ///   그때 RepairLossRatio를 정한다. 지금 필드를 만들어 두는 이유는
     ///   나중에 세이브 포맷을 깨지 않기 위함이다.
-    /// (docs/Blob_Equipment_System.md 「내구도」)
+    /// (docs/Dokkaebi_Equipment_System.md 「내구도」)
     /// </summary>
     public int MaxDurability { get; private set; }
 
@@ -66,7 +66,7 @@ public class ItemStack
 
     /// <summary>
     /// 최대 내구도의 33% 이하인지. 이 지점에서 성능이 떨어지고 UI가 경고색이 된다.
-    /// 0이 되어야 망가지는 것이 아니다. (docs/Blob_Equipment_System.md 4절)
+    /// 0이 되어야 망가지는 것이 아니다. (docs/Dokkaebi_Equipment_System.md 4절)
     /// </summary>
     public bool IsWorn
         => Definition != null && Definition.HasDurability
@@ -141,7 +141,7 @@ public class ItemStack
     ///
     /// 수리할수록 상한이 줄어 결국 폐기된다 — 장비가 자연 소멸하는 경제 싱크다.
     /// 덕코프에서 불만이 큰 축이라 완화한다: 티어 4 이상에만, 감소량을 작게.
-    /// (docs/Blob_Equipment_System.md 「내구도」)
+    /// (docs/Dokkaebi_Equipment_System.md 「내구도」)
     /// </summary>
     public int Repair(int amount)
     {

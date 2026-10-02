@@ -1,10 +1,10 @@
 using NUnit.Framework;
 using UnityEngine;
 
-namespace Blob.Tests
+namespace Dokkaebi.Tests
 {
     /// <summary>
-    /// 유형 고유 기믹 셋. (docs/Blob_Hunting_System.md 1절)
+    /// 유형 고유 기믹 셋. (docs/Dokkaebi_Hunting_System.md 1절)
     ///
     /// 문서가 말로만 적은 것을 수치로 옮겼다. 지켜야 할 것 —
     ///   1. 기믹은 셋뿐이다. 유형마다 주면 아홉을 외워야 한다.

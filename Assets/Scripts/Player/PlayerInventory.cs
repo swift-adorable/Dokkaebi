@@ -3,7 +3,7 @@ using UnityEngine;
 
 /// <summary>
 /// 플레이어의 가방과 장비 슬롯. 【하나의 가방】에 장비·젬·전리품이 전부 들어간다.
-/// (docs/Blob_Skill_System.md 11-1절 / docs/Blob_Equipment_System.md 5-1절)
+/// (docs/Dokkaebi_Skill_System.md 11-1절 / docs/Dokkaebi_Equipment_System.md 5-1절)
 ///
 /// 젬용 가방을 따로 두지 않은 이유 —
 /// "젬을 많이 챙겨 화력을 확보할까, 가방을 비워 전리품 공간을 남길까"라는
@@ -17,7 +17,7 @@ public class PlayerInventory : Singleton<PlayerInventory>
     ///
     /// 【20이다.】 이전 12는 너무 작았다 —
     /// 덕코프는 벙커에서 장비를 갖춰 파밍하므로 맨몸 상태가 사실상 없지만,
-    /// Blob은 벙커가 8단계라 맨몸이 곧 초반 경험이다.
+    /// Dokkaebi는 벙커가 8단계라 맨몸이 곧 초반 경험이다.
     /// 가장 작은 가방(+8)을 끼기 전에도 한 판은 돌 수 있어야 한다.
     /// (docs/research/duckov/08_전투_실측과_교전.md 6절)
     /// </summary>
@@ -92,7 +92,7 @@ public class PlayerInventory : Singleton<PlayerInventory>
         // 장비(가방)와 패시브(계정)가 합산된다.
         // 패시브 총합은 장비 최대치의 1/2을 넘지 않게 표에서 제한한다 —
         // 그렇지 않으면 가방을 고르는 결정이 사라진다.
-        // 상한은 PassiveCapacityTests가 강제한다. (docs/Blob_Passive_System.md 5절)
+        // 상한은 PassiveCapacityTests가 강제한다. (docs/Dokkaebi_Passive_System.md 5절)
         int passiveSlots = 0;
         float passiveWeight = 0f;
 
@@ -134,7 +134,7 @@ public class PlayerInventory : Singleton<PlayerInventory>
     /// </summary>
     private static float CarryWeightMultiplier()
     {
-        var player = FindAnyObjectByType<BlobController>(FindObjectsInactive.Exclude);
+        var player = FindAnyObjectByType<DokkaebiController>(FindObjectsInactive.Exclude);
 
         Health health = player != null ? player.GetComponent<Health>() : null;
 

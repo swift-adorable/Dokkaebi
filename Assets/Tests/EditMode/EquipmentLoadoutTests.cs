@@ -3,10 +3,10 @@ using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
 
-namespace Blob.Tests
+namespace Dokkaebi.Tests
 {
     /// <summary>
-    /// 장비 착용 · 옵션 합산 테스트. (docs/Blob_Equipment_System.md)
+    /// 장비 착용 · 옵션 합산 테스트. (docs/Dokkaebi_Equipment_System.md)
     /// </summary>
     public class EquipmentLoadoutTests
     {

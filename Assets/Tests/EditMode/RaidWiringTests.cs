@@ -1,7 +1,7 @@
 using NUnit.Framework;
 using UnityEngine;
 
-namespace Blob.Tests
+namespace Dokkaebi.Tests
 {
     /// <summary>
     /// 스포너가 유형 9종과 파밍 조건을 실제로 읽는지. (로드맵 7-G)
@@ -19,7 +19,7 @@ namespace Blob.Tests
 
             Assert.IsNotNull(catalog,
                 "Resources/EnemyPrefabCatalog.asset이 없습니다. "
-                + "「Blob/Enemy/유형 프리팹 카탈로그 생성」을 실행하십시오.");
+                + "「Dokkaebi/Enemy/유형 프리팹 카탈로그 생성」을 실행하십시오.");
 
             return catalog;
         }

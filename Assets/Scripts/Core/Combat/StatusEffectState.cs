@@ -5,7 +5,7 @@ using System;
 /// 한 대상에게 걸린 상태이상들의 상태. MonoBehaviour 의존이 없는 순수 클래스다.
 ///
 /// 시간을 밖에서 주입받으므로 EditMode에서 전수 검증할 수 있다.
-/// (docs/Blob_Combat_Baseline.md 7절)
+/// (docs/Dokkaebi_Combat_Baseline.md 7절)
 /// </summary>
 public sealed class StatusEffectState
 {
@@ -66,7 +66,7 @@ public sealed class StatusEffectState
     /// <param name="baseDamage">부여 시점의 기본 피해. 초당 피해의 기준이 된다.</param>
     /// <param name="durationScale">
     /// 지속시간 배율. 보조 젬 「치명적인 중독」·「깊은 상처」 같은 것이 여기를 건드린다.
-    /// 【투사체 수명과 다른 축이다.】 (docs/Blob_Audit.md D2)
+    /// 【투사체 수명과 다른 축이다.】 (docs/Dokkaebi_Audit.md D2)
     /// </param>
     public void Apply(StatusEffectType type, float baseDamage, float durationScale = 1f)
     {

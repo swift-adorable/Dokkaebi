@@ -1,6 +1,6 @@
 using NUnit.Framework;
 
-namespace Blob.Tests
+namespace Dokkaebi.Tests
 {
     /// <summary>
     /// 합성 발사가 SocketedBuild → WeaponModifiers 경로에서 실제로 성립하는지 검증한다.

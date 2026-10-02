@@ -67,6 +67,6 @@
         "*.sln": "*.csproj",
         "*.slnx": "*.csproj"
     },
-    "dotnet.defaultSolution": "Blob.slnx",
+    "dotnet.defaultSolution": "Dokkaebi.slnx",
     "dotnet.enableWorkspaceBasedDevelopment": false
 }

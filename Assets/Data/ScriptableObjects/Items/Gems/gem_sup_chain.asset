@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5f9766db0f8594e349438cc979f7b6fe, type: 3}
   m_Name: gem_sup_chain
-  m_EditorClassIdentifier: Blob.Runtime::ItemDefinition
+  m_EditorClassIdentifier: Dokkaebi.Runtime::ItemDefinition
   id: gem_sup_chain
   displayName: "\uC5F0\uC1C4"
   description: "\uC801\uC911 \uD6C4 \uB2E4\uB978 \uC801\uC5D0\uAC8C \uC7AC\uC720\uB3C4\uB41C\uB2E4.

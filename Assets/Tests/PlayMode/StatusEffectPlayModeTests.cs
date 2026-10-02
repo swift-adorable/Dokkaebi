@@ -3,7 +3,7 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace Blob.Tests
+namespace Dokkaebi.Tests
 {
     /// <summary>
     /// 상태이상이 실제 런타임에서 걸리고, 틱하고, 죽음으로 이어지는지 검증한다. (로드맵 5-F)

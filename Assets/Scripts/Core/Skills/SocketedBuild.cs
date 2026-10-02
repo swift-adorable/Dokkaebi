@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 /// <summary>
 /// 지금 소켓에 끼워져 있는 젬들. RunSkillState를 대체한다.
-/// (docs/Blob_Skill_System.md 11·12절)
+/// (docs/Dokkaebi_Skill_System.md 11·12절)
 ///
 /// RunSkillState와의 차이 —
 ///   · 「획득」이 없다. 줍는 것은 가방이 하고, 여기는 【끼운 것】만 안다.
@@ -594,7 +594,7 @@ public class SocketedBuild
     /// 【자기 핵심 젬은 못 걸고, 다른 발생원이 걸어 준 것을 이용한다.】
     /// 다른 발생원은 2번째 핵심 젬(Lv7)이거나 「화염 조율」 같은 속성 전환이다.
     /// 그래서 문서의 「단독으로는 전혀 작동하지 않는다」가 그대로 유지된다.
-    /// (docs/Blob_Audit.md D3)
+    /// (docs/Dokkaebi_Audit.md D3)
     /// </summary>
     public bool IsStatusBlockedForCore(int coreIndex, StatusEffectType status)
     {

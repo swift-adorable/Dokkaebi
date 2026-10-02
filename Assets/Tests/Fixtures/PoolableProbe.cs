@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Blob.Tests
+namespace Dokkaebi.Tests
 {
     /// <summary>
     /// IPoolable 호출 횟수를 기록하는 테스트 전용 컴포넌트.

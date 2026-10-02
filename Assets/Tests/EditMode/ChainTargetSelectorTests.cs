@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine;
 
-namespace Blob.Tests
+namespace Dokkaebi.Tests
 {
     /// <summary>
     /// Chain 대상 선정 테스트. (v5 §10 "같은 시퀀스에서 동일 적 재타격 불가")

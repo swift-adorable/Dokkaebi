@@ -1,9 +1,9 @@
 using NUnit.Framework;
 
-namespace Blob.Tests
+namespace Dokkaebi.Tests
 {
     /// <summary>
-    /// 기폭(원소 작렬)과 잔류물 대응표 테스트. (docs/Blob_Skill_System.md 5-2절)
+    /// 기폭(원소 작렬)과 잔류물 대응표 테스트. (docs/Dokkaebi_Skill_System.md 5-2절)
     /// </summary>
     public class DetonationResolverTests
     {

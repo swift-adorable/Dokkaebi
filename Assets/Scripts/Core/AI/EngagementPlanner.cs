@@ -48,7 +48,7 @@ public struct EngagementPlan
 
 /// <summary>
 /// 교전 판단. 거리·차례·재장전만 보고 「붙을까 / 돌까 / 물러날까 / 쏠까」를 정한다.
-/// (docs/Blob_Hunting_System.md — 적은 무작정 달라붙지 않는다)
+/// (docs/Dokkaebi_Hunting_System.md — 적은 무작정 달라붙지 않는다)
 ///
 /// 왜 순수 정적 클래스인가 —
 /// 이 판단이 곧 전투의 체감이다. 씬을 띄우지 않고 거리별로 전수 검증할 수 있어야

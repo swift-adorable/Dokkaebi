@@ -2,7 +2,7 @@ using UnityEngine;
 
 /// <summary>
 /// 소모품 하나가 하는 일. ItemDefinition이 들고 있는 값 묶음이다.
-/// (docs/Blob_Consumable_System.md 8절)
+/// (docs/Dokkaebi_Consumable_System.md 8절)
 ///
 /// 【전용 효과 필드를 계속 늘리지 않는다.】 강화·저항의 「이동 +25%」 같은
 /// 것은 상태이상으로 표현하기로 이미 정해 두었다(8절). 그런데 지금

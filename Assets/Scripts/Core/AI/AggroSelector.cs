@@ -71,7 +71,7 @@ public struct AggroMemory
 }
 
 /// <summary>
-/// 누구를 노릴 것인가. (docs/Blob_Hunting_System.md 4절)
+/// 누구를 노릴 것인가. (docs/Dokkaebi_Hunting_System.md 4절)
 ///
 /// 【핵심 규칙 — 먼저 문 대상을 계속 문다.】
 /// 문서 4절: "먼저 어그로를 끈 대상이 있으면 자기가 공격당해도 그 대상을 우선한다."

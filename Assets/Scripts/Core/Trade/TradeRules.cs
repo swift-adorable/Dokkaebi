@@ -25,7 +25,7 @@ public enum TradeError
 }
 
 /// <summary>
-/// 【사고파는 값과 규칙.】 MonoBehaviour 없는 순수 클래스다. (docs/Blob_Bunker_System.md 3절)
+/// 【사고파는 값과 규칙.】 MonoBehaviour 없는 순수 클래스다. (docs/Dokkaebi_Bunker_System.md 3절)
 ///
 /// 【전부 아니면 전혀】 — 골드만 빠지고 물건이 안 들어오거나, 물건만 빠지고
 /// 골드가 안 들어오는 경우를 만들지 않는다. 모든 검사를 먼저 하고 옮긴다.

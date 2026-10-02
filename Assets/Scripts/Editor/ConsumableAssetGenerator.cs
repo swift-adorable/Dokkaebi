@@ -3,7 +3,7 @@ using UnityEditor;
 using UnityEngine;
 
 /// <summary>
-/// 소모품 에셋 생성. (로드맵 8-A · docs/Blob_Consumable_System.md)
+/// 소모품 에셋 생성. (로드맵 8-A · docs/Dokkaebi_Consumable_System.md)
 ///
 /// 【이번에 만드는 것은 셋뿐이다 — 회복 · 해제 · 음료와 음식.】
 /// 강화와 저항은 「이동 +25%, 120초」처럼 이로운 상태를 걸어야 하는데
@@ -71,7 +71,7 @@ public static class ConsumableAssetGenerator
         // 소형 125/25 = 5회 · 환단 175/25 = 7회 · 대형 400/40 = 10회.
         // [확인됨 — 아이템 #15 · #16 · #17]
         //
-        // 회복량도 그대로 가져온다. Blob의 체력은 100 고정이고 덕코프
+        // 회복량도 그대로 가져온다. Dokkaebi의 체력은 100 고정이고 덕코프
         // 생명력의 기준값은 위키에 없지만(확인 불가), 12 / 20 / 35라는
         // 값 자체가 「한 방에 다 채우지 못한다」를 뜻하므로 그 비율이
         // 옮겨야 할 것이다. 한 번에 다 차면 「지금 쓸까 아꼈다 쓸까」가 없다.
@@ -225,7 +225,7 @@ public static class ConsumableAssetGenerator
         return list;
     }
 
-    [MenuItem("Blob/Items/소모품 에셋 생성")]
+    [MenuItem("Dokkaebi/Items/소모품 에셋 생성")]
     public static void Generate()
     {
         EnsureFolder(Root);
@@ -239,7 +239,7 @@ public static class ConsumableAssetGenerator
         AssetDatabase.Refresh();
 
         Debug.Log($"[ConsumableAssetGenerator] 소모품 {rows.Count}종 생성 완료 — "
-                  + "「Blob/Playtest/검증 카탈로그 생성」도 다시 실행하십시오.");
+                  + "「Dokkaebi/Playtest/검증 카탈로그 생성」도 다시 실행하십시오.");
     }
 
     /// <summary>내구도를 깎아 여러 번 쓰는 환단.</summary>

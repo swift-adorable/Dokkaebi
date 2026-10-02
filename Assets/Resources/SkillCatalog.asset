@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2ee04db315dea45c2b17a1d91bab13a8, type: 3}
   m_Name: SkillCatalog
-  m_EditorClassIdentifier: Blob.Runtime::SkillCatalog
+  m_EditorClassIdentifier: Dokkaebi.Runtime::SkillCatalog
   definitions:
   - {fileID: 11400000, guid: 00ecb7ccec4364bbc83afd7a2db56bf2, type: 2}
   - {fileID: 11400000, guid: 5e2a0d9a9f1a8426eb7d12c35825a554, type: 2}

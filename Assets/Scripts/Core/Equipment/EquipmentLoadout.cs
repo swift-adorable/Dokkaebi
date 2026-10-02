@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 /// <summary>
 /// 착용 상태. 슬롯 8칸. MonoBehaviour 의존이 없는 순수 클래스다.
-/// (docs/Blob_Equipment_System.md 1절)
+/// (docs/Dokkaebi_Equipment_System.md 1절)
 /// </summary>
 public class EquipmentLoadout
 {
@@ -116,7 +116,7 @@ public class EquipmentLoadout
     /// 세트 한계치 판정. 규칙 부여가 아니라 【누적 수치】다.
     ///
     /// 전부 아니면 전무가 아니라서 「장비 1점 + 소모품 1개」 조합이 성립한다.
-    /// (docs/Blob_Equipment_System.md 5-3절)
+    /// (docs/Dokkaebi_Equipment_System.md 5-3절)
     /// </summary>
     public int ContainmentWard(int consumableBonus = 0)
     {

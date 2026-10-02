@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using NUnit.Framework;
 
-namespace Blob.Tests
+namespace Dokkaebi.Tests
 {
     /// <summary>
     /// 세이브 파일 쓰기·읽기. (로드맵 8-F)
@@ -18,7 +18,7 @@ namespace Blob.Tests
         [SetUp]
         public void SetUp()
         {
-            folder = Path.Combine(Path.GetTempPath(), "BlobSaveTests_" + System.Guid.NewGuid().ToString("N"));
+            folder = Path.Combine(Path.GetTempPath(), "DokkaebiSaveTests_" + System.Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(folder);
             path = Path.Combine(folder, SaveStore.FileName);
         }
@@ -327,5 +327,34 @@ namespace Blob.Tests
             StringAssert.DoesNotContain("\"credits\"", json);
             StringAssert.Contains("\"gold\"", json);
         }
-    }
+    
+        /// <summary>코드네임을 바꾸기 전의 세이브가 새 이름으로 옮겨진다. (결정 2-46)</summary>
+        [Test]
+        public void 옛_이름의_세이브는_새_이름으로_옮겨진다()
+        {
+            string legacy = Path.Combine(folder, SaveStore.LegacyFileName);
+            SaveStore.Write(legacy, Sample(level: 9));
+
+            SaveStore.MoveLegacy(legacy, path);
+
+            Assert.IsFalse(File.Exists(legacy), "옛 파일이 그대로 남았습니다.");
+            Assert.AreEqual(SaveLoadResult.Main, SaveStore.Read(path, out SaveData data));
+            Assert.AreEqual(9, data.level);
+        }
+
+        /// <summary>새 이름의 세이브가 있으면 옛 파일로 덮어쓰지 않는다.</summary>
+        [Test]
+        public void 새_세이브가_있으면_옛_파일을_옮기지_않는다()
+        {
+            string legacy = Path.Combine(folder, SaveStore.LegacyFileName);
+            SaveStore.Write(legacy, Sample(level: 9));
+            SaveStore.Write(path, Sample(level: 3));
+
+            SaveStore.MoveLegacy(legacy, path);
+
+            Assert.IsTrue(File.Exists(legacy), "새 세이브가 있는데 옛 파일을 건드렸습니다.");
+            SaveStore.Read(path, out SaveData data);
+            Assert.AreEqual(3, data.level);
+        }
+}
 }

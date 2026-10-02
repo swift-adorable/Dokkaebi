@@ -10,7 +10,7 @@ using UnityEngine;
 /// 무엇보다 【원거리 적이 없으면 플레이어의 방어 기술을 확인할 수 없다】 —
 /// 예비동작을 보고 대시로 피하는 것도, 거리 절반 규칙(×0.5)도.
 ///
-/// 수치는 docs/Blob_Combat_Baseline.md 5절 「적 유형」 표를 그대로 쓴다.
+/// 수치는 docs/Dokkaebi_Combat_Baseline.md 5절 「적 유형」 표를 그대로 쓴다.
 /// 7단계에서 유형 9종을 데이터(ScriptableObject)로 옮기면 이 생성기는 지운다.
 /// 지금은 「플레이 검증을 할 수 있는 최소한」이 목적이다.
 /// </summary>
@@ -27,7 +27,7 @@ public static class EnemyPrefabGenerator
     public const float SpitterAttackRange = 9f;
     public const float SpitterPreferredDistance = 7f;
 
-    [MenuItem("Blob/Enemy/원거리 적 프리팹 생성")]
+    [MenuItem("Dokkaebi/Enemy/원거리 적 프리팹 생성")]
     public static void GenerateRanged()
     {
         var source = AssetDatabase.LoadAssetAtPath<GameObject>(Source);

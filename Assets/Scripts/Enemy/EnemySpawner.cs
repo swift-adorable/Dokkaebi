@@ -9,7 +9,7 @@ public class EnemySpawner : MonoBehaviour
     [SerializeField] private GameObject enemyPrefab;
 
     [Tooltip("원거리 적 프리팹. 비워 두면 근접만 나온다. "
-             + "「Blob/Enemy/원거리 적 프리팹 생성」으로 만든다.")]
+             + "「Dokkaebi/Enemy/원거리 적 프리팹 생성」으로 만든다.")]
     [SerializeField] private GameObject rangedEnemyPrefab;
 
     [Tooltip("원거리 적이 나올 비율(0~1). 근접만 나오면 전투가 "
@@ -98,7 +98,7 @@ public class EnemySpawner : MonoBehaviour
         if (catalog == null || catalog.FilledCount == 0)
         {
             GameLogger.Warning("[EnemySpawner] 유형 카탈로그가 없습니다. "
-                               + "「Blob/Enemy/유형 프리팹 카탈로그 생성」을 실행하십시오. "
+                               + "「Dokkaebi/Enemy/유형 프리팹 카탈로그 생성」을 실행하십시오. "
                                + "지금은 근접·원거리 둘만 나옵니다.");
 
             catalog = null;

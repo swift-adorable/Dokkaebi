@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5f9766db0f8594e349438cc979f7b6fe, type: 3}
   m_Name: gem_sup_pursuit
-  m_EditorClassIdentifier: Blob.Runtime::ItemDefinition
+  m_EditorClassIdentifier: Dokkaebi.Runtime::ItemDefinition
   id: gem_sup_pursuit
   displayName: "\uCD94\uACA9"
   description: "\uD0C4\uD658\uC774 \uC801\uC744 \uCD94\uC801\uD55C\uB2E4. \uC0C1\uD0DC\uC774\uC0C1\uC5D0

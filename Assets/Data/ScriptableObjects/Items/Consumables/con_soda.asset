@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5f9766db0f8594e349438cc979f7b6fe, type: 3}
   m_Name: con_soda
-  m_EditorClassIdentifier: Blob.Runtime::ItemDefinition
+  m_EditorClassIdentifier: Dokkaebi.Runtime::ItemDefinition
   id: con_soda
   displayName: "\uC2DD\uD61C"
   description: "\uAE40\uC774 \uBE60\uC84C\uB2E4. \uADF8\uB798\uB3C4 \uBB3C\uC774\uB2E4."

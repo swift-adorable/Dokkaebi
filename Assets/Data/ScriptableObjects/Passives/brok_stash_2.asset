@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ea17f4877b7bf48069bd560938e26492, type: 3}
   m_Name: brok_stash_2
-  m_EditorClassIdentifier: Blob.Runtime::PassiveNode
+  m_EditorClassIdentifier: Dokkaebi.Runtime::PassiveNode
   id: brok_stash_2
   displayName: "\uCC3D\uACE0 \uC815\uB9AC 2"
   description: "\uCC3D\uACE0 \uCE78 +20."

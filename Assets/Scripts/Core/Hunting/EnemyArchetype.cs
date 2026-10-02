@@ -1,5 +1,5 @@
 /// <summary>
-/// 적 유형 9종. (docs/Blob_Hunting_System.md 1절)
+/// 적 유형 9종. (docs/Dokkaebi_Hunting_System.md 1절)
 ///
 /// 【유형은 고정 수치를 갖는다.】
 /// 장(Stage)이 올라간다고 같은 유형의 체력에 배율을 곱하지 않는다.

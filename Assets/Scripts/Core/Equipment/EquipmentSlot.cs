@@ -1,6 +1,6 @@
 /// <summary>
 /// 착용 슬롯. 무기 1 + 방어 5 + 각인 2 = 8칸.
-/// (docs/Blob_Equipment_System.md 1절)
+/// (docs/Dokkaebi_Equipment_System.md 1절)
 /// </summary>
 public enum EquipmentSlot
 {

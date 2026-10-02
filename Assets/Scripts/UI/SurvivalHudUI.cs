@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 /// <summary>
 /// 화면 좌상단의 체력 · 수분 · 에너지, 그리고 그 아래의 상태 줄.
-/// (docs/Blob_Survival_System.md 7절)
+/// (docs/Dokkaebi_Survival_System.md 7절)
 ///
 /// 【덕코프와 같은 모양으로 둔다.】
 ///   하트 + 긴 막대 하나 · 그 오른쪽에 물방울 · 번개 원형 게이지 둘.
@@ -656,7 +656,7 @@ public class SurvivalHudUI : MonoBehaviour
     /// </summary>
     private static Health FindPlayerHealth()
     {
-        var controller = FindAnyObjectByType<BlobController>(FindObjectsInactive.Exclude);
+        var controller = FindAnyObjectByType<DokkaebiController>(FindObjectsInactive.Exclude);
 
         return controller != null ? controller.GetComponent<Health>() : null;
     }

@@ -3,7 +3,7 @@ using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
 
-namespace Blob.Tests
+namespace Dokkaebi.Tests
 {
     /// <summary>
     /// 전리품 칸과 추첨.

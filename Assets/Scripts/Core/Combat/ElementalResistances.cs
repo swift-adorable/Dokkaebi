@@ -5,7 +5,7 @@ using UnityEngine;
 /// 속성 저항 배율 묶음. 1.0이 기본이고, 0.5면 절반만 받고, 2.0이면 두 배로 받는다.
 ///
 /// MonoBehaviour 의존이 없는 순수 구조체다. EditMode 테스트 대상.
-/// (docs/Blob_Combat_Baseline.md 3-2절)
+/// (docs/Dokkaebi_Combat_Baseline.md 3-2절)
 /// </summary>
 [Serializable]
 public struct ElementalResistances

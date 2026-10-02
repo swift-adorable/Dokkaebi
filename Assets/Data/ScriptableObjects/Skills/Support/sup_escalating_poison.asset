@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6f1826eda630a40a7b8b37017e52d7bc, type: 3}
   m_Name: sup_escalating_poison
-  m_EditorClassIdentifier: Blob.Runtime::SkillDefinition
+  m_EditorClassIdentifier: Dokkaebi.Runtime::SkillDefinition
   id: sup_escalating_poison
   displayName: "\uACA9\uD654\uB418\uB294 \uC911\uB3C5"
   description: "\uC911\uB3C5 \uC911\uCCA9 \uC218\uC5D0 \uBE44\uB840\uD574 \uD53C\uD574\uAC00

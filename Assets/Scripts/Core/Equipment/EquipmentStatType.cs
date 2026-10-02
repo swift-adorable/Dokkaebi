@@ -1,5 +1,5 @@
 /// <summary>
-/// 장비 옵션 항목. (docs/Blob_Equipment_System.md 4절)
+/// 장비 옵션 항목. (docs/Dokkaebi_Equipment_System.md 4절)
 ///
 /// enum + 값 쌍으로 두는 이유 — 합산·표시·세이브가 전부 단순해진다.
 /// 필드로 나열하면 옵션 하나를 추가할 때마다 세 곳을 고쳐야 한다.
@@ -66,7 +66,7 @@ public enum EquipmentStatType
 
     // ── 공격 ──────────────────────────────────────────────────────────
     // 무기가 정한 기본값에 곱해지는 보정이다. 전부 가산 합산한다.
-    // (docs/Blob_Combat_Baseline.md 2절 — "모든 증가는 가산 합산")
+    // (docs/Dokkaebi_Combat_Baseline.md 2절 — "모든 증가는 가산 합산")
     //
     // ※ 이 축은 각인과 무기 부착물만 건드린다.
     //   방어구가 피해를 올리면 「무기 = 화력 / 방어구 = 생존」 경계가 무너진다.

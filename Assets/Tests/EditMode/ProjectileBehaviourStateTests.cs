@@ -1,6 +1,6 @@
 using NUnit.Framework;
 
-namespace Blob.Tests
+namespace Dokkaebi.Tests
 {
     /// <summary>
     /// 투사체 행동 우선순위 엔진 테스트.

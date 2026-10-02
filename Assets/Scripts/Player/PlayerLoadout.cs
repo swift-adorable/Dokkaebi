@@ -10,7 +10,7 @@ using UnityEngine;
 /// 왜 필요했는가 —
 /// 6-C에서 장비 82종을 만들었지만 PlayerWeapon은 프리팹 하드코딩 값으로 쏘고,
 /// 과중량은 UI 문구만 바꾸고, 방어도는 아무 데도 전달되지 않았다.
-/// 전부 「코드는 있는데 부르는 곳이 없는」 상태였다. (docs/Blob_Audit.md A절)
+/// 전부 「코드는 있는데 부르는 곳이 없는」 상태였다. (docs/Dokkaebi_Audit.md A절)
 /// </summary>
 [RequireComponent(typeof(Health))]
 public class PlayerLoadout : MonoBehaviour

@@ -2,7 +2,7 @@ using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
 
-namespace Blob.Tests
+namespace Dokkaebi.Tests
 {
     /// <summary>
     /// 아이템 규칙 — 태그 · 내구도 · 난이도. (로드맵 6-L)

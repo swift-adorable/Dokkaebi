@@ -11,7 +11,7 @@ using UnityEngine;
 ///   4. 옮기고 싶으면 재활용한다 — 손실 없이 목록으로 돌아간다
 ///
 /// 【모바일이라 바꾼 것】 덕코프는 마우스로 자리를 고르고 Q/E로 돌린다.
-/// Blob에는 마우스가 없으므로 【건물 그림자가 플레이어 앞에 붙어 다닌다】 —
+/// Dokkaebi에는 마우스가 없으므로 【건물 그림자가 플레이어 앞에 붙어 다닌다】 —
 /// 조이스틱으로 걸어가 자리를 잡고, 화면 아래 「회전 · 배치 · 취소」를 누른다.
 /// </summary>
 public class BunkerBuildings : MonoBehaviour
@@ -228,8 +228,8 @@ public class BunkerBuildings : MonoBehaviour
 
         if (player == null)
         {
-            var blob = FindAnyObjectByType<BlobController>(FindObjectsInactive.Exclude);
-            player = blob != null ? blob.transform : null;
+            var dokkaebi = FindAnyObjectByType<DokkaebiController>(FindObjectsInactive.Exclude);
+            player = dokkaebi != null ? dokkaebi.transform : null;
         }
 
         BuildingPose pose = CurrentPose();

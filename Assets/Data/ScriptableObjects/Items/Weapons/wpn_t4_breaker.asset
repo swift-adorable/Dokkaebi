@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6d5ed47cc3bec4828a0c77c2c18f1c47, type: 3}
   m_Name: wpn_t4_breaker
-  m_EditorClassIdentifier: Blob.Runtime::WeaponDefinition
+  m_EditorClassIdentifier: Dokkaebi.Runtime::WeaponDefinition
   id: wpn_t4_breaker
   displayName: "\uD751\uAC01\uAD81"
   description: "\uBB3C\uC18C \uBFD4\uC744 \uB304 \uAC01\uAD81. \uD55C \uBC1C\uC774 \uBB34\uAC81\uB2E4. \uB4E4\uACE0 \uB6F0\uB294 \uAC83\uC740 \uD3EC\uAE30\uD574\uC57C \uD55C\uB2E4."

@@ -24,7 +24,7 @@ public class PlayerWeapon : MonoBehaviour
     /// 착용 무기가 정한 사격 성능. PlayerLoadout이 장비가 바뀔 때마다 넣어준다.
     ///
     /// 기본값을 맨몸으로 두는 이유 — 무기를 잃어도 조작이 죽지 않아야
-    /// 시체를 회수하러 갈 수 있다. (docs/Blob_Progression_System.md 6절)
+    /// 시체를 회수하러 갈 수 있다. (docs/Dokkaebi_Progression_System.md 6절)
     /// </summary>
     private WeaponProfile profile = WeaponProfile.Unarmed;
 

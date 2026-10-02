@@ -4,7 +4,7 @@ using System;
 /// 피격자의 방어 정보. 플레이어와 적이 공용으로 쓴다.
 ///
 /// 머리 방어도는 원거리 피격에, 몸통 방어도는 근접 피격에 적용된다.
-/// 두 값을 합산하지 않는다. (docs/Blob_Equipment_System.md 1절)
+/// 두 값을 합산하지 않는다. (docs/Dokkaebi_Equipment_System.md 1절)
 /// </summary>
 [Serializable]
 public struct DefenceProfile

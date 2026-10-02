@@ -27,7 +27,7 @@ public static class SkillGemAssetGenerator
 
     private static readonly int[] ValueByCategory = { 420, 180, 300, 360 };
 
-    [MenuItem("Blob/Skill/젬 아이템 에셋 생성")]
+    [MenuItem("Dokkaebi/Skill/젬 아이템 에셋 생성")]
     public static void Generate()
     {
         SkillCatalog catalog = SkillCatalog.Load();
@@ -36,7 +36,7 @@ public static class SkillGemAssetGenerator
         {
             Debug.LogError(
                 "[SkillGemAssetGenerator] SkillCatalog이 비어 있습니다. " +
-                "먼저 Blob > Skill > 카탈로그 다시 만들기 를 실행하십시오.");
+                "먼저 Dokkaebi > Skill > 카탈로그 다시 만들기 를 실행하십시오.");
             return;
         }
 
@@ -115,7 +115,7 @@ public static class SkillGemAssetGenerator
     }
 
     /// <summary>Resources/SkillGemCatalog.asset을 만들거나 갱신한다.</summary>
-    [MenuItem("Blob/Skill/젬 카탈로그 다시 만들기")]
+    [MenuItem("Dokkaebi/Skill/젬 카탈로그 다시 만들기")]
     public static void RebuildCatalogFromFolder()
     {
         var gems = new List<ItemDefinition>();

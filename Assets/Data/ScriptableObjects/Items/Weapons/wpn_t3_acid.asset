@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6d5ed47cc3bec4828a0c77c2c18f1c47, type: 3}
   m_Name: wpn_t3_acid
-  m_EditorClassIdentifier: Blob.Runtime::WeaponDefinition
+  m_EditorClassIdentifier: Dokkaebi.Runtime::WeaponDefinition
   id: wpn_t3_acid
   displayName: "\uD5A5\uAC01\uAD81"
   description: "\uC6B0\uB9AC \uC18C\uBFD4\uC744 \uB304 \uAC01\uAD81. \uAC11\uC637 \uD2C8\uC744 \uBE44\uC9D1\uACE0 \uB4E4\uC5B4\uAC04\uB2E4."

@@ -16,7 +16,7 @@ public static class SkillCatalogBuilder
 {
     private const string CatalogAssetPath = "Assets/Resources/SkillCatalog.asset";
 
-    [MenuItem("Blob/Skill/카탈로그 다시 만들기")]
+    [MenuItem("Dokkaebi/Skill/카탈로그 다시 만들기")]
     public static void Rebuild()
     {
         SkillCatalog catalog = LoadOrCreateCatalog();

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using NUnit.Framework;
 
-namespace Blob.Tests
+namespace Dokkaebi.Tests
 {
     /// <summary>
     /// 도감(해금 기록)과 젬 드롭 규칙. (Skill_System.md 11-2 · 11-3절)

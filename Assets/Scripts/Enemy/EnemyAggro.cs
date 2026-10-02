@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// 이 개체가 지금 누구를 노리는가. (docs/Blob_Hunting_System.md 4절)
+/// 이 개체가 지금 누구를 노리는가. (docs/Dokkaebi_Hunting_System.md 4절)
 ///
 /// 판단은 AggroSelector(순수 클래스)가 하고, 여기서는
 /// 【언제 다시 판단할지】와 【후보를 모으는 일】만 맡는다.

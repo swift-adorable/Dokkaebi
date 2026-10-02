@@ -1,9 +1,9 @@
 using NUnit.Framework;
 
-namespace Blob.Tests
+namespace Dokkaebi.Tests
 {
     /// <summary>
-    /// 수분 · 에너지. (docs/Blob_Survival_System.md · 결정 2-32)
+    /// 수분 · 에너지. (docs/Dokkaebi_Survival_System.md · 결정 2-32)
     ///
     /// 지켜야 할 것 —
     ///   1. 수분이 에너지보다 먼저 바닥난다. 동시에 비면 게이지가 하나인 것과 같다.
@@ -118,7 +118,7 @@ namespace Blob.Tests
         [Test]
         public void 탈수는_이동을_깎고_음식을_덜_차게_한다()
         {
-            // 덕코프 「체력(스태미나) 회복 −70%」 그대로. Blob은 스태미나를
+            // 덕코프 「체력(스태미나) 회복 −70%」 그대로. Dokkaebi는 스태미나를
             // 에너지에 합쳤으므로 에너지가 차는 양에 붙는다.
             var state = new SurvivalState();
 
@@ -196,7 +196,7 @@ namespace Blob.Tests
         [Test]
         public void 굶주림_자체는_회복을_막지_않는다()
         {
-            // 덕코프의 배고픔은 스태미나 회복을 깎지만, Blob은 그 축이 에너지라
+            // 덕코프의 배고픔은 스태미나 회복을 깎지만, Dokkaebi는 그 축이 에너지라
             // 그대로 옮기면 자기 자신을 가리켜 빠져나올 수 없는 나선이 된다.
             var state = new SurvivalState();
 

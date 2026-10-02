@@ -79,7 +79,7 @@ public static class LootAssetGenerator
         };
     }
 
-    [MenuItem("Blob/Loot/전리품 에셋 생성")]
+    [MenuItem("Dokkaebi/Loot/전리품 에셋 생성")]
     public static void Generate()
     {
         EnsureFolder("Assets/Data");

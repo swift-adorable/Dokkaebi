@@ -35,7 +35,7 @@ public struct SocketCapacity
 }
 
 /// <summary>
-/// 레벨 → 개방된 슬롯. (docs/Blob_Skill_System.md 12-1절)
+/// 레벨 → 개방된 슬롯. (docs/Dokkaebi_Skill_System.md 12-1절)
 ///
 /// 레벨업의 보상이 「스킬 선택」에서 「소켓 개방」으로 바뀌었다.
 /// 선택창은 뜨지 않는다. 자리가 하나 열릴 뿐이고, 무엇을 끼울지는

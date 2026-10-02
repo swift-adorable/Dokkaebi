@@ -23,7 +23,7 @@ public class GameManager : Singleton<GameManager>
     ///
     /// 장(Stage)은 「무엇을 만나는가」만 정한다 — 구역이 바뀐다고
     /// 적 체력에 배율을 곱하지 않는다. 배율은 이 축 하나뿐이다.
-    /// (docs/Blob_Combat_Baseline.md 「적 유형」)
+    /// (docs/Dokkaebi_Combat_Baseline.md 「적 유형」)
     /// </summary>
     public DifficultyLevel Difficulty
     {

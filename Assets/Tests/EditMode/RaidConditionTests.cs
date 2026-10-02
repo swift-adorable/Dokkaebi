@@ -2,10 +2,10 @@ using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine;
 
-namespace Blob.Tests
+namespace Dokkaebi.Tests
 {
     /// <summary>
-    /// 파밍 조건 계약 테스트. (docs/Blob_Hunting_System.md 5·9절)
+    /// 파밍 조건 계약 테스트. (docs/Dokkaebi_Hunting_System.md 5·9절)
     ///
     /// 【여기서 강제하는 것】
     ///   1. 저항은 곱해지지 않는다 — 가장 낮은 배율 하나만

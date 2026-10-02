@@ -9,9 +9,9 @@ using UnityEngine;
 /// Resources.LoadAll이 닿지 않는다. SkillGemCatalog · PlaytestCatalog와
 /// 같은 방식으로, 참조만 모은 에셋 하나를 Resources에 둔다.
 ///
-/// 「Blob/Items/아이템 카탈로그 생성」이 채운다. 아이템을 추가하면 다시 실행한다.
+/// 「Dokkaebi/Items/아이템 카탈로그 생성」이 채운다. 아이템을 추가하면 다시 실행한다.
 /// </summary>
-[CreateAssetMenu(fileName = "ItemCatalog", menuName = "Blob/Item Catalog")]
+[CreateAssetMenu(fileName = "ItemCatalog", menuName = "Dokkaebi/Item Catalog")]
 public class ItemCatalog : ScriptableObject
 {
     public const string ResourcePath = "ItemCatalog";

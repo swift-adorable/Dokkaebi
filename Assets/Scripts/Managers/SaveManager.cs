@@ -9,9 +9,9 @@ using UnityEngine.SceneManagement;
 /// 덕코프는 파밍 **전과 후에만** 자동 저장한다. 파밍 중에 끄면 그 파밍에서
 /// 얻은 것도 잃은 것도 없다 — 롤백이다. [커뮤니티 확인]
 ///
-///   덕코프        Blob (지금)
+///   덕코프        Dokkaebi (지금)
 ///   파밍 전       벙커 → 파밍 출발  ← 저장한다 (SceneFlow.Depart) — 들고 가는 것까지
-///   파밍 후       사망             ← 저장한다 (BlobController.HandleDied)
+///   파밍 후       사망             ← 저장한다 (DokkaebiController.HandleDied)
 ///                 철수             ← 저장한다 (SceneFlow.Extract — 지금은 디버그 「즉시 철수」)
 ///   벙커에서의 일  창고·상점·가방을 닫을 때 ← 저장한다 (벙커에서만)
 ///
@@ -305,7 +305,7 @@ public static class SaveManager
         if (catalog == null)
         {
             GameLogger.Error("[Save] Resources/ItemCatalog가 없어 각인을 되살리지 못했습니다. "
-                             + "「Blob/Items/아이템 카탈로그 생성」을 실행하십시오.");
+                             + "「Dokkaebi/Items/아이템 카탈로그 생성」을 실행하십시오.");
             return;
         }
 

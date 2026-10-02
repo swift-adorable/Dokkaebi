@@ -1,6 +1,6 @@
 using NUnit.Framework;
 
-namespace Blob.Tests
+namespace Dokkaebi.Tests
 {
     /// <summary>
     /// 충돌 우선순위 큐 테스트. (v5 §10)

@@ -9,7 +9,7 @@ using UnityEngine;
 ///
 /// 이 한 항이 만드는 것 — 카이팅이 공짜가 아니게 되고,
 /// 보조 젬 대가 통화 「유효 사거리」가 실질적 의미를 갖는다.
-/// (docs/Blob_Combat_Baseline.md 4절)
+/// (docs/Dokkaebi_Combat_Baseline.md 4절)
 /// </summary>
 public static class RangeFalloff
 {

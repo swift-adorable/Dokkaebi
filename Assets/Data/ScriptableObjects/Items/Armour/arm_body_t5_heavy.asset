@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 680dd67e5b9a24d638effbb25e4da4c2, type: 3}
   m_Name: arm_body_t5_heavy
-  m_EditorClassIdentifier: Blob.Runtime::EquipmentDefinition
+  m_EditorClassIdentifier: Dokkaebi.Runtime::EquipmentDefinition
   id: arm_body_t5_heavy
   displayName: "\uB450\uC815\uAC11 (\uC911\uAC11)"
   description: "\uD310\uC744 \uACB9\uCCD0 \uB367\uB314\uB2E4. \uC544\uBB34\uAC83\uB3C4

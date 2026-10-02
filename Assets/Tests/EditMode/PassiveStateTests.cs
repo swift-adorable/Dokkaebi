@@ -3,10 +3,10 @@ using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
 
-namespace Blob.Tests
+namespace Dokkaebi.Tests
 {
     /// <summary>
-    /// 패시브 — 영구 성장. (docs/Blob_Passive_System.md)
+    /// 패시브 — 영구 성장. (docs/Dokkaebi_Passive_System.md)
     ///
     /// 【이 파일이 지키는 것 두 가지】
     ///  1. 패시브가 전투 수치를 주지 않는다. 문서에만 적어 두면

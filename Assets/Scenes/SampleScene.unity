@@ -503,7 +503,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a6435da1059d34f0ba0690f76a710d6b, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Blob.Runtime::EnemySpawner
+  m_EditorClassIdentifier: Dokkaebi.Runtime::EnemySpawner
   enemyPrefab: {fileID: 372103695842319712, guid: 3de03b7729aac4122a5489d88880ddcc, type: 3}
   rangedEnemyPrefab: {fileID: 1437810378520409102, guid: 03193a9ea1739479ba18b70000d5a181, type: 3}
   rangedRatio: 0.35
@@ -512,6 +512,7 @@ MonoBehaviour:
   spawnRadius: 12
   spawnOnRingOnly: 1
   prewarmCount: 16
+  useArchetypes: 1
 --- !u!4 &455094754
 Transform:
   m_ObjectHideFlags: 0
@@ -679,8 +680,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b7093a4d5fc644c8ba7a2cc31e4b5af4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerStats
-  baseRequiredXP: 10
-  requiredXPGrowth: 5
+  experienceCoefficient: 40
 --- !u!114 &614111513
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -793,7 +793,7 @@ GameObject:
   - component: {fileID: 659170796}
   - component: {fileID: 659170797}
   m_Layer: 0
-  m_Name: Blob
+  m_Name: Dokkaebi
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -906,7 +906,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: eb77803238f50421bafbb1ac7f94864a, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BlobController
+  m_EditorClassIdentifier: Dokkaebi.Runtime::DokkaebiController
 --- !u!135 &659170787
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -981,7 +981,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d762bcec594e34f10bc489469d3a6eda, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Blob.Runtime::PlayerWeapon
+  m_EditorClassIdentifier: Dokkaebi.Runtime::PlayerWeapon
   bulletPrefab: {fileID: 9100672181249319323, guid: 070cefa67d75149e69ecff42b023fe67, type: 3}
   firePoint: {fileID: 0}
   firePointChildName: FirePoint
@@ -997,8 +997,9 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c8048b112a2bc4667bee723bc27caf9f, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Blob.Runtime::PlayerAbsorber
-  xpPerCorpse: 1
+  m_EditorClassIdentifier: Dokkaebi.Runtime::PlayerAbsorber
+  experiencePerCorpse: 10
+  goldPerCorpse: 4
 --- !u!114 &659170792
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1010,7 +1011,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 56d5819098f5b42ab80cadfdd90b62d0, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Blob.Runtime::PlayerDash
+  m_EditorClassIdentifier: Dokkaebi.Runtime::PlayerDash
   dashDistance: 5
   dashDuration: 0.15
   dashCooldown: 1
@@ -1025,7 +1026,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 55080e72294dd4309b3bddf8d2cf982a, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Blob.Runtime::PlayerAiming
+  m_EditorClassIdentifier: Dokkaebi.Runtime::PlayerAiming
   aimDeadzone: 0.1
   rotationSpeed: 900
 --- !u!114 &659170794
@@ -1039,7 +1040,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6b48eb3ce85c94309b448f35049e24e3, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Blob.Runtime::PlayerMovement
+  m_EditorClassIdentifier: Dokkaebi.Runtime::PlayerMovement
   moveSpeed: 5
 --- !u!114 &659170795
 MonoBehaviour:
@@ -1052,7 +1053,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6eb54cb3e7e8a4b4cac83c0d0bcbc4ca, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Blob.Runtime::DesktopInputSource
+  m_EditorClassIdentifier: Dokkaebi.Runtime::DesktopInputSource
   dashKey: 32
   absorbKey: 101
 --- !u!114 &659170796
@@ -1066,7 +1067,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3addb66c72c6e4042b64a26ae3c2c16f, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Blob.Runtime::Health
+  m_EditorClassIdentifier: Dokkaebi.Runtime::Health
   team: 0
   maxHealth: 10
   invulnerableDuration: 0.6
@@ -1083,7 +1084,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9ac8ccffd192940c18d05e54a8f4181c, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Blob.Runtime::PlayerLoadout
+  m_EditorClassIdentifier: Dokkaebi.Runtime::PlayerLoadout
   refreshInterval: 0.25
 --- !u!1 &671507352
 GameObject:

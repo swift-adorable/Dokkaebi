@@ -2,7 +2,7 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace Blob.Tests
+namespace Dokkaebi.Tests
 {
     /// <summary>PoolManager 단위 테스트.</summary>
     public class PoolManagerTests

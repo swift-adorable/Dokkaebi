@@ -98,7 +98,7 @@ public readonly struct LoadoutSnapshot
             loadout.GetDefinition(EquipmentSlot.Weapon) as WeaponDefinition, modifiers);
 
         // 최대 체력은 장비가 올리지 않는다. 각인만 깎는다.
-        // (docs/Blob_Combat_Baseline.md 1절 — 체력은 100 고정)
+        // (docs/Dokkaebi_Combat_Baseline.md 1절 — 체력은 100 고정)
         int maxHealth = Mathf.Clamp(
             CombatConstants.PlayerBaseHealth
                 + Mathf.RoundToInt(modifiers.Get(EquipmentStatType.MaxHealth)),

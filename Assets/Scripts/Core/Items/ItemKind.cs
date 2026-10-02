@@ -1,7 +1,7 @@
 /// <summary>
 /// 아이템의 종류. 장비·젬·전리품이 같은 인벤토리를 공유하므로
 /// "어디에 낄 수 있는가"를 이 축으로 구분한다.
-/// (docs/Blob_Equipment_System.md / Blob_Skill_System.md 11-1절)
+/// (docs/Dokkaebi_Equipment_System.md / Dokkaebi_Skill_System.md 11-1절)
 /// </summary>
 public enum ItemKind
 {

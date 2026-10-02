@@ -6,7 +6,7 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace Blob.Tests
+namespace Dokkaebi.Tests
 {
     /// <summary>
     /// 개발 전용 UI가 출시 빌드로 새어 나가지 않는가.
@@ -56,7 +56,7 @@ namespace Blob.Tests
             typeof(PlayerStats),
             typeof(GameManager),
             typeof(EnemySpawner),
-            typeof(BlobController)
+            typeof(DokkaebiController)
         };
 
         private static List<GameObject> AllObjects(Scene scene)

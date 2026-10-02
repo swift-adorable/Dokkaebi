@@ -16,7 +16,7 @@ using UnityEngine;
 /// </summary>
 public static class PlaytestTools
 {
-    private const string Menu = "Blob/Playtest/";
+    private const string Menu = "Dokkaebi/Playtest/";
 
     private static bool RequirePlayMode()
     {

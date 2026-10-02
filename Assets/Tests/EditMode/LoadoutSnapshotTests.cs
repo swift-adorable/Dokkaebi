@@ -1,7 +1,7 @@
 using NUnit.Framework;
 using UnityEditor;
 
-namespace Blob.Tests
+namespace Dokkaebi.Tests
 {
     /// <summary>
     /// 착용 장비가 실제 성능으로 바뀌는지. (로드맵 6-H)
@@ -19,7 +19,7 @@ namespace Blob.Tests
             var asset = AssetDatabase.LoadAssetAtPath<EquipmentDefinition>($"{ItemRoot}/{path}");
 
             Assert.IsNotNull(asset,
-                $"{path} 에셋이 없습니다. 「Blob/Equipment/장비 에셋 전체 생성」을 실행하십시오.");
+                $"{path} 에셋이 없습니다. 「Dokkaebi/Equipment/장비 에셋 전체 생성」을 실행하십시오.");
 
             return asset;
         }
@@ -97,7 +97,7 @@ namespace Blob.Tests
         /// 【Ⅲ의 대가는 같은 축이 아니라 다른 축이다.】
         /// 진격 Ⅲ은 사거리를 더 깎지 않고 체력을 계속 깎는다.
         /// 그래야 Ⅲ 두 개를 끼는 선택이 실제로 위험해진다.
-        /// (docs/Blob_Imprint_System.md 2절)
+        /// (docs/Dokkaebi_Imprint_System.md 2절)
         /// </summary>
         [Test]
         public void 진격_3단_각인의_대가는_사거리가_아니라_체력이다()
@@ -151,7 +151,7 @@ namespace Blob.Tests
 
         /// <summary>
         /// 【무게가 실제로 느리게 만든다.】
-        /// 이 연결이 없던 동안에는 과중량이 UI 문구만 바꿨다. (docs/Blob_Audit.md A4)
+        /// 이 연결이 없던 동안에는 과중량이 UI 문구만 바꿨다. (docs/Dokkaebi_Audit.md A4)
         /// </summary>
         [Test]
         public void 과중량이_이동_배율을_실제로_깎는다()
@@ -201,7 +201,7 @@ namespace Blob.Tests
 
         /// <summary>
         /// 【체력은 늘어나지 않는다.】 장비도 패시브도 올리지 않는다.
-        /// 각인만 깎는다. (docs/Blob_Audit.md B2 결정)
+        /// 각인만 깎는다. (docs/Dokkaebi_Audit.md B2 결정)
         /// </summary>
         [Test]
         public void 장비는_최대_체력을_올리지_않는다()

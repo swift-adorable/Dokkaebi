@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5f9766db0f8594e349438cc979f7b6fe, type: 3}
   m_Name: gem_sup_frozen_malice
-  m_EditorClassIdentifier: Blob.Runtime::ItemDefinition
+  m_EditorClassIdentifier: Dokkaebi.Runtime::ItemDefinition
   id: gem_sup_frozen_malice
   displayName: "\uC5BC\uC5B4\uBD99\uC740 \uC545\uC758"
   description: "\uB3D9\uACB0 \uC784\uACC4\uCE58\uAC00 30% \uB0AE\uC544\uC9C4\uB2E4."

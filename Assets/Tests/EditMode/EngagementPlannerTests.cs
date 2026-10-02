@@ -1,7 +1,7 @@
 using NUnit.Framework;
 using UnityEngine;
 
-namespace Blob.Tests
+namespace Dokkaebi.Tests
 {
     /// <summary>
     /// 교전 판단. 「적이 무작정 달라붙지 않는다」를 거리별로 고정한다.

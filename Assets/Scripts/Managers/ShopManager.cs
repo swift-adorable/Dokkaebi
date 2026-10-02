@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 
 /// <summary>
-/// 상점들의 재고를 들고 있는다. (로드맵 8-I · 8-K · docs/Blob_Bunker_System.md 3절)
+/// 상점들의 재고를 들고 있는다. (로드맵 8-I · 8-K · docs/Dokkaebi_Bunker_System.md 3절)
 ///
 /// MonoBehaviour가 아니다 — 재고는 화면이 아니라 세이브에 속한다.
 /// 사고파는 규칙은 TradeRules가, 무엇을 파는지는 ShopTable이 정한다.

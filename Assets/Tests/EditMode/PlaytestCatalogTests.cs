@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 
-namespace Blob.Tests
+namespace Dokkaebi.Tests
 {
     /// <summary>
     /// 검증 도구가 실제로 쓸 수 있는 상태인지 고정한다. (로드맵 6-P)
@@ -23,7 +23,7 @@ namespace Blob.Tests
             catalog = PlaytestCatalog.Load();
 
             Assert.IsNotNull(catalog,
-                "Resources/PlaytestCatalog.asset이 없습니다. 「Blob/Playtest/검증 카탈로그 생성」을 실행하십시오.");
+                "Resources/PlaytestCatalog.asset이 없습니다. 「Dokkaebi/Playtest/검증 카탈로그 생성」을 실행하십시오.");
         }
 
         private static IEnumerable<TestCaseData> Bundles()
@@ -77,7 +77,7 @@ namespace Blob.Tests
             PassiveTree tree = PassiveTree.Load();
 
             Assert.IsNotNull(tree,
-                $"Resources/{PassiveTree.ResourcePath} 에셋이 없습니다. 「Blob/Passive/패시브 에셋 생성」을 실행하십시오.");
+                $"Resources/{PassiveTree.ResourcePath} 에셋이 없습니다. 「Dokkaebi/Passive/패시브 에셋 생성」을 실행하십시오.");
 
             Assert.Greater(tree.Count, 0, "패시브 트리에 노드가 하나도 없습니다.");
             Assert.IsFalse(tree.Nodes.Any(n => n == null), "패시브 트리에 빈 노드 참조가 있습니다.");

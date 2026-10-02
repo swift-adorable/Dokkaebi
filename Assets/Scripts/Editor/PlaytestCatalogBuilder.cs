@@ -17,7 +17,7 @@ public static class PlaytestCatalogBuilder
     private const string ItemRoot = "Assets/Data/ScriptableObjects/Items";
     private const string CatalogPath = "Assets/Resources/PlaytestCatalog.asset";
 
-    [MenuItem("Blob/Playtest/검증 카탈로그 생성")]
+    [MenuItem("Dokkaebi/Playtest/검증 카탈로그 생성")]
     public static void Build()
     {
         var catalog = AssetDatabase.LoadAssetAtPath<PlaytestCatalog>(CatalogPath);

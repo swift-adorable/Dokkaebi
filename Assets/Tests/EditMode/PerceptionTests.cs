@@ -3,10 +3,10 @@ using System.Linq;
 using NUnit.Framework;
 using UnityEngine;
 
-namespace Blob.Tests
+namespace Dokkaebi.Tests
 {
     /// <summary>
-    /// 감지의 계약 테스트. (docs/Blob_Hunting_System.md 8절)
+    /// 감지의 계약 테스트. (docs/Dokkaebi_Hunting_System.md 8절)
     ///
     /// 【이 축이 없던 동안 잠입이 존재하지 않았다.】
     /// EnemyBrain은 detectDistance 반경 안이면 무조건 알아챘다.

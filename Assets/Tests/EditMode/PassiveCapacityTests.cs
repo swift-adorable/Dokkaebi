@@ -3,7 +3,7 @@ using System.Linq;
 using NUnit.Framework;
 using UnityEditor;
 
-namespace Blob.Tests
+namespace Dokkaebi.Tests
 {
     /// <summary>
     /// 칸 축(칸·중량)의 계약 테스트.
@@ -14,13 +14,13 @@ namespace Blob.Tests
     /// 가방 티어 6종의 성격 차이(고중량형 30kg/10칸 · 소형물형 12kg/24칸)가 묻힌다.
     ///
     /// 그래서 상한을 문서에만 두지 않고 여기서 강제한다.
-    /// (docs/Blob_Passive_System.md 5절 · Blob_Audit.md)
+    /// (docs/Dokkaebi_Passive_System.md 5절 · Dokkaebi_Audit.md)
     ///
     /// 【1/2 라는 숫자의 근거】
     /// 덕코프 퍽은 가방 공간 +31칸 / 소지 중량 +37kg를 주어 장비 최대치
     /// (가방 +30칸 / +30kg)와 거의 1:1이다. [확인됨 — escapefromduckov.net 퍽 표]
     /// 다만 Lv.17~40에 걸쳐 열리는 후반 축이라 초중반에는 장비가 사실상 전부다.
-    /// Blob은 그 1:1을 그대로 쓰지 않고 절반에서 끊는다.
+    /// Dokkaebi는 그 1:1을 그대로 쓰지 않고 절반에서 끊는다.
     /// </summary>
     public class PassiveCapacityTests
     {
@@ -56,7 +56,7 @@ namespace Blob.Tests
             List<EquipmentDefinition> all = Load<EquipmentDefinition>(ItemRoot);
 
             Assert.IsNotEmpty(all,
-                "장비 에셋이 없습니다. Blob/Equipment/에셋 생성을 먼저 실행하세요.");
+                "장비 에셋이 없습니다. Dokkaebi/Equipment/에셋 생성을 먼저 실행하세요.");
 
             float total = 0f;
 
@@ -89,7 +89,7 @@ namespace Blob.Tests
                 $"패시브 칸 총합 {passive}은 장비 최대치 {equipment}의 " +
                 $"{PassiveShareCap:P0}({equipment * PassiveShareCap})를 넘습니다. " +
                 "가방 티어를 고르는 결정이 사라집니다. " +
-                "(docs/Blob_Passive_System.md 5절)");
+                "(docs/Dokkaebi_Passive_System.md 5절)");
         }
 
         [Test]
@@ -103,7 +103,7 @@ namespace Blob.Tests
             Assert.LessOrEqual(passive, equipment * PassiveShareCap,
                 $"패시브 중량 총합 {passive}kg은 장비 최대치 {equipment}kg의 " +
                 $"{PassiveShareCap:P0}({equipment * PassiveShareCap}kg)를 넘습니다. " +
-                "(docs/Blob_Passive_System.md 5절)");
+                "(docs/Dokkaebi_Passive_System.md 5절)");
         }
 
         // ── 하한 ──────────────────────────────────────────────────────────

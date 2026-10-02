@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine;
 
-namespace Blob.Tests
+namespace Dokkaebi.Tests
 {
     /// <summary>Mutation 보유/합산 및 후보 추첨 테스트.</summary>
     public class MutationInventoryTests
