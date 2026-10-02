@@ -37,7 +37,8 @@ public class SaveData
     ///       6판에는 없어 빈 가방 · 맨몸으로 읽힌다.
     ///   8 — 벙커 건물(buildings)과 상점 종류(shop 줄의 shop)를 더했다. 7판에는 없어
     ///       빈 벙커 · 잡화 상점 줄로 읽힌다.
-    public const int CurrentVersion = 8;
+    ///   9 — 이야기 진행(story)을 더했다 (3단계). 8판에는 없어 처음부터로 읽힌다.
+    public const int CurrentVersion = 9;
 
     public int version = CurrentVersion;
 
@@ -57,7 +58,7 @@ public class SaveData
 
     public int gold;
 
-    /// <summary>역행 계열을 발견했는가. 4장 관측실에서 켜진다.</summary>
+    /// <summary>역행 계열을 발견했는가. 만나는 곳은 미정이다 (Story 9절 TBD 4번).</summary>
     public bool discoveredRegression;
 
     // ── 성장 ──────────────────────────────────────────────────────────
@@ -96,6 +97,25 @@ public class SaveData
 
     /// <summary>지은 건물과 놓은 자리. 놓지 않은 건물은 placed가 false다.</summary>
     public List<SavedBuilding> buildings = new();
+
+    // ── 이야기 ────────────────────────────────────────────────────────
+
+    /// <summary>이야기 진행. 【죽어도 잃지 않는다】 — 쓰러뜨린 보스 · 주운 조각은 남는다.</summary>
+    public SavedStory story = new();
+}
+
+/// <summary>
+/// 이야기 진행 (StoryProgress). 열린 장 · 구역 · 사신패 · 상인은 담지 않는다 —
+/// 아래 다섯에서 계산한다.
+/// </summary>
+[Serializable]
+public class SavedStory
+{
+    public List<string> bosses = new();
+    public List<string> pieces = new();
+    public List<string> notices = new();
+    public List<string> seen = new();
+    public List<int> nights = new();
 }
 
 /// <summary>벙커 건물 하나.</summary>

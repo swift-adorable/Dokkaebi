@@ -30,7 +30,8 @@ public static class BuildingManager
         PlayerInventory inventory = PlayerInventory.EnsureInstance();
 
         return State.CanBuild(definition, gold,
-            id => BuildingState.CountIn(inventory.Stash, inventory.Bag, id));
+            id => BuildingState.CountIn(inventory.Stash, inventory.Bag, id),
+            StoryManager.Progress.IsBlueprintOpen);
     }
 
     /// <summary>값을 치르고 가진다. 놓는 것은 배치 모드가 따로 한다.</summary>
@@ -40,7 +41,8 @@ public static class BuildingManager
         PlayerInventory inventory = PlayerInventory.EnsureInstance();
         int gold = passive.Gold;
 
-        BuildError error = State.Build(definition, ref gold, inventory.Stash, inventory.Bag);
+        BuildError error = State.Build(definition, ref gold, inventory.Stash, inventory.Bag,
+            StoryManager.Progress.IsBlueprintOpen);
 
         if (error != BuildError.None)
             return error;
@@ -49,6 +51,10 @@ public static class BuildingManager
         inventory.RefreshCapacity();
 
         GameLogger.Log($"[Building] 지음 — {definition.Name}");
+
+        // 가게 세우기는 상인의 부탁이다 — 지어 주면 보상을 준다.
+        StoryManager.GrantBuildingReward(definition.Id);
+
         OnChanged?.Invoke();
 
         return BuildError.None;

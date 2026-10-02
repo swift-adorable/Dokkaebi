@@ -40,6 +40,13 @@ public static class SaveStore
     /// <summary>코드네임을 바꾸기 전의 파일 이름 (결정 2-46). 처음 읽을 때 새 이름으로 옮긴다.</summary>
     public const string LegacyFileName = "blob_save.json";
 
+    /// <summary>
+    /// 코드네임을 바꾸기 전의 제품 이름. 데스크톱의 persistentDataPath는
+    /// 「회사/제품」 폴더라, 제품 이름이 바뀌면 세이브 폴더도 바뀐다.
+    /// (모바일은 번들 ID가 바뀌어 다른 앱이 되므로 옮길 수 없다.)
+    /// </summary>
+    public const string LegacyProductFolder = "Blob";
+
     private const string BackupSuffix = ".bak";
     private const string TempSuffix = ".tmp";
 
@@ -48,8 +55,17 @@ public static class SaveStore
     {
         get
         {
-            string path = Path.Combine(Application.persistentDataPath, FileName);
-            MoveLegacy(Path.Combine(Application.persistentDataPath, LegacyFileName), path);
+            string folder = Application.persistentDataPath;
+            string path = Path.Combine(folder, FileName);
+
+            MoveLegacy(Path.Combine(folder, LegacyFileName), path);
+
+            // 제품 이름이 바뀌기 전의 폴더 (데스크톱 · 에디터)
+            DirectoryInfo parent = Directory.GetParent(folder);
+
+            if (parent != null)
+                MoveLegacy(Path.Combine(parent.FullName, LegacyProductFolder, LegacyFileName), path);
+
             return path;
         }
     }
@@ -64,6 +80,14 @@ public static class SaveStore
         {
             if (File.Exists(path) || File.Exists(path + BackupSuffix))
                 return;
+
+            if (!File.Exists(legacyPath) && !File.Exists(legacyPath + BackupSuffix))
+                return;
+
+            string directory = Path.GetDirectoryName(path);
+
+            if (!string.IsNullOrEmpty(directory))
+                Directory.CreateDirectory(directory);
 
             if (File.Exists(legacyPath))
                 File.Move(legacyPath, path);

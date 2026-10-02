@@ -24,7 +24,10 @@ public enum BuildError
     AlreadyOwned,
     MissingBuilding,
     NotEnoughGold,
-    NotEnoughMaterials
+    NotEnoughMaterials,
+
+    /// <summary>이 가게를 부탁할 상인이 아직 오지 않았다 — 설계도가 닫혀 있다 (3단계).</summary>
+    MissingMerchant
 }
 
 /// <summary>
@@ -83,13 +86,19 @@ public class BuildingState
     /// 덕코프가 어느 쪽 재료를 쓰는지는 위키에 없다 [확인 불가]. 벙커에서는
     /// 둘 다 손 닿는 곳에 있으니 나눌 이유가 없다.
     /// </summary>
-    public BuildError CanBuild(BuildingDefinition definition, int gold, System.Func<string, int> countOf)
+    public BuildError CanBuild(BuildingDefinition definition, int gold, System.Func<string, int> countOf,
+        System.Func<string, bool> blueprintOpen = null)
     {
         if (definition == null)
             return BuildError.Unknown;
 
         if (Owns(definition.Id))
             return BuildError.AlreadyOwned;
+
+        // 【이야기에서 상인이 와야 설계도가 열린다】 (docs/Dokkaebi_Story.md 1절).
+        // 판정을 넘겨받지 않으면 따지지 않는다 — 건물 규칙만 보는 검사 · 테스트용.
+        if (blueprintOpen != null && !blueprintOpen(definition.Id))
+            return BuildError.MissingMerchant;
 
         foreach (string required in definition.RequiredBuildings)
         {
@@ -114,9 +123,10 @@ public class BuildingState
     /// 통과했을 때만 뺀다. 재료는 창고에서 먼저, 모자라면 가방에서 뺀다 —
     /// 가방은 다음 파밍에 들고 갈 것이다.
     /// </summary>
-    public BuildError Build(BuildingDefinition definition, ref int gold, Inventory stash, Inventory bag)
+    public BuildError Build(BuildingDefinition definition, ref int gold, Inventory stash, Inventory bag,
+        System.Func<string, bool> blueprintOpen = null)
     {
-        BuildError error = CanBuild(definition, gold, id => CountIn(stash, bag, id));
+        BuildError error = CanBuild(definition, gold, id => CountIn(stash, bag, id), blueprintOpen);
 
         if (error != BuildError.None)
             return error;
@@ -176,6 +186,7 @@ public class BuildingState
             case BuildError.NotEnoughGold:      return "엽전이 모자랍니다.";
             case BuildError.NotEnoughMaterials: return "재료가 모자랍니다.";
             case BuildError.Unknown:            return "알 수 없는 건물입니다.";
+            case BuildError.MissingMerchant:    return "이 가게를 부탁할 상인이 아직 오지 않았습니다.";
             default:                            return string.Empty;
         }
     }
