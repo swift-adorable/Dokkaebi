@@ -433,7 +433,7 @@ public static class SkillAssetGenerator
         // 서리 핵심 젬에 꽂아도 불바다가 생겼다. 보조 젬이 속성을 정하면
         // 「핵심 젬 = 속성」이라는 전투 3층이 깨진다.
         r = New("sup_caltrops", "마름쇠",
-            "적중 지점에 잔류물을 남긴다. 종류는 꽂힌 핵심 젬의 속성을 따른다.",
+            "적중 지점에 잔류물을 남긴다. 종류는 꽂힌 핵심 구슬의 속성을 따른다.",
             SkillCategory.Support, 5);
         r.requiredTags = SkillTag.Zone;
         r.cost = CostType.BarrageDensity; r.costDesc = "발사 간격 +25%"; r.fireInterval = 1.25f;
@@ -525,7 +525,7 @@ public static class SkillAssetGenerator
         r = New("sup_fire_attunement", "화염 조율",
             "부여 계열의 속성을 화염으로 완전히 전환한다.", SkillCategory.Support, 9);
         r.requiredTags = SkillTag.Projectile;
-        r.cost = CostType.FunctionalExclusion; r.costDesc = "전환 전 속성 전용 보조 젬이 무효화된다";
+        r.cost = CostType.FunctionalExclusion; r.costDesc = "전환 전 속성 전용 보조 구슬이 무효화된다";
         r.exclusive = new[] { "sup_elemental_fusion" };
         r.ailOverride = StatusEffectType.Ignite;
         t.Add(r);
@@ -548,7 +548,7 @@ public static class SkillAssetGenerator
         t.Add(r);
 
         r = New("meta_cast_on_ignite", "점화 시 시전",
-            "점화된 적을 처치할 때마다 10% 충전된다. 발동 시 장착한 핵심 젬을 주변 적 전체에게 발동한다.",
+            "점화된 적을 처치할 때마다 10% 충전된다. 발동 시 지닌 핵심 구슬을 주변 적 전체에게 발동한다.",
             SkillCategory.Meta, 11);
         r.tags = SkillTag.Trigger | SkillTag.Fire;
         t.Add(r);
@@ -560,7 +560,7 @@ public static class SkillAssetGenerator
         t.Add(r);
 
         r = New("meta_cast_on_crit", "치명타 시 시전",
-            "치명타가 발생할 때마다 6% 충전된다. 발동 시 장착한 핵심 젬을 즉시 재발동한다.",
+            "치명타가 발생할 때마다 6% 충전된다. 발동 시 지닌 핵심 구슬을 즉시 재발동한다.",
             SkillCategory.Meta, 13);
         r.tags = SkillTag.Trigger;
         t.Add(r);

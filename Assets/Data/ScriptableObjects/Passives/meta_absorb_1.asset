@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Blob.Runtime::PassiveNode
   id: meta_absorb_1
   displayName: "\uC815\uAE30 \uAC70\uB450\uAE30 1"
-  description: "\uC2DC\uCCB4\uC5D0\uC11C \uB354 \uB9CE\uC740 \uAC83\uC744 \uB04C\uC5B4\uB0B8\uB2E4."
+  description: "\uD5C8\uBB3C\uC5D0\uC11C \uB354 \uB9CE\uC740 \uAC83\uC744 \uB04C\uC5B4\uB0B8\uB2E4."
   branch: 1
   effect: 10
   value: 15

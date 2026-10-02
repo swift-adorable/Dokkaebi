@@ -162,7 +162,7 @@ public static class TradeRules
             case TradeError.Worthless:        return "값이 나가지 않는 물건입니다.";
             case TradeError.NotForSale:       return "이 상점은 팔지 않습니다.";
             case TradeError.OutOfStock:       return "재고가 없습니다. 다음 파밍이 끝나면 채워집니다.";
-            case TradeError.NotEnoughGold: return "골드가 모자랍니다.";
+            case TradeError.NotEnoughGold: return "엽전이 모자랍니다.";
             case TradeError.NoSpace:          return "가방에 자리가 없습니다.";
             default:                          return string.Empty;
         }

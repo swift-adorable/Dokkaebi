@@ -83,7 +83,7 @@ public class BuildingScreenUI : MonoBehaviour
 
     private void Redraw()
     {
-        titleLabel.text = $"건설 · {PassiveManager.EnsureInstance().Gold:N0}골드";
+        titleLabel.text = $"건설 · {PassiveManager.EnsureInstance().Gold:N0}엽전";
 
         UIFactory.ClearChildren(list);
 
@@ -164,7 +164,7 @@ public class BuildingScreenUI : MonoBehaviour
         ItemCatalog catalog = ItemCatalog.Load();
 
         if (definition.Gold > 0)
-            sb.Append(Colored($"{definition.Gold:N0}골드", gold >= definition.Gold));
+            sb.Append(Colored($"{definition.Gold:N0}엽전", gold >= definition.Gold));
 
         foreach (MaterialCost cost in definition.Materials)
         {

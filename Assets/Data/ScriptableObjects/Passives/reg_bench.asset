@@ -14,8 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Blob.Runtime::PassiveNode
   id: reg_bench
   displayName: "\uC81C\uC791\uB300"
-  description: "\uC5ED\uD589\uC790\uAC00 \uB0A8\uAE34 \uB3C4\uBA74. \uBC99\uCEE4\uC5D0\uC11C
-    \uBB3C\uAC74\uC744 \uB9CC\uB4E4 \uC218 \uC788\uAC8C \uB41C\uB2E4."
+  description: "\uC624\uB798\uB41C \uB3C4\uBA74. \uC18C\uAD74\uC5D0\uC11C \uBB3C\uAC74\uC744 \uB9CC\uB4E4 \uC218 \uC788\uAC8C \uB41C\uB2E4."
   branch: 4
   effect: 40
   value: 1

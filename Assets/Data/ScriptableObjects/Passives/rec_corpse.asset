@@ -14,8 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Blob.Runtime::PassiveNode
   id: rec_corpse
   displayName: "\uD68C\uC218 \uACC4\uC57D"
-  description: "\uCCA0\uC218\uC5D0 \uC2E4\uD328\uD574\uB3C4 \uB0B4 \uC2DC\uCCB4\uC5D0\uC11C
-    \uD55C \uBC88\uC740 \uB418\uCC3E\uC544 \uC62C \uC218 \uC788\uB2E4."
+  description: "\uB3CC\uC544\uC624\uC9C0 \uBABB\uD574\uB3C4 \uC4F0\uB7EC\uC9C4 \uC790\uB9AC\uC5D0\uC11C \uD55C \uBC88\uC740 \uB418\uCC3E\uC544 \uC62C \uC218 \uC788\uB2E4."
   branch: 2
   effect: 21
   value: 1

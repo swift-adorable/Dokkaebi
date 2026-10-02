@@ -43,14 +43,14 @@ public static class SocketErrorText
         switch (error)
         {
             case SocketError.None:          return string.Empty;
-            case SocketError.NullGem:       return "젬이 없습니다.";
+            case SocketError.NullGem:       return "구슬이 없습니다.";
             case SocketError.WrongCategory: return "이 자리에 들어갈 분류가 아닙니다.";
             case SocketError.NoSuchSlot:    return "없는 자리입니다.";
             case SocketError.SlotLocked:    return "아직 열리지 않은 자리입니다.";
             case SocketError.LevelTooHigh:  return "레벨이 부족합니다.";
             case SocketError.NoCore:        return "핵심 스킬을 먼저 끼워야 합니다.";
             case SocketError.TagMismatch:   return "핵심 스킬이 요구 태그를 만족하지 않습니다.";
-            case SocketError.Duplicate:     return "같은 젬이 이미 끼워져 있습니다.";
+            case SocketError.Duplicate:     return "같은 구슬이 이미 끼워져 있습니다.";
             default:                        return "끼울 수 없습니다.";
         }
     }

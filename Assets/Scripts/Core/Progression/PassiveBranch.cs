@@ -65,7 +65,7 @@ public static class PassiveBranchInfo
             case PassiveBranch.Adapt:      return "얼마나 들고 나가는가";
             case PassiveBranch.Metabolism: return "얼마나 얻는가";
             case PassiveBranch.Recovery:   return "죽어도 무엇이 남는가";
-            case PassiveBranch.Brokerage:  return "벙커에서 무엇을 하는가";
+            case PassiveBranch.Brokerage:  return "소굴에서 무엇을 하는가";
             case PassiveBranch.Regression: return "기록되지 않은 것";
             default:                       return string.Empty;
         }

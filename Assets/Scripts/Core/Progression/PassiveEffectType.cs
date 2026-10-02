@@ -151,20 +151,20 @@ public static class PassiveEffectInfo
         {
             case PassiveEffectType.CarrySlots:     return "가방 공간";
             case PassiveEffectType.CarryWeight:    return "소지 중량";
-            case PassiveEffectType.AbsorbAmount:   return "경험치 획득";
-            case PassiveEffectType.AbsorbRange:    return "흡수 범위";
+            case PassiveEffectType.AbsorbAmount:   return "정기 획득";
+            case PassiveEffectType.AbsorbRange:    return "거두는 범위";
             case PassiveEffectType.LootRolls:      return "전리품 추첨";
             case PassiveEffectType.RareDropRate:   return "희귀 드롭";
             case PassiveEffectType.SafeSlots:      return "보존 칸";
-            case PassiveEffectType.CorpseRecovery: return "시체 회수";
-            case PassiveEffectType.ExtractMark:    return "철수 지점 표시";
+            case PassiveEffectType.CorpseRecovery: return "쓰러진 자리 되찾기";
+            case PassiveEffectType.ExtractMark:    return "길목 표시";
             case PassiveEffectType.SellPrice:      return "판매가";
             case PassiveEffectType.StashSlots:     return "창고 칸";
             case PassiveEffectType.ShopRefresh:    return "상점 갱신 쿨다운";
             case PassiveEffectType.ShopSlots:      return "상점 갱신 횟수";
             case PassiveEffectType.CraftBench:     return "제작대";
-            case PassiveEffectType.CodexAuto:      return "도감 자동 등록";
-            case PassiveEffectType.GemSalvage:     return "젬 분해";
+            case PassiveEffectType.CodexAuto:      return "구슬 장부 자동 등록";
+            case PassiveEffectType.GemSalvage:     return "구슬 깨기";
             case PassiveEffectType.MapLoot:        return "전리품 표시";
             default:                               return "없음";
         }

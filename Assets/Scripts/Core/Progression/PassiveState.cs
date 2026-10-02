@@ -262,7 +262,7 @@ public static class PassiveErrorText
             case PassiveError.AlreadyLearned:      return "이미 배웠습니다.";
             case PassiveError.MissingPrerequisite: return "선행 항목을 먼저 배워야 합니다.";
             case PassiveError.LevelTooLow:         return "레벨이 부족합니다.";
-            case PassiveError.NotEnoughGold:    return "골드가 부족합니다.";
+            case PassiveError.NotEnoughGold:    return "엽전이 부족합니다.";
             case PassiveError.MissingMaterials:    return "필요 재료가 부족합니다.";
             case PassiveError.BranchUndiscovered:  return "아직 발견하지 못한 계열입니다.";
             default:                               return "배울 수 없습니다.";

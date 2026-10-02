@@ -30,9 +30,9 @@ public class RunEndUI : MonoBehaviour
 
         instance.body.text =
             $"가방 · 장비 {lostCount}점을 잃었습니다.\n"
-            + "레벨 · 골드 · 패시브 · 각인 · 창고는 남습니다.";
+            + "레벨 · 엽전 · 패시브 · 새김패 · 창고는 남습니다.";
 
-        instance.buttonLabel.text = SceneFlow.HasBunker ? "벙커로 돌아가기" : "다시 시작";
+        instance.buttonLabel.text = SceneFlow.HasBunker ? "소굴로 돌아가기" : "다시 시작";
 
         instance.panel.SetActive(true);
     }
@@ -65,7 +65,7 @@ public class RunEndUI : MonoBehaviour
             new Vector2(0.06f, 0.34f), new Vector2(0.94f, 0.70f),
             TextAnchor.MiddleCenter, UIPalette.TextOnGlass);
 
-        Button button = UIFactory.CreateButton(box.transform, "벙커로 돌아가기",
+        Button button = UIFactory.CreateButton(box.transform, "소굴로 돌아가기",
             new Vector2(0.18f, 0.08f), new Vector2(0.82f, 0.28f),
             UIPalette.Action, OnReturn, 30);
 
