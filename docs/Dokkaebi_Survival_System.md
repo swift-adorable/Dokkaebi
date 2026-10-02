@@ -109,9 +109,8 @@ Dokkaebi는 「체력」이 HP라 충돌하므로, **스태미나를 에너지�
 Dokkaebi의 강화 소모품도 같은 대가를 진다 — `Dokkaebi_Consumable_System.md` 4절의
 「전부 대가가 붙는다」와 같은 장치이고, **대가의 통화가 하나 더 생기는 것**이다.
 
-지금은 축과 페널티만 만든다. 소모품 사용 시스템 자체가 아직 없어서
-(`Consumable_System` 9절 TBD) **연결은 8단계로 미룬다.**
-`PlayerSurvival.Restore(water, energy)` / `Drain(...)`이 그때 쓸 입구다.
+**연결했다 (8-A).** 소모품을 쓰면 `PlayerConsumables`가 `PlayerSurvival.Restore(water, energy)` ·
+`Drain(waterCost, energyCost)`를 부른다. 값은 소모품마다 `ConsumableEffect`에 있다.
 
 ---
 

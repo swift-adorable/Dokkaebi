@@ -11,37 +11,38 @@ Unity **6000.4.11f1** / URP 17.4.0 / Input System 1.19.0 / com.unity.test-framew
 | 어셈블리 | 용도 |
 |---|---|
 | `Dokkaebi.Runtime` | 게임 코드 |
-| `Dokkaebi.Editor` | 에디터 전용 |
-| `Dokkaebi.Tests.EditMode` | 테스트 코드 (Editor 전용) |
+| `Dokkaebi.Editor` | 에디터 전용 (에셋 생성기 · 메뉴 「Dokkaebi/…」) |
+| `Dokkaebi.Tests.EditMode` | EditMode 테스트 (Editor 전용) |
 | `Dokkaebi.Tests.Fixtures` | 테스트용 MonoBehaviour (전 플랫폼, `UNITY_INCLUDE_TESTS`) |
+| `Dokkaebi.Tests.PlayMode` | PlayMode 테스트 |
 
 ## 폴더 구조
 
 ```
 Assets/
-├── Art/  Audio/  Material/  Prefabs/  Scenes/  Settings/
+├── Art/  Audio/  Prefabs/  Material/  Scenes/  Settings/  UI/
 ├── Data/
-│   ├── ScriptableObjects/
-│   │   ├── Skills/        스킬 정의
-│   │   ├── Equipment/     장비·무기 정의 (슬롯별 하위 폴더)
-│   │   ├── Hunting/       원형 / 등급 배율 / 몬스터 속성 / 스폰 테이블
-│   │   └── Progression/   장 / 해금 노드 / 의뢰 / 레코더
-│   └── SaveData/          도감, 적재, 보유 장비, 계정 레벨, 해금 상태
+│   ├── Materials/               벙커 재질
+│   └── ScriptableObjects/
+│       ├── Items/               무기 · 방어구 · 가방 · 각인 · 소모품 · 젬 · 전리품
+│       ├── Loot/                전리품 표
+│       ├── Passives/  Skills/
 ├── Resources/
-│   ├── SkillCatalog.asset       에디터 도구가 자동 생성. 직접 편집 금지
-│   └── EquipmentCatalog.asset   동상
+│   ├── *Catalog.asset           에디터 도구가 자동 생성. 직접 편집 금지
+│   └── Story/StoryScript.txt    docs/Dokkaebi_Story_Script.txt의 사본 (메뉴 「Dokkaebi/Story/이야기 본문 가져오기」)
 ├── Scripts/
-│   ├── Core/
-│   │   ├── Combat/        피해 공식, 방어도, 사거리, 상태이상
-│   │   ├── Skills/        태그, 정의, 필터, 충돌 우선순위 큐, 합성 발사
-│   │   ├── Equipment/     슬롯, 옵션, 무게·내구도, 게이트
-│   │   ├── Hunting/       원형, 등급, 속성, 진영, 드랍, 스폰
-│   │   └── Progression/   장, 해금 트리, 의뢰, 레코더, 추출
-│   ├── Managers/  Player/  Enemy/  Weapon/  UI/  Camera/  Debug/  Editor/
+│   ├── Core/                    순수 로직 — 테스트가 여기를 본다
+│   │   ├── AI/  Combat/  Skills/  Equipment/  Items/  Hunting/  Raid/
+│   │   ├── Progression/  Survival/  Trade/  Bunker/  Save/  Story/
+│   ├── Managers/                씬을 넘는 싱글턴 (Game · Save · Story · Shop · Building …)
+│   ├── Player/  Enemy/  Weapon/  Camera/  Bunker/  Story/  UI/  Debug/
+│   └── Editor/                  에셋 생성기 · 검증 메뉴
 └── Tests/
-    ├── EditMode/
-    └── Fixtures/
+    ├── EditMode/  Fixtures/  PlayMode/
 ```
+
+씬은 `Bunker.unity`(소굴)와 `SampleScene.unity`(파밍 — 이름은 아직 템플릿 그대로)이다.
+세이브 파일은 `Application.persistentDataPath`의 `dokkaebi_save.json`이다 (`docs/Dokkaebi_Save_System.md`).
 
 ## 알려진 함정
 
@@ -70,7 +71,7 @@ Assets/
 
 ### 마지막 전체 검증
 
-**EditMode 257/257 통과 (커밋 `5-F`)** — `Assets/Refresh` → `recompile` 0 warning → 테스트 클래스를 개별 필터로 실행해 확인.
+**EditMode 728/728 통과 (2026-10-02)** — `Assets/Refresh` → `recompile` 0 warning → 테스트 클래스 48개를 개별 필터로 실행해 확인.
 전체 일괄 실행은 MCP 타임아웃으로 불가하다 (위 함정 참조).
 
 **PlayMode 9건은 미검증이다.** MCP로 실행할 수 없어 Test Runner 창에서 직접 돌려야 한다.

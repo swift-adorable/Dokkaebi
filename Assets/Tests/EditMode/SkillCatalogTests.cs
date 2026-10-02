@@ -189,16 +189,31 @@ namespace Dokkaebi.Tests
         ///
         /// 【위험 상태는 제외한다.】 동결·마비·부식은 핵심 젬이 직접 걸지 않는다.
         /// 원본(냉각·감전·중독)이 최대 중첩에 차면 전이로만 생긴다.
+        ///
+        /// 【이로운 상태와 그 대가도 제외한다 (8-C).】 가속·강화·회복·저항 등은
+        /// 소모품이 걸고, 쇠약은 가속이 끝나면 저절로 온다. 핵심 젬의 몫이 아니다.
         /// </summary>
         [Test]
         public void 부여_가능한_상태는_전부_어떤_Core로든_만들어진다()
         {
             var created = Of(SkillCategory.Core).Select(d => d.CreatesStatus).ToList();
+            var values = System.Enum.GetValues(typeof(StatusEffectType)).Cast<StatusEffectType>().ToList();
+            var aftermaths = values.Select(StatusEffectTable.AftermathOf)
+                                   .Where(a => a != StatusEffectType.None).ToList();
 
-            foreach (StatusEffectType s in System.Enum.GetValues(typeof(StatusEffectType)))
+            foreach (StatusEffectType s in values)
             {
                 if (s == StatusEffectType.None)
                     continue;
+
+                // 이로운 상태 · 그 대가는 소모품 쪽이다. 핵심 젬이 걸면 안 된다.
+                if (StatusEffectTable.IsBeneficial(s) || aftermaths.Contains(s))
+                {
+                    Assert.IsFalse(created.Contains(s),
+                        $"{s}는 소모품 쪽 상태입니다. 핵심 젬이 직접 걸면 안 됩니다.");
+
+                    continue;
+                }
 
                 // 위험 상태는 전이로만 생긴다.
                 if (s == StatusEffectType.Freeze
