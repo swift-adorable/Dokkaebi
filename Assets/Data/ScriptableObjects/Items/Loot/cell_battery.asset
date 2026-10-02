@@ -13,9 +13,8 @@ MonoBehaviour:
   m_Name: cell_battery
   m_EditorClassIdentifier: Blob.Runtime::ItemDefinition
   id: cell_battery
-  displayName: "\uC804\uC9C0"
-  description: "\uC544\uC9C1 \uC804\uD558\uAC00 \uB0A8\uC544 \uC788\uB2E4. \uB3D9\uB825
-    \uAD6C\uC5ED\uC5D0\uC11C \uC4F0\uC778\uB2E4."
+  displayName: "\uC22F"
+  description: "\uC544\uC9C1 \uBD88\uAE30\uAC00 \uB0A8\uC544 \uC788\uB2E4. \uAC00\uB9C8\uC5D0\uC11C \uC4F0\uC778\uB2E4."
   kind: 0
   tier: 0
   weight: 0.6

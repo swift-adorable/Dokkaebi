@@ -142,7 +142,7 @@ public sealed class StatusEffectState
     ///
     /// 전부 지우는 Clear와 나눠 두는 이유 — 싼 도구가 비싼 도구와 같은 일을
     /// 하면 비싼 쪽을 살 이유가 없다. 덕코프도 소형 구급상자는 출혈 1중첩,
-    /// 구급상자는 2중첩을 지운다. [확인됨 — 아이템 #17 · #16]
+    /// 환단은 2중첩을 지운다. [확인됨 — 아이템 #17 · #16]
     ///
     /// 남은 중첩이 0이 되면 지속시간도 함께 끝난다 — 중첩 0인데 상태가
     /// 살아 있으면 「걸려 있는데 아무 일도 안 일어나는」 칸이 남는다.
@@ -197,7 +197,7 @@ public sealed class StatusEffectState
         // 【대가는 이 순회가 끝난 뒤에 건다.】 루프 안에서 바로 걸면,
         // 대가의 번호가 지금 번호보다 크면 같은 프레임에 다시 순회되어
         // 같은 deltaTime으로 그 자리에서 만료된다. 쇠약이 걸리자마자
-        // 사라져 「대가가 없는 노란 주사약」가 됐다.
+        // 사라져 「대가가 없는 축지환」가 됐다.
         aftermathPending = 0;
 
         for (int i = 1; i < TypeCount; i++)
@@ -408,7 +408,7 @@ public sealed class StatusEffectState
     /// 것을 준다」가 된다. 덕코프도 「신체 방어구 +0.5」다. [확인됨]
     ///
     /// 부식(절반)이 곱해진 **뒤에** 더해진다 — 대가를 치르고 얻은 것을
-    /// 남의 상태이상이 반으로 깎으면 강화 주사약을 쓸 이유가 사라진다.
+    /// 남의 상태이상이 반으로 깎으면 녹용을 쓸 이유가 사라진다.
     /// </summary>
     public float ArmourBonus
         => (Has(StatusEffectType.Bolster) ? StatusEffectTable.BolsterArmourBonus : 0f)
@@ -424,7 +424,7 @@ public sealed class StatusEffectState
     public int MaxHealthBonus
         => Has(StatusEffectType.Frenzy) ? StatusEffectTable.FrenzyMaxHealthBonus : 0;
 
-    /// <summary>소지 중량 증가(중량 주사약)가 곱하는 최대 소지 중량 배율.</summary>
+    /// <summary>소지 중량 증가(공진단)가 곱하는 최대 소지 중량 배율.</summary>
     public float CarryWeightMultiplier
         => Has(StatusEffectType.Overload)
             ? StatusEffectTable.OverloadWeightMultiplier
@@ -437,7 +437,7 @@ public sealed class StatusEffectState
     /// LowerTo에는 「이미 잘 막고 있으면 더 못 깎는다」는 바닥이 있다.
     /// 그것은 **적의 속성을 합성할 때** 방어형 둘만으로 공략 불가가 되는
     /// 것을 막는 규칙이고, 플레이어가 쓴 소모품에는 맞지 않는다.
-    /// 그 바닥을 그대로 쓰면 화염 저항 장비를 낀 사람에게 화염 저항 주사약이 아무 일도
+    /// 그 바닥을 그대로 쓰면 화염 저항 장비를 낀 사람에게 석고환이 아무 일도
     /// 하지 않는다 — 「썼는데 변화가 없다」가 된다.
     ///
     /// 곱해도 면역(0)에 닿지 않으므로 안전하다. 0.75는 0을 만들지 못한다.

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: con_water
   m_EditorClassIdentifier: Blob.Runtime::ItemDefinition
   id: con_water
-  displayName: "\uC0DD\uC218"
+  displayName: "\uC0D8\uBB3C"
   description: "\uB9DB\uC740 \uC5C6\uC9C0\uB9CC \uC548\uC804\uD558\uB2E4."
   kind: 6
   tier: 0

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: con_regen
   m_EditorClassIdentifier: Blob.Runtime::ItemDefinition
   id: con_regen
-  displayName: "\uD68C\uBCF5 \uC8FC\uC0AC\uC57D"
+  displayName: "\uACBD\uC625\uACE0"
   description: "\uCC9C\uCC9C\uD788 \uC544\uBB38\uB2E4. \uAE09\uD560 \uB54C \uC4F0\uB294
     \uAC83\uC774 \uC544\uB2C8\uB2E4."
   kind: 6

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: memory_core
   m_EditorClassIdentifier: Blob.Runtime::ItemDefinition
   id: memory_core
-  displayName: "\uBA54\uBAA8\uB9AC \uCF54\uC5B4"
+  displayName: "\uB178\uB9AC\uAC1C"
   description: "\uAC00\uBCCD\uACE0 \uBE44\uC2F8\uB2E4. \uBCF4\uC774\uBA74 \uB2F4\uB294\uB2E4."
   kind: 0
   tier: 0

@@ -165,7 +165,7 @@ public class EnemyAggro : MonoBehaviour, IPoolable
                 continue;
 
             // 적끼리는 서로의 발소리를 듣는다 — 발소리가 있는 유형이라면.
-            // 잠복체·데이터체는 이 값이 0이라 측면·후방에서는 보이지 않는다.
+            // 수귀·무주귀는 이 값이 0이라 측면·후방에서는 보이지 않는다.
             float otherNoise = other.identity != null && other.identity.Profile.makesFootsteps
                 ? AllyFootstepRadius
                 : 0f;

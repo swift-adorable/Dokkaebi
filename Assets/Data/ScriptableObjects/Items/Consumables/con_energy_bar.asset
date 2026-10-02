@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: con_energy_bar
   m_EditorClassIdentifier: Blob.Runtime::ItemDefinition
   id: con_energy_bar
-  displayName: "\uC5D0\uB108\uC9C0 \uBC14"
+  displayName: "\uACF6\uAC10"
   description: "\uC0BC\uD0A4\uACE0 \uB098\uBA74 \uBB3C\uC744 \uCC3E\uAC8C \uB41C\uB2E4."
   kind: 6
   tier: 0

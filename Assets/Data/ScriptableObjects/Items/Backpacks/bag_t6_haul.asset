@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: bag_t6_haul
   m_EditorClassIdentifier: Blob.Runtime::EquipmentDefinition
   id: bag_t6_haul
-  displayName: "\uBC18\uCD9C\uC6A9 \uB300\uD615 \uBC30\uB0AD"
+  displayName: "\uD070 \uC9C0\uAC8C"
   description: "\uD55C \uBC88\uC5D0 \uB2E4 \uAC00\uC838\uAC08 \uC218 \uC788\uB2E4.
     \uB2E4\uB9CC \uB6F8 \uC218 \uC5C6\uB2E4."
   kind: 3

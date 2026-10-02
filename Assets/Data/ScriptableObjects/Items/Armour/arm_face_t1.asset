@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: arm_face_t1
   m_EditorClassIdentifier: Blob.Runtime::EquipmentDefinition
   id: arm_face_t1
-  displayName: "\uCC9C \uB9C8\uC2A4\uD06C"
+  displayName: "\uD558\uD68C\uD0C8"
   description: "\uBA3C\uC9C0\uB97C \uB9C9\uB294\uB2E4. \uADF8 \uC774\uC0C1\uC740
     \uAE30\uB300\uD560 \uC218 \uC5C6\uB2E4."
   kind: 2

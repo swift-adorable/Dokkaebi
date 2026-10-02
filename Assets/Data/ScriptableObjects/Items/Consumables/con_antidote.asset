@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: con_antidote
   m_EditorClassIdentifier: Blob.Runtime::ItemDefinition
   id: con_antidote
-  displayName: "\uD574\uB3C5\uC81C"
+  displayName: "\uAC10\uCD08"
   description: "\uC18D\uC744 \uAC8C\uC6CC \uB0B4\uB294 \uB9DB\uC774 \uB09C\uB2E4."
   kind: 6
   tier: 0

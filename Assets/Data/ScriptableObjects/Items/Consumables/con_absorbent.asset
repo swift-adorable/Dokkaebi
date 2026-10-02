@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: con_absorbent
   m_EditorClassIdentifier: Blob.Runtime::ItemDefinition
   id: con_absorbent
-  displayName: "\uD761\uC218\uC561"
+  displayName: "\uBD80\uC790\uD0D5"
   description: "\uBAB8\uC774 \uC81C \uAC83\uC774 \uC544\uB2CC \uAC83\uCC98\uB7FC
     \uC6C0\uC9C1\uC778\uB2E4. \uADF8 \uB300\uAC00\uB85C \uC548\uC5D0\uC11C\uBD80\uD130
     \uC0AD\uB294\uB2E4."

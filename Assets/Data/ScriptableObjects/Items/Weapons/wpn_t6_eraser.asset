@@ -13,9 +13,8 @@ MonoBehaviour:
   m_Name: wpn_t6_eraser
   m_EditorClassIdentifier: Blob.Runtime::WeaponDefinition
   id: wpn_t6_eraser
-  displayName: "\uC885\uACB0 \uBCD1\uAE30 \u300C\uC18C\uAC70\u300D"
-  description: "\uC9C0\uC0C1 \uC9C4\uC555\uC6A9\uC73C\uB85C \uB9CC\uB4E4\uC5B4\uC84C\uB2E4.
-    \uC4F0\uB294 \uCABD\uB3C4 \uBB34\uC0AC\uD558\uC9C0 \uC54A\uB2E4."
+  displayName: "\uCCA0\uD0DC\uAD81"
+  description: "\uBAB8\uC744 \uC1E0\uB85C \uB9CC\uB4E0 \uD65C. \uC4F0\uB294 \uCABD\uB3C4 \uBB34\uC0AC\uD558\uC9C0 \uC54A\uB2E4."
   kind: 1
   tier: 6
   weight: 7
@@ -44,4 +43,4 @@ MonoBehaviour:
   effectiveRange: 20
   projectileSpeed: 30
   attachmentSlots: 6
-  weaponFamily: "\uC885\uACB0"
+  weaponFamily: "\uD65C"

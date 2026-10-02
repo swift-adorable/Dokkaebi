@@ -39,7 +39,7 @@ public struct EnemyProfile
     public bool splitsOnDeath;
 
     /// <summary>
-    /// 초당 회복하는 최대 체력 비율. 「재생」 속성과 「재생 조직」 레이드 특성이 쓴다.
+    /// 초당 회복하는 최대 체력 비율. 「재생」 속성과 「되살아나는 잡귀」 레이드 특성이 쓴다.
     /// 둘 다 걸려도 더하지 않는다 — 가장 큰 것 하나만 남는다.
     /// </summary>
     public float regenPerSecond;
@@ -140,8 +140,8 @@ public struct EnemyProfile
             }
 
             // 【손댄 속성 하나만 내린다.】
-            // 전부 1.0인 묶음을 만들어 TakeLowest에 넣으면, 압착기의 전기 2배와
-            // 정착체의 화염 1.5배가 속성 하나 붙었다는 이유로 1.0으로 눌린다.
+            // 전부 1.0인 묶음을 만들어 TakeLowest에 넣으면, 절굿공이귀의 전기 2배와
+            // 허깨비의 화염 1.5배가 속성 하나 붙었다는 이유로 1.0으로 눌린다.
             // 유형이 요구하던 답이 지워진다. (테스트가 이 실수를 잡아냈다)
             if (EnemyAffixTable.TryGetResistance(affix, out DamageElement element))
                 profile.resistances.LowerTo(element, EnemyAffixTable.ResistanceMultiplier);

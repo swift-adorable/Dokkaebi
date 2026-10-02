@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// 이번 판의 조건 — 시설 상태와 레이드 특성. (docs/Blob_Decisions.md 2-25 · 7-G)
+/// 이번 판의 조건 — 밤 상태와 레이드 특성. (docs/Blob_Decisions.md 2-25 · 7-G)
 ///
 /// 【판마다 한 번만 굴린다.】
 /// 적이 스폰될 때마다 굴리면 같은 판 안에서 조건이 달라져,

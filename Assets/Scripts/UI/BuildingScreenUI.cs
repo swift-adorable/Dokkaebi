@@ -154,7 +154,7 @@ public class BuildingScreenUI : MonoBehaviour
     private static string StatusLine(bool placed)
         => placed ? "지음 · 놓여 있음" : "지음 · 놓지 않음 — 「배치」를 누르십시오";
 
-    /// <summary>「100골드 · 고철 3/6 · 전지 0/1 · 필요: 작업대」. 모자란 것은 붉게.</summary>
+    /// <summary>「100골드 · 쇠붙이 3/6 · 숯 0/1 · 필요: 작업대」. 모자란 것은 붉게.</summary>
     private static string CostLine(BuildingDefinition definition)
     {
         var sb = new StringBuilder();

@@ -13,9 +13,8 @@ MonoBehaviour:
   m_Name: bio_sample
   m_EditorClassIdentifier: Blob.Runtime::ItemDefinition
   id: bio_sample
-  displayName: "\uC870\uC9C1 \uC0D8\uD50C"
-  description: "\uAD73\uC9C0 \uC54A\uC740 \uC870\uC9C1. \uC5F0\uAD6C\uB3D9\uC5D0\uC11C
-    \uAC12\uC774 \uC624\uB978\uB2E4."
+  displayName: "\uC57D\uC7AC"
+  description: "\uB9D0\uB9B0 \uC57D\uC7AC. \uC57D\uBC29\uACE8\uC5D0\uC11C \uAC12\uC774 \uC624\uB978\uB2E4."
   kind: 0
   tier: 0
   weight: 0.3

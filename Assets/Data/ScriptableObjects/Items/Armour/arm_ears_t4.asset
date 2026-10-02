@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: arm_ears_t4
   m_EditorClassIdentifier: Blob.Runtime::EquipmentDefinition
   id: arm_ears_t4
-  displayName: "\uC804\uC220 \uD5E4\uB4DC\uC14B"
+  displayName: "\uCE60\uCE35 \uC724\uB3C4"
   description: "\uC18C\uB9AC\uAC00 \uC5B4\uB514\uC11C \uC624\uB294\uC9C0 \uC54C\uB824\uC900\uB2E4.
     \uBC29\uC5B4\uC5D0\uB294 \uC544\uBB34 \uB3C4\uC6C0\uC774 \uB418\uC9C0 \uC54A\uB294\uB2E4."
   kind: 2

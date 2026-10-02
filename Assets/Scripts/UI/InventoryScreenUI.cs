@@ -1098,7 +1098,7 @@ public partial class InventoryScreenUI : MonoBehaviour
             strip.raycastTarget = false;
 
             // 【긴 이름이 칸을 넘던 자리다.】
-            // 「진압용 중장갑 (중간)」처럼 아홉 자가 넘는 이름이 띠 밖으로
+            // 「면제배갑 (중간)」처럼 아홉 자가 넘는 이름이 띠 밖으로
             // 삐져나와 옆 칸과 겹쳐 보였다. 두 가지를 같이 건다 —
             // 줄바꿈을 허용해 두 줄까지 접고, 그래도 넘치면 글자를 줄인다.
             // 장비 탭이 폭을 다 쓰게 되면서 칸이 두 배로 넓어졌으므로
@@ -1139,7 +1139,7 @@ public partial class InventoryScreenUI : MonoBehaviour
         Inventory bag = PlayerInventory.EnsureInstance().Bag;
 
         // 【탭에 맞는 것만 보여 준다.】
-        // 스킬 탭에서 방탄복을 고를 일이 없고, 장비 탭에서 젬을 눌러 봐야
+        // 스킬 탭에서 쇄자갑을 고를 일이 없고, 장비 탭에서 젬을 눌러 봐야
         // 「스킬 탭에서 장착」이라는 안내만 다시 나온다. 목록만 길어진다.
         bagStacks.Clear();
 
@@ -1370,7 +1370,7 @@ public partial class InventoryScreenUI : MonoBehaviour
     /// <summary>
     /// 가방 칸의 사이드 메뉴. 【아이템 성격이 줄을 정한다.】
     ///
-    /// 「사용」은 **지금 쓸 수 있을 때만** 뜬다. 체력이 가득한데 구급상자
+    /// 「사용」은 **지금 쓸 수 있을 때만** 뜬다. 체력이 가득한데 환단
     /// 줄이 보이면 눌러 보고 나서야 소용없다는 것을 알게 되고, 그 사이에
     /// 한 개가 사라졌는지 아닌지도 알 수 없다. 강화·저항처럼 효과가 아직
     /// 비어 있는 것도 여기서 걸러진다. (PlayerConsumables.CanUse)
@@ -1580,7 +1580,7 @@ public partial class InventoryScreenUI : MonoBehaviour
 
             // 【이름이 없어서 무엇을 걸어 뒀는지 알 수 없었다.】
             // 아트가 없는 지금은 도형이 종류(소모품)까지만 말해 준다.
-            // 회복약인지 해독제인지는 이름을 봐야 안다 — 급할 때 누르는 자리다.
+            // 회복약인지 감초인지는 이름을 봐야 안다 — 급할 때 누르는 자리다.
             Image strip = UIFactory.CreatePanel("NameStrip", cell.transform,
                 UIPalette.NameStrip, new Vector2(0.04f, 0.04f), new Vector2(0.96f, 0.30f),
                 radius: 5);

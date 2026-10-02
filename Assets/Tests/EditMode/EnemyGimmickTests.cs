@@ -31,13 +31,13 @@ namespace Blob.Tests
         public void 유형과_기믹이_문서대로_이어진다()
         {
             Assert.AreEqual(EnemyGimmick.RadialSpray,
-                EnemyGimmickTable.Of(EnemyArchetype.Chemic), "화공체 — 8방향");
+                EnemyGimmickTable.Of(EnemyArchetype.Chemic), "왕지네 — 8방향");
 
             Assert.AreEqual(EnemyGimmick.BurstFire,
-                EnemyGimmickTable.Of(EnemyArchetype.Sentry), "보안기 — 3점사");
+                EnemyGimmickTable.Of(EnemyArchetype.Sentry), "순라귀 — 3점사");
 
             Assert.AreEqual(EnemyGimmick.GravityStealth,
-                EnemyGimmickTable.Of(EnemyArchetype.Settled), "정착체 — 중력·은신");
+                EnemyGimmickTable.Of(EnemyArchetype.Settled), "허깨비 — 중력·은신");
         }
 
         [Test]

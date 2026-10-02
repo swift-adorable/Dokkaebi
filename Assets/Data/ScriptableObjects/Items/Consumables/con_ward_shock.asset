@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: con_ward_shock
   m_EditorClassIdentifier: Blob.Runtime::ItemDefinition
   id: con_ward_shock
-  displayName: "\uC804\uAE30 \uC800\uD56D \uC8FC\uC0AC\uC57D"
+  displayName: "\uBCBD\uC870\uD658"
   description: "\uC800\uB9AC\uB294 \uAC83\uC774 \uB35C\uD558\uB2E4."
   kind: 6
   tier: 0

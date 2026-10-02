@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: med_stim
   m_EditorClassIdentifier: Blob.Runtime::ItemDefinition
   id: med_stim
-  displayName: "\uC9C4\uD1B5\uC81C"
+  displayName: "\uD604\uD638\uC0C9"
   description: "\uC7A0\uC2DC \uC544\uD514\uC744 \uC78A\uB294\uB2E4."
   kind: 6
   tier: 0

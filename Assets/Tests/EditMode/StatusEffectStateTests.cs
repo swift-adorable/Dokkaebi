@@ -527,7 +527,7 @@ namespace Blob.Tests
             Assert.IsFalse(state.Has(StatusEffectType.Haste));
             Assert.IsTrue(state.Has(StatusEffectType.Fatigue));
 
-            // 【대가는 순수 손해다.】 노란 주사약이 순수 증가가 되면 안 된다.
+            // 【대가는 순수 손해다.】 축지환이 순수 증가가 되면 안 된다.
             Assert.Less(state.SpeedMultiplier, 1f);
         }
 
@@ -583,14 +583,14 @@ namespace Blob.Tests
             state.ApplyWards(ref resist);
 
             // 0.5 × 0.75 = 0.375. LowerTo의 바닥을 쓰면 0.5 그대로라
-            // 「화염 저항 장비를 낀 사람에게 화염 저항 주사약이 아무 일도 안 한다」가 된다.
+            // 「화염 저항 장비를 낀 사람에게 석고환이 아무 일도 안 한다」가 된다.
             Assert.AreEqual(0.375f, resist.Get(DamageElement.Chaos), 0.001f);
         }
 
         [Test]
         public void 저항_주사약은_약점을_저항으로_뒤집지_않는다()
         {
-            // 압착기의 전기 2배가 저항 하나로 0.75가 되면
+            // 절굿공이귀의 전기 2배가 저항 하나로 0.75가 되면
             // 「얘는 전기로 잡아라」가 사라진다. LowerTo의 바닥 규칙이다.
             var state = new StatusEffectState();
 

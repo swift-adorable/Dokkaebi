@@ -11,7 +11,7 @@ namespace Blob.Tests
     ///   1. 저항은 곱해지지 않는다 — 가장 낮은 배율 하나만
     ///   2. 밀집과 산개는 같이 걸리지 않는다
     ///   3. 저항 특성도 한 판에 하나만
-    ///   4. 시설 상태는 양날이다 — 손해만 있는 상태를 만들지 않는다
+    ///   4. 밤 상태는 양날이다 — 손해만 있는 상태를 만들지 않는다
     /// </summary>
     public class RaidConditionTests
     {
@@ -30,7 +30,7 @@ namespace Blob.Tests
         [Test]
         public void 저항은_곱해지지_않는다()
         {
-            // 문서 9절 — "「경화 외피」 레이드(물리 ×0.5) + 「경화」 적(물리 ×0.5) → ×0.5."
+            // 문서 9절 — "「돌을 삼킨 잡귀」 레이드(물리 ×0.5) + 「경화」 적(물리 ×0.5) → ×0.5."
             // 곱연산이면 원천 둘로 「이 속성으로는 못 잡는다」가 되고,
             // 상태이상 피해에도 상성이 곱해지므로 방어도 무시라는 우회로까지 막힌다.
             EnemyProfile hardened = EnemyProfile.Build(
@@ -48,11 +48,11 @@ namespace Blob.Tests
         [Test]
         public void 약점이_저항으로_뒤집히지_않는다()
         {
-            // 압착기는 전기에 2배로 약하다. 「전기 저항 피막」이 걸려도 약점이 줄 뿐
+            // 절굿공이귀는 전기에 2배로 약하다. 「벼락을 삼킨 잡귀」이 걸려도 약점이 줄 뿐
             // 강점이 되어서는 안 된다 — 유형이 요구하던 답이 지워진다.
             EnemyProfile crusher = Profile(EnemyArchetype.Crusher);
 
-            Assert.Greater(crusher.resistances.lightning, 1f, "압착기의 전기 약점이 없습니다.");
+            Assert.Greater(crusher.resistances.lightning, 1f, "절굿공이귀의 전기 약점이 없습니다.");
 
             EnemyProfile insulated = With(FacilityState.Normal, RaidTrait.Insulated).Apply(crusher);
 
@@ -179,7 +179,7 @@ namespace Blob.Tests
                 "재생이 더해졌습니다.");
         }
 
-        // ── 4. 시설 상태 ──────────────────────────────────────────────
+        // ── 4. 밤 상태 ──────────────────────────────────────────────
 
         [Test]
         public void 모든_시설_상태가_추가_스폰을_갖는다()
@@ -202,10 +202,10 @@ namespace Blob.Tests
                 "「대폭 감소」인데 절반도 줄지 않았습니다.");
 
             Assert.IsFalse(FacilityStateTable.IsActive(FacilityState.Blackout, EnemyArchetype.Sentry),
-                "정전인데 보안기가 움직입니다. 손해만 남습니다.");
+                "그믐인데 순라귀가 움직입니다. 손해만 남습니다.");
 
             Assert.IsTrue(FacilityStateTable.IsActive(FacilityState.Blackout, EnemyArchetype.Scav),
-                "보안기가 아닌 것까지 멈췄습니다.");
+                "순라귀가 아닌 것까지 멈췄습니다.");
 
             Assert.IsTrue(FacilityStateTable.IsActive(FacilityState.Normal, EnemyArchetype.Sentry));
         }
@@ -213,11 +213,11 @@ namespace Blob.Tests
         [Test]
         public void 정전에서는_보기_전에_듣는다가_뒤집힌다()
         {
-            // 정전의 정체가 이것이다 — 시야가 총성보다 짧아진다.
+            // 그믐의 정체가 이것이다 — 시야가 총성보다 짧아진다.
             float sight = FacilityStateTable.VisionRange(FacilityState.Blackout, EnemyArchetype.Scav);
 
             Assert.Less(sight, EnemyArchetypeTable.DefaultVisionRange,
-                "정전인데 시야가 그대로입니다.");
+                "그믐인데 시야가 그대로입니다.");
         }
 
         [Test]
@@ -245,7 +245,7 @@ namespace Blob.Tests
             EnemyProfile scav = decon.Apply(Profile(EnemyArchetype.Scav));
 
             Assert.Greater(chemic.health, Profile(EnemyArchetype.Chemic).health,
-                "화공체가 강해지지 않았습니다. 추가 스폰이 숫자만 느는 것이 됩니다.");
+                "왕지네가 강해지지 않았습니다. 추가 스폰이 숫자만 느는 것이 됩니다.");
 
             Assert.AreEqual(Profile(EnemyArchetype.Scav).health, scav.health,
                 "상관없는 유형까지 강해졌습니다.");

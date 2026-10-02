@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: con_coagulant
   m_EditorClassIdentifier: Blob.Runtime::ItemDefinition
   id: con_coagulant
-  displayName: "\uAC15\uD654 \uC8FC\uC0AC\uC57D"
+  displayName: "\uB179\uC6A9"
   description: "\uAD73\uC740 \uB9CC\uD07C \uC57D\uC774 \uC548 \uB4E3\uB294\uB2E4."
   kind: 6
   tier: 0

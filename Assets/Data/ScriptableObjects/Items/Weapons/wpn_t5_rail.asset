@@ -13,9 +13,8 @@ MonoBehaviour:
   m_Name: wpn_t5_rail
   m_EditorClassIdentifier: Blob.Runtime::WeaponDefinition
   id: wpn_t5_rail
-  displayName: "\uB808\uC77C \uAD00\uD1B5\uC18C\uCD1D"
-  description: "\uBA40\uB9AC\uC11C \uB6AB\uB294\uB2E4. \uB2E4\uB9CC \uBC1C\uC0AC\uC74C\uC774
-    \uAD6C\uC5ED \uC808\uBC18\uC5D0 \uD37C\uC9C4\uB2E4."
+  displayName: "\uB179\uAC01\uAD81"
+  description: "\uC0AC\uC2B4\uBFD4\uC744 \uB304 \uD65C. \uBA40\uB9AC\uC11C \uB6AB\uB294\uB2E4. \uB2E4\uB9CC \uC2DC\uC704 \uC18C\uB9AC\uAC00 \uAD6C\uC5ED \uC808\uBC18\uC5D0 \uD37C\uC9C4\uB2E4."
   kind: 1
   tier: 5
   weight: 4.8
@@ -42,4 +41,4 @@ MonoBehaviour:
   effectiveRange: 20
   projectileSpeed: 34
   attachmentSlots: 4
-  weaponFamily: "\uC815\uBC00"
+  weaponFamily: "\uD65C"

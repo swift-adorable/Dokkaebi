@@ -14,13 +14,13 @@ public enum EnemyGimmick
 {
     None = 0,
 
-    /// <summary>화공체 — 8방향으로 흩뿌린다. 【피할 곳을 줄이는 방식】.</summary>
+    /// <summary>왕지네 — 8방향으로 흩뿌린다. 【피할 곳을 줄이는 방식】.</summary>
     RadialSpray = 1,
 
-    /// <summary>보안기 — 3점사. 【한 번 걸리면 세 방 맞는다】.</summary>
+    /// <summary>순라귀 — 3점사. 【한 번 걸리면 세 방 맞는다】.</summary>
     BurstFire = 2,
 
-    /// <summary>정착체 — 끌어당기고 숨는다. 【거리를 못 벌린다】.</summary>
+    /// <summary>허깨비 — 끌어당기고 숨는다. 【거리를 못 벌린다】.</summary>
     GravityStealth = 3
 }
 
@@ -65,10 +65,10 @@ public readonly struct GimmickSpec
 /// </summary>
 public static class EnemyGimmickTable
 {
-    /// <summary>[확인됨 — 문서 1절] 화공체의 8방향.</summary>
+    /// <summary>[확인됨 — 문서 1절] 왕지네의 8방향.</summary>
     public const int SprayDirections = 8;
 
-    /// <summary>[확인됨 — 문서 1절] 보안기의 3점사.</summary>
+    /// <summary>[확인됨 — 문서 1절] 순라귀의 3점사.</summary>
     public const int BurstShots = 3;
 
     /// <summary>
@@ -79,14 +79,14 @@ public static class EnemyGimmickTable
     public const float BurstInterval = 0.14f;
 
     /// <summary>
-    /// [불확실] 정착체가 끌어당기는 세기(m/s).
+    /// [불확실] 허깨비가 끌어당기는 세기(m/s).
     /// 기본 이동 속도(2.5)의 3할 남짓 — 「뒷걸음질이 느려진다」 정도다.
     /// 이보다 세면 도망 자체가 불가능해져 답이 하나로 줄어든다.
     /// </summary>
     public const float PullStrength = 0.8f;
 
     /// <summary>
-    /// [불확실] 정착체가 드러나는 거리(m).
+    /// [불확실] 허깨비가 드러나는 거리(m).
     /// 시야 거리(18)의 절반보다 짧아야 「눈앞에서 나타난다」가 된다.
     /// </summary>
     public const float RevealRange = 7f;

@@ -413,7 +413,7 @@ public class ExchangeWindowUI : MonoBehaviour
                 : null;
 
             // 한 개짜리로 그린다 — 재고 수는 아래 표로 따로 붙인다.
-            // 겹치지 않는 물건(구급상자)은 개수를 셀 수 없어서다.
+            // 겹치지 않는 물건(환단)은 개수를 셀 수 없어서다.
             ItemStack shown = definition != null ? new ItemStack(definition) : null;
 
             Image cell = ItemCell.Draw($"Shop_{i}", grid.Content, min, max, shown,

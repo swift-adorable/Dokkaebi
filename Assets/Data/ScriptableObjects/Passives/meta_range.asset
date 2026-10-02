@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: meta_range
   m_EditorClassIdentifier: Blob.Runtime::PassiveNode
   id: meta_range
-  displayName: "\uCD09\uC218 \uC5F0\uC7A5"
+  displayName: "\uAE34 \uC190"
   description: "\uB2FF\uB294 \uAC70\uB9AC\uAC00 \uB298\uC5C8\uB2E4."
   branch: 1
   effect: 11

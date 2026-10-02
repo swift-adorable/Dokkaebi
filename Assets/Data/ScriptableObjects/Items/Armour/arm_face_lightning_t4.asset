@@ -13,9 +13,8 @@ MonoBehaviour:
   m_Name: arm_face_lightning_t4
   m_EditorClassIdentifier: Blob.Runtime::EquipmentDefinition
   id: arm_face_lightning_t4
-  displayName: "\uC808\uC5F0 \uCC28\uB2E8 \uB9C8\uC2A4\uD06C"
-  description: "\uC0C1\uD0DC\uC774\uC0C1 \uC790\uCCB4\uB97C \uB9C9\uB294\uB2E4. \uB2E4\uB9CC
-    \uD53C\uD574\uB294 \uADF8\uB300\uB85C \uB4E4\uC5B4\uC628\uB2E4."
+  displayName: "\uD478\uB978 \uBC29\uC0C1\uC2DC\uD0C8"
+  description: "\uC804\uAE30 \uC800\uD56D. \uC0C1\uD0DC\uC774\uC0C1 \uC790\uCCB4\uB97C \uB9C9\uB294\uB2E4. \uB2E4\uB9CC \uD53C\uD574\uB294 \uADF8\uB300\uB85C \uB4E4\uC5B4\uC628\uB2E4."
   kind: 2
   tier: 4
   weight: 0.5

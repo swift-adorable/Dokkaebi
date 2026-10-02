@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: con_defroster
   m_EditorClassIdentifier: Blob.Runtime::ItemDefinition
   id: con_defroster
-  displayName: "\uD574\uBE59\uC81C"
+  displayName: "\uC0DD\uAC15"
   description: "\uC548\uCABD\uBD80\uD130 \uB179\uC778\uB2E4."
   kind: 6
   tier: 0

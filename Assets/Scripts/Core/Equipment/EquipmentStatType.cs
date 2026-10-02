@@ -36,7 +36,7 @@ public enum EquipmentStatType
 
     InvulnerableTime = 22,
 
-    /// <summary>받는 회복량 증가율. −1.0이면 회복량 0. (각인 「포식 Ⅲ」)</summary>
+    /// <summary>받는 회복량 증가율. −1.0이면 회복량 0. (각인 「먹성 Ⅲ」)</summary>
     HealingReceived = 23,
 
     // ── 기동 ──────────────────────────────────────────────────────────

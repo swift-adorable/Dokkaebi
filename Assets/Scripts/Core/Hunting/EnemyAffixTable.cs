@@ -158,7 +158,7 @@ public static class EnemyAffixTable
             case EnemyAffix.Hardened:     return "경화";
             case EnemyAffix.FireProof:    return "내화성";
             case EnemyAffix.Insulated:    return "절연성";
-            case EnemyAffix.Antibody:     return "항체";
+            case EnemyAffix.Antibody:     return "독 견딤";
             case EnemyAffix.Cryostable:   return "내한성";
             case EnemyAffix.Regenerating: return "재생";
             case EnemyAffix.Shell:        return "껍질";

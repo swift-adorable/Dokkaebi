@@ -18,17 +18,17 @@ public struct RaidTraitEffect
     /// <summary>무리가 흩어지는 정도의 배율. 1이면 그대로.</summary>
     public float spreadScale;
 
-    /// <summary>출혈이 걸리지 않는가. (응고 혈액)</summary>
+    /// <summary>출혈이 걸리지 않는가. (피 없는 잡귀)</summary>
     public bool blocksBleed;
 
-    /// <summary>장비 내구도 소모 배율. 1이면 그대로. (부식 대기)</summary>
+    /// <summary>장비 내구도 소모 배율. 1이면 그대로. (눅눅한 밤)</summary>
     public float durabilityLossScale;
 
     /// <summary>
     /// 이 특성과 같은 계열의 몬스터 속성. 출현 확률을 낮춘다.
     ///
     /// 【중복 완화】(문서 9절)
-    /// 「경화 외피」 레이드에서 「경화」 적까지 자주 나오면,
+    /// 「돌을 삼킨 잡귀」 레이드에서 「경화」 적까지 자주 나오면,
     /// 물리 빌드가 아예 못 싸우는 구간이 생긴다. 저항이 곱해지지 않더라도
     /// 「전부 ×0.5」인 판은 그 빌드에게 재미가 아니라 벽이다.
     /// </summary>
@@ -48,7 +48,7 @@ public static class RaidTraitTable
     public const float ResistanceMultiplier = EnemyAffixTable.ResistanceMultiplier;
 
     /// <summary>
-    /// 재생 조직의 초당 회복량(최대 체력 대비).
+    /// 되살아나는 잡귀의 초당 회복량(최대 체력 대비).
     /// 몬스터 속성 「재생」과 같은 값을 쓴다 — 같은 이름의 것이 두 값을 갖지 않는다.
     /// </summary>
     public const float RegenPerSecond = EnemyAffixTable.RegenPerSecond;
@@ -68,7 +68,7 @@ public static class RaidTraitTable
     public const float ScatteredSpreadScale = 1.8f;
 
     /// <summary>
-    /// 부식 대기의 내구도 소모 배율.
+    /// 눅눅한 밤의 내구도 소모 배율.
     /// 【불확실 — 문서에 수치가 없다.】 2배면 한 판에 장비가 반쯤 망가진다.
     /// 1.5배는 「오래 있으면 손해」를 느끼되 한 판을 버리게 하지는 않는 선이다.
     /// </summary>
@@ -77,7 +77,7 @@ public static class RaidTraitTable
     /// <summary>
     /// 중복 완화 — 같은 계열 몬스터 속성의 출현 가중치 배율.
     /// 【불확실 — 문서는 「낮춘다」고만 적었다.】 0으로 두면 그 속성이
-    /// 아예 사라져 「경화 외피 판에서는 경화가 없다」는 이상한 규칙이 된다.
+    /// 아예 사라져 「돌을 삼킨 잡귀 판에서는 경화가 없다」는 이상한 규칙이 된다.
     /// </summary>
     public const float OverlapWeightScale = 0.35f;
 
@@ -124,16 +124,16 @@ public static class RaidTraitTable
     {
         switch (trait)
         {
-            case RaidTrait.Dense:        return "밀집 서식";
-            case RaidTrait.Scattered:    return "산개 순찰";
-            case RaidTrait.Hardened:     return "경화 외피";
-            case RaidTrait.FireProof:    return "화염 저항 피부";
-            case RaidTrait.ColdAdapted:  return "저온 적응";
-            case RaidTrait.Insulated:    return "전기 저항 피막";
-            case RaidTrait.Antibody:     return "면역 항체";
-            case RaidTrait.Regenerating: return "재생 조직";
-            case RaidTrait.Congealed:    return "응고 혈액";
-            case RaidTrait.Corrosive:    return "부식 대기";
+            case RaidTrait.Dense:        return "떼 지은 밤";
+            case RaidTrait.Scattered:    return "흩어진 밤";
+            case RaidTrait.Hardened:     return "돌을 삼킨 잡귀";
+            case RaidTrait.FireProof:    return "불을 삼킨 잡귀";
+            case RaidTrait.ColdAdapted:  return "얼음을 삼킨 잡귀";
+            case RaidTrait.Insulated:    return "벼락을 삼킨 잡귀";
+            case RaidTrait.Antibody:     return "독을 삼킨 잡귀";
+            case RaidTrait.Regenerating: return "되살아나는 잡귀";
+            case RaidTrait.Congealed:    return "피 없는 잡귀";
+            case RaidTrait.Corrosive:    return "눅눅한 밤";
             default:                     return string.Empty;
         }
     }

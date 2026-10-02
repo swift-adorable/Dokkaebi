@@ -13,9 +13,8 @@ MonoBehaviour:
   m_Name: wpn_t3_acid
   m_EditorClassIdentifier: Blob.Runtime::WeaponDefinition
   id: wpn_t3_acid
-  displayName: "\uC0B0\uC131 \uBD84\uC0AC\uAE30"
-  description: "\uC5F0\uAD6C\uB3D9 \uC57D\uD488\uC744 \uADF8\uB300\uB85C \uC3DC\uB2E4.
-    \uC7A5\uAC11\uC744 \uB179\uC774\uBA70 \uB4E4\uC5B4\uAC04\uB2E4."
+  displayName: "\uD5A5\uAC01\uAD81"
+  description: "\uC6B0\uB9AC \uC18C\uBFD4\uC744 \uB304 \uAC01\uAD81. \uAC11\uC637 \uD2C8\uC744 \uBE44\uC9D1\uACE0 \uB4E4\uC5B4\uAC04\uB2E4."
   kind: 1
   tier: 3
   weight: 3
@@ -40,4 +39,4 @@ MonoBehaviour:
   effectiveRange: 13
   projectileSpeed: 22
   attachmentSlots: 2
-  weaponFamily: "\uD654\uD559"
+  weaponFamily: "\uD65C"

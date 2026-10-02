@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: con_bandage
   m_EditorClassIdentifier: Blob.Runtime::ItemDefinition
   id: con_bandage
-  displayName: "\uC9C0\uD608 \uBD95\uB300"
+  displayName: "\uC465"
   description: "\uAC10\uACE0 \uB098\uBA74 \uD53C\uB294 \uBA4E\uB294\uB2E4."
   kind: 6
   tier: 0

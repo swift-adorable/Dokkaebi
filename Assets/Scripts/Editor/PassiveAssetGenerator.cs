@@ -60,10 +60,10 @@ public static class PassiveAssetGenerator
     ///
     /// 비용 설계 —
     ///   하위 : 골드만            (바로 배운다)
-    ///   중간 : + 흔한 재료          (고철 · 전선 뭉치)
-    ///   상위 : + 귀한 재료          (메모리 코어 · 조직 샘플)
+    ///   중간 : + 흔한 재료          (쇠붙이 · 새끼 뭉치)
+    ///   상위 : + 귀한 재료          (노리개 · 약재)
     /// 골드만 쓰면 시간을 들이면 전부 열린다. 재료가 들어가야
-    /// "이 메모리 코어를 팔까, 패시브에 쓸까"가 생긴다.
+    /// "이 노리개를 팔까, 패시브에 쓸까"가 생긴다.
     /// </summary>
     private static List<Row> BuildTable()
     {
@@ -85,7 +85,7 @@ public static class PassiveAssetGenerator
             column: 2, row: 1, prereq: new[] { "adapt_slots_1" },
             materials: new[] { ("wire_bundle", 6) }));
 
-        rows.Add(N("adapt_frame", "외골격 프레임",
+        rows.Add(N("adapt_frame", "멜빵",
             "몸 밖에 뼈대를 하나 더 얹었다. 무게와 공간을 함께 번다.",
             PassiveBranch.Adapt, PassiveEffectType.CarryWeight, 9, level: 8, cost: 4200,
             column: 1, row: 2, prereq: new[] { "adapt_slots_2", "adapt_weight_1" },
@@ -97,11 +97,11 @@ public static class PassiveAssetGenerator
             materials: new[] { ("memory_core", 2) }));
 
         // ── 대사 — 얼마나 얻는가 ──────────────────────────────────────
-        rows.Add(N("meta_absorb_1", "포식 본능 1", "시체에서 더 많은 것을 끌어낸다.",
+        rows.Add(N("meta_absorb_1", "정기 거두기 1", "시체에서 더 많은 것을 끌어낸다.",
             PassiveBranch.Metabolism, PassiveEffectType.AbsorbAmount, 15, level: 1, cost: 700,
             column: 1, row: 0));
 
-        rows.Add(N("meta_range", "촉수 연장", "닿는 거리가 늘었다.",
+        rows.Add(N("meta_range", "긴 손", "닿는 거리가 늘었다.",
             PassiveBranch.Metabolism, PassiveEffectType.AbsorbRange, 1.5f, level: 3, cost: 1500,
             column: 0, row: 1, prereq: new[] { "meta_absorb_1" },
             materials: new[] { ("bio_sample", 4) }));
@@ -111,7 +111,7 @@ public static class PassiveAssetGenerator
             column: 2, row: 1, prereq: new[] { "meta_absorb_1" },
             materials: new[] { ("scrap_metal", 6) }));
 
-        rows.Add(N("meta_absorb_2", "포식 본능 2", "경험치 획득 +20%.",
+        rows.Add(N("meta_absorb_2", "정기 거두기 2", "경험치 획득 +20%.",
             PassiveBranch.Metabolism, PassiveEffectType.AbsorbAmount, 20, level: 7, cost: 3600,
             column: 1, row: 2, prereq: new[] { "meta_range", "meta_scav_1" },
             materials: new[] { ("bio_sample", 8) }));
@@ -128,7 +128,7 @@ public static class PassiveAssetGenerator
             PassiveBranch.Recovery, PassiveEffectType.SafeSlots, 1, level: 5, cost: 2500,
             column: 1, row: 0, materials: new[] { ("wire_bundle", 8) }));
 
-        rows.Add(N("rec_mark", "철수 좌표",
+        rows.Add(N("rec_mark", "돌아갈 길목",
             "지도에 철수 지점이 상시 표시된다.",
             PassiveBranch.Recovery, PassiveEffectType.ExtractMark, 1, level: 6, cost: 2200,
             column: 0, row: 1, prereq: new[] { "rec_safe_1" }));
@@ -166,7 +166,7 @@ public static class PassiveAssetGenerator
             PassiveBranch.Brokerage, PassiveEffectType.ShopRefresh, 10, level: 1, cost: 3000,
             column: 0, row: 2, prereq: new[] { "brok_sell_2" }));
 
-        rows.Add(N("brok_slots_1", "정보용량 1", "상점 갱신 횟수 +1.",
+        rows.Add(N("brok_slots_1", "단골 1", "상점 갱신 횟수 +1.",
             PassiveBranch.Brokerage, PassiveEffectType.ShopSlots, 1, level: 1, cost: 3600,
             column: 2, row: 2, prereq: new[] { "brok_stash_2" }));
 
@@ -174,7 +174,7 @@ public static class PassiveAssetGenerator
             PassiveBranch.Brokerage, PassiveEffectType.ShopRefresh, 10, level: 1, cost: 5400,
             column: 0, row: 3, prereq: new[] { "brok_refresh_1" }));
 
-        rows.Add(N("brok_slots_2", "정보용량 2", "상점 갱신 횟수 +1.",
+        rows.Add(N("brok_slots_2", "단골 2", "상점 갱신 횟수 +1.",
             PassiveBranch.Brokerage, PassiveEffectType.ShopSlots, 1, level: 1, cost: 6200,
             column: 2, row: 3, prereq: new[] { "brok_slots_1" }));
 
@@ -185,19 +185,19 @@ public static class PassiveAssetGenerator
             PassiveBranch.Regression, PassiveEffectType.CraftBench, 1, level: 1, cost: 3000,
             column: 1, row: 0, materials: new[] { ("memory_core", 1) }));
 
-        rows.Add(N("reg_salvage", "역분해",
+        rows.Add(N("reg_salvage", "구슬 깨기",
             "젬을 도로 풀어 재료로 되돌린다. 쓸모없는 젬이 사라진다.",
             PassiveBranch.Regression, PassiveEffectType.GemSalvage, 1, level: 1, cost: 4500,
             column: 0, row: 1, prereq: new[] { "reg_bench" },
             materials: new[] { ("bio_sample", 6) }));
 
-        rows.Add(N("reg_codex", "기록 역산",
+        rows.Add(N("reg_codex", "한눈에 알아보기",
             "처치만 해도 도감에 등록된다. 변이 샘플을 흡수할 필요가 없어진다.",
             PassiveBranch.Regression, PassiveEffectType.CodexAuto, 1, level: 1, cost: 6500,
             column: 2, row: 1, prereq: new[] { "reg_bench", "meta_absorb_2" },
             materials: new[] { ("memory_core", 3) }));
 
-        rows.Add(N("reg_map", "누락된 지도",
+        rows.Add(N("reg_map", "옛 지도",
             "지도에 전리품 위치가 표시된다. 원래 없던 마커이다.",
             PassiveBranch.Regression, PassiveEffectType.MapLoot, 1, level: 1, cost: 8000,
             column: 1, row: 2, prereq: new[] { "reg_salvage", "reg_codex" },
