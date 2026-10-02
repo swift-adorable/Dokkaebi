@@ -12,6 +12,7 @@ Unity 6 Mobile · Top-Down Shooter + Roguelite + Extraction Looting
 | [Story](Dokkaebi_Story.md) | 스토리 설계 · 6장 · 단서 | **왜 그렇게 되었는가** |
 | [Story_Script](Dokkaebi_Story_Script.txt) | 스토리 본문 v2.4 | 프롤로그 ~ 6장 끝 (엔딩) |
 | [Naming](Dokkaebi_Naming.md) | 이름 · 화면 표기 | **무엇이라 부르는가** |
+| [Mapping_2단계](Dokkaebi_Mapping_2단계.md) | 이전 이름 → 새 이름의 근거 | 왜 그 이름인가 (재확인 대기) |
 | [Combat_Baseline](Dokkaebi_Combat_Baseline.md) | 수치 | **얼마나 아픈가** |
 | [Skill_System](Dokkaebi_Skill_System.md) | 스킬 53종 | 무엇으로 죽이는가 |
 | [Equipment_System](Dokkaebi_Equipment_System.md) | 장비 · 무기 | 무엇을 입고 가는가 |
@@ -22,6 +23,8 @@ Unity 6 Mobile · Top-Down Shooter + Roguelite + Extraction Looting
 | [Consumable_System](Dokkaebi_Consumable_System.md) | 소모품 4분류 | 가방 한 칸을 무엇에 쓰는가 |
 | [Bunker_System](Dokkaebi_Bunker_System.md) | 벙커 · 제작 · 상점 · 퀘스트 | **파밍과 파밍 사이에 무엇을 하는가** |
 | [Save_System](Dokkaebi_Save_System.md) | 저장 · 롤백 · 백업 | **무엇이 언제 남는가** |
+| [Survival_System](Dokkaebi_Survival_System.md) | 수분 · 에너지 | 얼마나 버티는가 |
+| [Map_System](Dokkaebi_Map_System.md) | 지도 · 미니맵 · 마커 | 어디에 있는가 |
 | [Audit](Dokkaebi_Audit.md) | 문서 ↔ 코드 대조 | **지금 무엇이 어긋나 있는가** |
 | [Decisions](Dokkaebi_Decisions.md) | 결정 대기 | **아직 근거 없이 굴러가는 값** |
 | [Playtest_Checklist](Dokkaebi_Playtest_Checklist.md) | 플레이 검증 | **정말 되는가** |

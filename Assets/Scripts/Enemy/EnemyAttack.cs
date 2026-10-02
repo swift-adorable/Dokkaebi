@@ -3,10 +3,10 @@ using UnityEngine;
 /// <summary>적의 공격 방식. 유형마다 다르다. (docs/Dokkaebi_Hunting_System.md 1절)</summary>
 public enum EnemyAttackKind
 {
-    /// <summary>근접 — 사거리 안에서 직접 판정한다. 포자충 · 사냥개</summary>
+    /// <summary>근접 — 사거리 안에서 직접 판정한다. 잡귀 · 절굿공이귀 · 수귀 · 허깨비 · 무주귀</summary>
     Melee = 0,
 
-    /// <summary>원거리 — 투사체를 발사한다. 번개귀 · 침귀 · 감시자</summary>
+    /// <summary>원거리 — 투사체를 발사한다. 번개귀 · 왕지네 · 침귀 · 순라귀</summary>
     Ranged = 1
 }
 

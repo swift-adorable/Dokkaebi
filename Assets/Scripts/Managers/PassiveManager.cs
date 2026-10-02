@@ -25,7 +25,7 @@ public class PassiveManager : Singleton<PassiveManager>
     [SerializeField] private int gold = 5000;
 
     [Tooltip("역행 계열을 발견했는지. 세이브가 있으면 SaveManager가 덮는다. " +
-             "본래는 4장 관측실에서 「역행자」를 만나야 켜진다.")]
+             "역행 계열을 만나는 장소는 아직 정하지 않았다 (Dokkaebi_Story.md 미정 목록).")]
     [SerializeField] private bool discoveredRegression = false;
 
     private readonly PassiveState state = new();
