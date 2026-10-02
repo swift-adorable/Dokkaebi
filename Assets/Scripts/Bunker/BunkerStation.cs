@@ -136,7 +136,7 @@ public class BunkerStation : MonoBehaviour
                 break;
 
             case Kind.Departure:
-                SceneFlow.Depart();
+                DepartureUI.Open();
                 break;
         }
     }

@@ -356,5 +356,21 @@ namespace Dokkaebi.Tests
             SaveStore.Read(path, out SaveData data);
             Assert.AreEqual(3, data.level);
         }
+
+        /// <summary>제품 이름이 바뀌어 세이브 폴더가 달라져도 옮겨진다 — 새 폴더가 없으면 만든다.</summary>
+        [Test]
+        public void 다른_폴더의_옛_세이브도_옮겨진다()
+        {
+            string oldFolder = Path.Combine(folder, SaveStore.LegacyProductFolder);
+            Directory.CreateDirectory(oldFolder);
+            string legacy = Path.Combine(oldFolder, SaveStore.LegacyFileName);
+            SaveStore.Write(legacy, Sample(level: 5));
+
+            string newPath = Path.Combine(folder, "NewProduct", SaveStore.FileName);
+            SaveStore.MoveLegacy(legacy, newPath);
+
+            Assert.AreEqual(SaveLoadResult.Main, SaveStore.Read(newPath, out SaveData data));
+            Assert.AreEqual(5, data.level);
+        }
 }
 }

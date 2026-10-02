@@ -220,6 +220,7 @@ public static class SaveManager
 
         data.shop = ShopManager.Capture();
         data.buildings = BuildingManager.Capture();
+        data.story = StoryManager.Capture();
 
         return data;
     }
@@ -273,6 +274,7 @@ public static class SaveManager
         RestoreInto(PlayerInventory.Instance.Stash, data.stash, "창고");
         ShopManager.Restore(data.shop);
         BuildingManager.Restore(data.buildings);
+        StoryManager.Restore(data.story);
 
         // 레벨이 돌아왔으니 소켓 수도 맞춘다. 알림은 내지 않는다.
         SkillManager.EnsureInstance().ResyncLevel();
