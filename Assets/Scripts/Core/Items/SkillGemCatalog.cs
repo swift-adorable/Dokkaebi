@@ -14,7 +14,7 @@ using UnityEngine;
 ///
 /// SkillCatalog와 같은 이유로 Resources에 카탈로그 하나만 둔다.
 /// </summary>
-[CreateAssetMenu(fileName = "SkillGemCatalog", menuName = "Blob/Skill Gem Catalog")]
+[CreateAssetMenu(fileName = "SkillGemCatalog", menuName = "Dokkaebi/Skill Gem Catalog")]
 public class SkillGemCatalog : ScriptableObject
 {
     /// <summary>Resources 하위 경로. 확장자 없이 쓴다.</summary>

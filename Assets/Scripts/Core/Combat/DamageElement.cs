@@ -3,7 +3,7 @@
 ///
 /// 스킬 문서의 부여 핵심 젬 이름과 1:1로 대응한다.
 ///   화염 → Fire / 서리 → Cold / 뇌전 → Lightning / 역병 → Chaos / 열상 → Physical
-/// (docs/Blob_Combat_Baseline.md 7절)
+/// (docs/Dokkaebi_Combat_Baseline.md 7절)
 /// </summary>
 public enum DamageElement
 {
@@ -17,8 +17,8 @@ public enum DamageElement
 /// <summary>
 /// 피격 유형. 어느 쪽 방어도를 쓸지 결정한다.
 ///
-/// Blob은 조준이 자동에 가까워 부위 판정이 없다. 대신 피해 유형으로 나눈다.
-/// (docs/Blob_Equipment_System.md 1절)
+/// Dokkaebi는 조준이 자동에 가까워 부위 판정이 없다. 대신 피해 유형으로 나눈다.
+/// (docs/Dokkaebi_Equipment_System.md 1절)
 /// </summary>
 public enum HitKind
 {

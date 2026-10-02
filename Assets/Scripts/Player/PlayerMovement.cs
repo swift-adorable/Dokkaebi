@@ -22,7 +22,7 @@ public class PlayerMovement : MonoBehaviour
 
     /// <summary>
     /// 이동 속도 배율. 장비의 기동 옵션과 과중량이 곱해진 값이다.
-    /// PlayerLoadout이 넣어준다. (docs/Blob_Equipment_System.md 「무게와 칸」)
+    /// PlayerLoadout이 넣어준다. (docs/Dokkaebi_Equipment_System.md 「무게와 칸」)
     /// </summary>
     public float SpeedScale { get; set; } = 1f;
 

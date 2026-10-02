@@ -36,7 +36,7 @@ public class WeaponModifiers
     public float SpeedMultiplier { get; private set; } = 1f;
 
     // ── 효과 축 ───────────────────────────────────────────────────────
-    // 전부 가산 합산이다. (docs/Blob_Combat_Baseline.md 「피해 계산」)
+    // 전부 가산 합산이다. (docs/Dokkaebi_Combat_Baseline.md 「피해 계산」)
 
     /// <summary>기본 피해 증가율의 합. 0.35 = +35%</summary>
     public float DamageIncrease { get; private set; }
@@ -48,7 +48,7 @@ public class WeaponModifiers
     /// 상태이상·잔류물 지속시간 배율. 【투사체 수명(LifetimeMultiplier)과 다른 축이다.】
     ///
     /// 두 축을 하나로 쓰던 동안 「유지되는 대지」(잔류물 +100%)가
-    /// 투사체 사거리를 2배로 만들었다. (docs/Blob_Audit.md D2)
+    /// 투사체 사거리를 2배로 만들었다. (docs/Dokkaebi_Audit.md D2)
     /// </summary>
     public float AilmentDurationMultiplier { get; private set; } = 1f;
 
@@ -154,7 +154,7 @@ public class WeaponModifiers
     ///
     /// 거리 기준을 유효 사거리의 절반으로 둔 이유 —
     /// 사거리 보정이 걸리는 경계와 같아야 플레이어가 선 하나만 외우면 된다.
-    /// (docs/Blob_Combat_Baseline.md 「사거리 보정」)
+    /// (docs/Dokkaebi_Combat_Baseline.md 「사거리 보정」)
     /// </summary>
     public float ConditionalDamageIncrease(
         float travelledDistance, float effectiveRange, StatusEffectState targetStatus)

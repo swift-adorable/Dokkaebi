@@ -3,7 +3,7 @@ using UnityEngine;
 
 /// <summary>
 /// 이번 파밍의 조건 — 밤 상태 하나 + 레이드 특성 0~2개.
-/// (docs/Blob_Hunting_System.md 5·9절)
+/// (docs/Dokkaebi_Hunting_System.md 5·9절)
 ///
 /// 【파밍 전 화면에 전부 표시한다.】(문서 5절)
 /// 들어가서 알게 하면 조건이 아니라 사고가 된다. 빌드를 바꿔서 대응하라는

@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6f1826eda630a40a7b8b37017e52d7bc, type: 3}
   m_Name: sup_chain_detonation
-  m_EditorClassIdentifier: Blob.Runtime::SkillDefinition
+  m_EditorClassIdentifier: Dokkaebi.Runtime::SkillDefinition
   id: sup_chain_detonation
   displayName: "\uC5F0\uC1C4 \uAE30\uD3ED"
   description: "\uD3ED\uBC1C\uC774 1\uD68C \uC5F0\uC1C4\uB41C\uB2E4."

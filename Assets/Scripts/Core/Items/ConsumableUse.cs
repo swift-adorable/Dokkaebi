@@ -113,7 +113,7 @@ public readonly struct ConsumableOutcome
 /// <summary>
 /// 소모품 하나를 쓰면 무슨 일이 일어나는지 계산한다.
 /// MonoBehaviour 의존이 없는 순수 클래스다.
-/// (docs/Blob_Consumable_System.md)
+/// (docs/Dokkaebi_Consumable_System.md)
 ///
 /// 【적용과 계산을 나누는 이유】 「이미 체력이 가득한데 환단을 썼다」가
 /// 가장 흔한 사고다. 계산을 먼저 끝내 두면 그 경우를 쓰기 전에 막을 수

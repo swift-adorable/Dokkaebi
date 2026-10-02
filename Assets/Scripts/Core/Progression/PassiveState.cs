@@ -56,7 +56,7 @@ public struct PassiveContext
 
 /// <summary>
 /// 배운 패시브의 상태. 【영구 성장이다. 죽어도 잃지 않는다.】
-/// (docs/Blob_Passive_System.md)
+/// (docs/Dokkaebi_Passive_System.md)
 ///
 /// 레벨은 런마다 초기화되고 소켓을 연다.
 /// 레벨이 소켓과 패시브를 함께 연다. 레벨은 하나뿐이다. (결정 2-33)

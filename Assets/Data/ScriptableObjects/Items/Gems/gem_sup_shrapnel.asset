@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5f9766db0f8594e349438cc979f7b6fe, type: 3}
   m_Name: gem_sup_shrapnel
-  m_EditorClassIdentifier: Blob.Runtime::ItemDefinition
+  m_EditorClassIdentifier: Dokkaebi.Runtime::ItemDefinition
   id: gem_sup_shrapnel
   displayName: "\uD30C\uD3B8 \uD0C4\uD658"
   description: "\uB0A0\uC544\uAC00\uB294 \uC911\uC5D0 3\uAC08\uB798\uB85C \uCABC\uAC1C\uC9C4\uB2E4.

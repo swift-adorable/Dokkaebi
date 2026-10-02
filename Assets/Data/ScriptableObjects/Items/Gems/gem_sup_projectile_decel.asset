@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5f9766db0f8594e349438cc979f7b6fe, type: 3}
   m_Name: gem_sup_projectile_decel
-  m_EditorClassIdentifier: Blob.Runtime::ItemDefinition
+  m_EditorClassIdentifier: Dokkaebi.Runtime::ItemDefinition
   id: gem_sup_projectile_decel
   displayName: "\uD22C\uC0AC\uCCB4 \uAC10\uC18D"
   description: "\uD0C4\uC18D\uC774 40% \uB290\uB824\uC9C4\uB2E4. \uCCB4\uB958\uAC00

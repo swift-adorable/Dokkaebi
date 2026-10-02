@@ -1,5 +1,5 @@
 /// <summary>
-/// 상태이상 → 잔류물 대응표. (docs/Blob_Skill_System.md 4절)
+/// 상태이상 → 잔류물 대응표. (docs/Dokkaebi_Skill_System.md 4절)
 ///
 /// 상태를 지닌 채 죽은 적이 바닥에 무엇을 남기는지 정한다.
 /// 순수 함수만 두어 EditMode에서 검증한다.

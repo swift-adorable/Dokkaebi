@@ -1,7 +1,7 @@
 using System;
 
 /// <summary>
-/// 조건부 드롭 3종. (docs/Blob_Hunting_System.md 6-3절)
+/// 조건부 드롭 3종. (docs/Dokkaebi_Hunting_System.md 6-3절)
 ///
 /// 【빌드를 「가장 센 것」 하나로 수렴시키지 않는 가장 값싼 장치다.】
 /// 치명타 빌드는 「온전한 신경절」을 못 얻고,

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 
 /// <summary>
-/// 등급에 맞춰 속성을 뽑는다. (docs/Blob_Hunting_System.md 2·3절)
+/// 등급에 맞춰 속성을 뽑는다. (docs/Dokkaebi_Hunting_System.md 2·3절)
 ///
 /// 【System.Random을 받는 이유】
 /// 같은 씨앗이면 같은 결과가 나와야 테스트가 성립한다.

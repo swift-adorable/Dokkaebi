@@ -43,7 +43,7 @@ public struct PerceptionInput
 
 /// <summary>
 /// 감지 — 「먼저 감지당하는가 / 먼저 감지하는가」.
-/// (docs/Blob_Hunting_System.md 8절)
+/// (docs/Dokkaebi_Hunting_System.md 8절)
 ///
 /// 【지금까지는 거리 하나뿐이었다.】
 /// EnemyBrain은 detectDistance 반경 안이면 무조건 알아챘다.

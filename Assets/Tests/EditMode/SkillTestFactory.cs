@@ -1,7 +1,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace Blob.Tests
+namespace Dokkaebi.Tests
 {
     /// <summary>
     /// 테스트용 SkillDefinition을 코드로 만들어 주는 헬퍼. (v8 스키마)

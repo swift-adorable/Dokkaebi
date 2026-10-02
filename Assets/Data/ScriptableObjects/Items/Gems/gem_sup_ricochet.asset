@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5f9766db0f8594e349438cc979f7b6fe, type: 3}
   m_Name: gem_sup_ricochet
-  m_EditorClassIdentifier: Blob.Runtime::ItemDefinition
+  m_EditorClassIdentifier: Dokkaebi.Runtime::ItemDefinition
   id: gem_sup_ricochet
   displayName: "\uD295\uACA8 \uC3D8\uAE30"
   description: "\uC9C0\uD615\uC5D0 \uBD80\uB52A\uD788\uBA74 \uD295\uAE34\uB2E4. 3\uD68C.

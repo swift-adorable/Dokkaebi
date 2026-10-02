@@ -2,7 +2,7 @@ using UnityEngine;
 
 /// <summary>
 /// 패시브 계열. 【단일 트리를 쓰지 않는다.】
-/// (docs/Blob_Passive_System.md 1절 / 덕코프 조사 — 스킬은 독립 5계열 [확인됨])
+/// (docs/Dokkaebi_Passive_System.md 1절 / 덕코프 조사 — 스킬은 독립 5계열 [확인됨])
 ///
 /// 단일 트리는 「위로 한 줄」뿐이라 플레이어가 고를 것이 순서밖에 없다.
 /// 계열이 갈리면 파밍 성향이 갈린다.
@@ -15,7 +15,7 @@ public enum PassiveBranch
     /// <summary>대사 — 얼마나 얻는가. (덕코프 「생존 스킬」)</summary>
     Metabolism = 1,
 
-    /// <summary>회수 — 죽어도 무엇이 남는가. (Blob 고유)</summary>
+    /// <summary>회수 — 죽어도 무엇이 남는가. (Dokkaebi 고유)</summary>
     Recovery = 2,
 
     /// <summary>중개 — 벙커에서 무엇을 하는가. (덕코프 「블랙마켓 업그레이드」)</summary>

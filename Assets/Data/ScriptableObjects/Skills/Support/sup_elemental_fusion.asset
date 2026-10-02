@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6f1826eda630a40a7b8b37017e52d7bc, type: 3}
   m_Name: sup_elemental_fusion
-  m_EditorClassIdentifier: Blob.Runtime::SkillDefinition
+  m_EditorClassIdentifier: Dokkaebi.Runtime::SkillDefinition
   id: sup_elemental_fusion
   displayName: "\uC6D0\uC18C \uC735\uD569"
   description: "\uC6D0\uB798 \uC18D\uC131\uC744 \uC720\uC9C0\uD55C \uCC44 2\uCC28

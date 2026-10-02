@@ -11,9 +11,9 @@ using UnityEngine;
 ///
 /// 아이템은 Assets/Data/... 아래에 있어 Resources.LoadAll이 닿지 않는다.
 /// SkillCatalog와 같은 방식으로, 참조만 모은 에셋 하나를 Resources에 둔다.
-/// 목록은 「Blob/Playtest/검증 카탈로그 생성」이 만든다.
+/// 목록은 「Dokkaebi/Playtest/검증 카탈로그 생성」이 만든다.
 /// </summary>
-[CreateAssetMenu(fileName = "PlaytestCatalog", menuName = "Blob/Playtest Catalog")]
+[CreateAssetMenu(fileName = "PlaytestCatalog", menuName = "Dokkaebi/Playtest Catalog")]
 public class PlaytestCatalog : ScriptableObject
 {
     public const string ResourcePath = "PlaytestCatalog";

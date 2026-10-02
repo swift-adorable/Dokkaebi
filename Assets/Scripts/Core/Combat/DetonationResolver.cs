@@ -5,7 +5,7 @@ using UnityEngine;
 ///
 /// PoE2의 「원소 작렬」과 같은 구조다 — 파동 자체는 피해가 없고,
 /// 소모된 상태이상이 해당 속성의 폭발을 일으킨다.
-/// (docs/Blob_Skill_System.md 5-2절)
+/// (docs/Dokkaebi_Skill_System.md 5-2절)
 ///
 /// MonoBehaviour 의존이 없는 순수 클래스다.
 /// </summary>

@@ -11,7 +11,7 @@ using static EquipmentAssetWriter;
 /// 순수 증가를 주면 "죽어도 사라지지 않는 전투력"이 되어
 /// 「죽으면 들고 있던 것 전부」라는 이 게임의 뼈대가 물러진다.
 /// 그래서 전부 「A를 깎아 B를 얻는다」이며 예외가 없다.
-/// (docs/Blob_Imprint_System.md 0절)
+/// (docs/Dokkaebi_Imprint_System.md 0절)
 ///
 /// 대가는 전부 【음수 스탯】으로 표현한다. 별도 필드를 만들지 않는 이유 —
 /// 합산 경로가 하나여야 "왜 이 수치가 이렇게 나왔는가"를 추적할 수 있다.
@@ -35,7 +35,7 @@ public static class ImprintAssetGenerator
         public List<EquipmentStat> stats;
     }
 
-    /// <summary>단계별 가치. (docs/Blob_Imprint_System.md 2절)</summary>
+    /// <summary>단계별 가치. (docs/Dokkaebi_Imprint_System.md 2절)</summary>
     private static readonly int[] TierValue = { 350, 1000, 3500 };
 
     /// <summary>각인의 무게는 고정이다. 각인은 무게 결정을 만들지 않는다 — 슬롯이 결정이다.</summary>
@@ -177,7 +177,7 @@ public static class ImprintAssetGenerator
         return list;
     }
 
-    [MenuItem("Blob/Equipment/각인 에셋 생성")]
+    [MenuItem("Dokkaebi/Equipment/각인 에셋 생성")]
     public static void Generate()
     {
         List<Spec> table = Table();

@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ea17f4877b7bf48069bd560938e26492, type: 3}
   m_Name: reg_codex
-  m_EditorClassIdentifier: Blob.Runtime::PassiveNode
+  m_EditorClassIdentifier: Dokkaebi.Runtime::PassiveNode
   id: reg_codex
   displayName: "\uD55C\uB208\uC5D0 \uC54C\uC544\uBCF4\uAE30"
   description: "\uC4F0\uB7EC\uB728\uB9AC\uAE30\uB9CC \uD574\uB3C4 \uAD6C\uC2AC \uC7A5\uBD80\uC5D0 \uC624\uB978\uB2E4. \uAD6C\uC2AC \uC528\uB97C \uAC70\uB458 \uD544\uC694\uAC00 \uC5C6\uC5B4\uC9C4\uB2E4."

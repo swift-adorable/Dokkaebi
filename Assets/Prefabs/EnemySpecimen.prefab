@@ -144,7 +144,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3addb66c72c6e4042b64a26ae3c2c16f, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Blob.Runtime::Health
+  m_EditorClassIdentifier: Dokkaebi.Runtime::Health
   team: 1
   maxHealth: 60
   invulnerableDuration: 0
@@ -188,7 +188,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 352c47ce17ef0410a92731d536c71a4a, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Blob.Runtime::EnemyMovement
+  m_EditorClassIdentifier: Dokkaebi.Runtime::EnemyMovement
   moveSpeed: 2.2
   stoppingDistance: 1.2
   separationRadius: 1.1
@@ -206,7 +206,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d681ecc493445441fb3f81fbcf09ca6a, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Blob.Runtime::EnemyAttack
+  m_EditorClassIdentifier: Dokkaebi.Runtime::EnemyAttack
   attackKind: 1
   damage: 14
   attackRange: 9
@@ -231,7 +231,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4e9bb1d60759445e3962db8a4e9f0937, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Blob.Runtime::EnemyBrain
+  m_EditorClassIdentifier: Dokkaebi.Runtime::EnemyBrain
   detectDistance: 18
   preferredDistance: 7
   band: 0.5
@@ -256,7 +256,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 17cd5fe84e4a74bc2868d40a814e0c31, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Blob.Runtime::EnemyIdentity
+  m_EditorClassIdentifier: Dokkaebi.Runtime::EnemyIdentity
   archetype: 5
   rollRarity: 1
   fixedRarity: 0
@@ -272,6 +272,6 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 91fae52a7ad5746cbabeedb90c3e0586, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Blob.Runtime::EnemyAggro
+  m_EditorClassIdentifier: Dokkaebi.Runtime::EnemyAggro
   detectRange: 18
   reevaluateInterval: 0.4

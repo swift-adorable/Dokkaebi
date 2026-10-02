@@ -6,7 +6,7 @@ using static EquipmentAssetWriter;
 /// <summary>
 /// 무기 티어 1~6 에셋 생성. (로드맵 6-C)
 ///
-/// 수치는 전부 docs/Blob_Combat_Baseline.md 3절 표에서 그대로 가져왔다.
+/// 수치는 전부 docs/Dokkaebi_Combat_Baseline.md 3절 표에서 그대로 가져왔다.
 /// 여기서 임의로 바꾸면 문서와 코드가 갈라진다 —
 /// WeaponAssetTests가 표와 에셋이 일치하는지 검사한다.
 ///
@@ -100,7 +100,7 @@ public static class WeaponAssetGenerator
         };
     }
 
-    [MenuItem("Blob/Equipment/무기 에셋 생성")]
+    [MenuItem("Dokkaebi/Equipment/무기 에셋 생성")]
     public static void Generate()
     {
         List<Spec> table = Table();

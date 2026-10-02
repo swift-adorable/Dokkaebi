@@ -1,6 +1,6 @@
 using NUnit.Framework;
 
-namespace Blob.Tests
+namespace Dokkaebi.Tests
 {
     /// <summary>
     /// CooldownTimer 단위 테스트.

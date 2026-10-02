@@ -10,7 +10,7 @@ using UnityEngine;
 ///
 /// 두 축을 분리한 이유 — 가방마다 배분이 달라서 "이번 파밍에 무엇을 노리는가"에 따라
 /// 가방 선택이 갈린다. 고가 중량물이냐, 소형 재료 다수냐.
-/// (docs/Blob_Equipment_System.md 5-1절)
+/// (docs/Dokkaebi_Equipment_System.md 5-1절)
 ///
 /// MonoBehaviour 의존이 없는 순수 클래스다. EditMode 테스트 대상.
 /// </summary>
@@ -299,7 +299,7 @@ public class Inventory
     /// 철수에 실패했을 때 잃는 것을 비운다.
     ///
     /// 각인만 남는다. 플레이어가 배울 규칙은 하나여야 하므로 예외를 늘리지 않는다.
-    /// 젬도 장비와 똑같이 잃는다. (docs/Blob_Progression_System.md 6절)
+    /// 젬도 장비와 똑같이 잃는다. (docs/Dokkaebi_Progression_System.md 6절)
     /// </summary>
     public int DropOnDeath()
     {

@@ -20,9 +20,9 @@ public struct EquipmentStat
 ///
 /// 상속으로 둔 이유 — 젬 · 장비 · 전리품이 한 가방을 공유해야
 /// "화력을 챙길까, 전리품 공간을 남길까"라는 결정이 성립한다.
-/// (docs/Blob_Equipment_System.md 1절)
+/// (docs/Dokkaebi_Equipment_System.md 1절)
 /// </summary>
-[CreateAssetMenu(fileName = "Equipment", menuName = "Blob/Equipment Definition")]
+[CreateAssetMenu(fileName = "Equipment", menuName = "Dokkaebi/Equipment Definition")]
 public class EquipmentDefinition : ItemDefinition
 {
     [Header("Equipment")]
@@ -92,7 +92,7 @@ public class EquipmentDefinition : ItemDefinition
     ///
     /// 각인 검증에 쓴다 — 각인은 「A를 깎아 B를 얻는다」이므로
     /// 대가만 있고 이득이 없는 각인은 존재할 수 없다.
-    /// (docs/Blob_Imprint_System.md 0절)
+    /// (docs/Dokkaebi_Imprint_System.md 0절)
     /// </summary>
     public bool HasGain
     {

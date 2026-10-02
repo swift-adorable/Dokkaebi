@@ -2,7 +2,7 @@ using UnityEngine;
 
 /// <summary>
 /// 허깨비의 기믹 — 【끌어당기고, 가까이 오기 전까지 숨는다】.
-/// (docs/Blob_Hunting_System.md 1절 · EnemyGimmickTable)
+/// (docs/Dokkaebi_Hunting_System.md 1절 · EnemyGimmickTable)
 ///
 /// 【왜 둘이 한 컴포넌트인가】
 /// 둘이 같은 답을 요구하기 때문이다 — 「거리를 벌리지 못한다」.

@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 /// <summary>
 /// 가방 화면의 「패시브」 탭 — 영구 성장.
-/// (docs/Blob_Passive_System.md)
+/// (docs/Dokkaebi_Passive_System.md)
 ///
 /// 화면 구성
 ///   상단 : 계열 5개 (적응 / 대사 / 회수 / 중개 / 역행)
@@ -34,7 +34,7 @@ public partial class InventoryScreenUI
         if (tree == null || tree.Count == 0)
         {
             UIFactory.CreateLabel(rightContent,
-                "패시브 트리 에셋이 없습니다.\n메뉴 Blob > Passive > 패시브 에셋 생성 을 실행하십시오.",
+                "패시브 트리 에셋이 없습니다.\n메뉴 Dokkaebi > Passive > 패시브 에셋 생성 을 실행하십시오.",
                 28, FontStyle.Normal, Vector2.zero, new Vector2(1f, HeaderLine),
                 TextAnchor.MiddleCenter, UIPalette.TextDim);
             return;

@@ -2,10 +2,10 @@ using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine;
 
-namespace Blob.Tests
+namespace Dokkaebi.Tests
 {
     /// <summary>
-    /// 어그로 선택의 계약 테스트. (docs/Blob_Hunting_System.md 4절)
+    /// 어그로 선택의 계약 테스트. (docs/Dokkaebi_Hunting_System.md 4절)
     ///
     /// 【여기서 강제하는 것】
     ///   1. 먼저 문 대상을 계속 문다 — 맞아도 바꾸지 않는다

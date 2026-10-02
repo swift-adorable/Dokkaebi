@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5f9766db0f8594e349438cc979f7b6fe, type: 3}
   m_Name: bio_sample
-  m_EditorClassIdentifier: Blob.Runtime::ItemDefinition
+  m_EditorClassIdentifier: Dokkaebi.Runtime::ItemDefinition
   id: bio_sample
   displayName: "\uC57D\uC7AC"
   description: "\uB9D0\uB9B0 \uC57D\uC7AC. \uC57D\uBC29\uACE8\uC5D0\uC11C \uAC12\uC774 \uC624\uB978\uB2E4."

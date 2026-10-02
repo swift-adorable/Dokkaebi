@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 
 /// <summary>
-/// 소모품을 쓰는 동안의 시간을 잰다. (docs/Blob_Consumable_System.md 6절)
+/// 소모품을 쓰는 동안의 시간을 잰다. (docs/Dokkaebi_Consumable_System.md 6절)
 ///
 /// 【시전 시간이 회복의 균형추다.】 전투 중에 마실 수 없어야
 /// 「빠질까 버틸까」가 생긴다. 즉시 회복이면 체력은 그냥 자원이 되고,
@@ -208,7 +208,7 @@ public class ConsumableCaster : MonoBehaviour
 
     private static Health FindPlayerHealth()
     {
-        var player = FindAnyObjectByType<BlobController>(FindObjectsInactive.Exclude);
+        var player = FindAnyObjectByType<DokkaebiController>(FindObjectsInactive.Exclude);
 
         return player != null ? player.GetComponent<Health>() : null;
     }

@@ -9,7 +9,7 @@ using UnityEngine;
 /// </summary>
 public static class ProjectSettingsCheck
 {
-    [MenuItem("Blob/설정/프로젝트 설정 점검")]
+    [MenuItem("Dokkaebi/설정/프로젝트 설정 점검")]
     public static void Apply()
     {
         int fixedCount = 0;

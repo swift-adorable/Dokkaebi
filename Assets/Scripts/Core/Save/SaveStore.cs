@@ -35,13 +35,47 @@ public enum SaveLoadResult
 /// </summary>
 public static class SaveStore
 {
-    public const string FileName = "blob_save.json";
+    public const string FileName = "dokkaebi_save.json";
+
+    /// <summary>코드네임을 바꾸기 전의 파일 이름 (결정 2-46). 처음 읽을 때 새 이름으로 옮긴다.</summary>
+    public const string LegacyFileName = "blob_save.json";
 
     private const string BackupSuffix = ".bak";
     private const string TempSuffix = ".tmp";
 
     /// <summary>기본 경로. 테스트는 다른 폴더를 넘긴다.</summary>
-    public static string DefaultPath => Path.Combine(Application.persistentDataPath, FileName);
+    public static string DefaultPath
+    {
+        get
+        {
+            string path = Path.Combine(Application.persistentDataPath, FileName);
+            MoveLegacy(Path.Combine(Application.persistentDataPath, LegacyFileName), path);
+            return path;
+        }
+    }
+
+    /// <summary>
+    /// 옛 이름의 세이브(본 · 백업)를 새 이름으로 옮긴다. 새 이름의 파일이 하나라도 있으면
+    /// 아무것도 하지 않는다 — 새 세이브를 옛 파일로 덮어쓰지 않기 위해서다.
+    /// </summary>
+    public static void MoveLegacy(string legacyPath, string path)
+    {
+        try
+        {
+            if (File.Exists(path) || File.Exists(path + BackupSuffix))
+                return;
+
+            if (File.Exists(legacyPath))
+                File.Move(legacyPath, path);
+
+            if (File.Exists(legacyPath + BackupSuffix))
+                File.Move(legacyPath + BackupSuffix, path + BackupSuffix);
+        }
+        catch (IOException)
+        {
+            // 옮기지 못하면 새 세이브로 시작한다. 옛 파일은 그 자리에 남는다.
+        }
+    }
 
     public static string ToJson(SaveData data)
         => JsonUtility.ToJson(data, prettyPrint: true);

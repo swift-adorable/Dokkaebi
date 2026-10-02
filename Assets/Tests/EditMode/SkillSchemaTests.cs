@@ -1,7 +1,7 @@
 using System;
 using NUnit.Framework;
 
-namespace Blob.Tests
+namespace Dokkaebi.Tests
 {
     /// <summary>
     /// Skill System v8 문서와 코드 스키마가 어긋나지 않았는지 고정하는 테스트.

@@ -1,6 +1,6 @@
 using NUnit.Framework;
 
-namespace Blob.Tests
+namespace Dokkaebi.Tests
 {
     /// <summary>
     /// 공격 차례표. 「동시에 몇이 덤비는가」를 고정한다.

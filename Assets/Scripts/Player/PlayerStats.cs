@@ -36,7 +36,7 @@ public class PlayerStats : Singleton<PlayerStats>
     // 【레벨 L → L+1 필요 경험치 = 계수 × L².】 (결정 2-34)
     // 옛 곡선(10 + 5×(L−1))은 레벨이 파밍마다 초기화되던 때의 것이라, 영구 레벨로는
     // 보통 플레이어가 파밍 5번 만에 소켓을 다 연다. 시뮬레이션 142개 곡선 × 5개
-    // 플레이어 유형으로 골랐다 — docs/Blob_Progression_System.md 3절.
+    // 플레이어 유형으로 골랐다 — docs/Dokkaebi_Progression_System.md 3절.
     // 필드 이름을 바꾼 이유: 씬에 저장된 옛 값(10 · 5)이 새 곡선에 섞이지 않게.
     [Tooltip("레벨 L에서 L+1로 가는 데 필요한 경험치 = 이 값 × L²")]
     [Min(1)]

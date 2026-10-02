@@ -105,7 +105,7 @@ public partial class InventoryScreenUI : MonoBehaviour
     ///
     /// 용량이 늘면 칸이 작아지는 것이 아니라 내용물이 길어지고 스크롤이 생긴다.
     /// 6-N 이후 실사용 상한이 65칸(기본 20 + 장비 37 + 패시브 8)이라
-    /// 고정 격자로는 29칸이 보이지도 눌리지도 않았다. (Blob_Audit.md F1)
+    /// 고정 격자로는 29칸이 보이지도 눌리지도 않았다. (Dokkaebi_Audit.md F1)
     /// 모바일에서 터치 목표 크기를 지키는 유일한 방법이 스크롤이다.
     /// </summary>
     private const int BagVisibleRows = 6;
@@ -1065,7 +1065,7 @@ public partial class InventoryScreenUI : MonoBehaviour
                 isSelectedSlot || canAccept ? 3 : 2);
 
             // 장비 슬롯도 누를 수 있어야 한다. 이것이 없던 동안에는
-            // 에셋 82종을 만들어 놓고 게임에서 입을 방법이 없었다. (docs/Blob_Audit.md A1)
+            // 에셋 82종을 만들어 놓고 게임에서 입을 방법이 없었다. (docs/Dokkaebi_Audit.md A1)
             var slotButton = cell.gameObject.AddComponent<Button>();
             slotButton.targetGraphic = cell;
 
@@ -1623,7 +1623,7 @@ public partial class InventoryScreenUI : MonoBehaviour
 
         // 【여기가 전투 중에 쓰는 유일한 길이다.】 가방을 열고 쓰는 것과
         // 달리 시전 중에 움직이거나 맞으면 중단된다 — 그래서 「안전한 자리를
-        // 먼저 찾는다」가 행동이 된다. (docs/Blob_Consumable_System.md 6절)
+        // 먼저 찾는다」가 행동이 된다. (docs/Dokkaebi_Consumable_System.md 6절)
         if (!PlayerConsumables.CanUse(stack.Definition))
         {
             ShowToast($"「{stack.Definition.DisplayName}」 — 쓸 수 있는 물건이 아닙니다.");

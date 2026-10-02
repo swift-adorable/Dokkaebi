@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 680dd67e5b9a24d638effbb25e4da4c2, type: 3}
   m_Name: imp_devour_t2
-  m_EditorClassIdentifier: Blob.Runtime::EquipmentDefinition
+  m_EditorClassIdentifier: Dokkaebi.Runtime::EquipmentDefinition
   id: imp_devour_t2
   displayName: "\uBA39\uC131 \u2161"
   description: "\uBA40\uB9AC \uC788\uB294 \uAC83\uAE4C\uC9C0 \uB04C\uC5B4\uC640 \uC0BC\uD0A8\uB2E4."

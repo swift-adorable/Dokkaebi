@@ -5,7 +5,7 @@ using UnityEngine;
 ///
 /// MonoBehaviour 의존이 없는 순수 구조체다. 무기를 들고 각인을 끼웠을 때
 /// 실제로 어떤 숫자가 나오는지를 테스트로 검증할 수 있어야 한다.
-/// (docs/Blob_Combat_Baseline.md 2절 — 모든 증가는 가산 합산)
+/// (docs/Dokkaebi_Combat_Baseline.md 2절 — 모든 증가는 가산 합산)
 /// </summary>
 public readonly struct WeaponProfile
 {

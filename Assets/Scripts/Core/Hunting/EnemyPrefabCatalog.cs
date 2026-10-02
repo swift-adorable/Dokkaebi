@@ -9,9 +9,9 @@ using UnityEngine;
 /// 다시 끌어야 하고 하나를 빠뜨려도 조용히 그 유형만 안 나온다.
 ///
 /// PlaytestCatalog · SkillCatalog와 같은 방식이다 — 참조만 모은 에셋 하나를
-/// Resources에 두고, 「Blob/Enemy/유형 프리팹 카탈로그 생성」이 채운다.
+/// Resources에 두고, 「Dokkaebi/Enemy/유형 프리팹 카탈로그 생성」이 채운다.
 /// </summary>
-[CreateAssetMenu(fileName = "EnemyPrefabCatalog", menuName = "Blob/Enemy Prefab Catalog")]
+[CreateAssetMenu(fileName = "EnemyPrefabCatalog", menuName = "Dokkaebi/Enemy Prefab Catalog")]
 public class EnemyPrefabCatalog : ScriptableObject
 {
     public const string ResourcePath = "EnemyPrefabCatalog";

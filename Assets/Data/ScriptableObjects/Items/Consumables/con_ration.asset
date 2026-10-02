@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5f9766db0f8594e349438cc979f7b6fe, type: 3}
   m_Name: con_ration
-  m_EditorClassIdentifier: Blob.Runtime::ItemDefinition
+  m_EditorClassIdentifier: Dokkaebi.Runtime::ItemDefinition
   id: con_ration
   displayName: "\uBBF8\uC22B\uAC00\uB8E8"
   description: "\uC539\uB294 \uB370 \uC2DC\uAC04\uC774 \uAC78\uB9B0\uB2E4."

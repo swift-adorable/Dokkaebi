@@ -1,6 +1,6 @@
 using UnityEngine;
 
-/// <summary>적의 공격 방식. 유형마다 다르다. (docs/Blob_Hunting_System.md 1절)</summary>
+/// <summary>적의 공격 방식. 유형마다 다르다. (docs/Dokkaebi_Hunting_System.md 1절)</summary>
 public enum EnemyAttackKind
 {
     /// <summary>근접 — 사거리 안에서 직접 판정한다. 포자충 · 사냥개</summary>

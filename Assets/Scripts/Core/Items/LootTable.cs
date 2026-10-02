@@ -3,9 +3,9 @@ using UnityEngine;
 
 /// <summary>
 /// 전리품 표 에셋. 적 유형·상자 종류마다 하나씩 만든다.
-/// (docs/Blob_Hunting_System.md 드롭 / docs/Blob_Equipment_System.md)
+/// (docs/Dokkaebi_Hunting_System.md 드롭 / docs/Dokkaebi_Equipment_System.md)
 /// </summary>
-[CreateAssetMenu(fileName = "LootTable", menuName = "Blob/Loot Table")]
+[CreateAssetMenu(fileName = "LootTable", menuName = "Dokkaebi/Loot Table")]
 public class LootTable : ScriptableObject
 {
     [Header("Rolls")]

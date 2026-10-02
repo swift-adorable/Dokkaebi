@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5f9766db0f8594e349438cc979f7b6fe, type: 3}
   m_Name: med_stim
-  m_EditorClassIdentifier: Blob.Runtime::ItemDefinition
+  m_EditorClassIdentifier: Dokkaebi.Runtime::ItemDefinition
   id: med_stim
   displayName: "\uD604\uD638\uC0C9"
   description: "\uC7A0\uC2DC \uC544\uD514\uC744 \uC78A\uB294\uB2E4."

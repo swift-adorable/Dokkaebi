@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 
-namespace Blob.Tests
+namespace Dokkaebi.Tests
 {
     /// <summary>
     /// 「대가만 있고 효과가 없는 젬은 존재할 수 없다」를 강제한다. (D1)
@@ -29,7 +29,7 @@ namespace Blob.Tests
             catalog = SkillCatalog.Load();
 
             Assert.IsNotNull(catalog,
-                "SkillCatalog.asset을 찾지 못했습니다. 「Blob/Skill/카탈로그 다시 만들기」를 실행하십시오.");
+                "SkillCatalog.asset을 찾지 못했습니다. 「Dokkaebi/Skill/카탈로그 다시 만들기」를 실행하십시오.");
         }
 
         private static List<SkillDefinition> All()
@@ -67,7 +67,7 @@ namespace Blob.Tests
         /// 【투사체 수명과 상태이상 지속시간은 다른 축이다.】
         ///
         /// 하나로 쓰던 동안 「유지되는 대지」(잔류물 +100%)가
-        /// 투사체 사거리를 2배로 만들었다. (docs/Blob_Audit.md D2)
+        /// 투사체 사거리를 2배로 만들었다. (docs/Dokkaebi_Audit.md D2)
         /// </summary>
         [Test]
         public void 지속시간_Support가_투사체_수명을_건드리지_않는다()

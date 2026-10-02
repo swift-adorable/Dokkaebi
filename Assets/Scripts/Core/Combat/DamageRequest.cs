@@ -4,7 +4,7 @@ using System;
 /// 한 번의 피해를 계산하는 데 필요한 공격 측 정보.
 ///
 /// 무기가 기본값을, 스킬이 속성과 증가율을 채운다.
-/// (docs/Blob_Combat_Baseline.md 3절)
+/// (docs/Dokkaebi_Combat_Baseline.md 3절)
 /// </summary>
 [Serializable]
 public struct DamageRequest

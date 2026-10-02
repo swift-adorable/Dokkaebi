@@ -1,7 +1,7 @@
 using System;
 using NUnit.Framework;
 
-namespace Blob.Tests
+namespace Dokkaebi.Tests
 {
     /// <summary>
     /// SkillTag 테스트.

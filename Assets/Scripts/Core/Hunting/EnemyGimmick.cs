@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// 유형 고유의 기믹. (docs/Blob_Hunting_System.md 1절)
+/// 유형 고유의 기믹. (docs/Dokkaebi_Hunting_System.md 1절)
 ///
 /// 【수치만으로는 유형이 세 개도 안 나온다.】
 /// 체력·피해·속도만 다른 적 아홉은 「체력이 다른 같은 적 아홉」이다.
@@ -54,7 +54,7 @@ public readonly struct GimmickSpec
 }
 
 /// <summary>
-/// 기믹 수치표. (docs/Blob_Hunting_System.md 1절)
+/// 기믹 수치표. (docs/Dokkaebi_Hunting_System.md 1절)
 ///
 /// 【전부 불확실 — 문서에 숫자가 없다.】
 /// 기획서는 「8방향 장판」 「3점사 × 2~4」 「중력·은신」처럼 말로만 적었다.

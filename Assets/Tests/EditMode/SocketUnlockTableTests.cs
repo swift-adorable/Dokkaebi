@@ -1,6 +1,6 @@
 using NUnit.Framework;
 
-namespace Blob.Tests
+namespace Dokkaebi.Tests
 {
     /// <summary>
     /// 레벨 → 소켓 개방 표가 문서(Skill_System.md 12-1절)와 일치하는지 고정한다.

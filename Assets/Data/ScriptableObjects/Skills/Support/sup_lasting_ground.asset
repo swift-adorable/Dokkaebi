@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6f1826eda630a40a7b8b37017e52d7bc, type: 3}
   m_Name: sup_lasting_ground
-  m_EditorClassIdentifier: Blob.Runtime::SkillDefinition
+  m_EditorClassIdentifier: Dokkaebi.Runtime::SkillDefinition
   id: sup_lasting_ground
   displayName: "\uC720\uC9C0\uB418\uB294 \uB300\uC9C0"
   description: "\uC794\uB958\uBB3C \uC9C0\uC18D\uC2DC\uAC04\uC774 100% \uB298\uC5B4\uB09C\uB2E4."

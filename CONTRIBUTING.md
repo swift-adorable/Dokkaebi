@@ -10,10 +10,10 @@ Unity **6000.4.11f1** / URP 17.4.0 / Input System 1.19.0 / com.unity.test-framew
 
 | 어셈블리 | 용도 |
 |---|---|
-| `Blob.Runtime` | 게임 코드 |
-| `Blob.Editor` | 에디터 전용 |
-| `Blob.Tests.EditMode` | 테스트 코드 (Editor 전용) |
-| `Blob.Tests.Fixtures` | 테스트용 MonoBehaviour (전 플랫폼, `UNITY_INCLUDE_TESTS`) |
+| `Dokkaebi.Runtime` | 게임 코드 |
+| `Dokkaebi.Editor` | 에디터 전용 |
+| `Dokkaebi.Tests.EditMode` | 테스트 코드 (Editor 전용) |
+| `Dokkaebi.Tests.Fixtures` | 테스트용 MonoBehaviour (전 플랫폼, `UNITY_INCLUDE_TESTS`) |
 
 ## 폴더 구조
 
@@ -52,7 +52,7 @@ Assets/
 - **문서를 스크립트로 치환할 때** 앵커 문자열이 문서 앞쪽에도 있으면 구간이 복제된다. 절 헤더처럼 유일한 문자열을 앵커로 쓰고 `end > start`를 단언한다.
 - `git`이 `.git/index.lock`을 지우지 못하면 커밋이 막힌다. (셸에 삭제 권한이 없는 환경)
 - **Unity MCP로는 PlayMode 테스트를 실행할 수 없다.** Play 모드 진입 시 도메인 리로드가 일어나 MCP 연결 자체가 끊긴다(`Connection failed`). PlayMode는 Unity의 **Test Runner 창에서 직접** 돌린다. 시간이 걸리는 PlayMode 테스트는 `Time.timeScale`을 올려 실시간을 줄인다.
-- **Unity MCP의 `run_tests`는 전체 실행이 타임아웃된다.** 테스트가 200개를 넘으면서 MCP 응답 한도를 넘었다. `testFilter`에 클래스 전체 이름(`Blob.Tests.XxxTests`)을 넣어 클래스 단위로 나눠 돌린다. 부분 일치 필터(`Blob.Tests.Projectile`)는 0건을 반환하므로 쓰지 않는다.
+- **Unity MCP의 `run_tests`는 전체 실행이 타임아웃된다.** 테스트가 200개를 넘으면서 MCP 응답 한도를 넘었다. `testFilter`에 클래스 전체 이름(`Dokkaebi.Tests.XxxTests`)을 넣어 클래스 단위로 나눠 돌린다. 부분 일치 필터(`Dokkaebi.Tests.Projectile`)는 0건을 반환하므로 쓰지 않는다.
 
 ## MCP Unity 연동
 

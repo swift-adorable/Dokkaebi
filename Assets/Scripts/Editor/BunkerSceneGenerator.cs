@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 /// <summary>
-/// 벙커 씬을 만든다. (로드맵 8-J · docs/Blob_Bunker_System.md)
+/// 벙커 씬을 만든다. (로드맵 8-J · docs/Dokkaebi_Bunker_System.md)
 ///
 /// 【파밍 구역 씬에서 플레이어 · 카메라 · 조명 · 매니저를 복사해 온다.】
 /// 두 씬이 같은 플레이어 설정을 써야 들고 다니는 것이 같게 느껴진다. 손으로 두 벌을
@@ -27,7 +27,7 @@ public static class BunkerSceneGenerator
     /// <summary>구역 씬에서 가져오는 뿌리 오브젝트.</summary>
     private static readonly string[] CopiedRoots =
     {
-        "Main Camera", "Directional Light", "Global Volume", "Blob",
+        "Main Camera", "Directional Light", "Global Volume", "Dokkaebi",
         "Debug Object", "Canvas", "EventSystem", "Game Manager Object"
     };
 
@@ -39,7 +39,7 @@ public static class BunkerSceneGenerator
 
     private static readonly Vector3 SpawnPoint = BunkerLayout.Spawn;
 
-    [MenuItem("Blob/Bunker/벙커 씬 생성")]
+    [MenuItem("Dokkaebi/Bunker/벙커 씬 생성")]
     public static void Generate()
     {
         if (EditorApplication.isPlayingOrWillChangePlaymode)
@@ -217,14 +217,14 @@ public static class BunkerSceneGenerator
     /// <summary>플레이어를 시작 자리로 옮긴다. 카메라도 같은 만큼 옮긴다 — 둘의 간격이 곧 시점이다.</summary>
     private static void PlacePlayer(Dictionary<string, GameObject> copies)
     {
-        if (!copies.TryGetValue("Blob", out GameObject blob))
+        if (!copies.TryGetValue("Dokkaebi", out GameObject dokkaebi))
             return;
 
-        Vector3 from = blob.transform.position;
+        Vector3 from = dokkaebi.transform.position;
         Vector3 to = new(SpawnPoint.x, from.y, SpawnPoint.z);
         Vector3 delta = to - from;
 
-        blob.transform.position = to;
+        dokkaebi.transform.position = to;
 
         if (copies.TryGetValue("Main Camera", out GameObject camera))
             camera.transform.position += delta;

@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6f1826eda630a40a7b8b37017e52d7bc, type: 3}
   m_Name: meta_cast_on_crit
-  m_EditorClassIdentifier: Blob.Runtime::SkillDefinition
+  m_EditorClassIdentifier: Dokkaebi.Runtime::SkillDefinition
   id: meta_cast_on_crit
   displayName: "\uCE58\uBA85\uD0C0 \uC2DC \uC2DC\uC804"
   description: "\uCE58\uBA85\uD0C0\uAC00 \uBC1C\uC0DD\uD560 \uB54C\uB9C8\uB2E4 6%

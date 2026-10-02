@@ -5,12 +5,12 @@ using UnityEngine;
 ///
 /// 【무기는 기본값만 정한다】 — 속성도 투사체 행동도 붙이지 않는다.
 /// 속성은 핵심 젬, 궤도는 보조 젬의 몫이다. (전투 3층 구조)
-/// (docs/Blob_Equipment_System.md 2절 / Blob_Skill_System.md 1절)
+/// (docs/Dokkaebi_Equipment_System.md 2절 / Dokkaebi_Skill_System.md 1절)
 ///
 /// 방어 관통을 여기에 필드로 두지 않고 stats의 ArmourPenetration으로 두는 이유 —
 /// 부착물과 각인도 같은 축을 건드리므로 합산 경로가 하나여야 한다.
 /// </summary>
-[CreateAssetMenu(fileName = "Weapon", menuName = "Blob/Weapon Definition")]
+[CreateAssetMenu(fileName = "Weapon", menuName = "Dokkaebi/Weapon Definition")]
 public class WeaponDefinition : EquipmentDefinition
 {
     [Header("Weapon Base")]

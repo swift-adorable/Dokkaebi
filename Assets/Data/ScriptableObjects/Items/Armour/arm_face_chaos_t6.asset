@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 680dd67e5b9a24d638effbb25e4da4c2, type: 3}
   m_Name: arm_face_chaos_t6
-  m_EditorClassIdentifier: Blob.Runtime::EquipmentDefinition
+  m_EditorClassIdentifier: Dokkaebi.Runtime::EquipmentDefinition
   id: arm_face_chaos_t6
   displayName: "\uB204\uB7F0 \uCC98\uC6A9\uD0C8"
   description: "\uBC29\uB3C5. \uB9C9\uACE0 \uB35C \uBC1B\uB294\uB2E4. \uB300\uC2E0 \uC55E\uC774 \uC798 \uBCF4\uC774\uC9C0 \uC54A\uB294\uB2E4."

@@ -2,7 +2,7 @@ using System;
 
 /// <summary>
 /// 이 유형이 플레이어에게 요구하는 답.
-/// docs/Blob_Combat_Baseline.md 5절 표의 「요구하는 답」 열을 그대로 옮긴 것이다.
+/// docs/Dokkaebi_Combat_Baseline.md 5절 표의 「요구하는 답」 열을 그대로 옮긴 것이다.
 ///
 /// 【enum으로 둔 이유】
 /// 「하나의 유형이 두 개의 답을 요구하게 만들지 않는다」는 설계 규칙을
@@ -37,7 +37,7 @@ public enum EnemyAnswer
 
 /// <summary>
 /// 유형 한 종의 고정 수치.
-/// 출처는 docs/Blob_Combat_Baseline.md 5절 표다. 여기서 값을 새로 만들지 않는다.
+/// 출처는 docs/Dokkaebi_Combat_Baseline.md 5절 표다. 여기서 값을 새로 만들지 않는다.
 /// </summary>
 [Serializable]
 public struct EnemyArchetypeStats
@@ -135,7 +135,7 @@ public struct EnemyArchetypeStats
 }
 
 /// <summary>
-/// 유형 9종의 고정 수치표. (docs/Blob_Combat_Baseline.md 5절 · Hunting 1·4·8절)
+/// 유형 9종의 고정 수치표. (docs/Dokkaebi_Combat_Baseline.md 5절 · Hunting 1·4·8절)
 ///
 /// 【하나의 유형이 두 개의 답을 요구하게 만들지 않는다.】
 /// "체력이 많고 빠르고 원거리에 방어도까지 높은" 적은 만들지 않는다.

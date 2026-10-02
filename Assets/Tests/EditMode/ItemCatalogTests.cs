@@ -3,7 +3,7 @@ using System.Linq;
 using NUnit.Framework;
 using UnityEditor;
 
-namespace Blob.Tests
+namespace Dokkaebi.Tests
 {
     /// <summary>
     /// 세이브가 id로 아이템을 되찾는 카탈로그. (로드맵 8-F)
@@ -20,7 +20,7 @@ namespace Blob.Tests
         public void 카탈로그가_Resources에_있다()
         {
             Assert.IsNotNull(Catalog,
-                "Resources/ItemCatalog가 없습니다. 「Blob/Items/아이템 카탈로그 생성」을 실행하십시오.");
+                "Resources/ItemCatalog가 없습니다. 「Dokkaebi/Items/아이템 카탈로그 생성」을 실행하십시오.");
         }
 
         [Test]
@@ -37,7 +37,7 @@ namespace Blob.Tests
             var missing = onDisk.Where(id => Catalog.Find(id) == null).ToList();
 
             Assert.IsEmpty(missing,
-                "카탈로그에 없는 아이템 — 「Blob/Items/아이템 카탈로그 생성」을 다시 실행하십시오: "
+                "카탈로그에 없는 아이템 — 「Dokkaebi/Items/아이템 카탈로그 생성」을 다시 실행하십시오: "
                 + string.Join(", ", missing));
         }
 

@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5f9766db0f8594e349438cc979f7b6fe, type: 3}
   m_Name: gem_sup_cadence
-  m_EditorClassIdentifier: Blob.Runtime::ItemDefinition
+  m_EditorClassIdentifier: Dokkaebi.Runtime::ItemDefinition
   id: gem_sup_cadence
   displayName: "\uC6B4\uC728"
   description: "\uC5F0\uC0AC\uD560\uC218\uB85D \uBC1C\uC0AC \uC18D\uB3C4\uAC00 \uC99D\uD3ED\uB41C\uB2E4."

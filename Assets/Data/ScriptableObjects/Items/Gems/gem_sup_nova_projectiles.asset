@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5f9766db0f8594e349438cc979f7b6fe, type: 3}
   m_Name: gem_sup_nova_projectiles
-  m_EditorClassIdentifier: Blob.Runtime::ItemDefinition
+  m_EditorClassIdentifier: Dokkaebi.Runtime::ItemDefinition
   id: gem_sup_nova_projectiles
   displayName: "\uD3ED\uBC1C \uD22C\uC0AC\uCCB4"
   description: "\uC801\uC911 \uC9C0\uC810\uC5D0\uC11C \uD22C\uC0AC\uCCB4\uAC00 \uC0AC\uBC29\uC73C\uB85C

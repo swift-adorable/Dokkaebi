@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// 등급이 정하는 보상. (docs/Blob_Hunting_System.md 6절)
+/// 등급이 정하는 보상. (docs/Dokkaebi_Hunting_System.md 6절)
 ///
 /// 【등급이 곧 드롭 품질이다.】
 /// poe2db — "몬스터 속성 하나당 드롭 희귀도가 100% 이상 증가한다" [확인됨]

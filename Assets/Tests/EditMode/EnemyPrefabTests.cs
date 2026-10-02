@@ -2,7 +2,7 @@ using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
 
-namespace Blob.Tests
+namespace Dokkaebi.Tests
 {
     /// <summary>
     /// 적 프리팹이 전투 기준의 수치를 쓰고 있는가.
@@ -18,7 +18,7 @@ namespace Blob.Tests
     ///   즉 가만히 서 있어도 2분 30초를 버틴다. 「죽으면 잃는가」를 확인할 수 없었다.
     ///   적 체력 3 → 어떤 무기로도 한 발. 전투 체감이 전부 무의미했다.
     ///
-    /// 수치의 출처는 docs/Blob_Combat_Baseline.md 5절 「적 유형」 표다.
+    /// 수치의 출처는 docs/Dokkaebi_Combat_Baseline.md 5절 「적 유형」 표다.
     /// 7단계에서 유형 9종을 데이터로 만들면 이 테스트를 그 표 전체로 넓힌다.
     /// </summary>
     public class EnemyPrefabTests
@@ -49,7 +49,7 @@ namespace Blob.Tests
             Assert.AreEqual(ScavHealth, health.Max,
                 "적 체력이 기준(잡귀 20)과 다릅니다. "
                 + "한 발에 죽으면 무기 티어도 상태이상도 체감되지 않습니다. "
-                + "(docs/Blob_Combat_Baseline.md 5절)");
+                + "(docs/Dokkaebi_Combat_Baseline.md 5절)");
         }
 
         [Test]
@@ -63,7 +63,7 @@ namespace Blob.Tests
                 "적 피해가 기준(잡귀 8)과 다릅니다. "
                 + "피해가 낮으면 플레이어가 사실상 죽지 않아 "
                 + "「죽으면 잃는다」는 이 게임의 뼈대를 확인할 수 없습니다. "
-                + "(docs/Blob_Combat_Baseline.md 5절)");
+                + "(docs/Dokkaebi_Combat_Baseline.md 5절)");
 
             Assert.AreEqual(ScavArmourPenetration, attack.ArmourPenetration,
                 "잡귀는 방어 관통 0입니다. 방어구가 의미를 갖는 첫 적입니다.");
@@ -101,7 +101,7 @@ namespace Blob.Tests
             var go = AssetDatabase.LoadAssetAtPath<GameObject>(RangedPrefab);
 
             Assert.IsNotNull(go,
-                $"{RangedPrefab}이 없습니다. 「Blob/Enemy/원거리 적 프리팹 생성」을 실행하십시오.");
+                $"{RangedPrefab}이 없습니다. 「Dokkaebi/Enemy/원거리 적 프리팹 생성」을 실행하십시오.");
 
             return go;
         }
@@ -188,7 +188,7 @@ namespace Blob.Tests
                 var go = AssetDatabase.LoadAssetAtPath<GameObject>(row.path);
 
                 Assert.IsNotNull(go,
-                    $"{row.path}이 없습니다. 「Blob/Enemy/유형·진영 연결」을 실행하십시오.");
+                    $"{row.path}이 없습니다. 「Dokkaebi/Enemy/유형·진영 연결」을 실행하십시오.");
 
                 var identity = go.GetComponent<EnemyIdentity>();
 

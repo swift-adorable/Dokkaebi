@@ -6,7 +6,7 @@ using UnityEngine;
 ///
 /// SkillCatalog과 같은 이유로 Resources에 하나만 둔다.
 /// </summary>
-[CreateAssetMenu(fileName = "PassiveTree", menuName = "Blob/Passive Tree")]
+[CreateAssetMenu(fileName = "PassiveTree", menuName = "Dokkaebi/Passive Tree")]
 public class PassiveTree : ScriptableObject
 {
     public const string ResourcePath = "PassiveTree";

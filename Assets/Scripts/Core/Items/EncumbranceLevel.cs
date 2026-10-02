@@ -1,6 +1,6 @@
 /// <summary>
 /// 과중량 단계. 무게 상한 대비 비율로 결정된다.
-/// (docs/Blob_Equipment_System.md 5-1절)
+/// (docs/Dokkaebi_Equipment_System.md 5-1절)
 /// </summary>
 public enum EncumbranceLevel
 {

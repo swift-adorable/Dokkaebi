@@ -1,5 +1,5 @@
 /// <summary>
-/// 전투 수치의 단일 기준. (docs/Blob_Combat_Baseline.md 2절)
+/// 전투 수치의 단일 기준. (docs/Dokkaebi_Combat_Baseline.md 2절)
 ///
 /// 이 값들을 바꾸면 스킬·장비·사냥이 전부 따라 움직인다.
 /// 다른 곳에서 같은 의미의 상수를 새로 정의하지 않는다.
@@ -18,7 +18,7 @@ public static class CombatConstants
     /// 이전에는 180이었다(기본 100 + 계정 트리 30 + 장비 50).
     /// 그러나 계정 트리는 코드에 존재한 적이 없고 패시브는 체력을 금지하며,
     /// 최대 체력을 주는 장비 에셋도 0종이었다 — 근거가 없는 80이었다.
-    /// (docs/Blob_Audit.md B2)
+    /// (docs/Dokkaebi_Audit.md B2)
     /// </summary>
     public const int PlayerHealthCap = PlayerBaseHealth;
 

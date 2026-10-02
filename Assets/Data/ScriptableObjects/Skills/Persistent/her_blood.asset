@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6f1826eda630a40a7b8b37017e52d7bc, type: 3}
   m_Name: her_blood
-  m_EditorClassIdentifier: Blob.Runtime::SkillDefinition
+  m_EditorClassIdentifier: Dokkaebi.Runtime::SkillDefinition
   id: her_blood
   displayName: "\uD53C\uC758 \uC804\uB839"
   description: "\uCD9C\uD608 \uC911\uC778 \uC801\uC744 \uCC98\uCE58\uD558\uBA74 \uCD95\uC801\uB41C

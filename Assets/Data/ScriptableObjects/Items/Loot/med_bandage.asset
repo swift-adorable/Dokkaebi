@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5f9766db0f8594e349438cc979f7b6fe, type: 3}
   m_Name: med_bandage
-  m_EditorClassIdentifier: Blob.Runtime::ItemDefinition
+  m_EditorClassIdentifier: Dokkaebi.Runtime::ItemDefinition
   id: med_bandage
   displayName: "\uC465"
   description: "\uCD9C\uD608\uC744 \uBA48\uCD98\uB2E4. \uC7A0\uC2DC \uCD9C\uD608\uC5D0

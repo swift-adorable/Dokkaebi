@@ -3,7 +3,7 @@ using UnityEngine;
 /// <summary>
 /// 소모품을 실제로 쓰는 곳. 【계산은 ConsumableUse가 한다.】
 /// 여기는 지금 상태를 모아 넘기고, 나온 결과를 적용하고, 한 개를 뺀다.
-/// (docs/Blob_Consumable_System.md)
+/// (docs/Dokkaebi_Consumable_System.md)
 ///
 /// MonoBehaviour로 두지 않는 이유 — 쓰는 순간에만 필요한 일이라
 /// 매 프레임 도는 것이 없다. 화면이 부르는 함수 하나면 충분하다.
@@ -199,7 +199,7 @@ public static class PlayerConsumables
 
     private static Health FindPlayerHealth()
     {
-        var player = Object.FindAnyObjectByType<BlobController>(FindObjectsInactive.Exclude);
+        var player = Object.FindAnyObjectByType<DokkaebiController>(FindObjectsInactive.Exclude);
 
         return player != null ? player.GetComponent<Health>() : null;
     }

@@ -28,7 +28,7 @@ public struct FacilityStateEffect
 }
 
 /// <summary>
-/// 밤 상태 3종의 고정 표. (docs/Blob_Hunting_System.md 5절)
+/// 밤 상태 3종의 고정 표. (docs/Dokkaebi_Hunting_System.md 5절)
 ///
 /// 【한 번 나온 개체는 상태가 풀려도 사라지지 않는다.】(문서 5절)
 /// 그래서 이 표는 「스폰할 때 무엇을 더 섞을까」만 정하고,

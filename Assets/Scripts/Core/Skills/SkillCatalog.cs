@@ -11,7 +11,7 @@ using UnityEngine;
 /// 폴더를 스캔해 자동으로 채운다(SkillCatalogBuilder).
 /// → 에셋을 추가할 때 Inspector에 드래그하는 것을 잊는 실패 지점이 생기지 않는다. (프롬프트 5-4)
 /// </summary>
-[CreateAssetMenu(fileName = "SkillCatalog", menuName = "Blob/Skill Catalog")]
+[CreateAssetMenu(fileName = "SkillCatalog", menuName = "Dokkaebi/Skill Catalog")]
 public class SkillCatalog : ScriptableObject
 {
     /// <summary>Resources 하위 경로. 확장자 없이 쓴다.</summary>

@@ -6,7 +6,7 @@ using UnityEngine;
 ///
 /// 골드만 쓰면 시간을 들이면 전부 열린다. 결정이 없다.
 /// 재료를 요구하면 "이 노리개를 팔까, 패시브에 쓸까"가 생긴다.
-/// 파밍이 성장에 직접 닿는다. (docs/Blob_Passive_System.md 3절)
+/// 파밍이 성장에 직접 닿는다. (docs/Dokkaebi_Passive_System.md 3절)
 /// </summary>
 [System.Serializable]
 public struct PassiveMaterial
@@ -27,14 +27,14 @@ public struct PassiveMaterial
 }
 
 /// <summary>
-/// 패시브 한 칸. (docs/Blob_Passive_System.md)
+/// 패시브 한 칸. (docs/Dokkaebi_Passive_System.md)
 ///
 /// 선행 조건을 id 문자열로 두는 이유 —
 /// 에셋 간 상호 참조를 만들면 순환 참조와 GUID 꼬임이 생긴다.
 /// 이 방식이라 【계열을 넘는 선행】도 자연스럽게 표현된다
 /// (덕코프의 「식이요법 = 낚시 3 + 영양 관리 3」과 같은 교차 선행). [확인됨]
 /// </summary>
-[CreateAssetMenu(fileName = "Passive_", menuName = "Blob/Passive Node")]
+[CreateAssetMenu(fileName = "Passive_", menuName = "Dokkaebi/Passive Node")]
 public class PassiveNode : ScriptableObject
 {
     [Header("식별")]

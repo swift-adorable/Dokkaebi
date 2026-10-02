@@ -9,7 +9,7 @@ using UnityEngine;
 /// </summary>
 public static class EquipmentAssetGenerator
 {
-    [MenuItem("Blob/Equipment/장비 에셋 전체 생성")]
+    [MenuItem("Dokkaebi/Equipment/장비 에셋 전체 생성")]
     public static void GenerateAll()
     {
         AssetDatabase.StartAssetEditing();

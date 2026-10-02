@@ -1,5 +1,5 @@
 /// <summary>
-/// 상태이상 6종의 수치 표. (docs/Blob_Combat_Baseline.md 7절)
+/// 상태이상 6종의 수치 표. (docs/Dokkaebi_Combat_Baseline.md 7절)
 ///
 /// 초당 피해는 【부여 시점의 기본 피해】에 계수를 곱해 계산한다.
 /// 상태이상 피해는 방어도를 무시하고 속성 상성만 받는다.
@@ -106,7 +106,7 @@ public static class StatusEffectTable
     //   1초마다 2 피해를 받음 · 90초 · 배타 태그 Tagilla   [확인됨]
     //
     // 시야 거리 +4 · 감지 거리 +1 · 체력(스태미나) +15 · 근접 +0.1은 옮기지 않는다.
-    // Blob에는 플레이어 시야·스태미나·근접 축이 없다.
+    // Dokkaebi에는 플레이어 시야·스태미나·근접 축이 없다.
     //
     // 【90초 × 2 = 180 피해다.】 최대 체력 110보다 많다. 회복 없이 끝까지
     // 버티면 죽는다 — 덕코프가 그렇게 만들었다. 「이기려고 쓰는 것이 아니라
@@ -245,7 +245,7 @@ public static class StatusEffectTable
     /// 「다른 상태가 걸린다」와 같은 말이다. 상태이상 하나로 표현하면
     /// 화면도 그것을 그대로 보여 준다 — 플레이어는 쇠약이 걸린 것을
     /// 상태 줄에서 보고, 왜 느려졌는지 스스로 안다.
-    /// (docs/Blob_Consumable_System.md 8절)
+    /// (docs/Dokkaebi_Consumable_System.md 8절)
     /// </summary>
     public static StatusEffectType AftermathOf(StatusEffectType type)
     {

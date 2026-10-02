@@ -13,7 +13,7 @@ public static class EnemyPrefabCatalogBuilder
 {
     private const string CatalogPath = "Assets/Resources/EnemyPrefabCatalog.asset";
 
-    [MenuItem("Blob/Enemy/유형 프리팹 카탈로그 생성")]
+    [MenuItem("Dokkaebi/Enemy/유형 프리팹 카탈로그 생성")]
     public static void Build()
     {
         var catalog = AssetDatabase.LoadAssetAtPath<EnemyPrefabCatalog>(CatalogPath);

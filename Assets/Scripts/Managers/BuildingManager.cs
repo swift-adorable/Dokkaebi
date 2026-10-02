@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 
 /// <summary>
-/// 벙커 건물의 상태를 들고 있는다. (로드맵 8-K · docs/Blob_Bunker_System.md 3-4절)
+/// 벙커 건물의 상태를 들고 있는다. (로드맵 8-K · docs/Dokkaebi_Bunker_System.md 3-4절)
 ///
 /// MonoBehaviour가 아니다 — 무엇을 지었는지는 세이브에 속한다. 벙커 씬의
 /// BunkerBuildings가 이 상태를 보고 건물을 세우고, 바뀌면 다시 세운다.

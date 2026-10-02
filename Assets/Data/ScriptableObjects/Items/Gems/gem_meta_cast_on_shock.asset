@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5f9766db0f8594e349438cc979f7b6fe, type: 3}
   m_Name: gem_meta_cast_on_shock
-  m_EditorClassIdentifier: Blob.Runtime::ItemDefinition
+  m_EditorClassIdentifier: Dokkaebi.Runtime::ItemDefinition
   id: gem_meta_cast_on_shock
   displayName: "\uAC10\uC804 \uC2DC \uC2DC\uC804"
   description: "\uAC10\uC804\uC744 \uC720\uBC1C\uD560 \uB54C\uB9C8\uB2E4 8% \uCDA9\uC804\uB41C\uB2E4.

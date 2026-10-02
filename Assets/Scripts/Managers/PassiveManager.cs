@@ -3,7 +3,7 @@ using UnityEngine;
 
 /// <summary>
 /// 영구 성장 — 패시브. 【죽어도 잃지 않는다.】
-/// (docs/Blob_Progression_System.md 1절 — 레벨은 하나다)
+/// (docs/Dokkaebi_Progression_System.md 1절 — 레벨은 하나다)
 ///
 ///   레벨 : 영구. 소켓과 패시브를 연다.   → PlayerStats (결정 2-33)
 ///
@@ -142,7 +142,7 @@ public class PassiveManager : Singleton<PassiveManager>
             {
                 GameLogger.Error(
                     $"[PassiveManager] Resources/{PassiveTree.ResourcePath} 에셋이 없습니다. " +
-                    "메뉴 Blob > Passive > 패시브 에셋 생성 을 실행하십시오.", this);
+                    "메뉴 Dokkaebi > Passive > 패시브 에셋 생성 을 실행하십시오.", this);
             }
         }
 

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 
 /// <summary>
-/// 속성의 분류 · 효과 · 조합 금지 규칙. (docs/Blob_Hunting_System.md 3절)
+/// 속성의 분류 · 효과 · 조합 금지 규칙. (docs/Dokkaebi_Hunting_System.md 3절)
 ///
 /// MonoBehaviour 의존이 없는 순수 클래스다. EditMode 테스트 대상.
 /// </summary>
@@ -26,7 +26,7 @@ public static class EnemyAffixTable
     /// 문서 3절은 「초당 회복」이라고만 적고 수치를 비워 두었다.
     /// PoE2의 Regenerates Life가 초당 최대 생명의 2%다.
     /// [확인됨 — docs/research/poe2/01_몬스터_속성.md]
-    /// 같은 수치를 쓰되, 출처가 PoE2이고 Blob에서 검증되지 않았음을 밝힌다.
+    /// 같은 수치를 쓰되, 출처가 PoE2이고 Dokkaebi에서 검증되지 않았음을 밝힌다.
     /// </summary>
     public const float RegenPerSecond = 0.02f;
 

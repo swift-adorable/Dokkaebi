@@ -6,7 +6,7 @@ using static EquipmentAssetWriter;
 /// <summary>
 /// 방어구 4부위 + 가방 에셋 생성. (로드맵 6-C)
 ///
-/// 티어 대역은 docs/Blob_Equipment_System.md 3절 표를 따른다.
+/// 티어 대역은 docs/Dokkaebi_Equipment_System.md 3절 표를 따른다.
 ///
 /// 이 생성기가 지켜야 하는 세 가지
 ///  1. 【최고 티어일수록 칸이 준다】 — "방어 최대화 = 파밍량 최소화"
@@ -83,7 +83,7 @@ public static class ArmourAssetGenerator
     {
         public string key;
         public string label;
-        public string color;   // 오방색 — 화염 붉은 · 냉기 검은 · 전기 푸른 · 독 누런 · 물리 흰 (Blob_Naming.md 0절 5번)
+        public string color;   // 오방색 — 화염 붉은 · 냉기 검은 · 전기 푸른 · 독 누런 · 물리 흰 (Dokkaebi_Naming.md 0절 5번)
         public EquipmentStatType resist;
         public StatusEffectType status;
     }
@@ -97,7 +97,7 @@ public static class ArmourAssetGenerator
         new() { key = "physical",  label = "방탄", color = "흰", resist = EquipmentStatType.ResistPhysical,  status = StatusEffectType.Bleed  }
     };
 
-    [MenuItem("Blob/Equipment/방어구 · 가방 에셋 생성")]
+    [MenuItem("Dokkaebi/Equipment/방어구 · 가방 에셋 생성")]
     public static void Generate()
     {
         int count = 0;

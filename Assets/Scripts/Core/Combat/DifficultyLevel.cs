@@ -2,7 +2,7 @@
 /// 전역 난이도. 플레이어가 고르며, 장(Stage)은 "무엇을 만나는가"만 정한다.
 ///
 /// 덕코프의 분리를 그대로 도용했다 — 구역이 바뀐다고 적 체력에 배율을 곱하지 않는다.
-/// (docs/Blob_Combat_Baseline.md 5절)
+/// (docs/Dokkaebi_Combat_Baseline.md 5절)
 /// </summary>
 public enum DifficultyLevel
 {

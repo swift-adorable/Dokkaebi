@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5f9766db0f8594e349438cc979f7b6fe, type: 3}
   m_Name: water_bottle
-  m_EditorClassIdentifier: Blob.Runtime::ItemDefinition
+  m_EditorClassIdentifier: Dokkaebi.Runtime::ItemDefinition
   id: water_bottle
   displayName: "\uB9D1\uC740 \uBB3C"
   description: "\uB9C8\uC2E4 \uC218 \uC788\uB294 \uBB3C. \uBC24\uAE38\uC5D0\uC11C\uB294 \uADC0\uD558\uB2E4."

@@ -8,7 +8,7 @@ using UnityEngine;
 /// "젬을 많이 챙겨 화력을 확보할까, 가방을 비워 전리품 공간을 남길까"라는
 /// 결정이 성립하려면 셋이 같은 자원을 두고 경쟁해야 한다.
 /// </summary>
-[CreateAssetMenu(fileName = "Item", menuName = "Blob/Item Definition")]
+[CreateAssetMenu(fileName = "Item", menuName = "Dokkaebi/Item Definition")]
 public class ItemDefinition : ScriptableObject
 {
     [Header("Identity")]
@@ -102,7 +102,7 @@ public class ItemDefinition : ScriptableObject
     /// 반출 불가.
     ///
     /// 「파밍 안에서만 사는 축」을 만드는 태그다. 덕코프의 「강화」가 그 자리인데
-    /// Blob의 젬은 반출 가능하므로 이 축이 비어 있었다.
+    /// Dokkaebi의 젬은 반출 가능하므로 이 축이 비어 있었다.
     /// 지금은 태그만 두고, 쓰는 아이템은 7단계 이후에 만든다.
     /// </summary>
     public bool NoExtract => noExtract;
@@ -155,7 +155,7 @@ public class ItemDefinition : ScriptableObject
     /// 철수에 실패해도 잃지 않는 아이템인지.
     ///
     /// 각인만 해당한다. 플레이어가 배울 규칙은 하나여야 하므로 예외를 늘리지 않는다.
-    /// (docs/Blob_Progression_System.md 6절)
+    /// (docs/Dokkaebi_Progression_System.md 6절)
     /// </summary>
     public bool SurvivesDeath => kind == ItemKind.Imprint;
 

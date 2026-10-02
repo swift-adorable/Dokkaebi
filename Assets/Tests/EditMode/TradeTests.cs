@@ -3,10 +3,10 @@ using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
 
-namespace Blob.Tests
+namespace Dokkaebi.Tests
 {
     /// <summary>
-    /// 창고 · 잡화 상점 계약. (로드맵 8-I · docs/Blob_Bunker_System.md 3절)
+    /// 창고 · 잡화 상점 계약. (로드맵 8-I · docs/Dokkaebi_Bunker_System.md 3절)
     ///
     /// 【전부 아니면 전혀】 — 골드만 빠지거나 물건만 빠지는 거래가 한 번이라도
     /// 생기면 플레이어는 상점을 믿지 않는다. 그 계약을 여기서 강제한다.

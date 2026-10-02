@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 
-namespace Blob.Tests
+namespace Dokkaebi.Tests
 {
     /// <summary>
     /// 스킬 정의 에셋 53종의 구조 검증. (로드맵 5-E)
@@ -19,7 +19,7 @@ namespace Blob.Tests
         public void LoadCatalog()
         {
             catalog = SkillCatalog.Load();
-            Assert.IsNotNull(catalog, "SkillCatalog.asset을 찾지 못했습니다. Blob/Skill/카탈로그 다시 만들기를 실행하세요.");
+            Assert.IsNotNull(catalog, "SkillCatalog.asset을 찾지 못했습니다. Dokkaebi/Skill/카탈로그 다시 만들기를 실행하세요.");
         }
 
         private static IEnumerable<SkillDefinition> All => catalog.Definitions.Where(d => d != null);
@@ -47,7 +47,7 @@ namespace Blob.Tests
         [Test]
         public void 변형_수단이_본체보다_훨씬_많다()
         {
-            // PoE2는 보조 젬이 스킬 젬보다 130개 많다. Blob도 같은 비율을 지켜야
+            // PoE2는 보조 젬이 스킬 젬보다 130개 많다. Dokkaebi도 같은 비율을 지켜야
             // "조합해서 만드는 게임"이 된다.
             int cores = Of(SkillCategory.Core).Count();
             int supports = Of(SkillCategory.Support).Count();

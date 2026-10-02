@@ -1,9 +1,9 @@
 using NUnit.Framework;
 
-namespace Blob.Tests
+namespace Dokkaebi.Tests
 {
     /// <summary>
-    /// 피해 계산 공식 테스트. (docs/Blob_Combat_Baseline.md 3절)
+    /// 피해 계산 공식 테스트. (docs/Dokkaebi_Combat_Baseline.md 3절)
     ///
     /// 이 공식이 스킬·장비·사냥의 모든 수치를 지배하므로 경계값까지 전수 검증한다.
     /// </summary>

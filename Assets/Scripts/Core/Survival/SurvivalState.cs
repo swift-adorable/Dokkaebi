@@ -2,7 +2,7 @@ using UnityEngine;
 
 /// <summary>
 /// 수분 · 에너지 두 축의 상태와 그로부터 나오는 페널티.
-/// (docs/Blob_Survival_System.md · 결정 2-32)
+/// (docs/Dokkaebi_Survival_System.md · 결정 2-32)
 ///
 /// 【왜 순수 클래스인가】
 /// "15분 뒤에 탈수가 되는가", "3중첩까지 몇 초 걸리는가"는 게임을 띄우지 않고

@@ -1,6 +1,6 @@
 using NUnit.Framework;
 
-namespace Blob.Tests
+namespace Dokkaebi.Tests
 {
     /// <summary>
     /// 합성 발사 테스트. (확정 기획 — 핵심 젬 2개는 한 발에 합쳐진다)

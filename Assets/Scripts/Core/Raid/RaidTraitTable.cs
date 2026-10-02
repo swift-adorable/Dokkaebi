@@ -36,7 +36,7 @@ public struct RaidTraitEffect
 }
 
 /// <summary>
-/// 레이드 특성 10종의 고정 표. (docs/Blob_Hunting_System.md 9절)
+/// 레이드 특성 10종의 고정 표. (docs/Dokkaebi_Hunting_System.md 9절)
 ///
 /// MonoBehaviour 의존이 없는 순수 클래스다. EditMode 테스트 대상.
 /// </summary>

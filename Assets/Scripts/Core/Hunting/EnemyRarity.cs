@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// 등급 4종 (PoE2 방식). (docs/Blob_Hunting_System.md 2절)
+/// 등급 4종 (PoE2 방식). (docs/Dokkaebi_Hunting_System.md 2절)
 ///
 /// poe2db — "몬스터 속성 하나당 드롭 희귀도가 100% 이상 증가한다" [확인됨]
 /// → 【등급이 곧 드롭 품질이다.】 별도 드롭 테이블을 두지 않는다.
@@ -18,7 +18,7 @@ public enum EnemyRarity
 
 /// <summary>
 /// 등급이 주는 배율과 속성 개수.
-/// 수치 출처는 docs/Blob_Combat_Baseline.md 5절 「등급 배율」이다.
+/// 수치 출처는 docs/Dokkaebi_Combat_Baseline.md 5절 「등급 배율」이다.
 ///
 /// 【체력은 ×15까지 오르는데 피해는 ×1.8까지만 오른다. 의도된 비대칭이다.】
 /// 체력 배율은 파밍 안에서 젬으로 대응하고,

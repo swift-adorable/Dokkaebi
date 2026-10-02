@@ -5,7 +5,7 @@ using UnityEngine;
 /// 착용 장비의 옵션을 합산한 결과. MonoBehaviour 의존이 없는 순수 클래스다.
 ///
 /// 옵션은 전부 가산 합산한다. 곱연산은 전투 공식의 고정된 항들뿐이다.
-/// (docs/Blob_Combat_Baseline.md 3절)
+/// (docs/Dokkaebi_Combat_Baseline.md 3절)
 /// </summary>
 public class EquipmentModifiers
 {
@@ -25,7 +25,7 @@ public class EquipmentModifiers
     ///
     /// 내구도가 0이면 【방어 옵션만】 빠진다. 탐지·수집·보관 옵션은 계속 작동한다.
     /// 마모(33% 이하) 상태에서는 방어 옵션이 절반만 적용된다.
-    /// (docs/Blob_Equipment_System.md 4절)
+    /// (docs/Dokkaebi_Equipment_System.md 4절)
     /// </summary>
     public void Add(EquipmentDefinition definition, bool isBroken = false, bool isWorn = false)
     {

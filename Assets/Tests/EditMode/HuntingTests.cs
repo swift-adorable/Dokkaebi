@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 
-namespace Blob.Tests
+namespace Dokkaebi.Tests
 {
     /// <summary>
     /// 7단계 사냥 데이터 골격의 계약 테스트.
@@ -20,7 +20,7 @@ namespace Blob.Tests
     {
         // ── 1. 유형 수치가 문서 표와 같다 ─────────────────────────────
 
-        /// <summary>docs/Blob_Combat_Baseline.md 5절 표를 그대로 옮긴 것.</summary>
+        /// <summary>docs/Dokkaebi_Combat_Baseline.md 5절 표를 그대로 옮긴 것.</summary>
         private static readonly (EnemyArchetype archetype,
                                  int health, int damage, int penetration, float armour)[] Baseline =
         {
@@ -111,7 +111,7 @@ namespace Blob.Tests
         // ── 2. 설계 규칙 ──────────────────────────────────────────────
 
         /// <summary>
-        /// docs/Blob_Combat_Baseline.md 5절 표의 「요구하는 답」 열.
+        /// docs/Dokkaebi_Combat_Baseline.md 5절 표의 「요구하는 답」 열.
         ///
         /// 【이전 판을 폐기했다 — 정정】
         /// 처음에는 「체력 60 이상 + 방어도 4 이상 금지」라는 기준을 내가 만들어
@@ -365,7 +365,7 @@ namespace Blob.Tests
 
             Assert.AreEqual(0.5f, profile.resistances.physical, 0.001f,
                 "물리 저항이 0.5가 아닙니다. 곱연산이 들어갔다면 0.33이 됩니다. " +
-                "(docs/Blob_Hunting_System.md 9절)");
+                "(docs/Dokkaebi_Hunting_System.md 9절)");
 
             // 화염은 건드리지 않았으므로 유형 값이 그대로다.
             Assert.AreEqual(1.5f, profile.resistances.fire, 0.001f);

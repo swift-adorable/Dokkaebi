@@ -14,7 +14,7 @@ public enum InputSourceMode
 }
 
 /// <summary>
-/// 입력 파사드(Facade). BlobController는 오직 이 클래스만 바라본다.
+/// 입력 파사드(Facade). DokkaebiController는 오직 이 클래스만 바라본다.
 ///
 /// 실제 입력 수집은 IPlayerInputSource 구현체(Desktop / Touch)가 담당하며,
 /// 이 클래스는 활성 소스를 고르고 값을 중계할 뿐이다.

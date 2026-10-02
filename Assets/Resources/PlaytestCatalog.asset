@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 40f693e277877461a9538cbe3d4bce0c, type: 3}
   m_Name: PlaytestCatalog
-  m_EditorClassIdentifier: Blob.Runtime::PlaytestCatalog
+  m_EditorClassIdentifier: Dokkaebi.Runtime::PlaytestCatalog
   starterKit:
   - {fileID: 11400000, guid: a07b5f0327cc74afa9cf8c581fdfc951, type: 2}
   - {fileID: 11400000, guid: c0416051f3f53403b895fcd6eb41cbb4, type: 2}

@@ -14,7 +14,7 @@ public static class ItemCatalogBuilder
 {
     private const string CatalogPath = "Assets/Resources/ItemCatalog.asset";
 
-    [MenuItem("Blob/Items/아이템 카탈로그 생성")]
+    [MenuItem("Dokkaebi/Items/아이템 카탈로그 생성")]
     public static void Build()
     {
         List<ItemDefinition> items = AssetDatabase

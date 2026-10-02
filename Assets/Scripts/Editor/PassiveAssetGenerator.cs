@@ -3,7 +3,7 @@ using UnityEditor;
 using UnityEngine;
 
 /// <summary>
-/// 패시브 트리 에셋을 만드는 에디터 도구. (docs/Blob_Passive_System.md)
+/// 패시브 트리 에셋을 만드는 에디터 도구. (docs/Dokkaebi_Passive_System.md)
 ///
 /// 【표를 읽을 때 확인할 것 — 전투 수치가 하나도 없다.】
 /// 방어도·피해·체력·이동·시야·감지는 전부 장비의 몫이다.
@@ -206,7 +206,7 @@ public static class PassiveAssetGenerator
         return rows;
     }
 
-    [MenuItem("Blob/Passive/패시브 에셋 생성")]
+    [MenuItem("Dokkaebi/Passive/패시브 에셋 생성")]
     public static void Generate()
     {
         EnsureFolder("Assets/Data");
@@ -331,7 +331,7 @@ public static class PassiveAssetGenerator
             {
                 Debug.LogWarning(
                     $"[PassiveAssetGenerator] 재료 '{itemId}'를 찾지 못했습니다. " +
-                    "메뉴 Blob > Loot > 전리품 에셋 생성 을 먼저 실행하십시오.");
+                    "메뉴 Dokkaebi > Loot > 전리품 에셋 생성 을 먼저 실행하십시오.");
                 continue;
             }
 

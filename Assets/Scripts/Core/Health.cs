@@ -167,7 +167,7 @@ public class Health : MonoBehaviour, IDamageable, IPoolable
     /// 이 상태에 면역인지. 각인 「역치」와 얼굴 방어구 티어 4 이상이 면역을 준다.
     ///
     /// 이 판정이 항상 false였던 동안 역치 각인 3종과 얼굴 마스크 15종이
-    /// 아무 일도 하지 않았다. (docs/Blob_Audit.md A절)
+    /// 아무 일도 하지 않았다. (docs/Dokkaebi_Audit.md A절)
     /// </summary>
     public bool IsImmuneTo(StatusEffectType type)
     {
@@ -322,7 +322,7 @@ public class Health : MonoBehaviour, IDamageable, IPoolable
     ///
     /// 소모품이 만능이 아니게 하는 유일한 장치다 —
     /// 회복약 하나로 모든 상황이 풀리면 가방을 그것만으로 채우게 된다.
-    /// (docs/Blob_Combat_Baseline.md 「위험 상태」)
+    /// (docs/Dokkaebi_Combat_Baseline.md 「위험 상태」)
     /// </summary>
     public int Heal(int amount)
     {

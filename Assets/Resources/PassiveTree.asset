@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f7be04161c0944c85aa3408f3882ef0d, type: 3}
   m_Name: PassiveTree
-  m_EditorClassIdentifier: Blob.Runtime::PassiveTree
+  m_EditorClassIdentifier: Dokkaebi.Runtime::PassiveTree
   nodes:
   - {fileID: 11400000, guid: 4d6871710a3754799b32ade16da88a3c, type: 2}
   - {fileID: 11400000, guid: 96f247d80d2eb4abf916e9b9e0352fc7, type: 2}

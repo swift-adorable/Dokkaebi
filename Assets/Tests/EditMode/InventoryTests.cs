@@ -2,10 +2,10 @@ using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
 
-namespace Blob.Tests
+namespace Dokkaebi.Tests
 {
     /// <summary>
-    /// 인벤토리 테스트. (docs/Blob_Equipment_System.md 5-1절)
+    /// 인벤토리 테스트. (docs/Dokkaebi_Equipment_System.md 5-1절)
     ///
     /// 장비 · 젬 · 전리품이 같은 인벤토리를 쓴다는 것이 이 게임의 핵심 결정이다.
     /// "젬을 챙길까, 전리품 공간을 남길까"가 성립하려면 셋이 같은 자원을 두고 경쟁해야 한다.

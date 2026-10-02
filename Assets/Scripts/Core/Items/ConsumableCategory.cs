@@ -1,5 +1,5 @@
 /// <summary>
-/// 소모품 4분류 + 음료·음식. (docs/Blob_Consumable_System.md 1절)
+/// 소모품 4분류 + 음료·음식. (docs/Dokkaebi_Consumable_System.md 1절)
 ///
 /// 【분류가 있어야 하는 이유】 같은 분류는 덮어쓴다는 규칙(6절)과
 /// 「만능 회복약을 만들지 않는다」(7절)를 검사하려면 무엇이 무엇인지

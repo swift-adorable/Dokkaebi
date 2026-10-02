@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ea17f4877b7bf48069bd560938e26492, type: 3}
   m_Name: meta_absorb_1
-  m_EditorClassIdentifier: Blob.Runtime::PassiveNode
+  m_EditorClassIdentifier: Dokkaebi.Runtime::PassiveNode
   id: meta_absorb_1
   displayName: "\uC815\uAE30 \uAC70\uB450\uAE30 1"
   description: "\uD5C8\uBB3C\uC5D0\uC11C \uB354 \uB9CE\uC740 \uAC83\uC744 \uB04C\uC5B4\uB0B8\uB2E4."

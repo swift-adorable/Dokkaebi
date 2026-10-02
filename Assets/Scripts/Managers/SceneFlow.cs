@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 /// <summary>
-/// 벙커 ↔ 파밍 구역을 오간다. (로드맵 8-J · docs/Blob_Bunker_System.md 0절)
+/// 벙커 ↔ 파밍 구역을 오간다. (로드맵 8-J · docs/Dokkaebi_Bunker_System.md 0절)
 ///
 /// 【건너는 길은 세이브 하나다.】 떠나기 전에 저장하고, 도착한 씬에서
 /// SaveManager가 다시 읽는다. 매니저를 DontDestroyOnLoad로 끌고 다니지 않는다 —
@@ -13,7 +13,7 @@ using UnityEngine.SceneManagement;
 /// </summary>
 public static class SceneFlow
 {
-    /// <summary>벙커 씬 이름. 「Blob/Bunker/벙커 씬 생성」이 만든다.</summary>
+    /// <summary>벙커 씬 이름. 「Dokkaebi/Bunker/벙커 씬 생성」이 만든다.</summary>
     public const string BunkerScene = "Bunker";
 
     /// <summary>파밍 구역 씬 이름. 6장 구조(9단계)가 생기면 구역마다 나뉜다.</summary>
@@ -81,7 +81,7 @@ public static class SceneFlow
         if (!Application.CanStreamedLevelBeLoaded(scene))
         {
             GameLogger.Error($"[SceneFlow] 빌드 설정에 「{scene}」 씬이 없습니다. "
-                             + "「Blob/Bunker/벙커 씬 생성」을 실행하십시오.");
+                             + "「Dokkaebi/Bunker/벙커 씬 생성」을 실행하십시오.");
             return;
         }
 

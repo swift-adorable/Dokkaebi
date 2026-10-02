@@ -12,7 +12,7 @@ using UnityEngine;
 ///             × 난이도 보정
 ///
 /// 이 공식을 다른 곳에 복제하지 않는다. 복제하면 반드시 드리프트가 생긴다.
-/// (docs/Blob_Combat_Baseline.md 3절)
+/// (docs/Dokkaebi_Combat_Baseline.md 3절)
 /// </summary>
 public static class DamageResolver
 {

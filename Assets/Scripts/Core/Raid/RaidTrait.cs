@@ -1,6 +1,6 @@
 /// <summary>
 /// 레이드 특성 10종 — 【맵 전체】에 걸리는 조건.
-/// (docs/Blob_Hunting_System.md 9절)
+/// (docs/Dokkaebi_Hunting_System.md 9절)
 ///
 /// 【장 수를 늘리지 않고 조우를 다양하게 만드는 축이다.】
 /// 맵을 하나 더 만드는 것이 가장 비싼데, 같은 맵에 특성만 갈아 끼우면
