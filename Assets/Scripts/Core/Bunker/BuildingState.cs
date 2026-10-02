@@ -173,7 +173,7 @@ public class BuildingState
         {
             case BuildError.AlreadyOwned:       return "이미 지었습니다.";
             case BuildError.MissingBuilding:    return "먼저 지어야 하는 건물이 있습니다.";
-            case BuildError.NotEnoughGold:      return "골드가 모자랍니다.";
+            case BuildError.NotEnoughGold:      return "엽전이 모자랍니다.";
             case BuildError.NotEnoughMaterials: return "재료가 모자랍니다.";
             case BuildError.Unknown:            return "알 수 없는 건물입니다.";
             default:                            return string.Empty;

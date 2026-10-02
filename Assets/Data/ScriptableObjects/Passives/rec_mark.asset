@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Blob.Runtime::PassiveNode
   id: rec_mark
   displayName: "\uB3CC\uC544\uAC08 \uAE38\uBAA9"
-  description: "\uC9C0\uB3C4\uC5D0 \uCCA0\uC218 \uC9C0\uC810\uC774 \uC0C1\uC2DC \uD45C\uC2DC\uB41C\uB2E4."
+  description: "\uC9C0\uB3C4\uC5D0 \uAE38\uBAA9\uC774 \uB298 \uD45C\uC2DC\uB41C\uB2E4."
   branch: 2
   effect: 22
   value: 1

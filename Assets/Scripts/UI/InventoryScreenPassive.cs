@@ -101,7 +101,7 @@ public partial class InventoryScreenUI
             TextAnchor.MiddleLeft, UIPalette.TextOnGlass);
 
         UIFactory.CreateLabel(rightContent,
-            $"{manager.Gold:N0}골드", 30, FontStyle.Bold,
+            $"{manager.Gold:N0}엽전", 30, FontStyle.Bold,
             new Vector2(0.55f, HeaderLine), new Vector2(0.86f, 1f),
             TextAnchor.MiddleRight, UIPalette.TextAccent);
 
@@ -194,7 +194,7 @@ public partial class InventoryScreenUI
         // 중개 계열은 레벨을 보지 않는다. 그 사실을 화면에 적어 둔다.
         if (PassiveBranchInfo.UnlockKind(selectedBranch) == PassiveUnlockKind.GoldOnly)
         {
-            UIFactory.CreateLabel(area, "레벨과 무관 · 골드만", 22, FontStyle.Normal,
+            UIFactory.CreateLabel(area, "레벨과 무관 · 엽전만", 22, FontStyle.Normal,
                 new Vector2(0.03f, 0.94f), new Vector2(0.97f, 0.99f),
                 TextAnchor.MiddleRight, UIPalette.TextAccent);
         }
@@ -402,7 +402,7 @@ public partial class InventoryScreenUI
         if (node.UnlockKind != PassiveUnlockKind.GoldOnly)
             lines.Add($"요구 Lv.{node.RequiredLevel}");
 
-        lines.Add($"비용 {node.Cost:N0}골드");
+        lines.Add($"비용 {node.Cost:N0}엽전");
 
         if (node.NeedsMaterials)
             lines.Add($"필요 재료 — {node.MaterialText}");

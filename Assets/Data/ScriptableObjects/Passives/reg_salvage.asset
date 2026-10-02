@@ -14,8 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Blob.Runtime::PassiveNode
   id: reg_salvage
   displayName: "\uAD6C\uC2AC \uAE68\uAE30"
-  description: "\uC82C\uC744 \uB3C4\uB85C \uD480\uC5B4 \uC7AC\uB8CC\uB85C \uB418\uB3CC\uB9B0\uB2E4.
-    \uC4F8\uBAA8\uC5C6\uB294 \uC82C\uC774 \uC0AC\uB77C\uC9C4\uB2E4."
+  description: "\uAD6C\uC2AC\uC744 \uAE68 \uC7AC\uB8CC\uB85C \uB418\uB3CC\uB9B0\uB2E4. \uC4F8\uBAA8\uC5C6\uB294 \uAD6C\uC2AC\uC774 \uC0AC\uB77C\uC9C4\uB2E4."
   branch: 4
   effect: 42
   value: 1

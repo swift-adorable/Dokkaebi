@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Blob.Runtime::PassiveNode
   id: brok_stash_1
   displayName: "\uCC3D\uACE0 \uC815\uB9AC 1"
-  description: "\uBC99\uCEE4 \uCC3D\uACE0\uB97C \uB113\uD614\uB2E4."
+  description: "\uC18C\uAD74 \uCC3D\uACE0\uB97C \uB113\uD614\uB2E4."
   branch: 3
   effect: 31
   value: 20

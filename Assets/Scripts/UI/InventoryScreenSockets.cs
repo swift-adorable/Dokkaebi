@@ -258,7 +258,7 @@ public partial class InventoryScreenUI
 
         if (occupant == null)
         {
-            ShowToast("빈 자리입니다. 아래에서 젬을 누르고 「장착」을 누르십시오.");
+            ShowToast("빈 자리입니다. 아래에서 구슬을 누르고 「장착」을 누르십시오.");
             return;
         }
 

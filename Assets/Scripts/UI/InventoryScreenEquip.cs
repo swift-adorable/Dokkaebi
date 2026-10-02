@@ -297,8 +297,8 @@ public partial class InventoryScreenUI
             case EquipmentStatType.DetectedDistance:     return "발각 거리";
             case EquipmentStatType.Hearing:              return "청력";
             case EquipmentStatType.SoundLocate:          return "소리 위치";
-            case EquipmentStatType.XpAbsorbRange:        return "흡수 범위";
-            case EquipmentStatType.XpAbsorbAmount:       return "경험치 획득";
+            case EquipmentStatType.XpAbsorbRange:        return "거두는 범위";
+            case EquipmentStatType.XpAbsorbAmount:       return "정기 획득";
             case EquipmentStatType.RareDropRate:         return "희귀 드롭";
             case EquipmentStatType.MaxCarryWeight:       return "소지 중량";
             case EquipmentStatType.SlotCapacity:         return "칸";

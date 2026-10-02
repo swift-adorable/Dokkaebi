@@ -306,7 +306,7 @@ public partial class InventoryScreenUI
             $"{definition.Weight * detailStack.Count:0.0} kg", UIPalette.TextAccent);
 
         DrawChip(ChipWidth + ChipGap, 0.795f, ChipWidth,
-            $"{definition.BaseValue * detailStack.Count:N0}골드", UIPalette.TextAccent);
+            $"{definition.BaseValue * detailStack.Count:N0}엽전", UIPalette.TextAccent);
 
         if (detailStack.Count > 1)
         {
@@ -336,7 +336,7 @@ public partial class InventoryScreenUI
         FitName(title, 34);
 
         UIFactory.CreateLabel(detailContent,
-            $"젬 · 꽂혀 있음 ({SlotName(detailSocket.Value)})", 22, FontStyle.Normal,
+            $"구슬 · 꽂혀 있음 ({SlotName(detailSocket.Value)})", 22, FontStyle.Normal,
             new Vector2(0f, 0.875f), new Vector2(1f, 0.925f), TextAnchor.UpperLeft,
             UIPalette.TextDim);
 

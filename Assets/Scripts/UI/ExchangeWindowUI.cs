@@ -303,7 +303,7 @@ public class ExchangeWindowUI : MonoBehaviour
                 break;
 
             case Mode.Shop:
-                titleLabel.text = $"{otherName} · {PassiveManager.EnsureInstance().Gold:N0}골드";
+                titleLabel.text = $"{otherName} · {PassiveManager.EnsureInstance().Gold:N0}엽전";
                 break;
 
             default:
@@ -484,7 +484,7 @@ public class ExchangeWindowUI : MonoBehaviour
 
         var entries = new List<ItemActionMenu.Entry>
         {
-            new($"구매 {price:N0}골드", UIPalette.Action, () => Buy(definition), error == TradeError.None),
+            new($"구매 {price:N0}엽전", UIPalette.Action, () => Buy(definition), error == TradeError.None),
             new("상세보기", UIPalette.Subtle,
                 () => InventoryScreenUI.OpenReadOnlyDetail(new ItemStack(definition), otherName))
         };
@@ -603,7 +603,7 @@ public class ExchangeWindowUI : MonoBehaviour
         TradeError error = ShopManager.Sell(stack, out int earned);
 
         InventoryScreenUI.ShowToastIfOpen(error == TradeError.None
-            ? $"판매 — 「{name}」 +{earned:N0}골드"
+            ? $"판매 — 「{name}」 +{earned:N0}엽전"
             : TradeRules.Explain(error));
 
         RefreshAfterBagChange();

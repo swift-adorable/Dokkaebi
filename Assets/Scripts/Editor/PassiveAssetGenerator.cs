@@ -97,7 +97,7 @@ public static class PassiveAssetGenerator
             materials: new[] { ("memory_core", 2) }));
 
         // ── 대사 — 얼마나 얻는가 ──────────────────────────────────────
-        rows.Add(N("meta_absorb_1", "정기 거두기 1", "시체에서 더 많은 것을 끌어낸다.",
+        rows.Add(N("meta_absorb_1", "정기 거두기 1", "허물에서 더 많은 것을 끌어낸다.",
             PassiveBranch.Metabolism, PassiveEffectType.AbsorbAmount, 15, level: 1, cost: 700,
             column: 1, row: 0));
 
@@ -111,7 +111,7 @@ public static class PassiveAssetGenerator
             column: 2, row: 1, prereq: new[] { "meta_absorb_1" },
             materials: new[] { ("scrap_metal", 6) }));
 
-        rows.Add(N("meta_absorb_2", "정기 거두기 2", "경험치 획득 +20%.",
+        rows.Add(N("meta_absorb_2", "정기 거두기 2", "정기 획득 +20%.",
             PassiveBranch.Metabolism, PassiveEffectType.AbsorbAmount, 20, level: 7, cost: 3600,
             column: 1, row: 2, prereq: new[] { "meta_range", "meta_scav_1" },
             materials: new[] { ("bio_sample", 8) }));
@@ -129,12 +129,12 @@ public static class PassiveAssetGenerator
             column: 1, row: 0, materials: new[] { ("wire_bundle", 8) }));
 
         rows.Add(N("rec_mark", "돌아갈 길목",
-            "지도에 철수 지점이 상시 표시된다.",
+            "지도에 길목이 늘 표시된다.",
             PassiveBranch.Recovery, PassiveEffectType.ExtractMark, 1, level: 6, cost: 2200,
             column: 0, row: 1, prereq: new[] { "rec_safe_1" }));
 
         rows.Add(N("rec_corpse", "회수 계약",
-            "철수에 실패해도 내 시체에서 한 번은 되찾아 올 수 있다.",
+            "돌아오지 못해도 쓰러진 자리에서 한 번은 되찾아 올 수 있다.",
             PassiveBranch.Recovery, PassiveEffectType.CorpseRecovery, 1, level: 9, cost: 5500,
             column: 2, row: 1, prereq: new[] { "rec_safe_1" },
             materials: new[] { ("cell_battery", 6) }));
@@ -150,7 +150,7 @@ public static class PassiveAssetGenerator
             PassiveBranch.Brokerage, PassiveEffectType.SellPrice, 8, level: 1, cost: 600,
             column: 0, row: 0));
 
-        rows.Add(N("brok_stash_1", "창고 정리 1", "벙커 창고를 넓혔다.",
+        rows.Add(N("brok_stash_1", "창고 정리 1", "소굴 창고를 넓혔다.",
             PassiveBranch.Brokerage, PassiveEffectType.StashSlots, 20, level: 1, cost: 900,
             column: 2, row: 0));
 
@@ -181,18 +181,18 @@ public static class PassiveAssetGenerator
         // ── 역행 — 조우해야 보인다 ────────────────────────────────────
         // 【교차 선행】 다른 계열의 칸을 요구한다. 한 갈래만 파면 닿지 않는다.
         rows.Add(N("reg_bench", "제작대",
-            "역행자가 남긴 도면. 벙커에서 물건을 만들 수 있게 된다.",
+            "오래된 도면. 소굴에서 물건을 만들 수 있게 된다.",
             PassiveBranch.Regression, PassiveEffectType.CraftBench, 1, level: 1, cost: 3000,
             column: 1, row: 0, materials: new[] { ("memory_core", 1) }));
 
         rows.Add(N("reg_salvage", "구슬 깨기",
-            "젬을 도로 풀어 재료로 되돌린다. 쓸모없는 젬이 사라진다.",
+            "구슬을 깨 재료로 되돌린다. 쓸모없는 구슬이 사라진다.",
             PassiveBranch.Regression, PassiveEffectType.GemSalvage, 1, level: 1, cost: 4500,
             column: 0, row: 1, prereq: new[] { "reg_bench" },
             materials: new[] { ("bio_sample", 6) }));
 
         rows.Add(N("reg_codex", "한눈에 알아보기",
-            "처치만 해도 도감에 등록된다. 변이 샘플을 흡수할 필요가 없어진다.",
+            "쓰러뜨리기만 해도 구슬 장부에 오른다. 구슬 씨를 거둘 필요가 없어진다.",
             PassiveBranch.Regression, PassiveEffectType.CodexAuto, 1, level: 1, cost: 6500,
             column: 2, row: 1, prereq: new[] { "reg_bench", "meta_absorb_2" },
             materials: new[] { ("memory_core", 3) }));

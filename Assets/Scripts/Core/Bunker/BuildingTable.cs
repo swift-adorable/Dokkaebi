@@ -86,7 +86,7 @@ public static class BuildingTable
             opens: BunkerStation.Kind.None),
 
         // 덕코프 잡화 상점: 100 · 볼트 ×2 · 너트 ×2 · 목재 ×2 · 절전형 전구 ×1
-        new(GeneralStore, ShopTable.GeneralStoreName, "각종 약품과 잡화를 사거나 물건을 팔아 골드로 바꾼다.",
+        new(GeneralStore, ShopTable.GeneralStoreName, "각종 약품과 잡화를 사거나 물건을 팔아 엽전으로 바꾼다.",
             gold: 100,
             materials: new[] { new MaterialCost(Scrap, 6), new MaterialCost(Battery, 1) },
             requiredBuildings: null, width: 2f, depth: 1.4f,

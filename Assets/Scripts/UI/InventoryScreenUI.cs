@@ -523,7 +523,7 @@ public partial class InventoryScreenUI : MonoBehaviour
         // 【골드가 여기로 들어왔다.】
         // 화면 위 10%를 골드 하나 때문에 비워 두고 있었다.
         // 머리글 오른쪽은 어차피 비어 있던 자리다.
-        goldLabel = UIFactory.CreateLabel(content, "0골드", 28, FontStyle.Bold,
+        goldLabel = UIFactory.CreateLabel(content, "0엽전", 28, FontStyle.Bold,
             new Vector2(0.45f, TopBandTop + BandGap), new Vector2(1f, TitleTop),
             TextAnchor.MiddleRight, UIPalette.TextAccent);
 
@@ -960,7 +960,7 @@ public partial class InventoryScreenUI : MonoBehaviour
 
         int amount = PassiveManager.EnsureInstance().Gold;
 
-        goldLabel.text = $"{amount:N0}골드";
+        goldLabel.text = $"{amount:N0}엽전";
     }
 
     private void RefreshToggle()
@@ -1124,8 +1124,8 @@ public partial class InventoryScreenUI : MonoBehaviour
             case EquipmentSlot.Face:     return "얼굴";
             case EquipmentSlot.Ears:     return "이어폰";
             case EquipmentSlot.Backpack: return "가방";
-            case EquipmentSlot.ImprintA: return "각인 1";
-            case EquipmentSlot.ImprintB: return "각인 2";
+            case EquipmentSlot.ImprintA: return "새김패 1";
+            case EquipmentSlot.ImprintB: return "새김패 2";
             default:                     return slot.ToString();
         }
     }
@@ -1164,7 +1164,7 @@ public partial class InventoryScreenUI : MonoBehaviour
 
         if (tab == Tab.Socket)
         {
-            bagTitleLabel.text = $"스킬 젬 ({bagStacks.Count}개)";
+            bagTitleLabel.text = $"구슬 ({bagStacks.Count}개)";
             DrawGemSections(columns, cellSize, viewWidth, viewHeight);
             return;
         }
@@ -1243,7 +1243,7 @@ public partial class InventoryScreenUI : MonoBehaviour
         {
             bagGrid.sizeDelta = new Vector2(0f, Mathf.Max(1f, viewHeight));
 
-            UIFactory.CreateLabel(bagGrid, "가진 스킬 젬이 없습니다.", 26, FontStyle.Normal,
+            UIFactory.CreateLabel(bagGrid, "가진 구슬이 없습니다.", 26, FontStyle.Normal,
                 Vector2.zero, Vector2.one, TextAnchor.MiddleCenter, UIPalette.TextDim);
             return;
         }
@@ -1267,7 +1267,7 @@ public partial class InventoryScreenUI : MonoBehaviour
             SkillCategory category = order[c];
 
             UIFactory.CreateLabel(bagGrid,
-                $"{SkillCategoryName(category)} 젬", 23, FontStyle.Bold,
+                $"{SkillCategoryName(category)} 구슬", 23, FontStyle.Bold,
                 new Vector2(0.012f, 1f - (y + headerHeight) / total),
                 new Vector2(0.99f, 1f - y / total),
                 TextAnchor.MiddleLeft, UIPalette.TextAccent);
@@ -1415,7 +1415,7 @@ public partial class InventoryScreenUI : MonoBehaviour
         bool sellable = TradeRules.CanSell(stack, bonus) == TradeError.None;
 
         string label = sellable
-            ? $"판매 +{TradeRules.SellPrice(stack, bonus):N0}골드"
+            ? $"판매 +{TradeRules.SellPrice(stack, bonus):N0}엽전"
             : "판매 불가";
 
         return new ItemActionMenu.Entry(label, UIPalette.Gain,
@@ -1804,8 +1804,8 @@ public partial class InventoryScreenUI : MonoBehaviour
             case ItemKind.Weapon:     return "무기";
             case ItemKind.Armour:     return "방어구";
             case ItemKind.Backpack:   return "가방";
-            case ItemKind.Imprint:    return "각인";
-            case ItemKind.SkillGem:   return "스킬 젬";
+            case ItemKind.Imprint:    return "새김패";
+            case ItemKind.SkillGem:   return "구슬";
             case ItemKind.Consumable: return "소모품";
             case ItemKind.Key:        return "열쇠";
             case ItemKind.Material:   return "재료";
