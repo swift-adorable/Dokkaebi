@@ -298,6 +298,33 @@ namespace Dokkaebi.Tests
                     StringAssert.DoesNotStartWith("【기억의 조각", page, passage.Id);
         }
 
+        /// <summary>
+        /// 「(UI 튜토리얼 / …)」 같은 괄호 문단은 연출 지시다. 이야기 장면에 들어가면 안 된다 (결정 2-54).
+        /// </summary>
+        [Test]
+        public void 연출_지시는_이야기_장면에_들어가지_않는다()
+        {
+            string text = ScriptText();
+            Assert.IsTrue(text.Contains("(UI 튜토리얼 / "), "본문에 연출 지시가 하나도 없습니다 — 검사가 헛돕니다.");
+
+            Dictionary<string, StoryPassage> p = StoryScriptParser.Parse(text);
+
+            foreach (StoryPassage passage in p.Values)
+                foreach (string page in passage.Pages)
+                    Assert.IsFalse(StoryScriptParser.IsDirectionNote(page), $"{passage.Id}: {page}");
+        }
+
+        [Test]
+        public void 연출_지시_판정()
+        {
+            Assert.IsTrue(StoryScriptParser.IsDirectionNote("(UI 튜토리얼 / 구슬) 구슬 지니기"));
+            Assert.IsTrue(StoryScriptParser.IsDirectionNote("(기억 연출) 아홉 조각"));
+            Assert.IsTrue(StoryScriptParser.IsDirectionNote("(세계관 도감 / 넋불) 사람의 넋은"));
+            Assert.IsFalse(StoryScriptParser.IsDirectionNote("(끝)"));
+            Assert.IsFalse(StoryScriptParser.IsDirectionNote("\"아가, 그 불을 좀 보자꾸나.\""));
+            Assert.IsFalse(StoryScriptParser.IsDirectionNote(null));
+        }
+
         [Test]
         public void 마지막_보스_이야기는_끝으로_닫힌다()
         {

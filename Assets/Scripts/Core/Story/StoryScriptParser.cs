@@ -31,6 +31,8 @@ public sealed class StoryPassage
 ///     그 앞은 enter_구역, 그 뒤는 그 구역 보스 순서대로 boss_보스
 ///   · 「【기억의 조각 · 하나】」 문단은 구역 글에서 빼고 read_piece_n으로 둔다
 ///   · 「소굴 — 첫 번째 밤」 … 「소굴 — 마지막 밤」 → night_1 … night_5
+///   · 「(UI 튜토리얼 / …)」 「(환경 연출 / …)」 「(세계관 도감 / …)」 같은 괄호 문단은
+///     【연출 지시】다. 이야기 장면에 넣지 않는다 (결정 2-54 — 정보는 맞는 곳에서 전한다)
 /// 문단 하나가 한 쪽이다.
 /// </summary>
 public static class StoryScriptParser
@@ -41,6 +43,14 @@ public static class StoryScriptParser
     private static readonly Regex ZoneHeader = new(@"^(\d)-(\d) · ");
     private static readonly Regex ChapterHeader = new(@"^(\d)장 — ");
     private static readonly Regex PieceHeader = new(@"^【기억의 조각 · (.+)】$");
+
+    /// <summary>연출 지시 문단 — 이야기 장면에는 넣지 않는다.</summary>
+    private static readonly Regex DirectionNote =
+        new(@"^\((?:UI 튜토리얼|팝업|시스템 설명|환경 연출|세계관 도감|세계관 팝업|기억 연출)(?: / [^)]*)?\)");
+
+    /// <summary>문단이 연출 지시(괄호 표시)인가.</summary>
+    public static bool IsDirectionNote(string block)
+        => !string.IsNullOrEmpty(block) && DirectionNote.IsMatch(block);
 
     private static readonly string[] Numerals = { "하나", "둘", "셋", "넷", "다섯", "여섯", "일곱", "여덟", "아홉" };
     private static readonly string[] NightNames = { "첫 번째", "두 번째", "세 번째", "네 번째", "마지막" };
@@ -171,7 +181,12 @@ public static class StoryScriptParser
         void Flush()
         {
             if (current.Count > 0)
-                sections[sections.Count - 1].Add(string.Join("\n", current).Trim());
+            {
+                string block = string.Join("\n", current).Trim();
+
+                if (!IsDirectionNote(block))
+                    sections[sections.Count - 1].Add(block);
+            }
 
             current.Clear();
         }
