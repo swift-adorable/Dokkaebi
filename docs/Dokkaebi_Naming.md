@@ -137,7 +137,7 @@
 
 ## 5. 스토리
 
-→ 설계 요약 [`Dokkaebi_Story.md`](Dokkaebi_Story.md) · 본문 [`Dokkaebi_Story_Script.txt`](Dokkaebi_Story_Script.txt) (v2.8 초안 · Story Lock 대기 → `Story.md` 10절 · 프롤로그부터 6장 끝까지 · 6장 끝이 엔딩. 확장한다면 어린 도깨비가 제 이야기를 더 채워 나가는 내용으로 잇는다)
+→ 설계 요약 [`Dokkaebi_Story.md`](Dokkaebi_Story.md) · 본문 [`Dokkaebi_Story_Script.txt`](Dokkaebi_Story_Script.txt) (v2.8 · Story Lock 2026-10-06 → `Story.md` 10절 · 프롤로그부터 6장 끝까지 · 6장 끝이 엔딩. 확장한다면 어린 도깨비가 제 이야기를 더 채워 나가는 내용으로 잇는다)
 
 ## 6. 이야기 · 게임 화면 표기
 

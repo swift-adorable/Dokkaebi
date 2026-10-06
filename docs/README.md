@@ -10,7 +10,7 @@ Unity 6 Mobile · Top-Down Shooter + Roguelite + Extraction Looting
 |---|---|---|
 | [Master_Prompt](Dokkaebi_Master_Prompt.md) | 최상위 규약 | 어떻게 일하는가 |
 | [Story](Dokkaebi_Story.md) | 스토리 설계 · 6장 · 단서 | **왜 그렇게 되었는가** |
-| [Story_Script](Dokkaebi_Story_Script.txt) | 스토리 본문 v2.8 (초안) | 프롤로그 ~ 6장 끝 (엔딩) |
+| [Story_Script](Dokkaebi_Story_Script.txt) | 스토리 본문 v2.8 (**Story Lock** 2026-10-06) | 프롤로그 ~ 6장 끝 (엔딩) |
 | [Naming](Dokkaebi_Naming.md) | 이름 · 화면 표기 | **무엇이라 부르는가** |
 | [Glossary](Dokkaebi_Glossary.md) | 용어 · 레퍼런스 원어 대조 | 왜 그 용어인가 |
 | [Mapping_2단계](Dokkaebi_Mapping_2단계.md) | 이전 이름 → 새 이름의 근거 | 왜 그 이름인가 (재확인 대기) |
