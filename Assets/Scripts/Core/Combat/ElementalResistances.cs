@@ -34,7 +34,7 @@ public struct ElementalResistances
         }
     }
 
-    /// <summary>허깨비 · 무주귀 — 물리 0.66배, 화염 1.5배.</summary>
+    /// <summary>허깨비 — 물리 0.66배, 화염 1.5배. 무주귀는 화염 1.0이다(`EnemyArchetypeTable.Incorporeal` · Combat_Baseline 2-2 · 결정 2-64).</summary>
     public static ElementalResistances Settled
     {
         get

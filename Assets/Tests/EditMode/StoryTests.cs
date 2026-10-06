@@ -326,6 +326,7 @@ namespace Dokkaebi.Tests
             Assert.IsTrue(StoryScriptParser.IsDirectionNote("(퀘스트 / 메인 · 갱신) 현무패를 얻었다"));
             Assert.IsTrue(StoryScriptParser.IsDirectionNote("(퀘스트 / 서브) 참봉의 약탕간"));
             Assert.IsTrue(StoryScriptParser.IsDirectionNote("(퀘스트 / 메인 · 완료) 마지막 이야기"));
+            Assert.IsTrue(StoryScriptParser.IsDirectionNote("(시스템 설명 / 요리) 영감의 가게에서 재료를 조합해 음식을 만든다."));
             Assert.IsFalse(StoryScriptParser.IsDirectionNote("(끝)"));
             Assert.IsFalse(StoryScriptParser.IsDirectionNote("\"아가, 그 불을 좀 보자꾸나.\""));
             Assert.IsFalse(StoryScriptParser.IsDirectionNote(null));

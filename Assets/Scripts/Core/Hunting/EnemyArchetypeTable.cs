@@ -225,6 +225,8 @@ public static class EnemyArchetypeTable
     ///
     /// 허깨비와 나눠 둔 이유 — 문서 1절은 무주귀에 화염 1.5를 주지 않았다.
     /// 「정착 계열이니 같겠지」로 묶으면 원문에 없는 전제를 만드는 것이다.
+    /// 결정 2-64로 문서도 이 값(화염 ×1.0)에 맞췄다 — 허깨비 = 「불」의 답,
+    /// 무주귀 = 「물리 말고 아무거나」의 답 (Combat_Baseline 2-2).
     /// </summary>
     private static ElementalResistances Incorporeal
     {

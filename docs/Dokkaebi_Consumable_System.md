@@ -30,6 +30,8 @@
 (`Dokkaebi_Survival_System.md`)
 음식은 수분 · 에너지만 채운다 — 분류 「음료와 음식」(8-A · `ConsumableCategory`). 음료 · 음식 · 이야기 아이템 이름 → `Naming.md` 4절
 
+> **결정 2-64** — 음식은 영감의 잡화 가게에서 사거나 **요리로 만든다**. 이 문서는 **먹으면 무엇이 회복되는가**(음식 한 개의 값)만 맡는다 — 무엇으로 만드는가는 [`Cooking_System`](Dokkaebi_Cooking_System.md), 얼마나 버티는가는 [`Survival_System`](Dokkaebi_Survival_System.md). 요리로 만든 음식도 값은 같다. 메밀묵은 이야기 음식이다 (아이템 [미구현] · 레시피 아님).
+
 ## 2. 회복 — 【충전형이다】
 
 > **2026-09-23 정정.** 처음에는 「한 번 쓰면 사라지는 물건」으로 적었다.
