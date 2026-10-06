@@ -120,8 +120,7 @@ public class StoryRaidDirector : MonoBehaviour
             var identity = body.GetComponent<EnemyIdentity>();
 
             if (identity != null)
-                identity.Apply(RaidManager.Current.Apply(
-                    EnemyProfile.Build(boss.Bodies[i], boss.Rarity, System.Array.Empty<EnemyAffix>())));
+                identity.Apply(RaidManager.Current.Apply(EnemyProfile.ForBoss(boss, i)));   // Boss Data (결정 2-68)
 
             var health = body.GetComponent<Health>();
 

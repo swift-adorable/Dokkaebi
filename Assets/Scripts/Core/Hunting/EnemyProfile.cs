@@ -60,6 +60,30 @@ public struct EnemyProfile
     public EnemyAffix[] affixes;
 
     /// <summary>
+    /// 이야기 보스의 몸 하나 — 유형 · 등급으로 만든 뒤 체력 · 피해(· 방어도 · 화염)를 Boss Data로 바꾼다 (결정 2-68).
+    /// Boss Data가 없으면 유형 × 등급 그대로다.
+    /// </summary>
+    public static EnemyProfile ForBoss(BossDefinition boss, int bodyIndex)
+    {
+        EnemyProfile profile = Build(boss.Bodies[bodyIndex], boss.Rarity, System.Array.Empty<EnemyAffix>());
+        BossStats stats = BossDataTable.Of(boss.Id);
+
+        if (stats == null || bodyIndex >= stats.Health.Length || bodyIndex >= stats.Damage.Length)
+            return profile;
+
+        profile.health = Mathf.Max(1, stats.Health[bodyIndex]);
+        profile.damage = Mathf.Max(1, stats.Damage[bodyIndex]);
+
+        if (stats.Armour.HasValue)
+            profile.armour = stats.Armour.Value;
+
+        if (stats.Fire.HasValue)
+            profile.resistances.fire = stats.Fire.Value;
+
+        return profile;
+    }
+
+    /// <summary>
     /// 유형 · 등급 · 속성으로 최종 수치를 만든다.
     ///
     /// 【저항을 곱하지 않는 이유】(문서 9절)
