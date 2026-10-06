@@ -37,11 +37,11 @@ Unity 6 Mobile · Top-Down Shooter + Roguelite + Extraction Looting
 ## 읽는 순서
 
 처음이면 **Story → Master_Prompt → Combat_Baseline** 순으로 읽는다.
-Story가 "왜"를, Master_Prompt가 "규칙"을, Combat_Baseline이 "숫자"를 준다. 나머지는 참조용이다.
+Story가 "왜"를, Master_Prompt가 "규칙"을, Combat_Baseline이 "전투 숫자"를 준다 (그 밖의 숫자는 각 시스템 문서). 나머지는 참조용이다.
 
 ## 두 가지 불변 규칙
 
-1. **수치는 `Combat_Baseline.md`에만 존재한다.** 다른 문서는 참조만 하고 공식을 복제하지 않는다.
+1. **전투 수치는 `Combat_Baseline.md`에만 존재한다. 다른 시스템의 수치는 해당 시스템 문서가 기준이다** (결정 2-65). 원본은 한 곳 — 다른 문서는 참조만 하고 공식을 복제하지 않는다.
 2. **시스템 경계를 넘지 않는다.**
    스킬은 메커니즘을, 장비는 능력치를, 사냥은 상대를, 진행은 남는 것을 정한다.
    무기는 기본값만, 핵심 젬은 속성만, 보조 젬은 궤도만 정한다.
