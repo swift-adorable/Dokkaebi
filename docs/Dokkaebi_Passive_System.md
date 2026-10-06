@@ -3,7 +3,7 @@
 > **담당** — 레벨과 골드로 여는 것 · 파밍을 넘어 남는 것
 > 조사 기록: [`research/duckov_스킬.md`](research/duckov_스킬.md)
 
-전투 수치는 이 문서에 **없다** — 그것은 [`Equipment_System.md`](Dokkaebi_Equipment_System.md)의 몫이다. **그 경계가 이 문서의 핵심이다.**
+전투 수치는 이 문서에 **없다** — 전투 능력치를 주는 것은 장비([`Equipment_System.md`](Dokkaebi_Equipment_System.md))이고, 그 수치의 원본은 [`Combat_Baseline.md`](Dokkaebi_Combat_Baseline.md)다 (결정 2-65 · 2-66). **그 경계가 이 문서의 핵심이다.**
 
 ## 0. 절대 규칙 — 패시브는 전투 수치를 주지 않는다
 
