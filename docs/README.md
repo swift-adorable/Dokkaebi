@@ -19,10 +19,10 @@ Unity 6 Mobile · Top-Down Shooter + Roguelite + Extraction Looting
 | [Equipment_System](Dokkaebi_Equipment_System.md) | 장비 · 무기 | 무엇을 입고 가는가 |
 | [Hunting_System](Dokkaebi_Hunting_System.md) | 적 | 무엇을 상대하는가 |
 | [Progression_System](Dokkaebi_Progression_System.md) | 진행 | 왜 다시 들어가는가 |
-| [Passive_System](Dokkaebi_Passive_System.md) | 패시브 · 계정 5계열 | **파밍을 넘어 무엇이 남는가** |
+| [Passive_System](Dokkaebi_Passive_System.md) | 패시브 5계열 (레벨로 연다) | **파밍을 넘어 무엇이 남는가** |
 | [Imprint_System](Dokkaebi_Imprint_System.md) | 각인 8계열 | **죽어도 남는 것 — 전부 교환이다** |
 | [Consumable_System](Dokkaebi_Consumable_System.md) | 소모품 4분류 | 가방 한 칸을 무엇에 쓰는가 |
-| [Bunker_System](Dokkaebi_Bunker_System.md) | 벙커 · 제작 · 상점 · 퀘스트 | **파밍과 파밍 사이에 무엇을 하는가** |
+| [Bunker_System](Dokkaebi_Bunker_System.md) | 벙커 · 상인 4 · 건물 · 제작 · 퀘스트 | **파밍과 파밍 사이에 무엇을 하는가** |
 | [Save_System](Dokkaebi_Save_System.md) | 저장 · 롤백 · 백업 | **무엇이 언제 남는가** |
 | [Survival_System](Dokkaebi_Survival_System.md) | 수분 · 에너지 | 얼마나 버티는가 |
 | [Map_System](Dokkaebi_Map_System.md) | 지도 · 미니맵 · 마커 | 어디에 있는가 |
