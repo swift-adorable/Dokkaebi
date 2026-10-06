@@ -154,10 +154,12 @@ public class EnemySpawner : MonoBehaviour
     /// </summary>
     private GameObject PickPrefab()
     {
-        // 카탈로그가 있으면 유형 9종에서 고른다.
+        // 카탈로그가 있으면 이번 구역이 속한 장의 일반 적 풀에서 고른다 (Zone Data · 결정 2-57).
+        // 예전에는 9종에서 고르게 뽑았다 — 1장에 무주귀가 나왔다.
         if (catalog != null)
         {
-            var archetype = (EnemyArchetype)Random.Range(0, EnemyArchetypeTable.Count);
+            ChapterData chapter = ZoneDataTable.ChapterOfZone(StoryManager.TargetZone);
+            EnemyArchetype archetype = ZoneDataTable.Pick(chapter != null ? chapter.Chapter : 0, Random.value);
 
             GameObject picked = catalog.Get(archetype);
 
