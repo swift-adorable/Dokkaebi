@@ -31,6 +31,9 @@ public static class StoryManager
 
     public static StoryProgress Progress => progress ??= new StoryProgress();
 
+    /// <summary>퀘스트 진행 — 이야기 진행과 지은 건물에서 계산한다 (QuestTable · 결정 2-55 · 2-56).</summary>
+    public static QuestTracker Quests => new QuestTracker(Progress, BuildingManager.IsOpen);
+
     /// <summary>진행이 바뀌었을 때 — 보스 · 조각 · 방 · 밤.</summary>
     public static event Action OnChanged;
 
