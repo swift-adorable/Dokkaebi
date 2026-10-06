@@ -27,7 +27,7 @@ Unity 6 Mobile · Top-Down Shooter + Roguelite + Extraction Looting
 | [Survival_System](Dokkaebi_Survival_System.md) | 수분 · 에너지 | 얼마나 버티는가 |
 | [Map_System](Dokkaebi_Map_System.md) | 지도 · 미니맵 · 마커 | 어디에 있는가 |
 | [Audit](Dokkaebi_Audit.md) | 문서 ↔ 코드 대조 | **지금 무엇이 어긋나 있는가** |
-| [Decisions](Dokkaebi_Decisions.md) | 결정 대기 | **아직 근거 없이 굴러가는 값** |
+| [Decisions](Dokkaebi_Decisions.md) | 결정 기록 · 결정 대기 | **무엇을 왜 정했고, 무엇이 남았는가** (0절 = 지금 정할 것) |
 | [Playtest_Checklist](Dokkaebi_Playtest_Checklist.md) | 플레이 검증 | **정말 되는가** |
 
 개발 환경 → [`../CONTRIBUTING.md`](../CONTRIBUTING.md)
