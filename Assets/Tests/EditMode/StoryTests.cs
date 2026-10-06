@@ -307,6 +307,7 @@ namespace Dokkaebi.Tests
             string text = ScriptText();
             Assert.IsTrue(text.Contains("(UI 튜토리얼 / "), "본문에 연출 지시가 하나도 없습니다 — 검사가 헛돕니다.");
             Assert.IsTrue(text.Contains("(퀘스트 / 메인) 내 이야기를 찾는 길"), "영감의 메인 퀘스트가 없습니다 (결정 2-55).");
+            Assert.IsTrue(text.Contains("(퀘스트 / 메인) 마지막 이야기"), "두 번째 메인 퀘스트가 없습니다 (결정 2-56).");
 
             Dictionary<string, StoryPassage> p = StoryScriptParser.Parse(text);
 
@@ -324,6 +325,7 @@ namespace Dokkaebi.Tests
             Assert.IsTrue(StoryScriptParser.IsDirectionNote("(퀘스트 / 메인) 내 이야기를 찾는 길"));
             Assert.IsTrue(StoryScriptParser.IsDirectionNote("(퀘스트 / 메인 · 갱신) 현무패를 얻었다"));
             Assert.IsTrue(StoryScriptParser.IsDirectionNote("(퀘스트 / 서브) 참봉의 약탕간"));
+            Assert.IsTrue(StoryScriptParser.IsDirectionNote("(퀘스트 / 메인 · 완료) 마지막 이야기"));
             Assert.IsFalse(StoryScriptParser.IsDirectionNote("(끝)"));
             Assert.IsFalse(StoryScriptParser.IsDirectionNote("\"아가, 그 불을 좀 보자꾸나.\""));
             Assert.IsFalse(StoryScriptParser.IsDirectionNote(null));
