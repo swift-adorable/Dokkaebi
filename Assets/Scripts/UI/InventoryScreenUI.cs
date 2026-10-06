@@ -1122,7 +1122,7 @@ public partial class InventoryScreenUI : MonoBehaviour
             case EquipmentSlot.Head:     return "머리";
             case EquipmentSlot.Body:     return "갑옷";
             case EquipmentSlot.Face:     return "얼굴";
-            case EquipmentSlot.Ears:     return "이어폰";
+            case EquipmentSlot.Ears:     return "윤도";
             case EquipmentSlot.Backpack: return "가방";
             case EquipmentSlot.ImprintA: return "새김패 1";
             case EquipmentSlot.ImprintB: return "새김패 2";
@@ -1580,7 +1580,7 @@ public partial class InventoryScreenUI : MonoBehaviour
 
             // 【이름이 없어서 무엇을 걸어 뒀는지 알 수 없었다.】
             // 아트가 없는 지금은 도형이 종류(소모품)까지만 말해 준다.
-            // 회복약인지 감초인지는 이름을 봐야 안다 — 급할 때 누르는 자리다.
+            // 회복약인지 해독약인지는 이름을 봐야 안다 — 급할 때 누르는 자리다.
             Image strip = UIFactory.CreatePanel("NameStrip", cell.transform,
                 UIPalette.NameStrip, new Vector2(0.04f, 0.04f), new Vector2(0.96f, 0.30f),
                 radius: 5);

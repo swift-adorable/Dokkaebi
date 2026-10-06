@@ -51,7 +51,7 @@ public static class ConsumableAssetGenerator
     /// 조금씩」과 「한 번에 크게」가 서로 다른 선택이 된다.
     ///
     /// 【해제는 값이 같다.】 어떤 상태가 더 위험한지는 상황이 정하지
-    /// 도구가 정하지 않는다. 감초가 생강보다 비싸면 플레이어는
+    /// 도구가 정하지 않는다. 감두탕이 생강보다 비싸면 플레이어는
     /// 「중독이 더 무서운 것」이라고 잘못 배운다.
     /// </summary>
     private static List<Row> Table()
@@ -110,7 +110,7 @@ public static class ConsumableAssetGenerator
             "머리가 덜 아프다. 대신 목이 마른다.", 10, 0.03f, 9, 96,
             waterCost: 15f, castSeconds: 0.8f));
 
-        list.Add(Cure("con_antidote", "감초", "속을 게워 내는 맛이 난다.",
+        list.Add(Cure("con_antidote", "감두탕", "속을 게워 내는 맛이 난다.",
             StatusEffectType.Poison, 99, 0, 0.1f, 3, 90, castSeconds: 1.0f));
 
         list.Add(Cure("con_antacid", "황련", "안에서 타는 것을 끈다.",
