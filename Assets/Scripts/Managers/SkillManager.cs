@@ -122,6 +122,9 @@ public class SkillManager : Singleton<SkillManager>
         PlayerSurvival.EnsureInstance();
         SurvivalHudUI.EnsureInstance();
 
+        // 【임시】 퀘스트 추적 HUD — 퀘스트 창 · 아트는 레이어 작업 때.
+        QuestHudUI.EnsureInstance();
+
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         // 검증 패널. 실제 기기 빌드에서 장비를 얻을 유일한 경로다.
         // 출시 빌드에는 컴파일되지 않는다.

@@ -201,5 +201,49 @@ namespace Dokkaebi.Tests
                 Assert.AreEqual(shop ? QuestState.Active : QuestState.Completed, t.StateOf(q), q.Id);
             }
         }
+        // ── 추적 HUD 글 (임시 화면) ───────────────────────────────────
+
+        [Test]
+        public void HUD는_메인의_다음_목표를_보인다()
+        {
+            var p = new StoryProgress();
+            var t = new QuestTracker(p);
+            ClearChapter(p, 0);
+
+            QuestDefinition q = t.Tracked();
+            Assert.AreEqual("메인 · 내 이야기를 찾는 길", QuestHudText.Title(q));
+            Assert.AreEqual("현무패 — 북쪽 젖은 장터길 (0/6)", QuestHudText.Objective(t, q));
+
+            ClearChapter(p, 1);
+            Assert.AreEqual("청룡패 — 동쪽 물레방아길 (1/6)", QuestHudText.Objective(t, q));
+        }
+
+        [Test]
+        public void 알림은_받음_갱신_완료를_한_번씩_알린다()
+        {
+            var p = new StoryProgress();
+            var t = new QuestTracker(p);
+
+            Assert.IsEmpty(QuestHudText.Diff(null, QuestHudText.Snapshot(t)), "처음 보는 상태는 알리지 않는다");
+
+            var a = QuestHudText.Snapshot(t);
+            p.See(StoryTable.EnterEvent("0-1"));
+            p.See(StoryTable.EnterEvent("0-2"));
+            CollectionAssert.Contains(QuestHudText.Diff(a, QuestHudText.Snapshot(t)), "새 퀘스트 — 내 이야기를 찾는 길");
+
+            var b = QuestHudText.Snapshot(t);
+            p.See(StoryTable.EnterEvent("1-1"));
+            p.Defeat("yagwanggwi");
+            List<string> diff = QuestHudText.Diff(b, QuestHudText.Snapshot(t));
+            CollectionAssert.Contains(diff, "완료 — 봇짐 되찾기");
+            CollectionAssert.DoesNotContain(diff, "새 퀘스트 — 봇짐 되찾기", "받자마자 끝나면 완료만 알린다");
+
+            var c = QuestHudText.Snapshot(t);
+            p.Defeat("dalgyal");
+            p.Defeat("hyeonmu");
+            CollectionAssert.Contains(QuestHudText.Diff(c, QuestHudText.Snapshot(t)), "목표 갱신 — 내 이야기를 찾는 길");
+
+            Assert.IsEmpty(QuestHudText.Diff(QuestHudText.Snapshot(t), QuestHudText.Snapshot(t)));
+        }
     }
 }
