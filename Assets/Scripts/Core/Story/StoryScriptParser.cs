@@ -33,6 +33,7 @@ public sealed class StoryPassage
 ///   · 「소굴 — 첫 번째 밤」 … 「소굴 — 마지막 밤」 → night_1 … night_5
 ///   · 「(UI 튜토리얼 / …)」 「(환경 연출 / …)」 「(세계관 도감 / …)」 같은 괄호 문단은
 ///     【연출 지시】다. 이야기 장면에 넣지 않는다 (결정 2-54 — 정보는 맞는 곳에서 전한다)
+    ///   · 「(퀘스트 / 메인)」 「(퀘스트 / 메인 · 갱신)」 「(퀘스트 / 서브)」도 연출 지시다 — 퀘스트 창에 뜬다 (결정 2-55)
 /// 문단 하나가 한 쪽이다.
 /// </summary>
 public static class StoryScriptParser
@@ -46,7 +47,7 @@ public static class StoryScriptParser
 
     /// <summary>연출 지시 문단 — 이야기 장면에는 넣지 않는다.</summary>
     private static readonly Regex DirectionNote =
-        new(@"^\((?:UI 튜토리얼|팝업|시스템 설명|환경 연출|세계관 도감|세계관 팝업|기억 연출)(?: / [^)]*)?\)");
+        new(@"^\((?:UI 튜토리얼|팝업|시스템 설명|환경 연출|세계관 도감|세계관 팝업|기억 연출|퀘스트)(?: / [^)]*)?\)");
 
     /// <summary>문단이 연출 지시(괄호 표시)인가.</summary>
     public static bool IsDirectionNote(string block)

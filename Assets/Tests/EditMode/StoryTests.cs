@@ -306,6 +306,7 @@ namespace Dokkaebi.Tests
         {
             string text = ScriptText();
             Assert.IsTrue(text.Contains("(UI 튜토리얼 / "), "본문에 연출 지시가 하나도 없습니다 — 검사가 헛돕니다.");
+            Assert.IsTrue(text.Contains("(퀘스트 / 메인) 내 이야기를 찾는 길"), "영감의 메인 퀘스트가 없습니다 (결정 2-55).");
 
             Dictionary<string, StoryPassage> p = StoryScriptParser.Parse(text);
 
@@ -320,6 +321,9 @@ namespace Dokkaebi.Tests
             Assert.IsTrue(StoryScriptParser.IsDirectionNote("(UI 튜토리얼 / 구슬) 구슬 지니기"));
             Assert.IsTrue(StoryScriptParser.IsDirectionNote("(기억 연출) 아홉 조각"));
             Assert.IsTrue(StoryScriptParser.IsDirectionNote("(세계관 도감 / 넋불) 사람의 넋은"));
+            Assert.IsTrue(StoryScriptParser.IsDirectionNote("(퀘스트 / 메인) 내 이야기를 찾는 길"));
+            Assert.IsTrue(StoryScriptParser.IsDirectionNote("(퀘스트 / 메인 · 갱신) 현무패를 얻었다"));
+            Assert.IsTrue(StoryScriptParser.IsDirectionNote("(퀘스트 / 서브) 참봉의 약탕간"));
             Assert.IsFalse(StoryScriptParser.IsDirectionNote("(끝)"));
             Assert.IsFalse(StoryScriptParser.IsDirectionNote("\"아가, 그 불을 좀 보자꾸나.\""));
             Assert.IsFalse(StoryScriptParser.IsDirectionNote(null));
@@ -374,7 +378,8 @@ namespace Dokkaebi.Tests
                                            "새색시 탈", "아직 시작되지 않음", "할머니의 이야기 속에 있다", "살아온 만큼",
                                            "따뜻해지는 쪽이 그 여우다", "새김패가 남아 있었던",
                                            "(*", "feedback", "두 가지가 나온다",
-                                           "스물", "스무 개", "나이를 먹", "이미 시작된 이야기" })
+                                           "스물", "스무 개", "나이를 먹", "이미 시작된 이야기",
+                                           "아무도 그의 이야기를 하지 않아서", "둘 다 자기 이야기였다" })
                 StringAssert.DoesNotContain(old, body, $"본문에 「{old}」가 남았습니다.");
 
             StringAssert.Contains("완성된 이야기만 적힌다", body, "5-3 해태의 두루마리 규칙 (결정 2-50)");
