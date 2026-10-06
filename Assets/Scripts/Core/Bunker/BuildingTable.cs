@@ -53,24 +53,29 @@ public sealed class BuildingDefinition
 }
 
 /// <summary>
-/// 【벙커 건물표.】 (docs/Dokkaebi_Bunker_System.md 1 · 3-4절)
+/// 【벙커 건물표.】 상인 넷이 가게를 나눠 맡는다 (docs/Dokkaebi_Bunker_System.md 1절 · 결정 2-52 · 2-57).
 ///
-/// 덕코프 건물 페이지의 「비용 · 필요한 건물 · 최대 수량」을 옮겼다 [확인됨].
-/// 모든 건물의 최대 수량은 1이다 — 덕코프도 이 넷은 전부 1이다.
+///   작업대   — 상인 없이 처음부터 (제작 · 수리 · 분해 — 제작은 다음 단계)
+///   잡화 가게 — 영감 · 처음부터
+///   약탕간   — 참봉 · 첫 번째 밤
+///   대장간   — 빚쟁이 · 첫 번째 밤 (옛 무기 상점 + 방어구 상점)
+///   장부방   — 길달 · 두 번째 밤 (등록 · 관리 — 기능은 아직 없다)
 ///
-/// 【재료는 Dokkaebi 재료로 바꿨다.】 덕코프의 목재 · 볼트 · 너트 · 못 · 금속 조각은
-/// Dokkaebi에 없다. 쇠붙이는 쇠붙이, 전구 · MD40은 숯, 로프는 새끼 뭉치로 옮기고
-/// 개수는 그대로 더했다 [불확실 — 대응은 Dokkaebi의 결정].
-///
-/// 【퀘스트 조건은 뺐다.】 덕코프의 무기 상점은 퀘스트 「신호탑」, 방어구 상점은
-/// 「옛 친구의 편지」가 필요하다. 퀘스트는 10단계라 지금은 건물 조건만 둔다.
+/// 비용 — 작업대 · 잡화 가게는 덕코프 건물 페이지를 옮긴 그대로 [확인됨 → 재료는 Dokkaebi 재료로 바꿈 · 불확실].
+/// 대장간은 옛 무기 · 방어구 상점의 합, 약탕간 · 장부방은 본문의 재료(쇠붙이 · 숯 · 새끼 뭉치)로 정한 [임시값].
+/// 최대 수량은 전부 1이다.
 /// </summary>
 public static class BuildingTable
 {
     public const string Workbench = "workbench";
     public const string GeneralStore = "general_store";
-    public const string WeaponShop = "weapon_shop";
-    public const string ArmourShop = "armour_shop";
+    public const string Smithy = "smithy";
+    public const string Apothecary = "apothecary";
+    public const string LedgerRoom = "ledger_room";
+
+    /// <summary>판 9까지의 무기 상점 · 방어구 상점 — 대장간으로 읽는다 (결정 2-52).</summary>
+    public const string LegacyWeaponShop = "weapon_shop";
+    public const string LegacyArmourShop = "armour_shop";
 
     private const string Scrap = "scrap_metal";
     private const string Battery = "cell_battery";
@@ -86,26 +91,37 @@ public static class BuildingTable
             opens: BunkerStation.Kind.None),
 
         // 덕코프 잡화 상점: 100 · 볼트 ×2 · 너트 ×2 · 목재 ×2 · 절전형 전구 ×1
-        new(GeneralStore, ShopTable.GeneralStoreName, "각종 약품과 잡화를 사거나 물건을 팔아 엽전으로 바꾼다.",
+        new(GeneralStore, ShopTable.GeneralStoreName, "영감의 좌판. 잡화와 음식, 재료를 사고 물건을 팔아 엽전으로 바꾼다.",
             gold: 100,
             materials: new[] { new MaterialCost(Scrap, 6), new MaterialCost(Battery, 1) },
             requiredBuildings: null, width: 2f, depth: 1.4f,
             opens: BunkerStation.Kind.GeneralStore),
 
-        // 덕코프 무기 상점: 100 · 볼트 ×2 · 못 ×2 · 절전형 전구 ×1 · MD40 ×1 · 작업대
-        new(WeaponShop, ShopTable.WeaponShopName, "무기를 사고판다.",
+        // 본문 「쇠붙이 · 숯 · 새끼 뭉치를 모아 와 샘가에 약탕간을 세운다」 [임시값]
+        new(Apothecary, ShopTable.ApothecaryName, "참봉의 약탕간. 약품과 주사약을 사고판다.",
             gold: 100,
-            materials: new[] { new MaterialCost(Scrap, 4), new MaterialCost(Battery, 2) },
-            requiredBuildings: new[] { Workbench }, width: 2f, depth: 1.4f,
-            opens: BunkerStation.Kind.WeaponShop),
+            materials: new[] { new MaterialCost(Scrap, 3), new MaterialCost(Battery, 2), new MaterialCost(Wire, 1) },
+            requiredBuildings: null, width: 2f, depth: 1.4f,
+            opens: BunkerStation.Kind.Apothecary),
 
-        // 덕코프 방어구 상점: 100 · 너트 ×2 · 금속 조각 ×2 · 전구 ×1 · 로프 ×1 · 작업대
-        new(ArmourShop, ShopTable.ArmourShopName, "헬멧 · 방어구 · 가방을 사고판다.",
-            gold: 100,
-            materials: new[] { new MaterialCost(Scrap, 4), new MaterialCost(Battery, 1), new MaterialCost(Wire, 1) },
-            requiredBuildings: new[] { Workbench }, width: 2f, depth: 1.4f,
-            opens: BunkerStation.Kind.ArmourShop),
+        // 옛 무기 상점(쇠붙이 4 · 숯 2) + 방어구 상점(쇠붙이 4 · 숯 1 · 새끼 뭉치 1) · 작업대 [임시값]
+        new(Smithy, ShopTable.SmithyName, "빚쟁이의 대장간. 무기 · 방어구 · 가방을 사고판다.",
+            gold: 150,
+            materials: new[] { new MaterialCost(Scrap, 6), new MaterialCost(Battery, 2), new MaterialCost(Wire, 1) },
+            requiredBuildings: new[] { Workbench }, width: 2.4f, depth: 1.4f,
+            opens: BunkerStation.Kind.Smithy),
+
+        // 본문 「재료를 모아 와 장부방을 세운다」 — 등록 · 관리 기능은 아직 없다 [임시값]
+        new(LedgerRoom, ShopTable.LedgerRoomName, "길달의 장부방. 도감 · 열쇠 등록 · 기록을 맡는다. (기능은 다음 단계)",
+            gold: 150,
+            materials: new[] { new MaterialCost(Scrap, 4), new MaterialCost(Wire, 2) },
+            requiredBuildings: null, width: 2f, depth: 1.4f,
+            opens: BunkerStation.Kind.None),
     };
+
+    /// <summary>옛 id를 지금 id로. 대장간으로 합친 두 상점만 바뀐다.</summary>
+    public static string Canonical(string id)
+        => id == LegacyWeaponShop || id == LegacyArmourShop ? Smithy : id;
 
     public static IReadOnlyList<BuildingDefinition> All => all;
 

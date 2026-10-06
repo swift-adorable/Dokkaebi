@@ -38,7 +38,10 @@ public class SaveData
     ///   8 — 벙커 건물(buildings)과 상점 종류(shop 줄의 shop)를 더했다. 7판에는 없어
     ///       빈 벙커 · 잡화 상점 줄로 읽힌다.
     ///   9 — 이야기 진행(story)을 더했다 (3단계). 8판에는 없어 처음부터로 읽힌다.
-    public const int CurrentVersion = 9;
+    ///  10 — 상인 넷 = 가게 넷 (결정 2-52 · 2-57). 무기 상점 · 방어구 상점(weapon_shop · armour_shop)은
+    ///       대장간(smithy)으로, 상점 줄의 Weapon · Armour는 Smithy로 읽는다(BuildingManager · ShopManager).
+    ///       잡화 상점의 약 줄은 잡화 가게 표에 없어 버려지고 약탕간은 가득 찬 재고로 시작한다.
+    public const int CurrentVersion = 10;
 
     public int version = CurrentVersion;
 

@@ -187,8 +187,46 @@ namespace Dokkaebi.Tests
         public void 상점_건물은_상점을_연다()
         {
             Assert.AreEqual(BunkerStation.Kind.GeneralStore, BuildingTable.Find(BuildingTable.GeneralStore).Opens);
-            Assert.AreEqual(BunkerStation.Kind.WeaponShop, BuildingTable.Find(BuildingTable.WeaponShop).Opens);
-            Assert.AreEqual(BunkerStation.Kind.ArmourShop, BuildingTable.Find(BuildingTable.ArmourShop).Opens);
+            Assert.AreEqual(BunkerStation.Kind.Smithy, BuildingTable.Find(BuildingTable.Smithy).Opens);
+            Assert.AreEqual(BunkerStation.Kind.Apothecary, BuildingTable.Find(BuildingTable.Apothecary).Opens);
+            Assert.AreEqual(BunkerStation.Kind.None, BuildingTable.Find(BuildingTable.LedgerRoom).Opens, "장부방은 아직 기능이 없다");
+        }
+
+        [Test]
+        public void 상인_넷이_가게_넷을_맡는다_결정_2_52()
+        {
+            Assert.AreEqual(BuildingTable.GeneralStore, StoryTable.Merchant(StoryTable.Elder).BuildingId);
+            Assert.AreEqual(BuildingTable.Apothecary, StoryTable.Merchant(StoryTable.Chambong).BuildingId);
+            Assert.AreEqual(BuildingTable.Smithy, StoryTable.Merchant(StoryTable.Debtor).BuildingId);
+            Assert.AreEqual(BuildingTable.LedgerRoom, StoryTable.Merchant(StoryTable.Gildal).BuildingId);
+            Assert.IsNull(StoryTable.MerchantFor(BuildingTable.Workbench), "작업대는 상인 없이");
+        }
+
+        [Test]
+        public void 약은_약탕간에서만_판다_결정_2_57()
+        {
+            ItemCatalog catalog = ItemCatalog.Load();
+
+            foreach (ShopKind kind in new[] { ShopKind.General, ShopKind.Smithy })
+                foreach (ShopEntry entry in ShopTable.For(kind))
+                    Assert.IsFalse(entry.ItemId.StartsWith("con_medkit") || entry.ItemId.StartsWith("con_stim")
+                                   || entry.ItemId.StartsWith("con_ward") || entry.ItemId == "con_bandage",
+                        $"{kind}: {entry.ItemId}");
+
+            Assert.IsTrue(ShopTable.TryFind(ShopKind.Apothecary, "con_medkit_small", out _));
+            Assert.IsTrue(ShopTable.TryFind(ShopKind.General, "con_water", out _), "음식은 잡화 가게");
+            Assert.IsTrue(ShopTable.TryFind(ShopKind.Smithy, "wpn_t1_pipe", out _));
+            Assert.IsTrue(ShopTable.TryFind(ShopKind.Smithy, "arm_head_t1", out _), "무기 + 방어구 = 대장간");
+            Assert.IsNotNull(catalog);
+        }
+
+        [Test]
+        public void 옛_무기_방어구_상점은_대장간으로_읽힌다()
+        {
+            Assert.AreEqual(BuildingTable.Smithy, BuildingTable.Canonical(BuildingTable.LegacyWeaponShop));
+            Assert.AreEqual(BuildingTable.Smithy, BuildingTable.Canonical(BuildingTable.LegacyArmourShop));
+            Assert.AreEqual(BuildingTable.GeneralStore, BuildingTable.Canonical(BuildingTable.GeneralStore));
+            Assert.IsNull(BuildingTable.Find(BuildingTable.LegacyWeaponShop));
         }
 
         // ── 상점 ─────────────────────────────────────────────────────
@@ -206,11 +244,11 @@ namespace Dokkaebi.Tests
         }
 
         [Test]
-        public void 무기_방어구_상점은_티어_3까지만_판다()
+        public void 대장간은_티어_3까지만_판다()
         {
             ItemCatalog catalog = ItemCatalog.Load();
 
-            foreach (ShopKind kind in new[] { ShopKind.Weapon, ShopKind.Armour })
+            foreach (ShopKind kind in new[] { ShopKind.Smithy })
             {
                 foreach (ShopEntry entry in ShopTable.For(kind))
                     Assert.LessOrEqual(catalog.Find(entry.ItemId).Tier, 3, $"{kind}: {entry.ItemId}");
@@ -218,11 +256,47 @@ namespace Dokkaebi.Tests
         }
 
         [Test]
-        public void 세_상점_모두_물건을_사_준다()
+        public void 세_가게_모두_물건을_사_준다()
         {
-            // 결정 2-37 — 무기 상점 · 방어구 상점에서도 판다.
+            // 결정 2-37 — 대장간 · 약탕간에서도 판다.
             foreach (ShopKind kind in ShopTable.All)
                 Assert.IsTrue(ShopTable.BuysFromPlayer(kind), kind.ToString());
+        }
+        [Test]
+        public void 판_9_세이브의_무기_방어구_상점은_대장간_하나로_되살아난다()
+        {
+            BuildingManager.Restore(new List<SavedBuilding>
+            {
+                new SavedBuilding { id = BuildingTable.LegacyWeaponShop, placed = true, x = 7f, z = 0f },
+                new SavedBuilding { id = BuildingTable.LegacyArmourShop, placed = true, x = 7f, z = -3f },
+                new SavedBuilding { id = BuildingTable.GeneralStore, placed = false }
+            });
+
+            Assert.IsTrue(BuildingManager.State.IsPlaced(BuildingTable.Smithy));
+            Assert.IsTrue(BuildingManager.State.TryGetPose(BuildingTable.Smithy, out BuildingPose pose));
+            Assert.AreEqual(0f, pose.Z, "먼저 읽힌 자리");
+            Assert.IsTrue(BuildingManager.State.Owns(BuildingTable.GeneralStore));
+            Assert.IsFalse(BuildingManager.State.Owns(BuildingTable.LegacyWeaponShop));
+
+            BuildingManager.Restore(null);
+        }
+
+        [Test]
+        public void 판_9_세이브의_무기_방어구_재고는_대장간_재고가_된다()
+        {
+            ShopManager.Restore(new List<SavedStock>
+            {
+                new SavedStock { shop = "Weapon", id = "wpn_t1_pipe", remaining = 0 },
+                new SavedStock { shop = "Armour", id = "arm_head_t1", remaining = 0 },
+                new SavedStock { shop = "General", id = "con_medkit_small", remaining = 0 }
+            });
+
+            Assert.AreEqual(0, ShopManager.Of(ShopKind.Smithy).Remaining("wpn_t1_pipe"));
+            Assert.AreEqual(0, ShopManager.Of(ShopKind.Smithy).Remaining("arm_head_t1"));
+            Assert.AreEqual(3, ShopManager.Of(ShopKind.Apothecary).Remaining("con_medkit_small"), "약탕간은 가득 찬 재고로 시작");
+            Assert.AreEqual(0, ShopManager.Of(ShopKind.General).Remaining("con_medkit_small"), "잡화 가게는 약을 팔지 않는다");
+
+            ShopManager.Reset();
         }
     }
 }

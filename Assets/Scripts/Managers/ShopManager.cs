@@ -33,7 +33,7 @@ public static class ShopManager
         return state;
     }
 
-    /// <summary>잡화 상점의 재고.</summary>
+    /// <summary>잡화 가게의 재고.</summary>
     public static ShopState General => Of(ShopKind.General);
 
     /// <summary>
@@ -111,8 +111,9 @@ public static class ShopManager
     }
 
     /// <summary>
-    /// 세이브에서 되살린다. 【상점 이름이 비어 있는 줄은 잡화 상점이다】 —
-    /// 판 5~7에는 잡화 상점 하나뿐이었다.
+    /// 세이브에서 되살린다. 【상점 이름이 비어 있는 줄은 잡화 가게다】 — 판 5~7에는 잡화 상점 하나뿐이었다.
+    /// 판 8~9의 「Weapon」 · 「Armour」는 대장간으로 읽는다 (결정 2-52). 그 판의 잡화 상점 약 줄은
+    /// 잡화 가게 표에 없어 버려지고 약탕간은 가득 찬 재고로 시작한다.
     /// </summary>
     public static void Restore(List<SavedStock> saved)
     {
@@ -137,6 +138,9 @@ public static class ShopManager
     {
         if (string.IsNullOrEmpty(row.shop))
             return ShopKind.General;
+
+        if (row.shop == "Weapon" || row.shop == "Armour")
+            return ShopKind.Smithy;
 
         return System.Enum.TryParse(row.shop, out ShopKind kind) ? kind : ShopKind.General;
     }

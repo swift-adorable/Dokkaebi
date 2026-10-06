@@ -40,7 +40,7 @@ public class PlaytestPanelUI : MonoBehaviour
         ("건설 재료 지급", PlaytestActions.GiveBuildingMaterials),
         ("건물 목록 열기", PlaytestActions.OpenBuildingScreen),
         ("창고 열기",     PlaytestActions.OpenStash),
-        ("잡화 상점 열기", PlaytestActions.OpenShop),
+        ("잡화 가게 열기", PlaytestActions.OpenShop),
         ("골드 +5000",  PlaytestActions.GiveGold),
         ("상점 재고 채우기", PlaytestActions.RestockShop),
         ("지금 저장",     PlaytestActions.SaveNow),

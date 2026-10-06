@@ -101,8 +101,8 @@ namespace Dokkaebi.Tests
                             Assert.IsNotNull(StoryTable.Zone(o.Target), at);
                             break;
                         case QuestCondition.Build:
-                            Assert.IsTrue(BuildingTable.Find(o.Target) != null
-                                          || QuestTable.PlannedBuildings.Contains(o.Target), at);
+                            Assert.IsNotNull(BuildingTable.Find(o.Target), at);
+                            Assert.AreEqual(q.GiverId, StoryTable.MerchantFor(o.Target)?.Id, $"{at} — 가게를 부탁한 상인이 그 가게의 상인이다");
                             break;
                     }
                 }

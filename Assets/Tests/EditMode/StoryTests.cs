@@ -181,7 +181,9 @@ namespace Dokkaebi.Tests
             var p = new StoryProgress();
 
             Assert.IsTrue(p.HasMerchant(StoryTable.Elder), "영감은 처음부터 있습니다.");
-            Assert.IsFalse(p.IsBlueprintOpen(BuildingTable.GeneralStore));
+            Assert.IsTrue(p.IsBlueprintOpen(BuildingTable.GeneralStore), "영감의 잡화 가게는 처음부터 (결정 2-52)");
+            Assert.IsFalse(p.IsBlueprintOpen(BuildingTable.Apothecary));
+            Assert.IsFalse(p.IsBlueprintOpen(BuildingTable.Smithy));
             Assert.IsTrue(p.IsBlueprintOpen(BuildingTable.Workbench), "작업대는 상인 없이 짓습니다.");
 
             ClearChapter(p, 0);
@@ -192,7 +194,9 @@ namespace Dokkaebi.Tests
             Assert.IsTrue(p.HasMerchant(StoryTable.Chambong));
             Assert.IsTrue(p.HasMerchant(StoryTable.Debtor));
             Assert.IsFalse(p.HasMerchant(StoryTable.Gildal), "길달은 두 번째 밤에 옵니다.");
-            Assert.IsTrue(p.IsBlueprintOpen(BuildingTable.GeneralStore));
+            Assert.IsTrue(p.IsBlueprintOpen(BuildingTable.Apothecary), "참봉 — 약탕간");
+            Assert.IsTrue(p.IsBlueprintOpen(BuildingTable.Smithy), "빚쟁이 — 대장간");
+            Assert.IsFalse(p.IsBlueprintOpen(BuildingTable.LedgerRoom), "장부방은 두 번째 밤 (길달)");
             Assert.AreEqual(0, p.PendingNight());
         }
 

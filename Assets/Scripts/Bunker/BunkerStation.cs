@@ -30,11 +30,13 @@ public class BunkerStation : MonoBehaviour
         /// <summary>건물 설계도 테이블 — 건설.</summary>
         Blueprint = 3,
 
-        /// <summary>무기 상점.</summary>
-        WeaponShop = 4,
+        // 4 · 5는 옛 무기 상점 · 방어구 상점이다 — 대장간으로 합쳤다 (결정 2-52). 다시 쓰지 않는다.
 
-        /// <summary>방어구 상점.</summary>
-        ArmourShop = 5,
+        /// <summary>대장간 — 빚쟁이.</summary>
+        Smithy = 6,
+
+        /// <summary>약탕간 — 참봉.</summary>
+        Apothecary = 7,
 
         /// <summary>여는 것이 없다 (작업대 — 제작은 다음 단계).</summary>
         None = 99
@@ -59,8 +61,8 @@ public class BunkerStation : MonoBehaviour
         {
             case Kind.Stash:        return "창고";
             case Kind.GeneralStore: return ShopTable.GeneralStoreName;
-            case Kind.WeaponShop:   return ShopTable.WeaponShopName;
-            case Kind.ArmourShop:   return ShopTable.ArmourShopName;
+            case Kind.Smithy:       return ShopTable.SmithyName;
+            case Kind.Apothecary:   return ShopTable.ApothecaryName;
             case Kind.Departure:    return "파밍 출발";
             case Kind.Blueprint:    return "건설";
             default:                return string.Empty;
@@ -123,12 +125,12 @@ public class BunkerStation : MonoBehaviour
                 ExchangeWindowUI.EnsureInstance().OpenShop(ShopKind.General);
                 break;
 
-            case Kind.WeaponShop:
-                ExchangeWindowUI.EnsureInstance().OpenShop(ShopKind.Weapon);
+            case Kind.Smithy:
+                ExchangeWindowUI.EnsureInstance().OpenShop(ShopKind.Smithy);
                 break;
 
-            case Kind.ArmourShop:
-                ExchangeWindowUI.EnsureInstance().OpenShop(ShopKind.Armour);
+            case Kind.Apothecary:
+                ExchangeWindowUI.EnsureInstance().OpenShop(ShopKind.Apothecary);
                 break;
 
             case Kind.Blueprint:

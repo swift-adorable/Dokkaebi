@@ -97,8 +97,8 @@ public class BunkerBuildings : MonoBehaviour
         switch (kind)
         {
             case BunkerStation.Kind.GeneralStore: return new Color(0.90f, 0.70f, 0.25f);
-            case BunkerStation.Kind.WeaponShop:   return new Color(0.85f, 0.35f, 0.30f);
-            case BunkerStation.Kind.ArmourShop:   return new Color(0.45f, 0.60f, 0.80f);
+            case BunkerStation.Kind.Smithy:       return new Color(0.85f, 0.35f, 0.30f);
+            case BunkerStation.Kind.Apothecary:   return new Color(0.40f, 0.70f, 0.50f);
             default:                               return new Color(0.55f, 0.50f, 0.42f);
         }
     }

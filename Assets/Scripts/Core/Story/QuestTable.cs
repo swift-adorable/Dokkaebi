@@ -88,14 +88,6 @@ public static class QuestTable
     public const string MainMyStory = "main_my_story";
     public const string MainLastStory = "main_last_story";
 
-    // 결정 2-52의 건물 — 잡화 가게만 코드에 있다. 약탕간 · 대장간 · 장부방은 아직 없다 [코드 미반영].
-    public const string Apothecary = "apothecary";
-    public const string Smithy = "smithy";
-    public const string LedgerRoom = "ledger_room";
-
-    /// <summary>퀘스트가 가리키지만 아직 BuildingTable에 없는 건물 (결정 2-52 코드 반영 때 만든다).</summary>
-    public static readonly string[] PlannedBuildings = { Apothecary, Smithy, LedgerRoom };
-
     private static QuestObjective See(string text, string eventId, int unlocks = 0)
         => new(text, QuestCondition.Seen, eventId, unlocks);
 
@@ -139,17 +131,17 @@ public static class QuestTable
 
         new("sub_chambong_apothecary", QuestKind.Sub, "참봉의 약탕간", StoryTable.Chambong, Night(1), new[]
         {
-            Build("쇠붙이 · 숯 · 새끼 뭉치를 모아 와 샘가에 약탕간을 세운다", Apothecary)
+            Build("쇠붙이 · 숯 · 새끼 뭉치를 모아 와 샘가에 약탕간을 세운다", BuildingTable.Apothecary)
         }, "소환단 · 식혜 · 가공과 회복이 열린다"),
 
         new("sub_debtor_smithy", QuestKind.Sub, "빚쟁이의 대장간", StoryTable.Debtor, Night(1), new[]
         {
-            Build("쇠붙이 · 숯 · 새끼 뭉치를 모아 와 대장간을 세운다", Smithy)
+            Build("쇠붙이 · 숯 · 새끼 뭉치를 모아 와 대장간을 세운다", BuildingTable.Smithy)
         }, "헌 지갑(가벼운 갑옷) · 무기와 방어구가 열린다"),
 
         new("sub_gildal_ledger", QuestKind.Sub, "길달의 장부방", StoryTable.Gildal, Night(2), new[]
         {
-            Build("재료를 모아 와 장부방을 세운다", LedgerRoom)
+            Build("재료를 모아 와 장부방을 세운다", BuildingTable.LedgerRoom)
         }, "화살 한 묶음 · 등록과 관리가 열린다"),
 
         // ── 서브 — 지역 사건 다섯 ────────────────────────────────────

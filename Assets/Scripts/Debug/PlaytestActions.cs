@@ -758,7 +758,7 @@ public static class PlaytestActions
     public static string OpenShop()
     {
         ExchangeWindowUI.EnsureInstance().OpenShop(ShopKind.General);
-        return $"{ShopTable.GeneralStoreName}을 열었습니다. 골드 {PassiveManager.EnsureInstance().Gold:N0}.\n"
+        return $"{ShopTable.GeneralStoreName}를 열었습니다. 골드 {PassiveManager.EnsureInstance().Gold:N0}.\n"
                + "가방 칸을 누르면 「판매」가, 상점 칸을 누르면 「구매」가 뜹니다.";
     }
 
@@ -774,7 +774,7 @@ public static class PlaytestActions
     {
         ShopManager.RestockAfterRun();
         ExchangeWindowUI.RefreshIfOpen();
-        return "잡화 상점 재고를 채웠습니다. (원래는 파밍이 끝날 때 찬다)";
+        return "가게 셋(잡화 가게 · 약탕간 · 대장간)의 재고를 채웠습니다. (원래는 파밍이 끝날 때 찬다)";
     }
 
     // ── 벙커 (8-J) ───────────────────────────────────────────────────
@@ -794,7 +794,7 @@ public static class PlaytestActions
 
     // ── 건설 (8-K) ───────────────────────────────────────────────────
 
-    /// <summary>건물 넷을 다 지을 만큼의 골드 · 재료를 창고에 넣는다.</summary>
+    /// <summary>건물 다섯(작업대 · 잡화 가게 · 약탕간 · 대장간 · 장부방)을 다 지을 만큼의 골드 · 재료를 창고에 넣는다.</summary>
     public static string GiveBuildingMaterials()
     {
         ItemCatalog catalog = ItemCatalog.Load();
@@ -805,7 +805,7 @@ public static class PlaytestActions
         Inventory stash = PlayerInventory.EnsureInstance().Stash;
         int added = 0;
 
-        foreach ((string id, int count) in new[] { ("scrap_metal", 20), ("cell_battery", 6), ("wire_bundle", 3) })
+        foreach ((string id, int count) in new[] { ("scrap_metal", 21), ("cell_battery", 5), ("wire_bundle", 4) })
         {
             ItemDefinition definition = catalog.Find(id);
 
@@ -813,9 +813,9 @@ public static class PlaytestActions
                 added += stash.TryAdd(definition, count);
         }
 
-        PassiveManager.EnsureInstance().AddGold(400);
+        PassiveManager.EnsureInstance().AddGold(500);
 
-        return $"창고에 건설 재료 {added}개 · 400골드를 넣었습니다. 설계도 테이블(「건설」)에서 지으십시오.";
+        return $"창고에 건설 재료 {added}개 · 500골드를 넣었습니다. 설계도 테이블(「건설」)에서 지으십시오.";
     }
 
     public static string OpenBuildingScreen()
@@ -828,7 +828,7 @@ public static class PlaytestActions
     }
 
     /// <summary>
-    /// 【검증용】 재료를 주고 건물 넷을 전부 지어 정해진 자리에 놓는다.
+    /// 【검증용】 재료를 주고 건물 다섯을 전부 지어 정해진 자리에 놓는다.
     /// 화면을 누르지 않고 「짓기 → 배치 → 상점 열기」 길을 한 번에 지나가 본다.
     /// </summary>
     public static string BuildAllForTest()
@@ -842,8 +842,9 @@ public static class PlaytestActions
         {
             [BuildingTable.Workbench]    = new BuildingPose(-7f, -1f, 0),
             [BuildingTable.GeneralStore] = new BuildingPose(7f, 3f, 0),
-            [BuildingTable.WeaponShop]   = new BuildingPose(7f, 0f, 0),
-            [BuildingTable.ArmourShop]   = new BuildingPose(7f, -3f, 0),
+            [BuildingTable.Smithy]       = new BuildingPose(7f, 0f, 0),
+            [BuildingTable.Apothecary]   = new BuildingPose(7f, -3f, 0),
+            [BuildingTable.LedgerRoom]   = new BuildingPose(-7f, 2.5f, 0),
         };
 
         var log = new System.Text.StringBuilder();

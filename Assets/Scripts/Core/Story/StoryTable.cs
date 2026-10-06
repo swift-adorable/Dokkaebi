@@ -247,12 +247,13 @@ public static class StoryTable
 
     private static readonly MerchantDefinition[] merchants =
     {
-        new(Elder,    "영감",   0, string.Empty, null),
-        new(Debtor,   "빚쟁이", 1, BuildingTable.ArmourShop, new[] { ("arm_body_t1", 1) }),
-        new(Chambong, "참봉",   1, BuildingTable.GeneralStore,
+        // 상인 넷 = 가게 넷 (결정 2-52 · 2-57). 영감의 잡화 가게만 처음부터 지을 수 있다.
+        new(Elder,    "영감",   0, BuildingTable.GeneralStore, null),
+        new(Debtor,   "빚쟁이", 1, BuildingTable.Smithy, new[] { ("arm_body_t1", 1) }),
+        new(Chambong, "참봉",   1, BuildingTable.Apothecary,
             new[] { ("con_medkit_small", 2), ("con_soda", 1) }),
-        // 본문의 보상은 「화살 한 묶음」이다. 화살(탄약)이 아직 없다 [미구현] — 비워 둔다.
-        new(Gildal,   "길달",   2, BuildingTable.WeaponShop, null)
+        // 본문의 보상은 「화살 한 묶음」이다. 화살(탄약)이 아직 없다 [미구현] — 비워 둔다 (Bunker 6절).
+        new(Gildal,   "길달",   2, BuildingTable.LedgerRoom, null)
     };
 
     private static readonly PieceDefinition[] pieces =

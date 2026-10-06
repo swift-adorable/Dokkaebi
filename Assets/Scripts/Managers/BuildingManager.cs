@@ -116,13 +116,17 @@ public static class BuildingManager
         {
             foreach (SavedBuilding row in saved)
             {
-                if (row == null || BuildingTable.Find(row.id) == null)
+                // 판 9까지의 무기 상점 · 방어구 상점은 대장간으로 읽는다 (결정 2-52 · 판 10).
+                // 둘 다 놓여 있었으면 먼저 읽힌 자리를 쓴다.
+                string id = row == null ? null : BuildingTable.Canonical(row.id);
+
+                if (id == null || BuildingTable.Find(id) == null)
                     continue;
 
-                State.Own(row.id);
+                State.Own(id);
 
-                if (row.placed)
-                    State.Place(row.id, new BuildingPose(row.x, row.z, row.turns));
+                if (row.placed && !State.IsPlaced(id))
+                    State.Place(id, new BuildingPose(row.x, row.z, row.turns));
             }
         }
 
