@@ -48,7 +48,8 @@ public static class SceneFlow
     /// 소켓의 젬은 가방으로 돌아온다 (SkillManager.ResetRun). 젬은 칸을 먹지 않으므로
     /// 가방이 가득 차 있어도 잃지 않는다.
     ///
-    /// 철수 지점은 9단계다. 지금은 디버그 「즉시 철수」만 이 길을 부른다.
+    /// 【임시】 철수 지점(ExtractionDirector · 결정 2-78)의 원 안에서 5초 버티면 이 길로 온다.
+    /// 디버그 「즉시 철수」도 같은 길이다. 구역 맵(9단계)이 생기면 지점 자리만 맵이 정한다.
     /// </summary>
     public static void Extract()
     {

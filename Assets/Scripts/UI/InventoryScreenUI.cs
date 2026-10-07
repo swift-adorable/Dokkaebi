@@ -849,6 +849,7 @@ public partial class InventoryScreenUI : MonoBehaviour
         // 가방을 열면 소지 중량이 그 자리를 가져간다.
         SurvivalHudUI.SetHiddenByScreen(true);
         QuestHudUI.SetHiddenByScreen(true);
+        ExtractionHudUI.SetHiddenByScreen(true);
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         // 검증 패널은 이 화면 뒤에 있다. 켜져 있으면 글자가 비쳐 보인다.
@@ -882,6 +883,7 @@ public partial class InventoryScreenUI : MonoBehaviour
 
         SurvivalHudUI.SetHiddenByScreen(false);
         QuestHudUI.SetHiddenByScreen(false);
+        ExtractionHudUI.SetHiddenByScreen(false);
 
         // 파밍 중이었다면 오른쪽 전리품 패널도 같이 닫힌다. 둘은 한 벌이다.
         ExchangeWindowUI.CloseIfOpen();

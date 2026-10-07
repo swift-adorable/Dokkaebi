@@ -73,6 +73,10 @@ public class EnemySpawner : MonoBehaviour
 
             // 【임시】 열매 나무 2~3그루 — 산열매는 몬스터가 아니라 나무에서 딴다 (결정 2-76). 맵(9단계) 때 제자리로.
             BerryTree.SpawnForRaid(player.position);
+
+            // 【임시】 철수 지점 2곳 — 25~35m · 원 안에서 5초 버티면 철수 (결정 2-78). 맵(9단계) 때 제자리로.
+            if (!SceneFlow.InBunker)
+                ExtractionDirector.SpawnForRaid(player.position);
         }
 
         if (enemyPrefab == null)
