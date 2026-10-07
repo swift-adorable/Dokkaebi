@@ -95,9 +95,14 @@ public partial class InventoryScreenUI
         // 왼쪽 위에 「←」를 따로 뒀더니 아래의 「닫기」와 둘이 되어,
         // 어느 쪽이 무엇인지 매번 읽어야 했다. 골드를 왼쪽으로 물리고
         // 그 자리를 닫기가 가져간다 — 오른쪽 위는 원래 닫는 자리다.
+        // 【제목 자리에 화면 탭】 (결정 2-84) — 장비 · 스킬로 바로 넘어간다. 오른쪽 위 세 버튼은 감춰져 있다.
+        RectTransform tabs = UIFactory.CreateRegion("ScreenTabs", rightContent,
+            new Vector2(0f, HeaderLine + 0.01f), new Vector2(0.36f, 1f));
+        DrawScreenTabs(tabs);
+
         UIFactory.CreateLabel(rightContent,
-            $"패시브    Lv.{manager.Level}", 32, FontStyle.Bold,
-            new Vector2(0f, HeaderLine), new Vector2(0.55f, 1f),
+            $"Lv.{manager.Level}", 30, FontStyle.Bold,
+            new Vector2(0.38f, HeaderLine), new Vector2(0.55f, 1f),
             TextAnchor.MiddleLeft, UIPalette.TextOnGlass);
 
         UIFactory.CreateLabel(rightContent,

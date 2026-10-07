@@ -309,5 +309,38 @@ namespace Dokkaebi.Tests
             quick.Assign(QuickSlots.FirstItemSlot, item);
             Assert.AreSame(item, quick.Get(QuickSlots.FirstItemSlot));
         }
+        // ── 주운 장비 바로 착용 (결정 2-84) ─────────────────────────
+
+        [Test]
+        public void 주운_장비는_빈_자리에만_들어간다()
+        {
+            var bow = AssetDatabase.LoadAssetAtPath<WeaponDefinition>($"{ItemRoot}/Weapons/wpn_t1_pipe.asset");
+            var gun = AssetDatabase.LoadAssetAtPath<WeaponDefinition>($"{ItemRoot}/Weapons/wpn_t1_sechongtong.asset");
+            var bow2 = AssetDatabase.LoadAssetAtPath<WeaponDefinition>($"{ItemRoot}/Weapons/wpn_t2_coil.asset");
+            var loadout = new EquipmentLoadout();
+
+            Assert.AreEqual(EquipmentSlot.Weapon, loadout.EmptySlotFor(new ItemStack(bow)));
+            loadout.TryEquip(new ItemStack(bow), EquipmentSlot.Weapon, out _);
+
+            Assert.AreEqual(EquipmentSlot.Weapon2, loadout.EmptySlotFor(new ItemStack(gun)), "무기 2가 비었다");
+            loadout.TryEquip(new ItemStack(gun), EquipmentSlot.Weapon2, out _);
+
+            Assert.IsNull(loadout.EmptySlotFor(new ItemStack(bow2)), "두 자리가 다 차 있으면 가방으로");
+
+            var arrow = AssetDatabase.LoadAssetAtPath<ItemDefinition>($"{ItemRoot}/Ammo/{AmmoTable.Arrow}.asset");
+            Assert.IsNull(loadout.EmptySlotFor(new ItemStack(arrow, 10)), "탄은 장비가 아니다 — 통은 저절로 채운다");
+        }
+
+        [Test]
+        public void 튜토리얼이_끝나기_전에는_바로_착용하지_않는다()
+        {
+            var p = new StoryProgress();
+            p.See(StoryTable.EnterEvent("0-1"));
+            p.See(StoryTable.EnterEvent("0-2"));
+            Assert.IsFalse(ChapterZeroTable.TutorialDone(p), "0장은 가이드를 따라 손으로");
+
+            p.See(StoryTable.EnterEvent("1-1"));
+            Assert.IsTrue(ChapterZeroTable.TutorialDone(p));
+        }
     }
 }

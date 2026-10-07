@@ -54,8 +54,8 @@ public partial class InventoryScreenUI
         topInfoLabel.text = placingGem != null
             ? $"「{placingGem.Definition.DisplayName}」 — 밝은 자리를 누르십시오 (다른 곳을 누르면 취소)"
             : next > 0
-                ? $"다음 개방 Lv.{next} ({SocketUnlockTable.DescribeUnlock(next)})"
-                : "전부 개방됨";
+                ? $"Lv.{build.Level} · 다음 개방 Lv.{next} ({SocketUnlockTable.DescribeUnlock(next)})"
+                : $"Lv.{build.Level} · 전부 개방됨";
 
         // 핵심 2줄 + 발동·전령 1줄 = 세 줄. 칸 폭은 계산으로 낸다 —
         // 손으로 적으면 좌우 여백이 서로 달라진다.

@@ -212,6 +212,12 @@ public partial class InventoryScreenUI : MonoBehaviour
     /// <summary>위 단의 머리글 — 「장비」 또는 「Lv.n」.</summary>
     private Text equipTitleLabel;
 
+    /// <summary>화면 탭 줄 — 장비 · 스킬 · 패시브 (결정 2-84). 오른쪽 위 세 버튼은 화면이 떠 있는 동안 감춘다.</summary>
+    private RectTransform screenTabs;
+
+    /// <summary>머리글에서 탭 줄이 차지하는 폭 — 나머지(오른쪽)는 엽전 · 안내.</summary>
+    private const float ScreenTabsRight = 0.60f;
+
     /// <summary>머리글 오른쪽의 보조 정보 — 「다음 개방 Lv.3 (소켓 1)」.</summary>
     private Text topInfoLabel;
 
@@ -586,16 +592,27 @@ public partial class InventoryScreenUI : MonoBehaviour
             new Vector2(0f, TopBandTop + BandGap), new Vector2(0.55f, TitleTop),
             TextAnchor.MiddleLeft, UIPalette.TextDim);
 
+        // 【제목 자리에 화면 탭】 (결정 2-84) — 패널 안 머리글 줄이라 다른 패널과 겹치지 않는다.
+        equipTitleLabel.gameObject.SetActive(false);
+        screenTabs = UIFactory.CreateRegion("ScreenTabs", content,
+            new Vector2(0f, TopBandTop + BandGap), new Vector2(ScreenTabsRight, TitleTop));
+
         // 【골드가 여기로 들어왔다.】
         // 화면 위 10%를 골드 하나 때문에 비워 두고 있었다.
         // 머리글 오른쪽은 어차피 비어 있던 자리다.
         goldLabel = UIFactory.CreateLabel(content, "0엽전", 28, FontStyle.Bold,
-            new Vector2(0.45f, TopBandTop + BandGap), new Vector2(1f, TitleTop),
+            new Vector2(ScreenTabsRight + 0.02f, TopBandTop + BandGap), new Vector2(1f, TitleTop),
             TextAnchor.MiddleRight, UIPalette.TextAccent);
 
         topInfoLabel = UIFactory.CreateLabel(content, string.Empty, 22, FontStyle.Normal,
-            new Vector2(0.30f, TopBandTop + BandGap), new Vector2(1f, TitleTop),
+            new Vector2(ScreenTabsRight + 0.02f, TopBandTop + BandGap), new Vector2(1f, TitleTop),
             TextAnchor.MiddleRight, UIPalette.TextDim);
+
+        // 탭 옆 좁은 자리 — 긴 안내(구슬 고르는 중)는 두 줄 · 글자를 줄여 넣는다.
+        topInfoLabel.resizeTextForBestFit = true;
+        topInfoLabel.resizeTextMinSize = 14;
+        topInfoLabel.resizeTextMaxSize = 22;
+        topInfoLabel.horizontalOverflow = HorizontalWrapMode.Wrap;
 
         equipmentGrid = UIFactory.CreateRegion("TopBand", content,
             new Vector2(0f, EquipBandBottom), new Vector2(1f, TopBandTop));
@@ -927,6 +944,34 @@ public partial class InventoryScreenUI : MonoBehaviour
 #endif
     }
 
+    /// <summary>
+    /// 화면 탭 — 장비 · 스킬 · 패시브 (결정 2-84). 고른 탭이 밝다.
+    /// 전리품 · 창고 · 상점 창이 떠 있으면 그리지 않는다 — 그 창은 장비 탭(옛 배치)에만 맞는다.
+    /// </summary>
+    private void DrawScreenTabs(RectTransform area)
+    {
+        UIFactory.ClearChildren(area);
+
+        if (ExchangeWindowUI.AnyOpen)
+            return;
+
+        float width = 1f / TabNames.Length;
+
+        for (int i = 0; i < TabNames.Length; i++)
+        {
+            Tab target = (Tab)i;
+
+            UIFactory.CreateButton(area, TabNames[i],
+                new Vector2(i * width + 0.012f, 0f), new Vector2((i + 1) * width - 0.012f, 1f),
+                tab == target ? UIPalette.Action : UIPalette.Subtle,
+                () =>
+                {
+                    if (tab != target)
+                        SelectTab(target);
+                }, 24);
+        }
+    }
+
     private void SelectTab(Tab next)
     {
         CloseItemDetail();
@@ -1008,6 +1053,7 @@ public partial class InventoryScreenUI : MonoBehaviour
                 bagBack.gameObject.SetActive(!exchangeLayout);
 
             LayoutLeftColumn(skillTab);
+            DrawScreenTabs(screenTabs);
 
             UIFactory.ClearChildren(equipmentGrid);
 

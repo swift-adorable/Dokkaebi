@@ -139,6 +139,29 @@ public class EquipmentLoadout
         return active;
     }
 
+    /// <summary>
+    /// 주운 장비가 바로 들어갈 빈 자리 (결정 2-84). 없으면 null — 그 부위가 차 있으면 가방으로 간다.
+    /// 무기는 든 쪽 → 다른 쪽, 새김패는 1 → 2(같은 계열 · 단계 겹침 규칙은 CanEquip이 본다).
+    /// </summary>
+    public EquipmentSlot? EmptySlotFor(ItemStack stack)
+    {
+        if (stack?.Definition is not EquipmentDefinition definition)
+            return null;
+
+        EquipmentSlot[] candidates = definition.Slot switch
+        {
+            EquipmentSlot.Weapon => new[] { WeaponSlot(ActiveWeapon), WeaponSlot(1 - ActiveWeapon) },
+            EquipmentSlot.ImprintA or EquipmentSlot.ImprintB => new[] { EquipmentSlot.ImprintA, EquipmentSlot.ImprintB },
+            _ => new[] { definition.Slot },
+        };
+
+        foreach (EquipmentSlot slot in candidates)
+            if (Get(slot) == null && CanEquip(stack, slot))
+                return slot;
+
+        return null;
+    }
+
     private string AmmoIdOf(EquipmentSlot weaponSlot) => (Get(weaponSlot)?.Definition as WeaponDefinition)?.AmmoId;
 
     /// <summary>든 무기가 쓰는 탄 id. 무기가 없으면 null — 맨손은 탄을 쓰지 않는다.</summary>

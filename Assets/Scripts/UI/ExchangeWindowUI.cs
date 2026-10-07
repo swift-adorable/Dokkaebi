@@ -645,7 +645,55 @@ public class ExchangeWindowUI : MonoBehaviour
     private void Take(int index, ItemStack stack)
     {
         if (TakeInto(index, stack))
+        {
+            AutoEquipTaken(new[] { stack });
             AfterMove();
+        }
+    }
+
+    /// <summary>
+    /// 【주운 장비가 빈 자리에 바로 들어간다】 (결정 2-84) — 파밍(시체 · 봇짐)에서만, 튜토리얼이 끝난 뒤에만.
+    /// 그 부위가 차 있으면 가방에 그대로 둔다. 튜토리얼(0장)에서는 가이드를 따라 손으로 장착한다.
+    /// </summary>
+    private void AutoEquipTaken(IEnumerable<ItemStack> taken)
+    {
+        if (mode != Mode.Loot || !ChapterZeroTable.TutorialDone(StoryManager.Progress))
+            return;
+
+        PlayerInventory inventory = PlayerInventory.EnsureInstance();
+        EquipmentLoadout loadout = inventory.Loadout;
+        Inventory bag = inventory.Bag;
+        var names = new List<string>();
+
+        foreach (ItemStack stack in taken)
+        {
+            if (stack?.Definition is not EquipmentDefinition || !Holds(bag, stack))
+                continue;
+
+            EquipmentSlot? slot = loadout.EmptySlotFor(stack);
+            if (slot == null || !bag.RemoveStack(stack))
+                continue;
+
+            if (loadout.TryEquip(stack, slot.Value, out _))
+                names.Add(stack.Definition.DisplayName);
+            else
+                bag.TryAddStack(stack);
+        }
+
+        if (names.Count == 0)
+            return;
+
+        inventory.RefreshCapacity();
+        FindAnyObjectByType<PlayerLoadout>()?.Refresh();
+        InventoryScreenUI.ShowToastIfOpen($"빈 자리에 바로 착용 — {string.Join(" · ", names)}");
+    }
+
+    private static bool Holds(Inventory bag, ItemStack stack)
+    {
+        foreach (ItemStack s in bag.Stacks)
+            if (ReferenceEquals(s, stack))
+                return true;
+        return false;
     }
 
     /// <summary>【수량을 고른다】 (결정 2-77) — 겹친 물건은 몇 개를 꺼낼지 · 주울지 묻는다.</summary>
@@ -735,8 +783,17 @@ public class ExchangeWindowUI : MonoBehaviour
         }
         else
         {
+            // 장비는 집기 전에 기억해 둔다 — 빈 자리에 바로 넣으려고 (결정 2-84).
+            var equipment = new List<ItemStack>();
+            foreach (LootContainer box in Boxes)
+                for (int i = 0; i < box.Capacity; i++)
+                    if (box.Get(i)?.Definition is EquipmentDefinition)
+                        equipment.Add(box.Get(i));
+
             foreach (LootContainer box in Boxes)
                 moved += box.TakeAllTo(bag);
+
+            AutoEquipTaken(equipment);
         }
 
         GameLogger.Log($"[ExchangeWindowUI] {moved}칸 회수");
