@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f9766db0f8594e349438cc979f7b6fe, type: 3}
+  m_Name: con_sanjeok
+  m_EditorClassIdentifier: Dokkaebi.Runtime::ItemDefinition
+  id: con_sanjeok
+  displayName: "\uC0B0\uC801"
+  description: "\uACE0\uAE30\uB97C \uAF2C\uCC59\uC774\uC5D0 \uAFF0\uC5B4 \uAD6C\uC6E0\uB2E4."
+  kind: 6
+  tier: 0
+  weight: 0.6
+  icon: {fileID: 0}
+  slotSize: 1
+  stackMax: 1
+  maxDurability: 0
+  baseValue: 120
+  noExtract: 0
+  noRegister: 0
+  noTrade: 0
+  skill: {fileID: 0}
+  consumable:
+    category: 2
+    heal: 0
+    water: 0
+    energy: 60
+    waterCost: 0
+    energyCost: 0
+    cure: 0
+    cureStacks: 99
+    useCost: 0
+    castSeconds: 2
+    grant: 0

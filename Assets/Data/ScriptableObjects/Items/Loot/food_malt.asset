@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Dokkaebi.Runtime::ItemDefinition
   id: food_malt
   displayName: "\uC5FF\uAE30\uB984"
-  description: "\uC2F9 \uD2D4\uC6B4 \uBCF4\uB9AC\uB97C \uB9D0\uB9B0 \uAC83. \uC2DD\uD61C\uB97C
-    \uC0AD\uD78C\uB2E4."
+  description: "\uC2F9 \uD2D4\uC6B4 \uBCF4\uB9AC\uB97C \uB9D0\uB9B0 \uAC83. \uC5FF\uACFC
+    \uC2DD\uD61C\uB97C \uC0AD\uD78C\uB2E4."
   kind: 0
   tier: 0
   weight: 0.2

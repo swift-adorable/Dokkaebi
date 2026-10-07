@@ -37,7 +37,7 @@ public static class LootAssetGenerator
     /// </summary>
     private static List<Row> BuildTable()
     {
-        return new List<Row>
+        var rows = new List<Row>
         {
             //     id              이름            설명
             New("scrap_metal",   "쇠붙이",         "어디에나 굴러다닌다. 무겁고 싸다.",
@@ -62,23 +62,35 @@ public static class LootAssetGenerator
             New("med_stim",      "현호색",       "잠시 아픔을 잊는다.",
                 ItemKind.Consumable, weight: 0.1f, stackMax: 5, value: 60, tableWeight: 8, 1, 2),
 
-            New("water_bottle",  "맑은 물",       "마실 수 있는 물. 밤길에서는 귀하다.",
-                ItemKind.Consumable, weight: 0.5f, stackMax: 5, value: 35, tableWeight: 10, 1, 1),
-
-            // 요리 재료 (결정 2-64 · Cooking Data 2026-10-07) — 이름 · 값 [임시값]. 영감의 잡화 가게에서
-            // 음식으로 만든다. 만든 음식의 값이 재료 값의 합보다 커야 「만들면 엽전을 아낀다」가 된다.
-            New("food_rice",       "쌀",     "한 줌의 쌀. 영감의 가게에서 누룽지나 식혜가 된다.",
-                ItemKind.Material, weight: 0.3f, stackMax: 10, value: 15, tableWeight: 8, 1, 2),
-
-            New("food_barley",     "보리",   "볶으면 고소하다. 미숫가루가 된다.",
-                ItemKind.Material, weight: 0.3f, stackMax: 10, value: 15, tableWeight: 6, 1, 2),
-
-            New("food_malt",       "엿기름", "싹 틔운 보리를 말린 것. 식혜를 삭힌다.",
-                ItemKind.Material, weight: 0.2f, stackMax: 10, value: 12, tableWeight: 5, 1, 1),
-
-            New("food_persimmon",  "감",     "떫은 감. 말리면 곶감이 된다.",
-                ItemKind.Material, weight: 0.25f, stackMax: 10, value: 15, tableWeight: 6, 1, 2)
+            // 들판의 「맑은 물」(water_bottle)은 호리병 물(con_water)로 합쳤다 (결정 2-73) — 아래 ExistingRows.
         };
+
+        // 요리 재료 (결정 2-73) — IngredientTable이 원본이다. 장이 맞지 않는 재료는 그 판에서 빠진다
+        // (CorpseController → IngredientTable.DropsIn). 이미 있는 아이템(생강)은 ExistingRows가 맡는다.
+        foreach (Ingredient i in IngredientTable.All)
+        {
+            if (i.Existing)
+                continue;
+
+            rows.Add(New(i.Id, i.Name, i.Description, ItemKind.Material,
+                i.Weight, i.StackMax, i.Value, i.DropWeight, i.MinCount, i.MaxCount));
+        }
+
+        return rows;
+    }
+
+    private const string ConsumableRoot = "Assets/Data/ScriptableObjects/Items/Consumables";
+
+    /// <summary>
+    /// 소모품 생성기가 만든 것을 표에만 올린다 — 호리병 물(들판에서도 나온다) · 생강(1장 재료이자 동결 해제약).
+    /// </summary>
+    private static IEnumerable<(string id, int weight, int min, int max)> ExistingRows()
+    {
+        yield return (SpringTable.WaterId, 10, 1, 1);
+
+        foreach (Ingredient i in IngredientTable.All)
+            if (i.Existing)
+                yield return (i.Id, i.DropWeight, i.MinCount, i.MaxCount);
     }
 
     private static Row New(string id, string name, string desc, ItemKind kind,
@@ -110,6 +122,16 @@ public static class LootAssetGenerator
             ItemDefinition item = CreateOrUpdate(row);
 
             entries.Add(new LootEntry(item, row.weightInTable, row.minCount, row.maxCount));
+        }
+
+        foreach ((string id, int weight, int min, int max) in ExistingRows())
+        {
+            var existing = AssetDatabase.LoadAssetAtPath<ItemDefinition>($"{ConsumableRoot}/{id}.asset");
+
+            if (existing != null)
+                entries.Add(new LootEntry(existing, weight, min, max));
+            else
+                Debug.LogWarning($"[LootAssetGenerator] {id} 에셋이 없습니다 — 「Dokkaebi/Items/음식 에셋 생성」을 먼저 돌리십시오.");
         }
 
         // 빈손 줄. 시체마다 뭔가 나오면 파밍이 지루해진다.

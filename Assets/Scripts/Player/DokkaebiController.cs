@@ -108,6 +108,7 @@ public class DokkaebiController : MonoBehaviour
         // 저장한다. 가방은 이미 떨어뜨렸으므로 남는 것(계정 · 골드 · 패시브 ·
         // 도감 · 각인)만 디스크에 간다.
         ShopManager.RestockAfterRun();
+        SpringManager.RefillAfterRun();
 
         SaveManager.Commit("사망");
 

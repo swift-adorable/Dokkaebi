@@ -41,6 +41,9 @@ public class BunkerStation : MonoBehaviour
         /// <summary>부뚜막 — 잡화 가게 옆에 저절로 생기는 요리 자리 (결정 2-71).</summary>
         Cooking = 8,
 
+        /// <summary>고목 뿌리 샘가 — 호리병 물을 떠 간다 (결정 2-73). 처음부터 있다.</summary>
+        Spring = 9,
+
         /// <summary>여는 것이 없다 (작업대 — 제작은 다음 단계).</summary>
         None = 99
     }
@@ -67,6 +70,7 @@ public class BunkerStation : MonoBehaviour
             case Kind.Smithy:       return ShopTable.SmithyName;
             case Kind.Apothecary:   return ShopTable.ApothecaryName;
             case Kind.Cooking:      return CookingTable.HearthName;
+            case Kind.Spring:       return $"{SpringTable.Name} ({SpringManager.Remaining})";
             case Kind.Departure:    return "파밍 출발";
             case Kind.Blueprint:    return "건설";
             default:                return string.Empty;
@@ -140,6 +144,15 @@ public class BunkerStation : MonoBehaviour
             case Kind.Cooking:
                 CookingUI.Open();
                 break;
+
+            case Kind.Spring:
+            {
+                SpringError error = SpringManager.Draw();
+                StoryDialogueUI.ShowBanner(error == SpringError.None
+                    ? $"호리병에 물을 채웠다. (샘에 남은 물 {SpringManager.Remaining})"
+                    : SpringState.Explain(error), 2f);
+                break;
+            }
 
             case Kind.Blueprint:
                 BuildingScreenUI.Open();

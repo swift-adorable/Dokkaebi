@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f9766db0f8594e349438cc979f7b6fe, type: 3}
+  m_Name: con_acorn_jelly
+  m_EditorClassIdentifier: Dokkaebi.Runtime::ItemDefinition
+  id: con_acorn_jelly
+  displayName: "\uB3C4\uD1A0\uB9AC\uBB35"
+  description: "\uD0F1\uAE00\uD0F1\uAE00\uD558\uB2E4. \uC309\uC300\uD55C \uB4B7\uB9DB."
+  kind: 6
+  tier: 0
+  weight: 0.5
+  icon: {fileID: 0}
+  slotSize: 1
+  stackMax: 2
+  maxDurability: 0
+  baseValue: 60
+  noExtract: 0
+  noRegister: 0
+  noTrade: 0
+  skill: {fileID: 0}
+  consumable:
+    category: 2
+    heal: 0
+    water: 15
+    energy: 35
+    waterCost: 0
+    energyCost: 0
+    cure: 0
+    cureStacks: 99
+    useCost: 0
+    castSeconds: 1.2
+    grant: 0

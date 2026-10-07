@@ -38,7 +38,34 @@ public class BunkerBuildings : MonoBehaviour
     {
         instance = this;
         BuildingManager.OnChanged += Rebuild;
+        EnsureSpring();
         Rebuild();
+    }
+
+    private GameObject spring;
+
+    /// <summary>
+    /// 고목 뿌리 샘가 (결정 2-73). 짓는 것이 아니라 처음부터 있다 — 씬 생성기를 다시 돌리지 않도록 여기서 세운다.
+    /// 고정 자리라 건물을 그 위에 놓을 수 없다(Occupied).
+    /// </summary>
+    private void EnsureSpring()
+    {
+        if (spring != null)
+            return;
+
+        spring = new GameObject("Spring");
+        spring.transform.SetParent(transform, false);
+        spring.transform.position = BunkerLayout.SpringPosition;
+
+        GameObject pool = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+        pool.name = "Body";
+        pool.transform.SetParent(spring.transform, false);
+        pool.transform.localPosition = new Vector3(0f, 0.05f, 0f);
+        pool.transform.localScale = new Vector3(1.6f, 0.05f, 1.6f);
+        Tint(pool, new Color(0.30f, 0.55f, 0.80f));
+
+        AddLabel(spring.transform, SpringTable.Name);
+        spring.AddComponent<BunkerStation>().Setup(BunkerStation.Kind.Spring, 1.8f);
     }
 
     private void OnDisable()
@@ -284,6 +311,7 @@ public class BunkerBuildings : MonoBehaviour
         yield return BunkerLayout.FixedRect(BunkerLayout.StashPosition);
         yield return BunkerLayout.FixedRect(BunkerLayout.DeparturePosition);
         yield return BunkerLayout.FixedRect(BunkerLayout.BlueprintPosition);
+        yield return BunkerLayout.FixedRect(BunkerLayout.SpringPosition);
 
         if (player != null)
             yield return new Rect(player.position.x - 0.6f, player.position.z - 0.6f, 1.2f, 1.2f);

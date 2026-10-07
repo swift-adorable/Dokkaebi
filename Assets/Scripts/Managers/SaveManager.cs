@@ -153,6 +153,7 @@ public static class SaveManager
     {
         SaveStore.Delete(SavePath);
         DifficultyManager.Reset();
+        SpringManager.Reset();
 
         WritesBlocked = false;
         LastLoad = SaveLoadResult.None;
@@ -220,6 +221,7 @@ public static class SaveManager
         }
 
         data.shop = ShopManager.Capture();
+        data.spring = SpringManager.Capture();
         data.buildings = BuildingManager.Capture();
         data.story = StoryManager.Capture();
         data.difficulty = DifficultyManager.Capture();
@@ -275,6 +277,7 @@ public static class SaveManager
         RestoreInto(PlayerInventory.EnsureInstance().Bag, data.bag, "가방");
         RestoreInto(PlayerInventory.Instance.Stash, data.stash, "창고");
         ShopManager.Restore(data.shop);
+        SpringManager.Restore(data.spring);
         BuildingManager.Restore(data.buildings);
         StoryManager.Restore(data.story);
         DifficultyManager.Restore(data.difficulty);

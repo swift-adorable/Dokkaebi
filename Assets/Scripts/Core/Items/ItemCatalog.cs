@@ -36,8 +36,20 @@ public class ItemCatalog : ScriptableObject
         if (byId == null)
             BuildIndex();
 
-        return byId.TryGetValue(id, out ItemDefinition found) ? found : null;
+        if (byId.TryGetValue(id, out ItemDefinition found))
+            return found;
+
+        // 합쳐서 없어진 옛 id — 세이브에 남아 있으면 새 아이템으로 읽는다.
+        return LegacyIds.TryGetValue(id, out string now) && byId.TryGetValue(now, out found) ? found : null;
     }
+
+    /// <summary>
+    /// 옛 id → 지금 id. 들판의 「맑은 물」(water_bottle)은 호리병 물(con_water)로 합쳤다 (결정 2-73 · 세이브 12판).
+    /// </summary>
+    public static readonly IReadOnlyDictionary<string, string> LegacyIds = new Dictionary<string, string>
+    {
+        { "water_bottle", "con_water" },
+    };
 
     private void BuildIndex()
     {

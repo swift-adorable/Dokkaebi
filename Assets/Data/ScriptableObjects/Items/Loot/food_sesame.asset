@@ -10,20 +10,19 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5f9766db0f8594e349438cc979f7b6fe, type: 3}
-  m_Name: water_bottle
+  m_Name: food_sesame
   m_EditorClassIdentifier: Dokkaebi.Runtime::ItemDefinition
-  id: water_bottle
-  displayName: "\uB9D1\uC740 \uBB3C"
-  description: "\uB9C8\uC2E4 \uC218 \uC788\uB294 \uBB3C. \uBC24\uAE38\uC5D0\uC11C\uB294
-    \uADC0\uD558\uB2E4."
-  kind: 6
+  id: food_sesame
+  displayName: "\uAE68"
+  description: "\uAE30\uB984\uC744 \uC9DC\uBA74 \uACE0\uC18C\uD558\uB2E4."
+  kind: 0
   tier: 0
-  weight: 0.5
+  weight: 0.1
   icon: {fileID: 0}
   slotSize: 1
-  stackMax: 5
+  stackMax: 10
   maxDurability: 0
-  baseValue: 35
+  baseValue: 15
   noExtract: 0
   noRegister: 0
   noTrade: 0

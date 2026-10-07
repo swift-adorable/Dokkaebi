@@ -41,32 +41,44 @@ public class CookingUI : MonoBehaviour
         RectTransform safe = UIFactory.CreateSafeArea(canvas);
         Image dim = UIFactory.CreatePanel("Dim", safe, UIPalette.Dim, Vector2.zero, Vector2.one, 0);
         Image box = UIFactory.CreatePanel("Box", dim.transform, UIPalette.Panel,
-            new Vector2(0.18f, 0.12f), new Vector2(0.82f, 0.88f));
+            new Vector2(0.12f, 0.04f), new Vector2(0.88f, 0.96f));
 
         UIFactory.CreateLabel(box.transform, "요리 — 부뚜막", 30, FontStyle.Bold,
-            new Vector2(0.05f, 0.87f), new Vector2(0.75f, 0.98f), TextAnchor.MiddleLeft);
+            new Vector2(0.05f, 0.88f), new Vector2(0.75f, 0.98f), TextAnchor.MiddleLeft);
         UIFactory.CreateButton(box.transform, "닫기", new Vector2(0.78f, 0.88f), new Vector2(0.96f, 0.97f),
             UIPalette.Header, () => Destroy(gameObject), 22);
 
+        // 효과 크기로 나눈 탭 (결정 2-73) — 작음 8 · 보통 9 · 큼 5. 한 탭에 아홉 줄까지 들어간다.
+        string[] tabNames = { "작음", "보통", "큼" };
+        for (int t = 0; t < tabNames.Length; t++)
+        {
+            CookTier tier = (CookTier)t;
+            float x = 0.05f + t * 0.20f;
+            UIFactory.CreateButton(box.transform, tabNames[t], new Vector2(x, 0.78f), new Vector2(x + 0.18f, 0.86f),
+                UIPalette.Header, () => ShowTier(tier), 22);
+        }
+
         IReadOnlyList<Recipe> all = CookingTable.All;
+        var perTier = new int[3];
 
         for (int i = 0; i < all.Count; i++)
         {
             Recipe recipe = all[i];
-            float top = 0.84f - i * 0.17f;
+            int index = perTier[(int)recipe.Tier]++;
+            float top = 0.76f - index * 0.075f;
 
-            Text label = UIFactory.CreateLabel(box.transform, string.Empty, 22, FontStyle.Normal,
-                new Vector2(0.05f, top - 0.15f), new Vector2(0.72f, top), TextAnchor.MiddleLeft);
+            Text label = UIFactory.CreateLabel(box.transform, string.Empty, 19, FontStyle.Normal,
+                new Vector2(0.05f, top - 0.07f), new Vector2(0.76f, top), TextAnchor.MiddleLeft);
             Button button = UIFactory.CreateButton(box.transform, "만들기",
-                new Vector2(0.75f, top - 0.13f), new Vector2(0.96f, top - 0.02f), UIPalette.Action, () => Cook(recipe), 22);
+                new Vector2(0.78f, top - 0.065f), new Vector2(0.96f, top - 0.005f), UIPalette.Action, () => Cook(recipe), 19);
 
             rows.Add((recipe, label, button));
         }
 
         status = UIFactory.CreateLabel(box.transform, string.Empty, 20, FontStyle.Normal,
-            new Vector2(0.05f, 0.02f), new Vector2(0.95f, 0.14f), TextAnchor.MiddleCenter, UIPalette.TextAccent);
+            new Vector2(0.05f, 0.0f), new Vector2(0.95f, 0.07f), TextAnchor.MiddleCenter, UIPalette.TextAccent);
 
-        Refresh();
+        ShowTier(CookTier.Small);
     }
 
     private static bool Unlocked => CookingTable.IsUnlocked(BuildingManager.IsOpen);
@@ -80,7 +92,7 @@ public class CookingUI : MonoBehaviour
             var parts = new List<string>();
 
             foreach (MaterialCost c in recipe.Inputs)
-                parts.Add($"{NameOf(c.ItemId)} {c.Count} (가진 것 {BuildingState.CountIn(inv.Stash, inv.Bag, c.ItemId)})");
+                parts.Add($"{NameOf(c.ItemId)} {c.Count} ({CookingTable.CountOf(c.ItemId, id => BuildingState.CountIn(inv.Stash, inv.Bag, id))})");
 
             label.text = $"{NameOf(recipe.OutputId)}  ←  {string.Join(" · ", parts)}";
             button.interactable = CookingTable.CanCook(recipe,
@@ -108,5 +120,19 @@ public class CookingUI : MonoBehaviour
         Refresh();
     }
 
-    private string NameOf(string id) => catalog?.Find(id)?.DisplayName ?? id;
+    private void ShowTier(CookTier tier)
+    {
+        foreach ((Recipe recipe, Text label, Button button) in rows)
+        {
+            bool on = recipe.Tier == tier;
+            label.gameObject.SetActive(on);
+            button.gameObject.SetActive(on);
+        }
+
+        Refresh();
+    }
+
+    /// <summary>묶음(산적의 고기)은 카탈로그에 없다 — IngredientTable이 이름을 준다.</summary>
+    private string NameOf(string id)
+        => IngredientTable.IsTag(id) ? IngredientTable.NameOf(id) : catalog?.Find(id)?.DisplayName ?? id;
 }

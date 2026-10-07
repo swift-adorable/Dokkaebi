@@ -56,7 +56,7 @@ public static class ConsumableAssetGenerator
     /// </summary>
     private static List<Row> Table()
     {
-        var list = new List<Row>(16);
+        var list = new List<Row>(48);
 
         // 【시전 시간】 환단은 클수록 길다 — 2.0 / 3.0 / 4.5초.
         // 나무위키가 「이 등급부터 사용 시간이 길어져 전투 중에 쓰기 상당히
@@ -202,8 +202,10 @@ public static class ConsumableAssetGenerator
         // 【체력을 채우지 않는다.】 먹어서 상처가 낫기 시작하면
         // 수분·에너지 두 축이 체력에 흡수된다. (결정 2-32)
 
-        list.Add(Food("con_water", "샘물", "맛은 없지만 안전하다.",
-            water: 40f, energy: 0f, weight: 0.5f, stackMax: 3, value: 30));
+        // 호리병 물 (결정 2-73) — 옛 「샘물」. 고목 뿌리 샘가에서 한 밤에 8병 떠 간다(SpringTable) · 들판에서도 나온다
+        // (옛 「맑은 물」을 합쳤다). 부뚜막에서 요리의 물로도 쓴다 — 그래서 한 병은 작다(수분 40 → 20).
+        list.Add(Food("con_water", "호리병 물", "샘가에서 채운 물. 맛은 없지만 안전하다.",
+            water: 20f, energy: 0f, weight: 0.3f, stackMax: 5, value: 15));
 
         list.Add(Food("con_soda", "식혜", "김이 빠졌다. 그래도 물이다.",
             25f, 5f, 0.4f, 3, 45));
@@ -222,7 +224,80 @@ public static class ConsumableAssetGenerator
         list.Add(Food("con_whisky", "막걸리", "몸이 데워지는 대신 물이 마른다.",
             0f, 10f, 0.6f, 2, 70, waterCost: 15f));
 
+        // ── 부뚜막 요리 (결정 2-73 · CookingTable) ─────────────────────
+        //
+        // 【효과 크기 셋】 작음 = 에너지 · 수분 20 ~ 30 (공용 재료만) · 보통 = 40 안팎 (장 재료 하나) ·
+        // 큼 = 50 ~ 60에 다른 축도 조금 (장 재료 둘 이상). 기존 넷(누룽지 · 식혜 · 곶감 = 작음, 미숫가루 = 보통)이 기준이다.
+        // 【만든 음식 값 > 재료 값의 합】(결정 2-70 ④) — CookingTests가 지킨다. 전부 [임시값].
+
+        // 작음 — 공용 재료만
+        list.Add(Food("con_yeot", "엿", "늘어지게 달다. 조금씩 떼어 먹는다.",
+            0f, 20f, 0.1f, 5, 35));
+        list.Add(Food("con_roast_chestnut", "군밤", "껍질이 터지면 다 익은 것이다.",
+            0f, 25f, 0.2f, 5, 30));
+        list.Add(Food("con_roast_potato", "군감자", "속까지 포슬포슬하다.",
+            5f, 25f, 0.3f, 3, 30));
+        list.Add(Food("con_roast_sweet_potato", "군고구마", "껍질째 먹어도 달다.",
+            0f, 30f, 0.3f, 3, 35));
+        list.Add(Food("con_berry_juice", "열매즙", "산열매를 짜서 물에 탔다. 새콤하다.",
+            25f, 5f, 0.4f, 3, 40));
+
+        // 보통 — 장 재료 하나
+        list.Add(Food("con_sujeonggwa", "수정과", "곶감과 생강을 달인 물. 속이 따뜻해진다.",
+            35f, 10f, 0.4f, 3, 130));
+        list.Add(Food("con_yugwa", "유과", "찹쌀 과줄. 바삭하고 가볍다.",
+            0f, 40f, 0.2f, 3, 55));
+        list.Add(Food("con_songpyeon", "송편", "콩을 소로 넣은 떡.",
+            5f, 40f, 0.3f, 3, 60));
+        list.Add(Food("con_acorn_jelly", "도토리묵", "탱글탱글하다. 쌉쌀한 뒷맛.",
+            15f, 35f, 0.5f, 2, 60));
+        list.Add(Food("con_jujube_tea", "대추차", "달고 진하다.",
+            40f, 5f, 0.4f, 3, 55));
+        list.Add(Food("con_yakgwa", "약과", "제사상에 오르던 과자. 기름지고 달다.",
+            0f, 45f, 0.2f, 3, 70));
+        list.Add(Food("con_hwajeon", "화전", "꽃잎을 얹어 부친 찹쌀 전.",
+            5f, 40f, 0.3f, 3, 60));
+        list.Add(Food("con_honey_water", "꿀물", "목이 단번에 풀린다.",
+            40f, 10f, 0.4f, 3, 60));
+
+        // 큼 — 장 재료 둘 이상
+        list.Add(Food("con_tteokguk", "떡국", "가래떡과 무를 넣고 끓였다. 한 그릇이면 든든하다.",
+            30f, 50f, 0.8f, 1, 110, castSeconds: 2.0f));
+        list.Add(Food("con_samgyetang", "삼계탕", "닭 한 마리에 인삼과 찹쌀을 넣었다.",
+            30f, 60f, 1.0f, 1, 170, castSeconds: 2.0f));
+        list.Add(Food("con_pumpkin_porridge", "호박죽", "늙은호박을 곱게 쑤었다.",
+            25f, 50f, 0.8f, 1, 100, castSeconds: 2.0f));
+        list.Add(Food("con_sanjeok", "산적", "고기를 꼬챙이에 꿰어 구웠다.",
+            0f, 60f, 0.6f, 1, 120, castSeconds: 2.0f));
+        list.Add(Food("con_yaksik", "약식", "찹쌀에 대추 · 밤 · 꿀을 버무려 쪘다.",
+            0f, 60f, 0.5f, 2, 140, castSeconds: 2.0f));
+
         return list;
+    }
+
+    /// <summary>
+    /// 음식 · 음료만 다시 만든다 (결정 2-73). 다른 소모품(약 · 주사약)의 에셋은 건드리지 않는다 —
+    /// 「감초 → 감두탕」 이름 반영(Audit)은 아래 전체 생성이 따로 맡는다.
+    /// </summary>
+    [MenuItem("Dokkaebi/Items/음식 에셋 생성")]
+    public static void GenerateFoods()
+    {
+        EnsureFolder(Root);
+
+        int count = 0;
+        foreach (Row row in Table())
+        {
+            if (row.category != ConsumableCategory.Sustenance)
+                continue;
+
+            CreateOrUpdate(row);
+            count++;
+        }
+
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
+
+        Debug.Log($"[ConsumableAssetGenerator] 음식 {count}종 생성 완료 — 아이템 카탈로그도 다시 만드십시오.");
     }
 
     [MenuItem("Dokkaebi/Items/소모품 에셋 생성")]

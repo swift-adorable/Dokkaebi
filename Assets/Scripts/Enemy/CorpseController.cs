@@ -121,8 +121,13 @@ public class CorpseController : MonoBehaviour, IPoolable
     {
         random ??= new System.Random(Random.Range(int.MinValue, int.MaxValue));
 
+        // 요리 재료는 이번 구역이 속한 장의 것만 나온다 (결정 2-73). 공용 재료 · 다른 전리품은 그대로다.
+        ChapterData chapter = ZoneDataTable.ChapterOfZone(StoryManager.TargetZone);
+        int chapterNumber = chapter != null ? chapter.Chapter : 0;
+        System.Func<ItemDefinition, bool> allow = item => IngredientTable.DropsIn(item.Id, chapterNumber);
+
         if (lootTable != null)
-            lootTable.Fill(Loot, random, ValueMultiplier);
+            lootTable.Fill(Loot, random, ValueMultiplier, allow);
 
         // 패시브 「전리품 추첨 +n」. 표 자체는 그대로고 뽑는 횟수만 는다.
         int extraRolls = PassiveManager.HasInstance
@@ -130,7 +135,7 @@ public class CorpseController : MonoBehaviour, IPoolable
             : 0;
 
         if (lootTable != null && extraRolls > 0)
-            LootRoller.Roll(lootTable.Entries, extraRolls, random, Loot);
+            LootRoller.Roll(lootTable.Entries, extraRolls, random, Loot, allow);
 
         if (!SkillManager.HasInstance)
             return;

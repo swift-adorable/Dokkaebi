@@ -30,7 +30,8 @@ public class LootTable : ScriptableObject
     /// 이 표로 상자를 채운다. luckMultiplier는 적 등급 배율다.
     /// 추첨 횟수에만 곱한다 — 등급이 높으면 더 많이 나오되 표 자체는 같다.
     /// </summary>
-    public int Fill(LootContainer into, System.Random random, int luckMultiplier = 1)
+    public int Fill(LootContainer into, System.Random random, int luckMultiplier = 1,
+                    System.Func<ItemDefinition, bool> allow = null)
     {
         random ??= new System.Random();
 
@@ -38,7 +39,7 @@ public class LootTable : ScriptableObject
 
         rolls *= Mathf.Max(1, luckMultiplier);
 
-        return LootRoller.Roll(entries, rolls, random, into);
+        return LootRoller.Roll(entries, rolls, random, into, allow);
     }
 
 #if UNITY_EDITOR

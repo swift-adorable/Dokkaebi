@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Random = System.Random;
 
@@ -9,7 +10,7 @@ using Random = System.Random;
 public static class LootRoller
 {
     /// <summary>표의 가중치 합. 0이면 아무것도 나오지 않는다.</summary>
-    public static int TotalWeight(IReadOnlyList<LootEntry> entries)
+    public static int TotalWeight(IReadOnlyList<LootEntry> entries, Func<ItemDefinition, bool> allow = null)
     {
         if (entries == null)
             return 0;
@@ -18,19 +19,27 @@ public static class LootRoller
 
         for (int i = 0; i < entries.Count; i++)
         {
-            if (entries[i].IsValid)
+            if (Allowed(entries[i], allow))
                 total += entries[i].weight;
         }
 
         return total;
     }
 
+    /// <summary>
+    /// 이번 판에 뽑을 수 있는 줄인가. allow가 막은 줄은 표에서 빠진 것처럼 친다 —
+    /// 요리 재료는 그 장에서만 나온다(IngredientTable.DropsIn · 결정 2-73). 빈손 줄은 늘 남는다.
+    /// </summary>
+    private static bool Allowed(LootEntry entry, Func<ItemDefinition, bool> allow)
+        => entry.IsValid && (allow == null || entry.IsEmptyRoll || allow(entry.item));
+
     /// <summary>한 줄을 가중치로 뽑는다. 뽑을 것이 없으면 false.</summary>
-    public static bool TryPick(IReadOnlyList<LootEntry> entries, Random random, out LootEntry picked)
+    public static bool TryPick(IReadOnlyList<LootEntry> entries, Random random, out LootEntry picked,
+                               Func<ItemDefinition, bool> allow = null)
     {
         picked = default;
 
-        int total = TotalWeight(entries);
+        int total = TotalWeight(entries, allow);
 
         if (total <= 0)
             return false;
@@ -41,7 +50,7 @@ public static class LootRoller
 
         for (int i = 0; i < entries.Count; i++)
         {
-            if (!entries[i].IsValid)
+            if (!Allowed(entries[i], allow))
                 continue;
 
             roll -= entries[i].weight;
@@ -63,7 +72,8 @@ public static class LootRoller
     /// 칸이 차면 더 담지 않는다. 「빈손」 줄은 칸을 쓰지 않는다.
     /// </summary>
     public static int Roll(
-        IReadOnlyList<LootEntry> entries, int rolls, Random random, LootContainer into)
+        IReadOnlyList<LootEntry> entries, int rolls, Random random, LootContainer into,
+        Func<ItemDefinition, bool> allow = null)
     {
         if (into == null || rolls <= 0)
             return 0;
@@ -74,7 +84,7 @@ public static class LootRoller
 
         for (int i = 0; i < rolls && !into.IsFull; i++)
         {
-            if (!TryPick(entries, random, out LootEntry entry))
+            if (!TryPick(entries, random, out LootEntry entry, allow))
                 break;
 
             if (entry.IsEmptyRoll)

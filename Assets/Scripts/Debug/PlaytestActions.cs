@@ -773,8 +773,9 @@ public static class PlaytestActions
     public static string RestockShop()
     {
         ShopManager.RestockAfterRun();
+        SpringManager.RefillAfterRun();
         ExchangeWindowUI.RefreshIfOpen();
-        return "가게 셋(잡화 가게 · 약탕간 · 대장간)의 재고를 채웠습니다. (원래는 파밍이 끝날 때 찬다)";
+        return "가게 셋(잡화 가게 · 약탕간 · 대장간)의 재고와 샘가의 물을 채웠습니다. (원래는 파밍이 끝날 때 찬다)";
     }
 
     // ── 벙커 (8-J) ───────────────────────────────────────────────────

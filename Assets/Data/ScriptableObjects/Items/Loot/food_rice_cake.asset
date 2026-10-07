@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f9766db0f8594e349438cc979f7b6fe, type: 3}
+  m_Name: food_rice_cake
+  m_EditorClassIdentifier: Dokkaebi.Runtime::ItemDefinition
+  id: food_rice_cake
+  displayName: "\uAC00\uB798\uB5A1"
+  description: "\uC88C\uD310\uC5D0 \uB0A8\uC544 \uC788\uB358 \uB5A1. \uAD73\uC5C8\uC9C0\uB9CC
+    \uB053\uC774\uBA74 \uD480\uC5B4\uC9C4\uB2E4."
+  kind: 0
+  tier: 0
+  weight: 0.4
+  icon: {fileID: 0}
+  slotSize: 1
+  stackMax: 10
+  maxDurability: 0
+  baseValue: 20
+  noExtract: 0
+  noRegister: 0
+  noTrade: 0
+  skill: {fileID: 0}
+  consumable:
+    category: 0
+    heal: 0
+    water: 0
+    energy: 0
+    waterCost: 0
+    energyCost: 0
+    cure: 0
+    cureStacks: 99
+    useCost: 0
+    castSeconds: 0
+    grant: 0

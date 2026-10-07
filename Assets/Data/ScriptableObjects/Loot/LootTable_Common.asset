@@ -43,26 +43,110 @@ MonoBehaviour:
     weight: 8
     minCount: 1
     maxCount: 2
-  - item: {fileID: 11400000, guid: 3139cbbb43bcd4f0d9657cc111482330, type: 2}
-    weight: 10
-    minCount: 1
-    maxCount: 1
   - item: {fileID: 11400000, guid: 4c6a98097f57649d6b10e4d7a3a4654b, type: 2}
-    weight: 8
-    minCount: 1
-    maxCount: 2
-  - item: {fileID: 11400000, guid: 04dd1e956a07043fd9b26232fa7565eb, type: 2}
     weight: 6
     minCount: 1
     maxCount: 2
   - item: {fileID: 11400000, guid: f58dbb0478c3f41bd9bf9a0273622035, type: 2}
-    weight: 5
+    weight: 4
     minCount: 1
     maxCount: 1
   - item: {fileID: 11400000, guid: 848b3e8d5cea345ed92d89628532152b, type: 2}
-    weight: 6
+    weight: 4
     minCount: 1
     maxCount: 2
+  - item: {fileID: 11400000, guid: 5c6d6b12e5c434ccb99b3b88b7f8e2b4, type: 2}
+    weight: 4
+    minCount: 1
+    maxCount: 2
+  - item: {fileID: 11400000, guid: c03b812b9782441a2a36e938900ea09b, type: 2}
+    weight: 4
+    minCount: 1
+    maxCount: 2
+  - item: {fileID: 11400000, guid: 6c73aa3d35d5e42758a7b26d4faeb90c, type: 2}
+    weight: 4
+    minCount: 1
+    maxCount: 2
+  - item: {fileID: 11400000, guid: 919ea01f9d2ec44288f418f4cea8ff6b, type: 2}
+    weight: 4
+    minCount: 1
+    maxCount: 2
+  - item: {fileID: 11400000, guid: 45879a754d5504997a2db00ef6cae269, type: 2}
+    weight: 3
+    minCount: 1
+    maxCount: 2
+  - item: {fileID: 11400000, guid: 8bc8739bb8e0640799b1e40b90e3d9d3, type: 2}
+    weight: 3
+    minCount: 1
+    maxCount: 1
+  - item: {fileID: 11400000, guid: 04dd1e956a07043fd9b26232fa7565eb, type: 2}
+    weight: 4
+    minCount: 1
+    maxCount: 2
+  - item: {fileID: 11400000, guid: 12ae2f093a52c43b2bcf91425730ebd4, type: 2}
+    weight: 4
+    minCount: 1
+    maxCount: 2
+  - item: {fileID: 11400000, guid: 99397ce106e504f0c867f8a5ade4e72d, type: 2}
+    weight: 3
+    minCount: 1
+    maxCount: 1
+  - item: {fileID: 11400000, guid: 4984714b43fb742b0b3262b480954be9, type: 2}
+    weight: 2
+    minCount: 1
+    maxCount: 1
+  - item: {fileID: 11400000, guid: c33fbb701d90848689217e53abae730f, type: 2}
+    weight: 3
+    minCount: 1
+    maxCount: 2
+  - item: {fileID: 11400000, guid: 9aa348bbc217348459e8ec4330304f40, type: 2}
+    weight: 3
+    minCount: 1
+    maxCount: 2
+  - item: {fileID: 11400000, guid: 49a903161c6ea47e689f7185d684a203, type: 2}
+    weight: 3
+    minCount: 1
+    maxCount: 2
+  - item: {fileID: 11400000, guid: f965e55604cbb46caa45062c4e4e4bf4, type: 2}
+    weight: 2
+    minCount: 1
+    maxCount: 1
+  - item: {fileID: 11400000, guid: d7160071d631a46a2baca0bcc656f216, type: 2}
+    weight: 2
+    minCount: 1
+    maxCount: 1
+  - item: {fileID: 11400000, guid: a6571ebdd1de149278c633b4473092de, type: 2}
+    weight: 3
+    minCount: 1
+    maxCount: 2
+  - item: {fileID: 11400000, guid: 8b38b7edeebfd48638923238ea0a48bb, type: 2}
+    weight: 3
+    minCount: 1
+    maxCount: 2
+  - item: {fileID: 11400000, guid: 537e8299512204cf4998a65f04bf2e16, type: 2}
+    weight: 2
+    minCount: 1
+    maxCount: 1
+  - item: {fileID: 11400000, guid: 79ca9099d0dda49b08fa7cacce12d8ec, type: 2}
+    weight: 2
+    minCount: 1
+    maxCount: 1
+  - item: {fileID: 11400000, guid: 6dd166048c1d34b10905d1c666ba64d4, type: 2}
+    weight: 3
+    minCount: 1
+    maxCount: 2
+  - item: {fileID: 11400000, guid: b61c0a838ba0045fbb34836cfd1a3e74, type: 2}
+    weight: 2
+    minCount: 1
+    maxCount: 1
+  - item: {fileID: 11400000, guid: a86d25961c3db49b0bdafe7bc488b1b1, type: 2}
+    weight: 10
+    minCount: 1
+    maxCount: 1
+  - item: {fileID: 11400000, guid: ce8aca3e9dfd445d59339fb8d228e166, type: 2}
+    weight: 2
+    minCount: 1
+    maxCount: 1
   - item: {fileID: 0}
     weight: 40
     minCount: 1

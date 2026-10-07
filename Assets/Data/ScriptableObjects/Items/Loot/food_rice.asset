@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Dokkaebi.Runtime::ItemDefinition
   id: food_rice
   displayName: "\uC300"
-  description: "\uD55C \uC90C\uC758 \uC300. \uC601\uAC10\uC758 \uAC00\uAC8C\uC5D0\uC11C
-    \uB204\uB8FD\uC9C0\uB098 \uC2DD\uD61C\uAC00 \uB41C\uB2E4."
+  description: "\uD55C \uC90C\uC758 \uC300. \uB204\uB8FD\uC9C0\uB3C4 \uC2DD\uD61C\uB3C4
+    \uC5EC\uAE30\uC11C \uC2DC\uC791\uD55C\uB2E4."
   kind: 0
   tier: 0
   weight: 0.3

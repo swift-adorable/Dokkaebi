@@ -59,6 +59,7 @@ public static class SceneFlow
             SkillManager.Instance.ResetRun();
 
         ShopManager.RestockAfterRun();
+        SpringManager.RefillAfterRun();
         SaveManager.Commit("철수");
 
         ReturnToBunker();
