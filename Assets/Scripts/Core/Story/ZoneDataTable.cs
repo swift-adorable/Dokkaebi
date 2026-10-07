@@ -56,6 +56,12 @@ public sealed class ChapterData
     public int NormalPercent = 75;
     public int MagicPercent = 20;
 
+    /// <summary>
+    /// 이 장의 일반 적 체력 배율 — 「개체 배율」(Combat 5절: 같은 유형이라도 뒤 장 개체는 더 두껍게 둘 수 있다,
+    /// 전역 배율은 쓰지 않는다). 이야기 보스는 Boss Data가 덮으므로 걸리지 않는다 [임시값 — 결정 2-72].
+    /// </summary>
+    public float HealthScale = 1f;
+
     /// <summary>이 장에서는 일반 등급으로만 나오는 유형 — 1장 절굿공이귀 (결정 2-69).</summary>
     public EnemyArchetype[] NormalOnly = System.Array.Empty<EnemyArchetype>();
 
@@ -138,22 +144,23 @@ public static class ZoneDataTable
     public const int SwarmMin = 5;
     public const int SwarmMax = 8;
 
-    // 무리 크기 · 등급 분포 [임시값 — 결정 2-69] — research/sim/combat_sim.py로 맞췄다.
-    // 목표: Normal · 보통 플레이어(적 공격의 1/3을 맞는다)가 15분 한 판에 소환단 2~4개.
+    // 무리 크기 · 등급 분포 · 개체 체력 배율 [임시값 — 결정 2-72] — research/sim/balance_2_72.py로 맞췄다.
+    // 목표: Normal · 보통 플레이어(적 공격의 1/3을 맞는다)가 15분 한 판에서 한 무리에게 체력 100 넘게 맞을 위험 5~10%.
     static ZoneDataTable()
     {
         Set(0, 1, 2, 100, 0);
-        Set(1, 2, 3, 90, 9);   chapters[1].NormalOnly = new[] { EnemyArchetype.Crusher };
-        Set(2, 2, 4, 85, 13);
-        Set(3, 2, 3, 75, 20);
-        Set(4, 2, 4, 80, 17);
-        Set(5, 2, 3, 70, 23);
-        Set(6, 3, 5, 60, 30);
+        Set(1, 2, 4, 80, 17);  chapters[1].NormalOnly = new[] { EnemyArchetype.Crusher };
+        Set(2, 2, 3, 60, 30, 1.5f);
+        Set(3, 2, 3, 60, 30);
+        Set(4, 2, 3, 70, 23);
+        Set(5, 2, 4, 70, 23, 1.5f);
+        Set(6, 2, 4, 70, 23, 3.2f);
     }
 
-    private static void Set(int chapter, int packMin, int packMax, int normal, int magic)
+    private static void Set(int chapter, int packMin, int packMax, int normal, int magic, float health = 1f)
     {
         ChapterData c = chapters[chapter];
+        c.HealthScale = health;
         c.PackMin = packMin;
         c.PackMax = packMax;
         c.NormalPercent = normal;

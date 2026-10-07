@@ -75,8 +75,14 @@ public class EnemyIdentity : MonoBehaviour, IPoolable
         // 【이번 판의 조건을 마지막에 얹는다.】
         // 원형·등급·속성은 「이 개체가 무엇인가」이고, 조건은 「이번 판이 어떤
         // 판인가」다. 순서를 바꾸면 조건이 등급 배율에 다시 곱해져 두 번 먹는다.
-        Apply(RaidManager.Current.Apply(
-            EnemyProfile.Build(archetype, rarity, rolled)));
+        EnemyProfile profile = EnemyProfile.Build(archetype, rarity, rolled);
+
+        // 장의 개체 체력 배율 (Zone Data · 결정 2-72). 이야기 보스는 뒤에 Boss Data가 덮는다.
+        ChapterData chapter = ZoneDataTable.Chapter(CurrentChapter());
+        if (chapter != null && chapter.HealthScale != 1f)
+            profile.health = Mathf.Max(1, Mathf.RoundToInt(profile.health * chapter.HealthScale));
+
+        Apply(RaidManager.Current.Apply(profile));
     }
 
     /// <summary>이번 구역이 속한 장. 모르면 0장.</summary>

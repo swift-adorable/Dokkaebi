@@ -166,22 +166,21 @@ namespace Dokkaebi.Tests
             }
         }
         [Test]
-        public void 등급은_장이_오를수록_마법_희귀가_늘고_1장_절굿공이귀는_일반만()
+        public void 등급_분포는_100을_넘지_않고_1장_절굿공이귀는_일반만()
         {
-            // 4장은 일부러 3장보다 일반을 조금 더 둔다 — 잡귀 떼 · 허깨비 · 순라귀로 이미 바쁜 장이라 (결정 2-69).
-            for (int c = 1; c <= 6; c++)
+            for (int c = 0; c <= 6; c++)
             {
                 ChapterData d = ZoneDataTable.Chapter(c);
                 Assert.LessOrEqual(d.NormalPercent + d.MagicPercent, 100, $"{c}장");
-                Assert.GreaterOrEqual(ZoneDataTable.Chapter(1).NormalPercent, d.NormalPercent, $"1장이 가장 일반이 많다 — {c}장");
-                Assert.LessOrEqual(ZoneDataTable.Chapter(6).NormalPercent, d.NormalPercent, $"6장이 가장 일반이 적다 — {c}장");
+                Assert.GreaterOrEqual(d.HealthScale, 1f, $"{c}장 — 개체 배율은 두껍게만 (Combat 5절)");
             }
 
             for (int roll = 0; roll < 100; roll++)
                 Assert.AreEqual(EnemyRarity.Normal, ZoneDataTable.RollRarity(1, EnemyArchetype.Crusher, roll));
 
             Assert.AreEqual(EnemyRarity.Rare, ZoneDataTable.RollRarity(1, EnemyArchetype.Scav, 99));
-            Assert.AreEqual(EnemyRarity.Magic, ZoneDataTable.RollRarity(6, EnemyArchetype.Wraith, 60));
+            Assert.AreEqual(EnemyRarity.Magic, ZoneDataTable.RollRarity(6, EnemyArchetype.Wraith, 75));
+            Assert.Greater(ZoneDataTable.Chapter(6).HealthScale, ZoneDataTable.Chapter(1).HealthScale, "6장 개체가 더 두껍다");
         }
 
         [Test]
