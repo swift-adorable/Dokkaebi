@@ -148,7 +148,7 @@ public class CorpseController : MonoBehaviour, IPoolable
         if (!SkillManager.HasInstance)
             return;
 
-        ItemDefinition gem = SkillManager.Instance.RollGemDropItem(ValueMultiplier);
+        ItemDefinition gem = SkillManager.Instance.RollGemDropItem(ValueMultiplier, chapterNumber);
 
         if (gem != null)
             Loot.TryPut(gem);

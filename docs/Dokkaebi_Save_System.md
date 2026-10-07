@@ -41,7 +41,7 @@
 | 골드 | `PassiveManager.Credits` |
 | 역행 계열 발견 | `PassiveManager.DiscoveredRegression` |
 | 배운 패시브 | `PassiveManager.State` |
-| 도감 | `SkillManager.Codex` |
+| ~~도감~~ | 없앰 — **판 13** (결정 2-75). 12판의 codex 줄은 읽지 않는다 |
 | **각인 둘** | `EquipmentLoadout` ImprintA · ImprintB — **죽어도 남는 유일한 장착품** |
 | **창고** | `PlayerInventory.Stash` — 파밍에 들고 가지 않은 것 (판 5) |
 | 가게 재고 (잡화 가게 · 약탕간 · 대장간 — 결정 2-52 · 2-57 · 판 10) | `ShopManager` — 파밍이 끝날 때 가득 채운다 (결정 2-35) · 줄마다 상점 이름 (판 8) |

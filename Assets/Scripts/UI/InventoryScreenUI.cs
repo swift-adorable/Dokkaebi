@@ -1329,6 +1329,14 @@ public partial class InventoryScreenUI : MonoBehaviour
     /// <summary>젬이 아니면 유지형으로 몰아 둔다 — 목록에서 사라지지 않게.</summary>
     private static SkillCategory CategoryOf(ItemStack stack)
     {
+        // 고르지 않은 구슬은 고를 수 있는 쪽 칸에 둔다 — 정신력은 발동 칸에.
+        switch (stack?.Definition?.BlankGem ?? BlankGemKind.None)
+        {
+            case BlankGemKind.Core:    return SkillCategory.Core;
+            case BlankGemKind.Support: return SkillCategory.Support;
+            case BlankGemKind.Spirit:  return SkillCategory.Meta;
+        }
+
         return stack?.Definition?.Skill != null
             ? stack.Definition.Skill.Category
             : SkillCategory.Persistent;
@@ -1388,6 +1396,23 @@ public partial class InventoryScreenUI : MonoBehaviour
     private void OpenBagMenu(RectTransform cell, ItemStack stack)
     {
         ItemDefinition definition = stack.Definition;
+
+        // 고르지 않은 구슬 — 「구슬 고르기」가 첫 줄이다 (결정 2-75).
+        if (definition.IsBlankGem)
+        {
+            var blankEntries = new List<ItemActionMenu.Entry>();
+            ItemActionMenu.Entry? trade = ExchangeEntry(stack);
+            if (trade.HasValue)
+                blankEntries.Add(trade.Value);
+
+            blankEntries.Add(new ItemActionMenu.Entry("구슬 고르기", UIPalette.Action,
+                () => GemPickerUI.Open(definition, Refresh)));
+            blankEntries.Add(new ItemActionMenu.Entry("상세보기", UIPalette.Subtle, () => OpenItemDetail(stack)));
+            blankEntries.Add(new ItemActionMenu.Entry("버리기", UIPalette.Warning, () => OpenDiscardPopup(stack)));
+
+            ItemActionMenu.Open(cell, blankEntries);
+            return;
+        }
 
         bool equippable = definition is EquipmentDefinition
                           || (definition.IsSkillGem && definition.Skill != null);
@@ -1506,9 +1531,10 @@ public partial class InventoryScreenUI : MonoBehaviour
         if (stack?.Definition == null)
             return false;
 
-        return tab == Tab.Socket
-            ? stack.Definition.IsSkillGem
-            : !stack.Definition.IsSkillGem;
+        // 구슬(고른 것 · 고르지 않은 것)은 스킬 탭에 — 종류만 본다.
+        bool gem = stack.Definition.Kind == ItemKind.SkillGem;
+
+        return tab == Tab.Socket ? gem : !gem;
     }
 
     /// <summary>

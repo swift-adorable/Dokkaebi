@@ -113,18 +113,6 @@ namespace Dokkaebi.Tests
         }
 
         [Test]
-        public void 변이_샘플은_희귀_이상만_나온다()
-        {
-            // 「미해금 샘플을 들고 있을 때 지금 나갈까 더 돌까가 성립한다」(6-4절).
-            // 일반에서도 나오면 그 긴장이 사라진다 — 언제든 또 나오니까.
-            Assert.AreEqual(0f, EnemyRewardTable.SampleChance(EnemyRarity.Normal), 0.001f);
-            Assert.AreEqual(0f, EnemyRewardTable.SampleChance(EnemyRarity.Magic), 0.001f);
-
-            Assert.Greater(EnemyRewardTable.SampleChance(EnemyRarity.Rare), 0f);
-            Assert.AreEqual(1f, EnemyRewardTable.SampleChance(EnemyRarity.Unique), 0.001f);
-        }
-
-        [Test]
         public void 고유_장비는_온전하지_않다()
         {
             // 티어 4~6짜리를 온전하게 주면 수리 경제가 시작도 전에 무너진다.

@@ -68,7 +68,7 @@ public enum PassiveEffectType
     /// <summary>【해금】 역행 전용 제작법 — 작업대에서 연다 (결정 2-74). 작업대 제작이 생길 때 연결한다 [미구현].</summary>
     CraftBench = 40,
 
-    /// <summary>【해금】 처치만 해도 도감에 등록. 변이 샘플 흡수가 불필요해진다.</summary>
+    /// <summary>【쓰지 않는다】 처치만 해도 도감 등록 — 구슬 도감을 없앴다 (결정 2-75). 번호만 남긴다.</summary>
     CodexAuto = 41,
 
     /// <summary>【쓰지 않는다】 젬 분해 — 결정 2-74로 뺐다(젬은 강화 · 분해 없이 그대로 쓰기만 한다). 번호만 남긴다.</summary>

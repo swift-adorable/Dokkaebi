@@ -188,16 +188,12 @@ public static class PassiveAssetGenerator
 
         // 「구슬 깨기」(젬 분해)는 뺐다 — 젬은 강화 · 분해 없이 그대로 쓰기만 한다 (결정 2-74).
 
-        rows.Add(N("reg_codex", "한눈에 알아보기",
-            "쓰러뜨리기만 해도 구슬 장부에 오른다. 구슬 씨를 거둘 필요가 없어진다.",
-            PassiveBranch.Regression, PassiveEffectType.CodexAuto, 1, level: 1, cost: 6500,
-            column: 2, row: 1, prereq: new[] { "reg_bench", "meta_absorb_2" },
-            materials: new[] { ("memory_core", 3) }));
+        // 「한눈에 알아보기」(처치만 해도 도감 등록)는 뺐다 — 구슬 도감이 없어졌다 (결정 2-75).
 
         rows.Add(N("reg_map", "옛 지도",
             "지도에 전리품 위치가 표시된다. 원래 없던 마커이다.",
             PassiveBranch.Regression, PassiveEffectType.MapLoot, 1, level: 1, cost: 8000,
-            column: 1, row: 2, prereq: new[] { "reg_bench", "reg_codex" },
+            column: 1, row: 2, prereq: new[] { "reg_bench", "meta_absorb_2" },
             materials: new[] { ("memory_core", 4), ("cell_battery", 8) }));
 
         return rows;

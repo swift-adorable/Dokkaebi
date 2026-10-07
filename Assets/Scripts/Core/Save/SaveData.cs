@@ -45,7 +45,9 @@ public class SaveData
     ///       「아직 고르지 않음」으로 읽힌다.
     ///  12 — 고목 뿌리 샘가(spring — 남은 호리병 물)를 더했다 (결정 2-73). 11판에는 없어 가득 찬 샘으로 읽힌다.
     ///       들판의 「맑은 물」(water_bottle)은 호리병 물(con_water)로 읽는다(ItemCatalog.Find).
-    public const int CurrentVersion = 12;
+    ///  13 — 구슬 도감(codex)을 없앴다 (결정 2-75). 고르지 않은 구슬이 떨어지고 가방에서 고른다.
+    ///       12판의 codex 줄은 읽지 않고 버린다.
+    public const int CurrentVersion = 13;
 
     public int version = CurrentVersion;
 
@@ -72,9 +74,6 @@ public class SaveData
 
     /// <summary>배운 패시브의 id.</summary>
     public List<string> learnedPassives = new();
-
-    /// <summary>도감에 오른 스킬의 id. 드롭 풀이 여기서 정해진다.</summary>
-    public List<string> codex = new();
 
     /// <summary>
     /// 끼고 있는 각인 둘. 【각인은 죽어도 남는 유일한 장착품이다.】

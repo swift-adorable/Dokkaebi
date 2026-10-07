@@ -114,6 +114,73 @@ public static class SkillGemAssetGenerator
         EditorUtility.SetDirty(gem);
     }
 
+    // ────────────────────────────────── 고르지 않은 구슬 (결정 2-75)
+
+    private const string BlankRoot = "Assets/Data/ScriptableObjects/Items/BlankGems";
+
+    /// <summary>
+    /// 고르지 않은 구슬 13종 — 핵심 1~6단계 · 보조 1~6단계 · 정신력 1.
+    /// 젬 카탈로그(SkillGemCatalog)에는 넣지 않는다 — 가리키는 스킬이 없다. 아이템 카탈로그가 id로 찾는다.
+    /// 값 [임시값].
+    /// </summary>
+    [MenuItem("Dokkaebi/Skill/고르지 않은 구슬 에셋 생성")]
+    public static void GenerateBlanks()
+    {
+        if (!AssetDatabase.IsValidFolder(BlankRoot))
+            AssetDatabase.CreateFolder("Assets/Data/ScriptableObjects/Items", "BlankGems");
+
+        int count = 0;
+
+        for (int tier = 1; tier <= GemCutting.MaxTier; tier++)
+        {
+            int cap = GemCutting.LevelCap(tier);
+            string upTo = cap == int.MaxValue ? "어느 것이든" : $"요구 레벨 {cap} 이하에서";
+
+            WriteBlank(BlankGemKind.Core, tier, $"핵심 구슬 · {tier}단계",
+                $"아직 무엇도 아닌 핵심 구슬. 가방에서 핵심 구슬 하나로 고른다 — {upTo}.", 200 + tier * 40);
+            WriteBlank(BlankGemKind.Support, tier, $"보조 구슬 · {tier}단계",
+                $"아직 무엇도 아닌 보조 구슬. 가방에서 보조 구슬 하나로 고른다 — {upTo}.", 80 + tier * 20);
+            count += 2;
+        }
+
+        WriteBlank(BlankGemKind.Spirit, 0, "정신력 구슬",
+            "아직 무엇도 아닌 정신력 구슬. 가방에서 발동 · 전령 구슬 하나로 고른다.", 320);
+        count++;
+
+        AssetDatabase.SaveAssets();
+        Debug.Log($"[SkillGemAssetGenerator] 고르지 않은 구슬 {count}종 — 아이템 카탈로그도 다시 만드십시오.");
+    }
+
+    private static void WriteBlank(BlankGemKind kind, int tier, string name, string desc, int value)
+    {
+        string id = GemCutting.BlankId(kind, tier);
+        string path = $"{BlankRoot}/{id}.asset";
+
+        var item = AssetDatabase.LoadAssetAtPath<ItemDefinition>(path);
+        if (item == null)
+        {
+            item = ScriptableObject.CreateInstance<ItemDefinition>();
+            AssetDatabase.CreateAsset(item, path);
+        }
+
+        var so = new SerializedObject(item);
+        so.FindProperty("id").stringValue = id;
+        so.FindProperty("displayName").stringValue = name;
+        so.FindProperty("description").stringValue = desc;
+        so.FindProperty("kind").intValue = (int)ItemKind.SkillGem;
+        so.FindProperty("tier").intValue = kind == BlankGemKind.Spirit ? 0 : tier;
+        so.FindProperty("weight").floatValue = 0.4f;
+        so.FindProperty("slotSize").intValue = 1;
+        so.FindProperty("stackMax").intValue = 5;
+        so.FindProperty("maxDurability").intValue = 0;
+        so.FindProperty("baseValue").intValue = value;
+        so.FindProperty("skill").objectReferenceValue = null;
+        so.FindProperty("blankGem").intValue = (int)kind;
+        so.ApplyModifiedPropertiesWithoutUndo();
+
+        EditorUtility.SetDirty(item);
+    }
+
     /// <summary>Resources/SkillGemCatalog.asset을 만들거나 갱신한다.</summary>
     [MenuItem("Dokkaebi/Skill/젬 카탈로그 다시 만들기")]
     public static void RebuildCatalogFromFolder()

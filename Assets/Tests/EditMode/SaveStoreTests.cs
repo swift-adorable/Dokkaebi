@@ -38,7 +38,6 @@ namespace Dokkaebi.Tests
                 gold = gold,
                 discoveredRegression = true,
                 learnedPassives = new List<string> { "psv_a", "psv_b" },
-                codex = new List<string> { "skill_frost" },
                 imprints = new List<SavedItem>
                 {
                     new SavedItem { id = "imp_charge_t2", count = 1, durability = -1 },
@@ -60,7 +59,6 @@ namespace Dokkaebi.Tests
             Assert.AreEqual(1234, data.gold);
             Assert.IsTrue(data.discoveredRegression);
             CollectionAssert.AreEqual(new[] { "psv_a", "psv_b" }, data.learnedPassives);
-            CollectionAssert.AreEqual(new[] { "skill_frost" }, data.codex);
 
             // 빈 각인 칸도 자리가 남는다 — A · B 순서가 의미를 갖는다.
             Assert.AreEqual(2, data.imprints.Count);

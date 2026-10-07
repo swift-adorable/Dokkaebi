@@ -28,6 +28,6 @@ MonoBehaviour:
     count: 8
   prerequisites:
   - reg_bench
-  - reg_codex
+  - meta_absorb_2
   column: 1
   row: 2

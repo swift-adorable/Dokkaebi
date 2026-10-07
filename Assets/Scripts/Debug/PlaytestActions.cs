@@ -290,7 +290,7 @@ public static class PlaytestActions
         SaveData data = SaveManager.Capture();
 
         return $"저장했습니다.\nLv.{data.level} · 골드 {data.gold} · "
-               + $"패시브 {data.learnedPassives.Count} · 도감 {data.codex.Count}\n"
+               + $"패시브 {data.learnedPassives.Count}\n"
                + "게임에서는 사망할 때만 저장됩니다 — 파밍 중 종료는 롤백입니다.";
     }
 

@@ -67,6 +67,9 @@ public class ItemDefinition : ScriptableObject
     [Tooltip("젬일 때 어떤 스킬인지. 다른 종류에서는 비워 둔다.")]
     [SerializeField] private SkillDefinition skill;
 
+    [Tooltip("아직 고르지 않은 구슬 — 핵심 · 보조 · 정신력 (결정 2-75). skill은 비워 둔다. 단계는 tier.")]
+    [SerializeField] private BlankGemKind blankGem = BlankGemKind.None;
+
     [Tooltip("소모품일 때 무엇을 하는지. 다른 종류에서는 비워 둔다.")]
     [SerializeField] private ConsumableEffect consumable;
 
@@ -123,6 +126,12 @@ public class ItemDefinition : ScriptableObject
 
     /// <summary>젬인지. 스킬 참조가 있어야 젬으로 인정한다.</summary>
     public bool IsSkillGem => kind == ItemKind.SkillGem && skill != null;
+
+    /// <summary>아직 고르지 않은 구슬의 종류 (결정 2-75). 고른 구슬 · 다른 물건은 None.</summary>
+    public BlankGemKind BlankGem => kind == ItemKind.SkillGem && skill == null ? blankGem : BlankGemKind.None;
+
+    /// <summary>아직 고르지 않은 구슬인가 — 가방에서 원하는 구슬로 고른다.</summary>
+    public bool IsBlankGem => BlankGem != BlankGemKind.None;
 
     /// <summary>
     /// 짐인가 — 【가방의 칸과 무게를 잡아먹는가】. 스킬 젬만 아니다.

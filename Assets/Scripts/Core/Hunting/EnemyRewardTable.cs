@@ -86,19 +86,8 @@ public static class EnemyRewardTable
         }
     }
 
-    /// <summary>
-    /// 변이 샘플이 나올 확률(0~1). 희귀 이상만이다. (문서 6-4절)
-    /// 【불확실】 문서는 희귀를 「확률」이라고만 적었다.
-    /// </summary>
-    public static float SampleChance(EnemyRarity rarity)
-    {
-        switch (rarity)
-        {
-            case EnemyRarity.Rare:   return 0.25f;
-            case EnemyRarity.Unique: return 1f;
-            default:                 return 0f;
-        }
-    }
+    // 변이 샘플은 없앴다 (결정 2-75 — 구슬 도감을 없애고 고르지 않은 구슬 3종으로).
+
 
     /// <summary>
     /// 고유가 떨어뜨린 장비의 내구도 비율. 문서 6절이 「내구도 손상」이라고 적었다.

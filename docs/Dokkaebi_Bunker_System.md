@@ -177,7 +177,7 @@
 
 | 기능 | 무엇 |
 |---|---|
-| **도감** | 해금 기록. 드롭 풀과 제작을 넓힌다 ([`Skill_System.md`](Dokkaebi_Skill_System.md) 11-2절) |
+| ~~**도감**~~ | **구슬 도감은 없앴다 (결정 2-75)** · 옛 설명: 해금 기록. 드롭 풀과 제작을 넓힌다 ([`Skill_System.md`](Dokkaebi_Skill_System.md) 11-2절) |
 | **처치 기록** | 처치한 유형을 남긴다. 등급별 정보가 해금된다 |
 | **레코더 모아 두기** | 읽은 레코더를 다시 본다 ([`Progression_System.md`](Dokkaebi_Progression_System.md) 5절) |
 

@@ -324,7 +324,7 @@ public class Inventory
         return lost;
     }
 
-    /// <summary>가방 맨 앞 n칸 — 젬이 아닌 묶음을 앞에서부터 n개. 없으면 null.</summary>
+    /// <summary>가방 맨 앞 n칸 — 칸을 먹는 묶음(구슬이 아닌 것)을 앞에서부터 n개. 없으면 null.</summary>
     public HashSet<ItemStack> SafeStacks(int safeSlots)
     {
         if (safeSlots <= 0)
@@ -334,7 +334,7 @@ public class Inventory
 
         for (int i = 0; i < stacks.Count && safe.Count < safeSlots; i++)
         {
-            if (stacks[i].Definition != null && !stacks[i].Definition.IsSkillGem)
+            if (stacks[i].Definition != null && stacks[i].Definition.IsCargo)
                 safe.Add(stacks[i]);
         }
 

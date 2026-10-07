@@ -25,12 +25,8 @@ public class SkillManager : Singleton<SkillManager>
     [Tooltip("비워두면 Resources/SkillGemCatalog 에셋을 자동으로 불러온다.")]
     [SerializeField] private SkillGemCatalog gemCatalog;
 
-    [Header("도감 (세이브 연결 전 임시)")]
-    [Tooltip("※ 임시 — 변이 샘플 해금과 세이브가 붙기 전까지 전 젬을 드롭 풀에 넣는다.")]
-    [SerializeField] private bool unlockAllOnStart = true;
-
     [Header("드롭")]
-    [Tooltip("시체 1구를 흡수했을 때 젬이 나올 확률.")]
+    [Tooltip("시체 1구에서 구슬(핵심 · 보조 · 정신력 중 하나 — 결정 2-75)이 나올 확률.")]
     [Range(0f, 1f)]
     [SerializeField] private float gemDropChance = 0.18f;
 
@@ -42,8 +38,6 @@ public class SkillManager : Singleton<SkillManager>
     [SerializeField] private bool autoEquipFirstCore = true;
 
     private readonly SocketedBuild build = new();
-    private readonly SkillCodex codex = new();
-    private readonly List<SkillDefinition> dropPool = new();
     private readonly List<SkillDefinition> returned = new();
     private readonly List<ItemStack> gemStackBuffer = new();
 
@@ -51,12 +45,6 @@ public class SkillManager : Singleton<SkillManager>
 
     /// <summary>지금 소켓에 끼워져 있는 구성.</summary>
     public SocketedBuild Build => build;
-
-    /// <summary>도감 — 무엇이 드롭 풀에 들어오는가.</summary>
-    public SkillCodex Codex => codex;
-
-    /// <summary>현재 드롭 풀. 도감에 해금된 것만 들어 있다.</summary>
-    public IReadOnlyList<SkillDefinition> DropPool => dropPool;
 
     /// <summary>전체 정의 카탈로그. 로드 실패 시 null일 수 있다.</summary>
     public SkillCatalog Catalog => catalog;
@@ -108,11 +96,6 @@ public class SkillManager : Singleton<SkillManager>
     {
         LoadCatalogsIfNeeded();
 
-        if (unlockAllOnStart && catalog != null)
-            codex.UnlockAll(catalog.Definitions);
-
-        RebuildDropPool();
-
         SyncLevel();
 
         // 가방 화면(장비 · 가방 · 젬 소켓 · 패시브)을 보장한다.
@@ -161,7 +144,7 @@ public class SkillManager : Singleton<SkillManager>
         }
     }
 
-    // ────────────────────────────────── 카탈로그 · 도감
+    // ────────────────────────────────── 카탈로그
 
     private void LoadCatalogsIfNeeded()
     {
@@ -188,20 +171,6 @@ public class SkillManager : Singleton<SkillManager>
                     "메뉴 Dokkaebi > Skill > 젬 아이템 에셋 생성 을 실행하십시오.", this);
             }
         }
-    }
-
-    /// <summary>도감이 바뀌었을 때 드롭 풀을 다시 만든다.</summary>
-    public void RebuildDropPool()
-    {
-        if (catalog == null)
-        {
-            dropPool.Clear();
-            return;
-        }
-
-        codex.BuildDropPool(catalog.Definitions, dropPool);
-
-        GameLogger.Log($"[SkillManager] 드롭 풀 {dropPool.Count}종 (도감 {codex.Count}종 해금)");
     }
 
     // ────────────────────────────────── 레벨 = 소켓 개방
@@ -266,11 +235,12 @@ public class SkillManager : Singleton<SkillManager>
         if (OwnsCoreGem())
             return false;
 
-        SkillDefinition core = SkillGemDropTable.DrawFirstCore(dropPool, random);
+        // 도감은 없다(결정 2-75) — 부여 계열 핵심 구슬 전체에서 하나.
+        SkillDefinition core = catalog != null ? SkillGemDropTable.DrawFirstCore(catalog.Definitions, random) : null;
 
         if (core == null)
         {
-            GameLogger.Error("[SkillManager] 드롭 풀에 부여 계열 핵심 젬이 없습니다. 도감을 확인하십시오.", this);
+            GameLogger.Error("[SkillManager] 부여 계열 핵심 구슬이 카탈로그에 없습니다.", this);
             return false;
         }
 
@@ -290,11 +260,9 @@ public class SkillManager : Singleton<SkillManager>
     /// 가방에 바로 넣지 않는 이유 — 「무엇을 들고 갈지 고른다」가 철수 루팅의 결정이다.
     /// 자동으로 들어가면 그 결정이 사라진다. (전리품 창 도입, 확정 기획)
     /// </summary>
-    public ItemDefinition RollGemDropItem(int luckMultiplier = 1)
+    /// <param name="chapter">이번 구역이 속한 장 — 핵심 · 보조 구슬의 단계가 된다 (결정 2-75).</param>
+    public ItemDefinition RollGemDropItem(int luckMultiplier = 1, int chapter = 0)
     {
-        if (dropPool.Count == 0)
-            return null;
-
         random ??= new System.Random(Environment.TickCount);
 
         // 패시브 「희귀 드롭 +n%」도 곱한다 (Audit A9).
@@ -303,10 +271,40 @@ public class SkillManager : Singleton<SkillManager>
         if (random.NextDouble() >= chance)
             return null;
 
-        SkillDefinition drawn = SkillGemDropTable.Draw(dropPool, random);
+        // 【고르지 않은 구슬】이 떨어진다 — 핵심 25 · 보조 60 · 정신력 15. 무엇이 될지는 플레이어가 가방에서 고른다.
+        BlankGemKind kind = GemCutting.RollKind(random.Next(100));
+        string id = GemCutting.BlankId(kind, GemCutting.TierOf(chapter));
+        ItemDefinition blank = ItemCatalog.Load()?.Find(id);
 
-        return FindGemItem(drawn);
+        if (blank == null)
+            GameLogger.Error($"[SkillManager] 고르지 않은 구슬 {id}이(가) 없습니다 — 「고르지 않은 구슬 에셋 생성」을 돌리십시오.", this);
+
+        return blank;
     }
+
+    /// <summary>
+    /// 【구슬 고르기】 가방의 고르지 않은 구슬 하나를 원하는 구슬로 바꾼다 (결정 2-75). 한 번 고르면 되돌릴 수 없다.
+    /// </summary>
+    public GemCutError CutGem(ItemDefinition blank, SkillDefinition choice)
+    {
+        Inventory bag = PlayerInventory.EnsureInstance().Bag;
+        GemCutError error = GemCutting.Cut(bag, blank, choice, FindGemItem(choice));
+
+        if (error == GemCutError.None)
+        {
+            PlayerInventory.Instance.RefreshCapacity();
+            GameLogger.Log($"[SkillManager] 구슬을 골랐다: {blank.DisplayName} → {choice.DisplayName}");
+            OnGemGained?.Invoke(choice);
+        }
+
+        return error;
+    }
+
+    /// <summary>이 고르지 않은 구슬로 고를 수 있는 것.</summary>
+    public List<SkillDefinition> CutCandidates(ItemDefinition blank)
+        => blank == null || catalog == null
+            ? new List<SkillDefinition>()
+            : GemCutting.Candidates(blank.BlankGem, blank.Tier, catalog.Definitions);
 
     /// <summary>
     /// 젬을 가방에 넣는다. 자리가 없으면 false.

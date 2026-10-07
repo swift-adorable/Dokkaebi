@@ -118,7 +118,7 @@ public static class SaveManager
         Apply(data);
 
         GameLogger.Log($"[Save] 불러옴 — Lv.{data.level} · 골드 {data.gold} · "
-                       + $"패시브 {data.learnedPassives.Count} · 도감 {data.codex.Count} · "
+                       + $"패시브 {data.learnedPassives.Count} · "
                        + $"각인 {CountFilled(data.imprints)}");
 
         return result;
@@ -179,9 +179,6 @@ public static class SaveManager
             data.discoveredRegression = passive.DiscoveredRegression;
             data.learnedPassives = new List<string>(passive.State.LearnedIds);
         }
-
-        if (SkillManager.HasInstance)
-            data.codex = new List<string>(SkillManager.Instance.Codex.UnlockedIds);
 
         if (PlayerInventory.HasInstance)
         {
@@ -263,14 +260,6 @@ public static class SaveManager
         passive.Gold = data.gold;
         passive.DiscoveredRegression = data.discoveredRegression;
         passive.State.Restore(data.learnedPassives);
-
-        SkillCodex codex = SkillManager.EnsureInstance().Codex;
-
-        // 【덮어쓰지 않고 더한다.】 SkillManager.Start가 개발 설정으로 도감을
-        // 전부 열 수 있다(unlockAllOnStart). 그 설정이 꺼져 있을 때 세이브가
-        // 유일한 출처가 되고, 켜져 있을 때도 이 줄이 해를 끼치지 않는다.
-        foreach (string id in data.codex)
-            codex.Unlock(id);
 
         RestoreImprints(data.imprints);
         RestoreEquipment(data.equipment);
