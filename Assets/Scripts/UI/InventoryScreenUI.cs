@@ -165,6 +165,15 @@ public partial class InventoryScreenUI : MonoBehaviour
     /// </summary>
     private const float EquipColumnRight = 0.30f;
     private const float BagColumnLeft = 0.70f;
+
+    /// <summary>
+    /// 전리품 · 창고 · 상점 창이 뜨면 옛 배치 (결정 2-83) — 왼쪽 한 판(0 ~ 0.60)에 위 착용 칸 · 아래 가방, 오른쪽 0.615부터 그 창.
+    /// </summary>
+    private const float ExchangeColumnRight = 0.60f;
+    private const float ExchangeBagTop = 0.60f;
+
+    /// <summary>지금 옛 배치인가 — 장비 탭에서 전리품 · 창고 · 상점 창이 떠 있다.</summary>
+    private bool exchangeLayout;
     private RectTransform equipmentGrid;
     private RectTransform bagViewport;
     private RectTransform bagGrid;
@@ -507,7 +516,8 @@ public partial class InventoryScreenUI : MonoBehaviour
         goldLabel.gameObject.SetActive(!skillTab);
 
         // 착용 기둥은 위부터 — 장비 8칸(2 × 4)은 기둥을 거의 채우고, 소켓 판(4 × 3)은 위쪽 절반쯤.
-        equipmentGrid.anchorMin = new Vector2(0f, skillTab ? SocketBandBottom - 0.12f : 0f);
+        equipmentGrid.anchorMin = new Vector2(0f,
+            skillTab ? SocketBandBottom - 0.12f : exchangeLayout ? ExchangeBagTop + 0.02f : 0f);
         equipmentGrid.anchorMax = new Vector2(1f, TopBandTop);
         equipmentGrid.offsetMin = Vector2.zero;
         equipmentGrid.offsetMax = Vector2.zero;
@@ -971,10 +981,31 @@ public partial class InventoryScreenUI : MonoBehaviour
 
         if (showLeft)
         {
-            leftColumn.anchorMax = new Vector2(EquipColumnRight, 1f);
+            bool skillTab = tab == Tab.Socket;
+            exchangeLayout = !skillTab && ExchangeWindowUI.AnyOpen;
+
+            leftColumn.anchorMax = new Vector2(exchangeLayout ? ExchangeColumnRight : EquipColumnRight, 1f);
             leftColumn.offsetMax = new Vector2(-half, 0f);
 
-            bool skillTab = tab == Tab.Socket;
+            // 가방 기둥 — 평소엔 오른쪽 끝, 옛 배치에서는 왼쪽 한 판의 아래 (바탕을 끄고 한 판처럼 보이게).
+            if (exchangeLayout)
+            {
+                bagColumn.anchorMin = Vector2.zero;
+                bagColumn.anchorMax = new Vector2(ExchangeColumnRight, ExchangeBagTop);
+                bagColumn.offsetMin = Vector2.zero;
+                bagColumn.offsetMax = new Vector2(-half, 0f);
+            }
+            else
+            {
+                bagColumn.anchorMin = new Vector2(BagColumnLeft, 0f);
+                bagColumn.anchorMax = Vector2.one;
+                bagColumn.offsetMin = new Vector2(half, 0f);
+                bagColumn.offsetMax = Vector2.zero;
+            }
+
+            Transform bagBack = bagColumn.Find("Back");
+            if (bagBack != null)
+                bagBack.gameObject.SetActive(!exchangeLayout);
 
             LayoutLeftColumn(skillTab);
 
@@ -1021,7 +1052,8 @@ public partial class InventoryScreenUI : MonoBehaviour
         // 【닫혀 있으면 늘 보인다.】
         // 패시브 규칙은 「그 화면이 떠 있는 동안」에만 해당한다.
         // tab만 보다가, 패시브를 껐을 때 tab이 그대로라 버튼까지 같이 사라졌다.
-        bool show = !hudSuppressed && (!IsOpen || tab != Tab.Passive);
+        // 장비 · 스킬 · 패시브 화면이 떠 있는 동안은 세 버튼을 감춘다 (결정 2-83) — 가방 기둥 위에 겹쳐 떴다.
+        bool show = !hudSuppressed && !IsOpen;
 
         for (int i = 0; i < hudButtons.Count; i++)
         {
@@ -1104,15 +1136,18 @@ public partial class InventoryScreenUI : MonoBehaviour
         // 【PoE2 소지품창처럼】 (결정 2-82) — 왼쪽 큰 칸 무기 · 오른쪽 큰 칸 그 무기의 화살통 · 탄창(I · II 탭),
         // 가운데 머리 · 갑옷 · 가방, 아래 얼굴 · 윤도, 왼쪽 아래 · 오른쪽 아래 새김패.
         int set = loadout.ActiveWeapon;
-        EquipmentSlot[] slots =
-        {
-            EquipmentLoadout.WeaponSlot(set), EquipmentLoadout.AmmoSlot(set),
-            EquipmentSlot.Head, EquipmentSlot.Body, EquipmentSlot.Backpack,
-            EquipmentSlot.Face, EquipmentSlot.Ears,
-            EquipmentSlot.ImprintA, EquipmentSlot.ImprintB,
-        };
+        EquipmentSlot[] slots = exchangeLayout
+            ? CompactOrder
+            : new[]
+            {
+                EquipmentLoadout.WeaponSlot(set), EquipmentLoadout.AmmoSlot(set),
+                EquipmentSlot.Head, EquipmentSlot.Body, EquipmentSlot.Backpack,
+                EquipmentSlot.Face, EquipmentSlot.Ears,
+                EquipmentSlot.ImprintA, EquipmentSlot.ImprintB,
+            };
 
-        DrawWeaponSetTabs(loadout);
+        if (!exchangeLayout)
+            DrawWeaponSetTabs(loadout);
 
         // 【가로와 세로 여백을 같게 만든다.】
         // 정규화 여백 0.008 하나를 두 축에 쓰면, 가로로 긴 칸에서는
@@ -1128,9 +1163,19 @@ public partial class InventoryScreenUI : MonoBehaviour
 
         for (int i = 0; i < slots.Length; i++)
         {
-            EquipRect(slots[i], out Vector2 min, out Vector2 max);
-            min += new Vector2(padX, padY);
-            max -= new Vector2(padX, padY);
+            Vector2 min, max;
+
+            if (exchangeLayout)
+            {
+                // 옛 배치 — 위 띠에 6 × 2 격자 (결정 2-83).
+                UIFactory.GetCellAnchors(i, 6, 2, padX, padY, out min, out max);
+            }
+            else
+            {
+                EquipRect(slots[i], out min, out max);
+                min += new Vector2(padX, padY);
+                max -= new Vector2(padX, padY);
+            }
 
             ItemStack stack = loadout.Get(slots[i]);
 
@@ -1181,6 +1226,9 @@ public partial class InventoryScreenUI : MonoBehaviour
             // 【여백을 비율이 아니라 픽셀로 준다.】
             // 0.07(가로) / 0.05(세로)로 두었더니 칸이 가로로 길어
             // 왼쪽은 14px, 위는 3px이 됐다. 글자가 천장에 붙어 보였다.
+            // 작은 칸(얼굴 · 윤도 · 가방 · 새김패)은 글자를 줄인다 — 「새김패 2」가 칸을 넘었다.
+            bool smallCell = max.x - min.x < 0.15f;
+
             if (EquipmentLoadout.IsAmmoSlot(slots[i]))
             {
                 DrawAmmoSlot(cell, loadout, slots[i] == EquipmentSlot.Ammo2 ? 1 : 0);
@@ -1188,7 +1236,7 @@ public partial class InventoryScreenUI : MonoBehaviour
             }
 
             UIFactory.Inset(
-                UIFactory.CreateLabel(cell.transform, EquipmentSlotName(slots[i]), 20,
+                UIFactory.CreateLabel(cell.transform, EquipmentSlotName(slots[i]), smallCell ? 15 : 20,
                     FontStyle.Bold, new Vector2(0f, 0.5f), Vector2.one,
                     TextAnchor.UpperLeft, UIPalette.TextDim).rectTransform,
                 left: SlotPad, bottom: 0f, right: SlotPad, top: SlotPad);
@@ -1213,11 +1261,11 @@ public partial class InventoryScreenUI : MonoBehaviour
             // 장비 탭이 폭을 다 쓰게 되면서 칸이 두 배로 넓어졌으므로
             // 실제로 줄어드는 경우는 아주 긴 이름뿐이다.
             Text equipName = UIFactory.CreateLabel(strip.transform,
-                stack.Definition.DisplayName, 21, FontStyle.Bold,
+                stack.Definition.DisplayName, smallCell ? 16 : 21, FontStyle.Bold,
                 new Vector2(0.05f, 0f), new Vector2(0.95f, 1f),
                 TextAnchor.MiddleLeft, Color.white);
 
-            FitName(equipName, 21);
+            FitName(equipName, smallCell ? 16 : 21);
 
             DrawDurabilityBar(cell.transform, stack);
         }
@@ -1231,21 +1279,29 @@ public partial class InventoryScreenUI : MonoBehaviour
     /// </summary>
     private static void EquipRect(EquipmentSlot slot, out Vector2 min, out Vector2 max)
     {
+        // 다섯 기둥 — 큰 칸(무기) · 작은 칸 · 가운데 · 작은 칸 · 큰 칸(화살통) (결정 2-83 · 사용자 그림).
         switch (slot)
         {
             case EquipmentSlot.Weapon:
-            case EquipmentSlot.Weapon2:  min = new(0.00f, 0.40f); max = new(0.30f, 0.89f); return;
+            case EquipmentSlot.Weapon2:  min = new(0.00f, 0.44f); max = new(0.22f, 0.88f); return;
             case EquipmentSlot.Ammo:
-            case EquipmentSlot.Ammo2:    min = new(0.70f, 0.40f); max = new(1.00f, 0.89f); return;
-            case EquipmentSlot.Head:     min = new(0.34f, 0.75f); max = new(0.66f, 1.00f); return;
-            case EquipmentSlot.Body:     min = new(0.34f, 0.36f); max = new(0.66f, 0.75f); return;
-            case EquipmentSlot.Backpack: min = new(0.34f, 0.22f); max = new(0.66f, 0.36f); return;
-            case EquipmentSlot.Face:     min = new(0.34f, 0.00f); max = new(0.50f, 0.20f); return;
-            case EquipmentSlot.Ears:     min = new(0.50f, 0.00f); max = new(0.66f, 0.20f); return;
-            case EquipmentSlot.ImprintA: min = new(0.00f, 0.00f); max = new(0.30f, 0.36f); return;
-            default:                     min = new(0.70f, 0.00f); max = new(1.00f, 0.36f); return;   // ImprintB
+            case EquipmentSlot.Ammo2:    min = new(0.78f, 0.44f); max = new(1.00f, 0.88f); return;
+            case EquipmentSlot.Head:     min = new(0.38f, 0.78f); max = new(0.62f, 0.98f); return;
+            case EquipmentSlot.Face:     min = new(0.38f, 0.63f); max = new(0.62f, 0.76f); return;
+            case EquipmentSlot.Ears:     min = new(0.64f, 0.63f); max = new(0.76f, 0.76f); return;
+            case EquipmentSlot.Body:     min = new(0.38f, 0.32f); max = new(0.62f, 0.61f); return;
+            case EquipmentSlot.Backpack: min = new(0.64f, 0.47f); max = new(0.76f, 0.61f); return;
+            case EquipmentSlot.ImprintA: min = new(0.64f, 0.30f); max = new(0.76f, 0.45f); return;
+            default:                     min = new(0.24f, 0.30f); max = new(0.36f, 0.45f); return;   // ImprintB
         }
     }
+
+    /// <summary>옛 배치(전리품 · 창고 · 상점 창이 떴을 때)의 착용 칸 순서 — 6 × 2 (결정 2-83).</summary>
+    private static readonly EquipmentSlot[] CompactOrder =
+    {
+        EquipmentSlot.Weapon, EquipmentSlot.Ammo, EquipmentSlot.Head, EquipmentSlot.Body, EquipmentSlot.Face, EquipmentSlot.Ears,
+        EquipmentSlot.Weapon2, EquipmentSlot.Ammo2, EquipmentSlot.Backpack, EquipmentSlot.ImprintA, EquipmentSlot.ImprintB,
+    };
 
     /// <summary>
     /// 무기 칸 · 통 칸 위의 I · II 탭 — 누르면 그 무기를 든다(퀵슬롯 1 · 2와 같다). 든 쪽이 밝다.
@@ -1253,15 +1309,15 @@ public partial class InventoryScreenUI : MonoBehaviour
     private void DrawWeaponSetTabs(EquipmentLoadout loadout)
     {
         string[] names = { "I", "II" };
-        float[] lefts = { 0.00f, 0.70f };
+        float[] lefts = { 0.00f, 0.78f };
 
         foreach (float left in lefts)
         {
             for (int k = 0; k < 2; k++)
             {
                 int index = k;
-                float x0 = left + k * 0.15f + 0.005f;
-                float x1 = left + (k + 1) * 0.15f - 0.005f;
+                float x0 = left + k * 0.11f + 0.005f;
+                float x1 = left + (k + 1) * 0.11f - 0.005f;
                 bool on = loadout.ActiveWeapon == k;
                 bool has = loadout.WeaponAt(k) != null;
 

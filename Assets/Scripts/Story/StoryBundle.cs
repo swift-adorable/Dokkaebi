@@ -1,15 +1,19 @@
 using UnityEngine;
 
 /// <summary>
-/// 0-1 길가의 젖은 봇짐 (결정 2-79 · 본문 0-1). 앞에서 누르면 연다 — 한 번만.
+/// 0-1 길가의 젖은 봇짐 (결정 2-79 · 본문 0-1). 앞에서 누르면 【전리품 창으로 연다】 (결정 2-83) —
+/// 시체처럼 하나씩 · 전부 줍기로 가방에 넣는다. 바로 다 들어오지 않는다.
 ///
-///   · 환목궁 — 무기 칸이 비어 있으면 바로 쥔다. 차 있으면 가방으로
-///   · 소환단 · 식혜 · 미숫가루 — 가방으로 (ChapterZeroTable.BundleItems)
+///   · 안의 것: 환목궁 · 화살 60 · 소환단 3 · 식혜 2 · 미숫가루 2 (ChapterZeroTable)
+///   · 처음 열면 「연 것」으로 적는다 — 다음 판부터는 길가에 없다. 이번 판에는 다 집을 때까지 남는다
+///   · 다 집고 창을 닫으면 사라진다
 /// 모양은 임시(누런 자루). 아트가 들어오면 프리팹으로 바꾼다.
 /// </summary>
 public class StoryBundle : MonoBehaviour
 {
-    public bool Opened { get; private set; }
+    private LootContainer contents;
+
+    public LootContainer Contents => contents;
 
     public static StoryBundle Create(Vector3 at)
     {
@@ -33,63 +37,48 @@ public class StoryBundle : MonoBehaviour
         }
 
         var bundle = root.AddComponent<StoryBundle>();
+        bundle.Fill();
         root.AddComponent<BunkerStation>().Setup(BunkerStation.Kind.StoryBundle, 1.8f);
         return bundle;
     }
 
-    /// <summary>연다. 성공하면 true — 봇짐이 사라진다.</summary>
-    public bool Open()
+    private void Fill()
     {
-        if (Opened)
-            return false;
-
         ItemCatalog catalog = ItemCatalog.Load();
-        PlayerInventory inventory = PlayerInventory.EnsureInstance();
-        Inventory bag = inventory.Bag;
+        contents = new LootContainer(LootContainer.DefaultCapacity);
 
-        ItemDefinition bow = catalog?.Find(ChapterZeroTable.BowId);
-        // 빈 무기 자리가 있으면 바로 건다 (결정 2-81 — 두 자루).
-        EquipmentSlot bowSlot = inventory.Loadout.FreeWeaponSlot();
-        bool bowToBag = bow != null && inventory.Loadout.Get(bowSlot) != null;
+        if (catalog == null)
+            return;
 
-        // 전부 들어갈 자리가 있는지 먼저 본다 — 반만 들어가고 봇짐이 사라지면 안 된다.
-        int slotsNeeded = bowToBag ? bow.SlotSize : 0;
-        foreach ((string id, int count) in ChapterZeroTable.BundleItems)
-        {
-            ItemDefinition item = catalog?.Find(id);
-            if (item != null)
-                slotsNeeded += item.SlotSize * UnityEngine.Mathf.CeilToInt(count / (float)UnityEngine.Mathf.Max(1, item.StackMax));
-        }
-
-        if (bag.FreeSlots < slotsNeeded)
-        {
-            StoryDialogueUI.ShowBanner("가방에 자리가 없다.", 1.5f);
-            return false;
-        }
-
+        ItemDefinition bow = catalog.Find(ChapterZeroTable.BowId);
         if (bow != null)
-        {
-            var stack = new ItemStack(bow);
-
-            if (bowToBag || !inventory.Loadout.TryEquip(stack, bowSlot, out _))
-                bag.TryAddStack(stack);
-        }
+            contents.TryPut(bow);
 
         foreach ((string id, int count) in ChapterZeroTable.BundleItems)
         {
-            ItemDefinition item = catalog?.Find(id);
+            ItemDefinition item = catalog.Find(id);
             if (item != null)
-                bag.TryAdd(item, count);
+                contents.TryPut(item, count);
         }
+    }
 
-        inventory.RefreshCapacity();
-        Object.FindAnyObjectByType<PlayerLoadout>()?.Refresh();
+    /// <summary>연다 — 전리품 창. 처음 열면 「연 것」으로 적는다.</summary>
+    public void Open()
+    {
+        if (contents == null || contents.IsEmpty)
+        {
+            StoryDialogueUI.ShowBanner("빈 봇짐이다.", 1.2f);
+            return;
+        }
 
         StoryManager.Progress.See(ChapterZeroTable.BundleEvent);
-        Opened = true;
+        ExchangeWindowUI.EnsureInstance().Open(contents, ChapterZeroTable.BundleName, ExchangeWindowUI.Mode.Loot);
+    }
 
-        StoryDialogueUI.ShowBanner("봇짐을 풀었다 — 환목궁 · 화살 · 소환단 · 식혜 · 미숫가루.", 2.5f);
-        Destroy(gameObject);
-        return true;
+    private void Update()
+    {
+        // 다 집고 창을 닫으면 사라진다.
+        if (contents != null && contents.IsEmpty && !ExchangeWindowUI.AnyOpen)
+            Destroy(gameObject);
     }
 }

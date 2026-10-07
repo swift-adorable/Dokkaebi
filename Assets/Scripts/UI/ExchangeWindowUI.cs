@@ -44,10 +44,10 @@ public class ExchangeWindowUI : MonoBehaviour
     private const int MinRows = 2;
 
     // ── 자리 (안전 영역 기준 0~1) ─────────────────────────────────────
-    // 가운데에 뜬다 (결정 2-82) — 왼쪽은 착용 장비, 오른쪽 끝은 가방 기둥이 쓴다.
+    // 오른쪽에 붙인다 (결정 2-83 — 옛 배치로). 왼쪽은 가방 화면이 「착용 칸 + 가방」 한 판으로 쓴다.
 
-    private const float PanelLeft = 0.31f;
-    private const float PanelRight = 0.69f;
+    private const float PanelLeft = 0.615f;
+    private const float PanelRight = 0.985f;
     private const float PanelBottom = 0.30f;
     private const float PanelTop = 0.965f;
 
@@ -78,6 +78,9 @@ public class ExchangeWindowUI : MonoBehaviour
     private string otherName = "전리품";
 
     public bool IsOpen => panel != null && panel.activeSelf;
+
+    /// <summary>전리품 · 창고 · 상점 창이 떠 있는가 — 가방 화면이 옛 배치(착용 칸 + 가방 한 판)로 바뀐다 (결정 2-83).</summary>
+    public static bool AnyOpen => instance != null && instance.IsOpen;
 
     /// <summary>이 모드로 열려 있는가. 가방 화면이 사이드 메뉴 줄을 고를 때 쓴다.</summary>
     /// <summary>
