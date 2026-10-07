@@ -203,5 +203,111 @@ namespace Dokkaebi.Tests
             Assert.IsTrue(feed.UseUnarmed);
             Assert.AreEqual(AmmoFeedState.Unarmed, feed.State);
         }
+        // ── 무기 두 자루 · 미리 채우기 (결정 2-81) ─────────────────
+
+        [Test]
+        public void 미리_채우기는_25퍼센트_이하에서_가방에_탄이_있을_때만()
+        {
+            Assert.IsTrue(AmmoTable.ShouldOfferReload(7, 30, 10), "화살 30 → 7발부터");
+            Assert.IsFalse(AmmoTable.ShouldOfferReload(8, 30, 10));
+            Assert.IsTrue(AmmoTable.ShouldOfferReload(1, 4, 10), "신기전 4 → 1발");
+            Assert.IsTrue(AmmoTable.ShouldOfferReload(2, 8, 10), "산탄 8 → 2발");
+            Assert.IsFalse(AmmoTable.ShouldOfferReload(3, 30, 0), "가방에 없으면 안 뜬다");
+        }
+
+        [Test]
+        public void 무기는_두_자리_어디에나_걸리고_빈_쪽부터_찬다()
+        {
+            var bow = AssetDatabase.LoadAssetAtPath<WeaponDefinition>($"{ItemRoot}/Weapons/wpn_t1_pipe.asset");
+            var gun = AssetDatabase.LoadAssetAtPath<WeaponDefinition>($"{ItemRoot}/Weapons/wpn_t1_sechongtong.asset");
+            var loadout = new EquipmentLoadout();
+
+            Assert.AreEqual(EquipmentSlot.Weapon, loadout.FreeWeaponSlot());
+            loadout.TryEquip(new ItemStack(bow), EquipmentSlot.Weapon, out _);
+            Assert.AreEqual(EquipmentSlot.Weapon2, loadout.FreeWeaponSlot());
+            Assert.IsTrue(loadout.TryEquip(new ItemStack(gun), EquipmentSlot.Weapon2, out _));
+
+            Assert.AreSame(bow, loadout.ActiveWeaponDefinition);
+            Assert.AreEqual(AmmoTable.Arrow, loadout.AmmoId);
+
+            Assert.IsTrue(loadout.SetActiveWeapon(1));
+            Assert.AreSame(gun, loadout.ActiveWeaponDefinition);
+            Assert.AreEqual(AmmoTable.Shot, loadout.AmmoId);
+            Assert.AreEqual(EquipmentSlot.Weapon2, loadout.FreeWeaponSlot(), "둘 다 차 있으면 든 쪽과 바꾼다");
+        }
+
+        [Test]
+        public void 무기마다_제_통이_있고_바꿔_들어도_남는다()
+        {
+            var bow = AssetDatabase.LoadAssetAtPath<WeaponDefinition>($"{ItemRoot}/Weapons/wpn_t1_pipe.asset");
+            var gun = AssetDatabase.LoadAssetAtPath<WeaponDefinition>($"{ItemRoot}/Weapons/wpn_t1_sechongtong.asset");
+            var arrow = AssetDatabase.LoadAssetAtPath<ItemDefinition>($"{ItemRoot}/Ammo/{AmmoTable.Arrow}.asset");
+            var shot = AssetDatabase.LoadAssetAtPath<ItemDefinition>($"{ItemRoot}/Ammo/{AmmoTable.Shot}.asset");
+            var loadout = new EquipmentLoadout();
+            var bag = new Inventory(20, 999f);
+
+            loadout.TryEquip(new ItemStack(bow), EquipmentSlot.Weapon, out _);
+            loadout.TryEquip(new ItemStack(gun), EquipmentSlot.Weapon2, out _);
+            bag.TryAdd(arrow, 50);
+            bag.TryAdd(shot, 50);
+
+            Assert.AreEqual(30, loadout.RefillAmmo(bag, 0));
+            Assert.AreEqual(20, loadout.RefillAmmo(bag, 1));
+
+            loadout.ConsumeAmmo();
+            Assert.AreEqual(29, loadout.LoadedAt(0));
+
+            loadout.SetActiveWeapon(1);
+            loadout.ConsumeAmmo();
+            Assert.AreEqual(29, loadout.LoadedAt(0), "메고 있는 활의 화살통은 그대로");
+            Assert.AreEqual(19, loadout.LoadedAt(1));
+            Assert.IsTrue(loadout.ReturnMismatchedAmmo(bag));
+            Assert.AreEqual(29, loadout.LoadedAt(0), "제 무기의 탄은 돌려보내지 않는다");
+        }
+
+        [Test]
+        public void 메고_있는_무기의_옵션은_들어가지_않는다()
+        {
+            var bow = AssetDatabase.LoadAssetAtPath<WeaponDefinition>($"{ItemRoot}/Weapons/wpn_t1_pipe.asset");
+            var heavy = AssetDatabase.LoadAssetAtPath<WeaponDefinition>($"{ItemRoot}/Weapons/wpn_t4_breaker.asset");
+            var loadout = new EquipmentLoadout();
+            loadout.TryEquip(new ItemStack(bow), EquipmentSlot.Weapon, out _);
+            loadout.TryEquip(new ItemStack(heavy), EquipmentSlot.Weapon2, out _);
+
+            Assert.AreEqual(0f, loadout.Modifiers.Get(EquipmentStatType.MoveAbility), 0.0001f, "흑각궁은 메고만 있다");
+
+            loadout.SetActiveWeapon(1);
+            Assert.Less(loadout.Modifiers.Get(EquipmentStatType.MoveAbility), 0f, "흑각궁을 들면 대가가 붙는다");
+        }
+
+        [Test]
+        public void 바꿔_드는_동안은_못_쏘고_다_들면_새_무기로()
+        {
+            var feed = new AmmoFeed();
+            feed.Tick(true, 10, 30, 10, 1f, 0.1f);
+            Assert.AreEqual(AmmoFeedState.Ready, feed.State);
+
+            feed.BeginSwitch();
+            Assert.IsFalse(feed.CanShootWeapon(10));
+            Assert.IsFalse(feed.UseUnarmed);
+
+            feed.Tick(true, 0, 20, 5, 2f, AmmoFeed.SwitchSeconds);
+            Assert.AreEqual(AmmoFeedState.Reloading, feed.State, "새 무기의 통이 비어 있으면 바로 채운다");
+        }
+
+        [Test]
+        public void 퀵슬롯_1_2번은_무기_자리라_물건을_걸_수_없다()
+        {
+            var quick = new QuickSlots();
+            var item = new ItemStack(AssetDatabase.LoadAssetAtPath<ItemDefinition>($"{ItemRoot}/Ammo/{AmmoTable.Arrow}.asset"), 1);
+
+            quick.Assign(0, item);
+            quick.Assign(1, item);
+            Assert.IsNull(quick.Get(0));
+            Assert.IsNull(quick.Get(1));
+
+            quick.Assign(QuickSlots.FirstItemSlot, item);
+            Assert.AreSame(item, quick.Get(QuickSlots.FirstItemSlot));
+        }
     }
 }

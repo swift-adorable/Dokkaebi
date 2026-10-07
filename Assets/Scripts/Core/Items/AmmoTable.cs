@@ -90,4 +90,15 @@ public static class AmmoTable
     /// </summary>
     public static int RefillAmount(int loaded, int capacity, int inBag)
         => UnityEngine.Mathf.Clamp(capacity - loaded, 0, UnityEngine.Mathf.Max(0, inBag));
+
+    /// <summary>미리 채우기 버튼이 뜨는 남은 양 — 담는 수의 25% 이하 (결정 2-81) [임시값].</summary>
+    public const float OfferReloadRatio = 0.25f;
+
+    /// <summary>
+    /// 미리 채우기 버튼을 띄울까 — 통이 25% 이하로 남았고, 덜 찼고, 가방에 탄이 있다.
+    /// 화살 30 → 7발 · 쇠뇌살 15 → 3 · 산탄 8 → 2 · 신기전 4 → 1발부터.
+    /// </summary>
+    public static bool ShouldOfferReload(int loaded, int capacity, int inBag)
+        => capacity > 0 && inBag > 0 && loaded < capacity
+           && loaded <= UnityEngine.Mathf.FloorToInt(capacity * OfferReloadRatio);
 }

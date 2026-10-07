@@ -14,6 +14,13 @@ public class QuickSlots
 {
     public const int Count = 8;
 
+    /// <summary>
+    /// 1 · 2번은 무기 두 자루 자리다 (결정 2-81 — 덕코프처럼). 물건은 3 ~ 8번(0부터 세어 2 ~ 7)에만 건다.
+    /// </summary>
+    public const int FirstItemSlot = 2;
+
+    public static bool IsItemSlot(int index) => index >= FirstItemSlot && index < Count;
+
     /// <summary>비어 있음.</summary>
     public const int None = -1;
 
@@ -49,7 +56,7 @@ public class QuickSlots
     /// </summary>
     public void Assign(int index, ItemStack stack)
     {
-        if (index < 0 || index >= Count)
+        if (!IsItemSlot(index))
             return;
 
         if (stack == null)

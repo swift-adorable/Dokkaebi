@@ -1,12 +1,15 @@
 using System.Collections.Generic;
 
 /// <summary>
-/// 착용 상태. 슬롯 9칸 (화살통 · 탄창 포함 — 결정 2-80). MonoBehaviour 의존이 없는 순수 클래스다.
+/// 착용 상태. 슬롯 11칸 — 무기 두 자루 · 각자의 화살통 · 탄창 (결정 2-80 · 2-81). MonoBehaviour 의존이 없는 순수 클래스다.
 /// (docs/Dokkaebi_Equipment_System.md 1절)
 /// </summary>
 public class EquipmentLoadout
 {
-    private const int SlotCount = 9;
+    private const int SlotCount = 11;
+
+    /// <summary>든 무기 — 0 = 무기 1, 1 = 무기 2 (결정 2-81). 든 쪽만 사격 성능 · 옵션이 들어간다.</summary>
+    public int ActiveWeapon { get; private set; }
 
     private readonly ItemStack[] slots = new ItemStack[SlotCount];
 
@@ -35,11 +38,14 @@ public class EquipmentLoadout
         if (stack == null || stack.IsEmpty)
             return false;
 
-        // 화살통 · 탄창 — 든 무기가 쓰는 탄만, 정해진 수까지 (결정 2-80).
-        if (slot == EquipmentSlot.Ammo)
+        // 화살통 · 탄창 — 그 무기가 쓰는 탄만, 정해진 수까지 (결정 2-80).
+        if (IsAmmoSlot(slot))
+        {
+            string id = AmmoIdOf(WeaponSlotOf(slot));
             return stack.Definition.Kind == ItemKind.Ammo
-                   && stack.Definition.Id == AmmoId
-                   && stack.Count <= AmmoTable.CapacityOf(AmmoId);
+                   && stack.Definition.Id == id
+                   && stack.Count <= AmmoTable.CapacityOf(id);
+        }
 
         if (stack.Definition is not EquipmentDefinition definition)
             return false;
@@ -92,11 +98,55 @@ public class EquipmentLoadout
         return removed;
     }
 
-    /// <summary>든 무기가 쓰는 탄 id. 무기가 없으면 null — 맨손은 탄을 쓰지 않는다.</summary>
-    public string AmmoId => (Get(EquipmentSlot.Weapon)?.Definition as WeaponDefinition)?.AmmoId;
+    // ── 무기 두 자루 (결정 2-81) ─────────────────────────────────────
 
-    /// <summary>화살통 · 탄창에 든 수.</summary>
-    public int LoadedAmmo => Get(EquipmentSlot.Ammo)?.Count ?? 0;
+    public static bool IsWeaponSlot(EquipmentSlot slot) => slot == EquipmentSlot.Weapon || slot == EquipmentSlot.Weapon2;
+    public static bool IsAmmoSlot(EquipmentSlot slot) => slot == EquipmentSlot.Ammo || slot == EquipmentSlot.Ammo2;
+
+    public static EquipmentSlot WeaponSlot(int index) => index == 1 ? EquipmentSlot.Weapon2 : EquipmentSlot.Weapon;
+    public static EquipmentSlot AmmoSlot(int index) => index == 1 ? EquipmentSlot.Ammo2 : EquipmentSlot.Ammo;
+    public static EquipmentSlot AmmoSlotOf(EquipmentSlot weaponSlot) => weaponSlot == EquipmentSlot.Weapon2 ? EquipmentSlot.Ammo2 : EquipmentSlot.Ammo;
+    public static EquipmentSlot WeaponSlotOf(EquipmentSlot ammoSlot) => ammoSlot == EquipmentSlot.Ammo2 ? EquipmentSlot.Weapon2 : EquipmentSlot.Weapon;
+
+    public WeaponDefinition WeaponAt(int index) => Get(WeaponSlot(index))?.Definition as WeaponDefinition;
+
+    /// <summary>든 무기. 없으면 null — 맨손.</summary>
+    public WeaponDefinition ActiveWeaponDefinition => WeaponAt(ActiveWeapon);
+
+    /// <summary>무기를 바꿔 든다. 같은 쪽이면 false.</summary>
+    public bool SetActiveWeapon(int index)
+    {
+        index = index == 1 ? 1 : 0;
+        if (index == ActiveWeapon)
+            return false;
+
+        ActiveWeapon = index;
+        isDirty = true;
+        return true;
+    }
+
+    /// <summary>
+    /// 새 무기가 들어갈 자리 — 빈 쪽 먼저(무기 1 → 무기 2). 둘 다 차 있으면 든 쪽과 바꾼다.
+    /// </summary>
+    public EquipmentSlot FreeWeaponSlot()
+    {
+        if (Get(EquipmentSlot.Weapon) == null) return EquipmentSlot.Weapon;
+        if (Get(EquipmentSlot.Weapon2) == null) return EquipmentSlot.Weapon2;
+        return WeaponSlot(ActiveWeapon);
+    }
+
+    private string AmmoIdOf(EquipmentSlot weaponSlot) => (Get(weaponSlot)?.Definition as WeaponDefinition)?.AmmoId;
+
+    /// <summary>든 무기가 쓰는 탄 id. 무기가 없으면 null — 맨손은 탄을 쓰지 않는다.</summary>
+    public string AmmoId => AmmoIdOf(WeaponSlot(ActiveWeapon));
+
+    /// <summary>그 무기(0 · 1)가 쓰는 탄 · 통에 든 수 · 담는 수.</summary>
+    public string AmmoIdAt(int index) => AmmoIdOf(WeaponSlot(index));
+    public int LoadedAt(int index) => Get(AmmoSlot(index))?.Count ?? 0;
+    public int CapacityAt(int index) => AmmoTable.CapacityOf(AmmoIdAt(index));
+
+    /// <summary>든 무기의 화살통 · 탄창에 든 수.</summary>
+    public int LoadedAmmo => LoadedAt(ActiveWeapon);
 
     /// <summary>화살통 · 탄창에 담기는 수. 무기가 없으면 0.</summary>
     public int AmmoCapacity => AmmoTable.CapacityOf(AmmoId);
@@ -106,7 +156,8 @@ public class EquipmentLoadout
     /// </summary>
     public bool ConsumeAmmo()
     {
-        ItemStack held = Get(EquipmentSlot.Ammo);
+        EquipmentSlot slot = AmmoSlot(ActiveWeapon);
+        ItemStack held = Get(slot);
 
         if (held == null || held.IsEmpty)
             return false;
@@ -114,7 +165,7 @@ public class EquipmentLoadout
         held.Take(1);
 
         if (held.IsEmpty)
-            slots[(int)EquipmentSlot.Ammo] = null;
+            slots[(int)slot] = null;
 
         return true;
     }
@@ -122,9 +173,12 @@ public class EquipmentLoadout
     /// <summary>
     /// 가방에서 통을 채운다 — 빈 자리만큼, 가방에 있는 만큼. 채운 수를 돌려준다.
     /// </summary>
-    public int RefillAmmo(Inventory bag)
+    public int RefillAmmo(Inventory bag) => RefillAmmo(bag, ActiveWeapon);
+
+    /// <summary>그 무기(0 · 1)의 통을 가방에서 채운다.</summary>
+    public int RefillAmmo(Inventory bag, int index)
     {
-        string id = AmmoId;
+        string id = AmmoIdAt(index);
 
         if (string.IsNullOrEmpty(id) || bag == null)
             return 0;
@@ -134,15 +188,15 @@ public class EquipmentLoadout
         if (ammo == null)
             return 0;
 
-        int amount = AmmoTable.RefillAmount(LoadedAmmo, AmmoCapacity, bag.CountOf(ammo));
+        int amount = AmmoTable.RefillAmount(LoadedAt(index), CapacityAt(index), bag.CountOf(ammo));
 
         if (amount <= 0)
             return 0;
 
         bag.Remove(ammo, amount);
 
-        int total = LoadedAmmo + amount;
-        slots[(int)EquipmentSlot.Ammo] = new ItemStack(ammo, total);
+        int total = LoadedAt(index) + amount;
+        slots[(int)AmmoSlot(index)] = new ItemStack(ammo, total);
 
         return amount;
     }
@@ -153,19 +207,29 @@ public class EquipmentLoadout
     /// </summary>
     public bool ReturnMismatchedAmmo(Inventory bag)
     {
-        ItemStack held = Get(EquipmentSlot.Ammo);
+        bool ok = true;
 
-        if (held == null)
-            return true;
+        for (int index = 0; index < 2; index++)
+        {
+            EquipmentSlot slot = AmmoSlot(index);
+            ItemStack held = Get(slot);
 
-        if (held.Definition != null && held.Definition.Id == AmmoId)
-            return true;
+            if (held == null)
+                continue;
 
-        if (bag == null || !bag.TryAddStack(held))
-            return false;
+            if (held.Definition != null && held.Definition.Id == AmmoIdAt(index))
+                continue;
 
-        slots[(int)EquipmentSlot.Ammo] = null;
-        return true;
+            if (bag == null || !bag.TryAddStack(held))
+            {
+                ok = false;
+                continue;
+            }
+
+            slots[(int)slot] = null;
+        }
+
+        return ok;
     }
 
     private static ItemDefinition FindInBag(Inventory bag, string id)
@@ -192,6 +256,10 @@ public class EquipmentLoadout
                 ItemStack stack = slots[i];
 
                 if (stack?.Definition is not EquipmentDefinition definition)
+                    continue;
+
+                // 메고만 있는 무기의 옵션은 들어가지 않는다 — 든 무기만 (결정 2-81).
+                if (IsWeaponSlot((EquipmentSlot)i) && (EquipmentSlot)i != WeaponSlot(ActiveWeapon))
                     continue;
 
                 modifiers.Add(definition, stack.IsBroken, stack.IsWorn);
@@ -263,6 +331,8 @@ public class EquipmentLoadout
         if (lost.Count > 0)
             isDirty = true;
 
+        ActiveWeapon = 0;
+
         return lost;
     }
 
@@ -276,6 +346,10 @@ public class EquipmentLoadout
     {
         if (IsImprintSlot(slot))
             return IsImprintSlot(definition.Slot);
+
+        // 무기는 두 자리 어디에나 (결정 2-81).
+        if (IsWeaponSlot(slot))
+            return definition.Slot == EquipmentSlot.Weapon;
 
         return definition.Slot == slot;
     }

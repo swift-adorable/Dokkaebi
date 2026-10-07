@@ -22,9 +22,9 @@ public partial class InventoryScreenUI
     /// </summary>
     private void OnEquipSlotClicked(EquipmentSlot slot)
     {
-        if (slot == EquipmentSlot.Ammo)
+        if (EquipmentLoadout.IsAmmoSlot(slot))
         {
-            OnAmmoSlotClicked();
+            OnAmmoSlotClicked(slot == EquipmentSlot.Ammo2 ? 1 : 0);
             return;
         }
 
@@ -171,24 +171,25 @@ public partial class InventoryScreenUI
     /// <summary>
     /// 화살통 · 탄창 칸 (결정 2-80) — 가방의 탄으로 채운다. 소굴에서는 바로, 구역에서는 채우는 시간을 들여.
     /// </summary>
-    private void OnAmmoSlotClicked()
+    private void OnAmmoSlotClicked(int index)
     {
         PlayerInventory inventory = PlayerInventory.EnsureInstance();
         EquipmentLoadout loadout = inventory.Loadout;
 
-        if (string.IsNullOrEmpty(loadout.AmmoId))
+        if (string.IsNullOrEmpty(loadout.AmmoIdAt(index)))
         {
-            ShowToast("무기를 들면 그 무기의 탄이 여기 들어갑니다.");
+            ShowToast($"무기 {index + 1}을 걸면 그 무기의 탄이 여기 들어갑니다.");
             return;
         }
 
-        if (loadout.LoadedAmmo >= loadout.AmmoCapacity)
+        if (loadout.LoadedAt(index) >= loadout.CapacityAt(index))
         {
             ShowToast("이미 가득 찼습니다.");
             return;
         }
 
-        if (!SceneFlow.InBunker)
+        // 구역에서 든 무기의 통은 채우는 시간을 들인다. 메고 있는 무기 · 소굴에서는 바로.
+        if (!SceneFlow.InBunker && index == loadout.ActiveWeapon)
         {
             PlayerWeapon weapon = Object.FindAnyObjectByType<PlayerWeapon>();
             weapon?.Ammo.RequestReload();
@@ -196,7 +197,7 @@ public partial class InventoryScreenUI
             return;
         }
 
-        int moved = loadout.RefillAmmo(inventory.Bag);
+        int moved = loadout.RefillAmmo(inventory.Bag, index);
         ShowToast(moved > 0 ? $"{moved}발을 채웠습니다." : "가방에 맞는 탄이 없습니다.");
         AfterLoadoutChanged(inventory);
     }
@@ -206,6 +207,11 @@ public partial class InventoryScreenUI
     {
         // 바꿔 든 무기의 탄이 아닌 것 · 무기를 벗은 뒤의 탄은 가방으로 (결정 2-80).
         inventory.Loadout.ReturnMismatchedAmmo(inventory.Bag);
+
+        // 든 쪽을 벗었고 다른 쪽에 무기가 있으면 그쪽을 든다 (결정 2-81).
+        EquipmentLoadout l = inventory.Loadout;
+        if (l.ActiveWeaponDefinition == null && l.WeaponAt(1 - l.ActiveWeapon) != null)
+            l.SetActiveWeapon(1 - l.ActiveWeapon);
 
         inventory.RefreshCapacity();
 

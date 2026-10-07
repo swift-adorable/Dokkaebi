@@ -453,10 +453,14 @@ public partial class InventoryScreenUI
             new Vector2(0f, QuickRowTop + 0.008f), new Vector2(1f, QuickRowTop + 0.062f),
             TextAnchor.MiddleLeft, UIPalette.TextDim);
 
-        for (int i = 0; i < QuickSlots.Count; i++)
+        // 1 · 2번은 무기 자리 — 물건은 3 ~ 8번에 건다 (결정 2-81).
+        int itemSlots = QuickSlots.Count - QuickSlots.FirstItemSlot;
+
+        for (int i = QuickSlots.FirstItemSlot; i < QuickSlots.Count; i++)
         {
-            float left = i / (float)QuickSlots.Count + 0.005f;
-            float right = (i + 1) / (float)QuickSlots.Count - 0.005f;
+            int column = i - QuickSlots.FirstItemSlot;
+            float left = column / (float)itemSlots + 0.005f;
+            float right = (column + 1) / (float)itemSlots - 0.005f;
 
             int captured = i;
 
@@ -499,6 +503,10 @@ public partial class InventoryScreenUI
     {
         bool imprint = definition.Slot == EquipmentSlot.ImprintA
                        || definition.Slot == EquipmentSlot.ImprintB;
+
+        // 무기는 두 자리 — 빈 쪽 먼저, 둘 다 차 있으면 든 쪽과 바꾼다 (결정 2-81).
+        if (definition.Slot == EquipmentSlot.Weapon)
+            return loadout.FreeWeaponSlot();
 
         if (!imprint)
             return definition.Slot;

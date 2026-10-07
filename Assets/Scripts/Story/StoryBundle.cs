@@ -48,7 +48,9 @@ public class StoryBundle : MonoBehaviour
         Inventory bag = inventory.Bag;
 
         ItemDefinition bow = catalog?.Find(ChapterZeroTable.BowId);
-        bool bowToBag = bow != null && inventory.Loadout.Get(EquipmentSlot.Weapon) != null;
+        // 빈 무기 자리가 있으면 바로 건다 (결정 2-81 — 두 자루).
+        EquipmentSlot bowSlot = inventory.Loadout.FreeWeaponSlot();
+        bool bowToBag = bow != null && inventory.Loadout.Get(bowSlot) != null;
 
         // 전부 들어갈 자리가 있는지 먼저 본다 — 반만 들어가고 봇짐이 사라지면 안 된다.
         int slotsNeeded = bowToBag ? bow.SlotSize : 0;
@@ -69,7 +71,7 @@ public class StoryBundle : MonoBehaviour
         {
             var stack = new ItemStack(bow);
 
-            if (bowToBag || !inventory.Loadout.TryEquip(stack, EquipmentSlot.Weapon, out _))
+            if (bowToBag || !inventory.Loadout.TryEquip(stack, bowSlot, out _))
                 bag.TryAddStack(stack);
         }
 

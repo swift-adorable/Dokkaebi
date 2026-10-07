@@ -208,6 +208,8 @@ public static class SaveManager
                     data.equipment.Add(new SavedEquip { slot = (int)slot, item = ToSaved(worn) });
             }
 
+            data.activeWeapon = loadout.ActiveWeapon;
+
             data.stash = new List<SavedItem>();
 
             foreach (ItemStack stack in PlayerInventory.Instance.Stash.Stacks)
@@ -229,11 +231,11 @@ public static class SaveManager
     /// <summary>각인을 뺀 착용 자리. 각인은 죽어도 남아 따로 저장한다.</summary>
     private static readonly EquipmentSlot[] CarriedSlots =
     {
-        EquipmentSlot.Weapon, EquipmentSlot.Head, EquipmentSlot.Body,
+        EquipmentSlot.Weapon, EquipmentSlot.Weapon2, EquipmentSlot.Head, EquipmentSlot.Body,
         EquipmentSlot.Face, EquipmentSlot.Ears, EquipmentSlot.Backpack,
 
-        // 화살통 · 탄창 (결정 2-80) — 무기 다음에 입혀야 한다(무기가 정한 탄만 들어간다).
-        EquipmentSlot.Ammo
+        // 화살통 · 탄창 (결정 2-80 · 2-81) — 무기 다음에 입혀야 한다(무기가 정한 탄만 들어간다).
+        EquipmentSlot.Ammo, EquipmentSlot.Ammo2
     };
 
     private static SavedItem ToSaved(ItemStack stack)
@@ -266,6 +268,10 @@ public static class SaveManager
 
         RestoreImprints(data.imprints);
         RestoreEquipment(data.equipment);
+
+        // 든 무기 (결정 2-81) — 그 자리가 비었으면 무기 1.
+        EquipmentLoadout restored = PlayerInventory.EnsureInstance().Loadout;
+        restored.SetActiveWeapon(restored.WeaponAt(data.activeWeapon) != null ? data.activeWeapon : 0);
         RestoreInto(PlayerInventory.EnsureInstance().Bag, data.bag, "가방");
         RestoreInto(PlayerInventory.Instance.Stash, data.stash, "창고");
         ShopManager.Restore(data.shop);
@@ -410,7 +416,7 @@ public static class SaveManager
             }
 
             // 화살통 · 탄창은 수가 있다. 장비는 언제나 하나다.
-            int count = (EquipmentSlot)row.slot == EquipmentSlot.Ammo ? Mathf.Max(1, row.item.count) : 1;
+            int count = EquipmentLoadout.IsAmmoSlot((EquipmentSlot)row.slot) ? Mathf.Max(1, row.item.count) : 1;
             var stack = new ItemStack(definition, count, row.item.durability);
 
             if (!loadout.TryEquip(stack, (EquipmentSlot)row.slot, out _))

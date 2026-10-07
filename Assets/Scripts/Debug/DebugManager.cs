@@ -13,16 +13,16 @@ public class DebugManager : MonoBehaviour
 
     [Header("Cheat Keys")]
     [Tooltip("경험치 획득")]
-    [SerializeField] private KeyCode addXPKey = KeyCode.Alpha1;
+    [SerializeField] private KeyCode addXPKey = KeyCode.F1;   // 1 · 2는 무기 바꿔 들기 (결정 2-81)
 
     [Tooltip("모든 Skill 획득")]
-    [SerializeField] private KeyCode giveAllSkillsKey = KeyCode.Alpha2;
+    [SerializeField] private KeyCode giveAllSkillsKey = KeyCode.F2;
 
     [Tooltip("적 즉시 생성")]
-    [SerializeField] private KeyCode spawnEnemyKey = KeyCode.Alpha3;
+    [SerializeField] private KeyCode spawnEnemyKey = KeyCode.F3;
 
     [Tooltip("체력 회복")]
-    [SerializeField] private KeyCode healKey = KeyCode.Alpha4;
+    [SerializeField] private KeyCode healKey = KeyCode.F4;
 
     [Header("Cheat Values")]
     [SerializeField] private int xpPerCheat = 10;

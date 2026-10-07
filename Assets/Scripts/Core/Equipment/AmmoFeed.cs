@@ -11,6 +11,8 @@ public enum AmmoFeedState
     Slinging,
     /// <summary>무기를 등에 멨다 — 맨손으로 싸운다.</summary>
     Slung,
+    /// <summary>무기를 바꿔 드는 중 — 못 쏜다 (결정 2-81).</summary>
+    Switching,
 }
 
 public enum AmmoFeedEvent
@@ -37,6 +39,19 @@ public sealed class AmmoFeed
 {
     /// <summary>무기를 등에 메는 데 걸리는 시간 (초) [임시값].</summary>
     public const float SlingSeconds = 0.5f;
+
+    /// <summary>무기를 바꿔 드는 데 걸리는 시간 (초) [임시값 — 결정 2-81].</summary>
+    public const float SwitchSeconds = 0.4f;
+
+    /// <summary>
+    /// 무기를 바꿔 든다 — 바꿔 드는 동안 못 쏘고, 다 들면 새 무기의 통을 보고 다시 정한다.
+    /// 채우던 것 · 메던 것은 끊긴다.
+    /// </summary>
+    public void BeginSwitch()
+    {
+        State = AmmoFeedState.Switching;
+        Duration = Remaining = SwitchSeconds;
+    }
 
     public AmmoFeedState State { get; private set; } = AmmoFeedState.Unarmed;
     public float Remaining { get; private set; }
@@ -111,6 +126,16 @@ public sealed class AmmoFeed
                 State = AmmoFeedState.Slung;
                 Remaining = 0f;
                 return AmmoFeedEvent.Slung;
+
+            case AmmoFeedState.Switching:
+                Remaining -= UnityEngine.Mathf.Max(0f, deltaTime);
+                if (Remaining > 0f)
+                    return AmmoFeedEvent.None;
+
+                // 다 들었다 — 방금 무기를 든 것처럼 다시 정한다.
+                State = AmmoFeedState.Unarmed;
+                Remaining = 0f;
+                return Tick(true, loaded, capacity, inBag, reloadSeconds, 0f);
 
             case AmmoFeedState.Slung:
                 if (loaded > 0)

@@ -2,8 +2,9 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// 【임시】 화살통 · 탄창 HUD (결정 2-80) — 화면 아래 가운데 한 줄.
-///   「화살통 18/30 · 가방 112」 / 「채우는 중 ▮▮▮▯」 / 「활을 멨다 — 맨손」
+/// 【임시】 화살통 · 탄창 HUD (결정 2-80) — 화면 아래 가운데 한 줄. 채우는 중 · 멘 때만 뜬다.
+///   「화살통 채우는 중 ■■□□」 / 「환목궁을 멨다 — 맨손」
+/// 남은 수는 퀵슬롯 1 · 2(무기 칸)가 보여 준다 (결정 2-81).
 /// 아트 작업 때 다시 그린다.
 /// </summary>
 public class AmmoHudUI : MonoBehaviour
@@ -45,7 +46,7 @@ public class AmmoHudUI : MonoBehaviour
             new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), TextAnchor.MiddleCenter, UIPalette.TextOnGlass);
         label.rectTransform.pivot = new Vector2(0.5f, 0f);
         label.rectTransform.sizeDelta = new Vector2(640f, 34f);
-        label.rectTransform.anchoredPosition = new Vector2(0f, 120f);
+        label.rectTransform.anchoredPosition = new Vector2(0f, 190f);   // 퀵슬롯 줄 위
         label.horizontalOverflow = HorizontalWrapMode.Overflow;
         label.raycastTarget = false;
         label.gameObject.AddComponent<Outline>().effectColor = new Color(0f, 0f, 0f, 0.75f);
@@ -77,9 +78,13 @@ public class AmmoHudUI : MonoBehaviour
                 label.text = $"{Josa.EulReul(weapon.DisplayName)} 멨다 — 맨손 · 탄 없음";
                 break;
 
+            case AmmoFeedState.Switching:
+                label.color = UIPalette.TextDim;
+                label.text = $"{Josa.EulReul(weapon.DisplayName)} 드는 중";
+                break;
+
             default:
-                label.color = loadout.LoadedAmmo == 0 ? UIPalette.Warning : UIPalette.TextOnGlass;
-                label.text = $"{holder} {loadout.LoadedAmmo}/{loadout.AmmoCapacity} · 가방 {inBag}";
+                label.text = string.Empty;
                 break;
         }
     }

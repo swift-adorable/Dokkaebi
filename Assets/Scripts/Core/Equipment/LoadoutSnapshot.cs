@@ -95,7 +95,7 @@ public readonly struct LoadoutSnapshot
         EquipmentModifiers modifiers = loadout.Modifiers;
 
         var weapon = WeaponProfile.Create(
-            loadout.GetDefinition(EquipmentSlot.Weapon) as WeaponDefinition, modifiers);
+            loadout.ActiveWeaponDefinition, modifiers);   // 든 무기 (결정 2-81)
 
         // 최대 체력은 장비가 올리지 않는다. 각인만 깎는다.
         // (docs/Dokkaebi_Combat_Baseline.md 1절 — 체력은 100 고정)

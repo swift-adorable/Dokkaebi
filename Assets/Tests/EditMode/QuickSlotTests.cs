@@ -64,10 +64,10 @@ namespace Dokkaebi.Tests
             var stack = new ItemStack(Definition("medkit"), 3);
             var quick = new QuickSlots();
 
-            quick.Assign(1, stack);
+            quick.Assign(3, stack);
             quick.Assign(5, stack);
 
-            Assert.IsNull(quick.Get(1), "옮기지 않고 복사됐습니다.");
+            Assert.IsNull(quick.Get(3), "옮기지 않고 복사됐습니다.");
             Assert.AreSame(stack, quick.Get(5));
         }
 
@@ -78,10 +78,10 @@ namespace Dokkaebi.Tests
             var stack = new ItemStack(Definition("medkit"), 3);
             var quick = new QuickSlots();
 
-            quick.Assign(0, stack);
-            quick.Assign(0, stack);
+            quick.Assign(2, stack);
+            quick.Assign(2, stack);
 
-            Assert.IsNull(quick.Get(0));
+            Assert.IsNull(quick.Get(2));
             Assert.AreEqual(QuickSlots.None, quick.IndexOf(stack));
         }
 
@@ -126,12 +126,12 @@ namespace Dokkaebi.Tests
             ItemStack stack = AddTo(bag, Definition("medkit"), 1);
 
             var quick = new QuickSlots();
-            quick.Assign(0, stack);
+            quick.Assign(2, stack);
 
             stack.Take(1);
             quick.Prune(bag);
 
-            Assert.IsNull(quick.Get(0), "개수가 0인데 칸에 남아 있습니다.");
+            Assert.IsNull(quick.Get(2), "개수가 0인데 칸에 남아 있습니다.");
         }
 
         [Test]

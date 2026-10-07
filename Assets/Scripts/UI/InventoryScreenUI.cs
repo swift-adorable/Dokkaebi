@@ -745,6 +745,17 @@ public partial class InventoryScreenUI : MonoBehaviour
             toast.SetActive(false);
 
         RefreshCastBar();
+
+        // 무기 칸(1 · 2)의 탄 수 — 쏠 때마다 줄어든다 (결정 2-81).
+        RefreshWeaponBarIfChanged();
+
+        // 3 ~ 8 — 퀵슬롯 물건 쓰기 (데스크톱). 1 · 2는 PlayerAmmo가 무기 바꿔 들기로 받는다.
+        if (!IsOpen)
+        {
+            for (int i = QuickSlots.FirstItemSlot; i < QuickSlots.Count; i++)
+                if (Input.GetKeyDown(KeyCode.Alpha1 + i))
+                    OnQuickSlotClicked(i);
+        }
     }
 
     // ── 시전 막대 ─────────────────────────────────────────────────────
@@ -852,6 +863,7 @@ public partial class InventoryScreenUI : MonoBehaviour
         QuestHudUI.SetHiddenByScreen(true);
         ExtractionHudUI.SetHiddenByScreen(true);
         AmmoHudUI.SetHiddenByScreen(true);
+        ReloadButtonUI.SetHiddenByScreen(true);
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         // 검증 패널은 이 화면 뒤에 있다. 켜져 있으면 글자가 비쳐 보인다.
@@ -887,6 +899,7 @@ public partial class InventoryScreenUI : MonoBehaviour
         QuestHudUI.SetHiddenByScreen(false);
         ExtractionHudUI.SetHiddenByScreen(false);
         AmmoHudUI.SetHiddenByScreen(false);
+        ReloadButtonUI.SetHiddenByScreen(false);
 
         // 파밍 중이었다면 오른쪽 전리품 패널도 같이 닫힌다. 둘은 한 벌이다.
         ExchangeWindowUI.CloseIfOpen();
@@ -1101,8 +1114,8 @@ public partial class InventoryScreenUI : MonoBehaviour
 
         for (int i = 0; i < slots.Length; i++)
         {
-            // 착용 기둥이 세로로 길어져(결정 2-77) 2열로 쌓는다 — 화살통 · 탄창이 들어와 5줄 (결정 2-80).
-            UIFactory.GetCellAnchors(i, 2, 5, padX, padY, out Vector2 min, out Vector2 max);
+            // 착용 기둥이 세로로 길어져(결정 2-77) 2열로 쌓는다 — 무기 두 자루 · 통 둘이 들어와 6줄 (결정 2-80 · 2-81).
+            UIFactory.GetCellAnchors(i, 2, 6, padX, padY, out Vector2 min, out Vector2 max);
 
             ItemStack stack = loadout.Get(slots[i]);
 
@@ -1153,9 +1166,9 @@ public partial class InventoryScreenUI : MonoBehaviour
             // 【여백을 비율이 아니라 픽셀로 준다.】
             // 0.07(가로) / 0.05(세로)로 두었더니 칸이 가로로 길어
             // 왼쪽은 14px, 위는 3px이 됐다. 글자가 천장에 붙어 보였다.
-            if (slots[i] == EquipmentSlot.Ammo)
+            if (EquipmentLoadout.IsAmmoSlot(slots[i]))
             {
-                DrawAmmoSlot(cell, loadout);
+                DrawAmmoSlot(cell, loadout, slots[i] == EquipmentSlot.Ammo2 ? 1 : 0);
                 continue;
             }
 
@@ -1200,17 +1213,18 @@ public partial class InventoryScreenUI : MonoBehaviour
     /// </summary>
     private static readonly EquipmentSlot[] EquipOrder =
     {
-        EquipmentSlot.Weapon, EquipmentSlot.Head,
-        EquipmentSlot.Ammo, EquipmentSlot.Body,
+        EquipmentSlot.Weapon, EquipmentSlot.Weapon2,
+        EquipmentSlot.Ammo, EquipmentSlot.Ammo2,
+        EquipmentSlot.Head, EquipmentSlot.Body,
         EquipmentSlot.Face, EquipmentSlot.Ears,
         EquipmentSlot.Backpack, EquipmentSlot.ImprintA,
         EquipmentSlot.ImprintB,
     };
 
     /// <summary>화살통 · 탄창 칸 — 「화살통 / 화살 18/30」. 누르면 가방에서 채운다.</summary>
-    private void DrawAmmoSlot(Image cell, EquipmentLoadout loadout)
+    private void DrawAmmoSlot(Image cell, EquipmentLoadout loadout, int index)
     {
-        var weapon = loadout.Get(EquipmentSlot.Weapon)?.Definition as WeaponDefinition;
+        WeaponDefinition weapon = loadout.WeaponAt(index);
         string holder = weapon != null ? weapon.KindInfo.HolderName : "화살통";
 
         UIFactory.Inset(
@@ -1220,8 +1234,8 @@ public partial class InventoryScreenUI : MonoBehaviour
             left: SlotPad, bottom: 0f, right: SlotPad, top: SlotPad);
 
         string text = weapon == null
-            ? "무기를 들면 채운다"
-            : $"{AmmoTable.Find(weapon.AmmoId)?.Name ?? "탄"} {loadout.LoadedAmmo}/{loadout.AmmoCapacity}";
+            ? "무기를 걸면 채운다"
+            : $"{AmmoTable.Find(weapon.AmmoId)?.Name ?? "탄"} {loadout.LoadedAt(index)}/{loadout.CapacityAt(index)}";
 
         Image strip = UIFactory.CreatePanel("NameStrip", cell.transform, UIPalette.NameStrip,
             new Vector2(0f, 0f), new Vector2(1f, 0.5f), radius: 6);
@@ -1230,7 +1244,7 @@ public partial class InventoryScreenUI : MonoBehaviour
 
         Text label = UIFactory.CreateLabel(strip.transform, text, 21, FontStyle.Bold,
             new Vector2(0.05f, 0f), new Vector2(0.95f, 1f), TextAnchor.MiddleLeft,
-            weapon != null && loadout.LoadedAmmo == 0 ? UIPalette.Warning : Color.white);
+            weapon != null && loadout.LoadedAt(index) == 0 ? UIPalette.Warning : Color.white);
         FitName(label, 21);
     }
 
@@ -1238,7 +1252,8 @@ public partial class InventoryScreenUI : MonoBehaviour
     {
         switch (slot)
         {
-            case EquipmentSlot.Weapon:   return "무기";
+            case EquipmentSlot.Weapon:   return "무기 1";
+            case EquipmentSlot.Weapon2:  return "무기 2";
             case EquipmentSlot.Head:     return "머리";
             case EquipmentSlot.Body:     return "갑옷";
             case EquipmentSlot.Face:     return "얼굴";
@@ -1247,6 +1262,7 @@ public partial class InventoryScreenUI : MonoBehaviour
             case EquipmentSlot.ImprintA: return "새김패 1";
             case EquipmentSlot.ImprintB: return "새김패 2";
             case EquipmentSlot.Ammo:     return "화살통";
+            case EquipmentSlot.Ammo2:    return "화살통";
             default:                     return slot.ToString();
         }
     }
@@ -1697,6 +1713,13 @@ public partial class InventoryScreenUI : MonoBehaviour
             var cellMin = new Vector2(min.x, cellBottom);
             var cellMax = new Vector2(max.x, 1f);
 
+            // 1 · 2번 — 무기 두 자루 (결정 2-81).
+            if (i < QuickSlots.FirstItemSlot)
+            {
+                DrawWeaponQuickSlot(i, inventory.Loadout, cellMin, cellMax, min, max, bandTop);
+                continue;
+            }
+
             ItemStack stack = quick.Get(i);
 
             bool empty = stack?.Definition == null;
@@ -1763,6 +1786,124 @@ public partial class InventoryScreenUI : MonoBehaviour
                     new Vector2(0.56f, 0.70f), new Vector2(0.96f, 0.97f), 20, Color.white);
             }
         }
+    }
+
+    /// <summary>
+    /// 퀵슬롯 1 · 2 — 무기 칸 (결정 2-81 · 덕코프). 든 무기는 테두리가 밝고, 칸 위에 「화살 18/112」(통/가방).
+    /// 누르면(또는 1 · 2) 바꿔 든다.
+    /// </summary>
+    private void DrawWeaponQuickSlot(int index, EquipmentLoadout loadout,
+        Vector2 cellMin, Vector2 cellMax, Vector2 min, Vector2 max, float bandTop)
+    {
+        WeaponDefinition weapon = loadout.WeaponAt(index);
+        bool active = loadout.ActiveWeapon == index;
+        Color kind = UIPalette.ForItem(ItemKind.Weapon);
+
+        Image cell = UIFactory.CreatePanel($"Quick_{index}", quickBar,
+            weapon == null ? UIPalette.Inset : UIPalette.Glassify(kind, active ? 0.46f : 0.26f), cellMin, cellMax);
+
+        UIFactory.CreateOutline(cell,
+            active ? UIPalette.Brighten(UIPalette.SlotSelected, 0.22f)
+                : weapon == null ? UIPalette.EdgeSoft : UIPalette.Brighten(kind),
+            UIFactory.Radius, active ? 4 : 2);
+
+        var button = cell.gameObject.AddComponent<Button>();
+        button.targetGraphic = cell;
+        button.onClick.AddListener(() => OnWeaponQuickSlotClicked(index));
+
+        UIFactory.CreateLabel(quickBar, (index + 1).ToString(), 20, active ? FontStyle.Bold : FontStyle.Normal,
+            new Vector2(min.x, 0f), new Vector2(max.x, bandTop),
+            TextAnchor.MiddleCenter, active ? UIPalette.Text : UIPalette.TextDim);
+
+        if (weapon == null)
+        {
+            UIFactory.CreateLabel(cell.transform, $"무기 {index + 1}", 16, FontStyle.Normal,
+                Vector2.zero, Vector2.one, TextAnchor.MiddleCenter, UIPalette.TextDim).raycastTarget = false;
+            return;
+        }
+
+        Image glyph = UIFactory.CreatePanel("Glyph", cell.transform, UIPalette.GlyphTint,
+            new Vector2(0.20f, 0.34f), new Vector2(0.80f, 0.92f), radius: 0);
+        glyph.raycastTarget = false;
+        glyph.preserveAspect = true;
+
+        if (weapon.Icon != null)
+        {
+            glyph.sprite = weapon.Icon;
+            glyph.color = Color.white;
+        }
+        else
+        {
+            glyph.sprite = UISprites.Of(UISprites.GlyphFor(ItemKind.Weapon));
+        }
+
+        Image strip = UIFactory.CreatePanel("NameStrip", cell.transform,
+            UIPalette.NameStrip, new Vector2(0.04f, 0.04f), new Vector2(0.96f, 0.30f), radius: 5);
+        strip.raycastTarget = false;
+
+        Text name = UIFactory.CreateLabel(strip.transform, weapon.DisplayName, 16, FontStyle.Bold,
+            new Vector2(0.06f, 0f), new Vector2(0.94f, 1f), TextAnchor.MiddleCenter, Color.white);
+        ItemCell.WrapName(name, 16);
+
+        // 칸 위 — 탄 이름 · 통/가방 (덕코프 「AR-철갑탄 · 75/494」). 든 무기는 밝게.
+        int loaded = loadout.LoadedAt(index);
+        int bag = PlayerAmmo.InBag(index);
+        string ammo = AmmoTable.Find(weapon.AmmoId)?.Name ?? "탄";
+
+        Image chip = UIFactory.CreatePanel("AmmoChip", quickBar,
+            new Color(0f, 0f, 0f, active ? 0.72f : 0.45f),
+            new Vector2(cellMin.x, 1.02f), new Vector2(cellMax.x, 1.34f), radius: 6);
+        chip.raycastTarget = false;
+
+        Color countColor = loaded == 0 ? UIPalette.Warning
+            : AmmoTable.ShouldOfferReload(loaded, loadout.CapacityAt(index), bag) ? UIPalette.TextAccent
+            : Color.white;
+
+        UIFactory.CreateLabel(chip.transform, $"{ammo} {loaded}/{bag}", 17, FontStyle.Bold,
+            Vector2.zero, Vector2.one, TextAnchor.MiddleCenter,
+            active ? countColor : UIPalette.TextDim).raycastTarget = false;
+    }
+
+    private void OnWeaponQuickSlotClicked(int index)
+    {
+        if (IsOpen)
+        {
+            ShowToast("무기는 장비 칸에서 바꿔 겁니다. 1 · 2번은 든 무기를 고르는 자리입니다.");
+            return;
+        }
+
+        PlayerWeapon weapon = Object.FindAnyObjectByType<PlayerWeapon>();
+
+        if (weapon != null)
+            weapon.Ammo.SwitchTo(index);
+        else
+            PlayerInventory.EnsureInstance().Loadout.SetActiveWeapon(index);
+
+        RefreshQuickSlots();
+    }
+
+    /// <summary>무기 칸이 보여 주는 값이 바뀌었는지 — 쏠 때마다 다시 그리지 않으려고 값만 비교한다.</summary>
+    private int weaponBarSignature = int.MinValue;
+
+    private void RefreshWeaponBarIfChanged()
+    {
+        if (!PlayerInventory.HasInstance)
+            return;
+
+        EquipmentLoadout l = PlayerInventory.Instance.Loadout;
+        int signature = l.ActiveWeapon;
+        signature = signature * 31 + l.LoadedAt(0);
+        signature = signature * 31 + l.LoadedAt(1);
+        signature = signature * 31 + PlayerAmmo.InBag(0);
+        signature = signature * 31 + PlayerAmmo.InBag(1);
+        signature = signature * 31 + (l.WeaponAt(0)?.Id?.GetHashCode() ?? 0);
+        signature = signature * 31 + (l.WeaponAt(1)?.Id?.GetHashCode() ?? 0);
+
+        if (signature == weaponBarSignature)
+            return;
+
+        weaponBarSignature = signature;
+        RefreshQuickSlots();
     }
 
     private void OnQuickSlotClicked(int index)

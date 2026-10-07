@@ -93,6 +93,9 @@ public class SaveData
     /// <summary>착용 장비 — 각인을 뺀 여섯 자리. 각인은 imprints가 따로 맡는다.</summary>
     public List<SavedEquip> equipment = new();
 
+    /// <summary>든 무기 — 0 = 무기 1, 1 = 무기 2 (결정 2-81). 옛 세이브는 0.</summary>
+    public int activeWeapon;
+
     // ── 벙커 ──────────────────────────────────────────────────────────
 
     /// <summary>창고. 【죽어도 잃지 않는다】 — 파밍에 들고 가지 않은 것이다.</summary>
