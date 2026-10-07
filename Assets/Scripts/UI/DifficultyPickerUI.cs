@@ -56,7 +56,7 @@ public class DifficultyPickerUI : MonoBehaviour
     {
         DifficultyManager.Choose(level);
         SaveManager.Commit("난이도");
-        GameLogger.Log($"[Difficulty] {DifficultyTable.NameOf(level)}를 골랐습니다.");
+        GameLogger.Log($"[Difficulty] {DifficultyTable.NameOf(level)} — 골랐습니다.");
 
         Action done = onDone;
         Destroy(gameObject);

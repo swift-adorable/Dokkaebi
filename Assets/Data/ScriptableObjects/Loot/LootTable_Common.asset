@@ -47,6 +47,22 @@ MonoBehaviour:
     weight: 10
     minCount: 1
     maxCount: 1
+  - item: {fileID: 11400000, guid: 4c6a98097f57649d6b10e4d7a3a4654b, type: 2}
+    weight: 8
+    minCount: 1
+    maxCount: 2
+  - item: {fileID: 11400000, guid: 04dd1e956a07043fd9b26232fa7565eb, type: 2}
+    weight: 6
+    minCount: 1
+    maxCount: 2
+  - item: {fileID: 11400000, guid: f58dbb0478c3f41bd9bf9a0273622035, type: 2}
+    weight: 5
+    minCount: 1
+    maxCount: 1
+  - item: {fileID: 11400000, guid: 848b3e8d5cea345ed92d89628532152b, type: 2}
+    weight: 6
+    minCount: 1
+    maxCount: 2
   - item: {fileID: 0}
     weight: 40
     minCount: 1

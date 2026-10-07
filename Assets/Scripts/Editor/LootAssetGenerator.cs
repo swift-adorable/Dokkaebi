@@ -63,7 +63,21 @@ public static class LootAssetGenerator
                 ItemKind.Consumable, weight: 0.1f, stackMax: 5, value: 60, tableWeight: 8, 1, 2),
 
             New("water_bottle",  "맑은 물",       "마실 수 있는 물. 밤길에서는 귀하다.",
-                ItemKind.Consumable, weight: 0.5f, stackMax: 5, value: 35, tableWeight: 10, 1, 1)
+                ItemKind.Consumable, weight: 0.5f, stackMax: 5, value: 35, tableWeight: 10, 1, 1),
+
+            // 요리 재료 (결정 2-64 · Cooking Data 2026-10-07) — 이름 · 값 [임시값]. 영감의 잡화 가게에서
+            // 음식으로 만든다. 만든 음식의 값이 재료 값의 합보다 커야 「만들면 엽전을 아낀다」가 된다.
+            New("food_rice",       "쌀",     "한 줌의 쌀. 영감의 가게에서 누룽지나 식혜가 된다.",
+                ItemKind.Material, weight: 0.3f, stackMax: 10, value: 15, tableWeight: 8, 1, 2),
+
+            New("food_barley",     "보리",   "볶으면 고소하다. 미숫가루가 된다.",
+                ItemKind.Material, weight: 0.3f, stackMax: 10, value: 15, tableWeight: 6, 1, 2),
+
+            New("food_malt",       "엿기름", "싹 틔운 보리를 말린 것. 식혜를 삭힌다.",
+                ItemKind.Material, weight: 0.2f, stackMax: 10, value: 12, tableWeight: 5, 1, 1),
+
+            New("food_persimmon",  "감",     "떫은 감. 말리면 곶감이 된다.",
+                ItemKind.Material, weight: 0.25f, stackMax: 10, value: 15, tableWeight: 6, 1, 2)
         };
     }
 

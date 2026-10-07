@@ -163,7 +163,8 @@ public class BuildingState
         return total;
     }
 
-    private static int RemoveById(Inventory inventory, string itemId, int count)
+    /// <summary>그 아이템을 count개까지 뺀다. 뺀 수를 돌려준다. 요리(CookingTable)도 쓴다.</summary>
+    public static int RemoveById(Inventory inventory, string itemId, int count)
     {
         if (inventory == null || count <= 0)
             return 0;

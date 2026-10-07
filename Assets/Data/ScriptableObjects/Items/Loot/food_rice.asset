@@ -10,20 +10,20 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5f9766db0f8594e349438cc979f7b6fe, type: 3}
-  m_Name: cell_battery
+  m_Name: food_rice
   m_EditorClassIdentifier: Dokkaebi.Runtime::ItemDefinition
-  id: cell_battery
-  displayName: "\uC22F"
-  description: "\uC544\uC9C1 \uBD88\uAE30\uAC00 \uB0A8\uC544 \uC788\uB2E4. \uAC00\uB9C8\uC5D0\uC11C
-    \uC4F0\uC778\uB2E4."
+  id: food_rice
+  displayName: "\uC300"
+  description: "\uD55C \uC90C\uC758 \uC300. \uC601\uAC10\uC758 \uAC00\uAC8C\uC5D0\uC11C
+    \uB204\uB8FD\uC9C0\uB098 \uC2DD\uD61C\uAC00 \uB41C\uB2E4."
   kind: 0
   tier: 0
-  weight: 0.6
+  weight: 0.3
   icon: {fileID: 0}
   slotSize: 1
   stackMax: 10
   maxDurability: 0
-  baseValue: 70
+  baseValue: 15
   noExtract: 0
   noRegister: 0
   noTrade: 0

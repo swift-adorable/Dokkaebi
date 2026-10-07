@@ -14,10 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Dokkaebi.Runtime::ItemDefinition
   id: bio_sample
   displayName: "\uC57D\uC7AC"
-  description: "\uB9D0\uB9B0 \uC57D\uC7AC. \uC57D\uBC29\uACE8\uC5D0\uC11C \uAC12\uC774 \uC624\uB978\uB2E4."
+  description: "\uB9D0\uB9B0 \uC57D\uC7AC. \uC57D\uBC29\uACE8\uC5D0\uC11C \uAC12\uC774
+    \uC624\uB978\uB2E4."
   kind: 0
   tier: 0
   weight: 0.3
+  icon: {fileID: 0}
   slotSize: 1
   stackMax: 10
   maxDurability: 0
@@ -26,3 +28,15 @@ MonoBehaviour:
   noRegister: 0
   noTrade: 0
   skill: {fileID: 0}
+  consumable:
+    category: 0
+    heal: 0
+    water: 0
+    energy: 0
+    waterCost: 0
+    energyCost: 0
+    cure: 0
+    cureStacks: 99
+    useCost: 0
+    castSeconds: 0
+    grant: 0

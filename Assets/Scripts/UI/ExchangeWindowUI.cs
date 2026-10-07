@@ -58,6 +58,9 @@ public class ExchangeWindowUI : MonoBehaviour
     private Button takeAllButton;
     private Text footLabel;
 
+    /// <summary>【임시】 잡화 가게에서만 — 요리 화면을 연다 (결정 2-64 · Cooking Data). 화면은 레이어 작업 때.</summary>
+    private Button cookButton;
+
     private UIFactory.ScrollList grid;
 
     private Mode mode = Mode.Loot;
@@ -148,6 +151,11 @@ public class ExchangeWindowUI : MonoBehaviour
         footLabel = UIFactory.CreateLabel(box, "파밍이 끝나면 재고가 다시 찹니다.", 20,
             FontStyle.Normal, new Vector2(0.04f, 0.035f), new Vector2(0.96f, 0.130f),
             TextAnchor.MiddleCenter, UIPalette.Subtle);
+
+        cookButton = UIFactory.CreateButton(box, "요리",
+            new Vector2(0.74f, 0.905f), new Vector2(0.96f, 0.985f),
+            UIPalette.Action, CookingUI.Open, 22);
+        cookButton.gameObject.SetActive(false);
 
         panel.SetActive(false);
     }
@@ -313,6 +321,7 @@ public class ExchangeWindowUI : MonoBehaviour
 
         takeAllButton.gameObject.SetActive(mode != Mode.Shop);
         footLabel.gameObject.SetActive(mode == Mode.Shop);
+        cookButton.gameObject.SetActive(mode == Mode.Shop && shopKind == ShopKind.General);
 
         var label = takeAllButton.GetComponentInChildren<Text>();
 

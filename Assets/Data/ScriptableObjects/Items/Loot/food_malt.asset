@@ -10,20 +10,20 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5f9766db0f8594e349438cc979f7b6fe, type: 3}
-  m_Name: cell_battery
+  m_Name: food_malt
   m_EditorClassIdentifier: Dokkaebi.Runtime::ItemDefinition
-  id: cell_battery
-  displayName: "\uC22F"
-  description: "\uC544\uC9C1 \uBD88\uAE30\uAC00 \uB0A8\uC544 \uC788\uB2E4. \uAC00\uB9C8\uC5D0\uC11C
-    \uC4F0\uC778\uB2E4."
+  id: food_malt
+  displayName: "\uC5FF\uAE30\uB984"
+  description: "\uC2F9 \uD2D4\uC6B4 \uBCF4\uB9AC\uB97C \uB9D0\uB9B0 \uAC83. \uC2DD\uD61C\uB97C
+    \uC0AD\uD78C\uB2E4."
   kind: 0
   tier: 0
-  weight: 0.6
+  weight: 0.2
   icon: {fileID: 0}
   slotSize: 1
   stackMax: 10
   maxDurability: 0
-  baseValue: 70
+  baseValue: 12
   noExtract: 0
   noRegister: 0
   noTrade: 0
