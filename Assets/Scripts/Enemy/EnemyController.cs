@@ -116,6 +116,10 @@ public class EnemyController : MonoBehaviour, IPoolable
 
     public void OnDespawned()
     {
+        // 첫 구슬 표식은 그 한 몸의 것이다 — 쓰러지지 않고 풀로 돌아가도 다음 몸에 남기지 않는다.
+        if (TryGetComponent(out StoryGift gift))
+            Destroy(gift);
+
         // 【씬을 닫는 중이면 새로 만들지 않는다.】 풀이 치워지면서 반납이 불리는데,
         // 그때 EnemyManager는 이미 사라졌다. EnsureInstance로 새로 만들면 닫히는 씬에
         // 「EnemyManager (Runtime)」이 남는다 — 벙커로 철수할 때 실제로 났다.
@@ -174,5 +178,9 @@ public class EnemyController : MonoBehaviour, IPoolable
         EnemyRarity rarity = identity != null ? identity.Profile.rarity : EnemyRarity.Normal;
 
         controller.SetReward(rarity, health != null ? health.KillContext : default);
+
+        // 0-2 큰 요괴의 첫 구슬 (결정 2-79) — 시체 전리품에 넣고 표식을 지운다.
+        if (TryGetComponent(out StoryGift gift))
+            gift.Deliver(controller);
     }
 }

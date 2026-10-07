@@ -4,7 +4,7 @@ using UnityEngine.SceneManagement;
 /// <summary>
 /// 씬이 뜨면 이번에 보여 줄 이야기를 고른다. (로드맵 3단계)
 ///
-///   소굴(벙커)  처음이면 프롤로그 → 지나지 않은 밤이 있으면 그 밤 (상인이 온다)
+///   소굴(벙커)  처음이면 프롤로그 → 바로 0-1 (결정 2-79) · 0-1 뒤 처음 오면 「고목 아래」 → 지나지 않은 밤이 있으면 그 밤 (상인이 온다)
 ///   파밍 구역   그 구역에 처음 들어왔으면 구역 이야기 → 보스 · 조각 · 방을 놓는다
 ///
 /// 세이브가 씬 로드 때 먼저 읽히므로(SaveManager) 이 컴포넌트의 Start에서는
@@ -53,7 +53,28 @@ public class StoryDirector : MonoBehaviour
     private void PlayBunker()
     {
         // 【프롤로그 앞에서】 난이도를 한 번 고른다 (결정 2-77 — 2-69의 「프롤로그 뒤」를 바꿈). 이미 골랐으면 그냥 지나간다.
-        DifficultyPickerUI.ShowIfNeeded(() => StoryManager.PlayOnce(StoryTable.PrologueEvent, PlayNextNight));
+        DifficultyPickerUI.ShowIfNeeded(() => StoryManager.PlayOnce(StoryTable.PrologueEvent, AfterPrologue));
+    }
+
+    /// <summary>
+    /// 본문 순서 (결정 2-79) — 새 게임은 소굴을 거치지 않고 0-1 대숲 밤길로 간다.
+    /// 0-1을 지나 처음 소굴에 오면 「고목 아래」(영감 안내 · 창고 · 쓰러짐)를 보여 준다.
+    /// </summary>
+    private void AfterPrologue()
+    {
+        StoryProgress progress = StoryManager.Progress;
+
+        if (ChapterZeroTable.ShouldStartInZeroOne(progress))
+        {
+            StoryManager.TargetZone = ChapterZeroTable.StartZone;
+            SceneFlow.Depart();
+            return;
+        }
+
+        if (ChapterZeroTable.ShouldPlayArrival(progress))
+            StoryManager.PlayOnce(ChapterZeroTable.ArrivalEvent, PlayNextNight);
+        else
+            PlayNextNight();
     }
 
     private void PlayNextNight()

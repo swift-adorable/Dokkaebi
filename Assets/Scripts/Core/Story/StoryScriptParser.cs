@@ -27,6 +27,7 @@ public sealed class StoryPassage
 ///   · 「프롤로그」와 「도깨비 터와 고목 아래 소굴」의 첫 구역 앞까지 → prologue
 ///   · 「N장 — …」의 첫 구역 앞까지는 그 장 첫 구역의 앞머리가 된다
 ///   · 「1-1 · 장터 어귀」 같은 줄이 구역을 연다
+///   · 「고목 아래 (거점)」은 0-1 글에서 떼어 arrive_den으로 둔다 — 소굴에 처음 왔을 때 (결정 2-79)
 ///   · 구역 안에서 「싸움 끝에」 · 「싸움이 끝났」으로 시작하는 문단이 보스를 가른다 —
 ///     그 앞은 enter_구역, 그 뒤는 그 구역 보스 순서대로 boss_보스
 ///   · 「【기억의 조각 · 하나】」 문단은 구역 글에서 빼고 read_piece_n으로 둔다
@@ -112,13 +113,27 @@ public static class StoryScriptParser
             while (i < blocks.Count)
             {
                 string header = FirstLine(blocks[i]);
+
+                // 「고목 아래 (거점)」 — 0-1 글 뒤의 소굴 도착 장면. 0-1이 아니라 소굴에 처음 왔을 때 보여 준다 (결정 2-79).
+                if (IsArrivalHeader(header))
+                {
+                    var arrival = new List<string>();
+
+                    for (i++; i < blocks.Count && !ZoneHeader.IsMatch(FirstLine(blocks[i])); i++)
+                        arrival.Add(blocks[i]);
+
+                    result[ChapterZeroTable.ArrivalEvent] =
+                        new StoryPassage(ChapterZeroTable.ArrivalEvent, ChapterZeroTable.ArrivalTitle, arrival);
+                    continue;
+                }
+
                 Match m = ZoneHeader.Match(header);
                 string zoneId = $"{m.Groups[1].Value}-{m.Groups[2].Value}";
                 i++;
 
                 var zoneBlocks = new List<string>();
 
-                for (; i < blocks.Count && !ZoneHeader.IsMatch(FirstLine(blocks[i])); i++)
+                for (; i < blocks.Count && !ZoneHeader.IsMatch(FirstLine(blocks[i])) && !IsArrivalHeader(FirstLine(blocks[i])); i++)
                     zoneBlocks.Add(blocks[i]);
 
                 AddZone(result, zoneId, header, zoneBlocks, pendingChapterIntro);
@@ -215,6 +230,9 @@ public static class StoryScriptParser
         Flush();
         return sections;
     }
+
+    private static bool IsArrivalHeader(string line)
+        => line != null && line.Trim() == ChapterZeroTable.ArrivalHeader;
 
     private static string FirstLine(string block)
     {

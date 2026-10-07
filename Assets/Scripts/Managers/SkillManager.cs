@@ -115,8 +115,16 @@ public class SkillManager : Singleton<SkillManager>
 #endif
 
         // 【벙커에서는 주지 않는다】 — 소켓은 파밍 안의 것이다.
-        if (grantFirstCore && !SceneFlow.InBunker)
+        // 【0장은 본문대로】 0-1은 구슬 없이 활로, 첫 구슬은 0-2의 큰 요괴가 준다 (결정 2-79).
+        // 그 선물을 받은 뒤(또는 1장부터)에만 「핵심 구슬이 하나도 없을 때」의 안전판을 켠다.
+        if (grantFirstCore && !SceneFlow.InBunker && FirstCoreSafetyOn())
             GrantFirstCore();
+    }
+
+    private static bool FirstCoreSafetyOn()
+    {
+        ChapterData chapter = ZoneDataTable.ChapterOfZone(StoryManager.TargetZone);
+        return ChapterZeroTable.FirstCoreSafety(StoryManager.Progress, chapter != null ? chapter.Chapter : 0);
     }
 
     private void HandleBuildChanged() => OnBuildChanged?.Invoke();

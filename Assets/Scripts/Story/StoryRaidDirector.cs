@@ -48,6 +48,7 @@ public class StoryRaidDirector : MonoBehaviour
         catalog = EnemyPrefabCatalog.Load();
 
         PlacePickups();
+        PlaceChapterZero();
 
         BossDefinition next = StoryManager.Progress.NextBossIn(zone);
 
@@ -150,6 +151,62 @@ public class StoryRaidDirector : MonoBehaviour
             pending = next;
             Invoke(nameof(SpawnPending), BossDelay);
         }
+    }
+
+    // ── 0장 — 길가 봇짐 · 첫 구슬을 품은 큰 요괴 (결정 2-79) ─────────────
+
+    private void PlaceChapterZero()
+    {
+        StoryProgress progress = StoryManager.Progress;
+
+        if (ChapterZeroTable.ShouldPlaceBundle(progress, zone))
+        {
+            Vector3 ahead = player.forward;
+            ahead.y = 0f;
+            if (ahead.sqrMagnitude < 0.01f) ahead = Vector3.forward;
+
+            StoryBundle.Create(player.position + ahead.normalized * ChapterZeroTable.BundleDistance);
+        }
+
+        if (ChapterZeroTable.ShouldSendGiftCarrier(progress, zone))
+            Invoke(nameof(SpawnGiftCarrier), ChapterZeroTable.GiftDelay);
+    }
+
+    private void SpawnGiftCarrier()
+    {
+        if (player == null || catalog == null || !SkillManager.HasInstance)
+            return;
+
+        SkillDefinition skill = SkillManager.Instance.Catalog != null
+            ? SkillManager.Instance.Catalog.Find(ChapterZeroTable.GiftSkill)
+            : null;
+        ItemDefinition gem = SkillManager.Instance.FindGemItem(skill);
+        GameObject prefab = catalog.Get(ChapterZeroTable.GiftCarrier);
+
+        if (gem == null || prefab == null)
+        {
+            GameLogger.Warning("[Story] 0-2 첫 구슬(화염) · 큰 요괴 프리팹을 찾지 못했습니다.");
+            return;
+        }
+
+        Vector2 dir = Random.insideUnitCircle.normalized;
+        if (dir == Vector2.zero) dir = Vector2.up;
+
+        Vector3 at = player.position + new Vector3(dir.x, 0f, dir.y) * ChapterZeroTable.GiftDistance;
+        GameObject body = PoolManager.EnsureInstance().Spawn(prefab, at, Quaternion.identity);
+
+        if (body == null)
+            return;
+
+        if (body.TryGetComponent(out EnemyIdentity identity))
+            identity.Apply(RaidManager.Current.Apply(EnemyProfile.Build(
+                ChapterZeroTable.GiftCarrier, ChapterZeroTable.GiftRarity, System.Array.Empty<EnemyAffix>())));
+
+        StoryGift gift = body.GetComponent<StoryGift>() ?? body.AddComponent<StoryGift>();
+        gift.Item = gem;
+        gift.EventId = ChapterZeroTable.GiftEvent;
+
+        StoryDialogueUI.ShowBanner("큰 요괴가 나타났다.");
     }
 
     // ── 조각 · 방 ────────────────────────────────────────────────────
