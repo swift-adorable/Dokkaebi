@@ -153,12 +153,22 @@ public static class StoryManager
             return;
         }
 
+        // 프롤로그는 뒤를 가린다 — 지금은 어두운 바탕, 나중에 프롤로그 그림 (결정 2-82).
+        bool backdrop = eventId == StoryTable.PrologueEvent;
+
         StoryDialogueUI.Show(passage.Title, passage.Pages, () =>
         {
             Progress.See(eventId);
             OnChanged?.Invoke();
             done?.Invoke();
-        });
+        }, backdrop);
+    }
+
+    /// <summary>새 게임 — 이야기 진행 · 고른 구역을 비운다 (디버그 「세이브 지우기」).</summary>
+    public static void ResetForNewGame()
+    {
+        progress = null;
+        targetZone = null;
     }
 
     /// <summary>밤을 보여 주고 지난 것으로 적는다. 그 밤의 상인이 소굴에 온다.</summary>

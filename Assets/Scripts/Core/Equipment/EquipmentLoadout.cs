@@ -126,13 +126,17 @@ public class EquipmentLoadout
     }
 
     /// <summary>
-    /// 새 무기가 들어갈 자리 — 빈 쪽 먼저(무기 1 → 무기 2). 둘 다 차 있으면 든 쪽과 바꾼다.
+    /// 새 무기가 들어갈 자리 — 보고 있는(든) 쪽이 비었으면 거기, 아니면 다른 빈 쪽, 둘 다 차 있으면 든 쪽과 바꾼다.
+    /// 가방 화면의 I · II 탭으로 고른 쪽에 걸린다 (결정 2-82).
     /// </summary>
     public EquipmentSlot FreeWeaponSlot()
     {
-        if (Get(EquipmentSlot.Weapon) == null) return EquipmentSlot.Weapon;
-        if (Get(EquipmentSlot.Weapon2) == null) return EquipmentSlot.Weapon2;
-        return WeaponSlot(ActiveWeapon);
+        EquipmentSlot active = WeaponSlot(ActiveWeapon);
+        EquipmentSlot other = WeaponSlot(1 - ActiveWeapon);
+
+        if (Get(active) == null) return active;
+        if (Get(other) == null) return other;
+        return active;
     }
 
     private string AmmoIdOf(EquipmentSlot weaponSlot) => (Get(weaponSlot)?.Definition as WeaponDefinition)?.AmmoId;

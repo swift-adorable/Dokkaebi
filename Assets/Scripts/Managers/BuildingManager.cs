@@ -20,6 +20,9 @@ public static class BuildingManager
 
     public static BuildingState State => state ??= new BuildingState();
 
+    /// <summary>새 게임 — 지은 건물을 비운다 (디버그 「세이브 지우기」).</summary>
+    public static void Reset() => state = null;
+
     /// <summary>짓거나 · 놓거나 · 재활용했을 때.</summary>
     public static event Action OnChanged;
 

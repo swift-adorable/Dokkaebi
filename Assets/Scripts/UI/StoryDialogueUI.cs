@@ -21,6 +21,8 @@ public class StoryDialogueUI : MonoBehaviour
         public string Title;
         public List<string> Pages;
         public Action Done;
+        /// <summary>뒤를 가리는가 — 프롤로그 (결정 2-82). 지금은 어두운 바탕, 나중에 프롤로그 그림.</summary>
+        public bool Backdrop;
     }
 
     private static StoryDialogueUI instance;
@@ -32,6 +34,7 @@ public class StoryDialogueUI : MonoBehaviour
     private float previousTimeScale = 1f;
 
     private GameObject panel;
+    private GameObject backdrop;
     private Text title;
     private Text body;
     private Text counter;
@@ -42,7 +45,10 @@ public class StoryDialogueUI : MonoBehaviour
     /// <summary>보고 있는 중인가. 다른 화면이 입력을 받지 않게 할 때 쓴다.</summary>
     public static bool IsShowing => instance != null && instance.current != null;
 
-    public static void Show(string heading, IList<string> pages, Action done)
+    public static void Show(string heading, IList<string> pages, Action done) => Show(heading, pages, done, false);
+
+    /// <param name="withBackdrop">뒤 장면을 가린다 — 프롤로그 (결정 2-82).</param>
+    public static void Show(string heading, IList<string> pages, Action done, bool withBackdrop)
     {
         if (pages == null || pages.Count == 0)
         {
@@ -51,7 +57,10 @@ public class StoryDialogueUI : MonoBehaviour
         }
 
         StoryDialogueUI ui = EnsureInstance();
-        ui.queue.Enqueue(new Request { Title = heading ?? string.Empty, Pages = new List<string>(pages), Done = done });
+        ui.queue.Enqueue(new Request
+        {
+            Title = heading ?? string.Empty, Pages = new List<string>(pages), Done = done, Backdrop = withBackdrop
+        });
 
         if (ui.current == null)
             ui.Next();
@@ -97,6 +106,14 @@ public class StoryDialogueUI : MonoBehaviour
 
     private void Build(Canvas canvas)
     {
+        // 【프롤로그 바탕 — 임시】 뒤의 소굴을 가린다. 프롤로그 그림이 들어오면 이 자리에 깐다 (결정 2-82).
+        // 안전 영역 밖(노치)까지 덮으려고 캔버스에 바로 붙인다.
+        Image back = UIFactory.CreatePanel("PrologueBackdrop", canvas.transform,
+            new Color(0.035f, 0.04f, 0.06f, 1f), Vector2.zero, Vector2.one, radius: 0);
+        back.raycastTarget = false;
+        backdrop = back.gameObject;
+        backdrop.SetActive(false);
+
         RectTransform safe = UIFactory.CreateSafeArea(canvas);
 
         Image shade = UIFactory.CreatePanel("StoryShade", safe, new Color(0f, 0f, 0f, 0.45f),
@@ -157,6 +174,7 @@ public class StoryDialogueUI : MonoBehaviour
         }
 
         panel.SetActive(true);
+        backdrop.SetActive(current.Backdrop);
         Render();
     }
 
@@ -200,6 +218,7 @@ public class StoryDialogueUI : MonoBehaviour
     {
         current = null;
         panel.SetActive(false);
+        backdrop.SetActive(false);
         Time.timeScale = previousTimeScale;
     }
 }

@@ -336,8 +336,10 @@ public static class PlaytestActions
     {
         SaveManager.Wipe();
 
-        return "세이브와 백업을 지웠습니다.\n"
-               + "지금 화면의 레벨·골드는 그대로이고, 다음 실행부터 처음 상태로 시작합니다.";
+        // 지우고 바로 새 게임으로 — 난이도 → 프롤로그부터 (결정 2-82).
+        SceneFlow.RestartNewGame();
+
+        return "세이브와 백업을 지웠습니다. 처음부터 다시 시작합니다.";
     }
 
     /// <summary>가방을 통째로 비운다. 과중량 실험을 되돌린다.</summary>

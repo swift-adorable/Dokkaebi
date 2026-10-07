@@ -44,10 +44,10 @@ public class ExchangeWindowUI : MonoBehaviour
     private const int MinRows = 2;
 
     // ── 자리 (안전 영역 기준 0~1) ─────────────────────────────────────
-    // 오른쪽에 붙인다. 왼쪽은 가방 화면이 쓰고, 가운데는 비워 둔다.
+    // 가운데에 뜬다 (결정 2-82) — 왼쪽은 착용 장비, 오른쪽 끝은 가방 기둥이 쓴다.
 
-    private const float PanelLeft = 0.615f;
-    private const float PanelRight = 0.985f;
+    private const float PanelLeft = 0.31f;
+    private const float PanelRight = 0.69f;
     private const float PanelBottom = 0.30f;
     private const float PanelTop = 0.965f;
 

@@ -159,9 +159,12 @@ public partial class InventoryScreenUI : MonoBehaviour
     private static readonly string[] GemFilterNames = { "핵심", "보조", "발동", "전령" };
     private int gemFilter;
 
-    /// <summary>착용 기둥의 오른쪽 끝 · 가방 기둥의 오른쪽 끝 (안전 영역 기준). 전리품 · 창고 · 상점 창은 0.615부터.</summary>
+    /// <summary>
+    /// 착용 기둥의 오른쪽 끝 · 가방 기둥의 왼쪽 끝 (안전 영역 기준).
+    /// 가방 · 구슬 기둥은 오른쪽 끝에 붙어 가운데가 비어 보인다 (결정 2-82). 전리품 · 창고 · 상점 창은 가운데(0.31 ~ 0.69)에 뜬다.
+    /// </summary>
     private const float EquipColumnRight = 0.30f;
-    private const float BagColumnRight = 0.60f;
+    private const float BagColumnLeft = 0.70f;
     private RectTransform equipmentGrid;
     private RectTransform bagViewport;
     private RectTransform bagGrid;
@@ -589,7 +592,7 @@ public partial class InventoryScreenUI : MonoBehaviour
 
         // 【가방 · 구슬은 오른쪽 기둥으로】 (결정 2-77). 착용 장비 · 장착 스킬은 이 기둥에 남는다.
         bagColumn = UIFactory.CreateSlice("BagColumn", body,
-            new Vector2(EquipColumnRight, 0f), new Vector2(BagColumnRight, 1f), left: UIFactory.Gap * 0.5f);
+            new Vector2(BagColumnLeft, 0f), Vector2.one, left: UIFactory.Gap * 0.5f);
 
         UIFactory.CreateGlass("Back", bagColumn, UIPalette.Panel,
             Vector2.zero, Vector2.one, UIFactory.RadiusLarge);
@@ -1098,7 +1101,18 @@ public partial class InventoryScreenUI : MonoBehaviour
 
         EquipmentLoadout loadout = PlayerInventory.EnsureInstance().Loadout;
 
-        EquipmentSlot[] slots = EquipOrder;
+        // 【PoE2 소지품창처럼】 (결정 2-82) — 왼쪽 큰 칸 무기 · 오른쪽 큰 칸 그 무기의 화살통 · 탄창(I · II 탭),
+        // 가운데 머리 · 갑옷 · 가방, 아래 얼굴 · 윤도, 왼쪽 아래 · 오른쪽 아래 새김패.
+        int set = loadout.ActiveWeapon;
+        EquipmentSlot[] slots =
+        {
+            EquipmentLoadout.WeaponSlot(set), EquipmentLoadout.AmmoSlot(set),
+            EquipmentSlot.Head, EquipmentSlot.Body, EquipmentSlot.Backpack,
+            EquipmentSlot.Face, EquipmentSlot.Ears,
+            EquipmentSlot.ImprintA, EquipmentSlot.ImprintB,
+        };
+
+        DrawWeaponSetTabs(loadout);
 
         // 【가로와 세로 여백을 같게 만든다.】
         // 정규화 여백 0.008 하나를 두 축에 쓰면, 가로로 긴 칸에서는
@@ -1114,8 +1128,9 @@ public partial class InventoryScreenUI : MonoBehaviour
 
         for (int i = 0; i < slots.Length; i++)
         {
-            // 착용 기둥이 세로로 길어져(결정 2-77) 2열로 쌓는다 — 무기 두 자루 · 통 둘이 들어와 6줄 (결정 2-80 · 2-81).
-            UIFactory.GetCellAnchors(i, 2, 6, padX, padY, out Vector2 min, out Vector2 max);
+            EquipRect(slots[i], out Vector2 min, out Vector2 max);
+            min += new Vector2(padX, padY);
+            max -= new Vector2(padX, padY);
 
             ItemStack stack = loadout.Get(slots[i]);
 
@@ -1209,17 +1224,79 @@ public partial class InventoryScreenUI : MonoBehaviour
     }
 
     /// <summary>
-    /// 착용 칸 순서 — 화살통 · 탄창을 무기 바로 아래에 둔다 (결정 2-80). 2열이라 세 번째 자리가 무기 아래다.
+    /// 착용 칸 자리 (장비 판 0 ~ 1) — PoE2 소지품창을 따랐다 (결정 2-82).
+    ///   왼쪽 큰 칸 = 무기 · 오른쪽 큰 칸 = 그 무기의 화살통 · 탄창 (PoE2의 보조 손 · 화살통 자리), 위에 I · II 탭
+    ///   가운데 = 머리 · 갑옷 · 가방(허리띠 자리), 그 아래 작은 두 칸 = 얼굴 · 윤도
+    ///   왼쪽 아래 · 오른쪽 아래 = 새김패 1 · 2 (장갑 · 신발 자리)
     /// </summary>
-    private static readonly EquipmentSlot[] EquipOrder =
+    private static void EquipRect(EquipmentSlot slot, out Vector2 min, out Vector2 max)
     {
-        EquipmentSlot.Weapon, EquipmentSlot.Weapon2,
-        EquipmentSlot.Ammo, EquipmentSlot.Ammo2,
-        EquipmentSlot.Head, EquipmentSlot.Body,
-        EquipmentSlot.Face, EquipmentSlot.Ears,
-        EquipmentSlot.Backpack, EquipmentSlot.ImprintA,
-        EquipmentSlot.ImprintB,
-    };
+        switch (slot)
+        {
+            case EquipmentSlot.Weapon:
+            case EquipmentSlot.Weapon2:  min = new(0.00f, 0.40f); max = new(0.30f, 0.89f); return;
+            case EquipmentSlot.Ammo:
+            case EquipmentSlot.Ammo2:    min = new(0.70f, 0.40f); max = new(1.00f, 0.89f); return;
+            case EquipmentSlot.Head:     min = new(0.34f, 0.75f); max = new(0.66f, 1.00f); return;
+            case EquipmentSlot.Body:     min = new(0.34f, 0.36f); max = new(0.66f, 0.75f); return;
+            case EquipmentSlot.Backpack: min = new(0.34f, 0.22f); max = new(0.66f, 0.36f); return;
+            case EquipmentSlot.Face:     min = new(0.34f, 0.00f); max = new(0.50f, 0.20f); return;
+            case EquipmentSlot.Ears:     min = new(0.50f, 0.00f); max = new(0.66f, 0.20f); return;
+            case EquipmentSlot.ImprintA: min = new(0.00f, 0.00f); max = new(0.30f, 0.36f); return;
+            default:                     min = new(0.70f, 0.00f); max = new(1.00f, 0.36f); return;   // ImprintB
+        }
+    }
+
+    /// <summary>
+    /// 무기 칸 · 통 칸 위의 I · II 탭 — 누르면 그 무기를 든다(퀵슬롯 1 · 2와 같다). 든 쪽이 밝다.
+    /// </summary>
+    private void DrawWeaponSetTabs(EquipmentLoadout loadout)
+    {
+        string[] names = { "I", "II" };
+        float[] lefts = { 0.00f, 0.70f };
+
+        foreach (float left in lefts)
+        {
+            for (int k = 0; k < 2; k++)
+            {
+                int index = k;
+                float x0 = left + k * 0.15f + 0.005f;
+                float x1 = left + (k + 1) * 0.15f - 0.005f;
+                bool on = loadout.ActiveWeapon == k;
+                bool has = loadout.WeaponAt(k) != null;
+
+                Button tabButton = UIFactory.CreateButton(equipmentGrid, names[k],
+                    new Vector2(x0, 0.90f), new Vector2(x1, 0.99f),
+                    on ? UIPalette.Action : UIPalette.Subtle,
+                    () => OnWeaponSetTabClicked(index), 22);
+
+                var label = tabButton.GetComponentInChildren<Text>();
+                if (label != null && !on)
+                    label.color = has ? UIPalette.Text : UIPalette.TextDim;
+            }
+        }
+    }
+
+    private void OnWeaponSetTabClicked(int index)
+    {
+        PlayerInventory inventory = PlayerInventory.EnsureInstance();
+
+        // 빈 쪽도 볼 수 있어야 거기에 건다 — 소굴에서는 그냥 고르고, 구역에서는 드는 시간을 들인다.
+        if (inventory.Loadout.WeaponAt(index) == null || SceneFlow.InBunker)
+        {
+            inventory.Loadout.SetActiveWeapon(index);
+            Object.FindAnyObjectByType<PlayerLoadout>()?.Refresh();
+        }
+        else
+        {
+            Object.FindAnyObjectByType<PlayerWeapon>()?.Ammo.SwitchTo(index);
+        }
+
+        selected = null;
+        selectedSlot = null;
+        Refresh();
+        RefreshQuickSlots();
+    }
 
     /// <summary>화살통 · 탄창 칸 — 「화살통 / 화살 18/30」. 누르면 가방에서 채운다.</summary>
     private void DrawAmmoSlot(Image cell, EquipmentLoadout loadout, int index)

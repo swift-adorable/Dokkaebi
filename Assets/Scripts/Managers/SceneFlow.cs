@@ -67,6 +67,23 @@ public static class SceneFlow
     }
 
     /// <summary>
+    /// 【새 게임으로 다시 시작】 (디버그 「세이브 지우기」 · 결정 2-82) — 세이브를 지운 뒤 부른다.
+    /// 씬 밖에 사는 진행(이야기 · 난이도 · 건물 · 가게 · 샘)을 비우고 첫 씬(소굴)을 다시 연다.
+    /// 씬 안의 매니저는 새 씬에서 새로 만들어지고, 세이브가 없으니 처음 상태로 시작한다.
+    /// </summary>
+    public static void RestartNewGame()
+    {
+        StoryManager.ResetForNewGame();
+        DifficultyManager.Reset();
+        BuildingManager.Reset();
+        ShopManager.Reset();
+        SpringManager.Reset();
+
+        loading = false;
+        Load(HasBunker ? BunkerScene : RaidScene);
+    }
+
+    /// <summary>
     /// 벙커로 돌아간다. 사망 화면의 버튼이 부른다 — 사망 저장은 이미 끝났다.
     /// 벙커 씬이 빌드에 없으면 구역을 다시 연다.
     /// </summary>
