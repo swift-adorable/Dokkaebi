@@ -99,9 +99,39 @@ public class BulletController : MonoBehaviour, IPoolable
     private bool isConsumed;
     private bool isReturning;
 
+    private Renderer[] tintRenderers;
+    private Color[] baseColors;
+
     private void Awake()
     {
         pooledObject = GetComponent<PooledObject>();
+
+        // 【임시 표시】 탄 색 = 실은 상태 (결정 2-77). 원래 색을 기억해 두고 풀에서 돌아올 때 되돌린다.
+        tintRenderers = GetComponentsInChildren<Renderer>(true);
+        baseColors = new Color[tintRenderers.Length];
+        for (int i = 0; i < tintRenderers.Length; i++)
+            baseColors[i] = tintRenderers[i].material.color;
+    }
+
+    /// <summary>【임시】 실은 상태의 색으로 탄을 칠한다 — 화염 주황 · 역병 초록 · 서리 하늘 · 뇌전 노랑 · 열상 빨강.</summary>
+    private void ApplyTint()
+    {
+        if (tintRenderers == null)
+            return;
+
+        Color? color = StatusTint.Of(AppliedStatus);
+
+        for (int i = 0; i < tintRenderers.Length; i++)
+        {
+            if (tintRenderers[i] == null)
+                continue;
+
+            Material m = tintRenderers[i].material;
+            Color c = color ?? baseColors[i];
+            m.color = c;
+            if (m.HasProperty("_BaseColor"))
+                m.SetColor("_BaseColor", c);
+        }
     }
 
     public void OnSpawned()
@@ -120,6 +150,7 @@ public class BulletController : MonoBehaviour, IPoolable
         ricochetState.Clear();
 
         AppliedStatus = StatusEffectType.None;
+        ApplyTint();
 
         // 【풀에서 재사용될 때 반드시 끈다.】
         // 적 탄으로 쓰인 오브젝트가 플레이어 탄으로 돌아왔을 때
@@ -183,6 +214,7 @@ public class BulletController : MonoBehaviour, IPoolable
 
         AppliedStatus = status;
         originPoint = origin;
+        ApplyTint();
 
         // 적 탄은 행동(관통·갈래 등)도 스킬 보정도 치명타도 갖지 않는다.
         skillEffects = null;
@@ -249,6 +281,7 @@ public class BulletController : MonoBehaviour, IPoolable
         originPoint = origin;
 
         AppliedStatus = appliedStatus;
+        ApplyTint();
     }
 
     private void Update()

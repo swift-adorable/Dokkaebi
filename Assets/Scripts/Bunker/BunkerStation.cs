@@ -41,7 +41,7 @@ public class BunkerStation : MonoBehaviour
         /// <summary>부뚜막 — 잡화 가게 옆에 저절로 생기는 요리 자리 (결정 2-71).</summary>
         Cooking = 8,
 
-        /// <summary>고목 뿌리 샘가 — 호리병 물을 떠 간다 (결정 2-73). 처음부터 있다.</summary>
+        /// <summary>고목 뿌리 우물 — 물병을 떠 간다 (결정 2-73). 처음부터 있다.</summary>
         Spring = 9,
 
         /// <summary>【임시】 열매 나무 — 구역에서 산열매를 딴다 (결정 2-76). 소굴이 아니라 구역에 선다.</summary>
@@ -158,7 +158,7 @@ public class BunkerStation : MonoBehaviour
             {
                 SpringError error = SpringManager.Draw();
                 StoryDialogueUI.ShowBanner(error == SpringError.None
-                    ? $"호리병에 물을 채웠다. (샘에 남은 물 {SpringManager.Remaining})"
+                    ? $"물병에 물을 채웠다. (우물에 남은 물 {SpringManager.Remaining})"
                     : SpringState.Explain(error), 2f);
                 break;
             }

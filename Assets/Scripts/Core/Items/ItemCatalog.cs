@@ -44,7 +44,7 @@ public class ItemCatalog : ScriptableObject
     }
 
     /// <summary>
-    /// 옛 id → 지금 id. 들판의 「맑은 물」(water_bottle)은 호리병 물(con_water)로 합쳤다 (결정 2-73 · 세이브 12판).
+    /// 옛 id → 지금 id. 들판의 「맑은 물」(water_bottle)은 물병(con_water)로 합쳤다 (결정 2-73 · 세이브 12판).
     /// </summary>
     public static readonly IReadOnlyDictionary<string, string> LegacyIds = new Dictionary<string, string>
     {

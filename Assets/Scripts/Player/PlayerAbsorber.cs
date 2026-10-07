@@ -81,7 +81,30 @@ public class PlayerAbsorber : MonoBehaviour
         if (corpse == null)
             return false;
 
-        // 경험치는 최초 1회만. 창을 여러 번 열어도 다시 들어오지 않는다.
+        // 정기 · 엽전은 다가가는 순간 이미 들어왔다 (결정 2-77 · GrantRewards). 여기서는 전리품 창만 연다.
+        GrantRewards(corpse);
+
+        // 집을 것이 없으면 창을 열지 않고 시체를 정리한다.
+        if (!corpse.HasLoot)
+        {
+            Despawn(corpse);
+            return true;
+        }
+
+        ExchangeWindowUI.EnsureInstance().Open(corpse);
+
+        return true;
+    }
+
+    /// <summary>
+    /// 【정기(경험치) · 엽전은 자동으로 거둔다】 (결정 2-77) — 시체에 다가가 감지 범위에 들어오면 바로 들어온다.
+    /// 파밍 버튼은 전리품 창을 열 때만 쓴다. 한 시체에서 한 번만(TryMarkAbsorbed).
+    /// </summary>
+    public void GrantRewards(CorpseController corpse)
+    {
+        if (corpse == null)
+            return;
+
         if (corpse.TryMarkAbsorbed())
         {
             int baseAmount = Mathf.RoundToInt(experiencePerCorpse * corpse.ValueMultiplier);
@@ -113,16 +136,6 @@ public class PlayerAbsorber : MonoBehaviour
                     : string.Empty));
         }
 
-        // 집을 것이 없으면 창을 열지 않고 시체를 정리한다.
-        if (!corpse.HasLoot)
-        {
-            Despawn(corpse);
-            return true;
-        }
-
-        ExchangeWindowUI.EnsureInstance().Open(corpse);
-
-        return true;
     }
 
     /// <summary>시체를 풀로 돌려보낸다. 전리품 창이 비었을 때도 호출된다.</summary>
@@ -151,8 +164,13 @@ public class PlayerAbsorber : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.TryGetComponent(out CorpseController corpse))
-            NearbyCorpse = corpse;
+        if (!other.TryGetComponent(out CorpseController corpse))
+            return;
+
+        NearbyCorpse = corpse;
+
+        // 다가가기만 해도 정기 · 엽전이 들어온다 (결정 2-77).
+        GrantRewards(corpse);
     }
 
     private void OnTriggerExit(Collider other)

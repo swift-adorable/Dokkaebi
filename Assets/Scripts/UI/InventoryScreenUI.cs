@@ -141,6 +141,27 @@ public partial class InventoryScreenUI : MonoBehaviour
     private Image dim;
 
     private RectTransform leftColumn;
+
+    // ── 가방 · 구슬 기둥 (결정 2-77 — 왼쪽 착용 / 오른쪽 가방 · 구슬로 나눴다) ──
+    private RectTransform bagColumn;
+    private RectTransform bagFilterRow;
+
+    /// <summary>가방 탭 — 전체 · 장비 · 소모품 · 재료.</summary>
+    private enum BagFilter { All = 0, Equipment = 1, Consumable = 2, Material = 3 }
+
+    private static readonly string[] BagFilterNames = { "전체", "장비", "소모품", "재료" };
+    private BagFilter bagFilter = BagFilter.All;
+
+    /// <summary>구슬 탭 — 핵심 · 보조 · 발동 · 전령.</summary>
+    private static readonly SkillCategory[] GemFilters =
+        { SkillCategory.Core, SkillCategory.Support, SkillCategory.Meta, SkillCategory.Persistent };
+
+    private static readonly string[] GemFilterNames = { "핵심", "보조", "발동", "전령" };
+    private int gemFilter;
+
+    /// <summary>착용 기둥의 오른쪽 끝 · 가방 기둥의 오른쪽 끝 (안전 영역 기준). 전리품 · 창고 · 상점 창은 0.615부터.</summary>
+    private const float EquipColumnRight = 0.30f;
+    private const float BagColumnRight = 0.60f;
     private RectTransform equipmentGrid;
     private RectTransform bagViewport;
     private RectTransform bagGrid;
@@ -471,35 +492,66 @@ public partial class InventoryScreenUI : MonoBehaviour
 
     private const float BandGap = 0.010f;
 
+    /// <summary>가방 기둥에서 목록의 위 끝 — 그 위는 제목 · 탭 줄.</summary>
+    private const float BagListTop = 0.83f;
+
     /// <summary>탭에 맞춰 좌측 칸의 세로 배치를 바꾼다.</summary>
     private void LayoutLeftColumn(bool skillTab)
     {
-        float bandBottom = skillTab ? SocketBandBottom : EquipBandBottom;
-
-        float titleTop = bandBottom - BandGap;
-        float titleBottom = titleTop - ListTitleHeight;
-        float listTop = titleBottom - BandGap;
-
         // 스킬 탭에서만 「다음 개방」이 뜬다. 그때는 골드를 접는다 —
         // 젬을 끼우는 화면에서 돈은 쓸 일이 없다.
         topInfoLabel.gameObject.SetActive(skillTab);
         goldLabel.gameObject.SetActive(!skillTab);
 
-        equipmentGrid.anchorMin = new Vector2(0f, bandBottom);
+        // 착용 기둥은 위부터 — 장비 8칸(2 × 4)은 기둥을 거의 채우고, 소켓 판(4 × 3)은 위쪽 절반쯤.
+        equipmentGrid.anchorMin = new Vector2(0f, skillTab ? SocketBandBottom - 0.12f : 0f);
         equipmentGrid.anchorMax = new Vector2(1f, TopBandTop);
         equipmentGrid.offsetMin = Vector2.zero;
         equipmentGrid.offsetMax = Vector2.zero;
 
-        var title = bagTitleLabel.rectTransform;
-        title.anchorMin = new Vector2(0f, titleBottom);
-        title.anchorMax = new Vector2(1f, titleTop);
-        title.offsetMin = Vector2.zero;
-        title.offsetMax = Vector2.zero;
+        DrawBagFilterRow(skillTab);
+    }
 
-        bagWell.rectTransform.anchorMax = new Vector2(1f, listTop);
+    /// <summary>가방 기둥의 탭 줄 — 장비 탭은 전체 · 장비 · 소모품 · 재료, 스킬 탭은 핵심 · 보조 · 발동 · 전령 (결정 2-77).</summary>
+    private void DrawBagFilterRow(bool skillTab)
+    {
+        UIFactory.ClearChildren(bagFilterRow);
 
-        bagViewport.anchorMax = new Vector2(1f, listTop);
-        bagViewport.offsetMax = new Vector2(-8f, -8f);
+        string[] names = skillTab ? GemFilterNames : BagFilterNames;
+        int current = skillTab ? gemFilter : (int)bagFilter;
+        float width = 1f / names.Length;
+
+        for (int i = 0; i < names.Length; i++)
+        {
+            int index = i;
+            UIFactory.CreateButton(bagFilterRow, names[i],
+                new Vector2(i * width + 0.01f, 0f), new Vector2((i + 1) * width - 0.01f, 1f),
+                i == current ? UIPalette.Action : UIPalette.Subtle,
+                () =>
+                {
+                    if (skillTab) gemFilter = index;
+                    else bagFilter = (BagFilter)index;
+                    Refresh();
+                }, 22);
+        }
+    }
+
+    private bool MatchesBagFilter(ItemStack stack)
+    {
+        ItemKind kind = stack.Definition.Kind;
+
+        switch (bagFilter)
+        {
+            case BagFilter.Equipment:
+                return kind == ItemKind.Weapon || kind == ItemKind.Armour
+                       || kind == ItemKind.Backpack || kind == ItemKind.Imprint;
+            case BagFilter.Consumable:
+                return kind == ItemKind.Consumable;
+            case BagFilter.Material:
+                return kind == ItemKind.Material;
+            default:
+                return true;
+        }
     }
 
     private void BuildLeftColumn(RectTransform body)
@@ -534,15 +586,29 @@ public partial class InventoryScreenUI : MonoBehaviour
         equipmentGrid = UIFactory.CreateRegion("TopBand", content,
             new Vector2(0f, EquipBandBottom), new Vector2(1f, TopBandTop));
 
-        bagTitleLabel = UIFactory.CreateLabel(content, "가방", 29, FontStyle.Bold,
-            Vector2.zero, Vector2.one, TextAnchor.MiddleLeft, UIPalette.TextDim);
+        // 【가방 · 구슬은 오른쪽 기둥으로】 (결정 2-77). 착용 장비 · 장착 스킬은 이 기둥에 남는다.
+        bagColumn = UIFactory.CreateSlice("BagColumn", body,
+            new Vector2(EquipColumnRight, 0f), new Vector2(BagColumnRight, 1f), left: UIFactory.Gap * 0.5f);
+
+        UIFactory.CreateGlass("Back", bagColumn, UIPalette.Panel,
+            Vector2.zero, Vector2.one, UIFactory.RadiusLarge);
+
+        RectTransform bagContent = UIFactory.Inset(
+            UIFactory.CreateRegion("Content", bagColumn, Vector2.zero, Vector2.one),
+            UIFactory.Gap);
+
+        bagTitleLabel = UIFactory.CreateLabel(bagContent, "가방", 29, FontStyle.Bold,
+            new Vector2(0f, TopBandTop + BandGap), new Vector2(1f, TitleTop), TextAnchor.MiddleLeft, UIPalette.TextDim);
+
+        bagFilterRow = UIFactory.CreateRegion("FilterRow", bagContent,
+            new Vector2(0f, BagListTop + BandGap), new Vector2(1f, TopBandTop));
 
         // 아래 단 뒤에 한 단계 눌린 면을 깔아 깊이를 준다.
-        bagWell = UIFactory.CreatePanel("ListWell", content, UIPalette.Inset,
-            Vector2.zero, new Vector2(1f, 0.515f), UIFactory.Radius);
+        bagWell = UIFactory.CreatePanel("ListWell", bagContent, UIPalette.Inset,
+            Vector2.zero, new Vector2(1f, BagListTop), UIFactory.Radius);
 
-        bagViewport = UIFactory.CreateSlice("List", content,
-            Vector2.zero, new Vector2(1f, 0.515f),
+        bagViewport = UIFactory.CreateSlice("List", bagContent,
+            Vector2.zero, new Vector2(1f, BagListTop),
             left: 8f, bottom: 8f, right: 8f, top: 8f);
 
         // 마스크가 없으면 스크롤한 칸이 위쪽 장비 영역을 덮는다.
@@ -861,6 +927,7 @@ public partial class InventoryScreenUI : MonoBehaviour
         float half = UIFactory.Gap * 0.5f;
 
         leftColumn.gameObject.SetActive(showLeft);
+        bagColumn.gameObject.SetActive(showLeft);
         rightPanel.gameObject.SetActive(showRight);
 
         bodyRegion.anchorMin = new Vector2(0f, passive ? 0f : ColumnBottom);
@@ -883,7 +950,7 @@ public partial class InventoryScreenUI : MonoBehaviour
 
         if (showLeft)
         {
-            leftColumn.anchorMax = new Vector2(SidePanelRight, 1f);
+            leftColumn.anchorMax = new Vector2(EquipColumnRight, 1f);
             leftColumn.offsetMax = new Vector2(-half, 0f);
 
             bool skillTab = tab == Tab.Socket;
@@ -1029,7 +1096,8 @@ public partial class InventoryScreenUI : MonoBehaviour
 
         for (int i = 0; i < slots.Length; i++)
         {
-            UIFactory.GetCellAnchors(i, 4, 2, padX, padY, out Vector2 min, out Vector2 max);
+            // 착용 기둥이 세로로 길어져(결정 2-77) 2열 × 4줄로 쌓는다.
+            UIFactory.GetCellAnchors(i, 2, 4, padX, padY, out Vector2 min, out Vector2 max);
 
             ItemStack stack = loadout.Get(slots[i]);
 
@@ -1147,9 +1215,19 @@ public partial class InventoryScreenUI : MonoBehaviour
 
         foreach (ItemStack stack in bag.Stacks)
         {
-            if (BelongsToTab(stack))
-                bagStacks.Add(stack);
+            if (!BelongsToTab(stack))
+                continue;
+
+            // 탭 안의 탭 (결정 2-77) — 장비 탭은 종류로, 스킬 탭은 구슬 분류로 거른다.
+            if (tab == Tab.Socket ? CategoryOf(stack) != GemFilters[gemFilter] : !MatchesBagFilter(stack))
+                continue;
+
+            bagStacks.Add(stack);
         }
+
+        // 고르지 않은 구슬이 맨 앞 — 고르기부터 해야 끼울 수 있다.
+        if (tab == Tab.Socket)
+            bagStacks.Sort((a, b) => (b.Definition.IsBlankGem ? 1 : 0).CompareTo(a.Definition.IsBlankGem ? 1 : 0));
 
         // 부모(=뷰포트)의 실제 크기를 읽기 전에 레이아웃을 확정시킨다.
         Canvas.ForceUpdateCanvases();
@@ -1166,7 +1244,7 @@ public partial class InventoryScreenUI : MonoBehaviour
 
         if (tab == Tab.Socket)
         {
-            bagTitleLabel.text = $"구슬 ({bagStacks.Count}개)";
+            bagTitleLabel.text = $"구슬 — {GemFilterNames[gemFilter]} ({bagStacks.Count}개)";
             DrawGemSections(columns, cellSize, viewWidth, viewHeight);
             return;
         }
@@ -1226,11 +1304,8 @@ public partial class InventoryScreenUI : MonoBehaviour
     /// </summary>
     private void DrawGemSections(int columns, float cellSize, float viewWidth, float viewHeight)
     {
-        var order = new[]
-        {
-            SkillCategory.Core, SkillCategory.Support,
-            SkillCategory.Meta, SkillCategory.Persistent
-        };
+        // 구슬 탭이 고른 분류 하나만 그린다 (결정 2-77).
+        var order = new[] { GemFilters[gemFilter] };
 
         float headerHeight = cellSize * 0.42f;
 

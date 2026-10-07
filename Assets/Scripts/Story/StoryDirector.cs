@@ -52,8 +52,8 @@ public class StoryDirector : MonoBehaviour
 
     private void PlayBunker()
     {
-        // 프롤로그(인트로) 뒤에 난이도를 한 번 고른다 (결정 2-69). 이미 골랐으면 그냥 지나간다.
-        StoryManager.PlayOnce(StoryTable.PrologueEvent, () => DifficultyPickerUI.ShowIfNeeded(PlayNextNight));
+        // 【프롤로그 앞에서】 난이도를 한 번 고른다 (결정 2-77 — 2-69의 「프롤로그 뒤」를 바꿈). 이미 골랐으면 그냥 지나간다.
+        DifficultyPickerUI.ShowIfNeeded(() => StoryManager.PlayOnce(StoryTable.PrologueEvent, PlayNextNight));
     }
 
     private void PlayNextNight()
@@ -80,8 +80,9 @@ public class StoryDirector : MonoBehaviour
             StoryDialogueUI.ShowBanner(definition.Title, 2.5f);
 
         // 소굴을 거치지 않고 구역 씬부터 켰다면(에디터) 프롤로그부터 본다.
-        StoryManager.PlayOnce(StoryTable.PrologueEvent, () =>
-            StoryManager.PlayOnce(StoryTable.EnterEvent(zone), () =>
-                gameObject.AddComponent<StoryRaidDirector>().Begin(zone)));
+        DifficultyPickerUI.ShowIfNeeded(() =>
+            StoryManager.PlayOnce(StoryTable.PrologueEvent, () =>
+                StoryManager.PlayOnce(StoryTable.EnterEvent(zone), () =>
+                    gameObject.AddComponent<StoryRaidDirector>().Begin(zone))));
     }
 }

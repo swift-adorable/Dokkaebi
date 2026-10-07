@@ -45,7 +45,7 @@ public class BunkerBuildings : MonoBehaviour
     private GameObject spring;
 
     /// <summary>
-    /// 고목 뿌리 샘가 (결정 2-73). 짓는 것이 아니라 처음부터 있다 — 씬 생성기를 다시 돌리지 않도록 여기서 세운다.
+    /// 고목 뿌리 우물 (결정 2-73). 짓는 것이 아니라 처음부터 있다 — 씬 생성기를 다시 돌리지 않도록 여기서 세운다.
     /// 고정 자리라 건물을 그 위에 놓을 수 없다(Occupied).
     /// </summary>
     private void EnsureSpring()

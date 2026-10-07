@@ -1,5 +1,5 @@
 /// <summary>
-/// 이번 게임의 난이도 (결정 2-69). 새로 시작할 때 프롤로그 뒤에 한 번 고르고, 바꿀 수 없다.
+/// 이번 게임의 난이도 (결정 2-69). 새로 시작할 때 프롤로그 앞에서 한 번 고르고(결정 2-77), 바꿀 수 없다.
 /// 세이브에 담긴다(SaveData.difficulty). 고르기 전에는 Normal로 친다.
 /// </summary>
 public static class DifficultyManager

@@ -63,6 +63,16 @@ public class ExchangeWindowUI : MonoBehaviour
     private Mode mode = Mode.Loot;
     private CorpseController source;
     private LootContainer other;
+
+    /// <summary>
+    /// 【겹친 시체를 한 창에】 (결정 2-77) — 파밍을 누른 시체 둘레(MergeRadius)의 시체 전리품을 함께 보여 준다.
+    /// 칸 번호는 lootCells(상자 · 상자 안 칸)를 거쳐 원래 상자로 간다.
+    /// </summary>
+    private readonly List<CorpseController> sources = new();
+    private readonly List<(LootContainer box, int index)> lootCells = new();
+
+    /// <summary>함께 여는 시체의 거리 (m).</summary>
+    public const float MergeRadius = 2.5f;
     private Inventory stash;
     private ShopKind shopKind = ShopKind.General;
     private string otherName = "전리품";
@@ -162,7 +172,52 @@ public class ExchangeWindowUI : MonoBehaviour
 
         source = corpse;
 
-        Open(corpse.Loot, "전리품", Mode.Loot);
+        // 둘레의 다른 시체도 함께 — 먼저 누른 시체가 맨 앞이다.
+        sources.Clear();
+        sources.Add(corpse);
+
+        foreach (CorpseController near in FindObjectsByType<CorpseController>(FindObjectsInactive.Exclude))
+        {
+            if (near == null || near == corpse || !near.HasLoot)
+                continue;
+
+            Vector3 d = near.transform.position - corpse.transform.position;
+            d.y = 0f;
+
+            if (d.sqrMagnitude <= MergeRadius * MergeRadius)
+                sources.Add(near);
+        }
+
+        Open(corpse.Loot, sources.Count > 1 ? $"전리품 (시체 {sources.Count})" : "전리품", Mode.Loot);
+    }
+
+    /// <summary>지금 열려 있는 전리품 상자들. 겹친 시체가 없으면 하나뿐이다.</summary>
+    private IEnumerable<LootContainer> Boxes
+    {
+        get
+        {
+            if (mode == Mode.Loot && sources.Count > 0)
+            {
+                foreach (CorpseController c in sources)
+                    if (c != null)
+                        yield return c.Loot;
+            }
+            else if (other != null)
+            {
+                yield return other;
+            }
+        }
+    }
+
+    private bool AllLootEmpty
+    {
+        get
+        {
+            foreach (LootContainer box in Boxes)
+                if (!box.IsEmpty)
+                    return false;
+            return true;
+        }
     }
 
     /// <summary>임의의 상자를 연다. 창고가 8단계에 이 길로 들어온다.</summary>
@@ -170,6 +225,9 @@ public class ExchangeWindowUI : MonoBehaviour
     {
         if (container == null)
             return;
+
+        if (source == null || container != source.Loot)
+            sources.Clear();
 
         other = container;
         stash = null;
@@ -181,6 +239,7 @@ public class ExchangeWindowUI : MonoBehaviour
     /// <summary>창고를 연다. 벙커가 생기면(8단계 뒤쪽) 보관고가 이 길을 부른다.</summary>
     public void OpenStash()
     {
+        sources.Clear();
         source = null;
         other = null;
         stash = PlayerInventory.EnsureInstance().Stash;
@@ -192,6 +251,7 @@ public class ExchangeWindowUI : MonoBehaviour
     /// <summary>상점을 연다. 【종류별로 나뉜다】 — 잡화 · 무기 · 방어구 (8-K).</summary>
     public void OpenShop(ShopKind kind = ShopKind.General)
     {
+        sources.Clear();
         source = null;
         other = null;
         stash = null;
@@ -235,9 +295,10 @@ public class ExchangeWindowUI : MonoBehaviour
 
         // 다 집었으면 시체를 정리한다. 남아 있으면 그대로 두어
         // 나중에 돌아와 마저 집을 수 있게 한다.
-        if (mode == Mode.Loot && source != null && other != null && other.IsEmpty)
-            DespawnSource();
+        if (mode == Mode.Loot)
+            DespawnEmptySources();
 
+        sources.Clear();
         source = null;
         other = null;
         stash = null;
@@ -254,12 +315,23 @@ public class ExchangeWindowUI : MonoBehaviour
         closing = false;
     }
 
-    private void DespawnSource()
+    /// <summary>다 집은 시체를 정리한다 — 남은 것이 있으면 그대로 두어 나중에 마저 집게 한다.</summary>
+    private void DespawnEmptySources()
     {
         var absorber = FindAnyObjectByType<PlayerAbsorber>(FindObjectsInactive.Include);
 
-        if (absorber != null)
+        if (absorber == null)
+            return;
+
+        if (sources.Count == 0 && source != null && other != null && other.IsEmpty)
+        {
             absorber.Despawn(source);
+            return;
+        }
+
+        foreach (CorpseController c in sources)
+            if (c != null && !c.HasLoot)
+                absorber.Despawn(c);
     }
 
     /// <summary>
@@ -321,7 +393,7 @@ public class ExchangeWindowUI : MonoBehaviour
 
         takeAllButton.interactable = mode == Mode.Stash
             ? stash.Stacks.Count > 0
-            : mode == Mode.Loot && !other.IsEmpty;
+            : mode == Mode.Loot && !AllLootEmpty;
 
         // 칸 크기를 픽셀로 환산하려면 실제 크기가 확정되어 있어야 한다.
         // 다시 그리면 사이드 메뉴가 가리키던 칸이 사라진다.
@@ -346,9 +418,19 @@ public class ExchangeWindowUI : MonoBehaviour
         // 패시브가 줄어 칸이 모자라도 이미 든 것은 그대로다. 둘 다 보여야 한다.
         IReadOnlyList<ItemStack> stashStacks = mode == Mode.Stash ? stash.Stacks : null;
 
+        // 전리품은 열린 상자들의 물건을 이어 붙인다 (겹친 시체 — 결정 2-77).
+        if (mode == Mode.Loot)
+        {
+            lootCells.Clear();
+            foreach (LootContainer box in Boxes)
+                for (int b = 0; b < box.Capacity; b++)
+                    if (box.Get(b) != null)
+                        lootCells.Add((box, b));
+        }
+
         int cells = mode == Mode.Stash
             ? Mathf.Max(stash.SlotCapacity, stashStacks.Count)
-            : Mathf.Max(0, other.Capacity);
+            : Mathf.Max(other.Capacity, lootCells.Count);
 
         UIFactory.SquareGridMetrics(grid.Viewport, Columns, cells, MinRows,
             out int rows, out float height, out float padX, out float padY);
@@ -363,7 +445,7 @@ public class ExchangeWindowUI : MonoBehaviour
 
             ItemStack stack = mode == Mode.Stash
                 ? (i < stashStacks.Count ? stashStacks[i] : null)
-                : (i < cells ? other.Get(i) : null);
+                : (i < lootCells.Count ? lootCells[i].box.Get(lootCells[i].index) : null);
 
             int captured = i;
 
@@ -459,7 +541,7 @@ public class ExchangeWindowUI : MonoBehaviour
 
         var entries = ItemActionMenu.ForContainerItem(
             definition,
-            take: () => Take(index, stack),
+            take: () => AskTake(index, stack),
             equip: equippable ? () => TakeAndEquip(index, stack) : null,
             use: null,
             detail: () => InventoryScreenUI.OpenReadOnlyDetail(stack, otherName),
@@ -485,7 +567,7 @@ public class ExchangeWindowUI : MonoBehaviour
 
         var entries = new List<ItemActionMenu.Entry>
         {
-            new($"구매 {price:N0}엽전", UIPalette.Action, () => Buy(definition), error == TradeError.None),
+            new($"구매 {price:N0}엽전", UIPalette.Action, () => AskBuy(definition, entry, price), error == TradeError.None),
             new("상세보기", UIPalette.Subtle,
                 () => InventoryScreenUI.OpenReadOnlyDetail(new ItemStack(definition), otherName))
         };
@@ -538,10 +620,15 @@ public class ExchangeWindowUI : MonoBehaviour
             return false;
         }
 
-        if (other == null || other.Get(index) == null)
+        if (index < 0 || index >= lootCells.Count)
             return false;
 
-        if (other.TryTakeTo(index, bag))
+        (LootContainer box, int local) = lootCells[index];
+
+        if (box == null || box.Get(local) == null)
+            return false;
+
+        if (box.TryTakeTo(local, bag))
             return true;
 
         // 못 옮기면 아이템은 있던 자리에 그대로 남는다. 사라지지 않는다.
@@ -558,6 +645,77 @@ public class ExchangeWindowUI : MonoBehaviour
             AfterMove();
     }
 
+    /// <summary>【수량을 고른다】 (결정 2-77) — 겹친 물건은 몇 개를 꺼낼지 · 주울지 묻는다.</summary>
+    private void AskTake(int index, ItemStack stack)
+    {
+        if (stack == null || stack.Count <= 1)
+        {
+            Take(index, stack);
+            return;
+        }
+
+        string verb = mode == Mode.Stash ? "꺼내기" : "줍기";
+        QuantityPopupUI.Ask(stack.Definition.DisplayName, verb, stack.Count,
+            n => $"{stack.Definition.WeightCost * n:0.0} kg",
+            n => TakeCount(index, stack, n));
+    }
+
+    private void TakeCount(int index, ItemStack stack, int count)
+    {
+        Inventory bag = PlayerInventory.EnsureInstance().Bag;
+        bool moved;
+
+        if (mode == Mode.Stash)
+        {
+            moved = QuantityTransfer.Move(stash, bag, stack, count);
+        }
+        else
+        {
+            moved = index >= 0 && index < lootCells.Count
+                    && QuantityTransfer.Take(lootCells[index].box, lootCells[index].index, bag, count);
+        }
+
+        if (!moved)
+            InventoryScreenUI.ShowToastIfOpen("가방에 자리가 없습니다.");
+
+        AfterMove();
+    }
+
+    /// <summary>몇 개를 살지 고른다 — 재고 · 엽전이 허락하는 만큼까지.</summary>
+    private void AskBuy(ItemDefinition definition, ShopEntry entry, int price)
+    {
+        int remaining = ShopManager.Of(shopKind).Remaining(entry.ItemId);
+        int affordable = price > 0 ? PassiveManager.EnsureInstance().Gold / price : remaining;
+        int max = Mathf.Min(remaining, affordable);
+
+        if (!definition.IsStackable)
+            max = Mathf.Min(max, 1);
+
+        QuantityPopupUI.Ask(definition.DisplayName, "사기", Mathf.Max(1, max),
+            n => $"−{price * n:N0}엽전",
+            n => BuyCount(definition, n));
+    }
+
+    private void BuyCount(ItemDefinition definition, int count)
+    {
+        int bought = 0;
+        TradeError last = TradeError.None;
+
+        for (int i = 0; i < count; i++)
+        {
+            last = ShopManager.Buy(shopKind, definition);
+            if (last != TradeError.None)
+                break;
+            bought++;
+        }
+
+        InventoryScreenUI.ShowToastIfOpen(bought > 0
+            ? $"구매 — 「{definition.DisplayName}」 ×{bought}" + (bought < count ? $" ({TradeRules.Explain(last)})" : string.Empty)
+            : TradeRules.Explain(last));
+
+        AfterMove();
+    }
+
     private void TakeAll()
     {
         Inventory bag = PlayerInventory.EnsureInstance().Bag;
@@ -572,9 +730,10 @@ public class ExchangeWindowUI : MonoBehaviour
                     moved++;
             }
         }
-        else if (other != null)
+        else
         {
-            moved = other.TakeAllTo(bag);
+            foreach (LootContainer box in Boxes)
+                moved += box.TakeAllTo(bag);
         }
 
         GameLogger.Log($"[ExchangeWindowUI] {moved}칸 회수");
@@ -588,26 +747,43 @@ public class ExchangeWindowUI : MonoBehaviour
     /// </summary>
     public static void PutIntoStash(ItemStack stack)
     {
-        Inventory bag = PlayerInventory.EnsureInstance().Bag;
+        if (stack == null || stack.IsEmpty)
+            return;
 
-        if (!Inventory.MoveStack(bag, PlayerInventory.Instance.Stash, stack))
-            InventoryScreenUI.ShowToastIfOpen("창고에 자리가 없습니다.");
+        // 겹친 물건은 몇 개를 넣을지 고른다 (결정 2-77).
+        QuantityPopupUI.Ask(stack.Definition.DisplayName, "넣기", stack.Count, null, n =>
+        {
+            Inventory bag = PlayerInventory.EnsureInstance().Bag;
 
-        RefreshAfterBagChange();
+            if (!QuantityTransfer.Move(bag, PlayerInventory.Instance.Stash, stack, n))
+                InventoryScreenUI.ShowToastIfOpen("창고에 자리가 없습니다.");
+
+            RefreshAfterBagChange();
+        });
     }
 
     /// <summary>가방 칸을 판다. 가방 화면의 사이드 메뉴 「판매」가 부른다.</summary>
     public static void SellFromBag(ItemStack stack)
     {
-        string name = stack?.Definition != null ? stack.Definition.DisplayName : string.Empty;
+        if (stack == null || stack.IsEmpty)
+            return;
 
-        TradeError error = ShopManager.Sell(stack, out int earned);
+        string name = stack.Definition.DisplayName;
+        float bonus = ShopManager.SellBonusPercent;
 
-        InventoryScreenUI.ShowToastIfOpen(error == TradeError.None
-            ? $"판매 — 「{name}」 +{earned:N0}엽전"
-            : TradeRules.Explain(error));
+        // 겹친 물건은 몇 개를 팔지 고른다 (결정 2-77).
+        QuantityPopupUI.Ask(name, "팔기", stack.Count,
+            n => $"+{QuantityTransfer.SellPrice(stack, n, bonus):N0}엽전",
+            n =>
+            {
+                TradeError error = ShopManager.Sell(stack, n, out int earned);
 
-        RefreshAfterBagChange();
+                InventoryScreenUI.ShowToastIfOpen(error == TradeError.None
+                    ? $"판매 — 「{name}」 ×{n} +{earned:N0}엽전"
+                    : TradeRules.Explain(error));
+
+                RefreshAfterBagChange();
+            });
     }
 
     private static void RefreshAfterBagChange()
@@ -631,7 +807,7 @@ public class ExchangeWindowUI : MonoBehaviour
 
         // 【하나씩 주워 다 비워도 닫힌다.】 「전부 줍기」에만 있던 규칙이라,
         // 마지막 한 칸을 손으로 집으면 빈 창이 남아 있었다.
-        if (mode == Mode.Loot && other != null && other.IsEmpty)
+        if (mode == Mode.Loot && other != null && AllLootEmpty)
         {
             Close();
             return;

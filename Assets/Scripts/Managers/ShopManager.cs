@@ -83,11 +83,15 @@ public static class ShopManager
 
     /// <summary>가방의 한 칸을 통째로 판다. 어느 상점에서 팔든 값은 같다.</summary>
     public static TradeError Sell(ItemStack stack, out int earned)
+        => Sell(stack, stack != null ? stack.Count : 0, out earned);
+
+    /// <summary>가방 칸에서 n개를 판다 (결정 2-77 — 수량 고르기).</summary>
+    public static TradeError Sell(ItemStack stack, int count, out int earned)
     {
         PassiveManager passive = PassiveManager.EnsureInstance();
         int gold = passive.Gold;
 
-        TradeError error = TradeRules.Sell(stack, PlayerInventory.EnsureInstance().Bag,
+        TradeError error = QuantityTransfer.Sell(stack, count, PlayerInventory.EnsureInstance().Bag,
             SellBonusPercent, ref gold, out earned);
 
         if (error == TradeError.None)

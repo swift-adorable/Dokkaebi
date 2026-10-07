@@ -44,14 +44,14 @@ public enum CookError
 ///
 /// 만드는 것은 **이미 있는 음식**뿐이다 — 값(수분 · 에너지)은 Consumable(생성기)이 원본이다.
 /// 포만도 · 버프 · 실패 확률 · 조리 시간은 두지 않는다. 메밀묵은 이야기 음식이라 레시피가 아니다.
-/// 재료 이름 · 개수는 [임시값]. 재료와 나오는 장은 IngredientTable, 물은 고목 뿌리 샘가(SpringTable) — 결정 2-73.
+/// 재료 이름 · 개수는 [임시값]. 재료와 나오는 장은 IngredientTable, 물은 고목 뿌리 우물(SpringTable) — 결정 2-73.
 /// </summary>
 public static class CookingTable
 {
     /// <summary>요리하는 자리 — 영감의 잡화 가게 옆에 저절로 생긴다 (결정 2-71). 따로 짓지 않는다.</summary>
     public const string HearthName = "부뚜막";
 
-    // 재료 id는 IngredientTable이 원본이다. 물은 고목 뿌리 샘가에서 떠 오는 호리병 물(SpringTable).
+    // 재료 id는 IngredientTable이 원본이다. 물은 고목 뿌리 우물에서 떠 오는 물병(SpringTable).
     private const string Rice = IngredientTable.Rice;
     private const string Malt = IngredientTable.Malt;
     private const string Water = SpringTable.WaterId;

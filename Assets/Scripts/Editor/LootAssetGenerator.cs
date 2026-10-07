@@ -62,7 +62,7 @@ public static class LootAssetGenerator
             New("med_stim",      "현호색",       "잠시 아픔을 잊는다.",
                 ItemKind.Consumable, weight: 0.1f, stackMax: 5, value: 60, tableWeight: 8, 1, 2),
 
-            // 들판의 「맑은 물」(water_bottle)은 호리병 물(con_water)로 합쳤다 (결정 2-73) — 아래 ExistingRows.
+            // 들판의 「맑은 물」(water_bottle)은 물병(con_water)로 합쳤다 (결정 2-73) — 아래 ExistingRows.
         };
 
         // 요리 재료 (결정 2-73) — IngredientTable이 원본이다. 장이 맞지 않는 재료는 그 판에서 빠진다
@@ -90,7 +90,7 @@ public static class LootAssetGenerator
     private const string ConsumableRoot = "Assets/Data/ScriptableObjects/Items/Consumables";
 
     /// <summary>
-    /// 소모품 생성기가 만든 것을 표에만 올린다 — 호리병 물(들판에서도 나온다) · 생강(1장 재료이자 동결 해제약).
+    /// 소모품 생성기가 만든 것을 표에만 올린다 — 물병(들판에서도 나온다) · 생강(1장 재료이자 동결 해제약).
     /// </summary>
     private static IEnumerable<(string id, int weight, int min, int max)> ExistingRows()
     {

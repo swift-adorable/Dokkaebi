@@ -1,5 +1,5 @@
 /// <summary>
-/// 고목 뿌리 샘가의 물을 들고 있는다 (결정 2-73). 세이브에 담긴다(SaveData.spring).
+/// 고목 뿌리 우물의 물을 들고 있는다 (결정 2-73). 세이브에 담긴다(SaveData.spring).
 /// 상점 재고처럼 파밍이 끝날 때(철수 · 사망) 다시 찬다.
 /// </summary>
 public static class SpringManager
@@ -13,14 +13,14 @@ public static class SpringManager
 
     public static int Remaining => State.Remaining;
 
-    /// <summary>【파밍이 끝났다 = 한 밤이 지났다】 — 샘이 다시 찬다.</summary>
+    /// <summary>【파밍이 끝났다 = 한 밤이 지났다】 — 우물이 다시 찬다.</summary>
     public static void RefillAfterRun()
     {
         State.Refill();
-        GameLogger.Log($"[Spring] 샘이 다시 찼습니다 ({SpringTable.PerNight}).");
+        GameLogger.Log($"[Spring] 우물이 다시 찼습니다 ({SpringTable.PerNight}).");
     }
 
-    /// <summary>호리병 물 한 병을 떠서 가방에 넣는다.</summary>
+    /// <summary>물병 한 병을 떠서 가방에 넣는다.</summary>
     public static SpringError Draw()
     {
         ItemDefinition water = ItemCatalog.Load()?.Find(SpringTable.WaterId);

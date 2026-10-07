@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: con_water
   m_EditorClassIdentifier: Dokkaebi.Runtime::ItemDefinition
   id: con_water
-  displayName: "\uD638\uB9AC\uBCD1 \uBB3C"
-  description: "\uC0D8\uAC00\uC5D0\uC11C \uCC44\uC6B4 \uBB3C. \uB9DB\uC740 \uC5C6\uC9C0\uB9CC
-    \uC548\uC804\uD558\uB2E4."
+  displayName: "\uBB3C\uBCD1"
+  description: "\uC6B0\uBB3C\uC5D0\uC11C \uAE38\uC5B4 \uC628 \uBB3C. \uB9DB\uC740
+    \uC5C6\uC9C0\uB9CC \uC548\uC804\uD558\uB2E4."
   kind: 6
   tier: 0
   weight: 0.3
@@ -28,6 +28,7 @@ MonoBehaviour:
   noRegister: 0
   noTrade: 0
   skill: {fileID: 0}
+  blankGem: 0
   consumable:
     category: 2
     heal: 0

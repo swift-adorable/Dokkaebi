@@ -40,7 +40,7 @@ namespace Dokkaebi.Tests
                         Assert.IsNotNull(catalog.Find(member), $"{r.OutputId}: 재료 {member}");
             }
 
-            Assert.IsNull(CookingTable.ForOutput("con_water"), "호리병 물은 샘가에서 뜨는 것");
+            Assert.IsNull(CookingTable.ForOutput("con_water"), "물병은 우물에서 긷는 것");
             Assert.IsNull(CookingTable.ForOutput("con_whisky"), "막걸리는 빚는 것");
         }
 
@@ -88,11 +88,11 @@ namespace Dokkaebi.Tests
         }
 
         [Test]
-        public void 물을_넣은_음료는_호리병_물보다_목을_더_축인다()
+        public void 물을_넣은_음료는_물병_물보다_목을_더_축인다()
         {
             ItemCatalog catalog = Catalog;
             float water = catalog.Find(SpringTable.WaterId).Consumable.Water;
-            Assert.AreEqual(20f, water, "호리병 물 = 수분 20 (결정 2-73)");
+            Assert.AreEqual(20f, water, "물병 = 수분 20 (결정 2-73)");
 
             foreach (Recipe r in CookingTable.All.Where(r => r.Inputs.Any(c => c.ItemId == SpringTable.WaterId)))
                 Assert.Greater(catalog.Find(r.OutputId).Consumable.Water, water, r.OutputId);
@@ -193,7 +193,7 @@ namespace Dokkaebi.Tests
         }
 
         [Test]
-        public void 샘가는_한_밤에_여덟_병_넘치면_쌓이지_않는다()
+        public void 우물은_한_밤에_여덟_병_넘치면_쌓이지_않는다()
         {
             ItemDefinition water = Catalog.Find(SpringTable.WaterId);
             var bag = new Inventory(20, 99f);
@@ -214,10 +214,10 @@ namespace Dokkaebi.Tests
         }
 
         [Test]
-        public void 옛_맑은_물은_호리병_물로_읽는다()
+        public void 옛_맑은_물은_물병_물로_읽는다()
         {
             Assert.AreEqual(SpringTable.WaterId, Catalog.Find("water_bottle")?.Id);
-            Assert.AreEqual("호리병 물", Catalog.Find(SpringTable.WaterId).DisplayName);
+            Assert.AreEqual("물병", Catalog.Find(SpringTable.WaterId).DisplayName);
         }
     }
 }

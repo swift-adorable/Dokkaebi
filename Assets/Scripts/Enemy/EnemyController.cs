@@ -40,6 +40,10 @@ public class EnemyController : MonoBehaviour, IPoolable
         brain = GetComponent<EnemyBrain>();
         identity = GetComponent<EnemyIdentity>();
         pooledObject = GetComponent<PooledObject>();
+
+        // 【임시 표시】 머리 위 상태 글자 (결정 2-77).
+        if (!TryGetComponent(out EnemyStatusTag _))
+            gameObject.AddComponent<EnemyStatusTag>();
     }
 
     private void OnEnable()
