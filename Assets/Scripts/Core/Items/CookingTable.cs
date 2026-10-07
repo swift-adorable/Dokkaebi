@@ -30,7 +30,7 @@ public enum CookError
 }
 
 /// <summary>
-/// 【Cooking Data.】 영감의 잡화 가게에서 재료를 조합해 음식을 만든다 (결정 2-64 · docs/Dokkaebi_Cooking_System.md).
+/// 【Cooking Data.】 잡화 가게 옆 부뚜막에서 재료를 조합해 음식을 만든다 (결정 2-64 · 2-71 · docs/Dokkaebi_Cooking_System.md).
 ///
 /// 만드는 것은 **이미 있는 음식**뿐이다 — 값(수분 · 에너지)은 Consumable(생성기)이 원본이다.
 /// 포만도 · 버프 · 실패 확률 · 조리 시간은 두지 않는다. 메밀묵은 이야기 음식이라 레시피가 아니다.
@@ -38,6 +38,9 @@ public enum CookError
 /// </summary>
 public static class CookingTable
 {
+    /// <summary>요리하는 자리 — 영감의 잡화 가게 옆에 저절로 생긴다 (결정 2-71). 따로 짓지 않는다.</summary>
+    public const string HearthName = "부뚜막";
+
     public const string Rice = "food_rice";
     public const string Barley = "food_barley";
     public const string Malt = "food_malt";
@@ -70,7 +73,7 @@ public static class CookingTable
         return null;
     }
 
-    /// <summary>요리가 열렸는가 — 영감의 잡화 가게를 놓았다 (서브 퀘스트 「영감의 잡화 가게」).</summary>
+    /// <summary>요리가 열렸는가 — 영감의 잡화 가게를 놓았다 = 그 옆에 부뚜막이 생겼다 (서브 퀘스트 「영감의 잡화 가게」).</summary>
     public static bool IsUnlocked(Func<string, bool> isPlaced)
         => isPlaced != null && isPlaced(BuildingTable.GeneralStore);
 
@@ -112,7 +115,7 @@ public static class CookingTable
     {
         switch (error)
         {
-            case CookError.Locked:          return "영감의 잡화 가게를 세워야 요리할 수 있다.";
+            case CookError.Locked:          return "영감의 잡화 가게를 세워야 부뚜막이 생긴다.";
             case CookError.MissingMaterial: return "재료가 모자란다.";
             case CookError.BagFull:         return "가방에 자리가 없다.";
             default:                        return string.Empty;

@@ -70,6 +70,9 @@ public class BunkerBuildings : MonoBehaviour
         }
     }
 
+    /// <summary>잡화 가게 자리의 오른쪽 끝에 붙는 부뚜막의 폭(m).</summary>
+    private const float HearthWidth = 1.2f;
+
     private GameObject Spawn(BuildingDefinition definition, BuildingPose pose)
     {
         var root = new GameObject($"Building_{definition.Id}");
@@ -77,17 +80,43 @@ public class BunkerBuildings : MonoBehaviour
         root.transform.position = new Vector3(pose.X, 0f, pose.Z);
         root.transform.rotation = Quaternion.Euler(0f, pose.Turns * 90f, 0f);
 
+        // 잡화 가게는 자리의 왼쪽에 좌판, 오른쪽 끝에 부뚜막이 붙는다 (결정 2-71) — 가게를 놓거나 옮기면 함께 간다.
+        // 부뚜막은 가게의 자리(Width) 안에 있어 다른 건물과 겹치지 않는다.
+        bool withHearth = definition.Id == BuildingTable.GeneralStore;
+        float storeWidth = withHearth ? definition.Width - HearthWidth : definition.Width;
+        float storeX = withHearth ? -HearthWidth * 0.5f : 0f;
+
         GameObject body = GameObject.CreatePrimitive(PrimitiveType.Cube);
         body.name = "Body";
         body.transform.SetParent(root.transform, false);
-        body.transform.localPosition = new Vector3(0f, 0.6f, 0f);
-        body.transform.localScale = new Vector3(definition.Width, 1.2f, definition.Depth);
+        body.transform.localPosition = new Vector3(storeX, 0.6f, 0f);
+        body.transform.localScale = new Vector3(storeWidth, 1.2f, definition.Depth);
         Tint(body, ColorOf(definition.Opens));
 
-        AddLabel(root.transform, definition.Name);
+        var storeSpot = new GameObject("Station");
+        storeSpot.transform.SetParent(root.transform, false);
+        storeSpot.transform.localPosition = new Vector3(storeX, 0f, 0f);
+        AddLabel(storeSpot.transform, definition.Name);
 
         if (definition.Opens != BunkerStation.Kind.None)
-            root.AddComponent<BunkerStation>().Setup(definition.Opens, 2.6f);
+            storeSpot.AddComponent<BunkerStation>().Setup(definition.Opens, 2.6f);
+
+        if (withHearth)
+        {
+            var hearth = new GameObject("Hearth");
+            hearth.transform.SetParent(root.transform, false);
+            hearth.transform.localPosition = new Vector3((definition.Width - HearthWidth) * 0.5f, 0f, 0f);
+
+            GameObject stove = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            stove.name = "Body";
+            stove.transform.SetParent(hearth.transform, false);
+            stove.transform.localPosition = new Vector3(0f, 0.4f, 0f);
+            stove.transform.localScale = new Vector3(HearthWidth * 0.9f, 0.8f, definition.Depth * 0.8f);
+            Tint(stove, new Color(0.45f, 0.30f, 0.22f));
+
+            AddLabel(hearth.transform, CookingTable.HearthName);
+            hearth.AddComponent<BunkerStation>().Setup(BunkerStation.Kind.Cooking, 1.6f);
+        }
 
         return root;
     }

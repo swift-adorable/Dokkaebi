@@ -25,7 +25,7 @@ Unity 6 Mobile · Top-Down Shooter + Roguelite + Extraction Looting
 | [Bunker_System](Dokkaebi_Bunker_System.md) | 벙커 · 상인 4 · 건물 · 제작 · 퀘스트 | **파밍과 파밍 사이에 무엇을 하는가** |
 | [Save_System](Dokkaebi_Save_System.md) | 저장 · 롤백 · 백업 | **무엇이 언제 남는가** |
 | [Survival_System](Dokkaebi_Survival_System.md) | 수분 · 에너지 | 얼마나 버티는가 |
-| [Cooking_System](Dokkaebi_Cooking_System.md) | 요리 (영감의 잡화 가게 기능 · 결정 2-64) | 무엇을 만들어 먹는가 |
+| [Cooking_System](Dokkaebi_Cooking_System.md) | 요리 (잡화 가게 옆 부뚜막 · 결정 2-64 · 2-71) | 무엇을 만들어 먹는가 |
 | [Map_System](Dokkaebi_Map_System.md) | 지도 · 미니맵 · 마커 | 어디에 있는가 |
 | [Audit](Dokkaebi_Audit.md) | 문서 ↔ 코드 대조 | **지금 무엇이 어긋나 있는가** |
 | [Decisions](Dokkaebi_Decisions.md) | 결정 기록 · 결정 대기 | **무엇을 왜 정했고, 무엇이 남았는가** (0절 = 지금 정할 것) |

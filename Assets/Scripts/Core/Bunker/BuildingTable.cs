@@ -91,10 +91,10 @@ public static class BuildingTable
             opens: BunkerStation.Kind.None),
 
         // 덕코프 잡화 상점: 100 · 볼트 ×2 · 너트 ×2 · 목재 ×2 · 절전형 전구 ×1
-        new(GeneralStore, ShopTable.GeneralStoreName, "영감의 좌판. 잡화와 음식, 재료를 사고 물건을 팔아 엽전으로 바꾼다.",
+        new(GeneralStore, ShopTable.GeneralStoreName, "영감의 좌판. 잡화와 음식, 재료를 사고 물건을 팔아 엽전으로 바꾼다. 옆에 부뚜막이 붙어 요리할 수 있다.",
             gold: 100,
             materials: new[] { new MaterialCost(Scrap, 6), new MaterialCost(Battery, 1) },
-            requiredBuildings: null, width: 2f, depth: 1.4f,
+            requiredBuildings: null, width: 3.2f, depth: 1.4f,   // 오른쪽 1.2m는 부뚜막 (결정 2-71)
             opens: BunkerStation.Kind.GeneralStore),
 
         // 본문 「쇠붙이 · 숯 · 새끼 뭉치를 모아 와 샘가에 약탕간을 세운다」 [임시값]

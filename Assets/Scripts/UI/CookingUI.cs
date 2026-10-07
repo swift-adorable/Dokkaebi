@@ -3,8 +3,8 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// 【임시】 요리 화면 — 영감의 잡화 가게에서 재료로 음식을 만든다 (결정 2-64 · CookingTable).
-/// 잡화 가게 화면의 「요리」 버튼으로 연다. 모양은 레이어 · 아트 작업 때 가게 화면의 탭으로 옮긴다.
+/// 【임시】 요리 화면 — 잡화 가게 옆 부뚜막에서 재료로 음식을 만든다 (결정 2-64 · 2-71 · CookingTable).
+/// 부뚜막 앞에서 누르면 연다. 모양은 레이어 · 아트 작업 때 다시 만든다.
 /// </summary>
 public class CookingUI : MonoBehaviour
 {
@@ -22,7 +22,7 @@ public class CookingUI : MonoBehaviour
             return;
         }
 
-        // 가게 화면(1000)보다 위.
+        // 가방 화면(1000)보다 위.
         Canvas canvas = UIFactory.CreateCanvas("CookingCanvas (Runtime)", 1200);
         instance = canvas.gameObject.AddComponent<CookingUI>();
         instance.Build(canvas);
@@ -43,7 +43,7 @@ public class CookingUI : MonoBehaviour
         Image box = UIFactory.CreatePanel("Box", dim.transform, UIPalette.Panel,
             new Vector2(0.18f, 0.12f), new Vector2(0.82f, 0.88f));
 
-        UIFactory.CreateLabel(box.transform, "요리 — 영감의 가게", 30, FontStyle.Bold,
+        UIFactory.CreateLabel(box.transform, "요리 — 부뚜막", 30, FontStyle.Bold,
             new Vector2(0.05f, 0.87f), new Vector2(0.75f, 0.98f), TextAnchor.MiddleLeft);
         UIFactory.CreateButton(box.transform, "닫기", new Vector2(0.78f, 0.88f), new Vector2(0.96f, 0.97f),
             UIPalette.Header, () => Destroy(gameObject), 22);
