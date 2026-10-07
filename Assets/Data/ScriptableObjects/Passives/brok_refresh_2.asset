@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Dokkaebi.Runtime::PassiveNode
   id: brok_refresh_2
   displayName: "\uAC70\uB798\uC120 2"
-  description: "\uC0C1\uC810 \uAC31\uC2E0 \uCFE8\uB2E4\uC6B4 \u221210%."
+  description: "\uAC00\uAC8C\uC5D0\uC11C \uC0AC\uB294 \uAC12 \u221210%."
   branch: 3
   effect: 32
   value: 10

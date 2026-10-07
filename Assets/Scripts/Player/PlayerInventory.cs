@@ -145,10 +145,17 @@ public class PlayerInventory : Singleton<PlayerInventory>
     /// 철수 실패(사망) 처리. 각인을 제외한 가방·장비를 전부 잃는다.
     /// 규칙은 하나다 — 죽으면 들고 있던 것 전부.
     /// </summary>
+    /// <summary>사망해도 지키는 가방 칸 — 패시브 「안전 칸」의 합, 최대 2 (Passive_System 7절 5).</summary>
+    public const int MaxSafeSlots = 2;
+
+    public static int SafeSlots => PassiveManager.HasInstance
+        ? Mathf.Clamp(Mathf.RoundToInt(PassiveManager.Instance.Total(PassiveEffectType.SafeSlots)), 0, MaxSafeSlots)
+        : 0;
+
     public int DropOnDeath()
     {
         List<ItemStack> lostEquipment = Loadout.DropOnDeath();
-        int lostFromBag = Bag.DropOnDeath();
+        int lostFromBag = Bag.DropOnDeath(SafeSlots);
 
         RefreshCapacity();
 

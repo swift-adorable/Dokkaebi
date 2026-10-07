@@ -10,7 +10,8 @@ using Random = System.Random;
 public static class LootRoller
 {
     /// <summary>표의 가중치 합. 0이면 아무것도 나오지 않는다.</summary>
-    public static int TotalWeight(IReadOnlyList<LootEntry> entries, Func<ItemDefinition, bool> allow = null)
+    public static int TotalWeight(IReadOnlyList<LootEntry> entries, Func<ItemDefinition, bool> allow = null,
+                                  bool includeEmpty = true)
     {
         if (entries == null)
             return 0;
@@ -19,7 +20,7 @@ public static class LootRoller
 
         for (int i = 0; i < entries.Count; i++)
         {
-            if (Allowed(entries[i], allow))
+            if (Allowed(entries[i], allow, includeEmpty))
                 total += entries[i].weight;
         }
 
@@ -27,19 +28,35 @@ public static class LootRoller
     }
 
     /// <summary>
+    /// 빈손을 다시 뽑을 확률 — 무언가 나올 확률 q를 q × bonus로 만든다 (1을 넘지 않는다).
+    /// 빈손 확률 (1 − q) 중 p를 되돌리면 q + (1 − q)p = q × bonus → p = q(bonus − 1) / (1 − q).
+    /// </summary>
+    public static double RerollChance(IReadOnlyList<LootEntry> entries, Func<ItemDefinition, bool> allow, float bonus)
+    {
+        int total = TotalWeight(entries, allow);
+        int items = TotalWeight(entries, allow, includeEmpty: false);
+
+        if (total <= 0 || items <= 0 || items >= total || bonus <= 1f)
+            return 0d;
+
+        double q = (double)items / total;
+        return Math.Min(1d, q * (bonus - 1d) / (1d - q));
+    }
+
+    /// <summary>
     /// 이번 판에 뽑을 수 있는 줄인가. allow가 막은 줄은 표에서 빠진 것처럼 친다 —
     /// 요리 재료는 그 장에서만 나온다(IngredientTable.DropsIn · 결정 2-73). 빈손 줄은 늘 남는다.
     /// </summary>
-    private static bool Allowed(LootEntry entry, Func<ItemDefinition, bool> allow)
-        => entry.IsValid && (allow == null || entry.IsEmptyRoll || allow(entry.item));
+    private static bool Allowed(LootEntry entry, Func<ItemDefinition, bool> allow, bool includeEmpty = true)
+        => entry.IsValid && (entry.IsEmptyRoll ? includeEmpty : allow == null || allow(entry.item));
 
     /// <summary>한 줄을 가중치로 뽑는다. 뽑을 것이 없으면 false.</summary>
     public static bool TryPick(IReadOnlyList<LootEntry> entries, Random random, out LootEntry picked,
-                               Func<ItemDefinition, bool> allow = null)
+                               Func<ItemDefinition, bool> allow = null, bool includeEmpty = true)
     {
         picked = default;
 
-        int total = TotalWeight(entries, allow);
+        int total = TotalWeight(entries, allow, includeEmpty);
 
         if (total <= 0)
             return false;
@@ -50,7 +67,7 @@ public static class LootRoller
 
         for (int i = 0; i < entries.Count; i++)
         {
-            if (!Allowed(entries[i], allow))
+            if (!Allowed(entries[i], allow, includeEmpty))
                 continue;
 
             roll -= entries[i].weight;
@@ -73,7 +90,7 @@ public static class LootRoller
     /// </summary>
     public static int Roll(
         IReadOnlyList<LootEntry> entries, int rolls, Random random, LootContainer into,
-        Func<ItemDefinition, bool> allow = null)
+        Func<ItemDefinition, bool> allow = null, float findBonus = 1f)
     {
         if (into == null || rolls <= 0)
             return 0;
@@ -86,6 +103,12 @@ public static class LootRoller
         {
             if (!TryPick(entries, random, out LootEntry entry, allow))
                 break;
+
+            // 패시브 「희귀 드롭」 — 빈손이 나온 판의 일부를 다시 뽑아 「무언가 나올 확률」을 findBonus배로 만든다.
+            if (entry.IsEmptyRoll && findBonus > 1f
+                && random.NextDouble() < RerollChance(entries, allow, findBonus)
+                && TryPick(entries, random, out LootEntry again, allow, includeEmpty: false))
+                entry = again;
 
             if (entry.IsEmptyRoll)
                 continue;

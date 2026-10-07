@@ -13,8 +13,10 @@ MonoBehaviour:
   m_Name: reg_bench
   m_EditorClassIdentifier: Dokkaebi.Runtime::PassiveNode
   id: reg_bench
-  displayName: "\uC81C\uC791\uB300"
-  description: "\uC624\uB798\uB41C \uB3C4\uBA74. \uC18C\uAD74\uC5D0\uC11C \uBB3C\uAC74\uC744 \uB9CC\uB4E4 \uC218 \uC788\uAC8C \uB41C\uB2E4."
+  displayName: "\uC61B \uB3C4\uBA74"
+  description: "\uC624\uB798\uB41C \uB3C4\uBA74. \uC791\uC5C5\uB300\uC5D0\uC11C \uC5ED\uD589
+    \uC804\uC6A9 \uBB3C\uAC74\uC744 \uB9CC\uB4E4 \uC218 \uC788\uAC8C \uB41C\uB2E4.
+    [\uC791\uC5C5\uB300 \uC81C\uC791\uACFC \uD568\uAED8 \uC5F4\uB9B0\uB2E4]"
   branch: 4
   effect: 40
   value: 1

@@ -17,7 +17,8 @@ public class ShopState
         => itemId != null && remaining.TryGetValue(itemId, out int count) ? count : 0;
 
     /// <summary>표의 최대 재고로 전부 채운다.</summary>
-    public void Restock(IReadOnlyList<ShopEntry> table)
+    /// <param name="extraStock">패시브 「재고 +n」 — 줄마다 더 채운다 (Audit A9 · 결정 2-74).</param>
+    public void Restock(IReadOnlyList<ShopEntry> table, int extraStock = 0)
     {
         remaining.Clear();
 
@@ -25,7 +26,7 @@ public class ShopState
             return;
 
         for (int i = 0; i < table.Count; i++)
-            remaining[table[i].ItemId] = table[i].MaxStock;
+            remaining[table[i].ItemId] = table[i].MaxStock + (extraStock < 0 ? 0 : extraStock);
     }
 
     /// <summary>하나를 뺀다. 남은 것이 없으면 false.</summary>
@@ -45,9 +46,9 @@ public class ShopState
     /// 표를 고친 뒤 옛 세이브를 열면 생긴다. 저장에 없는 줄은 가득 찬 것으로 본다 —
     /// 새로 들어온 상품이 0개로 시작하면 다음 파밍까지 살 수 없다.
     /// </summary>
-    public void Restore(IReadOnlyList<ShopEntry> table, IReadOnlyList<SavedStock> saved)
+    public void Restore(IReadOnlyList<ShopEntry> table, IReadOnlyList<SavedStock> saved, int extraStock = 0)
     {
-        Restock(table);
+        Restock(table, extraStock);
 
         if (table == null || saved == null)
             return;

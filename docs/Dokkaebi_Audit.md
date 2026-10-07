@@ -9,7 +9,7 @@
 
 | 등급 | 남은 수 | 뜻 |
 |---|---|---|
-| **A. 끊긴 연결** | **3** (A5 · A6 · A9) | 코드가 있고 테스트도 통과하는데 **아무도 부르지 않는다** |
+| **A. 끊긴 연결** | **1** (A9 — 준비 중 패시브 넷 · 9단계 맵 · 작업대 제작 대기) | 코드가 있고 테스트도 통과하는데 **아무도 부르지 않는다** |
 | **B. 문서 간 모순** | **0** | — |
 | **C. 수치 불일치** | **0** | — |
 | **D. 데이터 모델 공백** | **1** (D5 — 이월) | 문서가 요구하는 것을 담을 필드가 없다 |
@@ -24,9 +24,9 @@
 
 | # | 무엇이 | 어디에 있는데 | 상태 |
 |---|---|---|---|
-| **A5** | **기폭(원소 작렬)** | `Core/Combat/DetonationResolver.cs` | **테스트뿐.** 기폭 핵심 젬 3종이 아무 효과도 내지 않는다 |
-| **A6** | **잔류물 5종** | `Core/Combat/GroundEffectTable.cs` | **생성 경로가 없다.** `CreatesGroundEffect`를 읽는 곳이 `SkillDefinition` 안뿐이다. 데이터 결함 3종은 먼저 고쳤다 (아래 주) |
-| **A9** | **패시브 효과 17종 중 11종** | `Core/Progression/PassiveEffectType.cs` | 게임 경로에서 읽는 것은 `CarrySlots` · `CarryWeight` · `AbsorbAmount` · `LootRolls` · `SellPrice` · `StashSlots` **6종뿐**. 나머지(`AbsorbRange` · `RareDropRate` · `SafeSlots` · `CorpseRecovery` · `ExtractMark` · `ShopRefresh` · `ShopSlots` · `CraftBench` · `CodexAuto` · `GemSalvage` · `MapLoot`)는 배워도 아무 일도 없다 |
+| ~~A5~~ | ~~기폭(원소 작렬)~~ | | **해결 (2026-10-07 · 결정 2-74)** — `SkillZoneDirector`가 원소 작렬 · 충격파 · 중력 붕괴를 돌린다 |
+| ~~A6~~ | ~~잔류물 5종~~ | | **해결 (결정 2-74)** — 사망 자리 · 폭발 · 우물이 잔류물을 깐다(적에게만). 마름쇠는 뺐다 |
+| A9 | **패시브 — 준비 중 넷** | `PassiveEffectInfo.IsPending` | 흡수 범위 · 희귀 드롭 · 안전 칸 · 사는 값 · 재고는 이었다 (결정 2-74). **남은 것**: 쓰러진 자리 되찾기 · 길목 표시 · 옛 지도(9단계 맵 · 철수 지점) · 옛 도면(작업대 제작) — 배울 수 없게 막아 두었다 |
 
 > **A6 주 — 연결 이전에 데이터가 틀려 있었다. (2026-09-21)**
 > · 「마름쇠」 — `FireZone` 고정이었다 → `FromCoreAilment` + `GroundEffectTable.Resolve`로 핵심 젬이 정한다.
@@ -64,7 +64,7 @@
 | E11 | 젬 드롭 확률 | **18%** | `Managers/SkillManager.cs:33` |
 | E12 | 무기별 부착 슬롯 | 0/1/2/3/4/6 | `Editor/WeaponAssetGenerator.cs` |
 | E13 | 마모(33%) 시 방어 옵션 | **절반** | `EquipmentModifiers.cs:46-53` |
-| E14 | 기폭 반경 · 중첩 배율 | **3m / 중첩당 1.2배** | `DetonationResolver.cs:49,52` — **어느 문서에도 근거가 없다** |
+| ~~E14~~ | ~~기폭 반경 · 중첩 배율~~ | 3m / 중첩당 1.2배 | **문서화 (결정 2-74)** — 사용자가 「무기 한 발 × 1.2 × 중첩」을 골랐다. Skill_System 4절 |
 
 ---
 

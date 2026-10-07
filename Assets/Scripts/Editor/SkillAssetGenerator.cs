@@ -3,7 +3,7 @@ using UnityEditor;
 using UnityEngine;
 
 /// <summary>
-/// Skill 정의 에셋 53종을 코드 표에서 생성하는 에디터 도구. (로드맵 5-E)
+/// Skill 정의 에셋 52종(결정 2-74 — 마름쇠를 뺌)을 코드 표에서 생성하는 에디터 도구. (로드맵 5-E)
 ///
 /// 왜 손으로 만들지 않는가:
 ///  · Inspector로 53개를 만들면 오타와 누락을 잡을 방법이 없다.
@@ -55,6 +55,12 @@ public static class SkillAssetGenerator
         public SkillConditionKind condition;
         public StatusEffectType conditionStatus;
         public float conditionalDmg;
+
+        // ── 기폭 장치 (Audit A5) ──────────────────────────────────────
+        public float fuse;          // 기폭 지연(초). 음수 = 그대로
+        public bool consumeAll;     // 쌓인 중첩 전부 소모
+        public int chain;           // 연쇄 횟수
+        public float cooldownAdd;   // 기폭 쿨다운 +초
     }
 
     private static Row New(string id, string name, string desc, SkillCategory category, int level)
@@ -75,18 +81,19 @@ public static class SkillAssetGenerator
             spread = 8f,
             ailOverride = StatusEffectType.None, ailAddition = StatusEffectType.None,
             condition = SkillConditionKind.None,
-            conditionStatus = StatusEffectType.None, conditionalDmg = 0f
+            conditionStatus = StatusEffectType.None, conditionalDmg = 0f,
+            fuse = -1f, consumeAll = false, chain = 0, cooldownAdd = 0f
         };
     }
 
-    [MenuItem("Dokkaebi/Skill/정의 에셋 53종 생성")]
+    [MenuItem("Dokkaebi/Skill/정의 에셋 52종 생성")]
     public static void Generate()
     {
         List<Row> rows = BuildTable();
 
-        if (rows.Count != 53)
+        if (rows.Count != 52)
         {
-            Debug.LogError($"[SkillAssetGenerator] 53종이어야 하는데 {rows.Count}종입니다. 표를 확인하세요.");
+            Debug.LogError($"[SkillAssetGenerator] 52종이어야 하는데 {rows.Count}종입니다. 표를 확인하세요.");
             return;
         }
 
@@ -178,6 +185,10 @@ public static class SkillAssetGenerator
         so.FindProperty("conditionKind").intValue = (int)row.condition;
         so.FindProperty("conditionStatus").intValue = (int)row.conditionStatus;
         so.FindProperty("conditionalDamageIncrease").floatValue = row.conditionalDmg;
+        so.FindProperty("fuseSeconds").floatValue = row.fuse;
+        so.FindProperty("consumesAllStacks").boolValue = row.consumeAll;
+        so.FindProperty("chainDetonations").intValue = row.chain;
+        so.FindProperty("detonationCooldownAdd").floatValue = row.cooldownAdd;
 
         so.ApplyModifiedPropertiesWithoutUndo();
 
@@ -427,23 +438,17 @@ public static class SkillAssetGenerator
         r.cost = CostType.EffectiveRange; r.costDesc = "기폭 범위 -30%";
         r.exclusive = new[] { "sup_long_fuse" };
         r.range = 0.7f;
+        r.fuse = 0f;
         t.Add(r);
 
-        // 【속성을 고정하지 않는다.】 전에는 FireZone이 박혀 있어서
-        // 서리 핵심 젬에 꽂아도 불바다가 생겼다. 보조 젬이 속성을 정하면
-        // 「핵심 젬 = 속성」이라는 전투 3층이 깨진다.
-        r = New("sup_caltrops", "마름쇠",
-            "적중 지점에 잔류물을 남긴다. 종류는 꽂힌 핵심 구슬의 속성을 따른다.",
-            SkillCategory.Support, 5);
-        r.requiredTags = SkillTag.Zone;
-        r.cost = CostType.BarrageDensity; r.costDesc = "발사 간격 +25%"; r.fireInterval = 1.25f;
-        r.ground = GroundEffectType.FromCoreAilment;
-        t.Add(r);
+        // 「마름쇠」(적중 지점에 잔류물)는 뺐다 (결정 2-74). 요구 태그 「잔류물」을 가진 핵심 구슬이
+        // 중력 붕괴 하나뿐인데 중력 붕괴는 속성이 없어, 끼워도 아무것도 남기지 않았다.
 
         r = New("sup_chain_detonation", "연쇄 기폭", "폭발이 1회 연쇄된다.", SkillCategory.Support, 7);
         r.requiredTags = SkillTag.Detonator;
         r.cost = CostType.Immediacy; r.costDesc = "기폭 쿨다운 +0.4초";
         r.dmg = 0.20f;
+        r.chain = 1; r.cooldownAdd = 0.4f;
         t.Add(r);
 
         // 【대가가 다른 축을 때리고 있었다.】
@@ -468,6 +473,7 @@ public static class SkillAssetGenerator
         r.cost = CostType.Immediacy; r.costDesc = "즉시성 상실";
         r.exclusive = new[] { "sup_short_fuse" };
         r.dmg = 0.35f;
+        r.fuse = 0.8f; r.consumeAll = true;
         t.Add(r);
 
         // 【광고한 효과가 구현되어 있지 않았다.】

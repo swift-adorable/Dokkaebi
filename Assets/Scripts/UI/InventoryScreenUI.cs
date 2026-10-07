@@ -1197,6 +1197,8 @@ public partial class InventoryScreenUI : MonoBehaviour
         float paddingX = viewWidth > 0f ? gap / viewWidth : BagCellPadding;
         float paddingY = contentHeight > 0f ? gap / contentHeight : BagCellPadding;
 
+        int safeSlots = PlayerInventory.SafeSlots;
+
         for (int i = 0; i < rows * columns; i++)
         {
             UIFactory.GetCellAnchors(i, columns, rows, paddingX, paddingY,
@@ -1205,6 +1207,12 @@ public partial class InventoryScreenUI : MonoBehaviour
             ItemStack cellStack = i < bagStacks.Count ? bagStacks[i] : null;
 
             DrawItemCell($"Bag_{i}", bagGrid, min, max, cellStack);
+
+            // 사망해도 지키는 칸 (패시브 · Audit A9) — 맨 앞 n칸에 표시한다.
+            if (i < safeSlots)
+                UIFactory.CreateBadge(bagGrid, "안전",
+                    new Vector2(min.x, max.y - (max.y - min.y) * 0.24f),
+                    new Vector2(min.x + (max.x - min.x) * 0.5f, max.y), 16);
         }
     }
 

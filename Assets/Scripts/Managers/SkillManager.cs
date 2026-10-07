@@ -297,7 +297,8 @@ public class SkillManager : Singleton<SkillManager>
 
         random ??= new System.Random(Environment.TickCount);
 
-        float chance = Mathf.Clamp01(gemDropChance * Mathf.Max(1, luckMultiplier));
+        // 패시브 「희귀 드롭 +n%」도 곱한다 (Audit A9).
+        float chance = Mathf.Clamp01(gemDropChance * Mathf.Max(1, luckMultiplier) * CorpseController.DropBonus);
 
         if (random.NextDouble() >= chance)
             return null;

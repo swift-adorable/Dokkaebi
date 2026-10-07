@@ -58,20 +58,20 @@ public enum PassiveEffectType
     /// <summary>창고 칸 +n.</summary>
     StashSlots = 31,
 
-    /// <summary>상점 갱신 쿨다운 −n%.</summary>
+    /// <summary>가게에서 사는 값 −n% (결정 2-74 — 옛 「상점 갱신 쿨다운」. 재고는 파밍마다 가득 차서(2-35) 쿨다운 축이 없었다). 이름은 저장 호환 때문에 그대로.</summary>
     ShopRefresh = 32,
 
-    /// <summary>상점 갱신 횟수 +n.</summary>
+    /// <summary>가게 물건마다 재고 +n (결정 2-74 — 옛 「상점 갱신 횟수」).</summary>
     ShopSlots = 33,
 
     // ── 역행 : 숨겨진 것 (전부 해금형) ────────────────────────────────
-    /// <summary>【해금】 제작대.</summary>
+    /// <summary>【해금】 역행 전용 제작법 — 작업대에서 연다 (결정 2-74). 작업대 제작이 생길 때 연결한다 [미구현].</summary>
     CraftBench = 40,
 
     /// <summary>【해금】 처치만 해도 도감에 등록. 변이 샘플 흡수가 불필요해진다.</summary>
     CodexAuto = 41,
 
-    /// <summary>【해금】 젬을 분해해 재료로 되돌린다.</summary>
+    /// <summary>【쓰지 않는다】 젬 분해 — 결정 2-74로 뺐다(젬은 강화 · 분해 없이 그대로 쓰기만 한다). 번호만 남긴다.</summary>
     GemSalvage = 42,
 
     /// <summary>【해금】 지도에 전리품 위치 표시.</summary>
@@ -94,6 +94,28 @@ public static class PassiveEffectInfo
             case PassiveEffectType.MapLoot:
                 return true;
 
+            default:
+                return false;
+        }
+    }
+
+    /// <summary>
+    /// 【준비 중】 효과가 붙을 시스템이 아직 없어 배울 수 없게 막는 것 (결정 2-74).
+    ///   · 쓰러진 자리 되찾기 · 길목 표시 · 옛 지도 — 구역 맵 · 철수 지점(9단계)
+    ///   · 옛 도면 — 작업대 제작
+    /// 시스템이 생기면 여기서 뺀다.
+    /// </summary>
+    public static bool IsPending(PassiveEffectType type)
+    {
+        switch (type)
+        {
+            case PassiveEffectType.CorpseRecovery:
+            case PassiveEffectType.ExtractMark:
+            case PassiveEffectType.MapLoot:
+            case PassiveEffectType.CraftBench:
+            case PassiveEffectType.CodexAuto:
+            case PassiveEffectType.GemSalvage:
+                return true;
             default:
                 return false;
         }
@@ -127,8 +149,8 @@ public static class PassiveEffectInfo
             case PassiveEffectType.AbsorbRange:  return " m";
             case PassiveEffectType.CarrySlots:
             case PassiveEffectType.SafeSlots:
-            case PassiveEffectType.StashSlots:
-            case PassiveEffectType.ShopSlots:    return "칸";
+            case PassiveEffectType.StashSlots:   return "칸";
+            case PassiveEffectType.ShopSlots:    return "개";
             case PassiveEffectType.LootRolls:    return "회";
             default:                             return string.Empty;
         }
@@ -139,7 +161,7 @@ public static class PassiveEffectInfo
         if (IsUnlockFlag(type))
             return Name(type);
 
-        // 쿨다운 감소는 값이 양수여도 「−」로 보여야 뜻이 맞는다.
+        // 값 깎기는 값이 양수여도 「−」로 보여야 뜻이 맞는다.
         string sign = type == PassiveEffectType.ShopRefresh ? "−" : "+";
 
         return $"{Name(type)} {sign}{value:0.#}{Unit(type)}";
@@ -160,9 +182,9 @@ public static class PassiveEffectInfo
             case PassiveEffectType.ExtractMark:    return "길목 표시";
             case PassiveEffectType.SellPrice:      return "판매가";
             case PassiveEffectType.StashSlots:     return "창고 칸";
-            case PassiveEffectType.ShopRefresh:    return "상점 갱신 쿨다운";
-            case PassiveEffectType.ShopSlots:      return "상점 갱신 횟수";
-            case PassiveEffectType.CraftBench:     return "제작대";
+            case PassiveEffectType.ShopRefresh:    return "사는 값";
+            case PassiveEffectType.ShopSlots:      return "가게 재고";
+            case PassiveEffectType.CraftBench:     return "옛 도면";
             case PassiveEffectType.CodexAuto:      return "구슬 장부 자동 등록";
             case PassiveEffectType.GemSalvage:     return "구슬 깨기";
             case PassiveEffectType.MapLoot:        return "전리품 표시";

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Dokkaebi.Runtime::SkillDefinition
   id: sup_frozen_malice
   displayName: "\uC5BC\uC5B4\uBD99\uC740 \uC545\uC758"
-  description: "\uB3D9\uACB0 \uC784\uACC4\uCE58\uAC00 30% \uB0AE\uC544\uC9C4\uB2E4."
+  description: "\uB3D9\uACB0 \uD55C\uACC4\uCE58\uAC00 30% \uB0AE\uC544\uC9C4\uB2E4."
   category: 1
   coreFamily: 0
   requiredLevel: 5
@@ -47,3 +47,7 @@ MonoBehaviour:
   ailmentOverride: 0
   ailmentAddition: 0
   speedMultiplier: 1
+  fuseSeconds: -1
+  consumesAllStacks: 0
+  chainDetonations: 0
+  detonationCooldownAdd: 0

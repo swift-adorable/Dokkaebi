@@ -163,8 +163,9 @@ namespace Dokkaebi.Tests
         {
             var state = new PassiveState();
 
+            // 효과는 계열 판정과 상관없다 — 준비 중(NotReady)이 아닌 것을 쓴다.
             PassiveNode hidden = Node("reg", PassiveBranch.Regression,
-                PassiveEffectType.CraftBench);
+                PassiveEffectType.LootRolls);
 
             Assert.AreEqual(PassiveError.BranchUndiscovered,
                 state.CanLearn(hidden, Ctx(discovered: false)));
@@ -308,7 +309,7 @@ namespace Dokkaebi.Tests
                 PassiveEffectType.AbsorbAmount);
 
             PassiveNode crossing = Node("reg_node", PassiveBranch.Regression,
-                PassiveEffectType.CodexAuto, prereq: new[] { "meta_root" });
+                PassiveEffectType.LootRolls, prereq: new[] { "meta_root" });
 
             Assert.AreEqual(PassiveError.MissingPrerequisite,
                 state.CanLearn(crossing, Ctx(discovered: true)));
@@ -363,7 +364,9 @@ namespace Dokkaebi.Tests
 
             Assert.IsFalse(state.HasUnlock(tree, PassiveEffectType.CraftBench));
 
-            state.TryLearn(bench, Ctx(discovered: true));
+            // 옛 도면은 작업대 제작이 생기기 전까지 배울 수 없다(결정 2-74) — 세이브에서 되살린 것으로 본다.
+            Assert.AreEqual(PassiveError.NotReady, state.CanLearn(bench, Ctx(discovered: true)));
+            state.Restore(new[] { "bench" });
 
             Assert.IsTrue(state.HasUnlock(tree, PassiveEffectType.CraftBench));
             Assert.IsTrue(PassiveEffectInfo.IsUnlockFlag(PassiveEffectType.CraftBench));

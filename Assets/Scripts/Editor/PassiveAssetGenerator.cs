@@ -162,34 +162,31 @@ public static class PassiveAssetGenerator
             PassiveBranch.Brokerage, PassiveEffectType.StashSlots, 20, level: 1, cost: 2400,
             column: 2, row: 1, prereq: new[] { "brok_stash_1" }));
 
-        rows.Add(N("brok_refresh_1", "거래선 1", "상점 갱신 쿨다운 −10%.",
+        // 거래선 · 단골 — 결정 2-74: 재고가 파밍마다 가득 차서(2-35) 「갱신」 축이 없었다 → 사는 값 · 재고로 바꿨다.
+        rows.Add(N("brok_refresh_1", "거래선 1", "가게에서 사는 값 −10%.",
             PassiveBranch.Brokerage, PassiveEffectType.ShopRefresh, 10, level: 1, cost: 3000,
             column: 0, row: 2, prereq: new[] { "brok_sell_2" }));
 
-        rows.Add(N("brok_slots_1", "단골 1", "상점 갱신 횟수 +1.",
+        rows.Add(N("brok_slots_1", "단골 1", "가게 물건마다 재고 +1.",
             PassiveBranch.Brokerage, PassiveEffectType.ShopSlots, 1, level: 1, cost: 3600,
             column: 2, row: 2, prereq: new[] { "brok_stash_2" }));
 
-        rows.Add(N("brok_refresh_2", "거래선 2", "상점 갱신 쿨다운 −10%.",
+        rows.Add(N("brok_refresh_2", "거래선 2", "가게에서 사는 값 −10%.",
             PassiveBranch.Brokerage, PassiveEffectType.ShopRefresh, 10, level: 1, cost: 5400,
             column: 0, row: 3, prereq: new[] { "brok_refresh_1" }));
 
-        rows.Add(N("brok_slots_2", "단골 2", "상점 갱신 횟수 +1.",
+        rows.Add(N("brok_slots_2", "단골 2", "가게 물건마다 재고 +1.",
             PassiveBranch.Brokerage, PassiveEffectType.ShopSlots, 1, level: 1, cost: 6200,
             column: 2, row: 3, prereq: new[] { "brok_slots_1" }));
 
         // ── 역행 — 조우해야 보인다 ────────────────────────────────────
         // 【교차 선행】 다른 계열의 칸을 요구한다. 한 갈래만 파면 닿지 않는다.
-        rows.Add(N("reg_bench", "제작대",
-            "오래된 도면. 소굴에서 물건을 만들 수 있게 된다.",
+        rows.Add(N("reg_bench", "옛 도면",
+            "오래된 도면. 작업대에서 역행 전용 물건을 만들 수 있게 된다. [작업대 제작과 함께 열린다]",
             PassiveBranch.Regression, PassiveEffectType.CraftBench, 1, level: 1, cost: 3000,
             column: 1, row: 0, materials: new[] { ("memory_core", 1) }));
 
-        rows.Add(N("reg_salvage", "구슬 깨기",
-            "구슬을 깨 재료로 되돌린다. 쓸모없는 구슬이 사라진다.",
-            PassiveBranch.Regression, PassiveEffectType.GemSalvage, 1, level: 1, cost: 4500,
-            column: 0, row: 1, prereq: new[] { "reg_bench" },
-            materials: new[] { ("bio_sample", 6) }));
+        // 「구슬 깨기」(젬 분해)는 뺐다 — 젬은 강화 · 분해 없이 그대로 쓰기만 한다 (결정 2-74).
 
         rows.Add(N("reg_codex", "한눈에 알아보기",
             "쓰러뜨리기만 해도 구슬 장부에 오른다. 구슬 씨를 거둘 필요가 없어진다.",
@@ -200,7 +197,7 @@ public static class PassiveAssetGenerator
         rows.Add(N("reg_map", "옛 지도",
             "지도에 전리품 위치가 표시된다. 원래 없던 마커이다.",
             PassiveBranch.Regression, PassiveEffectType.MapLoot, 1, level: 1, cost: 8000,
-            column: 1, row: 2, prereq: new[] { "reg_salvage", "reg_codex" },
+            column: 1, row: 2, prereq: new[] { "reg_bench", "reg_codex" },
             materials: new[] { ("memory_core", 4), ("cell_battery", 8) }));
 
         return rows;

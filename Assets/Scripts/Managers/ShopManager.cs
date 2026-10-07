@@ -27,7 +27,7 @@ public static class ShopManager
             return state;
 
         state = new ShopState();
-        state.Restock(ShopTable.For(kind));
+        state.Restock(ShopTable.For(kind), ExtraStock);
         states[kind] = state;
 
         return state;
@@ -43,10 +43,18 @@ public static class ShopManager
     public static void RestockAfterRun()
     {
         foreach (ShopKind kind in ShopTable.All)
-            Of(kind).Restock(ShopTable.For(kind));
+            Of(kind).Restock(ShopTable.For(kind), ExtraStock);
 
         GameLogger.Log("[Shop] 파밍이 끝나 상점 재고를 채웠습니다.");
     }
+
+    /// <summary>패시브 「재고 +n」의 합 — 가게 물건마다 n개씩 더 채운다 (Audit A9 · 결정 2-74 — 옛 「상점 갱신 횟수」).</summary>
+    public static int ExtraStock
+        => PassiveManager.HasInstance ? UnityEngine.Mathf.RoundToInt(PassiveManager.Instance.Total(PassiveEffectType.ShopSlots)) : 0;
+
+    /// <summary>패시브 「값 깎기 −n%」의 합 — 가게에서 사는 값 (Audit A9 · 결정 2-74 — 옛 「상점 갱신 쿨다운」).</summary>
+    public static float BuyDiscountPercent
+        => PassiveManager.HasInstance ? PassiveManager.Instance.Total(PassiveEffectType.ShopRefresh) : 0f;
 
     /// <summary>패시브 「흥정」의 합(%).</summary>
     public static float SellBonusPercent
@@ -62,7 +70,7 @@ public static class ShopManager
         int gold = passive.Gold;
 
         TradeError error = TradeRules.Buy(Of(kind), definition, entry,
-            PlayerInventory.EnsureInstance().Bag, ref gold);
+            PlayerInventory.EnsureInstance().Bag, ref gold, BuyDiscountPercent);
 
         if (error == TradeError.None)
         {
@@ -130,7 +138,7 @@ public static class ShopManager
                 }
             }
 
-            Of(kind).Restore(ShopTable.For(kind), rows);
+            Of(kind).Restore(ShopTable.For(kind), rows, ExtraStock);
         }
     }
 

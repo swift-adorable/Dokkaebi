@@ -29,7 +29,8 @@ MonoBehaviour:
   mutuallyExclusiveIds:
   - sup_elemental_fusion
   costType: 4
-  costDescription: "\uC804\uD658 \uC804 \uC18D\uC131 \uC804\uC6A9 Support\uAC00 \uBB34\uD6A8\uD654\uB41C\uB2E4"
+  costDescription: "\uC804\uD658 \uC804 \uC18D\uC131 \uC804\uC6A9 \uBCF4\uC870 \uAD6C\uC2AC\uC774
+    \uBB34\uD6A8\uD654\uB41C\uB2E4"
   grantedBehaviour: 0
   behaviourCharges: 0
   ricochetBounces: 0
@@ -48,3 +49,7 @@ MonoBehaviour:
   ailmentOverride: 1
   ailmentAddition: 0
   speedMultiplier: 1
+  fuseSeconds: -1
+  consumesAllStacks: 0
+  chainDetonations: 0
+  detonationCooldownAdd: 0

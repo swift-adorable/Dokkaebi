@@ -31,7 +31,7 @@ public class LootTable : ScriptableObject
     /// 추첨 횟수에만 곱한다 — 등급이 높으면 더 많이 나오되 표 자체는 같다.
     /// </summary>
     public int Fill(LootContainer into, System.Random random, int luckMultiplier = 1,
-                    System.Func<ItemDefinition, bool> allow = null)
+                    System.Func<ItemDefinition, bool> allow = null, float findBonus = 1f)
     {
         random ??= new System.Random();
 
@@ -39,7 +39,7 @@ public class LootTable : ScriptableObject
 
         rolls *= Mathf.Max(1, luckMultiplier);
 
-        return LootRoller.Roll(entries, rolls, random, into, allow);
+        return LootRoller.Roll(entries, rolls, random, into, allow, findBonus);
     }
 
 #if UNITY_EDITOR

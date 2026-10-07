@@ -28,9 +28,41 @@ public class PlayerAbsorber : MonoBehaviour
     /// <summary>지금 흡수할 수 있는지.</summary>
     public bool CanAbsorb => NearbyCorpse != null;
 
+    private SphereCollider sense;
+    private float baseSenseRadius;
+    private float senseTimer;
+
     private void Start()
     {
         poolManager = PoolManager.EnsureInstance();
+
+        // 패시브 「흡수 감지 범위 +n m」 (Audit A9) — 시체를 감지하는 트리거 구의 반경에 더한다.
+        foreach (SphereCollider s in GetComponents<SphereCollider>())
+        {
+            if (!s.isTrigger)
+                continue;
+
+            sense = s;
+            baseSenseRadius = s.radius;
+            break;
+        }
+    }
+
+    private void Update()
+    {
+        if (sense == null)
+            return;
+
+        senseTimer -= Time.deltaTime;
+        if (senseTimer > 0f)
+            return;
+        senseTimer = 0.5f;
+
+        float bonus = PassiveManager.HasInstance ? PassiveManager.Instance.Total(PassiveEffectType.AbsorbRange) : 0f;
+        float radius = baseSenseRadius + Mathf.Max(0f, bonus);
+
+        if (!Mathf.Approximately(sense.radius, radius))
+            sense.radius = radius;
     }
 
     /// <summary>

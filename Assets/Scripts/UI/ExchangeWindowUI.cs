@@ -475,12 +475,13 @@ public class ExchangeWindowUI : MonoBehaviour
     /// </summary>
     private void OpenShopMenu(RectTransform cell, ItemDefinition definition, ShopEntry entry)
     {
-        int price = TradeRules.BuyPrice(definition, entry);
+        int price = TradeRules.BuyPrice(definition, entry, ShopManager.BuyDiscountPercent);
 
         TradeError error = TradeRules.CanBuy(definition, entry,
             ShopManager.Of(shopKind).Remaining(entry.ItemId),
             PassiveManager.EnsureInstance().Gold,
-            PlayerInventory.EnsureInstance().Bag);
+            PlayerInventory.EnsureInstance().Bag,
+            ShopManager.BuyDiscountPercent);
 
         var entries = new List<ItemActionMenu.Entry>
         {

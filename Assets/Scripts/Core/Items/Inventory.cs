@@ -301,13 +301,20 @@ public class Inventory
     /// 각인만 남는다. 플레이어가 배울 규칙은 하나여야 하므로 예외를 늘리지 않는다.
     /// 젬도 장비와 똑같이 잃는다. (docs/Dokkaebi_Progression_System.md 6절)
     /// </summary>
-    public int DropOnDeath()
+    public int DropOnDeath(int safeSlots = 0)
     {
         int lost = 0;
+
+        // 패시브 「사망해도 지키는 가방 칸 +n」 — 가방 맨 앞 n칸(젬이 아닌 물건)은 남는다 (Audit A9).
+        // 【사망 규칙의 유일한 예외다】 (Passive_System 5절).
+        var safe = SafeStacks(safeSlots);
 
         for (int i = stacks.Count - 1; i >= 0; i--)
         {
             if (stacks[i].Definition != null && stacks[i].Definition.SurvivesDeath)
+                continue;
+
+            if (safe != null && safe.Contains(stacks[i]))
                 continue;
 
             lost += stacks[i].Count;
@@ -315,6 +322,23 @@ public class Inventory
         }
 
         return lost;
+    }
+
+    /// <summary>가방 맨 앞 n칸 — 젬이 아닌 묶음을 앞에서부터 n개. 없으면 null.</summary>
+    public HashSet<ItemStack> SafeStacks(int safeSlots)
+    {
+        if (safeSlots <= 0)
+            return null;
+
+        var safe = new HashSet<ItemStack>();
+
+        for (int i = 0; i < stacks.Count && safe.Count < safeSlots; i++)
+        {
+            if (stacks[i].Definition != null && !stacks[i].Definition.IsSkillGem)
+                safe.Add(stacks[i]);
+        }
+
+        return safe;
     }
 
     public void Clear() => stacks.Clear();

@@ -736,6 +736,11 @@ public class SocketedBuild
             if (IsNullified(definition))
                 continue;
 
+            // 【기폭 핵심 젬과 그 소켓은 탄에 싣지 않는다 (Audit A5).】 기폭은 투사체가 아니라 독립 발동이다(9절 4).
+            // 전에는 「짧은 퓨즈」(기폭 범위 −30%)가 탄의 유효 사거리를, 「유지되는 대지」가 탄 상태의 지속을 바꿨다.
+            if (IsInDetonationCore(definition))
+                continue;
+
             modifiers.Apply(definition);
         }
 
@@ -750,6 +755,59 @@ public class SocketedBuild
         isDirty = false;
 
         return modifiers;
+    }
+
+    // ────────────────────────────────── 기폭 (Audit A5)
+
+    /// <summary>이 정의가 기폭 계열 핵심 젬이거나, 그 핵심 젬의 소켓에 꽂혀 있는가.</summary>
+    public bool IsInDetonationCore(SkillDefinition definition)
+    {
+        if (definition == null)
+            return false;
+
+        for (int c = 0; c < MaxCores; c++)
+        {
+            SkillDefinition core = cores[c];
+
+            if (core == null || core.Family != CoreFamily.Detonation)
+                continue;
+
+            if (core == definition)
+                return true;
+
+            for (int s = 0; s < SocketsPerCore; s++)
+                if (sockets[c, s] == definition)
+                    return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// 그 칸의 기폭 핵심 젬과 소켓이 정한 값. 기폭 계열이 아니거나 비어 있으면 Core가 null.
+    /// 소켓의 보조 젬만 이 핵심 젬에 걸린다 — 탄 쪽 보정(GetModifiers)과 섞지 않는다.
+    /// </summary>
+    public DetonationLoadout GetDetonationLoadout(int coreIndex)
+    {
+        if (!IsValidCoreIndex(coreIndex))
+            return default;
+
+        SkillDefinition core = cores[coreIndex];
+
+        if (core == null || core.Family != CoreFamily.Detonation)
+            return default;
+
+        var loadout = DetonationLoadout.For(core);
+
+        for (int s = 0; s < SocketsPerCore; s++)
+        {
+            SkillDefinition support = sockets[coreIndex, s];
+
+            if (support != null && !IsNullified(support))
+                loadout = loadout.With(support);
+        }
+
+        return loadout;
     }
 
     // ────────────────────────────────── 내부

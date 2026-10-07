@@ -5,7 +5,7 @@ using NUnit.Framework;
 namespace Dokkaebi.Tests
 {
     /// <summary>
-    /// 스킬 정의 에셋 53종의 구조 검증. (로드맵 5-E)
+    /// 스킬 정의 에셋 52종의 구조 검증. (로드맵 5-E)
     ///
     /// 개별 수치를 검증하지 않는다. 수치는 플레이테스트로 바뀌기 때문이다.
     /// 대신 **바뀌면 안 되는 구조적 약속**만 고정한다.
@@ -30,16 +30,16 @@ namespace Dokkaebi.Tests
         // ── 개수 ──────────────────────────────────────────────────────────
 
         [Test]
-        public void 총_53종이다()
+        public void 총_52종이다()
         {
-            Assert.AreEqual(53, catalog.Count);
+            Assert.AreEqual(52, catalog.Count); // 결정 2-74 — 마름쇠를 뺐다
         }
 
         [Test]
         public void 카테고리별_개수가_문서와_일치한다()
         {
             Assert.AreEqual(8, Of(SkillCategory.Core).Count(), "Core");
-            Assert.AreEqual(35, Of(SkillCategory.Support).Count(), "Support");
+            Assert.AreEqual(34, Of(SkillCategory.Support).Count(), "Support");
             Assert.AreEqual(5, Of(SkillCategory.Meta).Count(), "Meta");
             Assert.AreEqual(5, Of(SkillCategory.Persistent).Count(), "전령");
         }

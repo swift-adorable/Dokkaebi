@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Dokkaebi.Runtime::SkillDefinition
   id: core_frost
   displayName: "\uC11C\uB9AC"
-  description: "\uB0C9\uAE30\uB97C \uB204\uC801\uC2DC\uD0A4\uACE0 \uC784\uACC4\uCE58\uB97C
+  description: "\uB0C9\uAE30\uB97C \uB204\uC801\uC2DC\uD0A4\uACE0 \uD55C\uACC4\uCE58\uB97C
     \uB118\uC73C\uBA74 \uB3D9\uACB0\uC2DC\uD0A8\uB2E4."
   category: 0
   coreFamily: 1
@@ -47,3 +47,7 @@ MonoBehaviour:
   ailmentOverride: 0
   ailmentAddition: 0
   speedMultiplier: 1
+  fuseSeconds: -1
+  consumesAllStacks: 0
+  chainDetonations: 0
+  detonationCooldownAdd: 0

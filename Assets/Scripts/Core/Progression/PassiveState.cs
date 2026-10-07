@@ -20,7 +20,10 @@ public enum PassiveError
     MissingMaterials,
 
     /// <summary>계열이 아직 발견되지 않았다. (역행)</summary>
-    BranchUndiscovered
+    BranchUndiscovered,
+
+    /// <summary>효과가 붙을 시스템이 아직 없다 — 맵 · 철수 지점 · 작업대 제작 (결정 2-74). 판에는 보이되 배울 수 없다.</summary>
+    NotReady
 }
 
 /// <summary>배울 수 있는지 판단하는 데 필요한 바깥 상태 전부.</summary>
@@ -103,6 +106,10 @@ public class PassiveState
             if (!IsLearned(prerequisites[i]))
                 return PassiveError.MissingPrerequisite;
         }
+
+        // 효과 없는 것을 골드로 사는 일을 막는다 (결정 2-74). 계열 · 선행을 먼저 알려 준다 — 그쪽이 더 근본이다.
+        if (PassiveEffectInfo.IsPending(node.Effect))
+            return PassiveError.NotReady;
 
         // 중개 계열은 레벨을 보지 않는다. 돈만 있으면 연다. (덕코프 블랙마켓과 같다)
         if (node.UnlockKind != PassiveUnlockKind.GoldOnly &&
@@ -265,6 +272,7 @@ public static class PassiveErrorText
             case PassiveError.NotEnoughGold:    return "엽전이 부족합니다.";
             case PassiveError.MissingMaterials:    return "필요 재료가 부족합니다.";
             case PassiveError.BranchUndiscovered:  return "아직 발견하지 못한 계열입니다.";
+            case PassiveError.NotReady:            return "준비 중입니다. 아직 쓸 곳이 없습니다.";
             default:                               return "배울 수 없습니다.";
         }
     }

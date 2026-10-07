@@ -41,12 +41,15 @@ public static class TradeRules
     // ── 값 ───────────────────────────────────────────────────────────
 
     /// <summary>하나를 사는 값. 올림 — 1 골드라도 싸게 팔지 않는다.</summary>
-    public static int BuyPrice(ItemDefinition definition, ShopEntry entry)
+    /// <param name="discountPercent">패시브 「값 깎기」의 합(%) — 10이면 −10% (Audit A9 · 결정 2-74). 최대 50%.</param>
+    public static int BuyPrice(ItemDefinition definition, ShopEntry entry, float discountPercent = 0f)
     {
         if (definition == null)
             return 0;
 
-        return Mathf.Max(1, Mathf.CeilToInt(definition.BaseValue * entry.PriceMultiplier));
+        float discount = 1f - Mathf.Clamp(discountPercent, 0f, 50f) * 0.01f;
+
+        return Mathf.Max(1, Mathf.CeilToInt(definition.BaseValue * entry.PriceMultiplier * discount));
     }
 
     /// <summary>
@@ -89,7 +92,8 @@ public static class TradeRules
     }
 
     public static TradeError CanBuy(
-        ItemDefinition definition, ShopEntry entry, int remaining, int gold, Inventory bag)
+        ItemDefinition definition, ShopEntry entry, int remaining, int gold, Inventory bag,
+        float discountPercent = 0f)
     {
         if (definition == null || definition.Id != entry.ItemId)
             return TradeError.NotForSale;
@@ -97,7 +101,7 @@ public static class TradeRules
         if (remaining <= 0)
             return TradeError.OutOfStock;
 
-        if (gold < BuyPrice(definition, entry))
+        if (gold < BuyPrice(definition, entry, discountPercent))
             return TradeError.NotEnoughGold;
 
         if (bag == null || !bag.CanAdd(definition))
@@ -110,12 +114,13 @@ public static class TradeRules
 
     /// <summary>하나를 산다. 성공하면 골드가 줄고 재고가 하나 빠진다.</summary>
     public static TradeError Buy(
-        ShopState shop, ItemDefinition definition, ShopEntry entry, Inventory bag, ref int gold)
+        ShopState shop, ItemDefinition definition, ShopEntry entry, Inventory bag, ref int gold,
+        float discountPercent = 0f)
     {
         if (shop == null)
             return TradeError.NotForSale;
 
-        TradeError error = CanBuy(definition, entry, shop.Remaining(entry.ItemId), gold, bag);
+        TradeError error = CanBuy(definition, entry, shop.Remaining(entry.ItemId), gold, bag, discountPercent);
 
         if (error != TradeError.None)
             return error;
@@ -125,7 +130,7 @@ public static class TradeRules
             return TradeError.NoSpace;
 
         shop.TryConsume(entry.ItemId);
-        gold -= BuyPrice(definition, entry);
+        gold -= BuyPrice(definition, entry, discountPercent);
 
         return TradeError.None;
     }

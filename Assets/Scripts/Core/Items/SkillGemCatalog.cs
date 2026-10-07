@@ -5,7 +5,7 @@ using UnityEngine;
 /// 젬 아이템 목록. SkillDefinition(규칙) ↔ ItemDefinition(실물)을 잇는다.
 ///
 /// 스킬이 실물 아이템이 되면서 두 개의 에셋이 필요해졌다.
-///   SkillDefinition — 무엇을 하는가 (53종, 그대로)
+///   SkillDefinition — 무엇을 하는가 (52종, 그대로)
 ///   ItemDefinition  — 무게·가치·가방 칸 (젬 1종당 1개)
 ///
 /// 둘을 한 에셋으로 합치지 않은 이유 — SkillDefinition은 소켓에 끼워진 뒤

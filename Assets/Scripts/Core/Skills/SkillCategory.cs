@@ -1,5 +1,5 @@
 /// <summary>
-/// Skill 대분류 — Skill System v8 §13 확정. 총 53종.
+/// Skill 대분류 — Skill System v8 §13 확정. 총 52종.
 /// Core 8 / Support 35 / Meta 5 / Persistent 5
 /// </summary>
 public enum SkillCategory

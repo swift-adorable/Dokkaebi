@@ -15,8 +15,8 @@ MonoBehaviour:
   id: meta_cast_on_crit
   displayName: "\uCE58\uBA85\uD0C0 \uC2DC \uC2DC\uC804"
   description: "\uCE58\uBA85\uD0C0\uAC00 \uBC1C\uC0DD\uD560 \uB54C\uB9C8\uB2E4 6%
-    \uCDA9\uC804\uB41C\uB2E4. \uBC1C\uB3D9 \uC2DC \uC7A5\uCC29\uD55C Core\uB97C \uC989\uC2DC
-    \uC7AC\uBC1C\uB3D9\uD55C\uB2E4."
+    \uCDA9\uC804\uB41C\uB2E4. \uBC1C\uB3D9 \uC2DC \uC9C0\uB2CC \uD575\uC2EC \uAD6C\uC2AC\uC744
+    \uC989\uC2DC \uC7AC\uBC1C\uB3D9\uD55C\uB2E4."
   category: 2
   coreFamily: 0
   requiredLevel: 13
@@ -48,3 +48,7 @@ MonoBehaviour:
   ailmentOverride: 0
   ailmentAddition: 0
   speedMultiplier: 1
+  fuseSeconds: -1
+  consumesAllStacks: 0
+  chainDetonations: 0
+  detonationCooldownAdd: 0

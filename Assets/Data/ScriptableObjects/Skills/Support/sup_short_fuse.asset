@@ -47,3 +47,7 @@ MonoBehaviour:
   ailmentOverride: 0
   ailmentAddition: 0
   speedMultiplier: 1
+  fuseSeconds: 0
+  consumesAllStacks: 0
+  chainDetonations: 0
+  detonationCooldownAdd: 0

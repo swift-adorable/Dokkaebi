@@ -117,6 +117,11 @@ public class CorpseController : MonoBehaviour, IPoolable
     /// 「무엇을 들고 갈지 고른다」가 철수 루팅의 결정이다.
     /// 자동으로 가방에 들어가면 그 결정이 사라진다.
     /// </summary>
+    /// <summary>패시브 「희귀 드롭」의 배율. 젬 드롭(SkillManager)도 같은 값을 쓴다.</summary>
+    public static float DropBonus => PassiveManager.HasInstance
+        ? 1f + PassiveManager.Instance.Total(PassiveEffectType.RareDropRate) * 0.01f
+        : 1f;
+
     private void FillLoot()
     {
         random ??= new System.Random(Random.Range(int.MinValue, int.MaxValue));
@@ -126,8 +131,11 @@ public class CorpseController : MonoBehaviour, IPoolable
         int chapterNumber = chapter != null ? chapter.Chapter : 0;
         System.Func<ItemDefinition, bool> allow = item => IngredientTable.DropsIn(item.Id, chapterNumber);
 
+        // 패시브 「희귀 드롭 +n%」 — 무언가 나올 확률이 (1 + n%)배 (Audit A9 · 결정 2-74 「전반적인 드롭」).
+        float findBonus = DropBonus;
+
         if (lootTable != null)
-            lootTable.Fill(Loot, random, ValueMultiplier, allow);
+            lootTable.Fill(Loot, random, ValueMultiplier, allow, findBonus);
 
         // 패시브 「전리품 추첨 +n」. 표 자체는 그대로고 뽑는 횟수만 는다.
         int extraRolls = PassiveManager.HasInstance
@@ -135,7 +143,7 @@ public class CorpseController : MonoBehaviour, IPoolable
             : 0;
 
         if (lootTable != null && extraRolls > 0)
-            LootRoller.Roll(lootTable.Entries, extraRolls, random, Loot, allow);
+            LootRoller.Roll(lootTable.Entries, extraRolls, random, Loot, allow, findBonus);
 
         if (!SkillManager.HasInstance)
             return;

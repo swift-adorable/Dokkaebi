@@ -168,6 +168,21 @@ public class SkillDefinition : ScriptableObject
     [Min(0.1f)]
     [SerializeField] private float speedMultiplier = 1f;
 
+    [Header("Effect — 기폭 장치 (Audit A5)")]
+    [Tooltip("기폭 지연(초). 음수면 바꾸지 않는다 — 짧은 퓨즈 0 · 긴 퓨즈 0.8.")]
+    [SerializeField] private float fuseSeconds = -1f;
+
+    [Tooltip("쌓인 중첩을 전부 소모한다 (긴 퓨즈). 기본은 한 중첩.")]
+    [SerializeField] private bool consumesAllStacks;
+
+    [Tooltip("폭발이 연쇄하는 횟수 (연쇄 기폭).")]
+    [Min(0)]
+    [SerializeField] private int chainDetonations;
+
+    [Tooltip("기폭 쿨다운에 더하는 초 (연쇄 기폭의 대가).")]
+    [Min(0f)]
+    [SerializeField] private float detonationCooldownAdd;
+
     // ────────────────────────────────── 읽기 전용 접근자
 
     public string Id => id;
@@ -225,6 +240,11 @@ public class SkillDefinition : ScriptableObject
     /// </summary>
     public float ZoneRadiusMultiplier => Mathf.Max(0.1f, zoneRadiusMultiplier);
 
+    public float FuseSeconds => fuseSeconds;
+    public bool ConsumesAllStacks => consumesAllStacks;
+    public int ChainDetonations => Mathf.Max(0, chainDetonations);
+    public float DetonationCooldownAdd => Mathf.Max(0f, detonationCooldownAdd);
+
     public StatusEffectType AilmentOverride => ailmentOverride;
     public StatusEffectType AilmentAddition => ailmentAddition;
 
@@ -258,6 +278,9 @@ public class SkillDefinition : ScriptableObject
         || ailmentOverride != StatusEffectType.None
         || ailmentAddition != StatusEffectType.None
         || blocksStatusCreation
+        || fuseSeconds >= 0f
+        || consumesAllStacks
+        || chainDetonations > 0
         || speedMultiplier > 1f
         || lifetimeMultiplier > 1f
         || fireIntervalMultiplier < 1f;

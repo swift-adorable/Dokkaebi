@@ -27,6 +27,12 @@ public class EnemyController : MonoBehaviour, IPoolable
 
     public Health Health => health;
 
+    /// <summary>
+    /// 적이 죽었다 — 시체를 만들고 풀로 돌아가기 【전에】 부른다. 상태이상이 아직 남아 있다.
+    /// 기폭 · 잔류물(SkillZoneDirector)이 듣는다 (Audit A5 · A6).
+    /// </summary>
+    public static event System.Action<EnemyController> Killed;
+
     private void Awake()
     {
         health = GetComponent<Health>();
@@ -132,6 +138,8 @@ public class EnemyController : MonoBehaviour, IPoolable
     private void HandleDied()
     {
         GameLogger.Log("[EnemyController] Die");
+
+        Killed?.Invoke(this);
 
         SpawnCorpse();
 

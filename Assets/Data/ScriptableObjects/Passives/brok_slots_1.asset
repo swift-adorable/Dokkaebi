@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Dokkaebi.Runtime::PassiveNode
   id: brok_slots_1
   displayName: "\uB2E8\uACE8 1"
-  description: "\uC0C1\uC810 \uAC31\uC2E0 \uD69F\uC218 +1."
+  description: "\uAC00\uAC8C \uBB3C\uAC74\uB9C8\uB2E4 \uC7AC\uACE0 +1."
   branch: 3
   effect: 33
   value: 1

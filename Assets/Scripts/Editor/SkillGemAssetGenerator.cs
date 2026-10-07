@@ -3,7 +3,7 @@ using UnityEditor;
 using UnityEngine;
 
 /// <summary>
-/// 스킬 정의 53종에 대응하는 「젬」 아이템 에셋을 만든다. (로드맵 6-D)
+/// 스킬 정의 52종에 대응하는 「젬」 아이템 에셋을 만든다. (로드맵 6-D)
 ///
 /// 왜 필요한가 —
 /// 스킬이 실물 아이템이 되면서 SkillDefinition 하나당 ItemDefinition 하나가 필요해졌다.
