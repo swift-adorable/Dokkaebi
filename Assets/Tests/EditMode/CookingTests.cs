@@ -40,7 +40,7 @@ namespace Dokkaebi.Tests
                         Assert.IsNotNull(catalog.Find(member), $"{r.OutputId}: 재료 {member}");
             }
 
-            Assert.IsNull(CookingTable.ForOutput("con_water"), "물병은 우물에서 긷는 것");
+            Assert.IsNull(CookingTable.ForOutput("con_water"), "물병은 샘에서 긷는 것");
             Assert.IsNull(CookingTable.ForOutput("con_whisky"), "막걸리는 빚는 것");
         }
 
@@ -193,7 +193,7 @@ namespace Dokkaebi.Tests
         }
 
         [Test]
-        public void 우물은_한_밤에_여덟_병_넘치면_쌓이지_않는다()
+        public void 샘은_한_밤에_여덟_병_넘치면_쌓이지_않는다()
         {
             ItemDefinition water = Catalog.Find(SpringTable.WaterId);
             var bag = new Inventory(20, 99f);

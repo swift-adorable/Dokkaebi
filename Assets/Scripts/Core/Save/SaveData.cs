@@ -43,7 +43,7 @@ public class SaveData
     ///       잡화 상점의 약 줄은 잡화 가게 표에 없어 버려지고 약탕간은 가득 찬 재고로 시작한다.
     ///  11 — 난이도(difficulty)를 더했다 (Normal · Nightmare · Hell — 결정 2-69). 10판에는 없어
     ///       「아직 고르지 않음」으로 읽힌다.
-    ///  12 — 고목 뿌리 우물(spring — 남은 물병)를 더했다 (결정 2-73). 11판에는 없어 가득 찬 우물로 읽힌다.
+    ///  12 — 고목 뿌리 샘(spring — 남은 물병)를 더했다 (결정 2-73). 11판에는 없어 가득 찬 샘으로 읽힌다.
     ///       들판의 「맑은 물」(water_bottle)은 물병(con_water)로 읽는다(ItemCatalog.Find).
     ///  13 — 구슬 도감(codex)을 없앴다 (결정 2-75). 고르지 않은 구슬이 떨어지고 가방에서 고른다.
     ///       12판의 codex 줄은 읽지 않고 버린다.
@@ -104,7 +104,7 @@ public class SaveData
     /// <summary>지은 건물과 놓은 자리. 놓지 않은 건물은 placed가 false다.</summary>
     public List<SavedBuilding> buildings = new();
 
-    /// <summary>고목 뿌리 우물에 남은 물병 (결정 2-73). 파밍이 끝나면 다시 찬다.</summary>
+    /// <summary>고목 뿌리 샘에 남은 물병 (결정 2-73). 파밍이 끝나면 다시 찬다.</summary>
     public int spring = SpringTable.PerNight;
 
     // ── 이야기 ────────────────────────────────────────────────────────

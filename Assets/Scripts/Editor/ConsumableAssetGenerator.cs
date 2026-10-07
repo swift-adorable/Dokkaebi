@@ -202,9 +202,9 @@ public static class ConsumableAssetGenerator
         // 【체력을 채우지 않는다.】 먹어서 상처가 낫기 시작하면
         // 수분·에너지 두 축이 체력에 흡수된다. (결정 2-32)
 
-        // 물병 (결정 2-73) — 옛 「샘물」. 고목 뿌리 우물에서 한 밤에 8병 떠 간다(SpringTable) · 들판에서도 나온다
+        // 물병 (결정 2-73) — 옛 「샘물」. 고목 뿌리 샘에서 한 밤에 8병 떠 간다(SpringTable) · 들판에서도 나온다
         // (옛 「맑은 물」을 합쳤다). 부뚜막에서 요리의 물로도 쓴다 — 그래서 한 병은 작다(수분 40 → 20).
-        list.Add(Food("con_water", "물병", "우물에서 길어 온 물. 맛은 없지만 안전하다.",
+        list.Add(Food("con_water", "물병", "샘에서 길어 온 물. 맛은 없지만 안전하다.",
             water: 20f, energy: 0f, weight: 0.3f, stackMax: 5, value: 15));
 
         list.Add(Food("con_soda", "식혜", "김이 빠졌다. 그래도 물이다.",

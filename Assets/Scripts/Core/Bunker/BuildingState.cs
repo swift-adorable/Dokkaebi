@@ -219,7 +219,7 @@ public static class BunkerLayout
     /// <summary>덕코프처럼 「플레이어 스폰 지점 오른쪽」 [확인됨 — 위키 가이드].</summary>
     public static readonly Vector3 BlueprintPosition = new(3f, 0f, 0f);
 
-    /// <summary>고목 뿌리 우물 (결정 2-73) — 창고의 맞은편 벽. 처음부터 있다.</summary>
+    /// <summary>고목 뿌리 샘 (결정 2-73) — 창고의 맞은편 벽. 처음부터 있다.</summary>
     public static readonly Vector3 SpringPosition = new(6f, 0f, RoomDepth * 0.5f - 2f);
 
     /// <summary>고정 자리가 바닥에서 차지하는 크기 (m).</summary>

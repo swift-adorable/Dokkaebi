@@ -1,5 +1,5 @@
 /// <summary>
-/// 【고목 뿌리 우물】 소굴 안의 우물. 물병을 떠 간다 (결정 2-73).
+/// 【고목 뿌리 샘】 소굴 안의 샘. 물병을 떠 간다 (결정 2-73).
 ///
 ///   · 파밍을 한 번 다녀올 때마다(한 밤) **8개**로 차오른다. 떠 가지 않은 물은 쌓이지 않고 넘친다.
 ///   · 떠 간 물병은 마셔도 되고(수분 20), 부뚜막에서 요리의 물로 써도 된다.
@@ -8,7 +8,7 @@
 /// </summary>
 public static class SpringTable
 {
-    public const string Name = "우물";
+    public const string Name = "샘";
 
     /// <summary>물병 — 옛 「샘물」 · 들판의 「맑은 물」(water_bottle)을 합쳤다.</summary>
     public const string WaterId = "con_water";
@@ -21,13 +21,13 @@ public enum SpringError
 {
     None = 0,
 
-    /// <summary>오늘 밤 우물이 말랐다 — 다음 파밍을 다녀오면 다시 찬다.</summary>
+    /// <summary>오늘 밤 샘이 말랐다 — 다음 파밍을 다녀오면 다시 찬다.</summary>
     Dry = 1,
 
     BagFull = 2
 }
 
-/// <summary>우물에 남은 물. MonoBehaviour 없는 순수 클래스 — EditMode 테스트 대상.</summary>
+/// <summary>샘에 남은 물. MonoBehaviour 없는 순수 클래스 — EditMode 테스트 대상.</summary>
 public sealed class SpringState
 {
     public int Remaining { get; private set; } = SpringTable.PerNight;
@@ -56,7 +56,7 @@ public sealed class SpringState
     {
         switch (error)
         {
-            case SpringError.Dry:     return "우물이 말랐다. 파밍을 다녀오면 다시 차오른다.";
+            case SpringError.Dry:     return "샘이 말랐다. 파밍을 다녀오면 다시 차오른다.";
             case SpringError.BagFull: return "가방에 자리가 없다.";
             default:                  return string.Empty;
         }
