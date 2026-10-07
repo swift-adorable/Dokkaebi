@@ -72,6 +72,14 @@ public static class LootAssetGenerator
             if (i.Existing)
                 continue;
 
+            // 전리품 표에 올리지 않는 재료(산열매 — 나무에서 딴다)도 아이템 에셋은 만든다.
+            if (i.DropWeight <= 0)
+            {
+                CreateOrUpdate(New(i.Id, i.Name, i.Description, ItemKind.Material,
+                    i.Weight, i.StackMax, i.Value, 0, i.MinCount, i.MaxCount));
+                continue;
+            }
+
             rows.Add(New(i.Id, i.Name, i.Description, ItemKind.Material,
                 i.Weight, i.StackMax, i.Value, i.DropWeight, i.MinCount, i.MaxCount));
         }

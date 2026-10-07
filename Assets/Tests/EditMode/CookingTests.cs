@@ -116,6 +116,19 @@ namespace Dokkaebi.Tests
         }
 
         [Test]
+        public void 산열매는_몬스터가_아니라_나무에서_딴다()
+        {
+            Assert.AreEqual(0, IngredientTable.Find(IngredientTable.Berry).DropWeight);
+            Assert.IsNotNull(Catalog.Find(IngredientTable.Berry), "아이템은 있다");
+
+            LootTable common = UnityEditor.AssetDatabase.LoadAssetAtPath<LootTable>(
+                "Assets/Data/ScriptableObjects/Loot/LootTable_Common.asset");
+            Assert.IsNotNull(common);
+            foreach (LootEntry e in common.Entries)
+                Assert.AreNotEqual(IngredientTable.Berry, e.item != null ? e.item.Id : null, "전리품 표에 없다 (결정 2-76)");
+        }
+
+        [Test]
         public void 전리품_추첨은_장이_맞지_않는_재료를_건너뛴다()
         {
             ItemCatalog catalog = Catalog;

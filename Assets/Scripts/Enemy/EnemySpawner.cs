@@ -68,7 +68,12 @@ public class EnemySpawner : MonoBehaviour
         }
 
         if (player != null)
+        {
             enemyManager.SetPlayer(player);
+
+            // 【임시】 열매 나무 2~3그루 — 산열매는 몬스터가 아니라 나무에서 딴다 (결정 2-76). 맵(9단계) 때 제자리로.
+            BerryTree.SpawnForRaid(player.position);
+        }
 
         if (enemyPrefab == null)
             GameLogger.Error("[EnemySpawner] enemyPrefab이 할당되지 않았습니다.", this);

@@ -15,7 +15,7 @@ MonoBehaviour:
   id: food_berry
   displayName: "\uC0B0\uC5F4\uB9E4"
   description: "\uC624\uB514 \xB7 \uC624\uBBF8\uC790 \xB7 \uC0B0\uC218\uC720 \xB7
-    \uBA38\uB8E8 \u2014 \uC0B0\uC5D0\uC11C \uB534 \uC791\uC740 \uC5F4\uB9E4."
+    \uBA38\uB8E8 \u2014 \uB098\uBB34\uC5D0\uC11C \uB534 \uC791\uC740 \uC5F4\uB9E4."
   kind: 0
   tier: 0
   weight: 0.1
@@ -28,6 +28,7 @@ MonoBehaviour:
   noRegister: 0
   noTrade: 0
   skill: {fileID: 0}
+  blankGem: 0
   consumable:
     category: 0
     heal: 0

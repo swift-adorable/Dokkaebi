@@ -44,6 +44,9 @@ public class BunkerStation : MonoBehaviour
         /// <summary>고목 뿌리 샘가 — 호리병 물을 떠 간다 (결정 2-73). 처음부터 있다.</summary>
         Spring = 9,
 
+        /// <summary>【임시】 열매 나무 — 구역에서 산열매를 딴다 (결정 2-76). 소굴이 아니라 구역에 선다.</summary>
+        BerryTree = 10,
+
         /// <summary>여는 것이 없다 (작업대 — 제작은 다음 단계).</summary>
         None = 99
     }
@@ -71,6 +74,7 @@ public class BunkerStation : MonoBehaviour
             case Kind.Apothecary:   return ShopTable.ApothecaryName;
             case Kind.Cooking:      return CookingTable.HearthName;
             case Kind.Spring:       return $"{SpringTable.Name} ({SpringManager.Remaining})";
+            case Kind.BerryTree:    return BerryTree.Name;
             case Kind.Departure:    return "파밍 출발";
             case Kind.Blueprint:    return "건설";
             default:                return string.Empty;
@@ -143,6 +147,11 @@ public class BunkerStation : MonoBehaviour
 
             case Kind.Cooking:
                 CookingUI.Open();
+                break;
+
+            case Kind.BerryTree:
+                if (TryGetComponent(out BerryTree tree))
+                    tree.Harvest();
                 break;
 
             case Kind.Spring:
