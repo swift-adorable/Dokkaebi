@@ -48,6 +48,17 @@ public sealed class ChapterData
     /// <summary>궂은 날이 피해를 주는가. 6장 꽃비만 false (결정 2-64).</summary>
     public readonly bool BadWeatherHurts;
 
+    /// <summary>한 무리의 크기 — 최솟값 · 최댓값(포함) [임시값 — 결정 2-69].</summary>
+    public int PackMin = 2;
+    public int PackMax = 4;
+
+    /// <summary>등급 분포(백분율) — 일반 · 마법 · 희귀. 장이 오르면 마법 · 희귀가 는다 (Hunting 7절 · 결정 2-69).</summary>
+    public int NormalPercent = 75;
+    public int MagicPercent = 20;
+
+    /// <summary>이 장에서는 일반 등급으로만 나오는 유형 — 1장 절굿공이귀 (결정 2-69).</summary>
+    public EnemyArchetype[] NormalOnly = System.Array.Empty<EnemyArchetype>();
+
     public ChapterData(int chapter, Season season, int weaponTier, PoolEntry[] pool, string[] materials,
         string badWeather1, string badWeather2, bool badWeatherHurts = true)
     {
@@ -122,10 +133,58 @@ public static class ZoneDataTable
             new[] { "꽃잎", "이슬", "향료가루", "꽃씨" }, "꽃비", "꽃비", false)
     };
 
-    /// <summary>4장의 잡귀는 떼로 나온다 — 한 번에 8~12 (Hunting 1절 · 이야기의 「잡귀 떼」) [스포너 미반영].</summary>
+    /// <summary>4장의 잡귀는 떼로 나온다 — 한 번에 5~8 (Hunting 1절 · 이야기의 「잡귀 떼」 · 8~12에서 낮춤 — 결정 2-69).</summary>
     public const int SwarmChapter = 4;
-    public const int SwarmMin = 8;
-    public const int SwarmMax = 12;
+    public const int SwarmMin = 5;
+    public const int SwarmMax = 8;
+
+    // 무리 크기 · 등급 분포 [임시값 — 결정 2-69] — research/sim/combat_sim.py로 맞췄다.
+    // 목표: Normal · 보통 플레이어(적 공격의 1/3을 맞는다)가 15분 한 판에 소환단 2~4개.
+    static ZoneDataTable()
+    {
+        Set(0, 1, 2, 100, 0);
+        Set(1, 2, 3, 90, 9);   chapters[1].NormalOnly = new[] { EnemyArchetype.Crusher };
+        Set(2, 2, 4, 85, 13);
+        Set(3, 2, 3, 75, 20);
+        Set(4, 2, 4, 80, 17);
+        Set(5, 2, 3, 70, 23);
+        Set(6, 3, 5, 60, 30);
+    }
+
+    private static void Set(int chapter, int packMin, int packMax, int normal, int magic)
+    {
+        ChapterData c = chapters[chapter];
+        c.PackMin = packMin;
+        c.PackMax = packMax;
+        c.NormalPercent = normal;
+        c.MagicPercent = magic;
+    }
+
+    /// <summary>
+    /// 이 장에서 이 유형의 등급을 고른다. roll은 0~99. 고유는 고르지 않는다(지정 구역 고정).
+    /// </summary>
+    public static EnemyRarity RollRarity(int chapter, EnemyArchetype archetype, int roll)
+    {
+        ChapterData c = Chapter(chapter) ?? chapters[0];
+
+        foreach (EnemyArchetype a in c.NormalOnly)
+            if (a == archetype)
+                return EnemyRarity.Normal;
+
+        if (roll < c.NormalPercent) return EnemyRarity.Normal;
+        if (roll < c.NormalPercent + c.MagicPercent) return EnemyRarity.Magic;
+        return EnemyRarity.Rare;
+    }
+
+    /// <summary>한 무리의 크기. 4장에서 잡귀가 앞장서면 떼. roll은 0 이상 1 미만.</summary>
+    public static int PackSize(int chapter, EnemyArchetype first, float roll)
+    {
+        ChapterData c = Chapter(chapter) ?? chapters[0];
+        bool swarm = chapter == SwarmChapter && first == EnemyArchetype.Scav;
+        int min = swarm ? SwarmMin : c.PackMin;
+        int max = swarm ? SwarmMax : c.PackMax;
+        return min + System.Math.Min(max - min, (int)(roll * (max - min + 1)));
+    }
 
     /// <summary>1장 첫 방문은 비로 고정한다 (결정 2-63 ①) [날씨 미구현].</summary>
     public const int FirstVisitRainChapter = 1;

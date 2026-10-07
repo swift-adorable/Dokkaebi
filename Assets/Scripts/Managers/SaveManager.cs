@@ -152,6 +152,7 @@ public static class SaveManager
     public static void Wipe()
     {
         SaveStore.Delete(SavePath);
+        DifficultyManager.Reset();
 
         WritesBlocked = false;
         LastLoad = SaveLoadResult.None;
@@ -221,6 +222,7 @@ public static class SaveManager
         data.shop = ShopManager.Capture();
         data.buildings = BuildingManager.Capture();
         data.story = StoryManager.Capture();
+        data.difficulty = DifficultyManager.Capture();
 
         return data;
     }
@@ -275,6 +277,7 @@ public static class SaveManager
         ShopManager.Restore(data.shop);
         BuildingManager.Restore(data.buildings);
         StoryManager.Restore(data.story);
+        DifficultyManager.Restore(data.difficulty);
 
         // 레벨이 돌아왔으니 소켓 수도 맞춘다. 알림은 내지 않는다.
         SkillManager.EnsureInstance().ResyncLevel();

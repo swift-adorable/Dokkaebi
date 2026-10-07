@@ -193,25 +193,41 @@ namespace Dokkaebi.Tests
         [Test]
         public void 난이도_보정이_곱해진다()
         {
-            Assert.AreEqual(80, DamageResolver.Resolve(Basic(100), DefenceProfile.None,
-                DifficultyTable.EnemyDamage(DifficultyLevel.Balanced)));
+            Assert.AreEqual(100, DamageResolver.Resolve(Basic(100), DefenceProfile.None,
+                DifficultyTable.EnemyDamage(DifficultyLevel.Normal)));
             Assert.AreEqual(150, DamageResolver.Resolve(Basic(100), DefenceProfile.None,
-                DifficultyTable.EnemyDamage(DifficultyLevel.Extreme)));
+                DifficultyTable.EnemyDamage(DifficultyLevel.Nightmare)));
+            Assert.AreEqual(200, DamageResolver.Resolve(Basic(100), DefenceProfile.None,
+                DifficultyTable.EnemyDamage(DifficultyLevel.Hell)));
         }
 
         [Test]
-        public void 폭주_난이도만_확장_상태이상을_활성화한다()
+        public void 지옥만_확장_상태이상을_켜고_적이_더_단단하다()
         {
-            Assert.IsTrue(DifficultyTable.HasExtendedAilments(DifficultyLevel.Frenzy));
-            Assert.IsFalse(DifficultyTable.HasExtendedAilments(DifficultyLevel.Extreme));
-            Assert.IsFalse(DifficultyTable.HasExtendedAilments(DifficultyLevel.Survival));
+            Assert.IsTrue(DifficultyTable.HasExtendedAilments(DifficultyLevel.Hell));
+            Assert.IsFalse(DifficultyTable.HasExtendedAilments(DifficultyLevel.Nightmare));
+            Assert.IsFalse(DifficultyTable.HasExtendedAilments(DifficultyLevel.Normal));
+            Assert.AreEqual(1.25f, DifficultyTable.EnemyHealth(DifficultyLevel.Hell), 0.0001f);
+            Assert.AreEqual(1f, DifficultyTable.EnemyHealth(DifficultyLevel.Nightmare), 0.0001f);
         }
 
         [Test]
-        public void 폭주는_피해가_가장_높고_체력이_가장_낮다()
+        public void 난이도는_한_번만_고른다_옛_값은_Normal로_읽는다()
         {
-            Assert.AreEqual(1.6f, DifficultyTable.EnemyDamage(DifficultyLevel.Frenzy), 0.0001f);
-            Assert.AreEqual(0.4f, DifficultyTable.EnemyHealth(DifficultyLevel.Frenzy), 0.0001f);
+            DifficultyManager.Reset();
+            Assert.IsFalse(DifficultyManager.IsChosen);
+            Assert.AreEqual(DifficultyLevel.Normal, DifficultyManager.Level, "고르기 전에는 Normal");
+
+            Assert.IsTrue(DifficultyManager.Choose(DifficultyLevel.Nightmare));
+            Assert.IsFalse(DifficultyManager.Choose(DifficultyLevel.Normal), "바꿀 수 없다");
+            Assert.AreEqual(DifficultyLevel.Nightmare, DifficultyManager.Level);
+
+            DifficultyManager.Restore(2);   // 옛 「균형」
+            Assert.AreEqual(DifficultyLevel.Normal, DifficultyManager.Level);
+            DifficultyManager.Restore(DifficultyManager.NotChosen);
+            Assert.IsFalse(DifficultyManager.IsChosen, "판 10 이전 세이브는 아직 고르지 않음");
+
+            DifficultyManager.Reset();
         }
 
         [Test]

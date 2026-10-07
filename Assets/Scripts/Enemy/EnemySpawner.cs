@@ -152,14 +152,22 @@ public class EnemySpawner : MonoBehaviour
     /// 원거리가 섞여야 「어느 쪽을 먼저 처리할까」가 생기고, 대시가
     /// 회피 기술로도 접근 기술로도 쓰인다. (Combat_Baseline 5절)
     /// </summary>
-    private GameObject PickPrefab()
+    /// <summary>이번 구역이 속한 장. 모르면 0장.</summary>
+    private static int CurrentChapter()
     {
+        ChapterData c = ZoneDataTable.ChapterOfZone(StoryManager.TargetZone);
+        return c != null ? c.Chapter : 0;
+    }
+
+    private GameObject PickPrefab(out EnemyArchetype archetype)
+    {
+        archetype = EnemyArchetype.Scav;
+
         // 카탈로그가 있으면 이번 구역이 속한 장의 일반 적 풀에서 고른다 (Zone Data · 결정 2-57).
         // 예전에는 9종에서 고르게 뽑았다 — 1장에 무주귀가 나왔다.
         if (catalog != null)
         {
-            ChapterData chapter = ZoneDataTable.ChapterOfZone(StoryManager.TargetZone);
-            EnemyArchetype archetype = ZoneDataTable.Pick(chapter != null ? chapter.Chapter : 0, Random.value);
+            archetype = ZoneDataTable.Pick(CurrentChapter(), Random.value);
 
             GameObject picked = catalog.Get(archetype);
 
@@ -194,7 +202,13 @@ public class EnemySpawner : MonoBehaviour
 
     private void SpawnEnemy()
     {
-        int count = RollGroupSize();
+        // 무리 크기 = 장의 무리 크기(Zone Data · 결정 2-69) × 이번 판 조건의 배율(밀집 · 산개).
+        // 첫 마리를 먼저 골라야 4장 잡귀 떼를 안다.
+        GameObject firstPrefab = PickPrefab(out EnemyArchetype first);
+        int count = catalog != null
+            ? Mathf.Max(1, Mathf.RoundToInt(ZoneDataTable.PackSize(CurrentChapter(), first, Random.value)
+                                             * Mathf.Max(0.1f, Conditions.GroupSizeScale)))
+            : RollGroupSize();
 
         // 퍼짐 배율 — 산개는 넓게, 밀집은 좁게 나온다.
         float spread = spawnRadius * Mathf.Max(0.1f, Conditions.SpreadScale);
@@ -211,7 +225,7 @@ public class EnemySpawner : MonoBehaviour
                 ? Vector3.zero
                 : RandomFlat(Random.insideUnitCircle * GroupSpacing);
 
-            poolManager.Spawn(PickPrefab(), origin + offset, Quaternion.identity);
+            poolManager.Spawn(i == 0 ? firstPrefab : PickPrefab(out _), origin + offset, Quaternion.identity);
         }
     }
 

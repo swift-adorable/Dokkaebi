@@ -165,5 +165,43 @@ namespace Dokkaebi.Tests
                 CollectionAssert.AreEqual(names, ZoneDataTable.Chapter(c).Materials, $"{c}장");
             }
         }
+        [Test]
+        public void 등급은_장이_오를수록_마법_희귀가_늘고_1장_절굿공이귀는_일반만()
+        {
+            // 4장은 일부러 3장보다 일반을 조금 더 둔다 — 잡귀 떼 · 허깨비 · 순라귀로 이미 바쁜 장이라 (결정 2-69).
+            for (int c = 1; c <= 6; c++)
+            {
+                ChapterData d = ZoneDataTable.Chapter(c);
+                Assert.LessOrEqual(d.NormalPercent + d.MagicPercent, 100, $"{c}장");
+                Assert.GreaterOrEqual(ZoneDataTable.Chapter(1).NormalPercent, d.NormalPercent, $"1장이 가장 일반이 많다 — {c}장");
+                Assert.LessOrEqual(ZoneDataTable.Chapter(6).NormalPercent, d.NormalPercent, $"6장이 가장 일반이 적다 — {c}장");
+            }
+
+            for (int roll = 0; roll < 100; roll++)
+                Assert.AreEqual(EnemyRarity.Normal, ZoneDataTable.RollRarity(1, EnemyArchetype.Crusher, roll));
+
+            Assert.AreEqual(EnemyRarity.Rare, ZoneDataTable.RollRarity(1, EnemyArchetype.Scav, 99));
+            Assert.AreEqual(EnemyRarity.Magic, ZoneDataTable.RollRarity(6, EnemyArchetype.Wraith, 60));
+        }
+
+        [Test]
+        public void 무리_크기는_장의_범위_안이고_4장_잡귀는_떼다()
+        {
+            for (int c = 0; c <= 6; c++)
+            {
+                ChapterData d = ZoneDataTable.Chapter(c);
+
+                for (float r = 0f; r <= 1f; r += 0.05f)
+                {
+                    int n = ZoneDataTable.PackSize(c, EnemyArchetype.Wraith, r);
+                    Assert.That(n, Is.InRange(d.PackMin, d.PackMax), $"{c}장 {r}");
+                }
+            }
+
+            Assert.AreEqual(ZoneDataTable.SwarmMin, ZoneDataTable.PackSize(4, EnemyArchetype.Scav, 0f));
+            Assert.AreEqual(ZoneDataTable.SwarmMax, ZoneDataTable.PackSize(4, EnemyArchetype.Scav, 0.999f));
+            Assert.AreEqual(ZoneDataTable.SwarmMax, ZoneDataTable.PackSize(4, EnemyArchetype.Scav, 1f), "끝값도 범위 안");
+            Assert.AreEqual(ZoneDataTable.Chapter(4).PackMax, ZoneDataTable.PackSize(4, EnemyArchetype.Settled, 0.999f), "잡귀가 앞장설 때만 떼");
+        }
     }
 }

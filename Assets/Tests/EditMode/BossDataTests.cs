@@ -29,7 +29,7 @@ namespace Dokkaebi.Tests
             BossDefinition hyeonmu = StoryTable.Boss("hyeonmu");
             EnemyProfile p = EnemyProfile.ForBoss(hyeonmu, 0);
             Assert.AreEqual(500, p.health);
-            Assert.AreEqual(21, p.damage);
+            Assert.AreEqual(19, p.damage, "버티는 시간 = 처치 시간 × 0.75로 낮춘 값 (결정 2-69)");
             Assert.AreEqual(2f, p.armour, "현무 방어도 2 — 1장 무기는 관통 0");
 
             EnemyProfile gumiho = EnemyProfile.ForBoss(StoryTable.Boss("gumiho"), 0);

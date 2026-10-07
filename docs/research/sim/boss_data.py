@@ -3,6 +3,9 @@
 # 몸은 지금(StoryTable) 그대로 — 현무 방어도 2 · 구미호 화염 약점 없음만 바꾼다.
 exec(open('enemy_sim.py').read())
 TARGET={0:20,1:40,2:60}; HITS={0:8,1:6,2:5}
+# 결정 2-69: 한 대 피해 = min(맞아도 되는 대수로 정한 값, 「버티는 시간 = 처치 시간 × 0.75」로 정한 값)
+# 버티는 시간은 기준 플레이어(Normal · 적 공격의 1/3을 맞는다)로 잰다. 3점사(순라귀 몸)는 셋 중 하나만 맞아도 맞는다.
+HR_BASE=1/3; TTD_RATIO=0.75; BURST_BODIES={'순라귀'}
 # (id, 이름, 구역, 장, 몸들, 등급, 단계 0=중간 1=장 2=최종)
 B=[('yagwanggwi','야광귀','1-1',1,['잡귀'],'고유',0),('dalgyal','달걀귀신','1-2',1,['무주귀'],'고유',0),
 ('hyeonmu','현무','1-3',1,['절굿공이귀'],'고유',1),('eodukssini','어둑시니','2-1',2,['허깨비'],'고유',0),
@@ -26,7 +29,10 @@ for bid,name,zone,ch,bodies,grade,lvl in B:
         fire=FIRE_OVERRIDE.get(bid, fi)
         dps=wd/wi*BUILD[ch]*af(armour,wp)*fire
         hpn=r10(per*dps)
-        hit=max(1,round(100/(hits*af(ARM[ch],pen))))
+        hit_cap=100/(hits*af(ARM[ch],pen))
+        eff_sum=sum((1-(1-HR_BASE)**3 if x in BURST_BODIES else HR_BASE)*af(ARM[ch],T[x][2]) for x in bodies)
+        hit_ttd=100*ATKINT/(eff_sum*TTD_RATIO*tgt)
+        hit=max(1,round(min(hit_cap,hit_ttd)))
         cur=hp*G[grade][0]
         out.append((b,hpn,hit,armour,fire,cur))
     rows.append((bid,name,zone,ch,lvl,tgt,hits,out))

@@ -56,8 +56,9 @@ public class EnemyIdentity : MonoBehaviour, IPoolable
 
     public void OnSpawned()
     {
+        // 등급 분포는 장마다 다르다 (Zone Data · 결정 2-69). 1장 절굿공이귀는 일반만.
         EnemyRarity rarity = rollRarity
-            ? EnemyRarityTable.Roll(Rng)
+            ? ZoneDataTable.RollRarity(CurrentChapter(), archetype, Rng.Next(0, 100))
             : fixedRarity;
 
         // 고유는 속성을 굴리지 않는다 — 개체마다 고정이다. (문서 2절)
@@ -76,6 +77,13 @@ public class EnemyIdentity : MonoBehaviour, IPoolable
         // 판인가」다. 순서를 바꾸면 조건이 등급 배율에 다시 곱해져 두 번 먹는다.
         Apply(RaidManager.Current.Apply(
             EnemyProfile.Build(archetype, rarity, rolled)));
+    }
+
+    /// <summary>이번 구역이 속한 장. 모르면 0장.</summary>
+    private static int CurrentChapter()
+    {
+        ChapterData c = ZoneDataTable.ChapterOfZone(StoryManager.TargetZone);
+        return c != null ? c.Chapter : 0;
     }
 
     public void OnDespawned()

@@ -30,7 +30,8 @@ public sealed class BossStats
 /// <summary>
 /// 【Boss Data.】 이야기 보스 17의 체력 · 피해 (결정 2-68).
 /// **원본은 docs/Dokkaebi_Combat_Baseline.md 5-1절 표다** — 이 표는 그것을 옮긴 것이고 BossDataTests가 대조한다.
-/// 표는 docs/research/sim/boss_data.py가 만든다 (처치 목표 중간 20초 · 장 40초 · 최종 60초, 빌드 배율 가정).
+/// 표는 docs/research/sim/boss_data.py가 만든다 (처치 목표 중간 20초 · 장 40초 · 최종 60초, 빌드 배율 가정,
+/// 한 대 피해 = min(맞아도 되는 대수, 버티는 시간 = 처치 시간 × 0.75 — 결정 2-69)).
 ///
 /// 등급 배율(고유 ×15)을 쓰지 않는다 — 그러면 6장이 1장보다 쉬워진다. 일반 적은 여전히 유형 × 등급이다.
 /// </summary>
@@ -47,21 +48,21 @@ public static class BossDataTable
     {
         S("yagwanggwi", new[] { 200 }, new[] { 22 }),
         S("dalgyal", new[] { 200 }, new[] { 12 }),
-        S("hyeonmu", new[] { 500 }, new[] { 21 }, armour: 2f),     // 1장 무기는 관통 0
+        S("hyeonmu", new[] { 500 }, new[] { 19 }, armour: 2f),     // 1장 무기는 관통 0
         S("eodukssini", new[] { 360 }, new[] { 28 }),
         S("gangcheori", new[] { 240 }, new[] { 16 }),
-        S("cheongnyong", new[] { 480 }, new[] { 29 }),
-        S("wongwi", new[] { 280, 420 }, new[] { 12, 33 }),
+        S("cheongnyong", new[] { 480 }, new[] { 27 }),
+        S("wongwi", new[] { 280, 420 }, new[] { 12, 22 }),
         S("dueoksini", new[] { 560 }, new[] { 33 }),
-        S("jujak", new[] { 640 }, new[] { 27 }),
+        S("jujak", new[] { 640 }, new[] { 12 }),
         S("duduri", new[] { 510 }, new[] { 33 }),
         S("kkeomeoksari", new[] { 1200 }, new[] { 39 }),
-        S("baekho", new[] { 2400 }, new[] { 52 }),
-        S("changgwi", new[] { 1080, 1080, 1080 }, new[] { 45, 45, 45 }),
+        S("baekho", new[] { 2400 }, new[] { 48 }),
+        S("changgwi", new[] { 1080, 1080, 1080 }, new[] { 37, 37, 37 }),
         S("sangun", new[] { 720 }, new[] { 39 }),
-        S("haetae", new[] { 1720 }, new[] { 44 }),
+        S("haetae", new[] { 1720 }, new[] { 19 }),
         S("samjogo", new[] { 2910 }, new[] { 45 }),
-        S("gumiho", new[] { 8740 }, new[] { 82 }, fire: 1.0f),       // 첫 구슬(불)이 최종 보스의 약점이 되지 않게
+        S("gumiho", new[] { 8740 }, new[] { 43 }, fire: 1.0f),       // 첫 구슬(불)이 최종 보스의 약점이 되지 않게
     };
 
     public static IReadOnlyList<BossStats> All => all;

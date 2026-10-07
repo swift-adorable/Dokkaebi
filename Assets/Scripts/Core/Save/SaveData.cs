@@ -41,7 +41,9 @@ public class SaveData
     ///  10 — 상인 넷 = 가게 넷 (결정 2-52 · 2-57). 무기 상점 · 방어구 상점(weapon_shop · armour_shop)은
     ///       대장간(smithy)으로, 상점 줄의 Weapon · Armour는 Smithy로 읽는다(BuildingManager · ShopManager).
     ///       잡화 상점의 약 줄은 잡화 가게 표에 없어 버려지고 약탕간은 가득 찬 재고로 시작한다.
-    public const int CurrentVersion = 10;
+    ///  11 — 난이도(difficulty)를 더했다 (Normal · Nightmare · Hell — 결정 2-69). 10판에는 없어
+    ///       「아직 고르지 않음」으로 읽힌다.
+    public const int CurrentVersion = 11;
 
     public int version = CurrentVersion;
 
@@ -105,6 +107,12 @@ public class SaveData
 
     /// <summary>이야기 진행. 【죽어도 잃지 않는다】 — 쓰러뜨린 보스 · 주운 조각은 남는다.</summary>
     public SavedStory story = new();
+
+    /// <summary>
+    /// 난이도 (DifficultyLevel 값 · 결정 2-69). 새로 시작할 때 한 번 고르고 바꿀 수 없다.
+    /// -1이면 아직 고르지 않았다 — 판 10 이전 세이브도 -1로 읽혀 다음 소굴에서 고른다.
+    /// </summary>
+    public int difficulty = DifficultyManager.NotChosen;
 }
 
 /// <summary>

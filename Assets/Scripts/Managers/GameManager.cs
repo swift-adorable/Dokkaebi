@@ -14,22 +14,14 @@ public class GameManager : Singleton<GameManager>
     /// <summary>플레이 가능 상태 여부. (기존 IsPlaying() 메서드 -> 프로퍼티로 변경)</summary>
     public bool IsPlaying => CurrentState == GameState.Playing;
 
-    [Header("Difficulty")]
-    [Tooltip("전역 난이도. 서바이벌이 모든 기획 수치의 기준값이다.")]
-    [SerializeField] private DifficultyLevel difficulty = DifficultyLevel.Survival;
-
     /// <summary>
-    /// 현재 난이도.
+    /// 현재 난이도 — 새로 시작할 때 고른 것(DifficultyManager · 결정 2-69).
     ///
     /// 장(Stage)은 「무엇을 만나는가」만 정한다 — 구역이 바뀐다고
     /// 적 체력에 배율을 곱하지 않는다. 배율은 이 축 하나뿐이다.
-    /// (docs/Dokkaebi_Combat_Baseline.md 「적 유형」)
+    /// (docs/Dokkaebi_Combat_Baseline.md 「적 유형」 · 6절)
     /// </summary>
-    public DifficultyLevel Difficulty
-    {
-        get => difficulty;
-        set => difficulty = value;
-    }
+    public DifficultyLevel Difficulty => DifficultyManager.Level;
 
     /// <summary>
     /// 적이 주는 피해의 배율. 전투 경로가 이 값을 곱한다.

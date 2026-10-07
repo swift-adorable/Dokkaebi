@@ -108,37 +108,37 @@ namespace Dokkaebi.Tests
         // ── 난이도 ────────────────────────────────────────────────────────
 
         /// <summary>
-        /// 서바이벌이 모든 기획 수치의 기준값이다. 여기가 1이 아니면
+        /// Normal(옛 서바이벌)이 모든 기획 수치의 기준값이다 (결정 2-69). 여기가 1이 아니면
         /// 문서의 모든 숫자가 실제와 어긋난다.
         /// </summary>
         [Test]
-        public void 서바이벌_난이도가_기준값_1이다()
+        public void Normal_난이도가_기준값_1이다()
         {
-            Assert.AreEqual(1f, DifficultyTable.EnemyDamage(DifficultyLevel.Survival), 0.0001f);
-            Assert.AreEqual(1f, DifficultyTable.EnemyHealth(DifficultyLevel.Survival), 0.0001f);
+            Assert.AreEqual(1f, DifficultyTable.EnemyDamage(DifficultyLevel.Normal), 0.0001f);
+            Assert.AreEqual(1f, DifficultyTable.EnemyHealth(DifficultyLevel.Normal), 0.0001f);
         }
 
         [Test]
         public void 난이도가_오르면_적_피해가_커진다()
         {
-            Assert.Less(DifficultyTable.EnemyDamage(DifficultyLevel.Balanced),
-                DifficultyTable.EnemyDamage(DifficultyLevel.Survival));
+            Assert.Less(DifficultyTable.EnemyDamage(DifficultyLevel.Normal),
+                DifficultyTable.EnemyDamage(DifficultyLevel.Nightmare));
 
-            Assert.Greater(DifficultyTable.EnemyDamage(DifficultyLevel.Extreme),
-                DifficultyTable.EnemyDamage(DifficultyLevel.Survival));
+            Assert.Less(DifficultyTable.EnemyDamage(DifficultyLevel.Nightmare),
+                DifficultyTable.EnemyDamage(DifficultyLevel.Hell));
         }
 
-        /// <summary>폭주는 피해가 가장 높은 대신 체력이 가장 낮다.</summary>
+        /// <summary>지옥은 피해도 체력도 가장 높다 — 옛 폭주(체력 40%)와 다르다 (결정 2-69).</summary>
         [Test]
-        public void 폭주는_피해가_최고이고_체력이_최저다()
+        public void 지옥은_피해와_체력이_가장_높다()
         {
             foreach (DifficultyLevel level in System.Enum.GetValues(typeof(DifficultyLevel)))
             {
                 Assert.LessOrEqual(DifficultyTable.EnemyDamage(level),
-                    DifficultyTable.EnemyDamage(DifficultyLevel.Frenzy));
+                    DifficultyTable.EnemyDamage(DifficultyLevel.Hell));
 
-                Assert.GreaterOrEqual(DifficultyTable.EnemyHealth(level),
-                    DifficultyTable.EnemyHealth(DifficultyLevel.Frenzy));
+                Assert.LessOrEqual(DifficultyTable.EnemyHealth(level),
+                    DifficultyTable.EnemyHealth(DifficultyLevel.Hell));
             }
         }
 

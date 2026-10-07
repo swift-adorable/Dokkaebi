@@ -52,7 +52,8 @@ public class StoryDirector : MonoBehaviour
 
     private void PlayBunker()
     {
-        StoryManager.PlayOnce(StoryTable.PrologueEvent, PlayNextNight);
+        // 프롤로그(인트로) 뒤에 난이도를 한 번 고른다 (결정 2-69). 이미 골랐으면 그냥 지나간다.
+        StoryManager.PlayOnce(StoryTable.PrologueEvent, () => DifficultyPickerUI.ShowIfNeeded(PlayNextNight));
     }
 
     private void PlayNextNight()
