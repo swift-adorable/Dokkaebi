@@ -94,5 +94,42 @@ namespace Dokkaebi.Tests
                 CollectionAssert.AreEqual(damage[s.Id], s.Damage, $"{s.Id} 피해");
             }
         }
+        // ── 처치 시간 계약 — 기준 빌드에서 중간 20초 · 장 40초 · 최종 60초 (결정 2-68) ──
+        // 무기 표는 Combat_Baseline 3절, 빌드 배율은 research/sim/enemy_sim.py의 BUILD [가정] 그대로다.
+        // 체력 · 방어도 · 화염 배율은 실제 코드 경로(EnemyProfile.ForBoss)에서 읽는다 — 누가 체력만 바꿔도 여기서 잡힌다.
+        private static readonly float[] WeaponDamage = { 0f, 10f, 13f, 16f, 22f, 28f, 34f };
+        private static readonly float[] WeaponInterval = { 1f, 0.40f, 0.35f, 0.32f, 0.45f, 0.50f, 0.45f };
+        private static readonly float[] WeaponPenetration = { 0f, 0f, 1f, 2f, 3f, 5f, 6f };
+        private static readonly float[] Build = { 1f, 1.0f, 1.2f, 1.5f, 1.8f, 2.2f, 2.6f };
+
+        private static float KillSeconds(BossDefinition boss)
+        {
+            int chapter = StoryTable.Zone(boss.ZoneId).Chapter;
+            int tier = Mathf.Max(1, chapter - 1);
+            float total = 0f;
+
+            for (int i = 0; i < boss.Bodies.Length; i++)
+            {
+                EnemyProfile p = EnemyProfile.ForBoss(boss, i);
+                float through = 2f / (Mathf.Max(p.armour - WeaponPenetration[tier], 0f) + 2f);
+                float dps = WeaponDamage[tier] / WeaponInterval[tier] * Build[chapter] * through * p.resistances.fire;
+                total += p.health / dps;
+            }
+
+            return total;
+        }
+
+        [Test]
+        public void 기준_빌드에서_처치_시간이_20_40_60초다()
+        {
+            foreach (BossDefinition b in StoryTable.Bosses)
+            {
+                float target = b.Id == "gumiho" ? BossDataTable.FinalBossSeconds
+                             : b.IsChapterBoss ? BossDataTable.ChapterBossSeconds
+                             : BossDataTable.MidBossSeconds;
+
+                Assert.AreEqual(target, KillSeconds(b), target * 0.05f, $"{b.Name} ({b.Id})");
+            }
+        }
     }
 }
