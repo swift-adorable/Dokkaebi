@@ -37,7 +37,11 @@ public class StoryDirector : MonoBehaviour
         if (FindAnyObjectByType<StoryDirector>() != null)
             return;
 
-        new GameObject("StoryDirector (Runtime)").AddComponent<StoryDirector>();
+        var go = new GameObject("StoryDirector (Runtime)");
+        go.AddComponent<StoryDirector>();
+
+        // 【임시】 0장 튜토리얼 가이드 (결정 2-85) — 끝났으면 스스로 꺼진다.
+        go.AddComponent<TutorialDirector>();
     }
 
     private void Start()

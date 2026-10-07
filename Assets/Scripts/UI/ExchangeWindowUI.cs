@@ -167,11 +167,16 @@ public class ExchangeWindowUI : MonoBehaviour
 
     // ────────────────────────────────── 열고 닫기
 
+    /// <summary>시체를 뒤졌다 — 튜토리얼 「쓰러진 잡귀를 뒤져라」가 듣는다 (결정 2-85).</summary>
+    public static event System.Action CorpseOpened;
+
     /// <summary>시체·상자를 파밍한다.</summary>
     public void Open(CorpseController corpse)
     {
         if (corpse == null)
             return;
+
+        CorpseOpened?.Invoke();
 
         source = corpse;
 

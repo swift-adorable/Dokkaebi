@@ -322,10 +322,11 @@ namespace Dokkaebi.Tests
             Assert.AreEqual(EquipmentSlot.Weapon, loadout.EmptySlotFor(new ItemStack(bow)));
             loadout.TryEquip(new ItemStack(bow), EquipmentSlot.Weapon, out _);
 
-            Assert.AreEqual(EquipmentSlot.Weapon2, loadout.EmptySlotFor(new ItemStack(gun)), "무기 2가 비었다");
-            loadout.TryEquip(new ItemStack(gun), EquipmentSlot.Weapon2, out _);
+            Assert.IsNull(loadout.EmptySlotFor(new ItemStack(gun)), "무기 1이 차 있으면 무기 2가 비어 있어도 가방으로 (2-85)");
 
-            Assert.IsNull(loadout.EmptySlotFor(new ItemStack(bow2)), "두 자리가 다 차 있으면 가방으로");
+            loadout.Unequip(EquipmentSlot.Weapon);
+            loadout.TryEquip(new ItemStack(gun), EquipmentSlot.Weapon2, out _);
+            Assert.AreEqual(EquipmentSlot.Weapon, loadout.EmptySlotFor(new ItemStack(bow2)), "무기 1이 비었으면 무기 1로");
 
             var arrow = AssetDatabase.LoadAssetAtPath<ItemDefinition>($"{ItemRoot}/Ammo/{AmmoTable.Arrow}.asset");
             Assert.IsNull(loadout.EmptySlotFor(new ItemStack(arrow, 10)), "탄은 장비가 아니다 — 통은 저절로 채운다");

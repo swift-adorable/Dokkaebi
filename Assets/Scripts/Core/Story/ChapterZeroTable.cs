@@ -68,12 +68,12 @@ public static class ChapterZeroTable
         => zone == GiftZone && !p.HasSeen(GiftEvent);
 
     /// <summary>
-    /// 튜토리얼이 끝났는가 (결정 2-84) — 지금은 「1장 첫 구역(1-1)에 들어섰다」.
-    /// 튜토리얼 가이드가 생기면 그 끝으로 바꾼다. 끝난 뒤부터 주운 장비가 빈 자리에 바로 들어간다.
-    /// 0장(0-1 봇짐의 환목궁)은 가이드를 따라 손으로 장착한다.
+    /// 튜토리얼이 끝났는가 (결정 2-84 · 2-85) — 가이드(TutorialTable)를 다 끝냈다.
+    /// 가이드 전의 세이브는 1장 첫 구역(1-1)에 들어섰으면 끝난 것으로 친다.
+    /// 끝난 뒤부터 주운 장비가 빈 자리에 바로 들어간다. 0장(봇짐의 환목궁)은 가이드를 따라 손으로 장착한다.
     /// </summary>
     public static bool TutorialDone(StoryProgress p)
-        => p.HasSeen(StoryTable.EnterEvent("1-1"));
+        => TutorialTable.IsDone(p) || p.HasSeen(StoryTable.EnterEvent("1-1"));
 
     /// <summary>핵심 구슬이 하나도 없을 때의 안전판을 켤까 — 0장에서는 선물을 받은 뒤부터.</summary>
     public static bool FirstCoreSafety(StoryProgress p, int chapter)

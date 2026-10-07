@@ -140,8 +140,9 @@ public class EquipmentLoadout
     }
 
     /// <summary>
-    /// 주운 장비가 바로 들어갈 빈 자리 (결정 2-84). 없으면 null — 그 부위가 차 있으면 가방으로 간다.
-    /// 무기는 든 쪽 → 다른 쪽, 새김패는 1 → 2(같은 계열 · 단계 겹침 규칙은 CanEquip이 본다).
+    /// 주운 장비가 바로 들어갈 빈 자리 (결정 2-84 · 2-85). 없으면 null — 그 부위가 차 있으면 가방으로 간다.
+    /// 【무기는 무기 1 자리만】 — 무기 1이 차 있으면 무기 2가 비어 있어도 가방으로 (2-85). 두 번째 자루는 손으로 건다.
+    /// 새김패는 1 → 2(같은 계열 · 단계 겹침 규칙은 CanEquip이 본다).
     /// </summary>
     public EquipmentSlot? EmptySlotFor(ItemStack stack)
     {
@@ -150,7 +151,7 @@ public class EquipmentLoadout
 
         EquipmentSlot[] candidates = definition.Slot switch
         {
-            EquipmentSlot.Weapon => new[] { WeaponSlot(ActiveWeapon), WeaponSlot(1 - ActiveWeapon) },
+            EquipmentSlot.Weapon => new[] { EquipmentSlot.Weapon },
             EquipmentSlot.ImprintA or EquipmentSlot.ImprintB => new[] { EquipmentSlot.ImprintA, EquipmentSlot.ImprintB },
             _ => new[] { definition.Slot },
         };

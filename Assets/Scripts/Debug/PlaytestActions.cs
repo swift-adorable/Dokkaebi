@@ -66,6 +66,14 @@ public static class PlaytestActions
     public static string GiveAllWeapons()
         => Catalog == null ? NoCatalog : Give(Catalog.Weapons, "무기");
 
+    /// <summary>튜토리얼 가이드를 다 끝낸 것으로 (결정 2-85) — 바로 착용 등 튜토리얼 뒤 규칙을 시험한다.</summary>
+    public static string FinishTutorial()
+    {
+        TutorialTable.CompleteAll(StoryManager.Progress);
+        TutorialHudUI.Clear();
+        return "튜토리얼을 끝냈습니다.";
+    }
+
     /// <summary>탄 7종을 한 칸씩(결정 2-80) — 무기 종류를 바꿔 가며 쏴 본다.</summary>
     public static string GiveAmmo()
     {

@@ -61,6 +61,11 @@ public static class SceneFlow
 
         ShopManager.RestockAfterRun();
         SpringManager.RefillAfterRun();
+
+        // 튜토리얼 마지막 단계 — 0-2에서 철수했다 (결정 2-85). 저장 전에 적어야 남는다.
+        if (StoryManager.TargetZone == ChapterZeroTable.GiftZone)
+            StoryManager.Progress.See(TutorialTable.Extracted02Event);
+
         SaveManager.Commit("철수");
 
         ReturnToBunker();
