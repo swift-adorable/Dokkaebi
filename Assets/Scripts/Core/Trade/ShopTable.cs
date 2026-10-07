@@ -66,6 +66,10 @@ public static class ShopTable
         new("scrap_metal",  5, 1.50f),
         new("cell_battery", 3, 1.50f),
         new("wire_bundle",  3, 1.50f),
+
+        // 탄 (결정 2-80) — 1티어 무기(환목궁 · 세총통)의 탄만. 대장간이 열리기 전(0장 · 1장)에도 살 수 있게 [임시값 — 재고]
+        new(AmmoTable.Arrow, 300, 1.00f),
+        new(AmmoTable.Shot,  300, 1.00f),
     };
 
     private static readonly ShopEntry[] apothecary =
@@ -94,6 +98,21 @@ public static class ShopTable
         new("wpn_t1_pipe", 1, 1.00f),
         new("wpn_t2_coil", 1, 1.00f),
         new("wpn_t3_acid", 1, 1.00f),
+        new("wpn_t1_sechongtong", 1, 1.00f),
+        new("wpn_t2_gwoljangno",  1, 1.00f),
+        new("wpn_t2_seungja",     1, 1.00f),
+        new("wpn_t3_pyeonjeon",   1, 1.00f),
+        new("wpn_t3_sunogi",      1, 1.00f),
+        new("wpn_t3_soseungja",   1, 1.00f),
+
+        // 탄 7종 (결정 2-80) [임시값 — 재고]
+        new(AmmoTable.Arrow,     300, 1.00f),
+        new(AmmoTable.Pyeonjeon, 200, 1.00f),
+        new(AmmoTable.Bolt,      200, 1.00f),
+        new(AmmoTable.Dart,      300, 1.00f),
+        new(AmmoTable.Shot,      300, 1.00f),
+        new(AmmoTable.Scatter,   200, 1.00f),
+        new(AmmoTable.Rocket,     20, 1.00f),
 
         new("arm_head_t1", 1, 1.00f),
         new("arm_head_t2", 1, 1.00f),

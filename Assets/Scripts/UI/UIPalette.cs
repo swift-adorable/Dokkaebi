@@ -214,6 +214,7 @@ public static class UIPalette
             case ItemKind.SkillGem:   return new Color(0.24f, 0.52f, 0.58f, 0.95f);
             case ItemKind.Consumable: return new Color(0.58f, 0.30f, 0.34f, 0.95f);
             case ItemKind.Key:        return new Color(0.60f, 0.52f, 0.22f, 0.95f);
+            case ItemKind.Ammo:       return new Color(0.46f, 0.40f, 0.30f, 0.95f);
             default:                  return SlotFilled;
         }
     }

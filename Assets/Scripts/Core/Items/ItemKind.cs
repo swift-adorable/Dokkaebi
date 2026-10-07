@@ -27,5 +27,8 @@ public enum ItemKind
     Consumable = 6,
 
     /// <summary>열쇠 · 인증. 구역 관문을 연다.</summary>
-    Key = 7
+    Key = 7,
+
+    /// <summary>탄 — 화살 · 편전 · 쇠뇌살 · 세전 · 철환 · 산탄 철환 · 신기전 (결정 2-80). 무기의 화살통 · 탄창에 채운다.</summary>
+    Ammo = 8
 }

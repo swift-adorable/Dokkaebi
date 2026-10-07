@@ -1,5 +1,5 @@
 /// <summary>
-/// 착용 슬롯. 무기 1 + 방어 5 + 각인 2 = 8칸.
+/// 착용 슬롯. 무기 1 + 방어 5 + 각인 2 + 화살통 · 탄창 1 = 9칸.
 /// (docs/Dokkaebi_Equipment_System.md 1절)
 /// </summary>
 public enum EquipmentSlot
@@ -26,5 +26,11 @@ public enum EquipmentSlot
     ImprintA = 6,
 
     /// <summary>각인 2.</summary>
-    ImprintB = 7
+    ImprintB = 7,
+
+    /// <summary>
+    /// 화살통 · 탄창 (결정 2-80) — 무기의 탄이 든다. 무기가 정한 탄 한 종류만, 탄마다 정해진 수까지.
+    /// 비면 가방에서 저절로 채운다(채우는 동안 못 쏜다). 무기를 벗으면 가방으로, 쓰러지면 무기와 함께 잃는다.
+    /// </summary>
+    Ammo = 8
 }

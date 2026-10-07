@@ -1,0 +1,60 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6d5ed47cc3bec4828a0c77c2c18f1c47, type: 3}
+  m_Name: wpn_t4_jangpyeonjeon
+  m_EditorClassIdentifier: Dokkaebi.Runtime::WeaponDefinition
+  id: wpn_t4_jangpyeonjeon
+  displayName: "\uC7A5\uD3B8\uC804"
+  description: "\uAE34 \uD1B5\uC544\uB97C \uC4F4 \uD3B8\uC804. \uBA40\uB9AC\uC11C
+    \uAE4A\uC774 \uBC15\uD78C\uB2E4."
+  kind: 1
+  tier: 4
+  weight: 5.5
+  icon: {fileID: 0}
+  slotSize: 1
+  stackMax: 1
+  maxDurability: 130
+  baseValue: 4200
+  noExtract: 0
+  noRegister: 0
+  noTrade: 0
+  skill: {fileID: 0}
+  blankGem: 0
+  consumable:
+    category: 0
+    heal: 0
+    water: 0
+    energy: 0
+    waterCost: 0
+    energyCost: 0
+    cure: 0
+    cureStacks: 99
+    useCost: 0
+    castSeconds: 0
+    grant: 0
+  slot: 0
+  stats:
+  - type: 3
+    value: 5
+  - type: 30
+    value: -0.08
+  setFamily: 
+  imprintFamily: 
+  immunity: 0
+  extraImmunities: 
+  baseDamage: 35.7
+  fireInterval: 0.653
+  effectiveRange: 15
+  projectileSpeed: 20
+  attachmentSlots: 3
+  weaponFamily: "\uD3B8\uC804"
+  weaponKind: 1

@@ -14,10 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Dokkaebi.Runtime::WeaponDefinition
   id: wpn_t5_rail
   displayName: "\uB179\uAC01\uAD81"
-  description: "\uC0AC\uC2B4\uBFD4\uC744 \uB304 \uD65C. \uBA40\uB9AC\uC11C \uB6AB\uB294\uB2E4. \uB2E4\uB9CC \uC2DC\uC704 \uC18C\uB9AC\uAC00 \uAD6C\uC5ED \uC808\uBC18\uC5D0 \uD37C\uC9C4\uB2E4."
+  description: "\uC0AC\uC2B4\uBFD4\uC744 \uB304 \uD65C. \uBA40\uB9AC\uC11C \uB6AB\uB294\uB2E4.
+    \uB2E4\uB9CC \uC2DC\uC704 \uC18C\uB9AC\uAC00 \uAD6C\uC5ED \uC808\uBC18\uC5D0
+    \uD37C\uC9C4\uB2E4."
   kind: 1
   tier: 5
   weight: 4.8
+  icon: {fileID: 0}
   slotSize: 1
   stackMax: 1
   maxDurability: 150
@@ -26,6 +29,19 @@ MonoBehaviour:
   noRegister: 0
   noTrade: 0
   skill: {fileID: 0}
+  blankGem: 0
+  consumable:
+    category: 0
+    heal: 0
+    water: 0
+    energy: 0
+    waterCost: 0
+    energyCost: 0
+    cure: 0
+    cureStacks: 99
+    useCost: 0
+    castSeconds: 0
+    grant: 0
   slot: 0
   stats:
   - type: 3
@@ -42,3 +58,4 @@ MonoBehaviour:
   projectileSpeed: 34
   attachmentSlots: 4
   weaponFamily: "\uD65C"
+  weaponKind: 0

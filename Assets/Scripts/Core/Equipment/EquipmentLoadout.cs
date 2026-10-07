@@ -1,12 +1,12 @@
 using System.Collections.Generic;
 
 /// <summary>
-/// 착용 상태. 슬롯 8칸. MonoBehaviour 의존이 없는 순수 클래스다.
+/// 착용 상태. 슬롯 9칸 (화살통 · 탄창 포함 — 결정 2-80). MonoBehaviour 의존이 없는 순수 클래스다.
 /// (docs/Dokkaebi_Equipment_System.md 1절)
 /// </summary>
 public class EquipmentLoadout
 {
-    private const int SlotCount = 8;
+    private const int SlotCount = 9;
 
     private readonly ItemStack[] slots = new ItemStack[SlotCount];
 
@@ -34,6 +34,12 @@ public class EquipmentLoadout
     {
         if (stack == null || stack.IsEmpty)
             return false;
+
+        // 화살통 · 탄창 — 든 무기가 쓰는 탄만, 정해진 수까지 (결정 2-80).
+        if (slot == EquipmentSlot.Ammo)
+            return stack.Definition.Kind == ItemKind.Ammo
+                   && stack.Definition.Id == AmmoId
+                   && stack.Count <= AmmoTable.CapacityOf(AmmoId);
 
         if (stack.Definition is not EquipmentDefinition definition)
             return false;
@@ -84,6 +90,91 @@ public class EquipmentLoadout
         isDirty = true;
 
         return removed;
+    }
+
+    /// <summary>든 무기가 쓰는 탄 id. 무기가 없으면 null — 맨손은 탄을 쓰지 않는다.</summary>
+    public string AmmoId => (Get(EquipmentSlot.Weapon)?.Definition as WeaponDefinition)?.AmmoId;
+
+    /// <summary>화살통 · 탄창에 든 수.</summary>
+    public int LoadedAmmo => Get(EquipmentSlot.Ammo)?.Count ?? 0;
+
+    /// <summary>화살통 · 탄창에 담기는 수. 무기가 없으면 0.</summary>
+    public int AmmoCapacity => AmmoTable.CapacityOf(AmmoId);
+
+    /// <summary>
+    /// 한 발을 뺀다. 비면 칸을 비운다. 뺐으면 true.
+    /// </summary>
+    public bool ConsumeAmmo()
+    {
+        ItemStack held = Get(EquipmentSlot.Ammo);
+
+        if (held == null || held.IsEmpty)
+            return false;
+
+        held.Take(1);
+
+        if (held.IsEmpty)
+            slots[(int)EquipmentSlot.Ammo] = null;
+
+        return true;
+    }
+
+    /// <summary>
+    /// 가방에서 통을 채운다 — 빈 자리만큼, 가방에 있는 만큼. 채운 수를 돌려준다.
+    /// </summary>
+    public int RefillAmmo(Inventory bag)
+    {
+        string id = AmmoId;
+
+        if (string.IsNullOrEmpty(id) || bag == null)
+            return 0;
+
+        ItemDefinition ammo = FindInBag(bag, id);
+
+        if (ammo == null)
+            return 0;
+
+        int amount = AmmoTable.RefillAmount(LoadedAmmo, AmmoCapacity, bag.CountOf(ammo));
+
+        if (amount <= 0)
+            return 0;
+
+        bag.Remove(ammo, amount);
+
+        int total = LoadedAmmo + amount;
+        slots[(int)EquipmentSlot.Ammo] = new ItemStack(ammo, total);
+
+        return amount;
+    }
+
+    /// <summary>
+    /// 통에 든 것이 지금 무기의 탄이 아니면 가방으로 돌려보낸다 (무기를 벗거나 바꿨을 때).
+    /// 가방이 받지 못하면 그대로 둔다. 돌려보냈거나 맞으면 true.
+    /// </summary>
+    public bool ReturnMismatchedAmmo(Inventory bag)
+    {
+        ItemStack held = Get(EquipmentSlot.Ammo);
+
+        if (held == null)
+            return true;
+
+        if (held.Definition != null && held.Definition.Id == AmmoId)
+            return true;
+
+        if (bag == null || !bag.TryAddStack(held))
+            return false;
+
+        slots[(int)EquipmentSlot.Ammo] = null;
+        return true;
+    }
+
+    private static ItemDefinition FindInBag(Inventory bag, string id)
+    {
+        foreach (ItemStack s in bag.Stacks)
+            if (s?.Definition != null && s.Definition.Id == id)
+                return s.Definition;
+
+        return null;
     }
 
     /// <summary>합산된 옵션. 변경이 있을 때만 다시 계산한다.</summary>

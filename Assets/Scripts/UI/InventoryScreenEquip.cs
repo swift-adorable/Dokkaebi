@@ -22,6 +22,12 @@ public partial class InventoryScreenUI
     /// </summary>
     private void OnEquipSlotClicked(EquipmentSlot slot)
     {
+        if (slot == EquipmentSlot.Ammo)
+        {
+            OnAmmoSlotClicked();
+            return;
+        }
+
         ItemStack current = PlayerInventory.EnsureInstance().Loadout.Get(slot);
 
         if (current?.Definition == null)
@@ -162,9 +168,45 @@ public partial class InventoryScreenUI
         AfterLoadoutChanged(inventory);
     }
 
+    /// <summary>
+    /// 화살통 · 탄창 칸 (결정 2-80) — 가방의 탄으로 채운다. 소굴에서는 바로, 구역에서는 채우는 시간을 들여.
+    /// </summary>
+    private void OnAmmoSlotClicked()
+    {
+        PlayerInventory inventory = PlayerInventory.EnsureInstance();
+        EquipmentLoadout loadout = inventory.Loadout;
+
+        if (string.IsNullOrEmpty(loadout.AmmoId))
+        {
+            ShowToast("무기를 들면 그 무기의 탄이 여기 들어갑니다.");
+            return;
+        }
+
+        if (loadout.LoadedAmmo >= loadout.AmmoCapacity)
+        {
+            ShowToast("이미 가득 찼습니다.");
+            return;
+        }
+
+        if (!SceneFlow.InBunker)
+        {
+            PlayerWeapon weapon = Object.FindAnyObjectByType<PlayerWeapon>();
+            weapon?.Ammo.RequestReload();
+            ShowToast("채웁니다.");
+            return;
+        }
+
+        int moved = loadout.RefillAmmo(inventory.Bag);
+        ShowToast(moved > 0 ? $"{moved}발을 채웠습니다." : "가방에 맞는 탄이 없습니다.");
+        AfterLoadoutChanged(inventory);
+    }
+
     /// <summary>착용이 바뀌면 칸 한도와 실제 성능을 즉시 다시 계산한다.</summary>
     private void AfterLoadoutChanged(PlayerInventory inventory)
     {
+        // 바꿔 든 무기의 탄이 아닌 것 · 무기를 벗은 뒤의 탄은 가방으로 (결정 2-80).
+        inventory.Loadout.ReturnMismatchedAmmo(inventory.Bag);
+
         inventory.RefreshCapacity();
 
         // 가방을 바꾸면 칸 한도가 달라지고, 무기를 바꾸면 사격 성능이 달라진다.

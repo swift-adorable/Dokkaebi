@@ -80,6 +80,9 @@ public class PlayerNoise : MonoBehaviour
     /// <summary>쐈다. 총성이 퍼진다.</summary>
     public void ReportShot() => Emit(shotRadius);
 
+    /// <summary>무기 종류마다 다른 발사 소리 — 총통은 크고 쇠뇌는 작다 (결정 2-80).</summary>
+    public void ReportShot(float scale) => Emit(shotRadius * Mathf.Max(0.1f, scale));
+
     /// <summary>임의의 소리를 낸다. 조약돌 같은 유인 도구가 쓸 자리다.</summary>
     public void Emit(float radius)
     {

@@ -4,7 +4,7 @@ using UnityEngine;
 using static EquipmentAssetWriter;
 
 /// <summary>
-/// 무기 티어 1~6 에셋 생성. (로드맵 6-C)
+/// 무기 에셋 생성 — 활 6 + 편전 · 쇠뇌 · 총통 · 신기전 17 = 23종 (로드맵 6-C · 결정 2-80).
 ///
 /// 수치는 전부 docs/Dokkaebi_Combat_Baseline.md 3절 표에서 그대로 가져왔다.
 /// 여기서 임의로 바꾸면 문서와 코드가 갈라진다 —
@@ -27,6 +27,7 @@ public static class WeaponAssetGenerator
         public string id;
         public string name;
         public string family;
+        public WeaponKind kind;
         public string desc;
         public float damage;
         public float interval;
@@ -40,7 +41,10 @@ public static class WeaponAssetGenerator
         public List<EquipmentStat> extra;
     }
 
-    public static List<Spec> Table()
+    /// <summary>
+    /// 활 6종 — 티어 기준선 (Combat_Baseline 3절 표). 다른 종류는 이 줄에 종류 배율을 얹는다.
+    /// </summary>
+    public static List<Spec> BowTable()
     {
         return new List<Spec>
         {
@@ -100,6 +104,62 @@ public static class WeaponAssetGenerator
         };
     }
 
+    /// <summary>
+    /// 활이 아닌 무기 17종 (Naming 1절 · 결정 2-80). (티어, id, 이름, 종류, 설명)
+    /// 천자총통은 산탄 철환을 쓴다 — 탄 표(3-2절)에 이름이 없어 큰 총통의 조란환(흩어지는 알)을 따랐다.
+    /// </summary>
+    public static readonly (int tier, string id, string name, WeaponKind kind, string desc)[] Lineup =
+    {
+        (1, "wpn_t1_sechongtong",   "세총통",       WeaponKind.Gun,               "손바닥만 한 작은 총통. 철환을 재어 쏜다. 소리가 크다."),
+        (2, "wpn_t2_gwoljangno",    "궐장노",       WeaponKind.Crossbow,          "발로 밟아 당기는 쇠뇌. 시위 소리가 거의 없다."),
+        (2, "wpn_t2_seungja",       "승자총통",     WeaponKind.ScatterGun,        "철환 여러 알을 한 번에 흩뿌린다. 가까이서 무섭다."),
+        (3, "wpn_t3_pyeonjeon",     "편전",         WeaponKind.Pyeonjeon,         "통아에 넣어 쏘는 짧은 화살. 갑옷 틈을 뚫는다."),
+        (3, "wpn_t3_sunogi",        "수노기",       WeaponKind.RepeatingCrossbow, "손으로 당겨 잇달아 쏘는 쇠뇌. 한 발은 가볍다."),
+        (3, "wpn_t3_soseungja",     "소승자총통",   WeaponKind.Gun,               "승자총통을 줄인 것. 들고 다니기 좋다."),
+        (4, "wpn_t4_jangpyeonjeon", "장편전",       WeaponKind.Pyeonjeon,         "긴 통아를 쓴 편전. 멀리서 깊이 박힌다."),
+        (4, "wpn_t4_yongdu",        "용두삼시수노", WeaponKind.RepeatingCrossbow, "용머리를 새긴 쇠뇌. 살을 잇달아 쏟아낸다."),
+        (4, "wpn_t4_byeolseungja",  "별승자총통",   WeaponKind.Gun,               "몸이 무거운 승자총통. 한 발 한 발이 단단하다."),
+        (4, "wpn_t4_sosingijeon",   "소신기전",     WeaponKind.Rocket,            "작은 화약 통을 단 신기전. 맞은 자리에서 터진다."),
+        (5, "wpn_t5_cheonbo",       "천보편전",     WeaponKind.Pyeonjeon,         "천 걸음을 간다는 편전."),
+        (5, "wpn_t5_gangno",        "강노",         WeaponKind.Crossbow,          "센 쇠뇌. 당기기 어렵지만 한 발이 묵직하다."),
+        (5, "wpn_t5_paljeon",       "팔전총통",     WeaponKind.ScatterGun,        "철환을 한 움큼 흩뿌린다. 발사음이 멀리 간다."),
+        (5, "wpn_t5_jungsingijeon", "중신기전",     WeaponKind.Rocket,            "중간 크기의 신기전. 폭발이 둘레를 휩쓴다."),
+        (6, "wpn_t6_sujil",         "수질구궁노",   WeaponKind.RepeatingCrossbow, "아홉 활을 묶은 큰 쇠뇌를 한 사람이 들 만큼 줄였다."),
+        (6, "wpn_t6_cheonja",       "천자총통",     WeaponKind.ScatterGun,        "가장 큰 총통을 줄였다. 쏘는 쪽도 무사하지 않다."),
+        (6, "wpn_t6_sanhwa",        "산화신기전",   WeaponKind.Rocket,            "불꽃을 흩뿌리며 터지는 신기전."),
+    };
+
+    /// <summary>
+    /// 무기 전부 — 활 6 + 17 = 23종. 활이 아닌 것은 같은 티어 활에 종류 배율을 얹는다 (WeaponKindTable):
+    /// 간격 = 활 × 간격 비율 · 한 번 피해 = 활 초당 피해 × 배율 × 간격 · 관통 + 보너스 · 무게 × 배율.
+    /// 티어 4 이상의 대가(활의 extra)는 그대로 따라간다.
+    /// </summary>
+    public static List<Spec> Table()
+    {
+        List<Spec> bows = BowTable();
+        var all = new List<Spec>(bows);
+
+        foreach ((int tier, string id, string name, WeaponKind kind, string desc) in Lineup)
+        {
+            Spec bow = bows.Find(b => b.tier == tier);
+            WeaponKindInfo k = WeaponKindTable.Of(kind);
+
+            all.Add(new Spec
+            {
+                tier = tier, id = id, name = name, family = k.Name, kind = kind, desc = desc,
+                damage = Mathf.Round(WeaponKindTable.ShotDamage(kind, bow.damage, bow.interval) * 10f) / 10f,
+                interval = Mathf.Round(WeaponKindTable.Interval(kind, bow.interval) * 1000f) / 1000f,
+                range = bow.range,
+                penetration = Mathf.Min(CombatConstants.MaxArmour, bow.penetration + k.PenetrationBonus),
+                weight = Mathf.Round(bow.weight * k.WeightScale * 10f) / 10f,
+                durability = bow.durability, value = bow.value, attachments = bow.attachments, speed = bow.speed,
+                extra = new List<EquipmentStat>(bow.extra)
+            });
+        }
+
+        return all;
+    }
+
     [MenuItem("Dokkaebi/Equipment/무기 에셋 생성")]
     public static void Generate()
     {
@@ -144,7 +204,8 @@ public static class WeaponAssetGenerator
             effectiveRange = spec.range,
             projectileSpeed = spec.speed,
             attachmentSlots = spec.attachments,
-            weaponFamily = spec.family
+            weaponFamily = spec.family,
+            weaponKind = spec.kind
         }, Folder, isWeapon: true);
     }
 }

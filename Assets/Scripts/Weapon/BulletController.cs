@@ -54,6 +54,12 @@ public class BulletController : MonoBehaviour, IPoolable
     /// <summary>적이 쏜 탄인가. 켜지면 Team 대신 진영으로 거른다.</summary>
     private bool useFactionGate;
 
+    /// <summary>신기전 — 맞은 자리 폭발 반경 (m) · 둘레가 받는 몫 (결정 2-80). 0이면 터지지 않는다.</summary>
+    private float explosionRadius;
+    private float explosionShare;
+    private static readonly Collider[] explosionHits = new Collider[24];
+    private static readonly System.Collections.Generic.List<Health> explosionDone = new();
+
     [Header("Behaviour Tuning")]
     [Tooltip("분열(Split) 시 좌우 최대 각도(도). 3갈래가 -각도 / 0 / +각도로 퍼진다.")]
     [SerializeField] private float splitAngle = 60f;
@@ -159,6 +165,16 @@ public class BulletController : MonoBehaviour, IPoolable
         // 풀링에서 가장 흔한 실패다.
         useFactionGate = false;
         shooterFaction = Faction.Wild;
+
+        explosionRadius = 0f;
+        explosionShare = 0f;
+    }
+
+    /// <summary>신기전 — 맞으면 반경 안의 다른 적이 몫만큼 피해를 받는다 (결정 2-80).</summary>
+    public void SetExplosion(float radius, float share)
+    {
+        explosionRadius = Mathf.Max(0f, radius);
+        explosionShare = Mathf.Clamp01(share);
     }
 
     public void OnDespawned()
@@ -425,6 +441,9 @@ public class BulletController : MonoBehaviour, IPoolable
 
         ApplyHit(targetHealth);
 
+        if (explosionRadius > 0f && explosionShare > 0f)
+            Explode(targetHealth);
+
         ResolveBehaviour(other.transform);
 
         return true;
@@ -464,7 +483,35 @@ public class BulletController : MonoBehaviour, IPoolable
     /// 반대로 하면 이 탄으로 죽는 적에게 상태가 남지 않아
     /// 전령(처치 시 연쇄)과 잔류물이 발동하지 않는다.
     /// </summary>
-    private void ApplyHit(Health target)
+    /// <summary>
+    /// 맞은 자리에서 터진다 — 둘레의 다른 대상이 몫만큼 받는다. 상태는 싣지 않는다(직접 맞은 쪽만).
+    /// </summary>
+    private void Explode(Health direct)
+    {
+        int count = Physics.OverlapSphereNonAlloc(transform.position, explosionRadius, explosionHits,
+            ~0, QueryTriggerInteraction.Collide);
+
+        explosionDone.Clear();
+
+        for (int i = 0; i < count; i++)
+        {
+            Collider c = explosionHits[i];
+
+            if (c == null || !c.TryGetComponent(out Health h) || h == direct || h.IsDead)
+                continue;
+
+            // 콜라이더가 여럿인 몸은 한 번만.
+            if (explosionDone.Contains(h) || !CanHit(h, c.transform))
+                continue;
+
+            explosionDone.Add(h);
+            ApplyHit(h, explosionShare, applyStatus: false);
+        }
+    }
+
+    private void ApplyHit(Health target) => ApplyHit(target, 1f, applyStatus: true);
+
+    private void ApplyHit(Health target, float scale, bool applyStatus)
     {
         float distance = Vector3.Distance(originPoint, transform.position);
 
@@ -477,7 +524,7 @@ public class BulletController : MonoBehaviour, IPoolable
                 + skillEffects.ConditionalDamageIncrease(distance, effectiveRange, target.Status);
         }
 
-        if (AppliedStatus != StatusEffectType.None)
+        if (applyStatus && AppliedStatus != StatusEffectType.None)
         {
             // 상태이상 위력은 직접 피해와 분리된 축이다.
             // 「연소」 각인과 속성 보조 젬이 여기만 키운다.
@@ -493,7 +540,7 @@ public class BulletController : MonoBehaviour, IPoolable
 
         var request = new DamageRequest
         {
-            baseDamage = damage,
+            baseDamage = Mathf.Max(1, Mathf.RoundToInt(damage * scale)),
             increasedPercent = increased,
             element = Element,
             hitKind = HitKind.Ranged,

@@ -25,9 +25,10 @@ public static class ChapterZeroTable
     public const string BundleName = "젖은 봇짐";
     public const string BowId = "wpn_t1_pipe";
 
-    /// <summary>봇짐 안의 것 — 소환단 · 식혜 · 미숫가루. 화살은 탄 개념이 없어 뺐다.</summary>
+    /// <summary>봇짐 안의 것 — 화살 한 줌 · 소환단 · 식혜 · 미숫가루. 화살은 들어서면 화살통으로 채워진다 (결정 2-80).</summary>
     public static readonly (string Id, int Count)[] BundleItems =
     {
+        (AmmoTable.Arrow, 60),
         ("con_medkit_small", 3),
         ("con_soda", 2),
         ("con_ration", 2),

@@ -230,7 +230,10 @@ public static class SaveManager
     private static readonly EquipmentSlot[] CarriedSlots =
     {
         EquipmentSlot.Weapon, EquipmentSlot.Head, EquipmentSlot.Body,
-        EquipmentSlot.Face, EquipmentSlot.Ears, EquipmentSlot.Backpack
+        EquipmentSlot.Face, EquipmentSlot.Ears, EquipmentSlot.Backpack,
+
+        // 화살통 · 탄창 (결정 2-80) — 무기 다음에 입혀야 한다(무기가 정한 탄만 들어간다).
+        EquipmentSlot.Ammo
     };
 
     private static SavedItem ToSaved(ItemStack stack)
@@ -406,7 +409,9 @@ public static class SaveManager
                 continue;
             }
 
-            var stack = new ItemStack(definition, 1, row.item.durability);
+            // 화살통 · 탄창은 수가 있다. 장비는 언제나 하나다.
+            int count = (EquipmentSlot)row.slot == EquipmentSlot.Ammo ? Mathf.Max(1, row.item.count) : 1;
+            var stack = new ItemStack(definition, count, row.item.durability);
 
             if (!loadout.TryEquip(stack, (EquipmentSlot)row.slot, out _))
                 GameLogger.Error($"[Save] 장비 「{row.item.id}」을 {(EquipmentSlot)row.slot}에 입히지 못했습니다.");

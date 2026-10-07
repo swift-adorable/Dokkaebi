@@ -544,7 +544,8 @@ public partial class InventoryScreenUI : MonoBehaviour
         {
             case BagFilter.Equipment:
                 return kind == ItemKind.Weapon || kind == ItemKind.Armour
-                       || kind == ItemKind.Backpack || kind == ItemKind.Imprint;
+                       || kind == ItemKind.Backpack || kind == ItemKind.Imprint
+                       || kind == ItemKind.Ammo;
             case BagFilter.Consumable:
                 return kind == ItemKind.Consumable;
             case BagFilter.Material:
@@ -850,6 +851,7 @@ public partial class InventoryScreenUI : MonoBehaviour
         SurvivalHudUI.SetHiddenByScreen(true);
         QuestHudUI.SetHiddenByScreen(true);
         ExtractionHudUI.SetHiddenByScreen(true);
+        AmmoHudUI.SetHiddenByScreen(true);
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         // 검증 패널은 이 화면 뒤에 있다. 켜져 있으면 글자가 비쳐 보인다.
@@ -884,6 +886,7 @@ public partial class InventoryScreenUI : MonoBehaviour
         SurvivalHudUI.SetHiddenByScreen(false);
         QuestHudUI.SetHiddenByScreen(false);
         ExtractionHudUI.SetHiddenByScreen(false);
+        AmmoHudUI.SetHiddenByScreen(false);
 
         // 파밍 중이었다면 오른쪽 전리품 패널도 같이 닫힌다. 둘은 한 벌이다.
         ExchangeWindowUI.CloseIfOpen();
@@ -1082,7 +1085,7 @@ public partial class InventoryScreenUI : MonoBehaviour
 
         EquipmentLoadout loadout = PlayerInventory.EnsureInstance().Loadout;
 
-        var slots = (EquipmentSlot[])System.Enum.GetValues(typeof(EquipmentSlot));
+        EquipmentSlot[] slots = EquipOrder;
 
         // 【가로와 세로 여백을 같게 만든다.】
         // 정규화 여백 0.008 하나를 두 축에 쓰면, 가로로 긴 칸에서는
@@ -1098,8 +1101,8 @@ public partial class InventoryScreenUI : MonoBehaviour
 
         for (int i = 0; i < slots.Length; i++)
         {
-            // 착용 기둥이 세로로 길어져(결정 2-77) 2열 × 4줄로 쌓는다.
-            UIFactory.GetCellAnchors(i, 2, 4, padX, padY, out Vector2 min, out Vector2 max);
+            // 착용 기둥이 세로로 길어져(결정 2-77) 2열로 쌓는다 — 화살통 · 탄창이 들어와 5줄 (결정 2-80).
+            UIFactory.GetCellAnchors(i, 2, 5, padX, padY, out Vector2 min, out Vector2 max);
 
             ItemStack stack = loadout.Get(slots[i]);
 
@@ -1150,6 +1153,12 @@ public partial class InventoryScreenUI : MonoBehaviour
             // 【여백을 비율이 아니라 픽셀로 준다.】
             // 0.07(가로) / 0.05(세로)로 두었더니 칸이 가로로 길어
             // 왼쪽은 14px, 위는 3px이 됐다. 글자가 천장에 붙어 보였다.
+            if (slots[i] == EquipmentSlot.Ammo)
+            {
+                DrawAmmoSlot(cell, loadout);
+                continue;
+            }
+
             UIFactory.Inset(
                 UIFactory.CreateLabel(cell.transform, EquipmentSlotName(slots[i]), 20,
                     FontStyle.Bold, new Vector2(0f, 0.5f), Vector2.one,
@@ -1186,6 +1195,45 @@ public partial class InventoryScreenUI : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 착용 칸 순서 — 화살통 · 탄창을 무기 바로 아래에 둔다 (결정 2-80). 2열이라 세 번째 자리가 무기 아래다.
+    /// </summary>
+    private static readonly EquipmentSlot[] EquipOrder =
+    {
+        EquipmentSlot.Weapon, EquipmentSlot.Head,
+        EquipmentSlot.Ammo, EquipmentSlot.Body,
+        EquipmentSlot.Face, EquipmentSlot.Ears,
+        EquipmentSlot.Backpack, EquipmentSlot.ImprintA,
+        EquipmentSlot.ImprintB,
+    };
+
+    /// <summary>화살통 · 탄창 칸 — 「화살통 / 화살 18/30」. 누르면 가방에서 채운다.</summary>
+    private void DrawAmmoSlot(Image cell, EquipmentLoadout loadout)
+    {
+        var weapon = loadout.Get(EquipmentSlot.Weapon)?.Definition as WeaponDefinition;
+        string holder = weapon != null ? weapon.KindInfo.HolderName : "화살통";
+
+        UIFactory.Inset(
+            UIFactory.CreateLabel(cell.transform, holder, 20,
+                FontStyle.Bold, new Vector2(0f, 0.5f), Vector2.one,
+                TextAnchor.UpperLeft, UIPalette.TextDim).rectTransform,
+            left: SlotPad, bottom: 0f, right: SlotPad, top: SlotPad);
+
+        string text = weapon == null
+            ? "무기를 들면 채운다"
+            : $"{AmmoTable.Find(weapon.AmmoId)?.Name ?? "탄"} {loadout.LoadedAmmo}/{loadout.AmmoCapacity}";
+
+        Image strip = UIFactory.CreatePanel("NameStrip", cell.transform, UIPalette.NameStrip,
+            new Vector2(0f, 0f), new Vector2(1f, 0.5f), radius: 6);
+        UIFactory.Inset(strip.rectTransform, left: SlotPad, bottom: SlotPad, right: SlotPad, top: 0f);
+        strip.raycastTarget = false;
+
+        Text label = UIFactory.CreateLabel(strip.transform, text, 21, FontStyle.Bold,
+            new Vector2(0.05f, 0f), new Vector2(0.95f, 1f), TextAnchor.MiddleLeft,
+            weapon != null && loadout.LoadedAmmo == 0 ? UIPalette.Warning : Color.white);
+        FitName(label, 21);
+    }
+
     private static string EquipmentSlotName(EquipmentSlot slot)
     {
         switch (slot)
@@ -1198,6 +1246,7 @@ public partial class InventoryScreenUI : MonoBehaviour
             case EquipmentSlot.Backpack: return "가방";
             case EquipmentSlot.ImprintA: return "새김패 1";
             case EquipmentSlot.ImprintB: return "새김패 2";
+            case EquipmentSlot.Ammo:     return "화살통";
             default:                     return slot.ToString();
         }
     }
@@ -1921,6 +1970,7 @@ public partial class InventoryScreenUI : MonoBehaviour
             case ItemKind.SkillGem:   return "구슬";
             case ItemKind.Consumable: return "소모품";
             case ItemKind.Key:        return "열쇠";
+            case ItemKind.Ammo:       return "탄";
             case ItemKind.Material:   return "재료";
             default:                  return kind.ToString();
         }

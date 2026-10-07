@@ -66,6 +66,27 @@ public static class PlaytestActions
     public static string GiveAllWeapons()
         => Catalog == null ? NoCatalog : Give(Catalog.Weapons, "무기");
 
+    /// <summary>탄 7종을 한 칸씩(결정 2-80) — 무기 종류를 바꿔 가며 쏴 본다.</summary>
+    public static string GiveAmmo()
+    {
+        ItemCatalog catalog = ItemCatalog.Load();
+        if (catalog == null)
+            return "아이템 카탈로그가 없습니다.";
+
+        Inventory bag = PlayerInventory.EnsureInstance().Bag;
+        int given = 0;
+
+        foreach (AmmoInfo a in AmmoTable.All)
+        {
+            ItemDefinition item = catalog.Find(a.Id);
+            if (item != null)
+                given += bag.TryAdd(item, Mathf.Min(200, a.StackMax));
+        }
+
+        PlayerInventory.Instance.RefreshCapacity();
+        return $"탄 {given}발";
+    }
+
     public static string GiveAllImprints()
         => Catalog == null ? NoCatalog : Give(Catalog.Imprints, "각인");
 

@@ -86,7 +86,7 @@ public class StoryBundle : MonoBehaviour
         StoryManager.Progress.See(ChapterZeroTable.BundleEvent);
         Opened = true;
 
-        StoryDialogueUI.ShowBanner("봇짐을 풀었다 — 환목궁 · 소환단 · 식혜 · 미숫가루.", 2.5f);
+        StoryDialogueUI.ShowBanner("봇짐을 풀었다 — 환목궁 · 화살 · 소환단 · 식혜 · 미숫가루.", 2.5f);
         Destroy(gameObject);
         return true;
     }

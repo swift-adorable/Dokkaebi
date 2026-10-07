@@ -144,7 +144,7 @@ namespace Dokkaebi.Tests
         {
             List<WeaponAssetGenerator.Spec> table = WeaponAssetGenerator.Table();
 
-            Assert.AreEqual(6, table.Count, "무기는 티어 1~6 = 6종입니다.");
+            Assert.AreEqual(23, table.Count, "무기는 활 6 + 편전 · 쇠뇌 · 총통 · 신기전 17 = 23종입니다 (결정 2-80).");
 
             foreach (WeaponAssetGenerator.Spec spec in table)
             {
@@ -169,7 +169,7 @@ namespace Dokkaebi.Tests
         [Test]
         public void 티어_1_무기가_전투_기준점과_같다()
         {
-            WeaponAssetGenerator.Spec t1 = WeaponAssetGenerator.Table().First(s => s.tier == 1);
+            WeaponAssetGenerator.Spec t1 = WeaponAssetGenerator.BowTable().First(s => s.tier == 1);
 
             Assert.AreEqual(CombatConstants.BaseWeaponDamage, t1.damage, 0.001f);
             Assert.AreEqual(CombatConstants.BaseFireInterval, t1.interval, 0.001f);
@@ -183,7 +183,7 @@ namespace Dokkaebi.Tests
         [Test]
         public void 무기_티어가_올라도_발사_간격은_단조_감소하지_않는다()
         {
-            List<WeaponAssetGenerator.Spec> table = WeaponAssetGenerator.Table()
+            List<WeaponAssetGenerator.Spec> table = WeaponAssetGenerator.BowTable()
                 .OrderBy(s => s.tier).ToList();
 
             bool foundSlower = false;
@@ -206,7 +206,7 @@ namespace Dokkaebi.Tests
         [Test]
         public void 무기_피해는_티어와_함께_오른다()
         {
-            List<WeaponAssetGenerator.Spec> table = WeaponAssetGenerator.Table()
+            List<WeaponAssetGenerator.Spec> table = WeaponAssetGenerator.BowTable()
                 .OrderBy(s => s.tier).ToList();
 
             for (int i = 1; i < table.Count; i++)

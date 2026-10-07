@@ -14,10 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Dokkaebi.Runtime::WeaponDefinition
   id: wpn_t4_breaker
   displayName: "\uD751\uAC01\uAD81"
-  description: "\uBB3C\uC18C \uBFD4\uC744 \uB304 \uAC01\uAD81. \uD55C \uBC1C\uC774 \uBB34\uAC81\uB2E4. \uB4E4\uACE0 \uB6F0\uB294 \uAC83\uC740 \uD3EC\uAE30\uD574\uC57C \uD55C\uB2E4."
+  description: "\uBB3C\uC18C \uBFD4\uC744 \uB304 \uAC01\uAD81. \uD55C \uBC1C\uC774
+    \uBB34\uAC81\uB2E4. \uB4E4\uACE0 \uB6F0\uB294 \uAC83\uC740 \uD3EC\uAE30\uD574\uC57C
+    \uD55C\uB2E4."
   kind: 1
   tier: 4
   weight: 5.5
+  icon: {fileID: 0}
   slotSize: 1
   stackMax: 1
   maxDurability: 130
@@ -26,6 +29,19 @@ MonoBehaviour:
   noRegister: 0
   noTrade: 0
   skill: {fileID: 0}
+  blankGem: 0
+  consumable:
+    category: 0
+    heal: 0
+    water: 0
+    energy: 0
+    waterCost: 0
+    energyCost: 0
+    cure: 0
+    cureStacks: 99
+    useCost: 0
+    castSeconds: 0
+    grant: 0
   slot: 0
   stats:
   - type: 3
@@ -42,3 +58,4 @@ MonoBehaviour:
   projectileSpeed: 20
   attachmentSlots: 3
   weaponFamily: "\uD65C"
+  weaponKind: 0

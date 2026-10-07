@@ -14,10 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Dokkaebi.Runtime::WeaponDefinition
   id: wpn_t2_coil
   displayName: "\uC8FD\uAD81"
-  description: "\uB300\uB098\uBB34\uB85C \uB9CC\uB4E0 \uD65C. \uD1B5\uB098\uBB34 \uD65C\uBCF4\uB2E4 \uC870\uC6A9\uD558\uACE0 \uBE60\uB974\uB2E4."
+  description: "\uB300\uB098\uBB34\uB85C \uB9CC\uB4E0 \uD65C. \uD1B5\uB098\uBB34
+    \uD65C\uBCF4\uB2E4 \uC870\uC6A9\uD558\uACE0 \uBE60\uB974\uB2E4."
   kind: 1
   tier: 2
   weight: 2.6
+  icon: {fileID: 0}
   slotSize: 1
   stackMax: 1
   maxDurability: 60
@@ -26,6 +28,19 @@ MonoBehaviour:
   noRegister: 0
   noTrade: 0
   skill: {fileID: 0}
+  blankGem: 0
+  consumable:
+    category: 0
+    heal: 0
+    water: 0
+    energy: 0
+    waterCost: 0
+    energyCost: 0
+    cure: 0
+    cureStacks: 99
+    useCost: 0
+    castSeconds: 0
+    grant: 0
   slot: 0
   stats:
   - type: 3
@@ -40,3 +55,4 @@ MonoBehaviour:
   projectileSpeed: 24
   attachmentSlots: 1
   weaponFamily: "\uD65C"
+  weaponKind: 0

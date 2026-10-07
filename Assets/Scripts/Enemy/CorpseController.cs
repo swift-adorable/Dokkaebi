@@ -129,7 +129,9 @@ public class CorpseController : MonoBehaviour, IPoolable
         // 요리 재료는 이번 구역이 속한 장의 것만 나온다 (결정 2-73). 공용 재료 · 다른 전리품은 그대로다.
         ChapterData chapter = ZoneDataTable.ChapterOfZone(StoryManager.TargetZone);
         int chapterNumber = chapter != null ? chapter.Chapter : 0;
-        System.Func<ItemDefinition, bool> allow = item => IngredientTable.DropsIn(item.Id, chapterNumber);
+        // 탄도 그 장에서 쓰는 무기의 것만 (결정 2-80).
+        System.Func<ItemDefinition, bool> allow = item =>
+            IngredientTable.DropsIn(item.Id, chapterNumber) && AmmoTable.DropsIn(item.Id, chapterNumber);
 
         // 패시브 「희귀 드롭 +n%」 — 무언가 나올 확률이 (1 + n%)배 (Audit A9 · 결정 2-74 「전반적인 드롭」).
         float findBonus = DropBonus;

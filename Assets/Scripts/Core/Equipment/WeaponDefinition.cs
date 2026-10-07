@@ -36,8 +36,11 @@ public class WeaponDefinition : EquipmentDefinition
     [SerializeField] private int attachmentSlots = 0;
 
     [Header("Identity")]
-    [Tooltip("계열 이름. 급조 / 전기 / 화학 / 중화기 / 정밀 / 종결")]
+    [Tooltip("계열 이름 — 활 · 편전 · 단발 쇠뇌 · 연발 쇠뇌 · 총통 · 산탄 총통 · 신기전")]
     [SerializeField] private string weaponFamily = string.Empty;
+
+    [Tooltip("무기 종류 — 쓰는 탄 · 채우는 시간 · 갈래 · 폭발을 정한다 (결정 2-80).")]
+    [SerializeField] private WeaponKind weaponKind = WeaponKind.Bow;
 
     public float BaseDamage => baseDamage;
     public float FireInterval => fireInterval;
@@ -45,6 +48,11 @@ public class WeaponDefinition : EquipmentDefinition
     public float ProjectileSpeed => projectileSpeed;
     public int AttachmentSlots => attachmentSlots;
     public string WeaponFamily => weaponFamily;
+    public WeaponKind WeaponType => weaponKind;
+    public WeaponKindInfo KindInfo => WeaponKindTable.Of(weaponKind);
+
+    /// <summary>이 무기가 쓰는 탄 id.</summary>
+    public string AmmoId => KindInfo.AmmoId;
 
     /// <summary>초당 피해. 보정 없는 기본값이다. 티어 비교에 쓴다.</summary>
     public float BaseDps => baseDamage / Mathf.Max(0.01f, fireInterval);

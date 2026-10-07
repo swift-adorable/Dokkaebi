@@ -38,6 +38,7 @@ public static class EquipmentAssetWriter
         public float projectileSpeed;
         public int attachmentSlots;
         public string weaponFamily;
+        public WeaponKind weaponKind;
     }
 
     /// <summary>
@@ -102,6 +103,7 @@ public static class EquipmentAssetWriter
             so.FindProperty("projectileSpeed").floatValue = row.projectileSpeed;
             so.FindProperty("attachmentSlots").intValue = row.attachmentSlots;
             so.FindProperty("weaponFamily").stringValue = row.weaponFamily ?? string.Empty;
+            so.FindProperty("weaponKind").intValue = (int)row.weaponKind;
         }
 
         so.ApplyModifiedPropertiesWithoutUndo();

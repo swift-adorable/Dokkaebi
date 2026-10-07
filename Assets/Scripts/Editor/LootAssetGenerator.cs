@@ -142,6 +142,10 @@ public static class LootAssetGenerator
                 Debug.LogWarning($"[LootAssetGenerator] {id} 에셋이 없습니다 — 「Dokkaebi/Items/음식 에셋 생성」을 먼저 돌리십시오.");
         }
 
+        // 탄 (결정 2-80) — 그 장에서 쓰는 무기의 탄만 나온다 (CorpseController → AmmoTable.DropsIn).
+        foreach (ItemDefinition ammo in AmmoAssetGenerator.CreateAll())
+            entries.Add(new LootEntry(ammo, AmmoTable.CorpseWeight, AmmoTable.CorpseMin, AmmoTable.CorpseMax));
+
         // 빈손 줄. 시체마다 뭔가 나오면 파밍이 지루해진다.
         entries.Add(new LootEntry(null, 40));
 

@@ -25,7 +25,8 @@ public class PlaytestPanelUI : MonoBehaviour
     {
         ("티어1 한 벌",   PlaytestActions.GiveStarterKit),
         ("티어6 한 벌",   PlaytestActions.GiveEndgameKit),
-        ("무기 6종",      PlaytestActions.GiveAllWeapons),
+        ("무기 전부",     PlaytestActions.GiveAllWeapons),
+        ("탄 한 묶음",    PlaytestActions.GiveAmmo),
         ("각인 전부",     PlaytestActions.GiveAllImprints),
         ("젬 전부",       PlaytestActions.GiveAllGems),
         ("수분·에너지 절반", PlaytestActions.HalveSurvival),

@@ -33,7 +33,20 @@ public class PlayerWeapon : MonoBehaviour
 
     private PoolManager poolManager;
     private PlayerNoise noise;
+    private PlayerAmmo ammo;
     private CooldownTimer cooldown;
+
+    /// <summary>화살통 · 탄창 (결정 2-80). 무기를 들었으면 통의 탄을 쓴다.</summary>
+    public PlayerAmmo Ammo
+    {
+        get
+        {
+            if (ammo == null && !TryGetComponent(out ammo))
+                ammo = gameObject.AddComponent<PlayerAmmo>();
+
+            return ammo;
+        }
+    }
 
     /// <summary>
     /// 실제 발사 간격. 무기가 정한 값에 Skill 보정이 곱해진다.
@@ -57,6 +70,11 @@ public class PlayerWeapon : MonoBehaviour
 
     /// <summary>필수 참조가 모두 연결되었는지.</summary>
     public bool IsConfigured => bulletPrefab != null && firePoint != null;
+
+    private void Awake()
+    {
+        _ = Ammo;
+    }
 
     private void Start()
     {
@@ -93,15 +111,35 @@ public class PlayerWeapon : MonoBehaviour
         if (!IsConfigured)
             return false;
 
-        if (!cooldown.TryConsume(Time.time, EffectiveFireInterval))
+        // 【화살통 · 탄창 (결정 2-80)】 무기를 들었으면 통의 탄으로 쏜다. 채우는 · 메는 동안은 못 쏜다.
+        // 탄이 다 떨어져 무기를 멨으면 맨손으로 — 무기가 없을 때와 같다.
+        bool unarmed = Ammo.UseUnarmed;
+
+        if (!unarmed && !Ammo.CanShootWeapon)
             return false;
 
-        Fire();
+        WeaponProfile shot = unarmed ? UnarmedProfile() : profile;
+        WeaponKindInfo? kind = unarmed ? null : PlayerAmmo.CurrentWeapon?.KindInfo;
+
+        float interval = shot.FireInterval * GetModifiers().FireIntervalMultiplier;
+
+        if (!cooldown.TryConsume(Time.time, interval))
+            return false;
+
+        Fire(shot, kind);
+
+        if (!unarmed)
+            Ammo.Consume();
 
         return true;
     }
 
-    private void Fire()
+    /// <summary>맨손 — 장비 보정(각인 등)은 그대로 얹는다.</summary>
+    private static WeaponProfile UnarmedProfile()
+        => WeaponProfile.Create(null,
+            PlayerInventory.HasInstance ? PlayerInventory.Instance.Loadout.Modifiers : null);
+
+    private void Fire(WeaponProfile shot, WeaponKindInfo? kind)
     {
         if (poolManager == null)
             poolManager = PoolManager.EnsureInstance();
@@ -113,7 +151,7 @@ public class PlayerWeapon : MonoBehaviour
             noise = GetComponent<PlayerNoise>();
 
         if (noise != null)
-            noise.ReportShot();
+            noise.ReportShot(kind.HasValue ? 1f + kind.Value.Noise * 0.25f : 1f);
 
         WeaponModifiers modifiers = GetModifiers();
 
@@ -121,10 +159,13 @@ public class PlayerWeapon : MonoBehaviour
         // 투사체마다가 아니라 '발사마다'이므로 루프 밖에서 한 번만 고른다.
         StatusEffectType ailment = SelectAilment(modifiers);
 
-        int count = modifiers.TotalProjectiles;
+        // 산탄은 한 번에 여러 갈래 — 피해는 갈래마다 나눈다 (결정 2-80). 투사체 보조 구슬의 갈래는 그 위에 더한다.
+        int pellets = kind.HasValue ? kind.Value.Pellets : 1;
+        int count = modifiers.TotalProjectiles + pellets - 1;
+        float pelletDamage = shot.Damage / pellets;
 
         // 여러 발이면 정면을 중심으로 좌우 대칭이 되도록 각도를 배분한다.
-        float spread = modifiers.SpreadAngle;
+        float spread = pellets > 1 ? Mathf.Max(modifiers.SpreadAngle, kind.Value.PelletSpread) : modifiers.SpreadAngle;
         float startAngle = count > 1 ? -spread * (count - 1) * 0.5f : 0f;
 
         // 총구와 같은 높이의 발사자 중심. 캡슐 판정이 수평이 되도록 y를 맞춘다.
@@ -147,12 +188,17 @@ public class PlayerWeapon : MonoBehaviour
                 // 착용 무기의 기본값을 먼저 준다. 이 한 줄이 없으면
                 // 장비 6종을 만들어 놓고 프리팹 하드코딩 값으로 쏘게 된다.
                 controller.SetWeaponBase(
-                    Mathf.Max(1, Mathf.RoundToInt(profile.Damage)),
-                    profile.EffectiveRange * modifiers.RangeMultiplier,
-                    profile.ArmourPenetration);
+                    Mathf.Max(1, Mathf.RoundToInt(pelletDamage)),
+                    shot.EffectiveRange * modifiers.RangeMultiplier,
+                    shot.ArmourPenetration);
 
                 controller.SetSkillEffects(modifiers);
-                controller.SetCritical(profile.CriticalChance, profile.CriticalMultiplier);
+                controller.SetCritical(shot.CriticalChance, shot.CriticalMultiplier);
+
+                // 신기전 — 맞은 자리에서 터진다 (결정 2-80).
+                controller.SetExplosion(
+                    kind.HasValue ? kind.Value.ExplosionRadius : 0f,
+                    kind.HasValue ? kind.Value.ExplosionShare : 0f);
 
                 controller.Configure(
                     modifiers.Behaviours,
