@@ -49,7 +49,11 @@ public class SaveData
     ///       12판의 codex 줄은 읽지 않고 버린다.
     ///  14 — 장마다 기억하는 지도(maps — 가 본 땅 · 마커)를 더했다 (결정 2-90). 13판에는 없어 처음 보는 지도로 읽힌다.
     ///  15 — 밤 시계(moon · weather · snowy — 다음 판의 달 · 날씨 칸)를 더했다 (결정 2-91). 14판에는 없어 삭 · 맑음으로 읽힌다.
-    public const int CurrentVersion = 18;
+    ///  16 — 쓰러진 자리(fallen)를 더했다 (결정 2-93). 15판에는 없어 null로 읽힌다.
+    ///  17 — 작업대 단계 · 연 제작법(workbenchStage · craftUnlocks)을 더했다 (결정 2-95). 16판에는 없어 Ⅰ · 빈 목록으로 읽힌다.
+    ///  18 — 아이템 줄의 최대 내구도(maxDurability)를 더했다 (결정 2-96). 17판에는 없어 -1(정의 그대로)로 읽힌다.
+    ///  19 — 샘가에 모인 것(springside) · 처치 기록(kills)을 더했다 (결정 2-97). 18판에는 없어 빈 목록으로 읽힌다.
+    public const int CurrentVersion = 19;
 
     public int version = CurrentVersion;
 
@@ -151,6 +155,23 @@ public class SaveData
 
     /// <summary>바쳐 연 제작법 (만드는 것의 id).</summary>
     public List<string> craftUnlocks = new();
+
+    // ── 약탕간 · 장부방 (결정 2-97 · 판 19) ──────────────────────────
+
+    /// <summary>샘가에 모여 아직 거두지 않은 것.</summary>
+    public List<SavedItem> springside = new();
+
+    /// <summary>내가 쓰러뜨린 적 — 갈래 × 등급별 수.</summary>
+    public List<SavedKill> kills = new();
+}
+
+/// <summary>처치 기록 한 줄 (결정 2-97). 갈래 · 등급은 enum 값이다.</summary>
+[Serializable]
+public class SavedKill
+{
+    public int archetype;
+    public int rarity;
+    public int count;
 }
 
 /// <summary>장 하나의 지도 기억 (MapMemory).</summary>

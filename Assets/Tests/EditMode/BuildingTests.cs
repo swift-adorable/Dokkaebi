@@ -189,7 +189,7 @@ namespace Dokkaebi.Tests
             Assert.AreEqual(BunkerStation.Kind.GeneralStore, BuildingTable.Find(BuildingTable.GeneralStore).Opens);
             Assert.AreEqual(BunkerStation.Kind.Smithy, BuildingTable.Find(BuildingTable.Smithy).Opens);
             Assert.AreEqual(BunkerStation.Kind.Apothecary, BuildingTable.Find(BuildingTable.Apothecary).Opens);
-            Assert.AreEqual(BunkerStation.Kind.None, BuildingTable.Find(BuildingTable.LedgerRoom).Opens, "장부방은 아직 기능이 없다");
+            Assert.AreEqual(BunkerStation.Kind.Ledger, BuildingTable.Find(BuildingTable.LedgerRoom).Opens, "장부방 — 장 지도 · 처치 기록 (결정 2-97)");
         }
 
         [Test]

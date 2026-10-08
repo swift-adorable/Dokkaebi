@@ -100,6 +100,9 @@ public class BunkerBuildings : MonoBehaviour
     /// <summary>잡화 가게 자리의 오른쪽 끝에 붙는 부뚜막의 폭(m).</summary>
     private const float HearthWidth = 1.2f;
 
+    /// <summary>약탕간 자리의 오른쪽 끝에 붙는 약탕의 폭(m) — 결정 2-97. 자리(Width)는 그대로 둔다(놓인 건물이 겹치지 않게).</summary>
+    private const float PotWidth = 0.8f;
+
     private GameObject Spawn(BuildingDefinition definition, BuildingPose pose)
     {
         var root = new GameObject($"Building_{definition.Id}");
@@ -110,8 +113,10 @@ public class BunkerBuildings : MonoBehaviour
         // 잡화 가게는 자리의 왼쪽에 좌판, 오른쪽 끝에 부뚜막이 붙는다 (결정 2-71) — 가게를 놓거나 옮기면 함께 간다.
         // 부뚜막은 가게의 자리(Width) 안에 있어 다른 건물과 겹치지 않는다.
         bool withHearth = definition.Id == BuildingTable.GeneralStore;
-        float storeWidth = withHearth ? definition.Width - HearthWidth : definition.Width;
-        float storeX = withHearth ? -HearthWidth * 0.5f : 0f;
+        bool withPot = definition.Id == BuildingTable.Apothecary;   // 약탕간 옆 약탕 (결정 2-97)
+        float sideWidth = withHearth ? HearthWidth : withPot ? PotWidth : 0f;
+        float storeWidth = definition.Width - sideWidth;
+        float storeX = -sideWidth * 0.5f;
 
         GameObject body = GameObject.CreatePrimitive(PrimitiveType.Cube);
         body.name = "Body";
@@ -145,6 +150,23 @@ public class BunkerBuildings : MonoBehaviour
             hearth.AddComponent<BunkerStation>().Setup(BunkerStation.Kind.Cooking, 1.6f);
         }
 
+        if (withPot)
+        {
+            var pot = new GameObject("Pot");
+            pot.transform.SetParent(root.transform, false);
+            pot.transform.localPosition = new Vector3((definition.Width - PotWidth) * 0.5f, 0f, 0f);
+
+            GameObject kettle = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            kettle.name = "Body";
+            kettle.transform.SetParent(pot.transform, false);
+            kettle.transform.localPosition = new Vector3(0f, 0.3f, 0f);
+            kettle.transform.localScale = new Vector3(PotWidth * 0.8f, 0.3f, PotWidth * 0.8f);
+            Tint(kettle, new Color(0.35f, 0.28f, 0.22f));
+
+            AddLabel(pot.transform, ApothecaryTable.PotName);
+            pot.AddComponent<BunkerStation>().Setup(BunkerStation.Kind.Brewing, 1.4f);
+        }
+
         return root;
     }
 
@@ -155,6 +177,7 @@ public class BunkerBuildings : MonoBehaviour
             case BunkerStation.Kind.GeneralStore: return new Color(0.90f, 0.70f, 0.25f);
             case BunkerStation.Kind.Smithy:       return new Color(0.85f, 0.35f, 0.30f);
             case BunkerStation.Kind.Apothecary:   return new Color(0.40f, 0.70f, 0.50f);
+            case BunkerStation.Kind.Ledger:       return new Color(0.45f, 0.50f, 0.75f);
             default:                               return new Color(0.55f, 0.50f, 0.42f);
         }
     }

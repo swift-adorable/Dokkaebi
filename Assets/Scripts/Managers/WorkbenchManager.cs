@@ -143,8 +143,8 @@ public static class WorkbenchManager
         return CraftError.None;
     }
 
-    /// <summary>창고 먼저, 모자라면 가방에서 뺀다. 뺀 수를 돌려준다.</summary>
-    private static int Remove(string itemId, int count)
+    /// <summary>창고 먼저, 모자라면 가방에서 뺀다. 뺀 수를 돌려준다. (약탕간도 쓴다 — 결정 2-97)</summary>
+    public static int Remove(string itemId, int count)
     {
         PlayerInventory inv = PlayerInventory.EnsureInstance();
         int removed = RemoveAll(inv.Stash, itemId, count);
@@ -167,7 +167,7 @@ public static class WorkbenchManager
         return removed;
     }
 
-    private static bool CanGive(string itemId, int count)
+    public static bool CanGive(string itemId, int count)
     {
         ItemDefinition definition = ItemCatalog.Load()?.Find(itemId);
         if (definition == null)
@@ -177,7 +177,8 @@ public static class WorkbenchManager
         return inv.Stash.CanAdd(definition, count) || inv.Bag.CanAdd(definition, count);
     }
 
-    private static void Give(string itemId, int count)
+    /// <summary>창고로, 자리가 없으면 가방으로.</summary>
+    public static void Give(string itemId, int count)
     {
         ItemDefinition definition = ItemCatalog.Load()?.Find(itemId);
         if (definition == null)

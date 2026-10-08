@@ -98,7 +98,7 @@ public static class BuildingTable
             opens: BunkerStation.Kind.GeneralStore),
 
         // 본문 「쇠붙이 · 숯 · 새끼 뭉치를 모아 와 샘가에 약탕간을 세운다」 [임시값]
-        new(Apothecary, ShopTable.ApothecaryName, "참봉의 약탕간. 약품과 주사약을 사고판다.",
+        new(Apothecary, ShopTable.ApothecaryName, "참봉의 약탕간. 약품과 주사약을 사고판다. 옆 약탕에서 약재로 약을 달이고, 판이 끝날 때마다 샘가에 약재가 모인다.",
             gold: 100,
             materials: new[] { new MaterialCost(Scrap, 3), new MaterialCost(Battery, 2), new MaterialCost(Wire, 1) },
             requiredBuildings: null, width: 2f, depth: 1.4f,
@@ -112,11 +112,11 @@ public static class BuildingTable
             opens: BunkerStation.Kind.Smithy),
 
         // 본문 「재료를 모아 와 장부방을 세운다」 — 등록 · 관리 기능은 아직 없다 [임시값]
-        new(LedgerRoom, ShopTable.LedgerRoomName, "길달의 장부방. 도감 · 열쇠 등록 · 기록을 맡는다. (기능은 다음 단계)",
+        new(LedgerRoom, ShopTable.LedgerRoomName, "길달의 장부방. 장 지도를 엽전으로 사고, 내가 쓰러뜨린 적의 기록과 모은 방을 다시 본다.",
             gold: 150,
             materials: new[] { new MaterialCost(Scrap, 4), new MaterialCost(Wire, 2) },
             requiredBuildings: null, width: 2f, depth: 1.4f,
-            opens: BunkerStation.Kind.None),
+            opens: BunkerStation.Kind.Ledger),
     };
 
     /// <summary>옛 id를 지금 id로. 대장간으로 합친 두 상점만 바뀐다.</summary>

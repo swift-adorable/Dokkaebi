@@ -228,6 +228,8 @@ public static class SaveManager
         NightClock.Capture(data);
         FallenCache.Capture(data);
         WorkbenchManager.Capture(data);
+        ApothecaryManager.Capture(data);
+        LedgerManager.Capture(data);
 
         return data;
     }
@@ -293,6 +295,8 @@ public static class SaveManager
         NightClock.Restore(data);
         FallenCache.Restore(data);
         WorkbenchManager.Restore(data);
+        ApothecaryManager.Restore(data);
+        LedgerManager.Restore(data);
 
         // 레벨이 돌아왔으니 소켓 수도 맞춘다. 알림은 내지 않는다.
         SkillManager.EnsureInstance().ResyncLevel();

@@ -118,6 +118,7 @@ public class DokkaebiController : MonoBehaviour
         ShopManager.RestockAfterRun();
         SpringManager.RefillAfterRun();
         NightClock.PassNight();   // 쓰러져도 한 밤이 지난다 (결정 2-91)
+        ApothecaryManager.OnNightPassed();   // 샘가 (결정 2-97)
 
         SaveManager.Commit("사망");
 

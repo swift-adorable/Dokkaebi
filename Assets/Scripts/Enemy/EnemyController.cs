@@ -149,6 +149,10 @@ public class EnemyController : MonoBehaviour, IPoolable
 
         Killed?.Invoke(this);
 
+        // 처치 기록 (결정 2-97) — 내가 쓰러뜨린 것만 센다.
+        if (identity != null && health != null && health.KillContext.killedByPlayer)
+            LedgerManager.RecordKill(identity.Profile.archetype, identity.Profile.rarity);
+
         SpawnCorpse();
 
         ReturnToPool();

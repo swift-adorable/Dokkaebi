@@ -60,6 +60,39 @@ public static class PlayCaptureMenu
             WorkbenchUI.Open();
     }
 
+    [MenuItem("Dokkaebi/Debug/약탕 화면 열기 (샘가 채움)")]
+    public static void OpenApothecary()
+    {
+        if (!EditorApplication.isPlaying)
+            return;
+
+        // 샘가가 비었으면 다섯 밤어치를 모아 둔다 — 약탕간이 없으면 모이지 않으니 있는 것처럼 센다.
+        if (ApothecaryManager.Springside.IsEmpty)
+            for (int i = 0; i < 5; i++)
+                ApothecaryManager.Springside.AccrueNight(true,
+                    ApothecaryTable.ChapterPool(c => StoryManager.Progress.IsChapterOpen(c) || c <= 2), new System.Random(i));
+
+        LedgerUI.Close();
+        ApothecaryUI.OpenSpringside();
+    }
+
+    [MenuItem("Dokkaebi/Debug/장부방 화면 열기 (처치 기록)")]
+    public static void OpenLedger()
+    {
+        if (!EditorApplication.isPlaying)
+            return;
+
+        if (LedgerManager.Kills.Total == 0)
+        {
+            LedgerManager.RecordKill(EnemyArchetype.Scav, EnemyRarity.Normal);
+            for (int i = 0; i < 6; i++) LedgerManager.RecordKill(EnemyArchetype.Crusher, EnemyRarity.Normal);
+            for (int i = 0; i < 31; i++) LedgerManager.RecordKill(EnemyArchetype.Dynamo, i % 5 == 0 ? EnemyRarity.Magic : EnemyRarity.Normal);
+        }
+
+        ApothecaryUI.Close();
+        LedgerUI.OpenKills();
+    }
+
     [MenuItem("Dokkaebi/Debug/출발 화면 열기")]
     public static void OpenDeparture()
     {

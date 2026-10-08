@@ -59,7 +59,13 @@ public class BunkerStation : MonoBehaviour
         /// <summary>작업대 — 단계 · 바치기 · 만들기 (결정 2-95).</summary>
         Workbench = 14,
 
-        /// <summary>여는 것이 없다 (작업대 — 제작은 다음 단계).</summary>
+        /// <summary>약탕 — 약탕간 옆에 붙는 달이기 · 샘가 자리 (결정 2-97).</summary>
+        Brewing = 15,
+
+        /// <summary>장부방 — 장 지도 · 처치 기록 · 모은 방 (결정 2-97).</summary>
+        Ledger = 16,
+
+        /// <summary>여는 것이 없다.</summary>
         None = 99
     }
 
@@ -92,6 +98,10 @@ public class BunkerStation : MonoBehaviour
             case Kind.StoryBundle:  return ChapterZeroTable.BundleName;
             case Kind.FallenStash:  return FallenStash.Name;
             case Kind.Workbench:    return "작업대";
+            case Kind.Brewing:      return ApothecaryManager.Springside.IsEmpty
+                                        ? ApothecaryTable.PotName
+                                        : $"{ApothecaryTable.PotName} · {ApothecaryTable.SpringsideName} !";
+            case Kind.Ledger:       return ShopTable.LedgerRoomName;
             case Kind.Departure:    return "파밍 출발";
             case Kind.Blueprint:    return "건설";
             default:                return string.Empty;
@@ -178,6 +188,14 @@ public class BunkerStation : MonoBehaviour
 
             case Kind.Workbench:
                 WorkbenchUI.Open();
+                break;
+
+            case Kind.Brewing:
+                ApothecaryUI.Open();
+                break;
+
+            case Kind.Ledger:
+                LedgerUI.Open();
                 break;
 
             case Kind.FallenStash:

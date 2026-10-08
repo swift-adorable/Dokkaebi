@@ -156,6 +156,7 @@ public class DepartureUI : MonoBehaviour
     private void Rest()
     {
         NightClock.PassNight();
+        // 샘가는 모이지 않는다 — 판이 끝날 때만 (결정 2-97 · 쉬기만 거듭해 약재를 거저 얻지 않게).
         SaveManager.Commit("하룻밤 쉬기");
         Fill();
     }
