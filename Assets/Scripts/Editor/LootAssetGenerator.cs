@@ -143,8 +143,12 @@ public static class LootAssetGenerator
         }
 
         // 탄 (결정 2-80) — 그 장에서 쓰는 무기의 탄만 나온다 (CorpseController → AmmoTable.DropsIn).
+        // 방어 관통탄은 드물게 · 조금 · 3장부터 (결정 2-95 — 처음 하나가 작업대 Ⅲ의 견본이 된다).
         foreach (ItemDefinition ammo in AmmoAssetGenerator.CreateAll())
-            entries.Add(new LootEntry(ammo, AmmoTable.CorpseWeight, AmmoTable.CorpseMin, AmmoTable.CorpseMax));
+        {
+            AmmoInfo info = AmmoTable.Find(ammo.Id) ?? default;
+            entries.Add(new LootEntry(ammo, info.CorpseWeight, info.CorpseMin, info.CorpseMax));
+        }
 
         // 빈손 줄. 시체마다 뭔가 나오면 파밍이 지루해진다.
         entries.Add(new LootEntry(null, 40));

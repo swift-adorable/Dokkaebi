@@ -144,6 +144,13 @@ MonoBehaviour:
   bulkMaterial: {fileID: 11400000, guid: 2cea37fa128934109856e90e89807614, type: 2}
   stackables:
   - {fileID: 11400000, guid: 69bb7210d5d424e1bb2ff19fd17aa70c, type: 2}
+  - {fileID: 11400000, guid: fef9e0fe8f5be475cae554fc84528a46, type: 2}
+  - {fileID: 11400000, guid: ebcacd8290f85496f869cfccedcc7aff, type: 2}
+  - {fileID: 11400000, guid: aeb3480c8678848fd9eea42c63fe4562, type: 2}
+  - {fileID: 11400000, guid: 87c51be06051c4023b2c46e56085f992, type: 2}
+  - {fileID: 11400000, guid: 2289e0709fe574a1aa7b739e039c45e2, type: 2}
+  - {fileID: 11400000, guid: bd78f30fa36fe4e3f83254fe8abb0001, type: 2}
+  - {fileID: 11400000, guid: de1234e35aed74c46850d324df51d958, type: 2}
   - {fileID: 11400000, guid: b7d8f76632b14415590786fd22094645, type: 2}
   - {fileID: 11400000, guid: 49a903161c6ea47e689f7185d684a203, type: 2}
   - {fileID: 11400000, guid: 04dd1e956a07043fd9b26232fa7565eb, type: 2}

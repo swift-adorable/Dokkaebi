@@ -90,10 +90,13 @@ public class PlayerAmmo : MonoBehaviour
             return 0;
 
         EquipmentLoadout loadout = PlayerInventory.Instance.Loadout;
-        string id = index < 0 ? loadout.AmmoId : loadout.AmmoIdAt(index);
+        int slot = index < 0 ? loadout.ActiveWeapon : index;
 
-        if (string.IsNullOrEmpty(id))
+        if (string.IsNullOrEmpty(loadout.AmmoIdAt(slot)))
             return 0;
+
+        // 채울 탄(통에 든 것과 같은 것 — 방어 관통탄이면 그것)만 센다 (결정 2-95).
+        string id = loadout.FeedIdAt(slot, PlayerInventory.Instance.Bag);
 
         int count = 0;
         foreach (ItemStack s in PlayerInventory.Instance.Bag.Stacks)

@@ -179,6 +179,15 @@ public class EnemyController : MonoBehaviour, IPoolable
 
         controller.SetReward(rarity, health != null ? health.KillContext : default);
 
+        // 무기 도면 (결정 2-95) — 고유(보스 · 큰 요괴) 시체에 드물게. 작업대 Ⅳ에서 바친다.
+        if (rarity == EnemyRarity.Unique && Random.value < WorkbenchTable.BlueprintDropChance)
+        {
+            WeaponKind kind = WorkbenchTable.BlueprintKinds[Random.Range(0, WorkbenchTable.BlueprintKinds.Length)];
+            ItemDefinition blueprint = ItemCatalog.Load()?.Find(WorkbenchTable.BlueprintOf(kind));
+            if (blueprint != null)
+                controller.Loot.TryPut(blueprint);
+        }
+
         // 0-2 큰 요괴의 첫 구슬 (결정 2-79) — 시체 전리품에 넣고 표식을 지운다.
         if (TryGetComponent(out StoryGift gift))
             gift.Deliver(controller);

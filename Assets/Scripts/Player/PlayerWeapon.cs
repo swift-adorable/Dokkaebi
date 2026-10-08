@@ -163,7 +163,11 @@ public class PlayerWeapon : MonoBehaviour
         // 산탄은 한 번에 여러 갈래 — 피해는 갈래마다 나눈다 (결정 2-80). 투사체 보조 구슬의 갈래는 그 위에 더한다.
         int pellets = kind.HasValue ? kind.Value.Pellets : 1;
         int count = modifiers.TotalProjectiles + pellets - 1;
-        float pelletDamage = shot.Damage / pellets;
+
+        // 방어 관통탄 (결정 2-95) — 통에 든 탄이 방어 관통 + · 피해 × 를 얹는다.
+        string loaded = kind.HasValue && PlayerInventory.HasInstance ? PlayerInventory.Instance.Loadout.LoadedAmmoId : null;
+        int penetration = shot.ArmourPenetration + AmmoTable.PenetrationBonusOf(loaded);
+        float pelletDamage = shot.Damage * AmmoTable.DamageScaleOf(loaded) / pellets;
 
         // 여러 발이면 정면을 중심으로 좌우 대칭이 되도록 각도를 배분한다.
         float spread = pellets > 1 ? Mathf.Max(modifiers.SpreadAngle, kind.Value.PelletSpread) : modifiers.SpreadAngle;
@@ -191,7 +195,7 @@ public class PlayerWeapon : MonoBehaviour
                 controller.SetWeaponBase(
                     Mathf.Max(1, Mathf.RoundToInt(pelletDamage)),
                     shot.EffectiveRange * modifiers.RangeMultiplier,
-                    shot.ArmourPenetration);
+                    penetration);
 
                 controller.SetSkillEffects(modifiers);
                 controller.SetCritical(shot.CriticalChance, shot.CriticalMultiplier);

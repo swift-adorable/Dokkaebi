@@ -53,6 +53,13 @@ public static class PlayCaptureMenu
             WorldMapUI.DebugZoomIn();
     }
 
+    [MenuItem("Dokkaebi/Debug/작업대 화면 열기")]
+    public static void OpenWorkbench()
+    {
+        if (EditorApplication.isPlaying)
+            WorkbenchUI.Open();
+    }
+
     [MenuItem("Dokkaebi/Debug/출발 화면 열기")]
     public static void OpenDeparture()
     {

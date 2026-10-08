@@ -141,6 +141,7 @@ public static class SceneFlow
         MapMemory.Reset();
         NightClock.Reset();
         FallenCache.Clear();
+        WorkbenchManager.Reset();
 
         loading = false;
         Load(HasBunker ? BunkerScene : RaidScene);

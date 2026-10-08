@@ -227,6 +227,7 @@ public static class SaveManager
         data.maps = MapMemory.Capture();
         NightClock.Capture(data);
         FallenCache.Capture(data);
+        WorkbenchManager.Capture(data);
 
         return data;
     }
@@ -288,6 +289,7 @@ public static class SaveManager
         MapMemory.Restore(data.maps);
         NightClock.Restore(data);
         FallenCache.Restore(data);
+        WorkbenchManager.Restore(data);
 
         // 레벨이 돌아왔으니 소켓 수도 맞춘다. 알림은 내지 않는다.
         SkillManager.EnsureInstance().ResyncLevel();

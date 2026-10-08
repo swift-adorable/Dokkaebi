@@ -41,9 +41,10 @@ public class EquipmentLoadout
         // 화살통 · 탄창 — 그 무기가 쓰는 탄만, 정해진 수까지 (결정 2-80).
         if (IsAmmoSlot(slot))
         {
+            // 방어 관통탄도 같은 무기의 통에 들어간다 (결정 2-95).
             string id = AmmoIdOf(WeaponSlotOf(slot));
             return stack.Definition.Kind == ItemKind.Ammo
-                   && stack.Definition.Id == id
+                   && AmmoTable.Accepts(id, stack.Definition.Id)
                    && stack.Count <= AmmoTable.CapacityOf(id);
         }
 
@@ -171,6 +172,33 @@ public class EquipmentLoadout
     /// <summary>그 무기(0 · 1)가 쓰는 탄 · 통에 든 수 · 담는 수.</summary>
     public string AmmoIdAt(int index) => AmmoIdOf(WeaponSlot(index));
     public int LoadedAt(int index) => Get(AmmoSlot(index))?.Count ?? 0;
+
+    /// <summary>그 무기(0 · 1)의 통에 든 탄 id. 비었으면 null.</summary>
+    public string LoadedIdAt(int index) => Get(AmmoSlot(index))?.Definition?.Id;
+
+    /// <summary>든 무기의 통에 든 탄 id — 쏠 때 방어 관통탄의 보정을 읽는다.</summary>
+    public string LoadedAmmoId => LoadedIdAt(ActiveWeapon);
+
+    /// <summary>
+    /// 그 무기가 다음에 채울 탄 id — 통에 든 것과 같은 것, 비었으면 가방에 있는 일반 탄 → 방어 관통탄 순 (결정 2-95).
+    /// 방어 관통탄은 아껴 쓰도록 일반 탄을 먼저 고른다. 방어 관통탄을 쓰려면 가방 화면에서 통에 넣는다.
+    /// </summary>
+    public string FeedIdAt(int index, Inventory bag)
+    {
+        string loaded = LoadedIdAt(index);
+        if (!string.IsNullOrEmpty(loaded))
+            return loaded;
+
+        string family = AmmoIdAt(index);
+        if (string.IsNullOrEmpty(family) || bag == null)
+            return family;
+
+        foreach (string id in AmmoTable.FamilyMembers(family))
+            if (FindInBag(bag, id) != null)
+                return id;
+
+        return family;
+    }
     public int CapacityAt(int index) => AmmoTable.CapacityOf(AmmoIdAt(index));
 
     /// <summary>든 무기의 화살통 · 탄창에 든 수.</summary>
@@ -206,11 +234,10 @@ public class EquipmentLoadout
     /// <summary>그 무기(0 · 1)의 통을 가방에서 채운다.</summary>
     public int RefillAmmo(Inventory bag, int index)
     {
-        string id = AmmoIdAt(index);
-
-        if (string.IsNullOrEmpty(id) || bag == null)
+        if (string.IsNullOrEmpty(AmmoIdAt(index)) || bag == null)
             return 0;
 
+        string id = FeedIdAt(index, bag);
         ItemDefinition ammo = FindInBag(bag, id);
 
         if (ammo == null)
@@ -245,7 +272,7 @@ public class EquipmentLoadout
             if (held == null)
                 continue;
 
-            if (held.Definition != null && held.Definition.Id == AmmoIdAt(index))
+            if (held.Definition != null && AmmoTable.Accepts(AmmoIdAt(index), held.Definition.Id))
                 continue;
 
             if (bag == null || !bag.TryAddStack(held))

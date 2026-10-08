@@ -63,7 +63,12 @@ namespace Dokkaebi.Tests
         [Test]
         public void 탄_7종_에셋이_표와_같다()
         {
-            Assert.AreEqual(7, AmmoTable.All.Count);
+            // 일반 탄 7 + 방어 관통탄 7 (결정 2-95).
+            Assert.AreEqual(14, AmmoTable.All.Count);
+            int piercing = 0;
+            foreach (AmmoInfo a in AmmoTable.All)
+                if (a.IsArmourPiercing) piercing++;
+            Assert.AreEqual(7, piercing);
 
             foreach (AmmoInfo a in AmmoTable.All)
             {
@@ -123,6 +128,29 @@ namespace Dokkaebi.Tests
             Assert.IsTrue(loadout.CanEquip(new ItemStack(arrow, 10), EquipmentSlot.Ammo));
             Assert.IsFalse(loadout.CanEquip(new ItemStack(shot, 10), EquipmentSlot.Ammo));
             Assert.IsFalse(loadout.CanEquip(new ItemStack(arrow, 31), EquipmentSlot.Ammo), "담는 수를 넘는다");
+        }
+
+        [Test]
+        public void 방어_관통탄도_같은_통에_들어가고_일반_탄을_먼저_채운다()
+        {
+            // 결정 2-95 — 쇠촉 화살은 활의 통에 들어간다. 비었을 때는 아껴 쓰도록 일반 화살을 먼저.
+            var (loadout, bag, arrow) = Setup(10);
+            var piercing = AssetDatabase.LoadAssetAtPath<ItemDefinition>(
+                $"{ItemRoot}/Ammo/{AmmoTable.PiercingOf(AmmoTable.Arrow)}.asset");
+            Assert.IsNotNull(piercing, "쇠촉 화살 에셋이 없습니다.");
+            bag.TryAdd(piercing, 10);
+
+            Assert.IsTrue(loadout.CanEquip(new ItemStack(piercing, 10), EquipmentSlot.Ammo));
+
+            loadout.RefillAmmo(bag);
+            Assert.AreEqual(AmmoTable.Arrow, loadout.LoadedAmmoId, "일반 화살을 먼저 채우지 않았습니다.");
+            Assert.AreEqual(10, bag.CountOf(piercing));
+
+            // 일반 화살이 떨어지면 쇠촉 화살로.
+            while (loadout.ConsumeAmmo()) { }
+            loadout.RefillAmmo(bag);
+            Assert.AreEqual(piercing.Id, loadout.LoadedAmmoId);
+            Assert.AreEqual(0, bag.CountOf(piercing));
         }
 
         [Test]

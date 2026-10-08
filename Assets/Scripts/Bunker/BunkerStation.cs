@@ -56,6 +56,9 @@ public class BunkerStation : MonoBehaviour
         /// <summary>쓰러진 자리 — 「회수 계약」으로 남은 잃은 것 (결정 2-93). 구역에 선다.</summary>
         FallenStash = 13,
 
+        /// <summary>작업대 — 단계 · 바치기 · 만들기 (결정 2-95).</summary>
+        Workbench = 14,
+
         /// <summary>여는 것이 없다 (작업대 — 제작은 다음 단계).</summary>
         None = 99
     }
@@ -88,6 +91,7 @@ public class BunkerStation : MonoBehaviour
             case Kind.BerryTree:    return BerryTree.Name;
             case Kind.StoryBundle:  return ChapterZeroTable.BundleName;
             case Kind.FallenStash:  return FallenStash.Name;
+            case Kind.Workbench:    return "작업대";
             case Kind.Departure:    return "파밍 출발";
             case Kind.Blueprint:    return "건설";
             default:                return string.Empty;
@@ -170,6 +174,10 @@ public class BunkerStation : MonoBehaviour
             case Kind.StoryBundle:
                 if (TryGetComponent(out StoryBundle bundle))
                     bundle.Open();
+                break;
+
+            case Kind.Workbench:
+                WorkbenchUI.Open();
                 break;
 
             case Kind.FallenStash:
