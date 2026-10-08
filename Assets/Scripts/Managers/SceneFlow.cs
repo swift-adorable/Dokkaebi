@@ -44,8 +44,45 @@ public static class SceneFlow
 
     private static bool loading;
 
+    /// <summary>비밀 통로로 넘어갈 때 설 자리 (장 · 위치). 도착한 맵이 한 번 읽고 지운다.</summary>
+    private static int arrivalChapter = -1;
+    private static Vector3 arrivalPosition;
+
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-    private static void ResetStatics() => loading = false;
+    private static void ResetStatics()
+    {
+        loading = false;
+        arrivalChapter = -1;
+    }
+
+    /// <summary>
+    /// 【역행 비밀 통로】 (결정 2-88) — 들고 있는 그대로 이전 장 맵의 그 구역으로 넘어간다.
+    /// 파밍 출발처럼 저장하고 넘어간다(소켓의 구슬은 그대로 · 철수가 아니다). 도착한 맵은 출발 자리 대신 출구에 세운다.
+    /// </summary>
+    public static void TakePassage(int toChapter, string toZone, Vector3 at)
+    {
+        if (loading || InBunker)
+            return;
+
+        StoryManager.TargetZone = toZone;
+        arrivalChapter = toChapter;
+        arrivalPosition = at;
+
+        SaveManager.Commit(SecretPassageRule.SaveReason);
+        Load(RaidSceneFor(toZone));
+    }
+
+    /// <summary>비밀 통로로 이 장에 왔으면 설 자리를 꺼낸다(한 번만).</summary>
+    public static bool TryTakeArrival(int chapter, out Vector3 at)
+    {
+        at = arrivalPosition;
+
+        if (arrivalChapter != chapter)
+            return false;
+
+        arrivalChapter = -1;
+        return true;
+    }
 
     /// <summary>
     /// 【파밍 출발】 — 벙커의 출발 지점이 부른다. 들고 가는 것까지 저장한 뒤 구역으로 간다.

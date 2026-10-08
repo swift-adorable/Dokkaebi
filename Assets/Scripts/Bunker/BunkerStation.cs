@@ -50,6 +50,9 @@ public class BunkerStation : MonoBehaviour
         /// <summary>0-1 길가의 젖은 봇짐 — 한 번 연다 (결정 2-79). 구역에 선다.</summary>
         StoryBundle = 11,
 
+        /// <summary>역행 비밀 통로 — 이전 장 맵으로 (결정 2-88). 구역에 선다.</summary>
+        SecretPassage = 12,
+
         /// <summary>여는 것이 없다 (작업대 — 제작은 다음 단계).</summary>
         None = 99
     }
@@ -65,7 +68,9 @@ public class BunkerStation : MonoBehaviour
     public Kind StationKind => kind;
 
     /// <summary>버튼에 적을 말.</summary>
-    public string Label => LabelOf(kind);
+    public string Label => kind == Kind.SecretPassage && TryGetComponent(out SecretPassage passage)
+        ? passage.Prompt
+        : LabelOf(kind);
 
     public static string LabelOf(Kind kind)
     {
@@ -161,6 +166,11 @@ public class BunkerStation : MonoBehaviour
             case Kind.StoryBundle:
                 if (TryGetComponent(out StoryBundle bundle))
                     bundle.Open();
+                break;
+
+            case Kind.SecretPassage:
+                if (TryGetComponent(out SecretPassage passage))
+                    passage.Enter();
                 break;
 
             case Kind.Spring:

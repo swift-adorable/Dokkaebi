@@ -52,6 +52,10 @@ public enum MapAnchorKind
     Piece,
     /// <summary>이야기 표지 — 서브 퀘스트 · 환경 연출 자리(처마 · 절구 · 아궁이 · 화로 …). 지금은 씬 표시만 — 레이어 · 아트 작업 때 쓴다.</summary>
     Landmark,
+    /// <summary>역행 비밀 통로 입구 — 이전 장으로 간다 (결정 2-52 · 2-88). 장마다 하나(1 ~ 6장). 그 구역을 끝낸 뒤에만 나타난다.</summary>
+    Secret,
+    /// <summary>비밀 통로로 오면 서는 자리 — 다음 장의 통로가 여기로 온다. 장마다 하나(0 ~ 5장).</summary>
+    SecretExit,
 }
 
 /// <summary>덩어리 하나 — 바닥(y = 0) 위에 놓인 상자. Center는 바닥 위 x · z, 높이는 Size.y.</summary>
@@ -231,6 +235,20 @@ public static class ZoneMapTable
 
     public static IReadOnlyList<ChapterMap> All => maps;
 
+    /// <summary>그 장의 맵에서 첫 번째 그 종류 자리 (구역 무관). 없으면 null.</summary>
+    public static MapAnchor? FirstOf(int chapter, MapAnchorKind kind)
+    {
+        ChapterMap map = Of(chapter);
+        if (map == null)
+            return null;
+
+        foreach (MapAnchor a in map.Anchors)
+            if (a.Kind == kind)
+                return a;
+
+        return null;
+    }
+
     private static MapBlock B(MapBlockKind k, float x, float z, float sx, float h, float sz) => new(k, x, z, sx, h, sz);
     private static MapAnchor A(MapAnchorKind k, string zone, float x, float z, string label = null) => new(k, zone, x, z, label);
     private static MapAnchor L(string zone, float x, float z, string label) => new(MapAnchorKind.Landmark, zone, x, z, label);
@@ -293,6 +311,7 @@ public static class ZoneMapTable
             A(MapAnchorKind.BerryTree, "0-1", -56f, 22f),
             A(MapAnchorKind.BerryTree, "0-1", -28f, -38f),
             A(MapAnchorKind.BerryTree, "0-1", -4f, -6f),
+            A(MapAnchorKind.SecretExit, "0-1", -21f, -20f, "무릎 냇물 — 1장 우물에서"),
 
             A(MapAnchorKind.Start, "0-2", 32f, 0f),
             A(MapAnchorKind.Gift, "0-2", 60f, 12f),
@@ -388,6 +407,8 @@ public static class ZoneMapTable
             A(AK.Pickup, "1-3", -24, 52), A(AK.Pickup, "1-3", 26, 70),
             A(AK.BerryTree, "1-3", -48, 58), A(AK.BerryTree, "1-3", 48, 50), A(AK.BerryTree, "1-3", 12, 74),
             L("1-3", 0, 75, "현무 등 너머 금줄 — 북쪽 밤길 끝"),
+            A(AK.Secret, "1-3", -4.5f, 62.5f, "우물 — 물이 땅 밑으로 흘러간다"),
+            A(AK.SecretExit, "1-3", 6, 70, "우물 곁 — 2장 상류 강바닥에서"),
         },
         new[]
         {
@@ -432,7 +453,7 @@ public static class ZoneMapTable
             B(K.Building, 18, -58, 12, 5, 8),                        // 갉히는 헛간
 
             // 2-3 강 상류 — 강을 막은 바위 · 통나무
-            B(K.Rock, -8, 64, 20, 4, 6),
+            B(K.Rock, -8, 62, 20, 4, 6),
             B(K.Bamboo, -60, 52, 30, 6, 12), B(K.Bamboo, -30, 44, 10, 6, 8), B(K.Bamboo, 22, 52, 14, 6, 14), B(K.Rock, -86, 44, 10, 3, 8),
 
             // 2-4 대숲 끝 — 금줄(장 끝)
@@ -456,6 +477,7 @@ public static class ZoneMapTable
             A(AK.BerryTree, "2-1", -88, -20), A(AK.BerryTree, "2-1", -48, 2), A(AK.BerryTree, "2-1", -22, -20),
             L("2-1", -20, 0.5f, "방앗간 — 방앗간지기 · 멈춘 물레방아"),
             L("2-1", -60, -24, "사당 터로 가는 길 — 대나무가 빽빽하다"),
+            A(AK.SecretExit, "2-1", -70, 2, "대숲 — 3장 약방골에서"),
 
             A(AK.Start, "2-2", 4, -8),
             A(AK.Extraction, "2-2", 16, 23), A(AK.Extraction, "2-2", 32, -38),
@@ -471,6 +493,7 @@ public static class ZoneMapTable
             A(AK.Pickup, "2-3", -40, 60), A(AK.Pickup, "2-3", 14, 38),
             A(AK.BerryTree, "2-3", -60, 38), A(AK.BerryTree, "2-3", -30, 64), A(AK.BerryTree, "2-3", 10, 58),
             L("2-3", -8, 57, "바위와 통나무가 무너져 쌓인 자리 — 막힌 강물"),
+            A(AK.Secret, "2-3", -8, 67.5f, "막힌 자리 너머 상류 강바닥"),
 
             A(AK.Start, "2-4", 46, 0),
             A(AK.Extraction, "2-4", 50, 60), A(AK.Extraction, "2-4", 50, -62),
@@ -541,6 +564,8 @@ public static class ZoneMapTable
             A(AK.BerryTree, "3-1", -50, 78), A(AK.BerryTree, "3-1", 50, 80), A(AK.BerryTree, "3-1", -16, 30),
             L("3-1", 4, 46, "약방골 한가운데 부엌 — 늙은 요괴 · 꺼져 가는 아궁이"),
             L("3-1", -18, 58, "멍석에 널린 약재"),
+            A(AK.Secret, "3-1", -54, 64, "멍석 골목 끝"),
+            A(AK.SecretExit, "3-1", 44, 54, "약방골 — 4장 장승 발치에서"),
 
             A(AK.Start, "3-2", 0, 14),
             A(AK.Extraction, "3-2", -55, -32), A(AK.Extraction, "3-2", 55, -6),
@@ -641,6 +666,8 @@ public static class ZoneMapTable
             L("4-1", 34, 20, "나무 장승들 — 두두리가 섞여 선다"),
             L("4-1", 70, -54, "벌판 끝 금줄 — 장승들이 붙든다 · 잡귀 떼가 몰려온다"),
             L("4-1", 88, 22, "늘어선 장승들 — 새겨진 이야기"),
+            A(AK.Secret, "4-1", 73, -32, "오래된 장승 뒤"),
+            A(AK.SecretExit, "4-1", 90, 10, "벌판 어귀 — 5장 문 그림에서"),
 
             A(AK.Start, "4-2", 25, 0),
             A(AK.Extraction, "4-2", 0, 52), A(AK.Extraction, "4-2", 2, -52),
@@ -720,6 +747,8 @@ public static class ZoneMapTable
             L("5-1", -30, -63, "담장 화로"), L("5-1", 10, -63, "담장 화로"), L("5-1", -30, -43, "담장 화로"),
             L("5-1", 0, -29, "담장 화로"), L("5-1", 20, -9, "담장 화로"), L("5-1", -20, 5, "담장 화로"),
             L("5-1", 10, 40, "담장의 바랜 호랑이 그림 — 산군"),
+            A(AK.Secret, "5-1", -14, -62, "바랜 문 그림 하나"),
+            A(AK.SecretExit, "5-1", -26, -43, "담장 화로 곁 — 6장 꽃밭에서"),
 
             A(AK.Start, "5-2", -52, 52),
             A(AK.Extraction, "5-2", 50, 52), A(AK.Extraction, "5-2", -20, 59),
@@ -781,6 +810,7 @@ public static class ZoneMapTable
             L("6-1", -10, 8, "참봉의 꽃"),
             L("6-1", 10, 8, "빚쟁이의 꽃"),
             L("6-1", 0, 30, "시든 꽃에서 빠져나온 혼들이 흘러가는 쪽"),
+            A(AK.Secret, "6-1", -86, -10, "꽃밭 가장자리 — 반쯤 탄 지방"),
 
             A(AK.Start, "6-2", 0, 42),
             A(AK.Extraction, "6-2", -50, 52), A(AK.Extraction, "6-2", 50, 52),

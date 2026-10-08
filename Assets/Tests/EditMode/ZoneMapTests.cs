@@ -236,6 +236,56 @@ namespace Dokkaebi.Tests
         }
 
         [Test]
+        public void 비밀_통로는_1장부터_장마다_하나이고_출구는_이전_장에_하나다()
+        {
+            foreach (ChapterMap map in Maps)
+            {
+                int secrets = 0, exits = 0;
+
+                foreach (MapAnchor a in map.Anchors)
+                {
+                    if (a.Kind == MapAnchorKind.Secret) secrets++;
+                    if (a.Kind == MapAnchorKind.SecretExit) exits++;
+
+                    if (a.Kind is MapAnchorKind.Secret or MapAnchorKind.SecretExit)
+                        Assert.IsFalse(string.IsNullOrEmpty(a.Label), $"{map.Chapter}장 {a.Kind} 이름");
+                }
+
+                Assert.AreEqual(map.Chapter == 0 ? 0 : 1, secrets, $"{map.Chapter}장 통로 입구");
+                Assert.AreEqual(map.Chapter == StoryTable.LastChapter ? 0 : 1, exits, $"{map.Chapter}장 통로 출구");
+
+                if (map.Chapter > 0)
+                {
+                    MapAnchor? exit = SecretPassageRule.ExitOf(map.Chapter);
+                    Assert.IsTrue(exit.HasValue, $"{map.Chapter}장 통로가 닿는 곳");
+                    Assert.AreEqual(map.Chapter - 1, StoryTable.Zone(exit.Value.ZoneId).Chapter, "이전 장으로 간다");
+                }
+            }
+
+            Assert.IsFalse(SecretPassageRule.ExitOf(0).HasValue, "0장에는 이전 장이 없다");
+        }
+
+        [Test]
+        public void 비밀_통로는_입구_구역을_끝낸_뒤에만_나타난다()
+        {
+            var p = new StoryProgress();
+            Assert.IsFalse(SecretPassageRule.IsOpen(p, 1), "현무 전");
+            Assert.IsFalse(SecretPassageRule.IsOpen(p, 0), "0장에는 통로가 없다");
+
+            foreach (BossDefinition b in StoryTable.Bosses)
+                if (b.ZoneId.StartsWith("1-"))
+                    p.Defeat(b.Id);
+
+            Assert.IsTrue(SecretPassageRule.IsOpen(p, 1), "1-3 현무 뒤 — 우물");
+            Assert.IsFalse(SecretPassageRule.IsOpen(p, 2), "2-3 강철이 전");
+
+            p.Defeat("gangcheori");
+            Assert.IsTrue(SecretPassageRule.IsOpen(p, 2), "2-3 강철이 뒤 — 상류 강바닥");
+
+            Assert.AreEqual("우물", SecretPassageRule.PromptOf(SecretPassageRule.EntranceOf(1).Value));
+        }
+
+        [Test]
         public void 적은_닫힌_구역과_덩어리_안에는_나오지_않는다()
         {
             ChapterMap map = ZoneMapTable.Of(0);

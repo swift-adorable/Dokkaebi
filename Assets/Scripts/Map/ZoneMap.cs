@@ -38,19 +38,26 @@ public class ZoneMap : MonoBehaviour
 
         PlacePlayer(map);
         RefreshGates();
+        SecretPassage.SpawnFor(chapter);   // 역행 비밀 통로 — 입구 구역을 끝냈을 때만 (결정 2-88)
     }
 
     private void PlacePlayer(ChapterMap map)
     {
-        List<MapAnchor> starts = map.AnchorsOf(MapAnchorKind.Start, Zone);
-        if (starts.Count == 0)
-            return;
+        // 비밀 통로로 왔으면 출구에 선다 (결정 2-88). 아니면 고른 구역의 출발 자리.
+        Vector3 at;
+        if (!SceneFlow.TryTakeArrival(map.Chapter, out at))
+        {
+            List<MapAnchor> starts = map.AnchorsOf(MapAnchorKind.Start, Zone);
+            if (starts.Count == 0)
+                return;
+
+            at = starts[0].Position;
+        }
 
         var movement = FindAnyObjectByType<PlayerMovement>(FindObjectsInactive.Exclude);
         if (movement == null)
             return;
 
-        Vector3 at = starts[0].Position;
         at.y = movement.transform.position.y;
 
         if (movement.TryGetComponent(out Rigidbody body))
