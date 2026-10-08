@@ -53,6 +53,20 @@ public class BerryTree : MonoBehaviour
     {
         int trees = Random.Range(MinTrees, MaxTrees + 1);
 
+        // 장 맵이 있으면 그 구역의 열매 나무 자리 중에서 (결정 2-86).
+        System.Collections.Generic.List<Vector3> anchors = ZoneMap.Anchors(MapAnchorKind.BerryTree);
+        if (anchors.Count > 0)
+        {
+            for (int i = 0; i < trees && anchors.Count > 0; i++)
+            {
+                int pick = Random.Range(0, anchors.Count);
+                Spawn(anchors[pick], i);
+                anchors.RemoveAt(pick);
+            }
+
+            return;
+        }
+
         for (int i = 0; i < trees; i++)
         {
             float angle = (i + Random.value * 0.6f) * Mathf.PI * 2f / trees;

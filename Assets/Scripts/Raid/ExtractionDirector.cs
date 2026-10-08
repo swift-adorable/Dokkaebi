@@ -32,7 +32,11 @@ public class ExtractionDirector : MonoBehaviour
 
         var root = new GameObject("ExtractionPoints (Runtime)");
         var director = root.AddComponent<ExtractionDirector>();
-        director.points = ExtractionTable.PickPoints(start, new System.Random());
+        // 장 맵이 있으면 그 구역의 길목 자리 (결정 2-86). 없으면 출발 자리에서 25~35m 무작위 두 곳.
+        System.Collections.Generic.List<Vector3> anchors = ZoneMap.Anchors(MapAnchorKind.Extraction);
+        director.points = anchors.Count > 0
+            ? anchors.ToArray()
+            : ExtractionTable.PickPoints(start, new System.Random());
 
         for (int i = 0; i < director.points.Length; i++)
             BuildMarker(root.transform, director.points[i], i);

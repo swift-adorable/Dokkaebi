@@ -243,12 +243,23 @@ public class EnemySpawner : MonoBehaviour
 
     private Vector3 PickSpawnPoint(float radius)
     {
-        Vector2 circle = Random.insideUnitCircle;
+        // 장 맵에서는 덩어리 안 · 닫힌 구역(금줄 너머) · 바닥 밖에 나오지 않게 몇 번 다시 고른다 (결정 2-86).
+        Vector3 candidate = player.position;
 
-        if (spawnOnRingOnly)
-            circle = circle.normalized;
+        for (int attempt = 0; attempt < 12; attempt++)
+        {
+            Vector2 circle = Random.insideUnitCircle;
 
-        return player.position + RandomFlat(circle * radius);
+            if (spawnOnRingOnly)
+                circle = circle.normalized;
+
+            candidate = player.position + RandomFlat(circle * radius);
+
+            if (ZoneMap.CanSpawnAt(candidate))
+                return candidate;
+        }
+
+        return candidate;
     }
 
     private static Vector3 RandomFlat(Vector2 circle)

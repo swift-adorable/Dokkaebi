@@ -48,7 +48,7 @@ public class StoryDirector : MonoBehaviour
     {
         if (SceneFlow.InBunker)
             PlayBunker();
-        else if (SceneManager.GetActiveScene().name == SceneFlow.RaidScene)
+        else if (SceneFlow.IsRaidScene(SceneManager.GetActiveScene().name))
             PlayRaid();
     }
 

@@ -19,6 +19,23 @@ public static class SceneFlow
     /// <summary>파밍 구역 씬 이름. 6장 구조(9단계)가 생기면 구역마다 나뉜다.</summary>
     public const string RaidScene = "SampleScene";
 
+    /// <summary>
+    /// 이 구역을 도는 씬 (결정 2-86) — 그 장의 맵 씬(「Chapter0」…)이 빌드에 있으면 그것, 아니면 옛 평지(SampleScene).
+    /// </summary>
+    public static string RaidSceneFor(string zoneId)
+    {
+        ChapterData chapter = ZoneDataTable.ChapterOfZone(zoneId);
+        string map = chapter != null ? ZoneMapTable.SceneFor(chapter.Chapter) : null;
+
+        return map != null && ZoneMapTable.Of(chapter.Chapter) != null && Application.CanStreamedLevelBeLoaded(map)
+            ? map
+            : RaidScene;
+    }
+
+    /// <summary>파밍 구역 씬인가 — 옛 평지이거나 장 맵.</summary>
+    public static bool IsRaidScene(string sceneName)
+        => sceneName == RaidScene || ZoneMapTable.IsMapScene(sceneName);
+
     /// <summary>지금 벙커에 있는가. 벙커에서는 쏘지 않고 수분·에너지가 줄지 않는다.</summary>
     public static bool InBunker => SceneManager.GetActiveScene().name == BunkerScene;
 
@@ -40,7 +57,7 @@ public static class SceneFlow
             return;
 
         SaveManager.Commit("파밍 출발");
-        Load(RaidScene);
+        Load(RaidSceneFor(StoryManager.TargetZone));
     }
 
     /// <summary>

@@ -111,7 +111,11 @@ public class StoryRaidDirector : MonoBehaviour
                 continue;
 
             Vector2 side = new Vector2(-dir.y, dir.x) * (i - (boss.Bodies.Length - 1) * 0.5f) * 2.5f;
-            Vector3 position = player.position + new Vector3(dir.x, 0f, dir.y) * BossDistance + new Vector3(side.x, 0f, side.y);
+            List<Vector3> bossSpots = ZoneMap.Anchors(MapAnchorKind.Boss);
+            Vector3 center = bossSpots.Count > 0
+                ? bossSpots[0]
+                : player.position + new Vector3(dir.x, 0f, dir.y) * BossDistance;
+            Vector3 position = center + new Vector3(side.x, 0f, side.y);
 
             GameObject body = pool.Spawn(prefab, position, Quaternion.identity);
 
@@ -161,11 +165,13 @@ public class StoryRaidDirector : MonoBehaviour
 
         if (ChapterZeroTable.ShouldPlaceBundle(progress, zone))
         {
+            // 장 맵이 있으면 봇짐 자리(헛간 앞 길가) — 없으면 플레이어 앞 4m (결정 2-86).
+            List<Vector3> spots = ZoneMap.Anchors(MapAnchorKind.Bundle);
             Vector3 ahead = player.forward;
             ahead.y = 0f;
             if (ahead.sqrMagnitude < 0.01f) ahead = Vector3.forward;
 
-            StoryBundle.Create(player.position + ahead.normalized * ChapterZeroTable.BundleDistance);
+            StoryBundle.Create(spots.Count > 0 ? spots[0] : player.position + ahead.normalized * ChapterZeroTable.BundleDistance);
         }
 
         if (ChapterZeroTable.ShouldSendGiftCarrier(progress, zone))
@@ -192,7 +198,10 @@ public class StoryRaidDirector : MonoBehaviour
         Vector2 dir = Random.insideUnitCircle.normalized;
         if (dir == Vector2.zero) dir = Vector2.up;
 
-        Vector3 at = player.position + new Vector3(dir.x, 0f, dir.y) * ChapterZeroTable.GiftDistance;
+        List<Vector3> giftSpots = ZoneMap.Anchors(MapAnchorKind.Gift);
+        Vector3 at = giftSpots.Count > 0
+            ? giftSpots[0]
+            : player.position + new Vector3(dir.x, 0f, dir.y) * ChapterZeroTable.GiftDistance;
         GameObject body = PoolManager.EnsureInstance().Spawn(prefab, at, Quaternion.identity);
 
         if (body == null)
@@ -224,7 +233,25 @@ public class StoryRaidDirector : MonoBehaviour
             StoryPickup.Create(StoryPickup.Kind.Notice, notice.Id, RandomPoint());
     }
 
+    /// <summary>조각 · 방 자리 — 장 맵이 있으면 그 구역의 자리 중 하나(같은 판에서 겹치지 않게), 없으면 플레이어 둘레.</summary>
+    private List<Vector3> pickupSpots;
+
     private Vector3 RandomPoint()
+    {
+        pickupSpots ??= ZoneMap.Anchors(MapAnchorKind.Pickup);
+
+        if (pickupSpots.Count > 0)
+        {
+            int pick = Random.Range(0, pickupSpots.Count);
+            Vector3 spot = pickupSpots[pick];
+            pickupSpots.RemoveAt(pick);
+            return spot;
+        }
+
+        return AroundPlayer();
+    }
+
+    private Vector3 AroundPlayer()
     {
         Vector2 dir = Random.insideUnitCircle.normalized;
         if (dir == Vector2.zero) dir = Vector2.right;
