@@ -78,7 +78,10 @@ public class WorldMapUI : MonoBehaviour, IPointerClickHandler
     {
         RectTransform safe = UIFactory.CreateSafeArea(canvas);
 
-        Image dim = UIFactory.CreatePanel("Dim", safe, UIPalette.Dim, new Vector2(-0.2f, -0.2f), new Vector2(1.2f, 1.2f));
+        // 덮개는 거의 불투명하게 — 뒤의 퀵슬롯 · 게임 화면이 지도 글자와 겹쳐 읽히지 않게.
+        var dimColor = UIPalette.Dim;
+        dimColor.a = 0.96f;
+        Image dim = UIFactory.CreatePanel("Dim", safe, dimColor, new Vector2(-0.2f, -0.2f), new Vector2(1.2f, 1.2f), 0);
         dim.raycastTarget = true;   // 지도 밖을 눌러도 조준이 돌지 않게
         root = dim.gameObject;
 
