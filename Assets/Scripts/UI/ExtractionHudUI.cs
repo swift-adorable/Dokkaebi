@@ -115,7 +115,8 @@ public class ExtractionHudUI : MonoBehaviour
     }
 
     /// <summary>매 프레임 — 철수 지점 연출이 부른다.</summary>
-    public void Show(Vector3 player, Vector3 target, ExtractionChannel channel, bool playerDead)
+    /// <summary>target이 null이면 아직 찾은 길목이 없다 — 화살표 없이 막대만 (결정 2-90).</summary>
+    public void Show(Vector3 player, Vector3? target, ExtractionChannel channel, bool playerDead)
     {
         if (hiddenByScreen || playerDead)
         {
@@ -136,16 +137,17 @@ public class ExtractionHudUI : MonoBehaviour
         }
 
         Camera cam = Camera.main;
-        if (cam == null)
+        if (cam == null || !target.HasValue)
         {
             HideAll();
             return;
         }
 
-        PlaceArrow(cam, target + Vector3.up * 8.5f);
+        Vector3 to = target.Value;
+        PlaceArrow(cam, to + Vector3.up * 8.5f);
 
-        float dx = player.x - target.x;
-        float dz = player.z - target.z;
+        float dx = player.x - to.x;
+        float dz = player.z - to.z;
         distanceLabel.text = $"{ExtractionDirector.Name} {Mathf.Sqrt(dx * dx + dz * dz):0}m";
     }
 

@@ -137,6 +137,7 @@ public static class SceneFlow
         BuildingManager.Reset();
         ShopManager.Reset();
         SpringManager.Reset();
+        MapMemory.Reset();
 
         loading = false;
         Load(HasBunker ? BunkerScene : RaidScene);

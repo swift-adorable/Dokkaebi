@@ -37,6 +37,7 @@ public class ZoneMap : MonoBehaviour
             return;
 
         PlacePlayer(map);
+        MapRuntime.Attach(gameObject, chapter);   // 지도 · 미니맵 (결정 2-90)
         RefreshGates();
         SecretPassage.SpawnFor(chapter);   // 역행 비밀 통로 — 입구 구역을 끝냈을 때만 (결정 2-88)
     }
@@ -84,6 +85,10 @@ public class ZoneMap : MonoBehaviour
 
             child.gameObject.SetActive(!StoryManager.Progress.IsZoneOpen(zone));
         }
+
+        // 지도의 금줄 · 닫힌 구역도 같이 (결정 2-90).
+        if (TryGetComponent(out MapRuntime runtime))
+            runtime.RedrawMap();
     }
 
     // ── 자리 묻기 ───────────────────────────────────────────────────

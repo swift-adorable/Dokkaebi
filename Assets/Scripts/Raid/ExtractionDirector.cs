@@ -4,7 +4,9 @@ using UnityEngine;
 /// 【임시】 철수 지점 2곳을 세우고, 원 안에서 5초 버티면 철수시킨다 (결정 2-78 · ExtractionTable).
 ///
 ///   · 구역 씬이 열릴 때 스포너가 한 번 부른다 — 열매 나무와 같은 자리
-///   · 초록 기둥 + 바닥 원 · 화면 가장자리 화살표(ExtractionHudUI)로 가장 가까운 곳을 가리킨다
+///   · 초록 기둥 + 바닥 원 · 화면 가장자리 화살표(ExtractionHudUI)로 【찾은 곳 중】 가장 가까운 곳을 가리킨다
+///   · 【찾기】 (결정 2-90) — 기둥이 화면에 들어오고 키 큰 덩어리가 가리지 않으면 찾은 것. 판마다 새로 찾는다.
+///     지도 · 미니맵 · 화살표는 찾은 길목만 보여 준다
 ///   · 다 버티면 SceneFlow.Extract — 철수 저장 · 상점 재고 · 샘 채움까지 그쪽이 한다
 /// 구역 맵(9단계)이 생기면 자리만 맵이 정한다.
 /// </summary>
@@ -17,12 +19,18 @@ public class ExtractionDirector : MonoBehaviour
     private static readonly Color CircleColor = new(0.18f, 0.55f, 0.26f);
 
     private Vector3[] points;
+    private bool[] discovered;
+    private float nextDiscover;
     private readonly ExtractionChannel channel = new();
     private Transform player;
     private Health playerHealth;
 
     public static ExtractionDirector Instance { get; private set; }
     public Vector3[] Points => points;
+
+    /// <summary>이 길목을 이번 판에 찾았는가 (결정 2-90).</summary>
+    public bool IsDiscovered(int index)
+        => discovered != null && index >= 0 && index < discovered.Length && discovered[index];
 
     /// <summary>이번 구역에 철수 지점을 세운다. 이미 있으면 그대로 둔다.</summary>
     public static ExtractionDirector SpawnForRaid(Vector3 start)
@@ -37,6 +45,7 @@ public class ExtractionDirector : MonoBehaviour
         director.points = anchors.Count > 0
             ? anchors.ToArray()
             : ExtractionTable.PickPoints(start, new System.Random());
+        director.discovered = new bool[director.points.Length];
 
         for (int i = 0; i < director.points.Length; i++)
             BuildMarker(root.transform, director.points[i], i);
@@ -86,8 +95,77 @@ public class ExtractionDirector : MonoBehaviour
                 return;
         }
 
-        int nearest = ExtractionTable.Nearest(player.position, points);
-        ExtractionHudUI.EnsureInstance().Show(player.position, points[nearest], channel, dead);
+        // 원 안에 선 길목은 찾은 것이다.
+        for (int i = 0; i < points.Length; i++)
+            if (!discovered[i] && ExtractionTable.InCircle(player.position, points[i]))
+                Discover(i);
+
+        if (Time.time >= nextDiscover)
+        {
+            nextDiscover = Time.time + MapTable.DiscoverInterval;
+            DiscoverVisible();
+        }
+
+        int nearest = NearestDiscovered(player.position);
+        ExtractionHudUI.EnsureInstance().Show(player.position,
+            nearest >= 0 ? points[nearest] : (Vector3?)null, channel, dead);
+    }
+
+    /// <summary>찾은 길목 중 가장 가까운 것. 하나도 없으면 -1.</summary>
+    private int NearestDiscovered(Vector3 from)
+    {
+        int best = -1;
+        float bestSq = float.MaxValue;
+
+        for (int i = 0; i < points.Length; i++)
+        {
+            if (!discovered[i])
+                continue;
+
+            float dx = from.x - points[i].x, dz = from.z - points[i].z;
+            float sq = dx * dx + dz * dz;
+
+            if (sq < bestSq)
+            {
+                bestSq = sq;
+                best = i;
+            }
+        }
+
+        return best;
+    }
+
+    /// <summary>
+    /// 기둥 가운데(4m)가 화면 안이고, 카메라에서 그 점까지 키 큰 덩어리가 가리지 않으면 찾은 것 (결정 2-90).
+    /// </summary>
+    private void DiscoverVisible()
+    {
+        Camera cam = Camera.main;
+        if (cam == null)
+            return;
+
+        for (int i = 0; i < points.Length; i++)
+        {
+            if (discovered[i])
+                continue;
+
+            Vector3 sight = points[i] + Vector3.up * MapTable.PillarSightHeight;
+            Vector3 vp = cam.WorldToViewportPoint(sight);
+
+            if (vp.z <= 0f || vp.x < 0f || vp.x > 1f || vp.y < 0f || vp.y > 1f)
+                continue;
+
+            if (Physics.Linecast(cam.transform.position, sight, GameLayers.ShotBlockMask, QueryTriggerInteraction.Ignore))
+                continue;
+
+            Discover(i);
+        }
+    }
+
+    private void Discover(int index)
+    {
+        discovered[index] = true;
+        StoryDialogueUI.ShowBanner($"{Name}을 찾았다.", 1.5f);
     }
 
     private bool FindPlayer()

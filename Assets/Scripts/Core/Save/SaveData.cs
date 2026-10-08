@@ -47,7 +47,8 @@ public class SaveData
     ///       들판의 「맑은 물」(water_bottle)은 물병(con_water)로 읽는다(ItemCatalog.Find).
     ///  13 — 구슬 도감(codex)을 없앴다 (결정 2-75). 고르지 않은 구슬이 떨어지고 가방에서 고른다.
     ///       12판의 codex 줄은 읽지 않고 버린다.
-    public const int CurrentVersion = 13;
+    ///  14 — 장마다 기억하는 지도(maps — 가 본 땅 · 마커)를 더했다 (결정 2-90). 13판에는 없어 처음 보는 지도로 읽힌다.
+    public const int CurrentVersion = 14;
 
     public int version = CurrentVersion;
 
@@ -120,6 +121,31 @@ public class SaveData
     /// -1이면 아직 고르지 않았다 — 판 10 이전 세이브도 -1로 읽혀 다음 소굴에서 고른다.
     /// </summary>
     public int difficulty = DifficultyManager.NotChosen;
+
+    // ── 지도 ──────────────────────────────────────────────────────────
+
+    /// <summary>장마다 가 본 땅 · 찍은 마커 (결정 2-90). 【죽어도 잃지 않는다】 — 아는 길은 아는 길이다.</summary>
+    public List<SavedMap> maps = new();
+}
+
+/// <summary>장 하나의 지도 기억 (MapMemory).</summary>
+[Serializable]
+public class SavedMap
+{
+    public int chapter;
+
+    /// <summary>가 본 땅 — FogGrid 비트를 base64로. 비어 있으면 아무 데도 안 가 봤다.</summary>
+    public string fog = string.Empty;
+
+    public List<SavedMarker> markers = new();
+}
+
+/// <summary>마커 하나 (월드 x · z).</summary>
+[Serializable]
+public class SavedMarker
+{
+    public float x;
+    public float z;
 }
 
 /// <summary>

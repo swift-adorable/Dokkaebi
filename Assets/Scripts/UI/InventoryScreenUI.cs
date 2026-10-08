@@ -410,8 +410,9 @@ public partial class InventoryScreenUI : MonoBehaviour
             // 오른쪽부터 역순으로 쌓는다 — 패시브가 가장 오른쪽.
             int fromRight = TabNames.Length - 1 - i;
 
+            // 장 맵에서는 미니맵 아래 (결정 2-90 · HudLayout).
             rect.anchoredPosition = new Vector2(
-                -(10f + fromRight * (HudButtonWidth + HudButtonGap)), -10f);
+                -(10f + fromRight * (HudButtonWidth + HudButtonGap)), HudLayout.TopRightButtonsY);
 
             var image = buttonObject.AddComponent<Image>();
             image.color = UIPalette.Header;
@@ -889,11 +890,13 @@ public partial class InventoryScreenUI : MonoBehaviour
 
         // 생존 게이지와 소지 중량 카드가 좌하단에서 겹친다.
         // 가방을 열면 소지 중량이 그 자리를 가져간다.
+        WorldMapUI.Close();
         SurvivalHudUI.SetHiddenByScreen(true);
         QuestHudUI.SetHiddenByScreen(true);
         ExtractionHudUI.SetHiddenByScreen(true);
         AmmoHudUI.SetHiddenByScreen(true);
         ReloadButtonUI.SetHiddenByScreen(true);
+        MinimapUI.SetHiddenByScreen(true);
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         // 검증 패널은 이 화면 뒤에 있다. 켜져 있으면 글자가 비쳐 보인다.
@@ -930,6 +933,7 @@ public partial class InventoryScreenUI : MonoBehaviour
         ExtractionHudUI.SetHiddenByScreen(false);
         AmmoHudUI.SetHiddenByScreen(false);
         ReloadButtonUI.SetHiddenByScreen(false);
+        MinimapUI.SetHiddenByScreen(false);
 
         // 파밍 중이었다면 오른쪽 전리품 패널도 같이 닫힌다. 둘은 한 벌이다.
         ExchangeWindowUI.CloseIfOpen();

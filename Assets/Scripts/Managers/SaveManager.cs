@@ -224,6 +224,7 @@ public static class SaveManager
         data.buildings = BuildingManager.Capture();
         data.story = StoryManager.Capture();
         data.difficulty = DifficultyManager.Capture();
+        data.maps = MapMemory.Capture();
 
         return data;
     }
@@ -279,6 +280,7 @@ public static class SaveManager
         BuildingManager.Restore(data.buildings);
         StoryManager.Restore(data.story);
         DifficultyManager.Restore(data.difficulty);
+        MapMemory.Restore(data.maps);
 
         // 레벨이 돌아왔으니 소켓 수도 맞춘다. 알림은 내지 않는다.
         SkillManager.EnsureInstance().ResyncLevel();
