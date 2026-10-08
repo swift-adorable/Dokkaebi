@@ -215,6 +215,13 @@ public static class StatusEffectTable
                 return new StatusEffectSpec(FrenzySelfDamagePerSecond, FrenzySeconds, 1,
                     DamageElement.Physical);
 
+            // 막이 넷 (결정 2-91) — 피해 없음 · 120초.
+            case StatusEffectType.GuardWarmth:
+            case StatusEffectType.GuardShield:
+            case StatusEffectType.GuardCool:
+            case StatusEffectType.GuardLight:
+                return new StatusEffectSpec(0f, GuardSeconds, 1, DamageElement.Physical);
+
             default:
                 return new StatusEffectSpec(0f, 0f, 1, DamageElement.Physical);
         }
@@ -270,12 +277,19 @@ public static class StatusEffectTable
             case StatusEffectType.WardLightning:
             case StatusEffectType.WardChaos:
             case StatusEffectType.Frenzy:
+            case StatusEffectType.GuardWarmth:
+            case StatusEffectType.GuardShield:
+            case StatusEffectType.GuardCool:
+            case StatusEffectType.GuardLight:
                 return true;
 
             default:
                 return false;
         }
     }
+
+    /// <summary>막이 소모품의 지속시간 (초) — 추천안 v3 「소모품 +1 · 60 ~ 180초」의 가운데 [임시값].</summary>
+    public const float GuardSeconds = 120f;
 
     /// <summary>저항이 막는 속성. 저항이 아니면 None을 뜻하는 Physical을 돌려준다.</summary>
     public static bool IsWard(StatusEffectType type)

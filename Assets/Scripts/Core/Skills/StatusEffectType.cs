@@ -90,7 +90,22 @@ public enum StatusEffectType
     ///
     /// 이름을 「흡수」로 두지 않는다 — 흡수는 플레이어의 기본 행동(흡수 범위)이다.
     /// </summary>
-    Frenzy = 19
+    Frenzy = 19,
+
+    // ── 막이 넷 — 궂은 날 (결정 2-63 · 2-91) ───────────────────────────────
+    // 막이 소모품이 건다. 걸려 있는 동안 그 막이 +1 · 120초. 비배타 (넷을 같이 걸 수 있다).
+
+    /// <summary>방한 — 겨울 한파.</summary>
+    GuardWarmth = 20,
+
+    /// <summary>막이 — 봄 흙비.</summary>
+    GuardShield = 21,
+
+    /// <summary>서늘함 — 여름 폭염 · 독안개.</summary>
+    GuardCool = 22,
+
+    /// <summary>밝히기 — 가을 짙은 안개.</summary>
+    GuardLight = 23
 }
 
 /// <summary>바닥에 남는 지형 상태 — v5 §5-2.</summary>

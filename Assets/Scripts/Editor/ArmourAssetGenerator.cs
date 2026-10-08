@@ -103,6 +103,7 @@ public static class ArmourAssetGenerator
         int count = 0;
 
         count += GenerateHead();
+        count += GenerateGuardHeads();
         count += GenerateBody();
         count += GenerateEars();
         count += GenerateFace();
@@ -144,6 +145,43 @@ public static class ArmourAssetGenerator
         }
 
         return HeadTable.Length;
+    }
+
+    // ── 막이 머리 장비 【임시】 (결정 2-91) ─────────────────────────────
+    // 궂은 날 막이 넷의 1단계. 이름 · 그림은 Naming · 아트 때 바꾼다 (결정 2-63).
+    // 방어도는 티어 1 투구의 절반 — 「막이를 쓰면 머리가 약해진다」가 대가다.
+    private static readonly (string id, string name, string desc, EquipmentStatType stat)[] GuardHeadTable =
+    {
+        ("arm_guard_warmth", "털벙거지", "【임시】 귀까지 덮는다. 한파에 방한 1.",          EquipmentStatType.ProtectWarmth),
+        ("arm_guard_shield", "갈모",     "【임시】 흙비를 흘려보낸다. 흙비에 막이 1.",      EquipmentStatType.ProtectShield),
+        ("arm_guard_cool",   "패랭이",   "【임시】 볕을 가린다. 폭염에 서늘함 1.",          EquipmentStatType.ProtectCool),
+        ("arm_guard_light",  "초롱갓",   "【임시】 갓끈에 작은 초롱을 달았다. 안개에 밝히기 1.", EquipmentStatType.ProtectLight),
+    };
+
+    private static int GenerateGuardHeads()
+    {
+        foreach (var g in GuardHeadTable)
+        {
+            Write(new Row
+            {
+                id = g.id,
+                name = g.name,
+                desc = g.desc,
+                kind = ItemKind.Armour,
+                slot = EquipmentSlot.Head,
+                tier = 1,
+                weight = 0.3f,
+                durability = 30,
+                value = 300,
+                stats = new List<EquipmentStat>
+                {
+                    S(EquipmentStatType.HeadArmour, 0.5f),
+                    S(g.stat, 1f)
+                }
+            }, ArmourFolder, isWeapon: false);
+        }
+
+        return GuardHeadTable.Length;
     }
 
     private static int GenerateBody()

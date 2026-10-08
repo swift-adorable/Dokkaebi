@@ -87,7 +87,22 @@ public enum EquipmentStatType
     CriticalMultiplier = 84,
 
     /// <summary>상태이상 위력 증가율. 직접 피해와 분리된 축이다.</summary>
-    AilmentPower = 85
+    AilmentPower = 85,
+
+    // ── 막이 — 궂은 날 (결정 2-63 · 2-91) ────────────────────────────────
+    // 덕코프 방한 · 폭풍 방어처럼 장비 한 부위 +0.5 ~ +1. 합을 반올림한 단계가 궂은 날 Ⅰ · Ⅱ를 막는다.
+
+    /// <summary>방한 — 겨울 한파.</summary>
+    ProtectWarmth = 90,
+
+    /// <summary>막이 — 봄 흙비.</summary>
+    ProtectShield = 91,
+
+    /// <summary>서늘함 — 여름 폭염 · 독안개.</summary>
+    ProtectCool = 92,
+
+    /// <summary>밝히기 — 가을 짙은 안개.</summary>
+    ProtectLight = 93
 }
 
 /// <summary>

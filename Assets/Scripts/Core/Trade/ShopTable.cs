@@ -91,6 +91,12 @@ public static class ShopTable
         new("con_ward_toxin",  3, 1.00f),
         new("con_ward_cold",   3, 1.00f),   // 덕코프에 없음 — 공간 저항 자리
         new("con_absorbent",   1, 1.00f),   // 타길라의 약품 자리 (최대 재고 1)
+
+        // 막이 소모품 【임시】 (결정 2-91)
+        new("con_guard_warmth", 3, 1.00f),
+        new("con_guard_shield", 3, 1.00f),
+        new("con_guard_cool",   3, 1.00f),
+        new("con_guard_light",  3, 1.00f),
     };
 
     private static readonly ShopEntry[] smithy =
@@ -135,6 +141,10 @@ public static class ShopTable
         new("arm_ears_t1", 1, 1.00f),
         new("arm_ears_t2", 1, 1.00f),
         new("arm_ears_t3", 1, 1.00f),
+        new("arm_guard_warmth", 1, 1.00f),   // 막이 머리 【임시】 (결정 2-91)
+        new("arm_guard_shield", 1, 1.00f),
+        new("arm_guard_cool",   1, 1.00f),
+        new("arm_guard_light",  1, 1.00f),
         new("bag_t1_sack", 1, 1.00f),
         new("bag_t2_vest", 1, 1.00f),
         new("bag_t3_pack", 1, 1.00f),

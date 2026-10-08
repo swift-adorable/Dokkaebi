@@ -270,6 +270,11 @@ public class Health : MonoBehaviour, IDamageable, IPoolable
         if (taken > 1f)
             amplified.increasedPercent += taken - 1f;
 
+        // 날씨가 키우는 속성 — 장마비에 감전 2배 (결정 2-64). 맞는 쪽에서 한 번만.
+        float environment = RaidManager.HasInstance ? RaidManager.Current.DamageMultiplier(request.element) : 1f;
+        if (environment > 1f)
+            amplified.increasedPercent += environment - 1f;
+
         int computed = DamageResolver.Resolve(amplified, Defence, difficultyMultiplier);
 
         if (computed <= 0)

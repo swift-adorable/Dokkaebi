@@ -27,6 +27,8 @@ public class MinimapUI : MonoBehaviour
     private RawImage fogImage;
     private RectTransform playerArrow;
     private readonly List<Text> icons = new();
+    private Text weatherLine;
+    private float weatherRefresh;
     private bool hiddenByScreen;
 
     public static MinimapUI EnsureInstance()
@@ -88,6 +90,46 @@ public class MinimapUI : MonoBehaviour
         hint.rectTransform.offsetMin = new Vector2(0f, 6f);
         hint.rectTransform.offsetMax = new Vector2(-10f, 30f);
         hint.raycastTarget = false;
+
+        // 달 · 날씨 · 막이 한 줄 (결정 2-91) — 미니맵 위쪽 띠.
+        Image strip = UIFactory.CreatePanel("WeatherStrip", frame, UIPalette.NameStrip,
+            new Vector2(0f, 1f), new Vector2(1f, 1f), radius: 0);
+        strip.raycastTarget = false;
+        strip.rectTransform.offsetMin = new Vector2(Inner, -Inner - 30f);
+        strip.rectTransform.offsetMax = new Vector2(-Inner, -Inner);
+
+        weatherLine = UIFactory.CreateLabel(strip.transform, string.Empty, 16, FontStyle.Bold,
+            Vector2.zero, Vector2.one, TextAnchor.MiddleCenter, UIPalette.TextOnGlass);
+        weatherLine.raycastTarget = false;
+        weatherLine.supportRichText = true;
+        weatherLine.rectTransform.offsetMin = new Vector2(4f, 0f);
+        weatherLine.rectTransform.offsetMax = new Vector2(-4f, 0f);
+        weatherLine.resizeTextForBestFit = true;
+        weatherLine.resizeTextMinSize = 10;
+        weatherLine.resizeTextMaxSize = 16;
+    }
+
+    /// <summary>미니맵 띠에 적을 한 줄 — 「보름 · 한파 · 방한 0/2 · 추위 23」.</summary>
+    public static string WeatherText(RaidConditions c, int protection, int deficit, float cold)
+    {
+        var parts = new List<string>(4);
+
+        if (c.lunar)
+            parts.Add(MoonTable.Name(c.moon));
+
+        RaidWeather w = c.weather;
+        parts.Add(w.Name);
+
+        if (w.Hazard != WeatherHazard.None)
+        {
+            string guard = $"{WeatherTable.ProtectionName(w.Protection)} {protection}/{w.Severity}";
+            parts.Add(deficit > 0 ? $"<color=#F29E66>{guard}</color>" : guard);
+        }
+
+        if (cold >= 1f)
+            parts.Add($"<color=#A8D2FF>추위 {Mathf.FloorToInt(cold)}</color>");
+
+        return string.Join(" · ", parts);
     }
 
     private static RawImage CreateRaw(string name, Transform parent)
@@ -112,6 +154,15 @@ public class MinimapUI : MonoBehaviour
 
         if (!show)
             return;
+
+        weatherRefresh -= Time.unscaledDeltaTime;
+        if (weatherRefresh <= 0f)
+        {
+            weatherRefresh = 0.25f;
+            PlayerWeather pw = PlayerWeather.Current;
+            weatherLine.text = WeatherText(RaidManager.Current,
+                pw != null ? pw.Protection : 0, pw != null ? pw.Deficit : 0, pw != null ? pw.ColdStacks : 0f);
+        }
 
         Vector3 center = runtime.Player.position;
         ChapterMap map = runtime.Map;

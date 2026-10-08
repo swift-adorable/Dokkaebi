@@ -14,10 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Dokkaebi.Runtime::EquipmentDefinition
   id: arm_face_chaos_t6
   displayName: "\uB204\uB7F0 \uCC98\uC6A9\uD0C8"
-  description: "\uBC29\uB3C5. \uB9C9\uACE0 \uB35C \uBC1B\uB294\uB2E4. \uB300\uC2E0 \uC55E\uC774 \uC798 \uBCF4\uC774\uC9C0 \uC54A\uB294\uB2E4."
+  description: "\uBC29\uB3C5. \uB9C9\uACE0 \uB35C \uBC1B\uB294\uB2E4. \uB300\uC2E0
+    \uC55E\uC774 \uC798 \uBCF4\uC774\uC9C0 \uC54A\uB294\uB2E4."
   kind: 2
   tier: 6
   weight: 0.8
+  icon: {fileID: 0}
   slotSize: 1
   stackMax: 1
   maxDurability: 150
@@ -26,6 +28,19 @@ MonoBehaviour:
   noRegister: 0
   noTrade: 0
   skill: {fileID: 0}
+  blankGem: 0
+  consumable:
+    category: 0
+    heal: 0
+    water: 0
+    energy: 0
+    waterCost: 0
+    energyCost: 0
+    cure: 0
+    cureStacks: 99
+    useCost: 0
+    castSeconds: 0
+    grant: 0
   slot: 3
   stats:
   - type: 14

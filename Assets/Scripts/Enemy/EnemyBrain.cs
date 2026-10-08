@@ -207,7 +207,8 @@ public class EnemyBrain : MonoBehaviour, IEnemySteering
         if (!hasSeenTarget)
         {
             hasSeenTarget = true;
-            reactionReadyTime = Time.time + reactionTime;
+            // 짙은 안개에서는 늦게 알아챈다 (결정 2-61 ② — 덕코프 「야간 반응 시간 계수」).
+            reactionReadyTime = Time.time + reactionTime * RaidManager.Current.EnemyReactionScale;
         }
 
         return Time.time >= reactionReadyTime;

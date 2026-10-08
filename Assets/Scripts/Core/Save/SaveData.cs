@@ -48,7 +48,8 @@ public class SaveData
     ///  13 — 구슬 도감(codex)을 없앴다 (결정 2-75). 고르지 않은 구슬이 떨어지고 가방에서 고른다.
     ///       12판의 codex 줄은 읽지 않고 버린다.
     ///  14 — 장마다 기억하는 지도(maps — 가 본 땅 · 마커)를 더했다 (결정 2-90). 13판에는 없어 처음 보는 지도로 읽힌다.
-    public const int CurrentVersion = 14;
+    ///  15 — 밤 시계(moon · weather · snowy — 다음 판의 달 · 날씨 칸)를 더했다 (결정 2-91). 14판에는 없어 삭 · 맑음으로 읽힌다.
+    public const int CurrentVersion = 15;
 
     public int version = CurrentVersion;
 
@@ -126,6 +127,17 @@ public class SaveData
 
     /// <summary>장마다 가 본 땅 · 찍은 마커 (결정 2-90). 【죽어도 잃지 않는다】 — 아는 길은 아는 길이다.</summary>
     public List<SavedMap> maps = new();
+
+    // ── 밤 시계 (결정 2-91) ───────────────────────────────────────────
+
+    /// <summary>다음 판의 달 (MoonPhase 값).</summary>
+    public int moon;
+
+    /// <summary>다음 판의 날씨 칸 (WeatherSlot 값) — 장마다 그 장의 계절로 읽는다.</summary>
+    public int weather;
+
+    /// <summary>겨울의 비 · 눈 칸이 눈인가.</summary>
+    public bool snowy;
 }
 
 /// <summary>장 하나의 지도 기억 (MapMemory).</summary>

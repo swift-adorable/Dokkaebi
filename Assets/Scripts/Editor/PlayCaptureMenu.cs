@@ -45,4 +45,37 @@ public static class PlayCaptureMenu
         if (EditorApplication.isPlaying)
             WorldMapUI.Toggle();
     }
+
+    [MenuItem("Dokkaebi/Debug/출발 화면 열기")]
+    public static void OpenDeparture()
+    {
+        if (EditorApplication.isPlaying)
+            DepartureUI.Open();
+    }
+
+    /// <summary>날씨 칸을 한 칸 넘기고 지금 판에 바로 건다 (결정 2-91 · 검증용).</summary>
+    [MenuItem("Dokkaebi/Debug/날씨 다음 칸")]
+    public static void NextWeather()
+    {
+        WeatherSlot next = (WeatherSlot)(((int)NightClock.Slot + 1) % 5);
+        NightClock.Set(NightClock.Moon, next, !NightClock.Snowy);
+        ApplyNight();
+    }
+
+    /// <summary>달을 한 칸 돌리고 지금 판에 바로 건다 (검증용).</summary>
+    [MenuItem("Dokkaebi/Debug/달 다음 칸")]
+    public static void NextMoon()
+    {
+        NightClock.Set(MoonTable.Next(NightClock.Moon), NightClock.Slot, NightClock.Snowy);
+        ApplyNight();
+    }
+
+    private static void ApplyNight()
+    {
+        if (EditorApplication.isPlaying && RaidManager.HasInstance)
+            RaidManager.Instance.Reroll();
+
+        Debug.Log($"[Debug] 달 {MoonTable.Name(NightClock.Moon)} · 날씨 칸 {NightClock.Slot} · 눈 {NightClock.Snowy}"
+                  + (RaidManager.HasInstance ? $" — {string.Join(" · ", RaidManager.Current.Describe())}" : string.Empty));
+    }
 }

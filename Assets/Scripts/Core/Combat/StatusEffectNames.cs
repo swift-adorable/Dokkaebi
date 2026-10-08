@@ -33,6 +33,10 @@ public static class StatusEffectNames
             case StatusEffectType.WardLightning: return "전기 저항";
             case StatusEffectType.WardChaos:     return "독 저항";
             case StatusEffectType.Frenzy:        return "폭주";
+            case StatusEffectType.GuardWarmth:   return "방한";
+            case StatusEffectType.GuardShield:   return "막이";
+            case StatusEffectType.GuardCool:     return "서늘함";
+            case StatusEffectType.GuardLight:    return "밝히기";
             default:                        return "—";
         }
     }

@@ -86,6 +86,10 @@ public class PlayerLoadout : MonoBehaviour
     private static float SurvivalMoveScale()
         => PlayerSurvival.HasInstance ? PlayerSurvival.Instance.State.MoveMultiplier : 1f;
 
+    /// <summary>날씨 — 장마비 (결정 2-64). 추위 중첩은 PlayerWeather가 더한다.</summary>
+    private static float WeatherMoveScale()
+        => RaidManager.Current.MoveScale * PlayerWeather.MoveScale;
+
     /// <summary>스냅샷을 각 컴포넌트에 나눠준다. 테스트가 직접 부를 수 있다.</summary>
     public void Apply(in LoadoutSnapshot snapshot)
     {
@@ -98,7 +102,7 @@ public class PlayerLoadout : MonoBehaviour
         // 생존 페널티(탈수·허기)를 여기서 함께 곱한다. PlayerSurvival이 직접
         // 쓰면 다음 Refresh에서 장비 값으로 덮여 페널티가 깜빡거린다.
         if (movement != null)
-            movement.SpeedScale = snapshot.MoveScale * SurvivalMoveScale();
+            movement.SpeedScale = snapshot.MoveScale * SurvivalMoveScale() * WeatherMoveScale();
 
         if (dash != null)
         {

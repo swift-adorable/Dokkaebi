@@ -334,7 +334,7 @@
 
 `Assets/Scripts/Core/Hunting/` — `EnemyArchetype` · `MonsterRarity` · `RarityScaling` ·
 `MonsterMod` · `MonsterModRoller`(순수) · `Faction` · `FactionRelation`(순수) ·
-`FacilityState`(밤 상태 — 달 축으로 바뀐다 · 결정 2-62) · `SpawnTable` · `DropTable`(순수) · `ConditionalDrop`(순수)
+~~`FacilityState`~~(지웠다 — `Core/Raid/MoonTable` · `WeatherTable` · `NightClock` · 결정 2-91) · `SpawnTable` · `DropTable`(순수) · `ConditionalDrop`(순수)
 
 교전 판단은 `Core/AI/`의 `EngagementPlanner` · `AttackTokenPool` (둘 다 순수).
 

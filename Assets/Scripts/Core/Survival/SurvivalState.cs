@@ -106,15 +106,17 @@ public class SurvivalState
     /// </summary>
     /// <param name="deltaTime">흐른 시간(초).</param>
     /// <param name="drainMultiplier">소모율 배율. 과중량 단계가 정한다.</param>
-    public int Tick(float deltaTime, float drainMultiplier = 1f)
+    /// <param name="waterScale">수분에만 곱한다 — 폭염 · 독안개 (결정 2-61).</param>
+    /// <param name="energyScale">에너지에만 곱한다 — 추위 중첩 (결정 2-61).</param>
+    public int Tick(float deltaTime, float drainMultiplier = 1f, float waterScale = 1f, float energyScale = 1f)
     {
         if (deltaTime <= 0f)
             return 0;
 
         float scale = Mathf.Max(0f, drainMultiplier);
 
-        water = Mathf.Max(0f, water - SurvivalTable.WaterDrainPerSecond * scale * deltaTime);
-        energy = Mathf.Max(0f, energy - SurvivalTable.EnergyDrainPerSecond * scale * deltaTime);
+        water = Mathf.Max(0f, water - SurvivalTable.WaterDrainPerSecond * scale * Mathf.Max(0f, waterScale) * deltaTime);
+        energy = Mathf.Max(0f, energy - SurvivalTable.EnergyDrainPerSecond * scale * Mathf.Max(0f, energyScale) * deltaTime);
 
         return TickStarvation(deltaTime);
     }

@@ -226,7 +226,8 @@ public class EnemyAggro : MonoBehaviour, IPoolable
             viewerPosition = transform.position,
             viewerForward = transform.forward,
             visionConeDegrees = stats.visionConeDegrees,
-            visionRange = Mathf.Min(stats.visionRange, detectRange),
+            // 달이 밝으면 멀리, 어두우면 가까이 본다 (결정 2-61 ③).
+            visionRange = Mathf.Min(stats.visionRange, detectRange) * RaidManager.Current.EnemyVisionScale,
             listenerHearingScale = stats.hearingScale,
             targetPosition = targetPosition,
             targetNoiseRadius = noiseRadius,

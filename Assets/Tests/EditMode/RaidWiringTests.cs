@@ -111,12 +111,13 @@ namespace Dokkaebi.Tests
         }
 
         [Test]
-        public void 소독_사이클이_화공체를_강하게_만든다()
+        public void 독안개가_왕지네를_강하게_만든다()
         {
             // 「그 상태에서 만나면 다르다」가 없으면 추가 스폰은 숫자만 느는 것이다.
             var conditions = new RaidConditions
             {
-                facility = FacilityState.Decontamination,
+                lunar = true,
+                weather = WeatherTable.For(3, WeatherSlot.Bad2, false, false),
                 traits = new RaidTrait[0]
             };
 
@@ -130,11 +131,12 @@ namespace Dokkaebi.Tests
         }
 
         [Test]
-        public void 소독_사이클이_다른_유형은_건드리지_않는다()
+        public void 독안개가_다른_유형은_건드리지_않는다()
         {
             var conditions = new RaidConditions
             {
-                facility = FacilityState.Decontamination,
+                lunar = true,
+                weather = WeatherTable.For(3, WeatherSlot.Bad2, false, false),
                 traits = new RaidTrait[0]
             };
 
@@ -152,13 +154,13 @@ namespace Dokkaebi.Tests
         {
             var dense = new RaidConditions
             {
-                facility = FacilityState.Normal,
+                weather = RaidWeather.Calm,
                 traits = new[] { RaidTrait.Dense }
             };
 
             var scattered = new RaidConditions
             {
-                facility = FacilityState.Normal,
+                weather = RaidWeather.Calm,
                 traits = new[] { RaidTrait.Scattered }
             };
 

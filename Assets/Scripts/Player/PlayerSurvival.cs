@@ -68,6 +68,10 @@ public class PlayerSurvival : MonoBehaviour
 
         health = GetComponent<Health>();
         loadout = GetComponent<PlayerLoadout>();
+
+        // 궂은 날 · 막이 (결정 2-91) — 플레이어에 하나.
+        if (!TryGetComponent(out PlayerWeather _))
+            gameObject.AddComponent<PlayerWeather>();
     }
 
     private void OnDestroy()
@@ -85,7 +89,8 @@ public class PlayerSurvival : MonoBehaviour
         float multiplier = SurvivalTable.DrainMultiplier(
             PlayerInventory.EnsureInstance().Encumbrance);
 
-        int damage = state.Tick(Time.deltaTime, multiplier);
+        // 날씨 — 폭염 · 독안개는 수분, 추위는 에너지를 더 태운다 (결정 2-61 · PlayerWeather).
+        int damage = state.Tick(Time.deltaTime, multiplier, PlayerWeather.WaterDrainScale, PlayerWeather.EnergyDrainScale);
 
         if (damage > 0 && health != null && !health.IsDead)
             health.TakeDamage(damage);

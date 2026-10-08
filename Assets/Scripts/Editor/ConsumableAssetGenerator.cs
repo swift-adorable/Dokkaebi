@@ -197,6 +197,20 @@ public static class ConsumableAssetGenerator
         list.Add(Ward("con_ward_toxin", "녹두환", "삭는 것이 덜하다.",
             StatusEffectType.WardChaos));
 
+        // 막이 소모품 【임시】 (결정 2-91) — 걸려 있는 2분 동안 그 막이 +1.
+        // 장비 막이 1과 합치면 궂은 날 Ⅱ도 버틴다. 이름 · 그림은 Naming · 아트 때 바꾼다.
+        list.Add(Guard("con_guard_warmth", "생강차", "【임시】 속이 뜨거워진다. 2분 동안 방한 +1.",
+            StatusEffectType.GuardWarmth, water: 5f));
+
+        list.Add(Guard("con_guard_shield", "면포", "【임시】 입과 코를 싸맨다. 2분 동안 막이 +1.",
+            StatusEffectType.GuardShield));
+
+        list.Add(Guard("con_guard_cool", "얼음물", "【임시】 석빙고에서 깬 얼음. 2분 동안 서늘함 +1.",
+            StatusEffectType.GuardCool, water: 10f));
+
+        list.Add(Guard("con_guard_light", "횃불", "【임시】 송진을 먹인 횃불. 2분 동안 밝히기 +1.",
+            StatusEffectType.GuardLight));
+
         // ── 음료 · 음식 ───────────────────────────────────────────────
         //
         // 【체력을 채우지 않는다.】 먹어서 상처가 낫기 시작하면
@@ -367,6 +381,19 @@ public static class ConsumableAssetGenerator
             grant = grant, waterCost = 20f,
             cure = StatusEffectType.None, cureStacks = 99,
             weight = 0.19f, stackMax = 3, value = 648
+        };
+    }
+
+    /// <summary>막이 소모품 【임시】 — 수분 대가 없음 · 가볍다 · 싸다. 궂은 날을 「살 수 있게」 한다.</summary>
+    private static Row Guard(string id, string name, string desc, StatusEffectType grant, float water = 0f)
+    {
+        return new Row
+        {
+            id = id, name = name, desc = desc,
+            category = ConsumableCategory.Ward,
+            grant = grant, water = water,
+            cure = StatusEffectType.None, cureStacks = 99,
+            weight = 0.2f, stackMax = 3, value = 120
         };
     }
 

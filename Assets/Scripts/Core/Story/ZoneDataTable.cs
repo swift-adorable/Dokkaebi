@@ -235,6 +235,34 @@ public static class ZoneDataTable
     /// <summary>
     /// 풀에서 하나 고른다. roll은 0 이상 1 미만 — 테스트에서 고정할 수 있게 밖에서 받는다.
     /// </summary>
+    /// <summary>비중에 배율을 곱해 고른다 — 달 · 날씨 (결정 2-62 · 2-64). 풀에 없는 유형은 늘 0.</summary>
+    public static EnemyArchetype Pick(int chapter, float roll, System.Func<EnemyArchetype, float> weightScale)
+    {
+        if (weightScale == null)
+            return Pick(chapter, roll);
+
+        ChapterData c = Chapter(chapter) ?? chapters[0];
+        float total = 0f;
+
+        foreach (PoolEntry e in c.Pool)
+            total += e.Weight * System.Math.Max(0f, weightScale(e.Archetype));
+
+        if (total <= 0f)
+            return Pick(chapter, roll);
+
+        float target = roll * total;
+        float acc = 0f;
+
+        foreach (PoolEntry e in c.Pool)
+        {
+            acc += e.Weight * System.Math.Max(0f, weightScale(e.Archetype));
+            if (target < acc)
+                return e.Archetype;
+        }
+
+        return c.Pool[c.Pool.Length - 1].Archetype;
+    }
+
     public static EnemyArchetype Pick(int chapter, float roll)
     {
         ChapterData c = Chapter(chapter) ?? chapters[0];

@@ -117,6 +117,10 @@ Dokkaebi의 강화 소모품도 같은 대가를 진다 — `Dokkaebi_Consumable
 **연결했다 (8-A).** 소모품을 쓰면 `PlayerConsumables`가 `PlayerSurvival.Restore(water, energy)` ·
 `Drain(waterCost, energyCost)`를 부른다. 값은 소모품마다 `ConsumableEffect`에 있다.
 
+**날씨도 태운다 (결정 2-91).** 폭염 · 독안개는 서늘함이 모자란 단계만큼 수분을 ×1.6 / ×2.4로,
+한파의 추위 중첩은 에너지를 중첩당 +1.3% 더 태운다. `SurvivalState.Tick(dt, 과중량, 수분 배율, 에너지 배율)` —
+배율은 `PlayerWeather`가 정한다 [임시값 — 결정 2-61].
+
 ---
 
 ## 6. 절대 금지 사항

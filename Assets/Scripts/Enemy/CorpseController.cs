@@ -134,7 +134,8 @@ public class CorpseController : MonoBehaviour, IPoolable
             IngredientTable.DropsIn(item.Id, chapterNumber) && AmmoTable.DropsIn(item.Id, chapterNumber);
 
         // 패시브 「희귀 드롭 +n%」 — 무언가 나올 확률이 (1 + n%)배 (Audit A9 · 결정 2-74 「전반적인 드롭」).
-        float findBonus = DropBonus;
+        // 기우는 달(하현 · 그믐)이면 재료가 더 나온다 (결정 2-62).
+        float findBonus = DropBonus * RaidManager.Current.LootScale;
 
         if (lootTable != null)
             lootTable.Fill(Loot, random, ValueMultiplier, allow, findBonus);

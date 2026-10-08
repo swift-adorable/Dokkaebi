@@ -113,6 +113,7 @@ public class DokkaebiController : MonoBehaviour
         // 도감 · 각인)만 디스크에 간다.
         ShopManager.RestockAfterRun();
         SpringManager.RefillAfterRun();
+        NightClock.PassNight();   // 쓰러져도 한 밤이 지난다 (결정 2-91)
 
         SaveManager.Commit("사망");
 

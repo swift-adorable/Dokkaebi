@@ -115,6 +115,10 @@ public class EquipmentModifiers
             case EquipmentStatType.HeadArmour:
             case EquipmentStatType.BodyArmour:
             case EquipmentStatType.ContainmentWard:
+            case EquipmentStatType.ProtectWarmth:
+            case EquipmentStatType.ProtectShield:
+            case EquipmentStatType.ProtectCool:
+            case EquipmentStatType.ProtectLight:
             case EquipmentStatType.ResistPhysical:
             case EquipmentStatType.ResistFire:
             case EquipmentStatType.ResistCold:

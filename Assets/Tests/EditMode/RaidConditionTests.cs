@@ -11,14 +11,22 @@ namespace Dokkaebi.Tests
     ///   1. 저항은 곱해지지 않는다 — 가장 낮은 배율 하나만
     ///   2. 밀집과 산개는 같이 걸리지 않는다
     ///   3. 저항 특성도 한 판에 하나만
-    ///   4. 밤 상태는 양날이다 — 손해만 있는 상태를 만들지 않는다
+    ///   4. 달 · 날씨는 양날이다 — 손해만 있는 상태를 만들지 않는다
     /// </summary>
     public class RaidConditionTests
     {
-        private static RaidConditions With(FacilityState state, params RaidTrait[] traits)
+        private static RaidConditions With(params RaidTrait[] traits)
         {
-            return new RaidConditions { facility = state, traits = traits };
+            return new RaidConditions { lunar = false, weather = RaidWeather.Calm, traits = traits };
         }
+
+        private static RaidConditions Night(MoonPhase moon, RaidWeather weather, params RaidTrait[] traits)
+        {
+            return new RaidConditions { lunar = true, moon = moon, weather = weather, traits = traits };
+        }
+
+        /// <summary>3장(여름)의 날씨 칸.</summary>
+        private static RaidWeather Summer(WeatherSlot slot) => WeatherTable.For(3, slot, false, false);
 
         private static EnemyProfile Profile(EnemyArchetype archetype)
         {
@@ -39,7 +47,7 @@ namespace Dokkaebi.Tests
 
             Assert.AreEqual(0.5f, hardened.resistances.physical, 0.001f, "속성만으로 0.5여야 합니다.");
 
-            EnemyProfile both = With(FacilityState.Normal, RaidTrait.Hardened).Apply(hardened);
+            EnemyProfile both = With(RaidTrait.Hardened).Apply(hardened);
 
             Assert.AreEqual(0.5f, both.resistances.physical, 0.001f,
                 "레이드 특성이 곱해졌습니다. 0.25가 되면 그 빌드는 파밍을 버려야 합니다.");
@@ -54,7 +62,7 @@ namespace Dokkaebi.Tests
 
             Assert.Greater(crusher.resistances.lightning, 1f, "절굿공이귀의 전기 약점이 없습니다.");
 
-            EnemyProfile insulated = With(FacilityState.Normal, RaidTrait.Insulated).Apply(crusher);
+            EnemyProfile insulated = With(RaidTrait.Insulated).Apply(crusher);
 
             Assert.Less(insulated.resistances.lightning, crusher.resistances.lightning,
                 "약점이 줄지 않았습니다.");
@@ -132,7 +140,6 @@ namespace Dokkaebi.Tests
             RaidConditions a = RaidConditionRoller.Roll(new System.Random(12345));
             RaidConditions b = RaidConditionRoller.Roll(new System.Random(12345));
 
-            Assert.AreEqual(a.facility, b.facility);
             CollectionAssert.AreEqual(a.traits, b.traits);
         }
 
@@ -142,7 +149,7 @@ namespace Dokkaebi.Tests
         public void 같은_계열_속성은_덜_나온다()
         {
             // 문서 9절 — 없으면 "그 속성 빌드가 아예 못 싸우는" 구간이 생긴다.
-            RaidConditions raid = With(FacilityState.Normal, RaidTrait.Hardened);
+            RaidConditions raid = With(RaidTrait.Hardened);
 
             Assert.Less(raid.AffixWeight(EnemyAffix.Hardened), 1f, "경화가 그대로 나옵니다.");
             Assert.AreEqual(1f, raid.AffixWeight(EnemyAffix.FireProof), 0.001f,
@@ -153,7 +160,7 @@ namespace Dokkaebi.Tests
         public void 중복_완화도_곱하지_않는다()
         {
             // 가중치를 곱하면 특성이 둘일 때 그 속성이 사실상 사라진다.
-            RaidConditions raid = With(FacilityState.Normal,
+            RaidConditions raid = With(
                 RaidTrait.Hardened, RaidTrait.Regenerating);
 
             Assert.AreEqual(RaidTraitTable.OverlapWeightScale,
@@ -173,82 +180,102 @@ namespace Dokkaebi.Tests
             Assert.AreEqual(EnemyAffixTable.RegenPerSecond, regen.regenPerSecond, 0.0001f,
                 "「재생」 속성이 아무 일도 하지 않습니다.");
 
-            EnemyProfile both = With(FacilityState.Normal, RaidTrait.Regenerating).Apply(regen);
+            EnemyProfile both = With(RaidTrait.Regenerating).Apply(regen);
 
             Assert.AreEqual(EnemyAffixTable.RegenPerSecond, both.regenPerSecond, 0.0001f,
                 "재생이 더해졌습니다.");
         }
 
-        // ── 4. 밤 상태 ──────────────────────────────────────────────
+        // ── 4. 달 · 날씨 (결정 2-59 ~ 2-64) ──────────────────────────
 
         [Test]
-        public void 모든_시설_상태가_추가_스폰을_갖는다()
+        public void 모든_달이_이름과_설명을_갖는다()
         {
-            foreach (FacilityState state in (FacilityState[])System.Enum.GetValues(typeof(FacilityState)))
+            foreach (MoonPhase moon in (MoonPhase[])System.Enum.GetValues(typeof(MoonPhase)))
             {
-                if (state == FacilityState.Normal)
-                    continue;
-
-                Assert.AreNotEqual(string.Empty, FacilityStateTable.Describe(state),
-                    FacilityStateTable.Name(state));
+                Assert.IsNotEmpty(MoonTable.Name(moon), moon.ToString());
+                Assert.IsNotEmpty(MoonTable.Describe(moon), moon.ToString());
             }
         }
 
         [Test]
-        public void 정전은_시야를_줄이는_대신_보안기를_멈춘다()
+        public void 삭은_시야를_줄이는_대신_순라귀를_멈춘다()
         {
-            // 문서 5절 — "상태가 양날이어야" 위험하지만 기회가 된다.
-            Assert.Less(FacilityStateTable.Of(FacilityState.Blackout).visionScale, 0.5f,
-                "「대폭 감소」인데 절반도 줄지 않았습니다.");
+            // 옛 그믐 밤 상태 — 「상태가 양날이어야」 위험하지만 기회가 된다.
+            RaidConditions dark = Night(MoonPhase.New, RaidWeather.Calm);
 
-            Assert.IsFalse(FacilityStateTable.IsActive(FacilityState.Blackout, EnemyArchetype.Sentry),
-                "그믐인데 순라귀가 움직입니다. 손해만 남습니다.");
-
-            Assert.IsTrue(FacilityStateTable.IsActive(FacilityState.Blackout, EnemyArchetype.Scav),
-                "순라귀가 아닌 것까지 멈췄습니다.");
-
-            Assert.IsTrue(FacilityStateTable.IsActive(FacilityState.Normal, EnemyArchetype.Sentry));
+            Assert.Less(dark.EnemyVisionScale, 0.5f, "「대폭 감소」인데 절반도 줄지 않았습니다.");
+            Assert.IsTrue(dark.SentryAsleep, "삭인데 순라귀가 움직입니다. 손해만 남습니다.");
+            Assert.IsFalse(Night(MoonPhase.Full, RaidWeather.Calm).SentryAsleep);
+            Assert.IsFalse(RaidConditions.None.SentryAsleep, "조건 없음에 달이 걸렸습니다.");
         }
 
         [Test]
-        public void 정전에서는_보기_전에_듣는다가_뒤집힌다()
+        public void 보름은_적이_멀리_보는_대신_잡귀가_적다()
         {
-            // 그믐의 정체가 이것이다 — 시야가 총성보다 짧아진다.
-            float sight = FacilityStateTable.VisionRange(FacilityState.Blackout, EnemyArchetype.Scav);
+            RaidConditions full = Night(MoonPhase.Full, RaidWeather.Calm);
 
-            Assert.Less(sight, EnemyArchetypeTable.DefaultVisionRange,
-                "그믐인데 시야가 그대로입니다.");
+            Assert.Greater(full.EnemyVisionScale, 1f);
+            Assert.Less(full.SpawnWeight(EnemyArchetype.Scav, false), 1f, "보름이 손해만 남깁니다.");
+            Assert.Greater(full.SpawnWeight(EnemyArchetype.Lurker, true), 1f, "물가 수귀가 늘지 않았습니다.");
+            Assert.AreEqual(1f, full.SpawnWeight(EnemyArchetype.Lurker, false), 0.001f, "물가가 아닌데 수귀가 늘었습니다.");
         }
 
         [Test]
-        public void 침수는_느려지는_대신_번개가_두_배다()
+        public void 달마다_좋은_것과_나쁜_것이_같이_있다()
         {
-            Assert.Less(FacilityStateTable.Of(FacilityState.Flooded).moveScale, 1f);
+            // 보름을 뺀 모든 달은 적 시야가 1 이하다 — 보름의 대가가 잡귀 감소다.
+            foreach (MoonPhase moon in (MoonPhase[])System.Enum.GetValues(typeof(MoonPhase)))
+            {
+                RaidConditions c = Night(moon, RaidWeather.Calm);
+                bool good = c.EnemyVisionScale < 1f || c.XpScale > 1f || c.LootScale > 1f
+                            || c.SpawnWeight(EnemyArchetype.Scav, false) < 1f;
+                Assert.IsTrue(good, $"{MoonTable.Name(moon)}에 좋은 것이 없습니다.");
+            }
+        }
 
-            RaidConditions flooded = With(FacilityState.Flooded);
+        [Test]
+        public void 장마비는_느려지는_대신_번개가_두_배다()
+        {
+            RaidConditions monsoon = Night(MoonPhase.FirstQuarter, Summer(WeatherSlot.Precipitation));
 
-            Assert.AreEqual(2f, flooded.DamageMultiplier(DamageElement.Lightning), 0.001f,
-                "문서에 적힌 「감전 피해 2배」가 지켜지지 않습니다.");
-
-            Assert.AreEqual(1f, flooded.DamageMultiplier(DamageElement.Fire), 0.001f,
+            Assert.IsTrue(monsoon.weather.IsMonsoon);
+            Assert.Less(monsoon.MoveScale, 1f);
+            Assert.AreEqual(2f, monsoon.DamageMultiplier(DamageElement.Lightning), 0.001f,
+                "「감전 피해 2배」가 지켜지지 않습니다.");
+            Assert.AreEqual(1f, monsoon.DamageMultiplier(DamageElement.Fire), 0.001f,
                 "상관없는 속성까지 커졌습니다.");
+
+            // 겨울 비 칸은 장마비가 아니다.
+            RaidConditions winterRain = Night(MoonPhase.FirstQuarter,
+                WeatherTable.For(1, WeatherSlot.Precipitation, false, false));
+            Assert.AreEqual(1f, winterRain.MoveScale, 0.001f);
         }
 
         [Test]
-        public void 소독은_깎는_대신_화공체를_강하게_만든다()
+        public void 독안개는_왕지네를_강하게_만든다()
         {
-            RaidConditions decon = With(FacilityState.Decontamination);
+            RaidConditions miasma = Night(MoonPhase.FirstQuarter, Summer(WeatherSlot.Bad2));
 
-            Assert.Greater(decon.EnvironmentDamagePerSecond, 0f, "환경 피해가 없습니다.");
+            Assert.IsTrue(miasma.weather.IsMiasma);
 
-            EnemyProfile chemic = decon.Apply(Profile(EnemyArchetype.Chemic));
-            EnemyProfile scav = decon.Apply(Profile(EnemyArchetype.Scav));
+            EnemyProfile chemic = miasma.Apply(Profile(EnemyArchetype.Chemic));
+            EnemyProfile scav = miasma.Apply(Profile(EnemyArchetype.Scav));
 
             Assert.Greater(chemic.health, Profile(EnemyArchetype.Chemic).health,
                 "왕지네가 강해지지 않았습니다. 추가 스폰이 숫자만 느는 것이 됩니다.");
-
             Assert.AreEqual(Profile(EnemyArchetype.Scav).health, scav.health,
                 "상관없는 유형까지 강해졌습니다.");
+            Assert.Greater(miasma.SpawnWeight(EnemyArchetype.Chemic, false), 1f);
+        }
+
+        [Test]
+        public void 짙은_안개는_적도_늦게_알아챈다()
+        {
+            RaidConditions fog = Night(MoonPhase.FirstQuarter, WeatherTable.For(4, WeatherSlot.Bad1, false, false));
+
+            Assert.AreEqual(WeatherHazard.Fog, fog.weather.Hazard);
+            Assert.Greater(fog.EnemyReactionScale, 1f, "안개가 내 손해만 남깁니다.");
         }
 
         [Test]
@@ -270,12 +297,12 @@ namespace Dokkaebi.Tests
         public void 파밍_전에_걸린_것을_전부_적는다()
         {
             // 문서 5절 — "들어가서 알게 하지 않는다."
-            RaidConditions raid = With(FacilityState.Flooded,
+            RaidConditions raid = Night(MoonPhase.Full, Summer(WeatherSlot.Precipitation),
                 RaidTrait.Dense, RaidTrait.Hardened);
 
             List<string> lines = raid.Describe();
 
-            Assert.AreEqual(3, lines.Count, "걸린 것 중 적히지 않은 것이 있습니다.");
+            Assert.AreEqual(4, lines.Count, "걸린 것 중 적히지 않은 것이 있습니다.");
 
             foreach (string line in lines)
                 Assert.IsNotEmpty(line);

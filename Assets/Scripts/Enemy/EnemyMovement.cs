@@ -165,6 +165,14 @@ public class EnemyMovement : MonoBehaviour
 
         CheckStuck();
 
+        // 삭에는 순라귀가 멈춘다 (결정 2-62) — 제자리에서 돌아보기만 한다.
+        RaidConditions conditions = RaidManager.Current;
+        if (conditions.SentryAsleep && IsSentry())
+        {
+            StopHorizontal();
+            return;
+        }
+
         if (IsHalted)
         {
             StopHorizontal();
@@ -174,7 +182,8 @@ public class EnemyMovement : MonoBehaviour
         float speed = moveSpeed
                       * Mathf.Max(0f, BaseSpeedScale)
                       * Mathf.Max(0f, SpeedScale)
-                      * StatusScale;
+                      * StatusScale
+                      * conditions.MoveScale;   // 장마비 (결정 2-64)
         Vector3 direction;
 
         // 돌아가는 중이면 두뇌의 유지 거리 · 측면 이동을 쓰지 않고 길을 따라간다 — 벽 앞에서 옆걸음만 치지 않게.
@@ -257,6 +266,9 @@ public class EnemyMovement : MonoBehaviour
     private bool lastWantedToMove;
 
     private void LateUpdate() => lastWantedToMove = wantedToMove;
+
+    private bool IsSentry()
+        => TryGetComponent(out EnemyIdentity identity) && identity.Profile.archetype == EnemyArchetype.Sentry;
 
     private bool MayDespawnWhenStuck()
     {

@@ -176,7 +176,10 @@ public class EnemySpawner : MonoBehaviour
         // 예전에는 9종에서 고르게 뽑았다 — 1장에 무주귀가 나왔다.
         if (catalog != null)
         {
-            archetype = ZoneDataTable.Pick(CurrentChapter(), Random.value);
+            // 달 · 날씨가 비중을 바꾼다 — 삭 무주귀 · 보름 물가 수귀 · 독안개 왕지네 (결정 2-62 · 2-64).
+            RaidConditions conditions = Conditions;
+            bool waterside = ZoneDataTable.IsWaterside(StoryManager.TargetZone);
+            archetype = ZoneDataTable.Pick(CurrentChapter(), Random.value, a => conditions.SpawnWeight(a, waterside));
 
             GameObject picked = catalog.Get(archetype);
 

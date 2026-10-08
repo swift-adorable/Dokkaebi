@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 
 /// <summary>
-/// 파밍 조건을 뽑는다.
+/// 파밍 조건을 뽑는다 — 레이드 특성. 달 · 날씨는 밤 시계(NightClock)가 미리 정해 두고 여기로 넘겨준다 (결정 2-91).
 ///
 /// 【무작위를 주입받는다.】 같은 씨앗이면 같은 판이 나와야
 /// "이 조건에서 이 빌드가 되는가"를 두 번 확인할 수 있다.
@@ -10,15 +10,6 @@ using System.Collections.Generic;
 /// </summary>
 public static class RaidConditionRoller
 {
-    /// <summary>
-    /// 밤 상태가 걸릴 확률.
-    ///
-    /// 【불확실 — 문서에 수치가 없다.】
-    /// 절반이 넘으면 평시가 오히려 특별해진다. 셋 중 하나쯤이
-    /// "이번엔 뭐가 걸렸나"를 확인하게 만드는 선이다.
-    /// </summary>
-    public const float FacilityChance = 0.35f;
-
     /// <summary>특성이 하나라도 걸릴 확률. 【불확실】</summary>
     public const float TraitChance = 0.5f;
 
@@ -33,22 +24,20 @@ public static class RaidConditionRoller
         RaidTrait.Regenerating, RaidTrait.Congealed, RaidTrait.Corrosive
     };
 
-    private static readonly FacilityState[] AllStates =
-    {
-        FacilityState.Blackout, FacilityState.Flooded, FacilityState.Decontamination
-    };
-
+    /// <summary>특성만 뽑는다 — 달 · 날씨 없음(lunar = false · 맑음).</summary>
     public static RaidConditions Roll(System.Random random)
+        => Roll(random, RaidConditions.None.moon, RaidWeather.Calm, lunar: false);
+
+    public static RaidConditions Roll(System.Random random, MoonPhase moon, RaidWeather weather, bool lunar = true)
     {
         if (random == null)
             return RaidConditions.None;
 
         var conditions = new RaidConditions
         {
-            facility = random.NextDouble() < FacilityChance
-                ? AllStates[random.Next(AllStates.Length)]
-                : FacilityState.Normal,
-
+            lunar = lunar,
+            moon = moon,
+            weather = weather,
             traits = System.Array.Empty<RaidTrait>()
         };
 

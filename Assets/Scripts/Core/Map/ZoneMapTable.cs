@@ -221,7 +221,7 @@ public static class ZoneMapTable
     public static bool IsMapScene(string sceneName)
         => !string.IsNullOrEmpty(sceneName) && sceneName.StartsWith(ScenePrefix) && Of(ChapterOfScene(sceneName)) != null;
 
-    private static int ChapterOfScene(string sceneName)
+    public static int ChapterOfScene(string sceneName)
         => int.TryParse(sceneName.Substring(ScenePrefix.Length), out int n) ? n : -1;
 
     public static ChapterMap Of(int chapter)

@@ -27,6 +27,7 @@ MonoBehaviour:
   noRegister: 0
   noTrade: 0
   skill: {fileID: 0}
+  blankGem: 0
   consumable:
     category: 1
     heal: 0

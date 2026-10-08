@@ -14,10 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Dokkaebi.Runtime::EquipmentDefinition
   id: arm_face_cold_t2
   displayName: "\uAC80\uC740 \uC624\uBC29\uC2E0\uC7A5\uD0C8"
-  description: "\uB0C9\uAE30 \uC800\uD56D. \uD574\uB2F9 \uC18D\uC131 \uD53C\uD574\uB97C \uC870\uAE08 \uB35C \uBC1B\uB294\uB2E4."
+  description: "\uB0C9\uAE30 \uC800\uD56D. \uD574\uB2F9 \uC18D\uC131 \uD53C\uD574\uB97C
+    \uC870\uAE08 \uB35C \uBC1B\uB294\uB2E4."
   kind: 2
   tier: 2
   weight: 0.3
+  icon: {fileID: 0}
   slotSize: 1
   stackMax: 1
   maxDurability: 55
@@ -26,6 +28,19 @@ MonoBehaviour:
   noRegister: 0
   noTrade: 0
   skill: {fileID: 0}
+  blankGem: 0
+  consumable:
+    category: 0
+    heal: 0
+    water: 0
+    energy: 0
+    waterCost: 0
+    energyCost: 0
+    cure: 0
+    cureStacks: 99
+    useCost: 0
+    castSeconds: 0
+    grant: 0
   slot: 3
   stats:
   - type: 12

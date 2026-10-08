@@ -112,6 +112,9 @@ public class PlayerAbsorber : MonoBehaviour
             int gainedXP = EnemyRewardTable.Experience(
                 baseAmount, corpse.Rarity, AbsorbMultiplier());
 
+            // 차는 달(초승 · 상현)이면 정기 +10% (결정 2-62).
+            gainedXP = Mathf.RoundToInt(gainedXP * RaidManager.Current.XpScale);
+
             if (PlayerStats.HasInstance)
                 PlayerStats.Instance.AddXP(gainedXP);
             else
@@ -125,6 +128,9 @@ public class PlayerAbsorber : MonoBehaviour
             // 흡수 보너스(패시브)는 경험치 축의 것이므로 골드에 곱하지 않는다.
             int gainedGold = EnemyRewardTable.Gold(
                 Mathf.RoundToInt(goldPerCorpse * corpse.ValueMultiplier), corpse.Rarity);
+
+            // 기우는 달(하현 · 그믐)이면 엽전 +10% (결정 2-62).
+            gainedGold = Mathf.RoundToInt(gainedGold * RaidManager.Current.LootScale);
 
             if (gainedGold > 0)
                 PassiveManager.EnsureInstance().AddGold(gainedGold);

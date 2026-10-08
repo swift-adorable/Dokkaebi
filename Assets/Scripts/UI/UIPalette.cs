@@ -136,6 +136,12 @@ public static class UIPalette
             // 폭주 — 이롭지만 피를 깎는다. 초록 무리에서 튀도록 자홍으로 둔다.
             case StatusEffectType.Frenzy:        return new Color(0.94f, 0.42f, 0.66f, 1f);
 
+            // 막이 넷 — 계절 색을 옅게 (겨울 하늘 · 봄 흙 · 여름 물 · 가을 등불).
+            case StatusEffectType.GuardWarmth:   return new Color(0.80f, 0.90f, 1f, 1f);
+            case StatusEffectType.GuardShield:   return new Color(0.86f, 0.76f, 0.56f, 1f);
+            case StatusEffectType.GuardCool:     return new Color(0.56f, 0.90f, 0.90f, 1f);
+            case StatusEffectType.GuardLight:    return new Color(1f, 0.86f, 0.52f, 1f);
+
             default:                        return Text;
         }
     }

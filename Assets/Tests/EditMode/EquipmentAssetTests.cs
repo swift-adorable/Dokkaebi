@@ -250,10 +250,27 @@ namespace Dokkaebi.Tests
         {
             List<EquipmentDefinition> armour = Load<EquipmentDefinition>("Armour");
 
-            Assert.AreEqual(6, armour.Count(a => a.Slot == EquipmentSlot.Head), "머리 6종");
+            Assert.AreEqual(6, armour.Count(a => a.Slot == EquipmentSlot.Head && !a.Id.StartsWith("arm_guard_")), "머리 6종");
+            Assert.AreEqual(4, armour.Count(a => a.Slot == EquipmentSlot.Head && a.Id.StartsWith("arm_guard_")),
+                "막이 머리 4종 【임시】 (결정 2-91)");
             Assert.AreEqual(18, armour.Count(a => a.Slot == EquipmentSlot.Body), "몸통 6티어 × 3변형");
             Assert.AreEqual(6, armour.Count(a => a.Slot == EquipmentSlot.Ears), "청각 6종");
             Assert.AreEqual(16, armour.Count(a => a.Slot == EquipmentSlot.Face), "얼굴 1 + 5속성 × 3단계");
+        }
+
+        [Test]
+        public void 막이_머리는_네_막이를_하나씩_1단계_준다()
+        {
+            var stats = new[] { EquipmentStatType.ProtectWarmth, EquipmentStatType.ProtectShield,
+                                EquipmentStatType.ProtectCool, EquipmentStatType.ProtectLight };
+
+            List<EquipmentDefinition> guards = Load<EquipmentDefinition>("Armour")
+                .Where(a => a.Id.StartsWith("arm_guard_")).ToList();
+
+            foreach (EquipmentStatType stat in stats)
+            {
+                Assert.AreEqual(1, guards.Count(g => g.GetStat(stat) >= 1f), $"{stat} 막이 머리가 하나가 아닙니다.");
+            }
         }
 
         /// <summary>

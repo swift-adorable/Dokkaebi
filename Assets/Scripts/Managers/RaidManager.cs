@@ -54,7 +54,15 @@ public class RaidManager : Singleton<RaidManager>
             ? new System.Random(seed)
             : new System.Random(System.Environment.TickCount);
 
-        conditions = RaidConditionRoller.Roll(random);
+        // 달 · 날씨는 밤 시계가 미리 정해 두었다(출발 화면이 보여 준 그대로) — 특성만 여기서 뽑는다 (결정 2-91).
+        // 장 맵 씬이면 그 씬의 장 — 편집기에서 장 씬을 바로 틀어도 그 장의 날씨가 걸린다.
+        string scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+        ChapterData chapter = ZoneDataTable.ChapterOfZone(StoryManager.TargetZone);
+        int number = ZoneMapTable.IsMapScene(scene)
+            ? ZoneMapTable.ChapterOfScene(scene)
+            : chapter != null ? chapter.Chapter : 0;
+        conditions = RaidConditionRoller.Roll(random, NightClock.Moon,
+            NightClock.WeatherFor(number, StoryManager.Progress));
 
         GameLogger.Log($"[RaidManager] 이번 판 — {string.Join(" · ", conditions.Describe())}");
     }

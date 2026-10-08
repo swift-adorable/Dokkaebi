@@ -54,7 +54,7 @@ public class PlayerWeapon : MonoBehaviour
     /// 무기를 들지 않았을 때는 WeaponProfile.Unarmed의 값을 쓴다.
     /// 프리팹 값이 착용 무기를 이기면 무기 6종을 만든 의미가 없다.
     /// </summary>
-    public float EffectiveFireInterval => profile.FireInterval * GetModifiers().FireIntervalMultiplier;
+    public float EffectiveFireInterval => profile.FireInterval * GetModifiers().FireIntervalMultiplier * PlayerWeather.FireIntervalScale;
 
     /// <summary>현재 사격 성능. UI와 테스트가 읽는다.</summary>
     public WeaponProfile Profile => profile;
@@ -121,7 +121,8 @@ public class PlayerWeapon : MonoBehaviour
         WeaponProfile shot = unarmed ? UnarmedProfile() : profile;
         WeaponKindInfo? kind = unarmed ? null : PlayerAmmo.CurrentWeapon?.KindInfo;
 
-        float interval = shot.FireInterval * GetModifiers().FireIntervalMultiplier;
+        // 추위가 쌓이면 쏘는 속도가 느려진다 (결정 2-61 · 덕코프 추위 −0.3%/중첩).
+        float interval = shot.FireInterval * GetModifiers().FireIntervalMultiplier * PlayerWeather.FireIntervalScale;
 
         if (!cooldown.TryConsume(Time.time, interval))
             return false;

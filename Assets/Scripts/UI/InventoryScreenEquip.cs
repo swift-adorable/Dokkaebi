@@ -329,6 +329,10 @@ public partial class InventoryScreenUI
             case EquipmentStatType.BodyArmour:           return "몸통 방어도";
             case EquipmentStatType.ArmourPenetration:    return "방어 관통";
             case EquipmentStatType.ContainmentWard:      return "격리 방호";
+            case EquipmentStatType.ProtectWarmth:        return "방한";
+            case EquipmentStatType.ProtectShield:        return "막이";
+            case EquipmentStatType.ProtectCool:          return "서늘함";
+            case EquipmentStatType.ProtectLight:         return "밝히기";
             case EquipmentStatType.ResistPhysical:       return "물리 저항";
             case EquipmentStatType.ResistFire:           return "화염 저항";
             case EquipmentStatType.ResistCold:           return "냉기 저항";
