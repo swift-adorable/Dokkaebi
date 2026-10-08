@@ -30,6 +30,7 @@ public class DifficultyPickerUI : MonoBehaviour
     private void Build(Canvas canvas)
     {
         RectTransform safe = UIFactory.CreateSafeArea(canvas);
+        GamePause.Register(canvas.gameObject);   // 떠 있는 동안 게임이 멈춘다 (결정 2-92)
         // 새 게임의 첫 화면 — 뒤의 소굴을 가린다 (결정 2-82). 이어서 프롤로그가 같은 바탕으로 이어진다.
         Image back = UIFactory.CreatePanel("Backdrop", canvas.transform,
             new Color(0.035f, 0.04f, 0.06f, 1f), Vector2.zero, Vector2.one, 0);

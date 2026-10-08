@@ -62,6 +62,7 @@ public class QuantityPopupUI : MonoBehaviour
     private void Build(Canvas canvas, string title, string verb)
     {
         RectTransform safe = UIFactory.CreateSafeArea(canvas);
+        GamePause.Register(canvas.gameObject);   // 떠 있는 동안 게임이 멈춘다 (결정 2-92)
         Image dim = UIFactory.CreatePanel("Dim", safe, UIPalette.Dim, Vector2.zero, Vector2.one, 0);
         dim.raycastTarget = true;
 

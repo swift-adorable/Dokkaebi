@@ -49,6 +49,7 @@ public class GemPickerUI : MonoBehaviour
     private void Build(Canvas canvas)
     {
         RectTransform safe = UIFactory.CreateSafeArea(canvas);
+        GamePause.Register(canvas.gameObject);   // 떠 있는 동안 게임이 멈춘다 (결정 2-92)
         Image dim = UIFactory.CreatePanel("Dim", safe, UIPalette.Dim, Vector2.zero, Vector2.one, 0);
         box = UIFactory.CreatePanel("Box", dim.transform, UIPalette.Panel,
             new Vector2(0.12f, 0.06f), new Vector2(0.88f, 0.94f)).rectTransform;

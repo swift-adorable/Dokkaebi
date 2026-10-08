@@ -59,6 +59,7 @@ public class BuildingScreenUI : MonoBehaviour
             Vector2.zero, Vector2.one, radius: 0);
         shade.raycastTarget = true;
         panel = shade.gameObject;
+        GamePause.Register(panel);   // 떠 있는 동안 게임이 멈춘다 (결정 2-92)
 
         Image box = UIFactory.CreateGlass("BuildingBox", shade.transform, UIPalette.Panel,
             new Vector2(0.16f, 0.10f), new Vector2(0.84f, 0.92f), UIFactory.RadiusLarge);

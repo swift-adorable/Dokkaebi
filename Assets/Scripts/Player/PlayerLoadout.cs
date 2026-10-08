@@ -26,6 +26,9 @@ public class PlayerLoadout : MonoBehaviour
 
     private float nextRefresh;
 
+    /// <summary>판에 들어와 처음 상한을 맞췄는가. 처음 한 번은 가득 채운다.</summary>
+    private bool healthInitialised;
+
     /// <summary>마지막으로 적용한 값. UI와 테스트가 읽는다.</summary>
     public LoadoutSnapshot Current { get; private set; } = LoadoutSnapshot.Empty;
 
@@ -125,7 +128,16 @@ public class PlayerLoadout : MonoBehaviour
         // 잘린다 — 늘린 10을 회복약으로 채워 두고 끝난 뒤에도 가져가지 못한다.
         int max = snapshot.MaxHealth + health.Status.MaxHealthBonus;
 
-        if (health.Max != max)
+        // 【처음 한 번은 가득 채운다】 — 씬의 Health는 옛 기본값(10)으로 깨어난다. 상한만 100으로 올리면
+        // 현재 체력이 10에 남아 판을 10/100으로 시작했다 (2026-10-08 확인). 판은 늘 가득 찬 채 시작한다.
+        if (!healthInitialised)
+        {
+            healthInitialised = true;
+            health.SetMaxHealth(max, refill: true);
+        }
+        else if (health.Max != max)
+        {
             health.SetMaxHealth(max);
+        }
     }
 }

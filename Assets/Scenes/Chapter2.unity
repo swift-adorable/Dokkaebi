@@ -3252,7 +3252,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Dokkaebi.Runtime::Health
   team: 0
-  maxHealth: 10
+  maxHealth: 100
   invulnerableDuration: 0.6
   headArmour: 0
   bodyArmour: 0

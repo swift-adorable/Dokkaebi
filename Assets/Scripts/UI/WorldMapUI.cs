@@ -85,6 +85,7 @@ public class WorldMapUI : MonoBehaviour, IPointerClickHandler
         Image dim = UIFactory.CreatePanel("Dim", safe, dimColor, new Vector2(-0.2f, -0.2f), new Vector2(1.2f, 1.2f), 0);
         dim.raycastTarget = true;   // 지도 밖을 눌러도 조준이 돌지 않게
         root = dim.gameObject;
+        GamePause.Register(root);   // 떠 있는 동안 게임이 멈춘다 (결정 2-92)
 
         RectTransform body = UIFactory.Inset(UIFactory.CreateRegion("Body", root.transform,
             new Vector2(1f / 7f, 1f / 7f), new Vector2(6f / 7f, 6f / 7f)), UIFactory.Gap);

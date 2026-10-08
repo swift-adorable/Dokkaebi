@@ -314,6 +314,7 @@ public partial class InventoryScreenUI : MonoBehaviour
         UIFactory.Inset(panelRect, UIFactory.Gap);
 
         panel = panelRect.gameObject;
+        GamePause.Register(panel);   // 떠 있는 동안 게임이 멈춘다 (결정 2-92)
 
         // 덮개는 패널 안에 둔다. 패널이 꺼지면 같이 꺼져야 한다.
         // 안전 영역 밖까지 덮으려고 앵커를 넉넉히 넘긴다.

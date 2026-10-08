@@ -131,6 +131,7 @@ public class ExchangeWindowUI : MonoBehaviour
             UIFactory.RadiusLarge);
 
         panel = window.gameObject;
+        GamePause.Register(panel);   // 떠 있는 동안 게임이 멈춘다 (결정 2-92)
 
         // 패널 위의 터치가 뒤의 조이스틱까지 내려가지 않게 막는다.
         window.raycastTarget = true;

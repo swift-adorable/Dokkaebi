@@ -31,7 +31,6 @@ public class StoryDialogueUI : MonoBehaviour
 
     private Request current;
     private int page;
-    private float previousTimeScale = 1f;
 
     private GameObject panel;
     private GameObject backdrop;
@@ -91,10 +90,6 @@ public class StoryDialogueUI : MonoBehaviour
         if (instance != this)
             return;
 
-        // 씬이 바뀌며 사라질 때 시간을 멈춘 채 두지 않는다.
-        if (current != null)
-            Time.timeScale = previousTimeScale;
-
         instance = null;
     }
 
@@ -126,6 +121,7 @@ public class StoryDialogueUI : MonoBehaviour
         tap.onClick.AddListener(OnNext);
 
         panel = shade.gameObject;
+        GamePause.Register(panel);   // 떠 있는 동안 게임이 멈춘다 (결정 2-92)
 
         Image box = UIFactory.CreateGlass("StoryBox", shade.transform, UIPalette.Panel,
             new Vector2(0.06f, 0.04f), new Vector2(0.94f, 0.46f), UIFactory.RadiusLarge);
@@ -167,11 +163,7 @@ public class StoryDialogueUI : MonoBehaviour
         page = 0;
 
         if (opening)
-        {
-            previousTimeScale = Time.timeScale > 0f ? Time.timeScale : 1f;
-            Time.timeScale = 0f;
-            ItemActionMenu.Close();
-        }
+            ItemActionMenu.Close();   // 시간은 GamePause가 멈춘다 (패널을 등록해 두었다)
 
         panel.SetActive(true);
         backdrop.SetActive(current.Backdrop);
@@ -219,6 +211,5 @@ public class StoryDialogueUI : MonoBehaviour
         current = null;
         panel.SetActive(false);
         backdrop.SetActive(false);
-        Time.timeScale = previousTimeScale;
     }
 }

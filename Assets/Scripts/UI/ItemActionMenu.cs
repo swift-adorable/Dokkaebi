@@ -160,6 +160,7 @@ public class ItemActionMenu : MonoBehaviour
             new Color(0f, 0f, 0f, 0.001f), Vector2.zero, Vector2.one, radius: 0);
 
         shade = blocker.gameObject;
+        GamePause.Register(shade);   // 떠 있는 동안 게임이 멈춘다 (결정 2-92)
 
         // 【닫고 나서 그 클릭을 뒤로 넘긴다.】 Button으로 두면 클릭이 여기서
         // 끝나 버려서, 메뉴가 떠 있는 동안 다른 칸을 눌러도 닫히기만 했다.

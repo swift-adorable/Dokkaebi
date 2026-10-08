@@ -48,8 +48,8 @@ public class GameManager : Singleton<GameManager>
 
         CurrentState = newState;
 
-        // Playing 외의 모든 상태는 게임 시간을 정지시킨다.
-        Time.timeScale = newState == GameState.Playing ? 1f : 0f;
+        // Playing 외의 모든 상태는 게임 시간을 정지시킨다. 열린 창도 같이 본다 (GamePause · 결정 2-92).
+        GamePause.Apply();
 
         GameLogger.Log($"[GameManager] State -> {CurrentState} (timeScale: {Time.timeScale})");
 
