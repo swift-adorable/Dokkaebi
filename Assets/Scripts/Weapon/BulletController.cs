@@ -553,6 +553,7 @@ public class BulletController : MonoBehaviour, IPoolable
 
         var request = new DamageRequest
         {
+            source = useFactionGate ? DamageSource.Enemy : DamageSource.Player,
             baseDamage = Mathf.Max(1, Mathf.RoundToInt(damage * scale)),
             increasedPercent = increased,
             element = Element,

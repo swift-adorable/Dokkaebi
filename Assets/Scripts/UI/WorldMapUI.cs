@@ -278,6 +278,10 @@ public class WorldMapUI : MonoBehaviour, IPointerClickHandler
                     Place(ref used, $"● {ExtractionDirector.Name}", MinimapUI.ExtractionColor,
                         Local(runtime, extraction.Points[i], size), 24);
 
+        foreach (MapLootMarks.Mark m in MapLootMarks.Collect())
+            Place(ref used, MapLootMarks.Label(m.kind), MapLootMarks.ColorOf(m.kind),
+                Local(runtime, m.position, size), m.kind == MapLootMarks.Kind.Fallen ? 24 : 22);
+
         IReadOnlyList<Vector2> markers = MapMemory.Markers(runtime.Chapter);
         for (int i = 0; i < markers.Count; i++)
             Place(ref used, $"◆{i + 1}", MinimapUI.MarkerColor,

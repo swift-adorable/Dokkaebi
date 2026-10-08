@@ -49,7 +49,7 @@ public class SaveData
     ///       12판의 codex 줄은 읽지 않고 버린다.
     ///  14 — 장마다 기억하는 지도(maps — 가 본 땅 · 마커)를 더했다 (결정 2-90). 13판에는 없어 처음 보는 지도로 읽힌다.
     ///  15 — 밤 시계(moon · weather · snowy — 다음 판의 달 · 날씨 칸)를 더했다 (결정 2-91). 14판에는 없어 삭 · 맑음으로 읽힌다.
-    public const int CurrentVersion = 15;
+    public const int CurrentVersion = 16;
 
     public int version = CurrentVersion;
 
@@ -138,6 +138,11 @@ public class SaveData
 
     /// <summary>겨울의 비 · 눈 칸이 눈인가.</summary>
     public bool snowy;
+
+    // ── 쓰러진 자리 (결정 2-93 · 판 16) ──────────────────────────────
+
+    /// <summary>「회수 계약」으로 남은 쓰러진 자리. 없으면 null — 15판 이하도 null.</summary>
+    public SavedFallen fallen;
 }
 
 /// <summary>장 하나의 지도 기억 (MapMemory).</summary>

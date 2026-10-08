@@ -134,7 +134,7 @@ public static class PassiveAssetGenerator
             column: 0, row: 1, prereq: new[] { "rec_safe_1" }));
 
         rows.Add(N("rec_corpse", "회수 계약",
-            "돌아오지 못해도 쓰러진 자리에서 한 번은 되찾아 올 수 있다.",
+            "쓰러지면 잃은 것이 그 자리에 남는다. 그 장에 다시 가면 한 번 되찾을 수 있다.",
             PassiveBranch.Recovery, PassiveEffectType.CorpseRecovery, 1, level: 9, cost: 5500,
             column: 2, row: 1, prereq: new[] { "rec_safe_1" },
             materials: new[] { ("cell_battery", 6) }));
@@ -191,7 +191,7 @@ public static class PassiveAssetGenerator
         // 「한눈에 알아보기」(처치만 해도 도감 등록)는 뺐다 — 구슬 도감이 없어졌다 (결정 2-75).
 
         rows.Add(N("reg_map", "옛 지도",
-            "지도에 전리품 위치가 표시된다. 원래 없던 마커이다.",
+            "지도에 봇짐 · 열매 나무 · 쓰러뜨린 적의 시체가 표시된다.",
             PassiveBranch.Regression, PassiveEffectType.MapLoot, 1, level: 1, cost: 8000,
             column: 1, row: 2, prereq: new[] { "reg_bench", "meta_absorb_2" },
             materials: new[] { ("memory_core", 4), ("cell_battery", 8) }));

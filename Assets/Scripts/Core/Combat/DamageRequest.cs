@@ -7,8 +7,19 @@ using System;
 /// (docs/Dokkaebi_Combat_Baseline.md 3절)
 /// </summary>
 [Serializable]
+/// <summary>누가 때렸는가 — 「내가 쓰러뜨린 적」을 가린다 (결정 2-93 · 전리품 표시). 모르면 Unknown(상태이상 틱).</summary>
+public enum DamageSource
+{
+    Unknown = 0,
+    Player = 1,
+    Enemy = 2,
+}
+
 public struct DamageRequest
 {
+    /// <summary>누가 때렸는가. Unknown이면 마지막으로 때린 쪽을 바꾸지 않는다 (상태이상 틱 — 건 쪽의 몫으로 남는다).</summary>
+    public DamageSource source;
+
     /// <summary>무기가 정하는 기본 피해.</summary>
     public int baseDamage;
 

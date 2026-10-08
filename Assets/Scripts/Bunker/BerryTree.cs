@@ -17,6 +17,12 @@ public class BerryTree : MonoBehaviour
 
     public bool Harvested { get; private set; }
 
+    /// <summary>판 안의 열매 나무 — 「옛 지도」가 딸 수 있는 것만 그린다 (결정 2-93).</summary>
+    public static readonly System.Collections.Generic.List<BerryTree> Active = new();
+
+    private void OnEnable() => Active.Add(this);
+    private void OnDisable() => Active.Remove(this);
+
     /// <summary>딴다 — 산열매 1~2가 가방으로. 성공하면 true.</summary>
     public bool Harvest()
     {

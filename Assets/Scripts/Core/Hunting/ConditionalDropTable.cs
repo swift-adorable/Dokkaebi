@@ -44,6 +44,9 @@ public struct KillContext
     /// 「점화를 걸지 않고」가 되어 버린다. 조건이 거짓말이 된다.
     /// </summary>
     public bool everIgnited;
+
+    /// <summary>플레이어가 쓰러뜨렸는가 — 마지막으로 때린 쪽이 플레이어 (결정 2-93 · 전리품 표시).</summary>
+    public bool killedByPlayer;
 }
 
 /// <summary>조건부 드롭 판정. 순수 클래스다.</summary>

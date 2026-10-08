@@ -14,8 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Dokkaebi.Runtime::PassiveNode
   id: rec_corpse
   displayName: "\uD68C\uC218 \uACC4\uC57D"
-  description: "\uB3CC\uC544\uC624\uC9C0 \uBABB\uD574\uB3C4 \uC4F0\uB7EC\uC9C4 \uC790\uB9AC\uC5D0\uC11C
-    \uD55C \uBC88\uC740 \uB418\uCC3E\uC544 \uC62C \uC218 \uC788\uB2E4."
+  description: "\uC4F0\uB7EC\uC9C0\uBA74 \uC783\uC740 \uAC83\uC774 \uADF8 \uC790\uB9AC\uC5D0
+    \uB0A8\uB294\uB2E4. \uADF8 \uC7A5\uC5D0 \uB2E4\uC2DC \uAC00\uBA74 \uD55C \uBC88
+    \uB418\uCC3E\uC744 \uC218 \uC788\uB2E4."
   branch: 2
   effect: 21
   value: 1

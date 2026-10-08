@@ -301,7 +301,7 @@ public class Inventory
     /// 각인만 남는다. 플레이어가 배울 규칙은 하나여야 하므로 예외를 늘리지 않는다.
     /// 젬도 장비와 똑같이 잃는다. (docs/Dokkaebi_Progression_System.md 6절)
     /// </summary>
-    public int DropOnDeath(int safeSlots = 0)
+    public int DropOnDeath(int safeSlots = 0, List<ItemStack> lostOut = null)
     {
         int lost = 0;
 
@@ -318,6 +318,7 @@ public class Inventory
                 continue;
 
             lost += stacks[i].Count;
+            lostOut?.Add(stacks[i]);
             stacks.RemoveAt(i);
         }
 

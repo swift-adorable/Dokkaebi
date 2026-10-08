@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Dokkaebi.Runtime::PassiveNode
   id: reg_map
   displayName: "\uC61B \uC9C0\uB3C4"
-  description: "\uC9C0\uB3C4\uC5D0 \uC804\uB9AC\uD488 \uC704\uCE58\uAC00 \uD45C\uC2DC\uB41C\uB2E4.
-    \uC6D0\uB798 \uC5C6\uB358 \uB9C8\uCEE4\uC774\uB2E4."
+  description: "\uC9C0\uB3C4\uC5D0 \uBD07\uC9D0 \xB7 \uC5F4\uB9E4 \uB098\uBB34 \xB7
+    \uC4F0\uB7EC\uB728\uB9B0 \uC801\uC758 \uC2DC\uCCB4\uAC00 \uD45C\uC2DC\uB41C\uB2E4."
   branch: 4
   effect: 43
   value: 1

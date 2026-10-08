@@ -75,8 +75,12 @@ namespace Dokkaebi.Tests
         [Test]
         public void 준비_중인_패시브는_배울_수_없다()
         {
-            Assert.IsTrue(PassiveEffectInfo.IsPending(PassiveEffectType.MapLoot));
             Assert.IsTrue(PassiveEffectInfo.IsPending(PassiveEffectType.CraftBench));
+
+            // 9단계 맵에 이었다 (결정 2-93) — 이제 배울 수 있다.
+            Assert.IsFalse(PassiveEffectInfo.IsPending(PassiveEffectType.MapLoot));
+            Assert.IsFalse(PassiveEffectInfo.IsPending(PassiveEffectType.ExtractMark));
+            Assert.IsFalse(PassiveEffectInfo.IsPending(PassiveEffectType.CorpseRecovery));
             Assert.IsFalse(PassiveEffectInfo.IsPending(PassiveEffectType.SafeSlots));
             Assert.AreEqual("옛 도면", PassiveEffectInfo.Name(PassiveEffectType.CraftBench));
         }

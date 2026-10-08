@@ -59,12 +59,22 @@ public class CorpseController : MonoBehaviour, IPoolable
     {
         Rarity = rarity;
         ConditionalDrops = ConditionalDropTable.Evaluate(in context);
+        KilledByPlayer = context.killedByPlayer;
     }
 
     /// <summary>이 시체에 남은 전리품.</summary>
     public LootContainer Loot => loot ??= new LootContainer(lootSlots);
 
     /// <summary>경험치를 이미 흡수했는지. 두 번 들어오지 않게 막는다.</summary>
+    /// <summary>플레이어가 쓰러뜨린 적의 시체인가 — 「전리품 표시」가 이것만 지도에 그린다 (결정 2-93).</summary>
+    public bool KilledByPlayer { get; private set; }
+
+    /// <summary>판 안의 시체 — 지도 표시용.</summary>
+    public static readonly System.Collections.Generic.List<CorpseController> Active = new();
+
+    private void OnEnable() => Active.Add(this);
+    private void OnDisable() => Active.Remove(this);
+
     public bool IsAbsorbed { get; private set; }
 
     /// <summary>집을 것이 남았는지. UI가 프롬프트 문구를 고르는 데 쓴다.</summary>
@@ -86,6 +96,7 @@ public class CorpseController : MonoBehaviour, IPoolable
         // 일반 적에게서 고유 보상이 나온다.
         Rarity = EnemyRarity.Normal;
         ConditionalDrops = ConditionalDrop.None;
+        KilledByPlayer = false;
 
         Loot.Clear();
 

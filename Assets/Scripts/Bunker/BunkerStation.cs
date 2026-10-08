@@ -53,6 +53,9 @@ public class BunkerStation : MonoBehaviour
         /// <summary>역행 비밀 통로 — 이전 장 맵으로 (결정 2-88). 구역에 선다.</summary>
         SecretPassage = 12,
 
+        /// <summary>쓰러진 자리 — 「회수 계약」으로 남은 잃은 것 (결정 2-93). 구역에 선다.</summary>
+        FallenStash = 13,
+
         /// <summary>여는 것이 없다 (작업대 — 제작은 다음 단계).</summary>
         None = 99
     }
@@ -84,6 +87,7 @@ public class BunkerStation : MonoBehaviour
             case Kind.Spring:       return $"{SpringTable.Name} ({SpringManager.Remaining})";
             case Kind.BerryTree:    return BerryTree.Name;
             case Kind.StoryBundle:  return ChapterZeroTable.BundleName;
+            case Kind.FallenStash:  return FallenStash.Name;
             case Kind.Departure:    return "파밍 출발";
             case Kind.Blueprint:    return "건설";
             default:                return string.Empty;
@@ -166,6 +170,11 @@ public class BunkerStation : MonoBehaviour
             case Kind.StoryBundle:
                 if (TryGetComponent(out StoryBundle bundle))
                     bundle.Open();
+                break;
+
+            case Kind.FallenStash:
+                if (TryGetComponent(out FallenStash fallen))
+                    fallen.Open();
                 break;
 
             case Kind.SecretPassage:

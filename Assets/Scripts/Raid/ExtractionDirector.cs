@@ -47,11 +47,26 @@ public class ExtractionDirector : MonoBehaviour
             : ExtractionTable.PickPoints(start, new System.Random());
         director.discovered = new bool[director.points.Length];
 
+        // 「돌아갈 길목」 (결정 2-93) — 찾지 않아도 처음부터 보인다(지도 · 미니맵 · 화살표).
+        if (MapPassives.ExtractMark)
+            for (int i = 0; i < director.discovered.Length; i++)
+                director.discovered[i] = true;
+
         for (int i = 0; i < director.points.Length; i++)
             BuildMarker(root.transform, director.points[i], i);
 
         GameLogger.Log($"[Extraction] 철수 지점 {director.points.Length}곳");
         return director;
+    }
+
+    /// <summary>길목을 모두 찾은 것으로 — 「돌아갈 길목」 · 검증 도구.</summary>
+    public void RevealAll()
+    {
+        if (discovered == null)
+            return;
+
+        for (int i = 0; i < discovered.Length; i++)
+            discovered[i] = true;
     }
 
     private void Awake() => Instance = this;

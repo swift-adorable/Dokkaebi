@@ -462,6 +462,7 @@ public class SkillZoneDirector : MonoBehaviour
     {
         var request = new DamageRequest
         {
+            source = DamageSource.Player,
             baseDamage = damage,
             element = element,
             hitKind = HitKind.Melee, // 폭발 → 몸통 방어도

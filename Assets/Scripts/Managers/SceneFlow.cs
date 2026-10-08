@@ -140,6 +140,7 @@ public static class SceneFlow
         SpringManager.Reset();
         MapMemory.Reset();
         NightClock.Reset();
+        FallenCache.Clear();
 
         loading = false;
         Load(HasBunker ? BunkerScene : RaidScene);

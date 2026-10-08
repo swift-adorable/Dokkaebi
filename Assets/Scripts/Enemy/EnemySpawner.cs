@@ -76,7 +76,14 @@ public class EnemySpawner : MonoBehaviour
 
             // 【임시】 철수 지점 2곳 — 25~35m · 원 안에서 5초 버티면 철수 (결정 2-78). 맵(9단계) 때 제자리로.
             if (!SceneFlow.InBunker)
+            {
                 ExtractionDirector.SpawnForRaid(player.position);
+
+                // 쓰러진 자리 (결정 2-93) — 이 장에 남아 있으면 이 판에 한 번 세운다.
+                string scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+                if (ZoneMapTable.IsMapScene(scene))
+                    FallenStash.SpawnForRaid(ZoneMapTable.ChapterOfScene(scene));
+            }
         }
 
         if (enemyPrefab == null)

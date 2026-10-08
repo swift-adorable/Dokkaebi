@@ -226,6 +226,7 @@ public static class SaveManager
         data.difficulty = DifficultyManager.Capture();
         data.maps = MapMemory.Capture();
         NightClock.Capture(data);
+        FallenCache.Capture(data);
 
         return data;
     }
@@ -239,6 +240,9 @@ public static class SaveManager
         // 화살통 · 탄창 (결정 2-80 · 2-81) — 무기 다음에 입혀야 한다(무기가 정한 탄만 들어간다).
         EquipmentSlot.Ammo, EquipmentSlot.Ammo2
     };
+
+    /// <summary>묶음 → 세이브 한 줄 (쓰러진 자리도 쓴다).</summary>
+    public static SavedItem ToSavedItem(ItemStack stack) => ToSaved(stack);
 
     private static SavedItem ToSaved(ItemStack stack)
     {
@@ -283,6 +287,7 @@ public static class SaveManager
         DifficultyManager.Restore(data.difficulty);
         MapMemory.Restore(data.maps);
         NightClock.Restore(data);
+        FallenCache.Restore(data);
 
         // 레벨이 돌아왔으니 소켓 수도 맞춘다. 알림은 내지 않는다.
         SkillManager.EnsureInstance().ResyncLevel();

@@ -78,8 +78,12 @@ public class Health : MonoBehaviour, IDamageable, IPoolable
     {
         killedByCritical = LastHitWasCritical,
         frozenAtDeath = Status.Has(StatusEffectType.Freeze),
-        everIgnited = EverIgnited
+        everIgnited = EverIgnited,
+        killedByPlayer = LastHitByPlayer
     };
+
+    /// <summary>마지막으로 때린 쪽이 플레이어인가 (상태이상 틱은 바꾸지 않는다 · 결정 2-93).</summary>
+    public bool LastHitByPlayer { get; private set; }
 
     /// <summary>
     /// 피해 계산에 넘길 방어 정보.
@@ -236,6 +240,7 @@ public class Health : MonoBehaviour, IDamageable, IPoolable
         // 재사용될 때마다 「미연소 포자」가 영영 나오지 않는다.
         LastHitWasCritical = false;
         EverIgnited = false;
+        LastHitByPlayer = false;
 
         if (StatusEffectSystem.HasInstance)
             StatusEffectSystem.Instance.Untrack(this);
@@ -283,6 +288,9 @@ public class Health : MonoBehaviour, IDamageable, IPoolable
         // 【0 피해는 기록하지 않는다.】 빗나간 타격이 「마지막 타격」이 되면
         // 조건부 드롭의 판정이 실제로 죽인 공격과 어긋난다.
         LastHitWasCritical = request.isCritical;
+
+        if (request.source != DamageSource.Unknown)
+            LastHitByPlayer = request.source == DamageSource.Player;
 
         // bypassArmour는 상태이상 틱만 켠다(StatusEffectState.Tick). 그래서
         // 이것이 꺼져 있으면 누군가 실제로 쏘거나 때린 것이다.

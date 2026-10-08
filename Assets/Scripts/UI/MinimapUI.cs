@@ -189,6 +189,17 @@ public class MinimapUI : MonoBehaviour
                 if (extraction.IsDiscovered(i))
                     Place(ref used, "●", ExtractionColor, extraction.Points[i], center, half, 22);
 
+        // 쓰러진 자리는 범위 밖이면 테두리 점으로, 전리품(옛 지도)은 범위 안의 것만 (결정 2-93).
+        foreach (MapLootMarks.Mark m in MapLootMarks.Collect())
+        {
+            bool fallen = m.kind == MapLootMarks.Kind.Fallen;
+            if (!fallen && !InRange(m.position, center))
+                continue;
+
+            Place(ref used, MapLootMarks.Glyph(m.kind), MapLootMarks.ColorOf(m.kind), m.position, center, half,
+                fallen ? 24 : 18);
+        }
+
         IReadOnlyList<Vector2> markers = MapMemory.Markers(runtime.Chapter);
         for (int i = 0; i < markers.Count; i++)
             Place(ref used, (i + 1).ToString(), MarkerColor, new Vector3(markers[i].x, 0f, markers[i].y), center, half, 20);
@@ -196,6 +207,10 @@ public class MinimapUI : MonoBehaviour
         for (int i = used; i < icons.Count; i++)
             icons[i].gameObject.SetActive(false);
     }
+
+    private static bool InRange(Vector3 world, Vector3 center)
+        => Mathf.Abs(world.x - center.x) <= MapTable.MinimapRange
+           && Mathf.Abs(world.z - center.z) <= MapTable.MinimapRange;
 
     /// <summary>점 하나 — 범위 밖이면 테두리에 붙여 그쪽을 가리킨다.</summary>
     private void Place(ref int used, string glyph, Color color, Vector3 world, Vector3 center, float half, int size)

@@ -15,6 +15,12 @@ public class StoryBundle : MonoBehaviour
 
     public LootContainer Contents => contents;
 
+    /// <summary>판 안의 봇짐 — 「옛 지도」가 그린다 (결정 2-93).</summary>
+    public static readonly System.Collections.Generic.List<StoryBundle> Active = new();
+
+    private void OnEnable() => Active.Add(this);
+    private void OnDisable() => Active.Remove(this);
+
     public static StoryBundle Create(Vector3 at)
     {
         var root = new GameObject("StoryBundle (0-1)");

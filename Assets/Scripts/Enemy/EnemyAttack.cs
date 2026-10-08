@@ -258,6 +258,7 @@ public class EnemyAttack : MonoBehaviour
         // 근접은 몸통 방어도를 쓴다. 사거리 보정은 적용하지 않는다.
         var request = new DamageRequest
         {
+            source = DamageSource.Enemy,
             baseDamage = damage,
             increasedPercent = 0f,
             element = ElementOf(appliedStatus),

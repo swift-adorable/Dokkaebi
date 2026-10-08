@@ -96,7 +96,11 @@ public class DokkaebiController : MonoBehaviour
 
         movement.SetInput(Vector2.zero);
 
-        int lost = PlayerInventory.EnsureInstance().DropOnDeath();
+        var lostStacks = new System.Collections.Generic.List<ItemStack>();
+        int lost = PlayerInventory.EnsureInstance().DropOnDeath(lostStacks);
+
+        // 쓰러진 자리 (결정 2-93) — 남아 있던 자리는 사라지고, 「회수 계약」을 배웠으면 여기 새 자리가 남는다.
+        RecordFallen(lostStacks);
 
         // 소켓의 젬은 파밍 안의 것이다. 남은 젬은 이미 위에서 사라졌다. (레벨은 남는다 — 결정 2-33)
         if (SkillManager.HasInstance)
@@ -121,6 +125,22 @@ public class DokkaebiController : MonoBehaviour
             gameManager.GameOver();
 
         RunEndUI.ShowDeath(lost);
+    }
+
+    private void RecordFallen(System.Collections.Generic.List<ItemStack> lostStacks)
+    {
+        string scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+        int chapter = ZoneMapTable.IsMapScene(scene) ? ZoneMapTable.ChapterOfScene(scene) : -1;
+
+        var items = new System.Collections.Generic.List<SavedItem>(lostStacks.Count);
+        foreach (ItemStack stack in lostStacks)
+            if (stack?.Definition != null && !stack.IsEmpty)
+                items.Add(SaveManager.ToSavedItem(stack));
+
+        FallenCache.OnDeath(MapPassives.CorpseRecovery, chapter, transform.position, items);
+
+        if (FallenCache.Current != null)
+            GameLogger.Log($"[Fallen] 쓰러진 자리가 남았다 — {chapter}장 · {items.Count}묶음");
     }
 
     private void Start()

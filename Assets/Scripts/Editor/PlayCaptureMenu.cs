@@ -78,4 +78,38 @@ public static class PlayCaptureMenu
         Debug.Log($"[Debug] 달 {MoonTable.Name(NightClock.Moon)} · 날씨 칸 {NightClock.Slot} · 눈 {NightClock.Snowy}"
                   + (RaidManager.HasInstance ? $" — {string.Join(" · ", RaidManager.Current.Describe())}" : string.Empty));
     }
+
+    /// <summary>
+    /// 지도 패시브 셋(돌아갈 길목 · 회수 계약 · 옛 지도)을 이 판에만 켜고, 쓰러진 자리 하나를 옆에 세운다 (결정 2-93 · 검증용).
+    /// 저장하지 않는다 — 판이 끝나며 저장되면 배운 것으로 남으니 확인 뒤 플레이를 멈춘다.
+    /// </summary>
+    [MenuItem("Dokkaebi/Debug/지도 패시브 셋 시험")]
+    public static void TryMapPassives()
+    {
+        if (!EditorApplication.isPlaying || !PassiveManager.HasInstance)
+            return;
+
+        var ids = new System.Collections.Generic.List<string>(PassiveManager.Instance.State.LearnedIds)
+        {
+            "rec_mark", "rec_corpse", "reg_map"
+        };
+        PassiveManager.Instance.State.Restore(ids);
+
+        if (ExtractionDirector.Instance != null)
+            ExtractionDirector.Instance.RevealAll();
+
+        MapRuntime runtime = MapRuntime.Current;
+        if (runtime != null && runtime.Player != null)
+        {
+            var items = new System.Collections.Generic.List<SavedItem>
+            {
+                new SavedItem { id = "con_water", count = 2 },
+                new SavedItem { id = "arm_guard_light", count = 1 },
+            };
+            FallenCache.OnDeath(true, runtime.Chapter, runtime.Player.position + new Vector3(10f, 0f, 10f), items);
+            FallenStash.SpawnForRaid(runtime.Chapter);
+        }
+
+        Debug.Log("[Debug] 지도 패시브 셋 켬 — 길목 전부 · 쓰러진 자리 하나 · 옛 지도");
+    }
 }

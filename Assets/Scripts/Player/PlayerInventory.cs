@@ -152,10 +152,14 @@ public class PlayerInventory : Singleton<PlayerInventory>
         ? Mathf.Clamp(Mathf.RoundToInt(PassiveManager.Instance.Total(PassiveEffectType.SafeSlots)), 0, MaxSafeSlots)
         : 0;
 
-    public int DropOnDeath()
+    /// <param name="lostOut">잃은 묶음을 받아 갈 목록 (쓰러진 자리 · 결정 2-93). 장비가 먼저다.</param>
+    public int DropOnDeath(List<ItemStack> lostOut = null)
     {
         List<ItemStack> lostEquipment = Loadout.DropOnDeath();
-        int lostFromBag = Bag.DropOnDeath(SafeSlots);
+        if (lostEquipment != null)
+            lostOut?.AddRange(lostEquipment);
+
+        int lostFromBag = Bag.DropOnDeath(SafeSlots, lostOut);
 
         RefreshCapacity();
 

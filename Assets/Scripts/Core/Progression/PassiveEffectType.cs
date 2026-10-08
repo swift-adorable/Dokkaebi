@@ -45,7 +45,7 @@ public enum PassiveEffectType
     /// </summary>
     SafeSlots = 20,
 
-    /// <summary>【해금】 철수 실패 시 내 시체에서 1회 회수.</summary>
+    /// <summary>【해금】 쓰러진 자리에 잃은 것이 남는다 — 그 장에 다시 간 판에서 한 번 (결정 2-93 · FallenCache).</summary>
     CorpseRecovery = 21,
 
     /// <summary>【해금】 지도에 철수 지점 상시 표시.</summary>
@@ -74,7 +74,7 @@ public enum PassiveEffectType
     /// <summary>【쓰지 않는다】 젬 분해 — 결정 2-74로 뺐다(젬은 강화 · 분해 없이 그대로 쓰기만 한다). 번호만 남긴다.</summary>
     GemSalvage = 42,
 
-    /// <summary>【해금】 지도에 전리품 위치 표시.</summary>
+    /// <summary>【해금】 지도에 전리품 위치 표시 — 봇짐 · 열매 나무 · 내가 쓰러뜨린 적의 시체 (결정 2-93).</summary>
     MapLoot = 43
 }
 
@@ -101,17 +101,14 @@ public static class PassiveEffectInfo
 
     /// <summary>
     /// 【준비 중】 효과가 붙을 시스템이 아직 없어 배울 수 없게 막는 것 (결정 2-74).
-    ///   · 쓰러진 자리 되찾기 · 길목 표시 · 옛 지도 — 구역 맵 · 철수 지점(9단계)
     ///   · 옛 도면 — 작업대 제작
+    /// 쓰러진 자리 되찾기 · 길목 표시 · 옛 지도는 구역 맵(9단계)에 이었다 (결정 2-93 · MapPassives).
     /// 시스템이 생기면 여기서 뺀다.
     /// </summary>
     public static bool IsPending(PassiveEffectType type)
     {
         switch (type)
         {
-            case PassiveEffectType.CorpseRecovery:
-            case PassiveEffectType.ExtractMark:
-            case PassiveEffectType.MapLoot:
             case PassiveEffectType.CraftBench:
             case PassiveEffectType.CodexAuto:
             case PassiveEffectType.GemSalvage:
