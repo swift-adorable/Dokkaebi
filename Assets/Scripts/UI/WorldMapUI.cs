@@ -6,7 +6,8 @@ using UnityEngine.UI;
 /// <summary>
 /// 【전체 지도】 (결정 2-90) — 미니맵을 누르거나 M. 지도가 떠 있어도 게임은 흐른다(덕코프처럼).
 ///
-///   · 보이는 것: 내 자리 · 바라보는 쪽 · 찾은 길목 · 구역 이름 · 금줄 · 진행 중인 퀘스트 구역 테두리 · 내 마커
+///   · 보이는 것: 내 자리 · 바라보는 쪽 · 찾은 길목 · 금줄 · 진행 중인 퀘스트 구역 테두리 · 내 마커
+///   · 구역 이름은 적지 않는다 — 맵 하나로 보이게 (2026-10-08 사용자)
 ///   · 가 보지 않은 땅은 어둡다 · 닫힌 구역은 더 어둡다 · 적은 보이지 않는다 (Map_System 4절)
 ///   · 두 번 누르면 마커를 찍는다(장마다 5개) · 마커를 두 번 누르면 지운다 — 마커는 지도 위에만 있다
 /// </summary>
@@ -198,18 +199,7 @@ public class WorldMapUI : MonoBehaviour, IPointerClickHandler
             Vector2 min = runtime.UvOf(new Vector3(area.Bounds.xMin, 0f, area.Bounds.yMin));
             Vector2 max = runtime.UvOf(new Vector3(area.Bounds.xMax, 0f, area.Bounds.yMax));
 
-            ZoneDefinition zone = StoryTable.Zone(area.ZoneId);
-            bool open = StoryManager.Progress.IsZoneOpen(area.ZoneId);
-            string name = zone != null ? $"{zone.Id} {zone.Name}" : area.ZoneId;
-
-            Text label = UIFactory.CreateLabel(overlay, open ? name : $"{name} (닫힘)", 24, FontStyle.Bold,
-                min, max, TextAnchor.UpperLeft, open ? UIPalette.Text : UIPalette.TextDim);
-            label.rectTransform.offsetMin = new Vector2(8f, 0f);
-            label.rectTransform.offsetMax = new Vector2(0f, -6f);
-            label.raycastTarget = false;
-            label.gameObject.AddComponent<Outline>().effectColor = new Color(0f, 0f, 0f, 0.85f);
-            builtForMap.Add(label.gameObject);
-
+            // 구역 이름 · 「(닫힘)」은 적지 않는다 — 장 하나가 한 맵으로 보이게 (2026-10-08 사용자).
             if (!questZones.Contains(area.ZoneId))
                 continue;
 
