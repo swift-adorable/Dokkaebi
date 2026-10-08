@@ -73,24 +73,28 @@ namespace Dokkaebi.Tests
         }
 
         /// <summary>
-        /// 【현재 감소량은 0이다.】 수리 비용과 경제가 8단계에 오므로 그때 값을 정한다.
-        /// 이 테스트는 값이 바뀌면 알려주는 역할을 한다.
+        /// 결정 2-96 — 수리 상한 감소를 켰다(정의상 최대의 5% · 티어 4 이상). 경제 수치는 WearTable.
         /// </summary>
         [Test]
-        public void 수리_상한_감소는_아직_꺼져_있다()
+        public void 수리_상한_감소는_티어_4_이상에만_작게()
         {
-            Assert.AreEqual(0f, ItemStack.RepairLossRatio, 0.0001f,
-                "수리 상한 감소를 켰습니다. 경제 수치를 함께 정했는지 확인하십시오.");
+            Assert.AreEqual(0.05f, ItemStack.RepairLossRatio, 0.0001f, "수리 상한 감소 수치가 바뀌었습니다 — 결정 2-96 확인.");
 
             ItemStack stack = Stack("Armour/arm_body_t6.asset");
-
             int before = stack.MaxDurability;
+            int loss = UnityEngine.Mathf.RoundToInt(stack.Definition.MaxDurability * ItemStack.RepairLossRatio);
 
             stack.Damage(30);
             stack.Repair(100);
 
-            Assert.AreEqual(before, stack.MaxDurability, "감소가 꺼져 있는데 상한이 줄었습니다.");
-            Assert.AreEqual(before, stack.Durability, "수리 후 상한까지 회복되어야 합니다.");
+            Assert.AreEqual(before - loss, stack.MaxDurability, "티어 6 수리에 상한이 줄지 않았습니다.");
+            Assert.AreEqual(stack.MaxDurability, stack.Durability, "수리 후 상한까지 회복되어야 합니다.");
+
+            ItemStack low = Stack("Armour/arm_body_t1.asset");
+            int lowBefore = low.MaxDurability;
+            low.Damage(10);
+            low.Repair(100);
+            Assert.AreEqual(lowBefore, low.MaxDurability, "티어 1인데 상한이 줄었습니다.");
         }
 
         [Test]

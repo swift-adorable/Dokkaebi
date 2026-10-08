@@ -28,6 +28,19 @@ public class ItemStack
     /// </summary>
     public int MaxDurability { get; private set; }
 
+    /// <summary>수리로 줄어든 최대 내구도까지 되살린다 (세이브 · 결정 2-96). maxDurability가 음수면 정의 그대로.</summary>
+    public ItemStack(ItemDefinition definition, int count, int durability, int maxDurability)
+        : this(definition, count, -1)
+    {
+        if (definition == null || !definition.HasDurability)
+            return;
+
+        if (maxDurability > 0)
+            MaxDurability = Mathf.Clamp(maxDurability, 1, definition.MaxDurability);
+
+        Durability = durability < 0 ? MaxDurability : Mathf.Clamp(durability, 0, MaxDurability);
+    }
+
     public ItemStack(ItemDefinition definition, int count = 1, int durability = -1)
     {
         Definition = definition;
@@ -128,10 +141,9 @@ public class ItemStack
     /// <summary>
     /// 수리할 때 최대 내구도가 깎이는 비율. 티어 4 이상에만 적용한다.
     ///
-    /// 【현재 0이다.】 수리 비용과 경제가 8단계에 오므로 그때 값을 정한다.
-    /// 0이어도 경로는 살아 있으므로, 값 하나만 바꾸면 경제 싱크가 켜진다.
+    /// 결정 2-96 — 고칠 때마다 정의상 최대의 5% [임시값]. 작게, 티어 4 이상만 (Equipment 4절).
     /// </summary>
-    public const float RepairLossRatio = 0f;
+    public const float RepairLossRatio = 0.05f;
 
     /// <summary>상한 감소가 적용되기 시작하는 티어. 하위 장비는 부담 없이 수리한다.</summary>
     public const int RepairLossMinTier = 4;
@@ -155,6 +167,22 @@ public class ItemStack
         Durability = Mathf.Min(MaxDurability, Durability + amount);
 
         return Durability - before;
+    }
+
+    /// <summary>고친 뒤의 최대 내구도 — 수리 화면이 미리 알려 준다.</summary>
+    public int MaxDurabilityAfterRepair
+    {
+        get
+        {
+            if (Definition == null || !Definition.HasDurability)
+                return 0;
+
+            if (RepairLossRatio <= 0f || Definition.Tier < RepairLossMinTier)
+                return MaxDurability;
+
+            int loss = Mathf.Max(1, Mathf.RoundToInt(Definition.MaxDurability * RepairLossRatio));
+            return Mathf.Max(1, MaxDurability - loss);
+        }
     }
 
     /// <summary>수리에 따른 상한 감소. 최소 1은 남겨 아이템이 즉시 소멸하지 않게 한다.</summary>

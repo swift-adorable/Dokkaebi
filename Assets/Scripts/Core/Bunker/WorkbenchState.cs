@@ -22,6 +22,10 @@ public enum CraftError
     MaxStage = 9,
     /// <summary>바칠 필요 없는 제작법이다.</summary>
     NoUnlockNeeded = 10,
+    /// <summary>고칠 것이 없다.</summary>
+    NothingToRepair = 11,
+    /// <summary>분해할 수 없다 (장비만 · 입은 것은 벗어야 한다).</summary>
+    CannotDismantle = 12,
 }
 
 /// <summary>
@@ -182,6 +186,8 @@ public class WorkbenchState
         CraftError.NotEnoughGold => "엽전이 모자란다.",
         CraftError.NoRoom => "창고에도 가방에도 자리가 없다.",
         CraftError.MaxStage => "더 올릴 단계가 없다.",
+        CraftError.NothingToRepair => "고칠 데가 없다.",
+        CraftError.CannotDismantle => "분해할 수 없다 — 가방 · 창고의 장비만 (입은 것은 벗어야 한다).",
         _ => string.Empty,
     };
 }

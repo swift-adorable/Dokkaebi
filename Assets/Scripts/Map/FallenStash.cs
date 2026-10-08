@@ -37,7 +37,7 @@ public class FallenStash : MonoBehaviour
 
             ItemDefinition definition = catalog.Find(item.id);
             if (definition != null)
-                container.TryPut(new ItemStack(definition, item.count, item.durability));
+                container.TryPut(new ItemStack(definition, item.count, item.durability, item.maxDurability));
         }
 
         if (container.IsEmpty)

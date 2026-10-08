@@ -44,6 +44,9 @@ public class Health : MonoBehaviour, IDamageable, IPoolable
     /// </summary>
     public event Action OnDirectHit;
 
+    /// <summary>직접 타격이 실제로 들어갔다 — 장비 닳기(PlayerWear)가 듣는다 (결정 2-96).</summary>
+    public event Action<DamageRequest, int> OnArmourHit;
+
     /// <summary>이 대상의 소속.</summary>
     public Team Team => team;
 
@@ -297,7 +300,13 @@ public class Health : MonoBehaviour, IDamageable, IPoolable
         if (!request.bypassArmour)
             OnDirectHit?.Invoke();
 
-        return ApplyRaw(computed, skipInvulnerability: request.bypassArmour);
+        int dealt = ApplyRaw(computed, skipInvulnerability: request.bypassArmour);
+
+        // 장비 닳기 (결정 2-96) — 실제로 들어간 직접 타격만. 상태이상 틱은 닳게 하지 않는다.
+        if (dealt > 0 && !request.bypassArmour)
+            OnArmourHit?.Invoke(request, dealt);
+
+        return dealt;
     }
 
     public int TakeDamage(int amount)

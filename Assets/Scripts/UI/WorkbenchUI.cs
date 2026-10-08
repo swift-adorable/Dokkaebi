@@ -23,6 +23,9 @@ public class WorkbenchUI : MonoBehaviour
     private readonly List<Image> tabs = new();
     private int shownStage = 1;
 
+    private const int RepairTab = WorkbenchTable.MaxStage + 1;
+    private const int DismantleTab = WorkbenchTable.MaxStage + 2;
+
     public static void Open()
     {
         if (instance != null)
@@ -61,14 +64,25 @@ public class WorkbenchUI : MonoBehaviour
         for (int stage = 1; stage <= WorkbenchTable.MaxStage; stage++)
         {
             int captured = stage;
-            float x = 0.04f + (stage - 1) * 0.12f;
+            float x = 0.04f + (stage - 1) * 0.095f;
             Button tab = UIFactory.CreateButton(box.transform, WorkbenchTable.StageName(stage),
-                new Vector2(x, 0.80f), new Vector2(x + 0.11f, 0.88f), UIPalette.Header, () => ShowStage(captured), 26);
+                new Vector2(x, 0.80f), new Vector2(x + 0.088f, 0.88f), UIPalette.Header, () => ShowStage(captured), 26);
             tabs.Add(tab.GetComponent<Image>());
         }
 
-        upgradeLine = UIFactory.CreateLabel(box.transform, string.Empty, 19, FontStyle.Normal,
-            new Vector2(0.53f, 0.80f), new Vector2(0.80f, 0.88f), TextAnchor.MiddleRight, UIPalette.TextDim);
+        // 수리 · 분해 (결정 2-96) — 작업대만 있으면 된다.
+        string[] extra = { "수리", "분해" };
+        for (int i = 0; i < extra.Length; i++)
+        {
+            int captured = RepairTab + i;
+            float x = 0.04f + (WorkbenchTable.MaxStage + i) * 0.095f;
+            Button tab = UIFactory.CreateButton(box.transform, extra[i],
+                new Vector2(x, 0.80f), new Vector2(x + 0.088f, 0.88f), UIPalette.Header, () => ShowStage(captured), 22);
+            tabs.Add(tab.GetComponent<Image>());
+        }
+
+        upgradeLine = UIFactory.CreateLabel(box.transform, string.Empty, 17, FontStyle.Normal,
+            new Vector2(0.62f, 0.80f), new Vector2(0.80f, 0.88f), TextAnchor.MiddleRight, UIPalette.TextDim);
         upgradeLine.supportRichText = true;
         upgradeButton = UIFactory.CreateButton(box.transform, "단계 올리기", new Vector2(0.81f, 0.80f),
             new Vector2(0.96f, 0.88f), UIPalette.Action, OnUpgrade, 20);
@@ -97,7 +111,7 @@ public class WorkbenchUI : MonoBehaviour
 
         for (int i = 0; i < tabs.Count; i++)
             tabs[i].color = i + 1 == shownStage ? UIPalette.SlotSelected
-                : i + 1 <= stage ? UIPalette.Header : UIPalette.SlotLocked;
+                : i + 1 <= stage || i + 1 >= RepairTab ? UIPalette.Header : UIPalette.SlotLocked;
 
         // 단계 올리기 줄
         if (stage >= WorkbenchTable.MaxStage)
@@ -121,6 +135,13 @@ public class WorkbenchUI : MonoBehaviour
         UIFactory.ClearChildren(list.Content);
         WorkbenchState state = WorkbenchManager.State;
         float y = 0f;
+
+        if (shownStage == RepairTab || shownStage == DismantleTab)
+        {
+            FillUpkeep(shownStage == RepairTab, ref y);
+            list.Content.sizeDelta = new Vector2(0f, y);
+            return;
+        }
 
         Text theme = UIFactory.CreateLabel(list.Content, $"{WorkbenchTable.StageName(shownStage)} — {WorkbenchTable.StageTheme(shownStage)}"
             + (state.Stage < shownStage ? "   (작업대를 이 단계로 올려야 한다)" : string.Empty),
@@ -171,6 +192,68 @@ public class WorkbenchUI : MonoBehaviour
         Button button = UIFactory.CreateButton(row.transform, verb, new Vector2(0.80f, 0.15f), new Vector2(0.98f, 0.85f),
             unlocked ? UIPalette.Action : UIPalette.Subtle, action, 22);
         button.interactable = canAct;
+    }
+
+    /// <summary>수리 · 분해 목록 (결정 2-96).</summary>
+    private void FillUpkeep(bool repair, ref float y)
+    {
+        Text theme = UIFactory.CreateLabel(list.Content, repair
+                ? "수리 — 엽전으로 고친다 · 티어 4 이상은 고칠 때마다 최대 내구도가 조금 준다"
+                : "분해 — 가방 · 창고의 장비를 재료로 되돌린다 · 닳을수록 덜 나온다",
+            20, FontStyle.Bold, Vector2.zero, Vector2.zero, TextAnchor.MiddleLeft, UIPalette.TextAccent);
+        Place(theme.rectTransform, ref y, 44f);
+
+        List<ItemStack> items = repair ? WorkbenchManager.Repairable() : WorkbenchManager.Dismantlable();
+
+        if (items.Count == 0)
+        {
+            Text none = UIFactory.CreateLabel(list.Content, repair ? "고칠 것이 없다." : "분해할 장비가 없다.", 20,
+                FontStyle.Normal, Vector2.zero, Vector2.zero, TextAnchor.MiddleLeft, UIPalette.TextDim);
+            Place(none.rectTransform, ref y, 44f);
+            return;
+        }
+
+        foreach (ItemStack stack in items)
+        {
+            Image row = UIFactory.CreatePanel("Row", list.Content, UIPalette.Row, Vector2.zero, Vector2.zero);
+            Place(row.rectTransform, ref y, RowHeight);
+
+            string name = stack.Definition.DisplayName;
+            string line;
+            bool canAct;
+            UnityEngine.Events.UnityAction action;
+
+            if (repair)
+            {
+                int cost = WearTable.RepairCost(stack);
+                int after = WearTable.MaxAfterRepair(stack);
+                string loss = after < stack.MaxDurability
+                    ? $" · <color=#EB7361>최대 내구도 {stack.MaxDurability} → {after}</color>"
+                    : string.Empty;
+                line = $"내구도 {stack.Durability}/{stack.MaxDurability} · {Colored($"{cost:N0}엽전", WorkbenchManager.Gold >= cost)}{loss}";
+                canAct = WorkbenchManager.Built && WorkbenchManager.Gold >= cost;
+                action = () => Act(WorkbenchManager.Repair(stack), $"{Josa.EulReul(name)} 고쳤다.");
+            }
+            else
+            {
+                var parts = new List<string>();
+                foreach (MaterialCost c in WearTable.DismantleYield(stack))
+                    parts.Add($"{NameOf(c.ItemId)} {c.Count}");
+
+                string worn = stack.Definition.HasDurability ? $"내구도 {stack.Durability}/{stack.MaxDurability} · " : string.Empty;
+                line = $"{worn}나오는 것: {string.Join(" · ", parts)}";
+                canAct = WorkbenchManager.Built;
+                action = () => Act(WorkbenchManager.Dismantle(stack), $"{Josa.EulReul(name)} 분해했다 — 재료는 창고에.");
+            }
+
+            Text label = UIFactory.CreateLabel(row.transform, $"<b>{name}</b>\n<size=18>{line}</size>", 22, FontStyle.Normal,
+                new Vector2(0.02f, 0f), new Vector2(0.78f, 1f), TextAnchor.MiddleLeft);
+            label.supportRichText = true;
+
+            Button button = UIFactory.CreateButton(row.transform, repair ? "고치기" : "분해", new Vector2(0.80f, 0.15f),
+                new Vector2(0.98f, 0.85f), repair ? UIPalette.Action : UIPalette.Subtle, action, 22);
+            button.interactable = canAct;
+        }
     }
 
     private void Act(CraftError error, string done)

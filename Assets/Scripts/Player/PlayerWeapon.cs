@@ -130,7 +130,10 @@ public class PlayerWeapon : MonoBehaviour
         Fire(shot, kind);
 
         if (!unarmed)
+        {
             Ammo.Consume();
+            PlayerWear.Current?.OnShot();   // 쏠 때마다 무기가 닳는다 (결정 2-96)
+        }
 
         return true;
     }

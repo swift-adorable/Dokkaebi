@@ -72,6 +72,10 @@ public class PlayerSurvival : MonoBehaviour
         // 궂은 날 · 막이 (결정 2-91) — 플레이어에 하나.
         if (!TryGetComponent(out PlayerWeather _))
             gameObject.AddComponent<PlayerWeather>();
+
+        // 장비 닳기 (결정 2-96).
+        if (!TryGetComponent(out PlayerWear _))
+            gameObject.AddComponent<PlayerWear>();
     }
 
     private void OnDestroy()

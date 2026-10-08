@@ -254,7 +254,10 @@ public static class SaveManager
         {
             id = stack.Definition.Id,
             count = stack.Count,
-            durability = stack.Definition.HasDurability ? stack.Durability : -1
+            durability = stack.Definition.HasDurability ? stack.Durability : -1,
+            maxDurability = stack.Definition.HasDurability && stack.MaxDurability < stack.Definition.MaxDurability
+                ? stack.MaxDurability
+                : -1
         };
     }
 
@@ -345,7 +348,7 @@ public static class SaveManager
                 continue;
             }
 
-            var stack = new ItemStack(definition, 1, item.durability);
+            var stack = new ItemStack(definition, 1, item.durability, item.maxDurability);
 
             if (!loadout.TryEquip(stack, slots[i], out _))
                 GameLogger.Error($"[Save] 각인 「{item.id}」을 {slots[i]}에 끼우지 못했습니다.");
@@ -388,7 +391,7 @@ public static class SaveManager
                 continue;
             }
 
-            target.TryAddStack(new ItemStack(definition, item.count, item.durability));
+            target.TryAddStack(new ItemStack(definition, item.count, item.durability, item.maxDurability));
         }
 
         target.SlotCapacity = capacity;
@@ -428,7 +431,7 @@ public static class SaveManager
 
             // 화살통 · 탄창은 수가 있다. 장비는 언제나 하나다.
             int count = EquipmentLoadout.IsAmmoSlot((EquipmentSlot)row.slot) ? Mathf.Max(1, row.item.count) : 1;
-            var stack = new ItemStack(definition, count, row.item.durability);
+            var stack = new ItemStack(definition, count, row.item.durability, row.item.maxDurability);
 
             if (!loadout.TryEquip(stack, (EquipmentSlot)row.slot, out _))
                 GameLogger.Error($"[Save] 장비 「{row.item.id}」을 {(EquipmentSlot)row.slot}에 입히지 못했습니다.");

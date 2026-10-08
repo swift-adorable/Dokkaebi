@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -60,6 +61,86 @@ public static class WorkbenchManager
         PlayerInventory.EnsureInstance().RefreshCapacity();
         ExchangeWindowUI.RefreshIfOpen();
         SaveManager.Commit(reason);
+    }
+
+    // ── 수리 · 분해 (결정 2-96) ──────────────────────────────────────
+
+    /// <summary>고칠 것들 — 입은 것 · 가방 · 창고.</summary>
+    public static List<ItemStack> Repairable()
+    {
+        var list = new List<ItemStack>();
+        PlayerInventory inv = PlayerInventory.EnsureInstance();
+
+        foreach (ItemStack s in inv.Loadout.All())
+            if (WearTable.NeedsRepair(s)) list.Add(s);
+        foreach (ItemStack s in inv.Bag.Stacks)
+            if (WearTable.NeedsRepair(s)) list.Add(s);
+        foreach (ItemStack s in inv.Stash.Stacks)
+            if (WearTable.NeedsRepair(s)) list.Add(s);
+
+        return list;
+    }
+
+    /// <summary>분해할 수 있는 것들 — 가방 · 창고 (입은 것은 벗어야 한다).</summary>
+    public static List<ItemStack> Dismantlable()
+    {
+        var list = new List<ItemStack>();
+        PlayerInventory inv = PlayerInventory.EnsureInstance();
+
+        foreach (ItemStack s in inv.Bag.Stacks)
+            if (WearTable.CanDismantle(s?.Definition)) list.Add(s);
+        foreach (ItemStack s in inv.Stash.Stacks)
+            if (WearTable.CanDismantle(s?.Definition)) list.Add(s);
+
+        return list;
+    }
+
+    public static CraftError Repair(ItemStack stack)
+    {
+        if (!Built)
+            return CraftError.NoWorkbench;
+
+        if (!WearTable.NeedsRepair(stack))
+            return CraftError.NothingToRepair;
+
+        int cost = WearTable.RepairCost(stack);
+        if (Gold < cost)
+            return CraftError.NotEnoughGold;
+
+        stack.Repair(stack.MaxDurability);
+        PlayerInventory.EnsureInstance().Loadout.MarkDirty();
+        Finish(CraftError.None, Gold - cost, "작업대 수리");
+        return CraftError.None;
+    }
+
+    public static CraftError Dismantle(ItemStack stack)
+    {
+        if (!Built)
+            return CraftError.NoWorkbench;
+
+        if (stack?.Definition == null || !WearTable.CanDismantle(stack.Definition))
+            return CraftError.CannotDismantle;
+
+        PlayerInventory inv = PlayerInventory.EnsureInstance();
+        Inventory from = inv.Bag.Stacks.Contains(stack) ? inv.Bag : inv.Stash.Stacks.Contains(stack) ? inv.Stash : null;
+        if (from == null)
+            return CraftError.CannotDismantle;
+
+        List<MaterialCost> yield = WearTable.DismantleYield(stack);
+        from.RemoveStack(stack);
+
+        foreach (MaterialCost c in yield)
+            if (!CanGive(c.ItemId, c.Count))
+            {
+                from.TryAddStack(stack);   // 놓을 자리가 없으면 되돌린다
+                return CraftError.NoRoom;
+            }
+
+        foreach (MaterialCost c in yield)
+            Give(c.ItemId, c.Count);
+
+        Finish(CraftError.None, Gold, "작업대 분해");
+        return CraftError.None;
     }
 
     /// <summary>창고 먼저, 모자라면 가방에서 뺀다. 뺀 수를 돌려준다.</summary>
