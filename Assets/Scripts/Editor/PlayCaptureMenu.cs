@@ -46,6 +46,13 @@ public static class PlayCaptureMenu
             WorldMapUI.Toggle();
     }
 
+    [MenuItem("Dokkaebi/Debug/전체 지도 한 칸 확대")]
+    public static void ZoomWorldMap()
+    {
+        if (EditorApplication.isPlaying)
+            WorldMapUI.DebugZoomIn();
+    }
+
     [MenuItem("Dokkaebi/Debug/출발 화면 열기")]
     public static void OpenDeparture()
     {

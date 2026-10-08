@@ -149,5 +149,6 @@ Dokkaebi에는 아직 구역 맵이 없어 표시할 것이 없기 때문이다.
 - **가 본 땅** — 4m 칸 · 둘레 18m를 0.25초마다 밝힌다 · 장마다 세이브에 남는다(`MapMemory` · `FogGrid` · 세이브 판 14)
 - **길목 찾기** — 기둥 가운데(4m)가 화면 안이고 카메라에서 키 큰 덩어리가 가리지 않으면, 또는 원을 밟으면 · 판마다 새로 · 화면 가장자리 화살표도 찾은 길목만
 - **마커** — 장마다 5개 · 지도 위에만 · 세이브에 남는다
+- **전체 지도 모양 (결정 2-94)** — 양피지 · 가장자리 번짐 · 위 「지도 › n장 › 장 이름」 · 왼쪽 줄(거르기 · 목표로 · 마커 목록 · 달 · 날씨) · 아래 확대 막대 · 「내 자리」 · 배율 1 ~ 4(열면 2) · 끌어서 이동 · 퀘스트 구역 테두리 + 「!」 (`Core/Map/MapView` · `MapRaster.Parchment`)
 - 코드: `Core/Map/MapTable` (수치) · `FogGrid` · `MapMemory` · `MapRaster` (표 → 그림) · `QuestZones` · `Map/MapRuntime` · `UI/MinimapUI` · `UI/WorldMapUI` · `UI/HudLayout`
 - 다음: 장부방에서 장 지도 사기(한 번에 밝히기 — `FogGrid.RevealAll`) · 아트 때 지도 그림을 손그림으로

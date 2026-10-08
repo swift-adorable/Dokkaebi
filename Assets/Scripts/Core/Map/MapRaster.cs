@@ -36,23 +36,28 @@ public static class MapRaster
         _ => new Color32(128, 128, 128, 255),
     };
 
-    public static int WidthOf(ChapterMap map) => Mathf.Max(1, Mathf.RoundToInt(map.HalfSize.x * 2f * MapTable.PixelsPerMeter));
-    public static int HeightOf(ChapterMap map) => Mathf.Max(1, Mathf.RoundToInt(map.HalfSize.y * 2f * MapTable.PixelsPerMeter));
+    public static int WidthOf(ChapterMap map, int ppm = MapTable.PixelsPerMeter) => Mathf.Max(1, Mathf.RoundToInt(map.HalfSize.x * 2f * ppm));
+    public static int HeightOf(ChapterMap map, int ppm = MapTable.PixelsPerMeter) => Mathf.Max(1, Mathf.RoundToInt(map.HalfSize.y * 2f * ppm));
 
     /// <summary>그린다. isOpen이 null이면 다 열린 것으로 본다.</summary>
-    public static Color32[] Render(ChapterMap map, Func<string, bool> isOpen)
+    public static Color32[] Render(ChapterMap map, Func<string, bool> isOpen, int pixelsPerMeter = MapTable.PixelsPerMeter,
+                                   bool parchment = false)
     {
-        int w = WidthOf(map), h = HeightOf(map);
+        Color32 ground = parchment ? ParchmentGround : Ground;
+        Color32 outside = parchment ? ParchmentOutside : OutOfZone;
+        Func<MapBlockKind, Color32> colorOf = parchment ? ParchmentColorOf : ColorOf;
+
+        int w = WidthOf(map, pixelsPerMeter), h = HeightOf(map, pixelsPerMeter);
         var pixels = new Color32[w * h];
-        float ppm = MapTable.PixelsPerMeter;
+        float ppm = pixelsPerMeter;
 
         // 바닥 — 구역 땅이면 바닥, 아니면 끊긴 밤길(어둡게). 닫힌 구역은 어둡게.
         for (int y = 0; y < h; y++)
         for (int x = 0; x < w; x++)
         {
-            Vector3 p = WorldOf(map, x, y);
+            Vector3 p = WorldOf(map, x, y, pixelsPerMeter);
             string zone = map.ZoneAt(p);
-            pixels[y * w + x] = zone == null ? OutOfZone : Shade(Ground, zone, isOpen);
+            pixels[y * w + x] = zone == null ? outside : Shade(ground, zone, isOpen);
         }
 
         // 덩어리 — 낮은 것(꽃밭 · 냇물)을 먼저, 키 큰 것을 나중에.
@@ -62,7 +67,7 @@ public static class MapRaster
                 if (b.Solid != solidPass)
                     continue;
 
-                Fill(map, pixels, w, h, b.Center, b.Size.x, b.Size.z, ColorOf(b.Kind), isOpen, ppm);
+                Fill(map, pixels, w, h, b.Center, b.Size.x, b.Size.z, colorOf(b.Kind), isOpen, ppm);
             }
 
         // 아직 닫힌 금줄 — 밝은 줄.
@@ -75,8 +80,8 @@ public static class MapRaster
     }
 
     /// <summary>화소 가운데의 월드 자리.</summary>
-    public static Vector3 WorldOf(ChapterMap map, int x, int y)
-        => new(-map.HalfSize.x + (x + 0.5f) / MapTable.PixelsPerMeter, 0f, -map.HalfSize.y + (y + 0.5f) / MapTable.PixelsPerMeter);
+    public static Vector3 WorldOf(ChapterMap map, int x, int y, int ppm = MapTable.PixelsPerMeter)
+        => new(-map.HalfSize.x + (x + 0.5f) / ppm, 0f, -map.HalfSize.y + (y + 0.5f) / ppm);
 
     /// <summary>월드 자리 → 그림의 0 ~ 1 좌표 (u, v).</summary>
     public static Vector2 UvOf(ChapterMap map, Vector3 world)
@@ -97,7 +102,7 @@ public static class MapRaster
         for (int y = y0; y <= y1; y++)
         for (int x = x0; x <= x1; x++)
         {
-            string zone = isOpen != null ? map.ZoneAt(WorldOf(map, x, y)) : null;
+            string zone = isOpen != null ? map.ZoneAt(WorldOf(map, x, y, Mathf.RoundToInt(ppm))) : null;
             pixels[y * w + x] = zone == null ? color : Shade(color, zone, isOpen);
         }
     }
@@ -108,5 +113,97 @@ public static class MapRaster
             return c;
 
         return new Color32((byte)(c.r * ClosedDim), (byte)(c.g * ClosedDim), (byte)(c.b * ClosedDim), 255);
+    }
+
+    // ── 양피지 (전체 지도 · 2026-10-08 사용자 참고 그림) ─────────────────────
+
+    /// <summary>양피지 바닥(길 · 마당 — 밝다) · 장 밖(짙다) [임시 — 아트 때 그림으로 바꾼다].</summary>
+    public static readonly Color32 ParchmentGround = new(228, 206, 160, 255);
+    public static readonly Color32 ParchmentOutside = new(62, 50, 37, 255);
+
+    /// <summary>양피지 빛 — 참고 그림처럼 길이 밝고 덩어리(건물 · 대숲 · 바위)가 짙다.</summary>
+    public static Color32 ParchmentColorOf(MapBlockKind kind) => kind switch
+    {
+        MapBlockKind.Boundary => new Color32(46, 37, 27, 255),
+        MapBlockKind.Bamboo => new Color32(104, 104, 70, 255),
+        MapBlockKind.Rock => new Color32(128, 112, 88, 255),
+        MapBlockKind.Building => new Color32(98, 76, 54, 255),
+        MapBlockKind.Bush => new Color32(146, 136, 94, 255),
+        MapBlockKind.Tree => new Color32(92, 72, 50, 255),
+        MapBlockKind.Water => new Color32(112, 122, 116, 255),
+        MapBlockKind.Fence => new Color32(110, 86, 60, 255),
+        MapBlockKind.Stall => new Color32(162, 132, 94, 255),
+        MapBlockKind.Well => new Color32(140, 130, 112, 255),
+        MapBlockKind.Post => new Color32(120, 96, 66, 255),
+        MapBlockKind.Flowerbed => new Color32(176, 132, 118, 255),
+        MapBlockKind.Geumjul => new Color32(226, 200, 132, 255),
+        _ => new Color32(140, 120, 92, 255),
+    };
+
+    /// <summary>
+    /// 양피지 빛으로 그린 지도(Render parchment)를 손본다 — 덩어리 가장자리에 먹선을 긋고, 종이 결을 살짝 섞는다.
+    /// 같은 그림이면 늘 같은 결과(결이 고정 씨앗).
+    /// </summary>
+    public static Color32[] Parchment(Color32[] source, int w, int h)
+    {
+        var result = new Color32[source.Length];
+
+        for (int y = 0; y < h; y++)
+        for (int x = 0; x < w; x++)
+        {
+            int i = y * w + x;
+            Color32 c = source[i];
+
+            float r = c.r, g = c.g, b = c.b;
+
+            // 먹선 — 이웃과 빛이 다르면 가장자리다.
+            if (IsEdge(source, w, h, x, y))
+            {
+                r *= 0.62f;
+                g *= 0.58f;
+                b *= 0.55f;
+            }
+
+            // 종이 결.
+            float grain = (Hash(x, y) - 0.5f) * 14f;
+
+            result[i] = new Color32(
+                (byte)Mathf.Clamp(r + grain, 0f, 255f),
+                (byte)Mathf.Clamp(g + grain, 0f, 255f),
+                (byte)Mathf.Clamp(b + grain * 0.8f, 0f, 255f),
+                255);
+        }
+
+        return result;
+    }
+
+    private static bool IsEdge(Color32[] px, int w, int h, int x, int y)
+    {
+        Color32 c = px[y * w + x];
+
+        return Differs(c, px, w, h, x + 1, y) || Differs(c, px, w, h, x - 1, y)
+            || Differs(c, px, w, h, x, y + 1) || Differs(c, px, w, h, x, y - 1);
+    }
+
+    private static bool Differs(Color32 c, Color32[] px, int w, int h, int x, int y)
+    {
+        if (x < 0 || y < 0 || x >= w || y >= h)
+            return false;
+
+        Color32 o = px[y * w + x];
+        int d = Mathf.Abs(c.r - o.r) + Mathf.Abs(c.g - o.g) + Mathf.Abs(c.b - o.b);
+
+        // 더 짙은 쪽(덩어리 안쪽)에만 선을 긋는다 — 선이 두 겹이 되지 않고 길은 깨끗하게 남는다.
+        return d > 24 && (c.r + c.g + c.b) < (o.r + o.g + o.b);
+    }
+
+    private static float Hash(int x, int y)
+    {
+        unchecked
+        {
+            uint n = (uint)(x * 374761393 + y * 668265263);
+            n = (n ^ (n >> 13)) * 1274126177u;
+            return ((n ^ (n >> 16)) & 0xFFFF) / 65535f;
+        }
     }
 }
