@@ -1,8 +1,10 @@
 using System.Collections.Generic;
 using System.IO;
+using Unity.AI.Navigation;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.SceneManagement;
 
 /// <summary>
@@ -11,6 +13,8 @@ using UnityEngine.SceneManagement;
 ///   1) 옛 파밍 씬(SampleScene)을 「Chapter0.unity」로 복사한다 — 플레이어 · 카메라 · 매니저 · 스포너가 그대로 온다
 ///   2) 바닥을 맵 크기로 늘리고, 덩어리 · 금줄을 단색 블록으로 얹는다 (맵 뿌리 「Map_Ch0」 + ZoneMap)
 ///   3) 빌드 설정에 넣는다 — SceneFlow가 그 장의 구역을 이 씬에서 돌린다
+///   4) 덩어리에 레이어를 붙인다 — 키 큰 것 Obstacle(화살 · 시야를 막는다) · 낮은 것 LowCover (ObstacleRules · 결정 2-89)
+///   5) NavMesh를 굽는다 — 적이 덩어리를 돌아간다. 금줄은 길을 파내는 장애물(열리면 걷힌다) · 덩어리 지붕은 못 걷는 땅
 /// 【다시 구우면 덮어쓴다】 손으로 고친 것은 사라진다 — 자리는 표(ZoneMapTable)에서 고친다.
 /// </summary>
 public static class ZoneMapBaker
@@ -21,6 +25,8 @@ public static class ZoneMapBaker
     [MenuItem("Dokkaebi/Map/장 맵 굽기 (전부)")]
     public static void BakeAll()
     {
+        EnsureLayers();
+
         foreach (ChapterMap map in ZoneMapTable.All)
             Bake(map);
 
@@ -103,9 +109,18 @@ public static class ZoneMapBaker
             counts[block.Kind] = n + 1;
 
             GameObject go = Block(block, $"{block.Kind}_{n}", rootObject.transform);
+            go.layer = ObstacleRules.LayerFor(block);
 
             if (!block.Solid)
+            {
                 Object.DestroyImmediate(go.GetComponent<Collider>());
+                continue;
+            }
+
+            // 지붕 위는 걷는 땅이 아니다 — 덩어리는 길을 막기만 한다.
+            var modifier = go.AddComponent<NavMeshModifier>();
+            modifier.overrideArea = true;
+            modifier.area = NotWalkableArea;
         }
 
         for (int i = 0; i < map.Gates.Length; i++)
@@ -113,7 +128,18 @@ public static class ZoneMapBaker
             MapGate gate = map.Gates[i];
             GameObject go = Block(gate.Block, $"Gate_{gate.ZoneId}#{i}", rootObject.transform);
             go.GetComponent<Renderer>().sharedMaterial = MaterialFor("Map_Gate", new Color(0.92f, 0.86f, 0.70f));
+            go.layer = ObstacleRules.GateLayer;
+            go.isStatic = false;   // 열리면 꺼진다
+
+            // NavMesh에 굽지 않고, 서 있는 동안만 길을 파낸다 — 구역이 열려 꺼지면 길이 이어진다.
+            go.AddComponent<NavMeshModifier>().ignoreFromBuild = true;
+            var obstacle = go.AddComponent<NavMeshObstacle>();
+            obstacle.shape = NavMeshObstacleShape.Box;
+            obstacle.size = Vector3.one;   // 배율이 곧 크기
+            obstacle.carving = true;
         }
+
+        BakeNavMesh(rootObject, map);
 
         // 자리 표시 — 보이지 않는 빈 오브젝트. 씬에서 어디인지 보려고 둔다(런타임은 표를 읽는다).
         var anchors = new GameObject("Anchors");
@@ -127,6 +153,69 @@ public static class ZoneMapBaker
             marker.transform.SetParent(anchors.transform, false);
             marker.transform.position = a.Position;
         }
+    }
+
+    private const int NotWalkableArea = 1;
+    private const string NavMeshFolder = "Assets/Data/NavMesh";
+
+    /// <summary>
+    /// NavMesh를 굽는다 (결정 2-89) — 맵 뿌리 아래 덩어리 콜라이더 + 맵 크기의 임시 바닥 상자로.
+    /// 바닥(Floor)은 씬 뿌리에 따로 있고 플레이어 · 적 콜라이더도 씬에 있어서, 「아래 것만」 모으려고 임시 바닥을 둔다.
+    /// 데이터는 Assets/Data/NavMesh/Chapter{n}_NavMesh.asset.
+    /// </summary>
+    private static void BakeNavMesh(GameObject root, ChapterMap map)
+    {
+        var ground = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        ground.name = "NavGround (bake only)";
+        ground.transform.SetParent(root.transform, false);
+        ground.transform.position = new Vector3(0f, -0.05f, 0f);
+        ground.transform.localScale = new Vector3(map.HalfSize.x * 2f, 0.1f, map.HalfSize.y * 2f);
+        Object.DestroyImmediate(ground.GetComponent<Renderer>());
+
+        var surface = root.AddComponent<NavMeshSurface>();
+        surface.collectObjects = CollectObjects.Children;
+        surface.useGeometry = NavMeshCollectGeometry.PhysicsColliders;
+        surface.BuildNavMesh();
+
+        Object.DestroyImmediate(ground);
+
+        if (surface.navMeshData == null)
+        {
+            Debug.LogError($"[ZoneMap] {map.SceneName} NavMesh를 굽지 못했습니다.");
+            return;
+        }
+
+        if (!AssetDatabase.IsValidFolder(NavMeshFolder))
+            AssetDatabase.CreateFolder("Assets/Data", "NavMesh");
+
+        string path = $"{NavMeshFolder}/{map.SceneName}_NavMesh.asset";
+        if (File.Exists(path))
+            AssetDatabase.DeleteAsset(path);
+
+        AssetDatabase.CreateAsset(surface.navMeshData, path);
+        EditorUtility.SetDirty(surface);
+    }
+
+    /// <summary>맵 레이어 이름을 TagManager에 적는다 (GameLayers — 번호는 코드가 정한다).</summary>
+    public static void EnsureLayers()
+    {
+        var tagManager = new SerializedObject(AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/TagManager.asset")[0]);
+        SerializedProperty layers = tagManager.FindProperty("layers");
+
+        SetLayer(layers, GameLayers.Obstacle, GameLayers.ObstacleName);
+        SetLayer(layers, GameLayers.LowCover, GameLayers.LowCoverName);
+
+        tagManager.ApplyModifiedPropertiesWithoutUndo();
+    }
+
+    private static void SetLayer(SerializedProperty layers, int index, string name)
+    {
+        SerializedProperty slot = layers.GetArrayElementAtIndex(index);
+
+        if (!string.IsNullOrEmpty(slot.stringValue) && slot.stringValue != name)
+            Debug.LogWarning($"[ZoneMap] 레이어 {index}「{slot.stringValue}」를 「{name}」으로 바꿉니다.");
+
+        slot.stringValue = name;
     }
 
     private static GameObject Block(MapBlock block, string name, Transform parent)

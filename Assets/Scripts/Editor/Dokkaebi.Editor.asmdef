@@ -4,7 +4,8 @@
     "references": [
         "Dokkaebi.Runtime",
         "UnityEngine.UI",
-        "UnityEditor.UI"
+        "UnityEditor.UI",
+        "Unity.AI.Navigation"
     ],
     "includePlatforms": [
         "Editor"

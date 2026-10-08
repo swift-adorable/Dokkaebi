@@ -224,11 +224,8 @@ public class EnemyBrain : MonoBehaviour, IEnemySteering
 
     private void UpdateLineOfSight(Vector3 toTarget, float distance)
     {
-        if (sightBlockMask.value == 0)
-        {
-            hasLineOfSight = true;
-            return;
-        }
+        // 비워 두면 맵 덩어리(키 큰 것)가 시야를 막는다 (결정 2-89). 프리팹에서 따로 정하면 그것을 쓴다.
+        int mask = sightBlockMask.value != 0 ? sightBlockMask.value : GameLayers.ShotBlockMask;
 
         if (Time.time < nextSightCheckTime)
             return;
@@ -238,7 +235,7 @@ public class EnemyBrain : MonoBehaviour, IEnemySteering
         Vector3 eye = transform.position + Vector3.up * eyeHeight;
 
         hasLineOfSight = !Physics.Raycast(
-            eye, toTarget, distance, sightBlockMask, QueryTriggerInteraction.Ignore);
+            eye, toTarget, distance, mask, QueryTriggerInteraction.Ignore);
     }
 
     /// <summary>

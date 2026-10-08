@@ -113,6 +113,15 @@ Dokkaebi에는 아직 구역 맵이 없어 표시할 것이 없기 때문이다.
 
 지나가면 처음 한 번 역행 계열이 보인다 · 파밍 출발처럼 저장하고 이전 장 맵으로 넘어간다(들고 있는 그대로).
 
-**구상 중 — 확인 대기**
-- **화살이 덩어리를 뚫는다** · **적 길찾기 없음** — 대응 구상은 사용자 확인 대기 (2026-10-08)
+**덩어리 · 화살 · 시야 · 길찾기** (결정 2-89 — 바꿀 수 있다)
+
+| 무엇 | 규칙 | 바꾸는 곳 |
+|---|---|---|
+| 걸음 | 막히는 덩어리 전부(냇물 · 꽃밭만 지나감) · 구역 사이 금줄 | `MapBlock.Solid` |
+| 화살 · 시야 | 키 큰 것만(레이어 Obstacle) — 낮은 것(LowCover: 좌판 · 수풀 · 우물 · 금줄)은 넘어간다 | `ObstacleRules.BlocksShots` → 다시 굽기 |
+| 폭발 · 범위 스킬 | 아직 벽을 보지 않는다 | `ObstacleRules.ExplosionsIgnoreWalls` 자리 |
+| 적 길찾기 | NavMesh 경로만 빌림(0.4초마다 · 곧장 보이면 곧장) · NavMesh는 굽기가 `Assets/Data/NavMesh/`에 | `EnemyPathing.Direction` |
+| 끼임 | 3초 경로 다시 · 10초 졸개는 풀로 | `EnemyMovement.Stuck*` |
+| 낳는 자리 | 걸어서 닿는 곳만 · 되도록 덩어리 뒤 | `EnemySpawner.PickSpawnPoint` |
+
 - 5장 산허리는 평지(높이는 아트 때)

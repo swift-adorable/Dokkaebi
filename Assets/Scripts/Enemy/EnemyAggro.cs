@@ -216,9 +216,8 @@ public class EnemyAggro : MonoBehaviour, IPoolable
     /// <summary>
     /// 이 위치의 대상을 알아챘는가. 눈과 귀 두 축을 본다.
     ///
-    /// 시야를 가리는 벽 판정은 아직 하지 않는다 —
-    /// EnemyBrain이 자기 레이캐스트를 따로 들고 있고, 두 곳에서 같은 판정을
-    /// 서로 모르게 돌리면 결과가 갈린다. 하나로 합치는 일은 따로 한다.
+    /// 키 큰 덩어리(GameLayers.ShotBlockMask)가 가리면 눈으로는 못 본다 (결정 2-89).
+    /// EnemyBrain의 사격 시야 레이도 같은 레이어를 본다 — 두 판정이 갈리지 않게 레이어 하나만 쓴다.
     /// </summary>
     private bool Sense(Vector3 targetPosition, float noiseRadius)
     {
@@ -234,8 +233,31 @@ public class EnemyAggro : MonoBehaviour, IPoolable
             hasLineOfSight = true
         };
 
-        return Perception.Detect(in input) != DetectionKind.None;
+        DetectionKind kind = Perception.Detect(in input);
+
+        // 눈으로 봤다면 덩어리가 가리는지 그때만 확인한다 — 레이는 「보였다」일 때 한 번 (결정 2-89).
+        // 가려져 있으면 소리로만 다시 판단한다. 소리는 벽을 넘는다.
+        if (kind == DetectionKind.Seen && IsHiddenByWall(targetPosition))
+        {
+            input.hasLineOfSight = false;
+            kind = Perception.Detect(in input);
+        }
+
+        return kind != DetectionKind.None;
     }
+
+    /// <summary>눈높이에서 대상까지 키 큰 덩어리가 가리는가.</summary>
+    private bool IsHiddenByWall(Vector3 targetPosition)
+    {
+        Vector3 eye = transform.position;
+        eye.y = EyeHeight;
+        targetPosition.y = EyeHeight;
+
+        return Physics.Linecast(eye, targetPosition, GameLayers.ShotBlockMask, QueryTriggerInteraction.Ignore);
+    }
+
+    /// <summary>시야 레이 높이 (m). 낮은 덩어리는 레이어(LowCover)가 달라 어차피 가리지 않는다.</summary>
+    private const float EyeHeight = 1f;
 
     /// <summary>고른 식별자를 실제 Transform으로 돌린다.</summary>
     private void Resolve(int picked, Transform player)

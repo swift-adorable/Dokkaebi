@@ -241,12 +241,21 @@ public class EnemySpawner : MonoBehaviour
     /// <summary>무리가 흩어지는 반경(m). 겹쳐 나오면 한 마리처럼 보인다.</summary>
     private const float GroupSpacing = 2.5f;
 
+    /// <summary>처음 쓸 때 만든다 — 필드 초기화 중에는 NavMeshPath를 만들 수 없다.</summary>
+    private UnityEngine.AI.NavMeshPath spawnPath;
+
+    /// <summary>
+    /// 낳을 자리. 장 맵에서는 덩어리 안 · 닫힌 구역(금줄 너머) · 바닥 밖에 나오지 않게 몇 번 다시 고른다 (결정 2-86).
+    /// 걸어서 플레이어에게 닿는 자리만 쓰고(덩어리 안쪽에 갇힌 칸 · 지붕 위 제외), 되도록 덩어리 뒤
+    /// (플레이어 눈에 안 보이는 곳)를 고른다 (결정 2-89). NavMesh가 없는 씬은 예전 그대로.
+    /// </summary>
     private Vector3 PickSpawnPoint(float radius)
     {
-        // 장 맵에서는 덩어리 안 · 닫힌 구역(금줄 너머) · 바닥 밖에 나오지 않게 몇 번 다시 고른다 (결정 2-86).
         Vector3 candidate = player.position;
+        Vector3? reachable = null;
+        Vector3 eye = player.position + Vector3.up;
 
-        for (int attempt = 0; attempt < 12; attempt++)
+        for (int attempt = 0; attempt < 16; attempt++)
         {
             Vector2 circle = Random.insideUnitCircle;
 
@@ -255,11 +264,19 @@ public class EnemySpawner : MonoBehaviour
 
             candidate = player.position + RandomFlat(circle * radius);
 
-            if (ZoneMap.CanSpawnAt(candidate))
+            if (!ZoneMap.CanSpawnAt(candidate) || !EnemyPathing.IsReachable(candidate, player.position, spawnPath ??= new UnityEngine.AI.NavMeshPath()))
+                continue;
+
+            bool hidden = Physics.Linecast(eye, candidate + Vector3.up, GameLayers.ShotBlockMask,
+                QueryTriggerInteraction.Ignore);
+
+            if (hidden)
                 return candidate;
+
+            reachable ??= candidate;
         }
 
-        return candidate;
+        return reachable ?? candidate;
     }
 
     private static Vector3 RandomFlat(Vector2 circle)

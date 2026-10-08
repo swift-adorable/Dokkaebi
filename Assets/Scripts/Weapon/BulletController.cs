@@ -77,7 +77,7 @@ public class BulletController : MonoBehaviour, IPoolable
     [SerializeField] private float muzzleCheckRadius = 0.25f;
 
     [Header("Ricochet (튕겨 쏘기)")]
-    [Tooltip("튕김 판정 대상 레이어. 지형/장애물 레이어를 지정한다.")]
+    [Tooltip("벽 · 튕김 판정 대상 레이어. 비워 두면 맵의 키 큰 덩어리(GameLayers.ShotBlockMask — 결정 2-89).")]
     [SerializeField] private LayerMask terrainMask = 0;
 
     [Tooltip("튕긴 직후 벽에 다시 박히지 않도록 법선 방향으로 밀어내는 거리(m)")]
@@ -316,32 +316,35 @@ public class BulletController : MonoBehaviour, IPoolable
 
         float step = currentSpeed * Time.deltaTime;
 
-        // 튕김 잔여가 없으면 레이캐스트 자체를 하지 않는다. 대부분의 탄은 여기서 비용이 0이다.
-        if (ricochetState.HasAny && TryRicochet(step))
+        // 덩어리에 닿으면 튕기거나(튕김이 남았으면) 그 자리에서 멈춘다 (결정 2-89). 탄 하나에 레이 하나.
+        if (TryHitWall(step))
             return;
 
         transform.position += transform.forward * step;
     }
 
+    /// <summary>벽으로 보는 레이어 — 프리팹이 비워 두면 맵의 키 큰 덩어리.</summary>
+    private int WallMask => terrainMask.value != 0 ? terrainMask.value : GameLayers.ShotBlockMask;
+
     /// <summary>
-    /// 이번 프레임 이동 구간에 지형이 있으면 반사한다.
+    /// 이번 프레임 이동 구간에 벽(키 큰 덩어리)이 있으면 반사하거나 그 자리에서 멈춘다 (결정 2-89).
     ///
     /// 물리 충돌 콜백이 아니라 전방 레이캐스트를 쓰는 이유:
     /// 빠른 탄이 얇은 벽을 통과(터널링)하는 것을 막고, 지형 법선을 정확히 얻기 위해서다.
+    /// 【멈출 때 바로 풀로 돌리지 않는다】 벽 앞까지 옮겨 두고 다음 프레임에 사라진다 —
+    /// 벽 바로 앞에 선 적도 이번 물리 단계의 충돌(OnTriggerEnter)로 맞는다.
     /// </summary>
-    private bool TryRicochet(float step)
+    private bool TryHitWall(float step)
     {
-        if (terrainMask.value == 0)
-            return false;
-
         if (!Physics.Raycast(transform.position, transform.forward, out RaycastHit hit,
-                step, terrainMask, QueryTriggerInteraction.Ignore))
+                step, WallMask, QueryTriggerInteraction.Ignore))
             return false;
 
-        // 튕김 횟수를 다 썼으면 벽에서 소멸한다.
-        if (!ricochetState.TryConsume())
+        // 튕김이 없거나 다 썼으면 벽 앞에서 멈추고 다음 프레임에 사라진다.
+        if (!ricochetState.HasAny || !ricochetState.TryConsume())
         {
-            ReturnToPool();
+            transform.position = hit.point - transform.forward * ricochetSkin;
+            despawnTime = Time.time;
             return true;
         }
 
@@ -392,11 +395,21 @@ public class BulletController : MonoBehaviour, IPoolable
     /// </summary>
     public void ResolveMuzzleOverlap(Vector3 shooterCenter)
     {
-        if (isConsumed || muzzleCheckRadius <= 0f)
+        if (isConsumed)
             return;
 
         Vector3 muzzle = transform.position;
         Vector3 forward = transform.forward;
+
+        // 벽에 붙어 쏘면 총구가 벽 안이나 너머에서 태어난다 — 쏜 사람과 총구 사이에 벽이 있으면 나가지 않는다 (결정 2-89).
+        if (Physics.Linecast(shooterCenter, muzzle, WallMask, QueryTriggerInteraction.Ignore))
+        {
+            ReturnToPool();
+            return;
+        }
+
+        if (muzzleCheckRadius <= 0f)
+            return;
 
         int count = Physics.OverlapCapsuleNonAlloc(
             shooterCenter, muzzle, muzzleCheckRadius, MuzzleOverlapBuffer,

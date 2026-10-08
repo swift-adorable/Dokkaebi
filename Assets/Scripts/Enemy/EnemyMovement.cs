@@ -3,9 +3,9 @@ using UnityEngine;
 /// <summary>
 /// 적 추격 이동.
 ///
-/// NavMesh를 쓰지 않고 직접 추격한다. 현재 맵에 장애물이 없고,
-/// 모바일에서 적 수십 마리에 NavMeshAgent를 붙이는 비용이 크기 때문이다.
-/// 장애물이 생기는 시점에 재검토한다.
+/// NavMeshAgent는 쓰지 않는다 — 모바일에서 적 수십 마리에 붙이는 비용이 크다.
+/// 장 맵(덩어리가 있는 맵)에서는 NavMesh에서 경로만 빌려(EnemyPathing · 결정 2-89) 돌아가고,
+/// 대상이 곧장 보이면 예전처럼 곧장 간다. 끼이면 경로를 다시 구하고, 오래 끼인 졸개는 풀로 돌려보낸다.
 /// </summary>
 [RequireComponent(typeof(Rigidbody))]
 public class EnemyMovement : MonoBehaviour
@@ -32,6 +32,20 @@ public class EnemyMovement : MonoBehaviour
 
     private Rigidbody rb;
     private EnemyManager enemyManager;
+
+    /// <summary>길찾기 — 덩어리를 돌아간다 (결정 2-89).</summary>
+    private readonly EnemyPathing pathing = new();
+
+    /// <summary>끼임 — 1초마다 움직인 거리를 본다. 3초면 경로 다시 · 10초면 졸개는 풀로 (결정 2-89 · [임시값]).</summary>
+    public const float StuckCheckInterval = 1f;
+    public const float StuckMoveThreshold = 0.3f;
+    public const int StuckRepathSeconds = 3;
+    public const int StuckDespawnSeconds = 10;
+
+    private Vector3 stuckAnchor;
+    private float nextStuckCheck;
+    private int stuckSeconds;
+    private bool wantedToMove;
 
     /// <summary>이동 방향을 대신 정해 주는 두뇌. 없으면 기존 직선 추격을 쓴다.</summary>
     private IEnemySteering steering;
@@ -102,8 +116,19 @@ public class EnemyMovement : MonoBehaviour
         enemyManager = EnemyManager.EnsureInstance();
     }
 
+    private void OnEnable()
+    {
+        // 풀에서 다시 나올 때 지난 삶의 경로 · 끼임을 지운다.
+        pathing.Reset();
+        stuckSeconds = 0;
+        stuckAnchor = transform.position;
+        nextStuckCheck = Time.time + StuckCheckInterval;
+    }
+
     private void FixedUpdate()
     {
+        wantedToMove = false;
+
         if (enemyManager == null)
             enemyManager = EnemyManager.EnsureInstance();
 
@@ -130,7 +155,15 @@ public class EnemyMovement : MonoBehaviour
             return;
         }
 
-        FaceTowards(toTarget);
+        // 덩어리를 돌아가야 하면 경로의 다음 꺾임점 쪽으로 (결정 2-89). 곧장 보이면 대상 쪽 그대로.
+        Vector3 chaseDirection = pathing.Direction(transform.position, target.position, out bool detour);
+        if (chaseDirection.sqrMagnitude < 0.0001f)
+            chaseDirection = toTarget.normalized;
+
+        // 돌아가는 동안은 가는 쪽을 본다 — 벽 너머 대상을 노려보며 옆걸음치면 어색하다.
+        FaceTowards(detour ? chaseDirection : toTarget);
+
+        CheckStuck();
 
         if (IsHalted)
         {
@@ -144,9 +177,14 @@ public class EnemyMovement : MonoBehaviour
                       * StatusScale;
         Vector3 direction;
 
+        // 돌아가는 중이면 두뇌의 유지 거리 · 측면 이동을 쓰지 않고 길을 따라간다 — 벽 앞에서 옆걸음만 치지 않게.
         // 두뇌가 붙어 있으면 방향은 두뇌가 정한다. (EnemyBrain — 유지 거리·측면 이동·차례)
         // 붙어 있지 않으면 기존 직선 추격 그대로다. 프리팹을 한꺼번에 고치지 않아도 된다.
-        if (steering != null &&
+        if (detour)
+        {
+            direction = chaseDirection;
+        }
+        else if (steering != null &&
             steering.TryGetSteering(toTarget.normalized, DistanceToTarget,
                                     out Vector3 steered, out float steerScale))
         {
@@ -167,7 +205,7 @@ public class EnemyMovement : MonoBehaviour
                 return;
             }
 
-            direction = toTarget.normalized;
+            direction = chaseDirection;
         }
 
         if (separationWeight > 0f)
@@ -178,6 +216,54 @@ public class EnemyMovement : MonoBehaviour
         // Rigidbody의 Y 고정도 없어서, 적끼리 부딪혀 한 번 위로 밀리면
         // 그 속도가 영영 남아 하늘로 올라갔다. 탑다운이라 높이는 쓰지 않는다.
         rb.linearVelocity = new Vector3(direction.x * speed, 0f, direction.z * speed);
+        wantedToMove = speed > 0.1f;
+    }
+
+    /// <summary>
+    /// 끼임 (결정 2-89) — 가려는데 1초에 0.3m도 못 움직인 초가 이어지면 3초에 경로를 다시 구하고,
+    /// 10초면 졸개는 풀로 돌려보낸다(스포너가 다른 자리에 새로 낸다). 이야기 보스 · 고유 등급 · 큰 요괴는 돌려보내지 않는다.
+    /// 판정은 지난 프레임의 「가려 했는가」로 한다 — 이번 프레임 속도는 아직 정해지지 않았다.
+    /// </summary>
+    private void CheckStuck()
+    {
+        if (Time.time < nextStuckCheck)
+            return;
+
+        nextStuckCheck = Time.time + StuckCheckInterval;
+
+        Vector3 moved = transform.position - stuckAnchor;
+        moved.y = 0f;
+        stuckAnchor = transform.position;
+
+        if (!lastWantedToMove || moved.magnitude >= StuckMoveThreshold)
+        {
+            stuckSeconds = 0;
+            return;
+        }
+
+        stuckSeconds++;
+
+        if (stuckSeconds == StuckRepathSeconds)
+            pathing.ForceRepath();
+
+        if (stuckSeconds >= StuckDespawnSeconds && MayDespawnWhenStuck())
+        {
+            stuckSeconds = 0;
+            if (TryGetComponent(out EnemyController controller))
+                controller.ReturnToPool();
+        }
+    }
+
+    private bool lastWantedToMove;
+
+    private void LateUpdate() => lastWantedToMove = wantedToMove;
+
+    private bool MayDespawnWhenStuck()
+    {
+        if (TryGetComponent(out StoryGift _))
+            return false;
+
+        return !TryGetComponent(out EnemyIdentity identity) || identity.Profile.rarity != EnemyRarity.Unique;
     }
 
     /// <summary>주변 적에게서 멀어지는 방향을 구한다. 적끼리 한 점에 뭉치는 것을 막는다.</summary>
