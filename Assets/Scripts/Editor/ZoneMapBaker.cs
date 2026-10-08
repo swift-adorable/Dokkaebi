@@ -40,10 +40,13 @@ public static class ZoneMapBaker
         if (existing.IsValid() && existing.isLoaded)
             EditorSceneManager.CloseScene(existing, true);
 
+        // 이미 있으면 내용만 덮어쓴다 — .meta(GUID)를 지켜야 빌드 설정 · 참조가 끊기지 않는다.
         if (File.Exists(path))
-            AssetDatabase.DeleteAsset(path);
-
-        if (!AssetDatabase.CopyAsset(RaidPath, path))
+        {
+            File.Copy(RaidPath, path, true);
+            AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate);
+        }
+        else if (!AssetDatabase.CopyAsset(RaidPath, path))
         {
             Debug.LogError($"[ZoneMap] {RaidPath} → {path} 복사에 실패했습니다.");
             return;
@@ -118,7 +121,9 @@ public static class ZoneMapBaker
 
         foreach (MapAnchor a in map.Anchors)
         {
-            var marker = new GameObject($"{a.Kind}_{a.ZoneId}");
+            // 조각 · 표지는 이야기 속 자리 이름을 붙인다 — 레이어 · 아트 작업 때 씬에서 찾는다 (결정 2-87).
+            string name = string.IsNullOrEmpty(a.Label) ? $"{a.Kind}_{a.ZoneId}" : $"{a.Kind}_{a.ZoneId}_{a.Label}";
+            var marker = new GameObject(name);
             marker.transform.SetParent(anchors.transform, false);
             marker.transform.position = a.Position;
         }
@@ -126,7 +131,7 @@ public static class ZoneMapBaker
 
     private static GameObject Block(MapBlock block, string name, Transform parent)
     {
-        PrimitiveType shape = block.Kind == MapBlockKind.Tree ? PrimitiveType.Cylinder : PrimitiveType.Cube;
+        PrimitiveType shape = block.Kind is MapBlockKind.Tree or MapBlockKind.Well ? PrimitiveType.Cylinder : PrimitiveType.Cube;
         GameObject go = GameObject.CreatePrimitive(shape);
         go.name = name;
         go.transform.SetParent(parent, false);
@@ -154,6 +159,11 @@ public static class ZoneMapBaker
         MapBlockKind.Tree => new Color(0.30f, 0.22f, 0.14f),
         MapBlockKind.Water => new Color(0.24f, 0.42f, 0.60f),
         MapBlockKind.Fence => new Color(0.36f, 0.26f, 0.16f),
+        MapBlockKind.Stall => new Color(0.62f, 0.48f, 0.30f),
+        MapBlockKind.Well => new Color(0.55f, 0.55f, 0.62f),
+        MapBlockKind.Post => new Color(0.72f, 0.62f, 0.44f),
+        MapBlockKind.Flowerbed => new Color(0.78f, 0.42f, 0.58f),
+        MapBlockKind.Geumjul => new Color(0.94f, 0.88f, 0.52f),
         _ => Color.gray,
     };
 
@@ -185,8 +195,14 @@ public static class ZoneMapBaker
     {
         var scenes = new List<EditorBuildSettingsScene>(EditorBuildSettings.scenes);
 
-        if (!scenes.Exists(s => s.path == path))
-            scenes.Add(new EditorBuildSettingsScene(path, true));
+        // 같은 경로가 있으면 새로 만든 항목으로 바꾼다 — GUID가 지금 .meta와 맞도록.
+        int index = scenes.FindIndex(s => s.path == path);
+        var entry = new EditorBuildSettingsScene(path, true);
+
+        if (index >= 0)
+            scenes[index] = entry;
+        else
+            scenes.Add(entry);
 
         EditorBuildSettings.scenes = scenes.ToArray();
     }

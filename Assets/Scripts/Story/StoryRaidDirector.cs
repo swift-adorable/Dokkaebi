@@ -9,8 +9,9 @@ using UnityEngine;
 /// 그 구역에 들어갈 때마다 다시 나온다. 이미 만난 중간 보스는 그 장 어느 구역에서든
 /// 가끔 다시 나온다 [덕코프 — 맵마다 이름 있는 보스가 여럿 나온다].
 ///
-/// 【자리】 맵이 아직 하나라(9단계) 플레이어 둘레에 놓는다. 구역이 맵이 되면
-/// 정해진 자리로 바꾼다.
+/// 【자리】 장 맵(결정 2-86 · 2-87)이 있으면 표의 자리 — 보스는 그 구역 보스 순서대로의 보스 자리,
+/// 다시 나온 중간 보스는 그 구역 보스 자리 중 아무 곳, 조각은 본문이 정한 조각 자리, 방은 방 자리 중 하나.
+/// 맵이 없는 씬(SampleScene)에서는 예전처럼 플레이어 둘레.
 /// </summary>
 public class StoryRaidDirector : MonoBehaviour
 {
@@ -102,6 +103,7 @@ public class StoryRaidDirector : MonoBehaviour
         var group = new StoryBossGroup(boss, OnGroupDefeated);
         Vector2 dir = Random.insideUnitCircle.normalized;
         if (dir == Vector2.zero) dir = Vector2.up;
+        Vector3 center = BossCenter(boss, dir);
 
         for (int i = 0; i < boss.Bodies.Length; i++)
         {
@@ -111,10 +113,6 @@ public class StoryRaidDirector : MonoBehaviour
                 continue;
 
             Vector2 side = new Vector2(-dir.y, dir.x) * (i - (boss.Bodies.Length - 1) * 0.5f) * 2.5f;
-            List<Vector3> bossSpots = ZoneMap.Anchors(MapAnchorKind.Boss);
-            Vector3 center = bossSpots.Count > 0
-                ? bossSpots[0]
-                : player.position + new Vector3(dir.x, 0f, dir.y) * BossDistance;
             Vector3 position = center + new Vector3(side.x, 0f, side.y);
 
             GameObject body = pool.Spawn(prefab, position, Quaternion.identity);
@@ -135,6 +133,36 @@ public class StoryRaidDirector : MonoBehaviour
 
         bossAlive = group.Count > 0;
         return bossAlive;
+    }
+
+    /// <summary>
+    /// 보스가 설 자리 (결정 2-87). 이 구역의 보스면 구역 보스 순서와 같은 번째 보스 자리
+    /// (3-2 처녀귀신 · 몽달귀신 → 두억시니, 5-1 창귀 → 산군). 다른 구역에서 다시 나온 중간 보스는
+    /// 이 구역 보스 자리 중 아무 곳 — 보스 자리가 없는 구역(2-2 · 3-1 · 4-4 · 5-3)이면 플레이어 둘레의 설 수 있는 곳.
+    /// </summary>
+    private Vector3 BossCenter(BossDefinition boss, Vector2 dir)
+    {
+        List<Vector3> spots = ZoneMap.Anchors(MapAnchorKind.Boss);
+
+        if (spots.Count > 0)
+        {
+            int index = StoryTable.BossesIn(zone).IndexOf(boss);
+            return index >= 0 && index < spots.Count ? spots[index] : spots[Random.Range(0, spots.Count)];
+        }
+
+        // 설 수 있는 곳을 몇 방향 찾아본다 — 맵이 없으면 첫 방향 그대로.
+        for (int tries = 0; tries < 8; tries++)
+        {
+            Vector2 d = tries == 0 ? dir : Random.insideUnitCircle.normalized;
+            if (d == Vector2.zero)
+                continue;
+
+            Vector3 at = player.position + new Vector3(d.x, 0f, d.y) * BossDistance;
+            if (ZoneMap.CanSpawnAt(at))
+                return at;
+        }
+
+        return player.position + new Vector3(dir.x, 0f, dir.y) * BossDistance;
     }
 
     private void OnGroupDefeated(BossDefinition boss)
@@ -225,7 +253,11 @@ public class StoryRaidDirector : MonoBehaviour
         PieceDefinition piece = StoryTable.PieceIn(zone);
 
         if (piece != null && !StoryManager.Progress.HasPiece(piece.Id))
-            StoryPickup.Create(StoryPickup.Kind.Piece, piece.Id, RandomPoint());
+        {
+            // 본문이 정한 자리(옛 주막 부뚜막 밑 · 포목전 기둥 …) — 없으면 방 자리 중 하나 (결정 2-87).
+            List<Vector3> pieceSpots = ZoneMap.Anchors(MapAnchorKind.Piece);
+            StoryPickup.Create(StoryPickup.Kind.Piece, piece.Id, pieceSpots.Count > 0 ? pieceSpots[0] : RandomPoint());
+        }
 
         NoticeDefinition notice = StoryTable.NoticeIn(zone);
 
