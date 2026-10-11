@@ -29,6 +29,27 @@ public class ShopState
             remaining[table[i].ItemId] = table[i].MaxStock + (extraStock < 0 ? 0 : extraStock);
     }
 
+    /// <summary>
+    /// 줄을 표에 맞춘다 — 표에 없는 줄은 버리고, 새 줄은 가득 채우고, 있던 줄은 남은 수를 그대로 둔다.
+    /// 오늘의 물건을 다시 뽑을 때 쓴다 (결정 2-98). fresh에 든 줄은 있던 것이어도 가득 채운다.
+    /// </summary>
+    public void Refit(IReadOnlyList<ShopEntry> table, int extraStock = 0, ICollection<string> fresh = null)
+    {
+        var keep = new Dictionary<string, int>(remaining);
+        remaining.Clear();
+
+        if (table == null)
+            return;
+
+        for (int i = 0; i < table.Count; i++)
+        {
+            string id = table[i].ItemId;
+            int max = table[i].MaxStock + (extraStock < 0 ? 0 : extraStock);
+            bool refill = fresh != null && fresh.Contains(id);
+            remaining[id] = !refill && keep.TryGetValue(id, out int have) ? (have > max ? max : have) : max;
+        }
+    }
+
     /// <summary>하나를 뺀다. 남은 것이 없으면 false.</summary>
     public bool TryConsume(string itemId)
     {

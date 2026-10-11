@@ -53,7 +53,8 @@ public class SaveData
     ///  17 — 작업대 단계 · 연 제작법(workbenchStage · craftUnlocks)을 더했다 (결정 2-95). 16판에는 없어 Ⅰ · 빈 목록으로 읽힌다.
     ///  18 — 아이템 줄의 최대 내구도(maxDurability)를 더했다 (결정 2-96). 17판에는 없어 -1(정의 그대로)로 읽힌다.
     ///  19 — 샘가에 모인 것(springside) · 처치 기록(kills)을 더했다 (결정 2-97). 18판에는 없어 빈 목록으로 읽힌다.
-    public const int CurrentVersion = 19;
+    ///  20 — 가게마다 오늘의 물건(shopDaily — shop · id)을 더했다 (결정 2-98). 19판에는 없어 새로 뽑는다.
+    public const int CurrentVersion = 20;
 
     public int version = CurrentVersion;
 
@@ -163,6 +164,11 @@ public class SaveData
 
     /// <summary>내가 쓰러뜨린 적 — 갈래 × 등급별 수.</summary>
     public List<SavedKill> kills = new();
+
+    // ── 오늘의 물건 (결정 2-98 · 판 20) ──────────────────────────────
+
+    /// <summary>가게마다 오늘의 물건 — shop · id만 쓴다. 남은 수는 shop 줄에 함께 담긴다.</summary>
+    public List<SavedStock> shopDaily = new();
 }
 
 /// <summary>처치 기록 한 줄 (결정 2-97). 갈래 · 등급은 enum 값이다.</summary>

@@ -42,6 +42,51 @@ public static class LedgerManager
         return LedgerError.None;
     }
 
+    // ── 가게 재고 (결정 2-98) ────────────────────────────────────────
+
+    public static LedgerError CanRefill(ShopKind kind)
+        => LedgerTable.CanServeShop(Built, BuildingManager.IsOpen(LedgerTable.BuildingOf(kind)), Gold, ShopDailyTable.RefillPrice(kind));
+
+    public static LedgerError CanReroll(ShopKind kind)
+    {
+        LedgerError error = LedgerTable.CanServeShop(Built, BuildingManager.IsOpen(LedgerTable.BuildingOf(kind)), Gold, ShopDailyTable.RerollPrice);
+        if (error != LedgerError.None)
+            return error;
+
+        StoryProgress progress = StoryManager.Progress;
+        return ShopDailyTable.Pool(kind, c => progress != null && progress.IsChapterOpen(c)).Count == 0
+            ? LedgerError.NothingToRoll
+            : LedgerError.None;
+    }
+
+    /// <summary>그 가게 재고를 지금 가득 채운다.</summary>
+    public static LedgerError Refill(ShopKind kind)
+    {
+        LedgerError error = CanRefill(kind);
+        if (error != LedgerError.None)
+            return error;
+
+        PassiveManager.Instance.Gold -= ShopDailyTable.RefillPrice(kind);
+        ShopManager.RefillNow(kind);
+        ExchangeWindowUI.RefreshIfOpen();
+        SaveManager.Commit("가게 재고 채우기");
+        return LedgerError.None;
+    }
+
+    /// <summary>그 가게의 오늘의 물건을 다시 뽑는다.</summary>
+    public static LedgerError Reroll(ShopKind kind)
+    {
+        LedgerError error = CanReroll(kind);
+        if (error != LedgerError.None)
+            return error;
+
+        PassiveManager.Instance.Gold -= ShopDailyTable.RerollPrice;
+        ShopManager.RerollDaily(kind);
+        ExchangeWindowUI.RefreshIfOpen();
+        SaveManager.Commit("오늘의 물건 다시 뽑기");
+        return LedgerError.None;
+    }
+
     // ── 세이브 ───────────────────────────────────────────────────────
 
     public static void Capture(SaveData data) => data.kills = Kills.Capture();

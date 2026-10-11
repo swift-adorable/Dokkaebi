@@ -93,6 +93,26 @@ public static class PlayCaptureMenu
         LedgerUI.OpenKills();
     }
 
+    [MenuItem("Dokkaebi/Debug/장부방 화면 열기 (가게 재고)")]
+    public static void OpenLedgerShops()
+    {
+        if (!EditorApplication.isPlaying)
+            return;
+
+        ApothecaryUI.Close();
+        LedgerUI.OpenShops();
+    }
+
+    [MenuItem("Dokkaebi/Debug/장부방 화면 열기 (모은 글)")]
+    public static void OpenLedgerWritings()
+    {
+        if (!EditorApplication.isPlaying)
+            return;
+
+        ApothecaryUI.Close();
+        LedgerUI.OpenWritings();
+    }
+
     [MenuItem("Dokkaebi/Debug/출발 화면 열기")]
     public static void OpenDeparture()
     {

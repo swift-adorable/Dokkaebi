@@ -487,7 +487,7 @@ public class ExchangeWindowUI : MonoBehaviour
     private void DrawShopGrid()
     {
         ItemCatalog catalog = ItemCatalog.Load();
-        IReadOnlyList<ShopEntry> entries = ShopTable.For(shopKind);
+        IReadOnlyList<ShopEntry> entries = ShopManager.EntriesOf(shopKind);   // 평소 표 + 오늘의 물건 (결정 2-98)
 
         UIFactory.SquareGridMetrics(grid.Viewport, Columns, entries.Count, MinRows,
             out int rows, out float height, out float padX, out float padY);
@@ -519,6 +519,11 @@ public class ExchangeWindowUI : MonoBehaviour
             UIFactory.CreateBadge(cell.transform, remaining > 0 ? $"×{remaining}" : "품절",
                 new Vector2(0.56f, 0.06f), new Vector2(0.96f, 0.30f), 20,
                 remaining > 0 ? Color.white : UIPalette.Warning);
+
+            // 오늘의 물건 — 판마다 바뀌는 칸 (결정 2-98)
+            if (ShopManager.IsDaily(shopKind, entry.ItemId))
+                UIFactory.CreateBadge(cell.transform, "오늘",
+                    new Vector2(0.04f, 0.70f), new Vector2(0.46f, 0.94f), 18, UIPalette.TextAccent);
 
             if (remaining <= 0)
                 cell.gameObject.AddComponent<CanvasGroup>().alpha = 0.45f;

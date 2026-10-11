@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// 【임시】 장부방 화면 (결정 2-97) — 장 지도 · 처치 기록 · 모은 방. 장부방 앞에서 누르면 연다.
+/// 【임시】 장부방 화면 (결정 2-97 · 2-98) — 장 지도 · 처치 기록 · 가게 재고 · 모은 글(조각 · 방). 장부방 앞에서 누르면 연다.
 /// 떠 있는 동안 게임이 멈춘다(결정 2-92). 모양은 레이어 · 아트 작업 때 다시 만든다.
 /// </summary>
 public class LedgerUI : MonoBehaviour
@@ -14,7 +14,8 @@ public class LedgerUI : MonoBehaviour
 
     private const int MapsTab = 0;
     private const int KillsTab = 1;
-    private const int NoticesTab = 2;
+    private const int ShopsTab = 2;
+    private const int NoticesTab = 3;
 
     private Text title;
     private Text status;
@@ -45,6 +46,12 @@ public class LedgerUI : MonoBehaviour
     /// <summary>처치 기록 탭으로 연다 (검증 도구).</summary>
     public static void OpenKills() => Open(KillsTab);
 
+    /// <summary>가게 재고 탭으로 연다 (검증 도구).</summary>
+    public static void OpenShops() => Open(ShopsTab);
+
+    /// <summary>모은 글 탭으로 연다 (검증 도구).</summary>
+    public static void OpenWritings() => Open(NoticesTab);
+
     private void OnDestroy()
     {
         if (instance == this)
@@ -64,7 +71,7 @@ public class LedgerUI : MonoBehaviour
         UIFactory.CreateButton(box.transform, "닫기", new Vector2(0.8f, 0.9f), new Vector2(0.96f, 0.97f),
             UIPalette.Header, () => Destroy(gameObject), 22);
 
-        string[] names = { LedgerTable.MapsTab, LedgerTable.KillsTab, LedgerTable.NoticesTab };
+        string[] names = { LedgerTable.MapsTab, LedgerTable.KillsTab, LedgerTable.ShopsTab, LedgerTable.NoticesTab };
         for (int i = 0; i < names.Length; i++)
         {
             int captured = i;
@@ -101,6 +108,7 @@ public class LedgerUI : MonoBehaviour
         switch (shown)
         {
             case KillsTab:   FillKills(ref y); break;
+            case ShopsTab:   FillShops(ref y); break;
             case NoticesTab: FillNotices(ref y); break;
             default:         FillMaps(ref y); break;
         }
@@ -210,11 +218,95 @@ public class LedgerUI : MonoBehaviour
     private static string ResistLine(ElementalResistances r)
         => $"물리 ×{r.physical:0.##} · 화염 ×{r.fire:0.##} · 냉기 ×{r.cold:0.##} · 번개 ×{r.lightning:0.##} · 카오스 ×{r.chaos:0.##}";
 
-    // ── 모은 방 ──────────────────────────────────────────────────────
+    // ── 가게 재고 (결정 2-98) ────────────────────────────────────────
+
+    private void FillShops(ref float y)
+    {
+        AddTheme($"판이 끝날 때마다 가게마다 「오늘의 물건」 {ShopDailyTable.Slots}칸이 바뀐다 — 여기서 엽전으로 지금 채우거나 다시 뽑는다", ref y);
+
+        ItemCatalog catalog = ItemCatalog.Load();
+
+        foreach (ShopKind kind in ShopTable.All)
+        {
+            bool open = BuildingManager.IsOpen(LedgerTable.BuildingOf(kind));
+            ShopState state = ShopManager.Of(kind);
+            var parts = new List<string>();
+
+            foreach (string id in ShopManager.DailyOf(kind))
+            {
+                string name = catalog?.Find(id)?.DisplayName ?? id;
+                int left = state.Remaining(id);
+                parts.Add(left > 0 ? $"{name} ×{left}" : $"{name} 품절");
+            }
+
+            string daily = parts.Count > 0 ? string.Join(" · ", parts) : "들일 물건이 아직 없다";
+            string head = open ? ShopTable.NameOf(kind) : $"{ShopTable.NameOf(kind)} (아직 짓지 않았다)";
+
+            Image row = UIFactory.CreatePanel("Row", list.Content, UIPalette.Row, Vector2.zero, Vector2.zero);
+            Place(row.rectTransform, ref y, 120f);
+
+            Text label = UIFactory.CreateLabel(row.transform,
+                $"<b>{head}</b>\n<size=18>오늘의 물건 — {daily}</size>", 22, FontStyle.Normal,
+                new Vector2(0.02f, 0f), new Vector2(0.62f, 1f), TextAnchor.MiddleLeft, open ? UIPalette.Text : UIPalette.TextDim);
+            label.supportRichText = true;
+
+            int refill = ShopDailyTable.RefillPrice(kind);
+            Button fill = UIFactory.CreateButton(row.transform, $"지금 채우기 · {refill}엽전",
+                new Vector2(0.64f, 0.53f), new Vector2(0.98f, 0.93f), UIPalette.Action,
+                () => OnShop(LedgerManager.Refill(kind), $"{ShopTable.NameOf(kind)} 재고를 가득 채웠다."), 18);
+            fill.interactable = LedgerManager.CanRefill(kind) == LedgerError.None;
+
+            Button reroll = UIFactory.CreateButton(row.transform, $"오늘의 물건 다시 뽑기 · {ShopDailyTable.RerollPrice}엽전",
+                new Vector2(0.64f, 0.07f), new Vector2(0.98f, 0.47f), UIPalette.Subtle,
+                () => OnShop(LedgerManager.Reroll(kind), $"{ShopTable.NameOf(kind)}의 오늘의 물건을 다시 들였다."), 18);
+            reroll.interactable = LedgerManager.CanReroll(kind) == LedgerError.None;
+        }
+    }
+
+    private void OnShop(LedgerError error, string done)
+    {
+        status.text = error == LedgerError.None ? done : LedgerTable.Explain(error);
+        Refresh();
+    }
+
+    // ── 모은 글 — 기억의 조각 · 방 ───────────────────────────────────
 
     private void FillNotices(ref float y)
     {
         StoryProgress progress = StoryManager.Progress;
+
+        // 기억의 조각 (결정 2-98) — 본문 글을 그대로 보여 준다
+        var pieces = new List<PieceDefinition>();
+        foreach (PieceDefinition piece in StoryTable.Pieces)
+            if (progress != null && progress.HasPiece(piece.Id))
+                pieces.Add(piece);
+
+        AddTheme($"기억의 조각 {pieces.Count} / {StoryTable.Pieces.Count}", ref y);
+
+        if (pieces.Count == 0)
+            AddLine("아직 주운 조각이 없다.", ref y);
+
+        foreach (PieceDefinition piece in pieces)
+        {
+            StoryPassage passage = StoryManager.Passage(StoryTable.PieceEvent(piece.Id));
+            string title = passage != null && !string.IsNullOrEmpty(passage.Title) ? passage.Title : $"기억의 조각 {piece.Number}";
+            string body = passage != null ? string.Join("\n\n", passage.Pages) : string.Empty;
+
+            int lines = 1;
+            foreach (string para in body.Split('\n'))
+                lines += 1 + para.Length / 38;
+
+            Image row = UIFactory.CreatePanel("Row", list.Content, UIPalette.Row, Vector2.zero, Vector2.zero);
+            Place(row.rectTransform, ref y, 40f + lines * 25f);
+
+            Text label = UIFactory.CreateLabel(row.transform,
+                $"<b>{title}</b>  <size=16><color=#A8A08C>{piece.ZoneId}</color></size>\n<size=19>{body}</size>", 21, FontStyle.Normal,
+                new Vector2(0.02f, 0f), new Vector2(0.98f, 1f), TextAnchor.UpperLeft);
+            label.supportRichText = true;
+            label.rectTransform.offsetMin = new Vector2(0f, 8f);
+            label.rectTransform.offsetMax = new Vector2(0f, -8f);
+        }
+
         var collected = new List<NoticeDefinition>();
 
         foreach (NoticeDefinition notice in StoryTable.Notices)

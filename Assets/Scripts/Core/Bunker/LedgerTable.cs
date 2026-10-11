@@ -13,6 +13,10 @@ public enum LedgerError
     /// <summary>이미 다 밝혀진 지도다.</summary>
     AlreadyRevealed = 4,
     NotEnoughGold = 5,
+    /// <summary>그 가게를 아직 짓지 않았다.</summary>
+    ShopClosed = 6,
+    /// <summary>오늘의 물건 풀이 비었다 (대장간 — 3장 전).</summary>
+    NothingToRoll = 7,
 }
 
 /// <summary>
@@ -26,7 +30,8 @@ public static class LedgerTable
 {
     public const string MapsTab = "장 지도";
     public const string KillsTab = "처치 기록";
-    public const string NoticesTab = "모은 방";
+    public const string ShopsTab = "가게 재고";
+    public const string NoticesTab = "모은 글";
 
     /// <summary>장 지도 값 — 0장 100, n장 200 × n.</summary>
     public static int MapPrice(int chapter) => chapter <= 0 ? 100 : 200 * chapter;
@@ -48,6 +53,26 @@ public static class LedgerTable
         return gold < MapPrice(chapter) ? LedgerError.NotEnoughGold : LedgerError.None;
     }
 
+    /// <summary>그 가게의 건물 id.</summary>
+    public static string BuildingOf(ShopKind kind) => kind switch
+    {
+        ShopKind.Smithy => BuildingTable.Smithy,
+        ShopKind.Apothecary => BuildingTable.Apothecary,
+        _ => BuildingTable.GeneralStore,
+    };
+
+    /// <summary>가게 재고 일(지금 채우기 · 다시 뽑기)을 할 수 있는가 (결정 2-98).</summary>
+    public static LedgerError CanServeShop(bool built, bool shopBuilt, int gold, int price)
+    {
+        if (!built)
+            return LedgerError.NoLedger;
+
+        if (!shopBuilt)
+            return LedgerError.ShopClosed;
+
+        return gold < price ? LedgerError.NotEnoughGold : LedgerError.None;
+    }
+
     public static bool IsFullyRevealed(FogGrid fog) => fog != null && fog.RevealedCount >= fog.Width * fog.Height;
 
     public static string Explain(LedgerError error) => error switch
@@ -57,6 +82,8 @@ public static class LedgerTable
         LedgerError.NoMap => "그 장에는 지도가 없다.",
         LedgerError.AlreadyRevealed => "이미 다 밝혀진 지도다.",
         LedgerError.NotEnoughGold => "엽전이 모자란다.",
+        LedgerError.ShopClosed => "그 가게를 아직 짓지 않았다.",
+        LedgerError.NothingToRoll => "아직 들일 물건이 없다.",
         _ => string.Empty,
     };
 

@@ -252,8 +252,8 @@ public static class StoryTable
         new(Debtor,   "빚쟁이", 1, BuildingTable.Smithy, new[] { ("arm_body_t1", 1) }),
         new(Chambong, "참봉",   1, BuildingTable.Apothecary,
             new[] { ("con_medkit_small", 2), ("con_soda", 1) }),
-        // 본문의 보상은 「화살 한 묶음」이다. 화살(탄약)이 아직 없다 [미구현] — 비워 둔다 (Bunker 6절).
-        new(Gildal,   "길달",   2, BuildingTable.LedgerRoom, null)
+        // 본문의 보상 「화살 한 묶음」 = 화살 30 — 작업대 Ⅰ이 한 번에 만드는 양 (사용자 결정 2026-10-11 · 결정 2-98).
+        new(Gildal,   "길달",   2, BuildingTable.LedgerRoom, new[] { (AmmoTable.Arrow, 30) })
     };
 
     private static readonly PieceDefinition[] pieces =

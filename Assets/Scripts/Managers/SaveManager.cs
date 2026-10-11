@@ -220,6 +220,7 @@ public static class SaveManager
         }
 
         data.shop = ShopManager.Capture();
+        data.shopDaily = ShopManager.CaptureDaily();
         data.spring = SpringManager.Capture();
         data.buildings = BuildingManager.Capture();
         data.story = StoryManager.Capture();
@@ -286,6 +287,7 @@ public static class SaveManager
         restored.SetActiveWeapon(restored.WeaponAt(data.activeWeapon) != null ? data.activeWeapon : 0);
         RestoreInto(PlayerInventory.EnsureInstance().Bag, data.bag, "가방");
         RestoreInto(PlayerInventory.Instance.Stash, data.stash, "창고");
+        ShopManager.RestoreDaily(data.shopDaily);   // 재고보다 먼저 (결정 2-98)
         ShopManager.Restore(data.shop);
         SpringManager.Restore(data.spring);
         BuildingManager.Restore(data.buildings);
