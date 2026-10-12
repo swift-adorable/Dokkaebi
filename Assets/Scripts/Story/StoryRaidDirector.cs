@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// 파밍 구역에 이야기 보스 · 기억의 조각 · 방을 놓는다. (로드맵 3단계 · Story 2절)
+/// 파밍 구역에 이야기 보스 · 기억의 조각을 놓는다. (로드맵 3단계 · Story 2절)
 ///
 /// 【보스】 그 구역의 아직 쓰러뜨리지 않은 보스가 맨 앞부터 하나씩 나온다.
 /// 앞의 것을 쓰러뜨리면 다음 것이 나온다(3-2 · 5-1). 장 보스는 다 쓰러뜨린 뒤에도
@@ -24,7 +24,7 @@ public class StoryRaidDirector : MonoBehaviour
     /// <summary>보스가 나오는 거리 (m).</summary>
     public const float BossDistance = 12f;
 
-    /// <summary>조각 · 방이 놓이는 거리 (m).</summary>
+    /// <summary>조각이 놓이는 거리 (m).</summary>
     public const float PickupMin = 8f;
     public const float PickupMax = 15f;
 
@@ -246,7 +246,7 @@ public class StoryRaidDirector : MonoBehaviour
         StoryDialogueUI.ShowBanner("큰 요괴가 나타났다.");
     }
 
-    // ── 조각 · 방 ────────────────────────────────────────────────────
+    // ── 조각 ────────────────────────────────────────────────────
 
     private void PlacePickups()
     {
@@ -258,14 +258,9 @@ public class StoryRaidDirector : MonoBehaviour
             List<Vector3> pieceSpots = ZoneMap.Anchors(MapAnchorKind.Piece);
             StoryPickup.Create(StoryPickup.Kind.Piece, piece.Id, pieceSpots.Count > 0 ? pieceSpots[0] : RandomPoint());
         }
-
-        NoticeDefinition notice = StoryTable.NoticeIn(zone);
-
-        if (notice != null && !StoryManager.Progress.HasNotice(notice.Id))
-            StoryPickup.Create(StoryPickup.Kind.Notice, notice.Id, RandomPoint());
     }
 
-    /// <summary>조각 · 방 자리 — 장 맵이 있으면 그 구역의 자리 중 하나(같은 판에서 겹치지 않게), 없으면 플레이어 둘레.</summary>
+    /// <summary>조각 자리 — 장 맵이 있으면 그 구역의 자리 중 하나(같은 판에서 겹치지 않게), 없으면 플레이어 둘레.</summary>
     private List<Vector3> pickupSpots;
 
     private Vector3 RandomPoint()

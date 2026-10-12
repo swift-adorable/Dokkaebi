@@ -59,7 +59,7 @@ public sealed class BuildingDefinition
 ///   잡화 가게 — 영감 · 처음부터
 ///   약탕간   — 참봉 · 첫 번째 밤
 ///   대장간   — 빚쟁이 · 첫 번째 밤 (옛 무기 상점 + 방어구 상점)
-///   장부방   — 길달 · 두 번째 밤 (장 지도 · 처치 기록 · 가게 재고 · 모은 글 — 결정 2-97 · 2-98)
+///   장부방   — 길달 · 두 번째 밤 (장 지도 · 처치 기록 · 가게 재고 · 기억의 조각 — 결정 2-97 · 2-98 · 2-100)
 ///
 /// 비용 — 작업대 · 잡화 가게는 덕코프 건물 페이지를 옮긴 그대로 [확인됨 → 재료는 Dokkaebi 재료로 바꿈 · 불확실].
 /// 대장간은 옛 무기 · 방어구 상점의 합, 약탕간 · 장부방은 본문의 재료(쇠붙이 · 숯 · 새끼 뭉치)로 정한 [임시값].
@@ -112,7 +112,7 @@ public static class BuildingTable
             opens: BunkerStation.Kind.Smithy),
 
         // 본문 「재료를 모아 와 장부방을 세운다」 [비용 임시값]
-        new(LedgerRoom, ShopTable.LedgerRoomName, "길달의 장부방. 장 지도를 엽전으로 사고, 내가 쓰러뜨린 적의 기록과 모은 글(조각 · 방)을 다시 본다. 가게 재고를 채우고 오늘의 물건을 다시 들인다.",
+        new(LedgerRoom, ShopTable.LedgerRoomName, "길달의 장부방. 장 지도를 엽전으로 사고, 내가 쓰러뜨린 적의 기록과 주운 기억의 조각을 다시 본다. 가게 재고를 채우고 오늘의 물건을 다시 들인다.",
             gold: 150,
             materials: new[] { new MaterialCost(Scrap, 4), new MaterialCost(Wire, 2) },
             requiredBuildings: null, width: 2f, depth: 1.4f,

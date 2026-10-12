@@ -31,7 +31,7 @@ public static class LedgerTable
     public const string MapsTab = "장 지도";
     public const string KillsTab = "처치 기록";
     public const string ShopsTab = "가게 재고";
-    public const string NoticesTab = "모은 글";
+    public const string PiecesTab = "기억의 조각";
 
     /// <summary>장 지도 값 — 0장 100, n장 200 × n.</summary>
     public static int MapPrice(int chapter) => chapter <= 0 ? 100 : 200 * chapter;

@@ -220,7 +220,6 @@ namespace Dokkaebi.Tests
             var p = new StoryProgress();
             p.Defeat("hyeonmu");
             p.CollectPiece("piece_3");
-            p.CollectNotice("notice_1");
             p.See("enter_0-1");
             p.PassNight(1);
 
@@ -233,7 +232,6 @@ namespace Dokkaebi.Tests
             Assert.IsTrue(q.HasDefeated("hyeonmu"));
             Assert.IsFalse(q.HasDefeated("없는_보스"));
             Assert.IsTrue(q.HasPiece("piece_3"));
-            Assert.IsTrue(q.HasNotice("notice_1"));
             Assert.IsTrue(q.HasSeen("enter_0-1"));
             Assert.IsTrue(q.HasNight(1));
         }

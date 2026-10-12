@@ -41,14 +41,14 @@ public enum MapAnchorKind
     Start,
     Extraction,
     Boss,
-    /// <summary>기억의 조각 · 방.</summary>
+    /// <summary>기억의 조각 (옛 방 자리 — 방은 결정 2-100에서 뺐다).</summary>
     Pickup,
     /// <summary>0-1 젖은 봇짐.</summary>
     Bundle,
     BerryTree,
     /// <summary>0-2 큰 요괴.</summary>
     Gift,
-    /// <summary>기억의 조각 — 본문이 정한 자리(주막 부뚜막 밑 · 포목전 기둥 …). 방(榜)은 Pickup에 놓는다.</summary>
+    /// <summary>기억의 조각 — 본문이 정한 자리(주막 부뚜막 밑 · 포목전 기둥 …). (옛 방(榜)은 결정 2-100에서 뺐다.)</summary>
     Piece,
     /// <summary>이야기 표지 — 서브 퀘스트 · 환경 연출 자리(처마 · 절구 · 아궁이 · 화로 …). 지금은 씬 표시만 — 레이어 · 아트 작업 때 쓴다.</summary>
     Landmark,

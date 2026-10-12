@@ -113,11 +113,12 @@ public class EnemyAggro : MonoBehaviour, IPoolable
 
     private void Update()
     {
-        // 대상을 잃었으면 주기를 기다리지 않는다 —
-        // 죽은 것을 계속 보고 서 있는 것처럼 보인다.
-        bool lost = Target == null || !Target.gameObject.activeInHierarchy;
+        // 대상을 막 잃었으면(죽거나 꺼짐) 주기를 기다리지 않는다 — 죽은 것을 계속 보고 서 있는 것처럼 보인다.
+        // 【대상이 처음부터 없으면 주기를 지킨다】 (결정 2-100) — 전에는 아직 아무도 못 본 적(대부분)이
+        // 매 프레임 모두를 다시 살펴 60마리면 프레임마다 3,600번 감지 · 시야 판정을 했다.
+        bool justLost = Target is not null && (Target == null || !Target.gameObject.activeInHierarchy);
 
-        if (!lost && Time.time < nextEvaluateTime)
+        if (!justLost && Time.time < nextEvaluateTime)
             return;
 
         nextEvaluateTime = Time.time + reevaluateInterval;

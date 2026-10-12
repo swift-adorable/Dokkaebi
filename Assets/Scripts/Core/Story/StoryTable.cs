@@ -134,23 +134,8 @@ public sealed class PieceDefinition
     }
 }
 
-/// <summary>방(榜) — 길에 붙은 글. 힌트 수집품이다 (결정 2-41 · 2-45).</summary>
-public sealed class NoticeDefinition
-{
-    public readonly string Id;
-    public readonly string ZoneId;
-    public readonly string Text;
-
-    public NoticeDefinition(string id, string zoneId, string text)
-    {
-        Id = id;
-        ZoneId = zoneId;
-        Text = text;
-    }
-}
-
 /// <summary>
-/// 【이야기 표.】 장 · 구역 · 보스 · 상인 · 기억의 조각 · 방.
+/// 【이야기 표.】 장 · 구역 · 보스 · 상인 · 기억의 조각. (방(榜)은 결정 2-100에서 뺐다 — 본문 길달 대사에만 남는다.)
 /// 기준 문서는 docs/Dokkaebi_Story.md 2~3절과 본문 docs/Dokkaebi_Story_Script.txt다.
 /// 본문의 글은 여기에 옮기지 않는다 — StoryScriptParser가 본문에서 읽는다.
 /// </summary>
@@ -160,9 +145,6 @@ public static class StoryTable
 
     /// <summary>5장(돌문)을 여는 사신패 수.</summary>
     public const int TabletsForGate = 4;
-
-    /// <summary>방 하나를 읽으면 받는 엽전 [미검증 — 정한 값].</summary>
-    public const int NoticeReward = 20;
 
     private static ZoneDefinition Z(string id, string name, ZoneClear clear)
         => new(id, int.Parse(id.Substring(0, 1)), name, clear);
@@ -263,25 +245,10 @@ public static class StoryTable
         new("piece_7", 7, "3-3"), new("piece_8", 8, "4-1"), new("piece_9", 9, "5-1")
     };
 
-    // 방의 글은 게임 규칙을 그대로 알려 준다 — 「이름이 기능을 거짓말하지 않는다」.
-    // 글은 새로 지은 것이다 [조어 — 사용자 확인 대기].
-    private static readonly NoticeDefinition[] notices =
-    {
-        new("notice_1", "0-1", "붉은 빛이 번뜩이면 그때 몸을 날려라. 늦으면 맞고, 이르면 다시 맞는다."),
-        new("notice_2", "0-2", "길목은 몇 곳뿐이다. 돌아갈 길목을 먼저 알아 두어라."),
-        new("notice_3", "1-1", "체를 처마에 걸어 두면 야광귀는 구멍을 세느라 꼼짝 못 한다."),
-        new("notice_4", "2-1", "어둑시니는 올려다볼수록 커진다. 발끝을 보아라."),
-        new("notice_5", "2-3", "큰물이 진 밤에는 번개가 두 배로 아프다."),
-        new("notice_6", "3-2", "독안개 낀 밤에는 왕지네가 몰려든다."),
-        new("notice_7", "4-2", "허깨비에게는 칼이 잘 들지 않는다. 불을 써라."),
-        new("notice_8", "5-1", "그믐에는 순라귀가 돌지 않는다.")
-    };
-
     public static IReadOnlyList<ChapterDefinition> Chapters => chapters;
     public static IReadOnlyList<BossDefinition> Bosses => bosses;
     public static IReadOnlyList<MerchantDefinition> Merchants => merchants;
     public static IReadOnlyList<PieceDefinition> Pieces => pieces;
-    public static IReadOnlyList<NoticeDefinition> Notices => notices;
 
     public static ChapterDefinition Chapter(int number)
         => number >= 0 && number < chapters.Length ? chapters[number] : null;
@@ -345,29 +312,11 @@ public static class StoryTable
         return null;
     }
 
-    public static NoticeDefinition NoticeIn(string zoneId)
-    {
-        foreach (NoticeDefinition n in notices)
-            if (n.ZoneId == zoneId)
-                return n;
-
-        return null;
-    }
-
     public static PieceDefinition Piece(string id)
     {
         foreach (PieceDefinition p in pieces)
             if (p.Id == id)
                 return p;
-
-        return null;
-    }
-
-    public static NoticeDefinition Notice(string id)
-    {
-        foreach (NoticeDefinition n in notices)
-            if (n.Id == id)
-                return n;
 
         return null;
     }

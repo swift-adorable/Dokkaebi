@@ -10,9 +10,16 @@ using UnityEngine.UI;
 /// </summary>
 public class StationPromptUI : MonoBehaviour
 {
-    // 흡수 버튼(MobileInputUIFactory)과 같은 자리 · 같은 크기. 벙커에는 시체가 없어 겹치지 않는다.
+    // 벙커에서는 흡수 버튼(MobileInputUIFactory)과 같은 자리 · 같은 크기 — 벙커에는 시체가 없다.
+    // 【구역에서는 흡수 버튼 바로 위】 (결정 2-100) — 쓰러진 자리 · 봇짐 · 열매 나무 · 비밀 통로가 구역에도 있어,
+    // 같은 자리면 시체 옆에서 「파밍」을 누를 수 없었다.
     private const float Size = MobileInputUIFactory.AbsorbPromptSize;
-    private static readonly Vector2 Position = MobileInputUIFactory.AbsorbButtonPosition;
+    private const float Gap = 24f;
+    private static readonly Vector2 BunkerPosition = MobileInputUIFactory.AbsorbButtonPosition;
+    private static readonly Vector2 RaidPosition = MobileInputUIFactory.AbsorbButtonPosition + new Vector2(0f, Size + Gap);
+
+    private RectTransform rect;
+    private float nextPlayerSearch;
 
     private static StationPromptUI instance;
 
@@ -46,11 +53,11 @@ public class StationPromptUI : MonoBehaviour
         var root = new GameObject("StationPrompt", typeof(RectTransform));
         root.transform.SetParent(safe, false);
 
-        var rect = (RectTransform)root.transform;
+        rect = (RectTransform)root.transform;
         rect.anchorMin = rect.anchorMax = new Vector2(1f, 0f);
         rect.pivot = new Vector2(0.5f, 0.5f);
         rect.sizeDelta = new Vector2(Size, Size);
-        rect.anchoredPosition = Position;
+        rect.anchoredPosition = SceneFlow.InBunker ? BunkerPosition : RaidPosition;
 
         group = root.AddComponent<CanvasGroup>();
 
@@ -64,8 +71,10 @@ public class StationPromptUI : MonoBehaviour
 
     private void Update()
     {
-        if (player == null)
+        // 플레이어 찾기는 0.5초에 한 번 — 없는 동안 매 프레임 씬 전체를 뒤졌다 (결정 2-100).
+        if (player == null && Time.unscaledTime >= nextPlayerSearch)
         {
+            nextPlayerSearch = Time.unscaledTime + 0.5f;
             var dokkaebi = FindAnyObjectByType<DokkaebiController>(FindObjectsInactive.Exclude);
             player = dokkaebi != null ? dokkaebi.transform : null;
         }
@@ -79,7 +88,15 @@ public class StationPromptUI : MonoBehaviour
         current = player != null && !covered ? BunkerStation.NearestTo(player.position) : null;
 
         if (current != null && label != null)
-            label.text = current.Label;
+        {
+            string text = current.Label;
+            if (label.text != text)
+                label.text = text;   // 같으면 다시 넣지 않는다 — 넣을 때마다 글자 메시를 다시 만든다
+        }
+
+        Vector2 at = SceneFlow.InBunker ? BunkerPosition : RaidPosition;
+        if (rect != null && rect.anchoredPosition != at)
+            rect.anchoredPosition = at;
 
         SetVisible(current != null);
     }

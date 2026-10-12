@@ -103,6 +103,13 @@ public class SurvivalHudUI : MonoBehaviour
 
     /// <summary>상태이상을 고르고 정렬할 때 쓰는 임시 목록. 매 프레임 새로 만들지 않는다.</summary>
     private readonly List<StatusEffectType> visible = new();
+    private StatusEffectState sortState;
+    private System.Comparison<StatusEffectType> byRemaining;
+
+    // 체력 글자 — 바뀔 때만 새로 만든다 (결정 2-100).
+    private int shownHp = int.MinValue;
+    private int shownHpMax = int.MinValue;
+    private string hpText = string.Empty;
 
     /// <summary>
     /// 화면에 세울 줄 하나.
@@ -482,7 +489,9 @@ public class SurvivalHudUI : MonoBehaviour
 
         // 남은 시간이 짧은 것 먼저 — 곧 풀릴 것이 위에 있어야
         // 「기다릴까 약을 쓸까」를 정할 수 있다.
-        visible.Sort((a, b) => state.RemainingOf(a).CompareTo(state.RemainingOf(b)));
+        sortState = state;
+        byRemaining ??= (a, b) => sortState.RemainingOf(a).CompareTo(sortState.RemainingOf(b));   // 매 프레임 새 람다를 만들지 않는다 (결정 2-100)
+        visible.Sort(byRemaining);
 
         for (int i = 0; i < visible.Count; i++)
         {
@@ -590,7 +599,14 @@ public class SurvivalHudUI : MonoBehaviour
 
         bool warn = ratio <= SurvivalTable.HealthWarnRatio;
 
-        SetHorizontal(healthFill, healthLabel, ratio, $"{health.Current} / {health.Max}",
+        if (health.Current != shownHp || health.Max != shownHpMax)
+        {
+            shownHp = health.Current;
+            shownHpMax = health.Max;
+            hpText = $"{shownHp} / {shownHpMax}";
+        }
+
+        SetHorizontal(healthFill, healthLabel, ratio, hpText,
             UIPalette.HealthBar, warn);
 
         if (heartIcon != null)
@@ -628,8 +644,8 @@ public class SurvivalHudUI : MonoBehaviour
             fill.gameObject.SetActive(ratio > 0f);
         }
 
-        if (label != null)
-            label.text = text;
+        if (label != null && label.text != text)
+            label.text = text;   // 같으면 넣지 않는다 — 넣을 때마다 글자 메시를 다시 만든다 (결정 2-100)
     }
 
     private static void SetRadial(Image fill, Image icon, Text label, float ratio,
@@ -646,8 +662,8 @@ public class SurvivalHudUI : MonoBehaviour
         if (icon != null)
             icon.color = color;
 
-        if (label != null)
-            label.text = text;
+        if (label != null && label.text != text)
+            label.text = text;   // 같으면 넣지 않는다 — 넣을 때마다 글자 메시를 다시 만든다 (결정 2-100)
     }
 
     /// <summary>

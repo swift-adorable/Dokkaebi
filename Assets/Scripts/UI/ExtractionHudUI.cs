@@ -22,6 +22,7 @@ public class ExtractionHudUI : MonoBehaviour
     private RectTransform arrow;
     private Text arrowGlyph;
     private Text distanceLabel;
+    private int shownMeters = -1;   // 1m 바뀔 때만 글자를 새로 (결정 2-100)
     private GameObject bar;
     private RectTransform barFill;
     private Text barLabel;
@@ -148,7 +149,12 @@ public class ExtractionHudUI : MonoBehaviour
 
         float dx = player.x - to.x;
         float dz = player.z - to.z;
-        distanceLabel.text = $"{ExtractionDirector.Name} {Mathf.Sqrt(dx * dx + dz * dz):0}m";
+        int meters = Mathf.RoundToInt(Mathf.Sqrt(dx * dx + dz * dz));
+        if (meters != shownMeters)
+        {
+            shownMeters = meters;
+            distanceLabel.text = $"{ExtractionDirector.Name} {meters}m";
+        }
     }
 
     private void PlaceArrow(Camera cam, Vector3 world)

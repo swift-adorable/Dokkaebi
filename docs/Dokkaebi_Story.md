@@ -237,6 +237,8 @@
 
 ### 레코더와의 관계
 
+> **결정 2-100 — 방(榜) 8장은 뺐다 (2026-10-12).** 기억의 조각 9장만 남는다. 아래는 옛 기록이다.
+
 기억의 조각(이야기 단서 9장)과 **레코더류 수집품(힌트 수집품)을 둘 다 둔다.** 레코더는 더 이상 스토리의 유일한 전달 수단이 아니다.
 
 - 레코더의 테마 이름은 **방(榜)**이다 (결정 2-45). 8장을 0-1 · 0-2 · 1-1 · 2-1 · 2-3 · 3-2 · 4-2 · 5-1에 하나씩 놓았다 (8-1절)
@@ -319,7 +321,7 @@
 | 장 · 구역 · 열리는 규칙 | `Core/Story/StoryTable.cs` · `StoryProgress.cs` | 구현 · 테스트 |
 | 파밍 출발 화면 — 열린 구역 고르기, 5장은 사신패 n/4 | `UI/DepartureUI.cs` | 구현 · 화면 미검증 |
 | 상인 4명 · 밤 · 설계도 열림 · 가게 보상 | `StoryTable` · `BuildingState`(MissingMerchant) · `StoryManager` | 구현 · 테스트 — 상인 ↔ 가게 대응은 옛 구조 (결정 2-52 · 2-57 코드 미반영) |
-| 기억의 조각 9장 · 방(榜) 8장 | `Story/StoryPickup.cs` · `StoryRaidDirector.cs` | 구현 · 화면 미검증 |
+| 기억의 조각 9장 (방 8장은 결정 2-100에서 뺐다) | `Story/StoryPickup.cs` · `StoryRaidDirector.cs` | 구현 · 화면 미검증 |
 | 중간 보스 11 · 장 보스 6 | `StoryTable` · `StoryRaidDirector.cs` | 구현 · 화면 미검증 — **중간 보스 수는 개체 수가 아니라 이야기상 조우 단위로 센다.** 처녀귀신 · 몽달귀신은 1조우(개체로는 12 · 결정 2-65) |
 | 이야기 장면 — 본문 문단을 한 쪽씩 | `Core/Story/StoryScriptParser.cs` · `UI/StoryDialogueUI.cs` | 구현 · 테스트(나누기) |
 

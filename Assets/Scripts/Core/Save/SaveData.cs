@@ -209,7 +209,6 @@ public class SavedStory
 {
     public List<string> bosses = new();
     public List<string> pieces = new();
-    public List<string> notices = new();
     public List<string> seen = new();
     public List<int> nights = new();
 }

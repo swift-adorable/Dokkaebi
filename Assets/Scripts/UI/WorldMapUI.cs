@@ -13,7 +13,7 @@ using UnityEngine.UI;
 ///   · 아이콘 아래 이름표 · 퀘스트 구역은 테두리 + 가운데 「!」
 /// 【확대 · 이동】 배율 1(장 하나가 다 보인다) ~ 4 · 열면 2배로 내 자리가 가운데 · 끌어서 이동 · 휠 · 두 손가락 확대.
 /// 【보이는 것】 내 자리 · 바라보는 쪽 · 찾은 길목 · 금줄 · 퀘스트 구역 · 내 마커 · 쓰러진 자리 · (옛 지도) 전리품.
-///   구역 이름은 적지 않는다 · 가 보지 않은 땅은 어둡다 · 적 · 보스 · 조각 · 방은 그리지 않는다 (Map_System 4절)
+///   구역 이름은 적지 않는다 · 가 보지 않은 땅은 어둡다 · 적 · 보스 · 조각은 그리지 않는다 (Map_System 4절)
 /// 【마커】 두 번 누르면 찍는다(장마다 5개) · 마커를 두 번 누르면 지운다 — 지도 위에만 있다.
 /// </summary>
 public class WorldMapUI : MonoBehaviour
@@ -68,6 +68,14 @@ public class WorldMapUI : MonoBehaviour
     // ── 보는 자리 ─────────────────────────────────────────────────────
     private float zoom = MapView.OpenZoom;
     private Vector2 center = new(0.5f, 0.5f);
+
+    // 【매 프레임 다시 그리지 않는다】 (결정 2-100) — 지도가 떠 있는 동안 게임은 멈춰 있다(2-92).
+    // 끌거나 확대할 때만 바로, 그 밖에는 0.25초에 한 번. 퀘스트 구역은 열 때 · 다시 그릴 때만 센다.
+    private const float IdleRefresh = 0.25f;
+    private Vector2 lastCenter = new(-1f, -1f);
+    private float lastZoom = -1f;
+    private float nextRefresh;
+    private List<ZoneArea> questCache;
     private float aspect = 1f;
 
     private float lastTapTime = -10f;
@@ -384,6 +392,7 @@ public class WorldMapUI : MonoBehaviour
 
         mapImage.texture = runtime.EnsureParchment();
         fogImage.texture = runtime.FogTexture;
+        questCache = null;
 
         root.SetActive(true);
         markerList.SetActive(false);
@@ -471,6 +480,7 @@ public class WorldMapUI : MonoBehaviour
             return;
 
         fogImage.texture = runtime.FogTexture;
+        questCache = null;
 
         // 금줄이 걷혔으면 양피지도 새로 — 열려 있을 때만 바로 그린다(닫혀 있으면 다음에 열 때).
         if (IsOpen)
@@ -508,7 +518,14 @@ public class WorldMapUI : MonoBehaviour
 
         HandlePinch();
         ApplyView();
-        Refresh();
+
+        if (center != lastCenter || !Mathf.Approximately(zoom, lastZoom) || Time.unscaledTime >= nextRefresh)
+        {
+            lastCenter = center;
+            lastZoom = zoom;
+            nextRefresh = Time.unscaledTime + IdleRefresh;
+            Refresh();
+        }
     }
 
     private Vector2 ContentSize => MapView.FitSize(viewport.rect.size, aspect) * zoom;
@@ -540,7 +557,7 @@ public class WorldMapUI : MonoBehaviour
         outlineLayer.gameObject.SetActive(Shown(Layer.Quest));
 
         if (Shown(Layer.Quest))
-            foreach (ZoneArea area in QuestAreas(runtime))
+            foreach (ZoneArea area in questCache ??= QuestAreas(runtime))
             {
                 Vector3 mid = new(area.Bounds.center.x, 0f, area.Bounds.center.y);
                 PlaceIcon(ref used, runtime, mid, size, UISprites.Glyph.Diamond, "!", null, QuestColor, 46);
@@ -585,13 +602,20 @@ public class WorldMapUI : MonoBehaviour
             playerArrow.gameObject.SetActive(false);
         }
 
-        markerCount.text = $"표시 {markers.Count}/{MapTable.MaxMarkers}";
+        SetText(markerCount, $"표시 {markers.Count}/{MapTable.MaxMarkers}");
 
         RaidConditions night = RaidManager.Current;
-        moonLabel.text = night.lunar ? MoonTable.Name(night.moon) : string.Empty;
-        weatherLabel.text = night.weather.Chapter > 0
+        SetText(moonLabel, night.lunar ? MoonTable.Name(night.moon) : string.Empty);
+        SetText(weatherLabel, night.weather.Chapter > 0
             ? $"{WeatherTable.SeasonName(night.weather.Season)}\n{night.weather.Name}"
-            : night.weather.Name;
+            : night.weather.Name);
+    }
+
+    /// <summary>같은 글이면 넣지 않는다 — 넣을 때마다 글자 메시를 다시 만든다.</summary>
+    private static void SetText(Text label, string text)
+    {
+        if (label != null && label.text != text)
+            label.text = text;
     }
 
     private bool InView(Vector2 at)

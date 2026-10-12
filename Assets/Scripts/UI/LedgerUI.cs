@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// 【임시】 장부방 화면 (결정 2-97 · 2-98) — 장 지도 · 처치 기록 · 가게 재고 · 모은 글(조각 · 방). 장부방 앞에서 누르면 연다.
+/// 【임시】 장부방 화면 (결정 2-97 · 2-98 · 2-100) — 장 지도 · 처치 기록 · 가게 재고 · 기억의 조각. 장부방 앞에서 누르면 연다.
 /// 떠 있는 동안 게임이 멈춘다(결정 2-92). 모양은 레이어 · 아트 작업 때 다시 만든다.
 /// </summary>
 public class LedgerUI : MonoBehaviour
@@ -15,7 +15,7 @@ public class LedgerUI : MonoBehaviour
     private const int MapsTab = 0;
     private const int KillsTab = 1;
     private const int ShopsTab = 2;
-    private const int NoticesTab = 3;
+    private const int PiecesTab = 3;
 
     private Text title;
     private Text status;
@@ -49,8 +49,8 @@ public class LedgerUI : MonoBehaviour
     /// <summary>가게 재고 탭으로 연다 (검증 도구).</summary>
     public static void OpenShops() => Open(ShopsTab);
 
-    /// <summary>모은 글 탭으로 연다 (검증 도구).</summary>
-    public static void OpenWritings() => Open(NoticesTab);
+    /// <summary>기억의 조각 탭으로 연다 (검증 도구).</summary>
+    public static void OpenWritings() => Open(PiecesTab);
 
     private void OnDestroy()
     {
@@ -71,7 +71,7 @@ public class LedgerUI : MonoBehaviour
         UIFactory.CreateButton(box.transform, "닫기", new Vector2(0.8f, 0.9f), new Vector2(0.96f, 0.97f),
             UIPalette.Header, () => Destroy(gameObject), 22);
 
-        string[] names = { LedgerTable.MapsTab, LedgerTable.KillsTab, LedgerTable.ShopsTab, LedgerTable.NoticesTab };
+        string[] names = { LedgerTable.MapsTab, LedgerTable.KillsTab, LedgerTable.ShopsTab, LedgerTable.PiecesTab };
         for (int i = 0; i < names.Length; i++)
         {
             int captured = i;
@@ -109,7 +109,7 @@ public class LedgerUI : MonoBehaviour
         {
             case KillsTab:   FillKills(ref y); break;
             case ShopsTab:   FillShops(ref y); break;
-            case NoticesTab: FillNotices(ref y); break;
+            case PiecesTab: FillPieces(ref y); break;
             default:         FillMaps(ref y); break;
         }
 
@@ -269,9 +269,9 @@ public class LedgerUI : MonoBehaviour
         Refresh();
     }
 
-    // ── 모은 글 — 기억의 조각 · 방 ───────────────────────────────────
+    // ── 기억의 조각 (결정 2-98 · 방은 2-100에서 뺐다) ──────────────────
 
-    private void FillNotices(ref float y)
+    private void FillPieces(ref float y)
     {
         StoryProgress progress = StoryManager.Progress;
 
@@ -305,34 +305,6 @@ public class LedgerUI : MonoBehaviour
             label.supportRichText = true;
             label.rectTransform.offsetMin = new Vector2(0f, 8f);
             label.rectTransform.offsetMax = new Vector2(0f, -8f);
-        }
-
-        var collected = new List<NoticeDefinition>();
-
-        foreach (NoticeDefinition notice in StoryTable.Notices)
-            if (progress != null && progress.HasNotice(notice.Id))
-                collected.Add(notice);
-
-        AddTheme($"길에서 모은 방 {collected.Count} / {StoryTable.Notices.Count}", ref y);
-
-        if (collected.Count == 0)
-        {
-            AddLine("아직 모은 방이 없다.", ref y);
-            return;
-        }
-
-        foreach (NoticeDefinition notice in collected)
-        {
-            ZoneDefinition zone = StoryTable.Zone(notice.ZoneId);
-            string where = zone != null ? $"{notice.ZoneId} {zone.Name}" : notice.ZoneId;
-
-            Image row = UIFactory.CreatePanel("Row", list.Content, UIPalette.Row, Vector2.zero, Vector2.zero);
-            Place(row.rectTransform, ref y, 96f);
-
-            Text label = UIFactory.CreateLabel(row.transform,
-                $"<size=16><color=#A8A08C>{where}</color></size>\n「{notice.Text}」", 21, FontStyle.Normal,
-                new Vector2(0.02f, 0f), new Vector2(0.98f, 1f), TextAnchor.MiddleLeft);
-            label.supportRichText = true;
         }
     }
 

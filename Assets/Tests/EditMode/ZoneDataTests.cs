@@ -142,7 +142,6 @@ namespace Dokkaebi.Tests
             ZoneSummary bamboo = ZoneDataTable.Summary("2-1");
             Assert.IsTrue(bamboo.Quests.Any(q => q.Id == "sub_watermill"));
             Assert.IsNotNull(bamboo.Piece);
-            Assert.IsNotNull(bamboo.Notice);
             Assert.IsTrue(bamboo.IsWaterside);
 
             // 퀘스트 목표가 닿는 구역은 전부 요약에 잡힌다.

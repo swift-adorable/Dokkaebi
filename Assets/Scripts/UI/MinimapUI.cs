@@ -202,11 +202,24 @@ public class MinimapUI : MonoBehaviour
 
         IReadOnlyList<Vector2> markers = MapMemory.Markers(runtime.Chapter);
         for (int i = 0; i < markers.Count; i++)
-            Place(ref used, (i + 1).ToString(), MarkerColor, new Vector3(markers[i].x, 0f, markers[i].y), center, half, 20);
+            Place(ref used, MarkerNumber(i), MarkerColor, new Vector3(markers[i].x, 0f, markers[i].y), center, half, 20);
 
         for (int i = used; i < icons.Count; i++)
             icons[i].gameObject.SetActive(false);
     }
+
+    private static readonly string[] markerNumbers = BuildMarkerNumbers();
+
+    private static string[] BuildMarkerNumbers()
+    {
+        var list = new string[MapTable.MaxMarkers];
+        for (int i = 0; i < list.Length; i++)
+            list[i] = (i + 1).ToString();
+        return list;
+    }
+
+    /// <summary>마커 번호 글자 — 매 프레임 ToString으로 새로 만들지 않는다 (결정 2-100).</summary>
+    private static string MarkerNumber(int i) => i >= 0 && i < markerNumbers.Length ? markerNumbers[i] : (i + 1).ToString();
 
     private static bool InRange(Vector3 world, Vector3 center)
         => Mathf.Abs(world.x - center.x) <= MapTable.MinimapRange

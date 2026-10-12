@@ -19,19 +19,16 @@ public class StoryProgress
 {
     private readonly HashSet<string> defeated = new();
     private readonly HashSet<string> pieces = new();
-    private readonly HashSet<string> notices = new();
     private readonly HashSet<string> seen = new();
     private readonly HashSet<int> nights = new();
 
     public IEnumerable<string> DefeatedBosses => defeated;
     public IEnumerable<string> Pieces => pieces;
-    public IEnumerable<string> Notices => notices;
     public IEnumerable<string> SeenEvents => seen;
     public IEnumerable<int> Nights => nights;
 
     public bool HasDefeated(string bossId) => bossId != null && defeated.Contains(bossId);
     public bool HasPiece(string pieceId) => pieceId != null && pieces.Contains(pieceId);
-    public bool HasNotice(string noticeId) => noticeId != null && notices.Contains(noticeId);
     public bool HasSeen(string eventId) => eventId != null && seen.Contains(eventId);
     public bool HasNight(int night) => nights.Contains(night);
 
@@ -44,8 +41,6 @@ public class StoryProgress
 
     public bool CollectPiece(string pieceId) => StoryTable.Piece(pieceId) != null && pieces.Add(pieceId);
 
-    public bool CollectNotice(string noticeId) => StoryTable.Notice(noticeId) != null && notices.Add(noticeId);
-
     public bool See(string eventId) => !string.IsNullOrEmpty(eventId) && seen.Add(eventId);
 
     /// <summary>밤을 지났다. 그 밤의 상인이 와 있게 된다.</summary>
@@ -55,7 +50,6 @@ public class StoryProgress
     {
         defeated.Clear();
         pieces.Clear();
-        notices.Clear();
         seen.Clear();
         nights.Clear();
     }
@@ -234,7 +228,6 @@ public class StoryProgress
         {
             bosses = new List<string>(defeated),
             pieces = new List<string>(pieces),
-            notices = new List<string>(notices),
             seen = new List<string>(seen),
             nights = new List<int>(nights)
         };
@@ -250,7 +243,7 @@ public class StoryProgress
 
         foreach (string id in saved.bosses ?? new List<string>()) Defeat(id);
         foreach (string id in saved.pieces ?? new List<string>()) CollectPiece(id);
-        foreach (string id in saved.notices ?? new List<string>()) CollectNotice(id);
+        // 방(榜)은 뺐다 (결정 2-100) — 옛 세이브의 notices 줄은 읽지 않는다.
         foreach (string id in saved.seen ?? new List<string>()) See(id);
         foreach (int n in saved.nights ?? new List<int>()) PassNight(n);
     }

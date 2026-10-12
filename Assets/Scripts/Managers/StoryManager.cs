@@ -34,7 +34,7 @@ public static class StoryManager
     /// <summary>퀘스트 진행 — 이야기 진행과 지은 건물에서 계산한다 (QuestTable · 결정 2-55 · 2-56).</summary>
     public static QuestTracker Quests => new QuestTracker(Progress, BuildingManager.IsOpen);
 
-    /// <summary>진행이 바뀌었을 때 — 보스 · 조각 · 방 · 밤.</summary>
+    /// <summary>진행이 바뀌었을 때 — 보스 · 조각 · 밤.</summary>
     public static event Action OnChanged;
 
     /// <summary>본문을 나눈 토막들. 처음 읽을 때 Resources의 사본을 나눈다.</summary>
@@ -117,23 +117,6 @@ public static class StoryManager
 
         if (passage != null)
             StoryDialogueUI.Show(passage.Title, passage.Pages, () => Progress.See(passage.Id));
-    }
-
-    public static void ReportNotice(string noticeId)
-    {
-        NoticeDefinition notice = StoryTable.Notice(noticeId);
-
-        if (notice == null || !Progress.CollectNotice(noticeId))
-            return;
-
-        PassiveManager.EnsureInstance().Gold += StoryTable.NoticeReward;
-        OnChanged?.Invoke();
-
-        StoryDialogueUI.Show("방(榜)", new List<string>
-        {
-            notice.Text,
-            $"엽전 {StoryTable.NoticeReward}닢을 주웠다."
-        }, null);
     }
 
     /// <summary>

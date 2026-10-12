@@ -39,7 +39,11 @@ public class ReloadButtonUI : MonoBehaviour
 
     private void Build(Canvas canvas)
     {
-        Image disc = UIFactory.CreatePanel("ReloadButton", canvas.transform,
+        // 【안전 영역 안에】 (결정 2-100) — 대시 버튼(MobileInputUIFactory)은 안전 영역 안에 있다.
+        // 캔버스 바로 아래 두면 노치 폰에서 오른쪽 여백만큼 어긋나 대시 버튼과 겹쳤다.
+        RectTransform safe = UIFactory.CreateSafeArea(canvas);
+
+        Image disc = UIFactory.CreatePanel("ReloadButton", safe,
             new Color(0.10f, 0.12f, 0.16f, 0.72f), new Vector2(1f, 0f), new Vector2(1f, 0f), radius: 64);
         RectTransform rect = disc.rectTransform;
         rect.pivot = new Vector2(0.5f, 0.5f);

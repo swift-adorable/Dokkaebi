@@ -103,7 +103,7 @@ public static class PlayCaptureMenu
         LedgerUI.OpenShops();
     }
 
-    [MenuItem("Dokkaebi/Debug/장부방 화면 열기 (모은 글)")]
+    [MenuItem("Dokkaebi/Debug/장부방 화면 열기 (기억의 조각)")]
     public static void OpenLedgerWritings()
     {
         if (!EditorApplication.isPlaying)

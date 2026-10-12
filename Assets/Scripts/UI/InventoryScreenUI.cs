@@ -1528,6 +1528,10 @@ public partial class InventoryScreenUI : MonoBehaviour
 
         int safeSlots = PlayerInventory.SafeSlots;
 
+        // 【지켜지는 바로 그 묶음에】 (결정 2-100) — 거르기를 켜면 보이는 칸의 순서가 가방 순서와 달라,
+        // 「앞에서 n칸」에 붙이면 지켜지지 않는 물건에 「안전」이 붙었다.
+        HashSet<ItemStack> safeStacks = safeSlots > 0 ? PlayerInventory.EnsureInstance().Bag.SafeStacks(safeSlots) : null;
+
         for (int i = 0; i < rows * columns; i++)
         {
             UIFactory.GetCellAnchors(i, columns, rows, paddingX, paddingY,
@@ -1537,8 +1541,8 @@ public partial class InventoryScreenUI : MonoBehaviour
 
             DrawItemCell($"Bag_{i}", bagGrid, min, max, cellStack);
 
-            // 사망해도 지키는 칸 (패시브 · Audit A9) — 맨 앞 n칸에 표시한다.
-            if (i < safeSlots)
+            // 사망해도 지키는 칸 (패시브 · Audit A9) — 쓰러져도 남는 묶음에 표시한다.
+            if (cellStack != null && safeStacks != null && safeStacks.Contains(cellStack))
                 UIFactory.CreateBadge(bagGrid, "안전",
                     new Vector2(min.x, max.y - (max.y - min.y) * 0.24f),
                     new Vector2(min.x + (max.x - min.x) * 0.5f, max.y), 16);
@@ -2053,9 +2057,39 @@ public partial class InventoryScreenUI : MonoBehaviour
             : AmmoTable.ShouldOfferReload(loaded, loadout.CapacityAt(index), bag) ? UIPalette.TextAccent
             : Color.white;
 
-        UIFactory.CreateLabel(chip.transform, $"{ammo} {loaded}/{bag}", 17, FontStyle.Bold,
+        Text chipLabel = UIFactory.CreateLabel(chip.transform, $"{ammo} {loaded}/{bag}", 17, FontStyle.Bold,
             Vector2.zero, Vector2.one, TextAnchor.MiddleCenter,
-            active ? countColor : UIPalette.TextDim).raycastTarget = false;
+            active ? countColor : UIPalette.TextDim);
+        chipLabel.raycastTarget = false;
+        ammoChips[index] = chipLabel;
+    }
+
+    /// <summary>탄 칩 글자만 고친다 — 쏠 때마다 빠른 칸 8개를 통째로 다시 만들지 않게 (결정 2-100).</summary>
+    private void UpdateAmmoChips()
+    {
+        if (!PlayerInventory.HasInstance)
+            return;
+
+        EquipmentLoadout loadout = PlayerInventory.Instance.Loadout;
+
+        for (int index = 0; index < ammoChips.Length; index++)
+        {
+            Text chip = ammoChips[index];
+            WeaponDefinition weapon = loadout.WeaponAt(index);
+            if (chip == null || weapon == null)
+                continue;
+
+            int loaded = loadout.LoadedAt(index);
+            int bag = PlayerAmmo.InBag(index);
+            string ammo = AmmoTable.Find(weapon.AmmoId)?.Name ?? "탄";
+            bool active = loadout.ActiveWeapon == index;
+
+            chip.text = $"{ammo} {loaded}/{bag}";
+            chip.color = !active ? UIPalette.TextDim
+                : loaded == 0 ? UIPalette.Warning
+                : AmmoTable.ShouldOfferReload(loaded, loadout.CapacityAt(index), bag) ? UIPalette.TextAccent
+                : Color.white;
+        }
     }
 
     private void OnWeaponQuickSlotClicked(int index)
@@ -2078,6 +2112,8 @@ public partial class InventoryScreenUI : MonoBehaviour
 
     /// <summary>무기 칸이 보여 주는 값이 바뀌었는지 — 쏠 때마다 다시 그리지 않으려고 값만 비교한다.</summary>
     private int weaponBarSignature = int.MinValue;
+    private int ammoCountSignature;
+    private readonly Text[] ammoChips = new Text[QuickSlots.FirstItemSlot];
 
     private void RefreshWeaponBarIfChanged()
     {
@@ -2085,19 +2121,31 @@ public partial class InventoryScreenUI : MonoBehaviour
             return;
 
         EquipmentLoadout l = PlayerInventory.Instance.Loadout;
-        int signature = l.ActiveWeapon;
-        signature = signature * 31 + l.LoadedAt(0);
-        signature = signature * 31 + l.LoadedAt(1);
-        signature = signature * 31 + PlayerAmmo.InBag(0);
-        signature = signature * 31 + PlayerAmmo.InBag(1);
-        signature = signature * 31 + (l.WeaponAt(0)?.Id?.GetHashCode() ?? 0);
-        signature = signature * 31 + (l.WeaponAt(1)?.Id?.GetHashCode() ?? 0);
 
-        if (signature == weaponBarSignature)
+        // 【모양이 바뀔 때만 다시 만든다】 (결정 2-100) — 든 무기 · 무기 종류가 바뀌면 칸을 다시,
+        // 탄 수만 바뀌면(쏠 때마다) 칩 글자만 고친다.
+        int structure = l.ActiveWeapon;
+        structure = structure * 31 + (l.WeaponAt(0)?.Id?.GetHashCode() ?? 0);
+        structure = structure * 31 + (l.WeaponAt(1)?.Id?.GetHashCode() ?? 0);
+
+        int counts = l.LoadedAt(0);
+        counts = counts * 31 + l.LoadedAt(1);
+        counts = counts * 31 + PlayerAmmo.InBag(0);
+        counts = counts * 31 + PlayerAmmo.InBag(1);
+
+        if (structure != weaponBarSignature)
+        {
+            weaponBarSignature = structure;
+            ammoCountSignature = counts;
+            RefreshQuickSlots();
             return;
+        }
 
-        weaponBarSignature = signature;
-        RefreshQuickSlots();
+        if (counts != ammoCountSignature)
+        {
+            ammoCountSignature = counts;
+            UpdateAmmoChips();
+        }
     }
 
     private void OnQuickSlotClicked(int index)

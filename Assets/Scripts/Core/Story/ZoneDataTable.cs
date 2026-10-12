@@ -96,7 +96,6 @@ public sealed class ZoneSummary
     public ChapterData Chapter;
     public List<BossDefinition> Bosses;
     public PieceDefinition Piece;
-    public NoticeDefinition Notice;
 
     /// <summary>이 구역에서 시작하거나 이 구역을 목표로 삼는 퀘스트.</summary>
     public List<QuestDefinition> Quests;
@@ -107,7 +106,7 @@ public sealed class ZoneSummary
 
 /// <summary>
 /// 【Zone Data.】 장 → 구역 → 중간 보스 → 장 보스 → 기억의 조각 → 방 → 퀘스트 + 계절 · 적 풀 · 재료.
-/// 이야기 쪽(구역 · 보스 · 조각 · 방)은 StoryTable, 퀘스트는 QuestTable이 원본이다 — 여기서는 모으기만 한다.
+/// 이야기 쪽(구역 · 보스 · 조각)은 StoryTable, 퀘스트는 QuestTable이 원본이다 — 여기서는 모으기만 한다.
 /// 여기가 원본인 것: 계절(2-59) · 일반 적 풀(2-57 · Hunting 1절) · 장별 재료 이름(Story 8절) · 물가 태그(2-63).
 /// </summary>
 public static class ZoneDataTable
@@ -299,7 +298,6 @@ public static class ZoneDataTable
             Chapter = Chapter(zone.Chapter),
             Bosses = StoryTable.BossesIn(zoneId),
             Piece = StoryTable.PieceIn(zoneId),
-            Notice = StoryTable.NoticeIn(zoneId),
             Quests = quests,
             IsWaterside = IsWaterside(zoneId)
         };

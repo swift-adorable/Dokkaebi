@@ -7,7 +7,7 @@ using UnityEngine;
 ///
 ///   · 바닥 · 덩어리(키 큰 것은 짙게 · 낮은 것은 옅게) · 냇물 · 꽃밭 · 장 끝 금줄
 ///   · 닫힌 구역은 어둡게 · 아직 닫힌 금줄(MapGate)은 밝은 줄
-///   · 적 · 보스 · 조각 · 방은 그리지 않는다 (Map_System 4절 — 지도가 적 위치를 알려 주지 않는다)
+///   · 적 · 보스 · 조각은 그리지 않는다 (Map_System 4절 — 지도가 적 위치를 알려 주지 않는다)
 /// </summary>
 public static class MapRaster
 {
