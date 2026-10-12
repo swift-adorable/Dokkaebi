@@ -75,6 +75,7 @@ public class SkillZoneDirector : MonoBehaviour
 
         TickGrounds(dt);
         TickPending();
+        TickHeralds();
         TickPushes();
 
         SocketedBuild build = SkillManager.HasInstance ? SkillManager.Instance.Build : null;
@@ -133,6 +134,9 @@ public class SkillZoneDirector : MonoBehaviour
         StatusEffectState status = enemy.Health.Status;
         StatusEffectType picked = SkillZoneTable.PickDetonation(status);
         Vector3 at = enemy.transform.position;
+
+        QueueHerald(at, status);
+        SpreadFreezeOnDeath(at, status);
 
         DetonationLoadout burst = BurstLoadout(out bool hasBurst);
 
@@ -219,13 +223,16 @@ public class SkillZoneDirector : MonoBehaviour
         TickPending();
     }
 
-    private void Explode(Vector3 at, StatusEffectType status, int stacks, DetonationLoadout loadout, int chainsLeft)
+    private void Explode(Vector3 at, StatusEffectType status, int stacks, DetonationLoadout loadout, int chainsLeft,
+                         StatusEffectType spreadOverride = StatusEffectType.None, bool leaveGround = true)
     {
         DetonationResult result = DetonationResolver.Resolve(
             status, stacks, Mathf.RoundToInt(ShotDamage), loadout.IsValid ? loadout.RadiusMultiplier : 1f);
 
         if (!result.Detonated)
             return;
+
+        StatusEffectType spread = spreadOverride != StatusEffectType.None ? spreadOverride : result.SpreadStatus;
 
         int damage = Mathf.Max(1, Mathf.RoundToInt(result.Damage * (1f + (loadout.IsValid ? loadout.DamageIncrease : 0f))));
         Health farthest = null;
@@ -235,8 +242,8 @@ public class SkillZoneDirector : MonoBehaviour
         foreach (Health target in targets)
         {
             // 응집된 적은 전이 범위가 넓다 — 확산은 대상의 SpreadMultiplier를 따른다.
-            if (result.SpreadStatus != StatusEffectType.None)
-                target.ApplyStatus(result.SpreadStatus, ShotDamage);
+            if (spread != StatusEffectType.None)
+                target.ApplyStatus(spread, ShotDamage, byPlayer: true);
 
             Hit(target, damage, result.Element);
 
@@ -246,7 +253,7 @@ public class SkillZoneDirector : MonoBehaviour
 
         Flash(at, result.Radius, ColorOf(result.Element));
 
-        if (result.Ground != GroundEffectType.None)
+        if (leaveGround && result.Ground != GroundEffectType.None)
             SpawnGround(result.Ground, at,
                 SkillZoneTable.GroundRadius * (loadout.IsValid ? loadout.ZoneRadiusMultiplier : 1f),
                 SkillZoneTable.GroundDuration * (loadout.IsValid ? loadout.DurationMultiplier : 1f),
@@ -254,7 +261,7 @@ public class SkillZoneDirector : MonoBehaviour
 
         // 연쇄 기폭 — 가장 멀리 맞은 적 자리에서 한 번 더 터진다.
         if (chainsLeft > 0 && farthest != null)
-            Explode(farthest.transform.position, status, stacks, loadout, chainsLeft - 1);
+            Explode(farthest.transform.position, status, stacks, loadout, chainsLeft - 1, spreadOverride, leaveGround);
     }
 
     /// <summary>터뜨린 상태를 지운다 — 위험 상태로 넘어가 있었으면 위험 상태를.</summary>
@@ -274,7 +281,12 @@ public class SkillZoneDirector : MonoBehaviour
             return;
         shockwaveTimer = SkillZoneTable.ShockwaveInterval + loadout.Cooldown - SkillZoneTable.DetonationCooldown;
 
-        Vector3 center = transform.position;
+        ShockwaveAt(transform.position, loadout);
+    }
+
+    /// <summary>이 자리에서 충격파를 한 번 낸다 — 밀어내고, 걸린 상태 · 잔류물 · 지연 기폭을 바로 터뜨린다.</summary>
+    private void ShockwaveAt(Vector3 center, DetonationLoadout loadout)
+    {
         float radius = loadout.Radius(SkillZoneTable.ShockwaveRadius);
 
         // Explode가 targets를 다시 채우므로 따로 담는다.
@@ -354,7 +366,12 @@ public class SkillZoneDirector : MonoBehaviour
             return; // 적이 없으면 기다린다 — 빈 땅에 우물을 만들지 않는다
 
         gravityTimer = SkillZoneTable.GravityInterval;
-        SpawnGround(GroundEffectType.GravityWell, nearest.transform.position,
+        GravityAt(nearest.transform.position, loadout);
+    }
+
+    private void GravityAt(Vector3 at, DetonationLoadout loadout)
+    {
+        SpawnGround(GroundEffectType.GravityWell, at,
             SkillZoneTable.GravityRadius * loadout.ZoneRadiusMultiplier,
             SkillZoneTable.GravityDuration * loadout.DurationMultiplier,
             ShotDamage);
@@ -391,7 +408,7 @@ public class SkillZoneDirector : MonoBehaviour
 
             CollectEnemies(zone.Position, zone.Radius, targets);
             foreach (Health target in targets)
-                target.ApplyStatus(status, zone.SourceDamage);
+                target.ApplyStatus(status, zone.SourceDamage, byPlayer: true);
         }
 
         removed.Clear();
@@ -415,6 +432,243 @@ public class SkillZoneDirector : MonoBehaviour
                 body.MovePosition(body.position + delta);
             else
                 target.transform.position += delta;
+        }
+    }
+
+    // ────────────────────────────────── 번지는 구슬(전령) · 모였다 터지는 구슬(발동) — 결정 2-102
+
+    private struct HeraldBlast
+    {
+        public Vector3 Position;
+        public StatusEffectType Condition;
+        public int Stacks;
+        public float At;
+    }
+
+    private readonly List<HeraldBlast> heraldQueue = new();
+    private readonly List<Health> freezeTargets = new();
+    private readonly List<Health> metaTargets = new();
+    private float freezeSpreadUntil = -1f;
+
+    private static readonly StatusEffectType[] ElementalAilments =
+        { StatusEffectType.Ignite, StatusEffectType.Freeze, StatusEffectType.Shock };
+
+    /// <summary>전령 — 그 상태가 걸린 적을 처치하면 잠깐 뒤 그 자리에서 터져 둘레로 번진다.</summary>
+    private void QueueHerald(Vector3 at, StatusEffectState status)
+    {
+        SkillDefinition herald = SkillManager.HasInstance ? SkillManager.Instance.Build?.Herald : null;
+        if (herald == null)
+            return;
+
+        StatusEffectType condition = herald.ConsumesStatus;
+        if (!TriggerGemTable.HeraldMatches(condition, status))
+            return;
+
+        heraldQueue.Add(new HeraldBlast
+        {
+            Position = at,
+            Condition = condition,
+            Stacks = TriggerGemTable.HeraldStacks(condition, status.StacksOf(condition)),
+            At = Time.time + TriggerGemTable.HeraldDelay
+        });
+    }
+
+    private void TickHeralds()
+    {
+        for (int i = heraldQueue.Count - 1; i >= 0; i--)
+        {
+            if (i >= heraldQueue.Count || heraldQueue[i].At > Time.time)
+                continue;
+
+            HeraldBlast b = heraldQueue[i];
+            heraldQueue.RemoveAt(i);
+
+            // 전령은 잔류물을 남기지 않는다 — 젬 설명에 있는 것(폭발 · 번짐)만 한다.
+            Explode(b.Position, b.Condition, b.Stacks, default, 0,
+                TriggerGemTable.HeraldSpread(b.Condition), leaveGround: false);
+        }
+    }
+
+    /// <summary>동결 시 시전이 연 5초 동안 — 동결된 채 죽은 적 옆의 적이 동결된다.</summary>
+    private void SpreadFreezeOnDeath(Vector3 at, StatusEffectState status)
+    {
+        if (Time.time > freezeSpreadUntil || status == null || !status.Has(StatusEffectType.Freeze))
+            return;
+
+        CollectEnemies(at, TriggerGemTable.FreezeSpreadRadius, freezeTargets);
+        PlayerHitEvents.BeginSuppress();
+        try
+        {
+            foreach (Health t in freezeTargets)
+                t.ApplyStatus(StatusEffectType.Freeze, ShotDamage, byPlayer: true);
+        }
+        finally
+        {
+            PlayerHitEvents.EndSuppress();
+        }
+
+        if (freezeTargets.Count > 0)
+            Flash(at, TriggerGemTable.FreezeSpreadRadius, ColorOf(DamageElement.Cold));
+    }
+
+    /// <summary>
+    /// 지닌 핵심 구슬을 이 둘레에 한 번 더 (점화 시 시전 · 치명타 시 시전).
+    /// 싣는 구슬은 그 상태를 걸고, 터뜨리는 구슬은 그 자리에서 한 번 일어난다.
+    /// </summary>
+    public void FireCoresAt(Vector3 center, float radius)
+    {
+        SocketedBuild build = SkillManager.HasInstance ? SkillManager.Instance.Build : null;
+        if (build == null || !EnemyManager.HasInstance)
+            return;
+
+        bool fired = false;
+
+        for (int c = 0; c < SocketedBuild.MaxCores; c++)
+        {
+            if (build.GetCore(c) == null)
+                continue;
+
+            DetonationLoadout loadout = build.GetDetonationLoadout(c);
+            if (loadout.IsValid)
+            {
+                switch (loadout.CoreId)
+                {
+                    case SkillZoneTable.ElementalBurstId:
+                        CollectEnemies(center, radius, metaTargets);
+                        DetonateAll(metaTargets, loadout, elementalOnly: false);
+                        fired = true;
+                        break;
+                    case SkillZoneTable.ShockwaveId:
+                        ShockwaveAt(center, loadout);
+                        fired = true;
+                        break;
+                    case SkillZoneTable.GravityCollapseId:
+                        GravityAt(center, loadout);
+                        fired = true;
+                        break;
+                }
+                continue;
+            }
+
+            StatusEffectType ailment = build.EffectiveAilmentOf(c);
+            if (ailment == StatusEffectType.None)
+                continue;
+
+            CollectEnemies(center, radius, metaTargets);
+            foreach (Health t in metaTargets)
+                if (t != null && !t.IsDead)
+                    t.ApplyStatus(ailment, ShotDamage, byPlayer: true);
+            fired = true;
+        }
+
+        if (fired)
+            Flash(center, radius, new Color(1f, 0.9f, 0.6f));
+    }
+
+    /// <summary>원소 상태 이상 시 시전 — 화면 안 적에게 걸린 점화 · 동결 · 감전을 한꺼번에 기폭.</summary>
+    public void DetonateElementalOnScreen()
+    {
+        CollectOnScreen(metaTargets);
+        DetonateAll(metaTargets, default, elementalOnly: true);
+    }
+
+    /// <summary>감전 시 시전 — 화면 안의 감전된 적 모두에게 낙뢰.</summary>
+    public void StrikeShockedOnScreen()
+    {
+        CollectOnScreen(metaTargets);
+        int damage = Mathf.Max(1, Mathf.RoundToInt(ShotDamage * TriggerGemTable.StrikeDamageScale));
+
+        foreach (Health t in metaTargets)
+        {
+            if (t == null || t.IsDead)
+                continue;
+            if (!t.Status.Has(StatusEffectType.Shock) && !t.Status.Has(StatusEffectType.Paralyze))
+                continue;
+
+            Vector3 at = t.transform.position;
+            Hit(t, damage, DamageElement.Lightning);
+            Flash(at, 0.8f, ColorOf(DamageElement.Lightning));
+        }
+    }
+
+    /// <summary>동결 시 시전 — 둘레 적 모두 동결 · 5초 동안 동결된 적이 죽으면 옆으로 옮는다.</summary>
+    public void FreezeAround(Vector3 center, float radius)
+    {
+        CollectEnemies(center, radius, metaTargets);
+        foreach (Health t in metaTargets)
+            t.ApplyStatus(StatusEffectType.Freeze, ShotDamage, byPlayer: true);
+
+        freezeSpreadUntil = Time.time + TriggerGemTable.FreezeSpreadSeconds;
+        Flash(center, radius, ColorOf(DamageElement.Cold));
+    }
+
+    /// <summary>목록의 적마다 걸린 상태를 소모해 터뜨린다. elementalOnly면 점화 · 동결 · 감전을 모두.</summary>
+    private void DetonateAll(List<Health> list, DetonationLoadout loadout, bool elementalOnly)
+    {
+        for (int i = 0; i < list.Count; i++)
+        {
+            Health t = list[i];
+            if (t == null || t.IsDead || detonatedThisFrame.Contains(t))
+                continue;
+
+            Vector3 at = t.transform.position;
+            StatusEffectState status = t.Status;
+
+            if (!elementalOnly)
+            {
+                StatusEffectType picked = SkillZoneTable.PickDetonation(status);
+                if (picked == StatusEffectType.None)
+                    continue;
+
+                int stacks = loadout.IsValid && loadout.ConsumesAllStacks ? SkillZoneTable.StacksFor(status, picked) : 1;
+                ConsumeFor(status, picked, stacks);
+                detonatedThisFrame.Add(t);
+                Explode(at, picked, stacks, loadout, loadout.IsValid ? loadout.Chains : 0);
+                continue;
+            }
+
+            bool any = false;
+            foreach (StatusEffectType st in ElementalAilments)
+            {
+                bool has = status.Has(st) || (st == StatusEffectType.Shock && status.Has(StatusEffectType.Paralyze));
+                if (!has)
+                    continue;
+
+                int stacks = Mathf.Max(1, SkillZoneTable.StacksFor(status, st));
+                ConsumeFor(status, st, stacks);
+                Explode(at, st, stacks, default, 0);
+                any = true;
+            }
+
+            if (any)
+                detonatedThisFrame.Add(t);
+        }
+    }
+
+    /// <summary>카메라에 보이는 살아 있는 적. 카메라가 없으면 둘레 반경으로 대신한다.</summary>
+    private void CollectOnScreen(List<Health> into)
+    {
+        Camera cam = Camera.main;
+        if (cam == null)
+        {
+            CollectEnemies(transform.position, TriggerGemTable.ScreenFallbackRadius, into);
+            return;
+        }
+
+        into.Clear();
+        if (!EnemyManager.HasInstance)
+            return;
+
+        IReadOnlyList<EnemyController> enemies = EnemyManager.Instance.ActiveEnemies;
+        for (int i = 0; i < enemies.Count; i++)
+        {
+            EnemyController e = enemies[i];
+            if (e == null || e.Health == null || e.Health.IsDead)
+                continue;
+
+            Vector3 v = cam.WorldToViewportPoint(e.transform.position);
+            if (v.z > 0f && v.x >= 0f && v.x <= 1f && v.y >= 0f && v.y <= 1f)
+                into.Add(e.Health);
         }
     }
 
@@ -487,6 +741,8 @@ public class SkillZoneDirector : MonoBehaviour
         grounds.Clear();
         pending.Clear();
         pushes.Clear();
+        heraldQueue.Clear();
+        freezeSpreadUntil = -1f;
     }
 
     private void DestroyVisual(GroundZone zone)

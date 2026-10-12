@@ -12,6 +12,7 @@ public class AmmoHudUI : MonoBehaviour
     private static AmmoHudUI instance;
 
     private Text label;
+    private Text triggerLabel;
     private bool hiddenByScreen;
 
     public static AmmoHudUI EnsureInstance()
@@ -32,6 +33,7 @@ public class AmmoHudUI : MonoBehaviour
 
         instance.hiddenByScreen = hidden;
         instance.label.gameObject.SetActive(!hidden);
+        instance.triggerLabel.gameObject.SetActive(!hidden);
     }
 
     private void OnDestroy()
@@ -50,6 +52,27 @@ public class AmmoHudUI : MonoBehaviour
         label.horizontalOverflow = HorizontalWrapMode.Overflow;
         label.raycastTarget = false;
         label.gameObject.AddComponent<Outline>().effectColor = new Color(0f, 0f, 0f, 0.75f);
+
+        // 발동 구슬이 차오른 정도 (결정 2-102) — 탄 줄 위.
+        triggerLabel = UIFactory.CreateLabel(canvas.transform, "", 20, FontStyle.Bold,
+            new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), TextAnchor.MiddleCenter, UIPalette.TextDim);
+        triggerLabel.rectTransform.pivot = new Vector2(0.5f, 0f);
+        triggerLabel.rectTransform.sizeDelta = new Vector2(640f, 28f);
+        triggerLabel.rectTransform.anchoredPosition = new Vector2(0f, 226f);
+        triggerLabel.horizontalOverflow = HorizontalWrapMode.Overflow;
+        triggerLabel.raycastTarget = false;
+        triggerLabel.gameObject.AddComponent<Outline>().effectColor = new Color(0f, 0f, 0f, 0.75f);
+    }
+
+    /// <summary>발동 구슬 줄. 빈 글이면 지운다 — 거점 · 발동 구슬 없음.</summary>
+    public static void ShowTrigger(string text, bool highlight = false)
+    {
+        if (string.IsNullOrEmpty(text) && instance == null)
+            return;
+
+        AmmoHudUI hud = EnsureInstance();
+        hud.triggerLabel.color = highlight ? UIPalette.TextAccent : UIPalette.TextDim;
+        hud.triggerLabel.text = text ?? string.Empty;
     }
 
     public void Show(WeaponDefinition weapon, EquipmentLoadout loadout, AmmoFeed feed, int inBag)

@@ -182,6 +182,11 @@
 
 **전령 5** — 재/얼음/천둥/역병/피. 「해당 상태의 적 처치 시 연쇄」. 동시 장착 **1개**.
 
+**구현 (결정 2-102)** — 본문 이름: 발동 젬 = 「모였다 터지는 구슬」, 전령 = 「번지는 구슬」.
+- 충전 — `TriggerGemTable.ChargePer` · `TriggerCharge` (판마다 0 · 저장 없음). 충전 사건은 `PlayerHitEvents`(새로 걸린 점화 · 동결 · 감전, 치명타)와 적 처치.
+- 실행 — `TriggerGemDirector`가 다 찬 다음 프레임에 `SkillZoneDirector`의 `StrikeShockedOnScreen · FireCoresAt · FreezeAround · DetonateElementalOnScreen`을 부른다. 실행 중에는 `PlayerHitEvents`를 막는다.
+- 전령 — `SkillZoneDirector.QueueHerald` → 0.1초 뒤 `Explode`(번짐 상태는 `TriggerGemTable.HeraldSpread`, 잔류물 없음).
+
 > 1개인 이유 — 한 파밍의 빌드는 보통 한 속성으로 수렴한다.
 > 2개를 들어도 하나만 작동하므로 자원 시스템(Nucleus)을 두지 않고 「5종 중 하나」로 끝낸다.
 >

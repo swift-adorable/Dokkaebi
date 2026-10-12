@@ -49,6 +49,9 @@ public class DokkaebiController : MonoBehaviour
         // 기폭 · 잔류물 (Audit A5 · A6) — 프리팹을 고치지 않고 코드로 붙인다.
         if (!TryGetComponent(out SkillZoneDirector _))
             gameObject.AddComponent<SkillZoneDirector>();
+
+        if (!TryGetComponent(out TriggerGemDirector _))
+            gameObject.AddComponent<TriggerGemDirector>();
         absorber = GetComponent<PlayerAbsorber>();
         health = GetComponent<Health>();
 

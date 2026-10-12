@@ -555,7 +555,7 @@ public class BulletController : MonoBehaviour, IPoolable
             float ailmentBase = damage * Mathf.Max(0f, 1f + (skillEffects?.AilmentPower ?? 0f)) * equipmentAilment;
 
             target.ApplyStatus(
-                AppliedStatus, ailmentBase, skillEffects?.AilmentDurationMultiplier ?? 1f);
+                AppliedStatus, ailmentBase, skillEffects?.AilmentDurationMultiplier ?? 1f, byPlayer: !useFactionGate);
         }
 
         // 치명타는 명중마다 따로 굴린다. 발사 시점에 굴리면

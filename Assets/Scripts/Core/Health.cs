@@ -136,7 +136,8 @@ public class Health : MonoBehaviour, IDamageable, IPoolable
     /// </summary>
     /// <param name="type">거는 상태</param>
     /// <param name="sourceDamage">부여 시점의 기본 피해. 초당 피해의 기준이 된다.</param>
-    public void ApplyStatus(StatusEffectType type, float sourceDamage, float durationScale = 1f)
+    /// <param name="byPlayer">플레이어가 건 것인가 — 새로 걸린 점화 · 동결 · 감전을 발동 구슬에 알린다 (결정 2-102)</param>
+    public void ApplyStatus(StatusEffectType type, float sourceDamage, float durationScale = 1f, bool byPlayer = false)
     {
         if (IsDead || type == StatusEffectType.None || sourceDamage <= 0f)
             return;
@@ -151,11 +152,24 @@ public class Health : MonoBehaviour, IDamageable, IPoolable
         if (type == StatusEffectType.Ignite)
             EverIgnited = true;
 
+        bool report = byPlayer && Team != Team.Player;
+        bool hadIgnite = report && Status.Has(StatusEffectType.Ignite);
+        bool hadFreeze = report && Status.Has(StatusEffectType.Freeze);
+        bool hadShock = report && Status.Has(StatusEffectType.Shock);
+
         Status.Apply(type, sourceDamage, durationScale);
 
         StatusEffectSystem.EnsureInstance().Track(this);
 
         OnStatusChanged?.Invoke(type);
+
+        // 냉기가 한계를 넘어 동결로 바뀐 것도 「동결을 걸었다」로 센다.
+        if (report)
+        {
+            if (!hadIgnite && Status.Has(StatusEffectType.Ignite)) PlayerHitEvents.ReportInflicted(this, StatusEffectType.Ignite);
+            if (!hadFreeze && Status.Has(StatusEffectType.Freeze)) PlayerHitEvents.ReportInflicted(this, StatusEffectType.Freeze);
+            if (!hadShock && Status.Has(StatusEffectType.Shock))   PlayerHitEvents.ReportInflicted(this, StatusEffectType.Shock);
+        }
     }
 
     /// <summary>
@@ -301,6 +315,10 @@ public class Health : MonoBehaviour, IDamageable, IPoolable
             OnDirectHit?.Invoke();
 
         int dealt = ApplyRaw(computed, skipInvulnerability: request.bypassArmour);
+
+        // 치명타 시 시전 (결정 2-102) — 플레이어의 치명타가 적에게 실제로 들어갔다.
+        if (dealt > 0 && request.isCritical && request.source == DamageSource.Player && Team != Team.Player)
+            PlayerHitEvents.ReportCritical(this);
 
         // 장비 닳기 (결정 2-96) — 실제로 들어간 직접 타격만. 상태이상 틱은 닳게 하지 않는다.
         if (dealt > 0 && !request.bypassArmour)
