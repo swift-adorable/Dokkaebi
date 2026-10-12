@@ -69,6 +69,19 @@ namespace Dokkaebi.Tests
         }
 
         [Test]
+        public void 기억_연출은_오의삼_장면_조각이다()
+        {
+            // 결정 2-111 — 본문 945 「(기억 연출) 아홉 조각의 장면이 빠르게 겹친다 — …」
+            LoreEntry memory = LoreTable.Parse(ScriptText()).Single(x => x.Kind == LoreKind.Memory);
+            Assert.AreEqual(StoryTable.EnterEvent("5-3"), memory.UnlockEvent);
+
+            List<string> frames = LoreTable.MontageFrames(memory.Body);
+            Assert.GreaterOrEqual(frames.Count, 9);
+            CollectionAssert.Contains(frames, "새벽의 빗자루질");
+            CollectionAssert.DoesNotContain(frames, "이어서");
+        }
+
+        [Test]
         public void 토막을_보면_열린다()
         {
             var progress = new StoryProgress();

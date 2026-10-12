@@ -49,6 +49,16 @@ public class StoryDirector : MonoBehaviour
 
     private void Start()
     {
+        // 본문 연출 — 도깨비불 · 소굴 소품 · 장 맵 소품 (결정 2-111).
+        var movement = FindAnyObjectByType<PlayerMovement>(FindObjectsInactive.Exclude);
+        if (movement != null && !movement.TryGetComponent(out PlayerWisp _))
+            movement.gameObject.AddComponent<PlayerWisp>();
+
+        if (SceneFlow.InBunker)
+            gameObject.AddComponent<BunkerScenery>();
+        else if (SceneFlow.IsRaidScene(SceneManager.GetActiveScene().name))
+            gameObject.AddComponent<StoryScenery>();
+
         if (SceneFlow.InBunker)
             PlayBunker();
         else if (SceneFlow.IsRaidScene(SceneManager.GetActiveScene().name))

@@ -92,6 +92,20 @@ public static class StoryManager
         ShowPopups(eventId, done);
     }
 
+    private static void PlayMemories(string eventId, Action done)
+    {
+        foreach (LoreEntry entry in Lore)
+        {
+            if (entry.Kind == LoreKind.Memory && entry.UnlockEvent == eventId)
+            {
+                MemoryMontageUI.Play(LoreTable.MontageFrames(entry.Body), done);
+                return;
+            }
+        }
+
+        done?.Invoke();
+    }
+
     private static void ShowPopups(string eventId, Action done)
     {
         foreach (LoreEntry entry in Lore)
@@ -189,14 +203,20 @@ public static class StoryManager
         }
 
         // 프롤로그는 뒤를 가린다 — 지금은 어두운 바탕, 나중에 프롤로그 그림 (결정 2-82).
-        bool backdrop = eventId == StoryTable.PrologueEvent;
+        // 5-3 두루마리 · 넋 보내기도 뒤를 가린다 (결정 2-111).
+        bool backdrop = eventId == StoryTable.PrologueEvent || eventId == StoryTable.EnterEvent("5-3")
+                        || eventId == StoryTable.SendSoulEvent;
 
         StoryDialogueUI.Show(passage.Title, passage.Pages, () =>
         {
             MarkSeen(eventId, () =>
             {
-                OnChanged?.Invoke();
-                done?.Invoke();
+                // 기억 연출 — 그 토막 안에 있던 「(기억 연출)」 글을 장면 조각으로 겹쳐 띄운다 (결정 2-111).
+                PlayMemories(eventId, () =>
+                {
+                    OnChanged?.Invoke();
+                    done?.Invoke();
+                });
             });
         }, backdrop);
     }
