@@ -331,6 +331,13 @@ public static class StoryTable
 
     public const string PrologueEvent = "prologue";
 
+    /// <summary>
+    /// 넋 보내기 (결정 2-108) — 구미호를 물리친 뒤 결계의 가장자리에서 보는 마지막 장면(본문 1079 ~ 끝).
+    /// 파서가 6-2의 보스 글을 이 문단에서 나눈다.
+    /// </summary>
+    public const string SendSoulEvent = "send_soul";
+    public const string SendSoulMarker = "어린 도깨비는 결계의 가장자리에 섰다";
+
     public static string EnterEvent(string zoneId) => $"enter_{zoneId}";
     public static string BossEvent(string bossId) => $"boss_{bossId}";
     public static string NightEvent(int night) => $"night_{night}";

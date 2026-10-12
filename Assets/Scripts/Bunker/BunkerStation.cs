@@ -65,6 +65,9 @@ public class BunkerStation : MonoBehaviour
         /// <summary>장부방 — 장 지도 · 처치 기록 · 가게 재고 · 기억의 조각 (결정 2-97 · 2-98 · 2-100).</summary>
         Ledger = 16,
 
+        /// <summary>퀘스트 자리 — 줍기 · 말 걸기 · 건네기 (결정 2-108). 구역 · 소굴에 선다.</summary>
+        QuestSpot = 17,
+
         /// <summary>여는 것이 없다.</summary>
         None = 99
     }
@@ -82,7 +85,9 @@ public class BunkerStation : MonoBehaviour
     /// <summary>버튼에 적을 말.</summary>
     public string Label => kind == Kind.SecretPassage && TryGetComponent(out SecretPassage passage)
         ? passage.Prompt
-        : LabelOf(kind);
+        : kind == Kind.QuestSpot && TryGetComponent(out QuestSpot spot)
+            ? spot.Prompt
+            : LabelOf(kind);
 
     public static string LabelOf(Kind kind)
     {
@@ -210,6 +215,11 @@ public class BunkerStation : MonoBehaviour
             case Kind.SecretPassage:
                 if (TryGetComponent(out SecretPassage passage))
                     passage.Enter();
+                break;
+
+            case Kind.QuestSpot:
+                if (TryGetComponent(out QuestSpot spot))
+                    spot.Use();
                 break;
 
             case Kind.Spring:

@@ -153,6 +153,8 @@ public static class StoryScriptParser
         List<BossDefinition> bosses = StoryTable.BossesIn(zoneId);
 
         var segments = new List<List<string>> { new() };
+        List<string> sendSoul = null;
+        bool send = false;
 
         if (chapterIntro != null)
             segments[0].AddRange(chapterIntro);
@@ -176,11 +178,27 @@ public static class StoryScriptParser
             if (block.StartsWith("싸움 끝에") || block.StartsWith("싸움이 끝났"))
                 segments.Add(new List<string>());
 
+            // 넋 보내기 — 구미호 뒤 결계의 가장자리 장면은 따로 (결정 2-108).
+            if (block.StartsWith(StoryTable.SendSoulMarker))
+            {
+                sendSoul = new List<string>();
+                send = true;
+            }
+
+            if (send)
+            {
+                sendSoul.Add(block);
+                continue;
+            }
+
             segments[segments.Count - 1].Add(block);
         }
 
         string enter = StoryTable.EnterEvent(zoneId);
         result[enter] = new StoryPassage(enter, header, segments[0]);
+
+        if (sendSoul != null)
+            result[StoryTable.SendSoulEvent] = new StoryPassage(StoryTable.SendSoulEvent, "결계의 가장자리", sendSoul);
 
         for (int k = 1; k < segments.Count && k - 1 < bosses.Count; k++)
         {

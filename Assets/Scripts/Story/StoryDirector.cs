@@ -42,6 +42,9 @@ public class StoryDirector : MonoBehaviour
 
         // 【임시】 0장 튜토리얼 가이드 (결정 2-85) — 끝났으면 스스로 꺼진다.
         go.AddComponent<TutorialDirector>();
+
+        // 퀘스트 자리 — 본문 행동대로 (결정 2-108).
+        go.AddComponent<QuestSpotDirector>();
     }
 
     private void Start()

@@ -237,11 +237,13 @@ namespace Dokkaebi.Tests
         }
 
         [Test]
-        public void 구미호를_쓰러뜨리면_엔딩이다()
+        public void 넋을_보내면_엔딩이다()
         {
+            // 결정 2-108 — 구미호를 물리친 뒤 결계의 가장자리에서 넋을 보내야 끝난다.
             var p = new StoryProgress();
-            Assert.IsFalse(p.IsEnded);
             p.Defeat("gumiho");
+            Assert.IsFalse(p.IsEnded);
+            p.See(StoryTable.SendSoulEvent);
             Assert.IsTrue(p.IsEnded);
         }
 
@@ -337,8 +339,12 @@ namespace Dokkaebi.Tests
         [Test]
         public void 마지막_보스_이야기는_끝으로_닫힌다()
         {
+            // 결정 2-108 — 구미호 뒤 「결계의 가장자리」 장면은 넋 보내기(send_soul)로 따로 — 거기가 끝이다.
             Dictionary<string, StoryPassage> p = StoryScriptParser.Parse(ScriptText());
-            List<string> pages = p[StoryTable.BossEvent("gumiho")].Pages;
+            Assert.IsFalse(p[StoryTable.BossEvent("gumiho")].Pages.Any(x => x.StartsWith(StoryTable.SendSoulMarker)),
+                "구미호 글에 넋 보내기 장면이 남아 있다");
+            StringAssert.StartsWith(StoryTable.SendSoulMarker, p[StoryTable.SendSoulEvent].Pages[0]);
+            List<string> pages = p[StoryTable.SendSoulEvent].Pages;
 
             Assert.AreEqual("(끝)", pages[pages.Count - 1]);
             Assert.IsTrue(pages.Skip(pages.Count - 4).Any(x => x.Contains("오는 동안 이미 내 이야기가 생겼네")),

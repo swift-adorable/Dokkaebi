@@ -43,12 +43,28 @@ public sealed class QuestTracker
             case QuestCondition.DefeatBoss: return story.HasDefeated(objective.Target);
             case QuestCondition.ClearZone:  return story.IsCleared(objective.Target);
             case QuestCondition.Build:      return isBuilt(objective.Target);
+            case QuestCondition.SeenCount:  return SeenOf(objective.ProgressEvents) >= objective.Count;
             default:                        return false;
         }
     }
 
     /// <summary>센 목표의 진행 글(예: 「2 / 5」). 세는 목표가 아니면 빈 글 (결정 2-106).</summary>
-    public string ProgressText(QuestObjective objective) => string.Empty;
+    public string ProgressText(QuestObjective objective)
+    {
+        if (objective == null || objective.ProgressEvents.Length == 0)
+            return string.Empty;
+
+        return $"{SeenOf(objective.ProgressEvents)} / {objective.ProgressEvents.Length}";
+    }
+
+    private int SeenOf(string[] events)
+    {
+        int n = 0;
+        foreach (string e in events)
+            if (story.HasSeen(e))
+                n++;
+        return n;
+    }
 
     public bool IsStarted(QuestDefinition quest)
         => quest != null && (story.HasSeen(quest.StartEvent) || IsComplete(quest));

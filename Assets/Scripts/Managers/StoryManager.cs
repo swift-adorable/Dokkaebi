@@ -47,6 +47,9 @@ public static class StoryManager
     /// <summary>진행이 바뀌었을 때 — 보스 · 조각 · 밤.</summary>
     public static event Action OnChanged;
 
+    /// <summary>진행이 바뀌었다고 알린다 — 퀘스트 자리를 했을 때 (결정 2-108).</summary>
+    public static void NotifyChanged() => OnChanged?.Invoke();
+
     /// <summary>본문을 나눈 토막들. 처음 읽을 때 Resources의 사본을 나눈다.</summary>
     public static Dictionary<string, StoryPassage> Passages
     {

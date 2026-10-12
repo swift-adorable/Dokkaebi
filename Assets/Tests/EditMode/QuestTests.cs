@@ -35,6 +35,15 @@ namespace Dokkaebi.Tests
 
             if (chapter >= 1 && chapter <= 5)
                 p.See(StoryTable.NightEvent(chapter));
+
+            // 퀘스트 자리 (결정 2-108) — 이 장의 구역 자리를 다 하고, 소굴 자리는 먼저 할 일이 끝났으면 한다.
+            var zones = new HashSet<string>(StoryTable.Chapter(chapter).Zones.Select(z => z.Id));
+            foreach (QuestSpotDefinition s in QuestSpotTable.Spots.Where(x => zones.Contains(x.ZoneId)))
+                p.See(s.DoneEvent);
+
+            foreach (QuestSpotDefinition s in QuestSpotTable.Spots.Where(x => x.ZoneId == QuestSpotDefinition.BunkerZone))
+                if (s.RequiresEvents.All(p.HasSeen) && s.RequiresBosses.All(p.HasDefeated))
+                    p.See(s.DoneEvent);
         }
 
         [Test]
@@ -92,7 +101,12 @@ namespace Dokkaebi.Tests
                     switch (o.Condition)
                     {
                         case QuestCondition.Seen:
-                            Assert.IsTrue(events.Contains(o.Target), at);
+                            Assert.IsTrue(events.Contains(o.Target) || IsSpotEvent(o.Target), at);
+                            break;
+                        case QuestCondition.SeenCount:
+                            Assert.AreEqual(o.Count, o.ProgressEvents.Length, at);
+                            foreach (string e in o.ProgressEvents)
+                                Assert.IsTrue(IsSpotEvent(e), $"{at} — {e}");
                             break;
                         case QuestCondition.DefeatBoss:
                             Assert.IsNotNull(StoryTable.Boss(o.Target), at);
@@ -108,6 +122,9 @@ namespace Dokkaebi.Tests
                 }
             }
         }
+
+        private static bool IsSpotEvent(string e)
+            => QuestSpotTable.Spots.Any(s => s.DoneEvent == e);
 
         [Test]
         public void 목표가_여는_장이_진행_규칙과_같다()
@@ -234,6 +251,7 @@ namespace Dokkaebi.Tests
             var b = QuestHudText.Snapshot(t);
             p.See(StoryTable.EnterEvent("1-1"));
             p.Defeat("yagwanggwi");
+            p.See(QuestSpotTable.EventOf(QuestSpotTable.BundleBack));
             List<string> diff = QuestHudText.Diff(b, QuestHudText.Snapshot(t));
             CollectionAssert.Contains(diff, "완료 — 봇짐 되찾기");
             CollectionAssert.DoesNotContain(diff, "새 퀘스트 — 봇짐 되찾기", "받자마자 끝나면 완료만 알린다");

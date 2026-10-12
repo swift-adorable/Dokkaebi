@@ -22,9 +22,13 @@ public static class QuestHudText
         if (next == null)
             return string.Empty;
 
+        // 모으는 목표는 「k / n」을 붙인다 (결정 2-108).
+        string progress = tracker.ProgressText(next);
+        string text = string.IsNullOrEmpty(progress) ? next.Text : $"{next.Text} · {progress}";
+
         return quest.Objectives.Length > 1
-            ? $"{next.Text} ({tracker.MetCount(quest)}/{quest.Objectives.Length})"
-            : next.Text;
+            ? $"{text} ({tracker.MetCount(quest)}/{quest.Objectives.Length})"
+            : text;
     }
 
     /// <summary>알림 — 퀘스트를 받았다 · 목표가 바뀌었다 · 끝냈다.</summary>

@@ -217,8 +217,8 @@ public class StoryProgress
         return m == null || HasMerchant(m.Id);
     }
 
-    /// <summary>엔딩 — 구미호를 쓰러뜨렸다. 그 뒤로도 계속 다시 들어갈 수 있다.</summary>
-    public bool IsEnded => HasDefeated("gumiho");
+    /// <summary>엔딩 — 할머니의 넋을 보냈다 (결정 2-108 — 예전엔 구미호를 쓰러뜨린 것). 그 뒤로도 계속 다시 들어갈 수 있다.</summary>
+    public bool IsEnded => HasSeen(StoryTable.SendSoulEvent);
 
     // ── 세이브 ───────────────────────────────────────────────────────
 

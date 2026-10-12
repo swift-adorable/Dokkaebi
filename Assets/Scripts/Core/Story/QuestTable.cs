@@ -21,7 +21,10 @@ public enum QuestCondition
     ClearZone = 2,
 
     /// <summary>이 건물을 지어 놓았다.</summary>
-    Build = 3
+    Build = 3,
+
+    /// <summary>이 사건들을 Count개 넘게 봤다 — 약재 셋 · 불씨 다섯 · 장승 셋 (결정 2-108). Target은 「|」로 이은 사건 id.</summary>
+    SeenCount = 4
 }
 
 /// <summary>퀘스트 목표 하나. MainQuest → Objective → UnlockZone (Progression 4절).</summary>
@@ -36,12 +39,24 @@ public sealed class QuestObjective
     /// <summary>이 목표를 채우면 열리는 장. 0이면 없다. 실제로 여는 규칙은 StoryProgress에 있고, 둘이 같은지는 테스트가 본다.</summary>
     public readonly int UnlocksChapter;
 
-    public QuestObjective(string text, QuestCondition condition, string target, int unlocksChapter = 0)
+    /// <summary>SeenCount — 채워야 하는 수.</summary>
+    public readonly int Count;
+
+    /// <summary>
+    /// 진행을 「k / n」으로 보일 사건들 (결정 2-108) — SeenCount면 Target의 사건들, 아니면 이 목표 앞에 모아야 하는 것(지방 다섯 등). 없으면 빈 배열.
+    /// </summary>
+    public readonly string[] ProgressEvents;
+
+    public QuestObjective(string text, QuestCondition condition, string target, int unlocksChapter = 0,
+        int count = 0, string[] progressEvents = null)
     {
         Text = text;
         Condition = condition;
         Target = target;
         UnlocksChapter = unlocksChapter;
+        Count = count;
+        ProgressEvents = progressEvents
+            ?? (condition == QuestCondition.SeenCount && target != null ? target.Split('|') : System.Array.Empty<string>());
     }
 }
 
@@ -104,6 +119,22 @@ public static class QuestTable
     private static QuestObjective Build(string text, string buildingId)
         => new(text, QuestCondition.Build, buildingId);
 
+    private static QuestObjective All(string text, string[] events)
+        => new(text, QuestCondition.SeenCount, string.Join("|", events), 0, events.Length);
+
+    private static QuestObjective SeeAfter(string text, string eventId, string[] gather)
+        => new(text, QuestCondition.Seen, eventId, 0, 0, gather);
+
+    private static string Spot(string spotId) => QuestSpotTable.EventOf(spotId);
+
+    private static string[] Spots(string[] ids)
+    {
+        var r = new string[ids.Length];
+        for (int i = 0; i < ids.Length; i++)
+            r[i] = Spot(ids[i]);
+        return r;
+    }
+
     private static string Enter(string zone) => StoryTable.EnterEvent(zone);
     private static string Night(int n) => StoryTable.NightEvent(n);
 
@@ -118,14 +149,16 @@ public static class QuestTable
             Boss("백호패 — 서쪽 장승들길", "baekho", 5),
             See("돌문 열기 — 고목 뿌리 아래", Enter("5-1")),
             Clear("해태의 두루마리 확인 — 돌문 아래 길 끝, 궁궐 문", "5-3", 6)
-        }, "사신패 넷 · 두루마리"),
+        }, "사신패 넷 · 두루마리",
+        "사신패 넷을 모아 돌문을 열고, 해태가 지키는 두루마리에서 내 대목을 찾는다"),
 
+        // 결정 2-108 — 본문 1077 「결계의 가장자리에 닿았다」는 구미호를 물리친 뒤의 갱신, 넋은 가장자리에서 보낸다.
         new(MainLastStory, QuestKind.Main, "마지막 이야기", StoryTable.Elder, Enter("5-3"), new[]
         {
             See("꽃밭으로 간다", Enter("6-1")),
-            See("결계의 가장자리로 간다", Enter("6-2")),
-            Boss("할머니의 넋을 보낸다", "gumiho")
-        }),
+            Boss("결계의 가장자리로 간다", "gumiho"),
+            See("할머니의 넋을 보낸다", Spot(QuestSpotTable.SendSoul))
+        }, "", "할머니의 넋을 보낸다"),
 
         // ── 서브 — 상인 넷 (가게 세우기) ─────────────────────────────
         new("sub_elder_store", QuestKind.Sub, "영감의 잡화 가게", StoryTable.Elder, Enter("0-1"), new[]
@@ -148,39 +181,39 @@ public static class QuestTable
             Build("재료를 모아 와 장부방을 세운다", BuildingTable.LedgerRoom)
         }, "화살 한 묶음 · 등록과 관리가 열린다"),
 
-        // ── 서브 — 지역 사건 다섯 ────────────────────────────────────
-        new("sub_bundle", QuestKind.Sub, "봇짐 되찾기", StoryTable.Elder, Enter("1-1"), new[]
+        // ── 서브 — 지역 사건 다섯 (결정 2-108 — 본문 행동대로 · QuestSpotTable) ──
+        new(QuestSpotTable.Bundle, QuestKind.Sub, "봇짐 되찾기", StoryTable.Elder, Enter("1-1"), new[]
         {
-            Boss("봇짐을 훔쳐 간 시커먼 것을 쫓아 봇짐을 되찾는다", "yagwanggwi")
-        }),
+            Boss("봇짐을 훔쳐 간 시커먼 것을 쫓는다", "yagwanggwi"),
+            See("봇짐을 되찾는다", Spot(QuestSpotTable.BundleBack))
+        }, "", "봇짐을 훔쳐 간 시커먼 것을 쫓아 봇짐을 되찾는다"),
 
-        new("sub_watermill", QuestKind.Sub, "멈춘 물레방아", StoryTable.Elder, Night(1), new[]
+        new(QuestSpotTable.Watermill, QuestKind.Sub, "멈춘 물레방아", StoryTable.Elder, Night(1), new[]
         {
-            See("대숲 강가의 방앗간 늙은이에게 영감의 안부를 전한다", Enter("2-1")),
-            Clear("언덕 너머에서 절구를 찾아온다", "2-2"),
+            See("대숲 강가의 방앗간 늙은이에게 영감의 안부를 전한다", Spot(QuestSpotTable.MillGreet)),
+            SeeAfter("언덕 너머에서 절구를 찾아온다", Spot(QuestSpotTable.MillMortar), new[] { Spot(QuestSpotTable.Mortar) }),
             Boss("상류의 강철이를 쫓아 강물을 되돌린다", "gangcheori"),
-            See("영감에게 물레방아 소식을 전한다", Night(2))
-        }),
+            See("영감에게 물레방아 소식을 전한다", Spot(QuestSpotTable.ElderMillNews))
+        }, "", "대숲 강가의 방앗간 늙은이에게 영감의 안부를 전한다"),
 
-        new("sub_chongmyeongtang", QuestKind.Sub, "총명탕", StoryTable.Chambong, Night(2), new[]
+        new(QuestSpotTable.Chongmyeong, QuestKind.Sub, "총명탕", StoryTable.Chambong, Night(2), new[]
         {
-            Clear("약방골에서 총명탕 약재를 찾는다", "3-1"),
-            Clear("불씨 골목의 꺼져 가는 아궁이에서 불씨를 모은다", "3-2"),
-            See("달인 총명탕을 빚쟁이에게 건넨다", Night(3))
-        }),
+            All("약방골에서 총명탕 약재를 찾는다", Spots(QuestSpotTable.Herbs)),
+            All("불씨 골목의 꺼져 가는 아궁이에서 불씨를 모은다", Spots(QuestSpotTable.Embers)),
+            SeeAfter("달인 총명탕을 빚쟁이에게 건넨다", Spot(QuestSpotTable.DebtorTonic), new[] { Spot(QuestSpotTable.KitchenBrew) })
+        }, "", "약방골에서 총명탕을 달여 와 빚쟁이에게 건넨다"),
 
-        // 「장승에 달라붙은 잡귀를 떼어 낸다」는 구역 목표다 — 구역 목표가 아직 없어 구역을 끝내면 채운다 [임시].
-        new("sub_jangseung", QuestKind.Sub, "장승 지키기", StoryTable.Elder, Enter("4-1"), new[]
+        new(QuestSpotTable.Jangseung, QuestKind.Sub, "장승 지키기", StoryTable.Elder, Enter("4-1"), new[]
         {
-            Clear("장승에 달라붙은 잡귀를 떼어 낸다", "4-1"),
+            All("장승에 달라붙은 잡귀를 떼어 낸다", Spots(QuestSpotTable.Jangseungs)),
             Boss("장승을 긁는 꺼먹살이를 막는다", "kkeomeoksari")
-        }),
+        }, "", "장승에 달라붙은 잡귀를 떼어 낸다 (구역 목표)"),
 
-        // 「지방을 모아 화로에 태운다」도 구역 목표다 — 지금은 돌길(5-1)을 끝내면 채운다 [임시].
-        new("sub_jibang", QuestKind.Sub, "지방 보내기", StoryTable.Elder, Enter("5-1"), new[]
+        new(QuestSpotTable.Jibang, QuestKind.Sub, "지방 보내기", StoryTable.Elder, Enter("5-1"), new[]
         {
-            Clear("돌길에 떠도는 지방을 모아 담장의 화로에 마저 태워 보낸다", "5-1")
-        })
+            SeeAfter("돌길에 떠도는 지방을 모아 담장의 화로에 마저 태워 보낸다", Spot(QuestSpotTable.JibangBurn),
+                Spots(QuestSpotTable.Jibangs))
+        }, "", "돌길에 떠도는 지방을 모아 담장의 화로에 마저 태워 보낸다")
     };
 
     public static IReadOnlyList<QuestDefinition> Quests => quests;
