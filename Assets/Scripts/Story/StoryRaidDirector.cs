@@ -135,6 +135,9 @@ public class StoryRaidDirector : MonoBehaviour
             if (health != null)
                 group.Track(health);
 
+            // 보스마다의 패턴 (결정 2-110).
+            BossPattern.Attach(body, boss.Id);
+
             if (i == 0 && uniqueId != null)
             {
                 if (!body.TryGetComponent(out UniqueDrop drop))

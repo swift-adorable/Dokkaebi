@@ -243,8 +243,12 @@ public class Health : MonoBehaviour, IDamageable, IPoolable
         pool = new HealthPool(maxHealth);
     }
 
+    /// <summary>받는 피해 배율 — 보스 패턴만 바꾼다 (결정 2-110). 0이면 피해를 받지 않는다. 다시 나올 때 1로.</summary>
+    public float IncomingDamageScale { get; set; } = 1f;
+
     public void OnSpawned()
     {
+        IncomingDamageScale = 1f;
         // 풀 재사용 시 체력을 되돌리지 않으면 죽은 상태로 스폰되어 즉사한다.
         pool.ResetToFull();
         invulnerability.Reset();
@@ -298,6 +302,10 @@ public class Health : MonoBehaviour, IDamageable, IPoolable
             amplified.increasedPercent += environment - 1f;
 
         int computed = DamageResolver.Resolve(amplified, Defence, difficultyMultiplier);
+
+        // 보스 패턴이 받는 피해를 바꾼다 — 흐려짐 · 뿌리내림 · 함께 섬 (결정 2-110). 평소 1.
+        if (IncomingDamageScale != 1f && computed > 0)
+            computed = Mathf.Max(IncomingDamageScale > 0f ? 1 : 0, Mathf.RoundToInt(computed * IncomingDamageScale));
 
         if (computed <= 0)
             return 0;
