@@ -201,6 +201,7 @@ public class PlayerWeapon : MonoBehaviour
                     penetration);
 
                 controller.SetSkillEffects(modifiers);
+                controller.SetEquipmentAilment(shot.AilmentPower);   // 「연소」 각인 (결정 2-99)
                 controller.SetCritical(shot.CriticalChance, shot.CriticalMultiplier);
 
                 // 신기전 — 맞은 자리에서 터진다 (결정 2-80).

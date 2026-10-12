@@ -123,7 +123,9 @@ public class GemPickerUI : MonoBehaviour
             return;
         }
 
-        SaveManager.Commit("구슬 고르기");
+        // 파밍 중에는 저장하지 않는다 (결정 2-99 · SaveManager 머리말) — 철수해야 남는다.
+        if (SceneFlow.InBunker)
+            SaveManager.Commit("구슬 고르기");
         onDone?.Invoke();
         Destroy(gameObject);
     }

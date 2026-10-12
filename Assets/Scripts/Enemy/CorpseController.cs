@@ -41,7 +41,10 @@ public class CorpseController : MonoBehaviour, IPoolable
     /// 인스펙터 값은 EnemyRarity를 넘겨받지 못한 시체(씬에 직접 놓인 것 등)의
     /// 기본값으로만 남는다. 등급을 받으면 표가 이긴다.
     /// </summary>
-    public int ValueMultiplier => Mathf.Max(1, valueMultiplier);
+    public int ValueMultiplier => rewardSet ? EnemyRewardTable.LootRolls(Rarity) : Mathf.Max(1, valueMultiplier);
+
+    /// <summary>죽은 적이 등급을 넘겨주었는가 — 씬에 직접 놓인 시체는 아니다.</summary>
+    private bool rewardSet;
 
     /// <summary>등급이 정한 경험치 배율. 정수로 깎지 않는다.</summary>
     public float ExperienceMultiplier => EnemyRewardTable.ExperienceMultiplier(Rarity);
@@ -60,6 +63,47 @@ public class CorpseController : MonoBehaviour, IPoolable
         Rarity = rarity;
         ConditionalDrops = ConditionalDropTable.Evaluate(in context);
         KilledByPlayer = context.killedByPlayer;
+        rewardSet = true;
+
+        // 【등급을 받은 뒤 다시 채운다】 (결정 2-99) — 풀에서 꺼낼 때(OnSpawned) 이미 일반 등급으로 채웠다.
+        // 그대로 두면 고유 보스도 일반과 같은 추첨 횟수 · 같은 구슬 확률이었다 (Hunting 6절 「등급이 곧 드롭 품질」).
+        Loot.Clear();
+        FillLoot();
+    }
+
+    /// <summary>
+    /// 반드시 넣을 것 (무기 도면 · 이야기 선물). 칸이 가득하면 가장 값싼 것을 빼고 넣는다 — 조용히 사라지지 않게 (결정 2-99).
+    /// </summary>
+    public bool PutGuaranteed(ItemDefinition item)
+    {
+        if (item == null)
+            return false;
+
+        if (Loot.TryPut(item))
+            return true;
+
+        int cheapest = -1;
+        int value = int.MaxValue;
+
+        for (int i = 0; i < Loot.Capacity; i++)
+        {
+            ItemStack s = Loot.Get(i);
+            if (s?.Definition == null)
+                continue;
+
+            int v = s.Definition.BaseValue * s.Count;
+            if (v < value)
+            {
+                value = v;
+                cheapest = i;
+            }
+        }
+
+        if (cheapest < 0)
+            return false;
+
+        Loot.Take(cheapest);
+        return Loot.TryPut(item);
     }
 
     /// <summary>이 시체에 남은 전리품.</summary>
@@ -91,6 +135,7 @@ public class CorpseController : MonoBehaviour, IPoolable
         EnsurePassable();
 
         IsAbsorbed = false;
+        rewardSet = false;
 
         // 풀에서 재사용될 때 이전 개체의 등급·조건이 남으면
         // 일반 적에게서 고유 보상이 나온다.
@@ -148,6 +193,15 @@ public class CorpseController : MonoBehaviour, IPoolable
         // 기우는 달(하현 · 그믐)이면 재료가 더 나온다 (결정 2-62).
         float findBonus = DropBonus * RaidManager.Current.LootScale;
 
+        // 구슬을 먼저 — 등급이 높아 추첨이 많으면 칸이 차서 가장 귀한 것이 빠졌다 (결정 2-99).
+        if (SkillManager.HasInstance)
+        {
+            ItemDefinition gem = SkillManager.Instance.RollGemDropItem(ValueMultiplier, chapterNumber);
+
+            if (gem != null)
+                Loot.TryPut(gem);
+        }
+
         if (lootTable != null)
             lootTable.Fill(Loot, random, ValueMultiplier, allow, findBonus);
 
@@ -158,14 +212,6 @@ public class CorpseController : MonoBehaviour, IPoolable
 
         if (lootTable != null && extraRolls > 0)
             LootRoller.Roll(lootTable.Entries, extraRolls, random, Loot, allow, findBonus);
-
-        if (!SkillManager.HasInstance)
-            return;
-
-        ItemDefinition gem = SkillManager.Instance.RollGemDropItem(ValueMultiplier, chapterNumber);
-
-        if (gem != null)
-            Loot.TryPut(gem);
     }
 
     /// <summary>

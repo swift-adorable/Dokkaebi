@@ -171,7 +171,15 @@ public class EquipmentLoadout
 
     /// <summary>그 무기(0 · 1)가 쓰는 탄 · 통에 든 수 · 담는 수.</summary>
     public string AmmoIdAt(int index) => AmmoIdOf(WeaponSlot(index));
-    public int LoadedAt(int index) => Get(AmmoSlot(index))?.Count ?? 0;
+    /// <summary>
+    /// 그 무기의 통에 든 수. 【그 무기가 받지 않는 탄은 없는 것으로 센다】 (결정 2-99) — 가방이 가득해 바꿔 든 무기의 통에
+    /// 다른 탄이 남아도 총이 화살을 쏘거나 화살로 장전하지 않게.
+    /// </summary>
+    public int LoadedAt(int index)
+    {
+        ItemStack held = Get(AmmoSlot(index));
+        return held?.Definition != null && AmmoTable.Accepts(AmmoIdAt(index), held.Definition.Id) ? held.Count : 0;
+    }
 
     /// <summary>그 무기(0 · 1)의 통에 든 탄 id. 비었으면 null.</summary>
     public string LoadedIdAt(int index) => Get(AmmoSlot(index))?.Definition?.Id;
@@ -186,7 +194,7 @@ public class EquipmentLoadout
     public string FeedIdAt(int index, Inventory bag)
     {
         string loaded = LoadedIdAt(index);
-        if (!string.IsNullOrEmpty(loaded))
+        if (!string.IsNullOrEmpty(loaded) && AmmoTable.Accepts(AmmoIdAt(index), loaded))
             return loaded;
 
         string family = AmmoIdAt(index);
@@ -215,7 +223,7 @@ public class EquipmentLoadout
         EquipmentSlot slot = AmmoSlot(ActiveWeapon);
         ItemStack held = Get(slot);
 
-        if (held == null || held.IsEmpty)
+        if (held == null || held.IsEmpty || !AmmoTable.Accepts(AmmoIdAt(ActiveWeapon), held.Definition.Id))
             return false;
 
         held.Take(1);
@@ -235,6 +243,12 @@ public class EquipmentLoadout
     public int RefillAmmo(Inventory bag, int index)
     {
         if (string.IsNullOrEmpty(AmmoIdAt(index)) || bag == null)
+            return 0;
+
+        // 맞지 않는 탄이 통에 남아 있으면 채우지 않는다 — 덮어쓰면 그 탄이 사라진다.
+        // 가방에 자리가 나면 ReturnMismatchedAmmo가 먼저 돌려보낸다 (결정 2-99).
+        ItemStack held = Get(AmmoSlot(index));
+        if (held?.Definition != null && !AmmoTable.Accepts(AmmoIdAt(index), held.Definition.Id))
             return 0;
 
         string id = FeedIdAt(index, bag);

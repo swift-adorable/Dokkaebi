@@ -62,7 +62,7 @@ public class BunkerStation : MonoBehaviour
         /// <summary>약탕 — 약탕간 옆에 붙는 달이기 · 샘가 자리 (결정 2-97).</summary>
         Brewing = 15,
 
-        /// <summary>장부방 — 장 지도 · 처치 기록 · 모은 방 (결정 2-97).</summary>
+        /// <summary>장부방 — 장 지도 · 처치 기록 · 가게 재고 · 모은 글 (결정 2-97 · 2-98).</summary>
         Ledger = 16,
 
         /// <summary>여는 것이 없다.</summary>

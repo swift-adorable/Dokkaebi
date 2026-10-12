@@ -129,15 +129,50 @@ public static class WorkbenchManager
         List<MaterialCost> yield = WearTable.DismantleYield(stack);
         from.RemoveStack(stack);
 
-        foreach (MaterialCost c in yield)
-            if (!CanGive(c.ItemId, c.Count))
-            {
-                from.TryAddStack(stack);   // 놓을 자리가 없으면 되돌린다
-                return CraftError.NoRoom;
-            }
+        // 【전부 아니면 전혀】 (결정 2-99) — 재료마다 따로 「들어가나」만 보면, 셋째 재료가 들어갈 자리를
+        // 첫째가 먼저 차지해 조용히 사라졌다. 실제로 넣어 보고, 하나라도 못 넣으면 넣은 것을 빼고 되돌린다.
+        ItemCatalog catalog = ItemCatalog.Load();
+        var added = new List<(Inventory inv, ItemDefinition def, int count)>();
+        bool fits = catalog != null;
 
         foreach (MaterialCost c in yield)
-            Give(c.ItemId, c.Count);
+        {
+            ItemDefinition def = fits ? catalog.Find(c.ItemId) : null;
+            if (def == null)
+            {
+                fits = false;
+                break;
+            }
+
+            int left = c.Count;
+            int a = inv.Stash.TryAdd(def, left);
+            if (a > 0) added.Add((inv.Stash, def, a));
+            left -= a;
+
+            if (left > 0)
+            {
+                int b = inv.Bag.TryAdd(def, left);
+                if (b > 0) added.Add((inv.Bag, def, b));
+                left -= b;
+            }
+
+            if (left > 0)
+            {
+                fits = false;
+                break;
+            }
+        }
+
+        if (!fits)
+        {
+            foreach ((Inventory where, ItemDefinition def, int count) in added)
+                where.Remove(def, count);
+
+            if (!from.TryAddStack(stack) && !(from == inv.Bag ? inv.Stash : inv.Bag).TryAddStack(stack))
+                GameLogger.Error($"[Workbench] 분해를 되돌리다 「{stack.Definition.DisplayName}」을 놓을 자리가 없었습니다.");
+
+            return CraftError.NoRoom;
+        }
 
         Finish(CraftError.None, Gold, "작업대 분해");
         return CraftError.None;

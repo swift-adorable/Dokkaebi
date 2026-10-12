@@ -111,6 +111,10 @@ public class PlayerAmmo : MonoBehaviour
         if (!PlayerInventory.HasInstance)
             return;
 
+        // 창이 떠서 멈춘 동안에는 단축키를 받지 않는다 (결정 2-99). 탄 흐름(feed)도 멈춘 시간에 맞춰 쉰다.
+        if (GamePause.IsHeld)
+            return;
+
         // 1 · 2 — 무기 바꿔 들기. 소굴에서도 고를 수 있다(들고 나갈 쪽).
         if (Input.GetKeyDown(KeyCode.Alpha1))
             SwitchTo(0);

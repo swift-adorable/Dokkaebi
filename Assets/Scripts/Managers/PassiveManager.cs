@@ -186,10 +186,10 @@ public class PassiveManager : Singleton<PassiveManager>
     }
 
     /// <summary>배운 패시브의 효과 합.</summary>
-    public float Total(PassiveEffectType effect) => state.Total(tree, effect);
+    public float Total(PassiveEffectType effect) => state.Total(Tree, effect);   // Start 전(세이브 적용 중)에도 트리를 읽는다 (결정 2-99)
 
     /// <summary>해금형 효과가 켜졌는지.</summary>
-    public bool HasUnlock(PassiveEffectType effect) => state.HasUnlock(tree, effect);
+    public bool HasUnlock(PassiveEffectType effect) => state.HasUnlock(Tree, effect);
 
     /// <summary>
     /// 지금 배운 것을 실제 시스템에 반영한다.

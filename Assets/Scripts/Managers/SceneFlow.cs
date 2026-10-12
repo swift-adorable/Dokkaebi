@@ -44,6 +44,9 @@ public static class SceneFlow
 
     private static bool loading;
 
+    /// <summary>씬을 바꾸는 중인가 — 철수가 끝나 벙커를 불러오는 사이에 쓰러져도 사망을 처리하지 않는다.</summary>
+    public static bool IsLoading => loading;
+
     /// <summary>비밀 통로로 넘어갈 때 설 자리 (장 · 위치). 도착한 맵이 한 번 읽고 지운다.</summary>
     private static int arrivalChapter = -1;
     private static Vector3 arrivalPosition;
@@ -68,7 +71,9 @@ public static class SceneFlow
         arrivalChapter = toChapter;
         arrivalPosition = at;
 
-        SaveManager.Commit(SecretPassageRule.SaveReason);
+        // 디스크에 쓰지 않는다 (결정 2-99) — 넘어가자마자 앱을 끄면 파밍 출발 때로 돌아간다(철수 없이 전리품을 지키지 않게).
+        SkillManager.CarryAcrossScene();   // 소켓의 구슬은 그대로
+        SaveManager.CarryToNextScene();
         Load(RaidSceneFor(toZone));
     }
 
@@ -93,6 +98,7 @@ public static class SceneFlow
         if (loading || !InBunker)
             return;
 
+        SkillManager.CarryAcrossScene();   // 벙커에서 끼운 구슬을 구역에서도 그대로 (결정 2-99)
         SaveManager.Commit("파밍 출발");
         Load(RaidSceneFor(StoryManager.TargetZone));
     }
@@ -143,6 +149,8 @@ public static class SceneFlow
         NightClock.Reset();
         FallenCache.Clear();
         WorkbenchManager.Reset();
+        SaveManager.ClearCarried();
+        SkillManager.ClearCarried();
         ApothecaryManager.Reset();
         LedgerManager.Reset();
 

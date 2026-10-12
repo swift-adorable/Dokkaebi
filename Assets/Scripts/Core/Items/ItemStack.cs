@@ -21,9 +21,8 @@ public class ItemStack
     /// ItemDefinition이 아니라 여기에 두는 이유 — 정의는 모든 개체가 공유하는
     /// 에셋이라 「이 개체는 상한이 깎였다」를 담을 자리가 없다.
     ///
-    /// ※ 현재 감소량은 0이다. 수리 비용과 경제가 8단계에 오므로
-    ///   그때 RepairLossRatio를 정한다. 지금 필드를 만들어 두는 이유는
-    ///   나중에 세이브 포맷을 깨지 않기 위함이다.
+    /// 감소량은 결정 2-96에서 정했다 — 티어 4 이상, 고칠 때마다 정의상 최대의 5% (RepairLossRatio).
+    ///   줄어든 최대는 세이브 판 18의 maxDurability에 남는다.
     /// (docs/Dokkaebi_Equipment_System.md 「내구도」)
     /// </summary>
     public int MaxDurability { get; private set; }

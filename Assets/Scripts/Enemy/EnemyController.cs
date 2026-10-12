@@ -189,7 +189,7 @@ public class EnemyController : MonoBehaviour, IPoolable
             WeaponKind kind = WorkbenchTable.BlueprintKinds[Random.Range(0, WorkbenchTable.BlueprintKinds.Length)];
             ItemDefinition blueprint = ItemCatalog.Load()?.Find(WorkbenchTable.BlueprintOf(kind));
             if (blueprint != null)
-                controller.Loot.TryPut(blueprint);
+                controller.PutGuaranteed(blueprint);   // 칸이 가득해도 사라지지 않게 (결정 2-99)
         }
 
         // 0-2 큰 요괴의 첫 구슬 (결정 2-79) — 시체 전리품에 넣고 표식을 지운다.

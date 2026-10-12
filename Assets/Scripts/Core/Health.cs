@@ -309,6 +309,12 @@ public class Health : MonoBehaviour, IDamageable, IPoolable
         return dealt;
     }
 
+    /// <summary>
+    /// 허기 · 갈증 · 동상 · 흙비처럼 몸이 깎이는 피해 (결정 2-99). 맞은 뒤 무적을 켜지도 않고, 무적 중에도 들어간다 —
+    /// 켜면 동상만으로 적 공격의 40%쯤을 흘려 맞지 않게 되고, 무적 중의 틱은 사라졌다.
+    /// </summary>
+    public int TakeTickDamage(int amount) => ApplyRaw(amount, skipInvulnerability: true);
+
     public int TakeDamage(int amount)
     {
         return ApplyRaw(amount, skipInvulnerability: false);

@@ -149,7 +149,20 @@ public static class PlayerConsumables
     {
         if (outcome.UseCost <= 0)
         {
-            PlayerInventory.EnsureInstance().Bag.Remove(stack.Definition, 1);
+            // 【쓴 바로 그 묶음에서 뺀다】 (결정 2-99) — 종류로 빼면, 시전 중 그 묶음을 팔거나 창고에 넣었을 때
+            // 다른 묶음이 줄거나 아무것도 줄지 않는다(공짜로 쓴다).
+            Inventory bag = PlayerInventory.EnsureInstance().Bag;
+
+            if (bag.Holds(stack))
+            {
+                stack.Take(1);
+                if (stack.IsEmpty)
+                    bag.RemoveStack(stack);
+            }
+            else
+            {
+                bag.Remove(stack.Definition, 1);
+            }
 
             return string.Empty;
         }

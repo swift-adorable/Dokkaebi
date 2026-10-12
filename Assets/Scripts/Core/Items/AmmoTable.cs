@@ -76,7 +76,7 @@ public static class AmmoTable
     /// <summary>방어 관통탄 id = 일반 탄 id + 이것 (결정 2-95).</summary>
     public const string PiercingSuffix = "_ap";
 
-    // 방어 관통탄 [임시값] — 방어 관통 +1 · 피해 ×0.9 · 값 4배 · 작업대 Ⅲ에서만 만든다(가게에 없다).
+    // 방어 관통탄 [임시값] — 방어 관통 +1 · 피해 ×0.9 · 값 4배 · 작업대 Ⅲ에서 만든다 · 평소 가게 표에는 없고 대장간 「오늘의 물건」에 3장부터 들어온다(결정 2-98).
     // 시체에서는 드물게(비중 2 · 4~10발) — 처음 하나가 작업대에 바칠 견본이 된다.
     public const int PiercingBonus = 1;
     public const float PiercingDamageScale = 0.9f;

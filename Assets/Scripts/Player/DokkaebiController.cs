@@ -92,19 +92,27 @@ public class DokkaebiController : MonoBehaviour
     /// </summary>
     private void HandleDied()
     {
+        // 철수가 끝나 벙커를 불러오는 사이에 쓰러졌다 — 이미 철수 저장을 했다. 덮어쓰지 않는다 (결정 2-99).
+        if (SceneFlow.IsLoading)
+        {
+            GameLogger.Log("[DokkaebiController] 씬을 바꾸는 중에 쓰러짐 — 무시합니다 (철수가 먼저다).");
+            return;
+        }
+
         GameLogger.Log("[DokkaebiController] 플레이어 사망");
 
         movement.SetInput(Vector2.zero);
+
+        // 【소켓을 먼저 비운다】 (결정 2-99) — 지닌 구슬은 잃는다(본문 「지닌 구슬 · 걸친 것 · 가방은 잃는다」).
+        // 전에는 가방을 떨어뜨린 *뒤에* 소켓을 비워, 구슬이 빈 가방으로 돌아와 그대로 저장됐다.
+        if (SkillManager.HasInstance)
+            SkillManager.Instance.ResetRun();
 
         var lostStacks = new System.Collections.Generic.List<ItemStack>();
         int lost = PlayerInventory.EnsureInstance().DropOnDeath(lostStacks);
 
         // 쓰러진 자리 (결정 2-93) — 남아 있던 자리는 사라지고, 「회수 계약」을 배웠으면 여기 새 자리가 남는다.
         RecordFallen(lostStacks);
-
-        // 소켓의 젬은 파밍 안의 것이다. 남은 젬은 이미 위에서 사라졌다. (레벨은 남는다 — 결정 2-33)
-        if (SkillManager.HasInstance)
-            SkillManager.Instance.ResetRun();
 
         // 장비를 잃었으므로 사격 성능·방어도·이동 배율을 즉시 다시 계산한다.
         if (loadout != null)
@@ -152,7 +160,8 @@ public class DokkaebiController : MonoBehaviour
 
     private void Update()
     {
-        if (gameManager == null || !gameManager.IsPlaying)
+        // 창이 떠서 게임이 멈춘 동안에는 쏘기 · 대시 · 흡수를 받지 않는다 (결정 2-92 · 2-99).
+        if (gameManager == null || !gameManager.IsPlaying || GamePause.IsHeld)
         {
             movement.SetInput(Vector2.zero);
             return;

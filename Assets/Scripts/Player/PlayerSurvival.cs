@@ -97,7 +97,7 @@ public class PlayerSurvival : MonoBehaviour
         int damage = state.Tick(Time.deltaTime, multiplier, PlayerWeather.WaterDrainScale, PlayerWeather.EnergyDrainScale);
 
         if (damage > 0 && health != null && !health.IsDead)
-            health.TakeDamage(damage);
+            health.TakeTickDamage(damage);   // 무적을 켜지 않는다 (결정 2-99)
 
         SyncPenalties();
 

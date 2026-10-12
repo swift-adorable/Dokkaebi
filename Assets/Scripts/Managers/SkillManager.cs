@@ -43,6 +43,22 @@ public class SkillManager : Singleton<SkillManager>
 
     private System.Random random;
 
+    // ── 씬을 넘는 소켓 (결정 2-99) ───────────────────────────────────
+    // 소켓은 씬 안의 SkillManager에 산다. 파밍 출발 · 비밀 통로로 씬이 바뀔 때 끼운 자리를 적어 두었다가
+    // 새 씬에서 가방(세이브가 소켓 구슬을 가방 줄로 담는다)에서 꺼내 같은 자리에 다시 끼운다.
+    private struct CarriedSocket
+    {
+        public int kind;   // 0 핵심 · 1 보조 · 2 발동 · 3 전령
+        public int a;      // 핵심 칸 · 발동 칸
+        public int b;      // 보조 소켓
+        public string id;
+    }
+
+    private static List<CarriedSocket> carriedSockets;
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    private static void ResetCarried() => carriedSockets = null;
+
     /// <summary>지금 소켓에 끼워져 있는 구성.</summary>
     public SocketedBuild Build => build;
 
@@ -97,6 +113,9 @@ public class SkillManager : Singleton<SkillManager>
         LoadCatalogsIfNeeded();
 
         SyncLevel();
+
+        // 파밍 출발 · 비밀 통로 — 끼웠던 구슬을 같은 자리에 다시 (결정 2-99). 첫 구슬 안전판보다 먼저.
+        RestoreCarried();
 
         // 가방 화면(장비 · 가방 · 젬 소켓 · 패시브)을 보장한다.
         InventoryScreenUI.EnsureInstance();
@@ -534,6 +553,92 @@ public class SkillManager : Singleton<SkillManager>
         }
 
         returned.Clear();
+    }
+
+    // ────────────────────────────────── 씬을 넘는 소켓 (결정 2-99)
+
+    /// <summary>지금 소켓에 끼운 구슬의 아이템들 — 세이브가 가방 줄로 담는다(앱을 꺼도 구슬이 사라지지 않게).</summary>
+    public List<ItemDefinition> EquippedGemItems()
+    {
+        var list = new List<ItemDefinition>();
+
+        foreach (SkillDefinition skill in build.Equipped)
+        {
+            ItemDefinition gem = FindGemItem(skill);
+            if (gem != null)
+                list.Add(gem);
+        }
+
+        return list;
+    }
+
+    /// <summary>씬을 바꾸기 직전에 부른다 — 끼운 자리를 적어 둔다. 구슬 자체는 세이브(가방 줄)가 나른다.</summary>
+    public static void CarryAcrossScene()
+    {
+        carriedSockets = null;
+
+        if (!HasInstance)
+            return;
+
+        SocketedBuild b = Instance.build;
+        var list = new List<CarriedSocket>();
+
+        for (int c = 0; c < SocketedBuild.MaxCores; c++)
+        {
+            SkillDefinition core = b.GetCore(c);
+            if (core != null)
+                list.Add(new CarriedSocket { kind = 0, a = c, id = core.Id });
+
+            for (int s = 0; s < SocketedBuild.SocketsPerCore; s++)
+            {
+                SkillDefinition support = b.GetSocket(c, s);
+                if (support != null)
+                    list.Add(new CarriedSocket { kind = 1, a = c, b = s, id = support.Id });
+            }
+        }
+
+        for (int m = 0; m < SocketedBuild.MaxMetas; m++)
+        {
+            SkillDefinition meta = b.GetMeta(m);
+            if (meta != null)
+                list.Add(new CarriedSocket { kind = 2, a = m, id = meta.Id });
+        }
+
+        if (b.Herald != null)
+            list.Add(new CarriedSocket { kind = 3, id = b.Herald.Id });
+
+        carriedSockets = list.Count > 0 ? list : null;
+    }
+
+    /// <summary>새 게임 · 디버그.</summary>
+    public static void ClearCarried() => carriedSockets = null;
+
+    private void RestoreCarried()
+    {
+        if (carriedSockets == null || catalog == null)
+            return;
+
+        List<CarriedSocket> list = carriedSockets;
+        carriedSockets = null;
+
+        // 핵심부터 — 보조는 핵심의 소켓에 들어간다. (리스트는 이미 그 순서다)
+        foreach (CarriedSocket c in list)
+        {
+            SkillDefinition skill = catalog.Find(c.id);
+            if (skill == null)
+                continue;
+
+            bool ok = c.kind switch
+            {
+                0 => TryEquipCore(skill, c.a),
+                1 => TryEquipSupport(skill, c.a, c.b),
+                2 => TryEquipMeta(skill, c.a),
+                _ => TryEquipHerald(skill),
+            };
+
+            if (!ok)
+                GameLogger.Warning($"[SkillManager] 씬을 넘은 구슬을 다시 끼우지 못했습니다 — 가방에 남깁니다: {skill.DisplayName}");
+        }
     }
 
     // ────────────────────────────────── 파밍 종료

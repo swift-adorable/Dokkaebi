@@ -40,7 +40,8 @@ public readonly struct ShopEntry
 ///
 /// 【잡화 가게 — 영감】 잡화 · 음식 · 재료. **약은 팔지 않는다** (결정 2-57). 음식 · 재료의 재고는 [임시값].
 /// 【약탕간 — 참봉】 옛 잡화 상점의 약 줄 그대로 — 재고와 가격 계수는 덕코프 상점 표 [확인됨].
-///   주사약은 덕코프에서 머드가 판다 — 약은 전부 참봉이다. 해제약 넷은 팔지 않는다 (상점 표에 없거나 수집하지 못했다).
+///   주사약은 덕코프에서 머드가 판다 — 약은 전부 참봉이다. 해제약 넷 · 약재는 평소 표에 없다 — 오늘의 물건(2-98) · 약탕(2-97)으로.
+///   막이 소모품 넷은 잡화 가게가 판다 (결정 2-91 ⑤ · 2-99).
 /// 【대장간 — 빚쟁이】 옛 무기 상점 + 방어구 상점을 합쳤다 (결정 2-52). 덕코프에 같은 물건이 없어
 ///   전부 1개 · 1.00× [불확실]. 【티어 1~3만 판다】 — 「상점에서 최상위를 팔지 않는다」. 각인 Ⅰ · Ⅱ 판매는 [미구현].
 /// 【세 가게 모두 플레이어의 물건을 사 준다】 (결정 2-37). 판매가는 어디서 팔든 같다 (TradeRules.SellPrice).
@@ -70,6 +71,12 @@ public static class ShopTable
         // 탄 (결정 2-80) — 1티어 무기(환목궁 · 세총통)의 탄만. 대장간이 열리기 전(0장 · 1장)에도 살 수 있게 [임시값 — 재고]
         new(AmmoTable.Arrow, 300, 1.00f),
         new(AmmoTable.Shot,  300, 1.00f),
+
+        // 막이 소모품 【임시】 (결정 2-91 ⑤ — 잡화 가게가 판다. 약탕간에 잘못 있던 것을 옮겼다 · 결정 2-99)
+        new("con_guard_warmth", 3, 1.00f),
+        new("con_guard_shield", 3, 1.00f),
+        new("con_guard_cool",   3, 1.00f),
+        new("con_guard_light",  3, 1.00f),
     };
 
     private static readonly ShopEntry[] apothecary =
@@ -91,12 +98,6 @@ public static class ShopTable
         new("con_ward_toxin",  3, 1.00f),
         new("con_ward_cold",   3, 1.00f),   // 덕코프에 없음 — 공간 저항 자리
         new("con_absorbent",   1, 1.00f),   // 타길라의 약품 자리 (최대 재고 1)
-
-        // 막이 소모품 【임시】 (결정 2-91)
-        new("con_guard_warmth", 3, 1.00f),
-        new("con_guard_shield", 3, 1.00f),
-        new("con_guard_cool",   3, 1.00f),
-        new("con_guard_light",  3, 1.00f),
     };
 
     private static readonly ShopEntry[] smithy =

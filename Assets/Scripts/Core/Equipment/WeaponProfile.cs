@@ -96,7 +96,10 @@ public readonly struct WeaponProfile
             CombatConstants.BaseCriticalChance + m.Get(EquipmentStatType.CriticalChance),
             0f, CombatConstants.MaxCriticalChance);
         float critMult = Mathf.Max(1f, b.CriticalMultiplier + m.Get(EquipmentStatType.CriticalMultiplier));
-        float ailment = Mathf.Max(0f, 1f + m.Get(EquipmentStatType.AilmentPower));
+        // 상태이상 위력은 직접 피해와 분리된 축이다 (결정 2-99) — 탄은 이미 깎인 직접 피해로 상태이상을 건다.
+        // 「연소」의 직접 피해 감소가 상태이상까지 깎지 않게 그만큼 되돌려 둔다(Ⅲ: 피해 절반 · 상태이상 위력 +80%).
+        float directScale = Mathf.Max(0.05f, 1f + m.Get(EquipmentStatType.DamageIncrease));
+        float ailment = Mathf.Max(0f, 1f + m.Get(EquipmentStatType.AilmentPower)) / Mathf.Min(1f, directScale);
 
         return new WeaponProfile(damage, interval, range, penetration, critChance, critMult, ailment);
     }

@@ -271,6 +271,9 @@ public class Inventory
         return false;
     }
 
+    /// <summary>이 개체(같은 묶음)를 들고 있는가 — 같은 종류가 아니라 바로 그 묶음.</summary>
+    public bool Holds(ItemStack stack) => stack != null && stacks.Contains(stack);
+
     /// <summary>특정 개체를 뺀다. 소켓에 끼울 때 쓴다.</summary>
     public bool RemoveStack(ItemStack stack)
     {

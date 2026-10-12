@@ -96,7 +96,8 @@ public class ConsumableCaster : MonoBehaviour
             return;
         }
 
-        float seconds = target.Definition.Consumable?.CastSeconds ?? 0f;
+        // 벙커에서는 바로 쓴다 (결정 2-99) — 시간을 끌 위험이 없다. 가방이 떠 있어 게임이 멈춰 있기도 하다.
+        float seconds = SceneFlow.InBunker ? 0f : target.Definition.Consumable?.CastSeconds ?? 0f;
 
         if (seconds <= 0f)
         {
@@ -143,8 +144,8 @@ public class ConsumableCaster : MonoBehaviour
         if (stack == null)
             return;
 
-        // 가방에서 사라졌다 — 버렸거나 창고로 옮겼다.
-        if (stack.IsEmpty)
+        // 가방에서 사라졌다 — 버렸거나 창고로 옮겼거나 팔았다. 개수가 남아 있어도 그 묶음이 가방에 없으면 끊는다 (결정 2-99).
+        if (stack.IsEmpty || !PlayerInventory.HasInstance || !PlayerInventory.Instance.Bag.Holds(stack))
         {
             Finish("물건이 없어져 중단했습니다.");
             return;

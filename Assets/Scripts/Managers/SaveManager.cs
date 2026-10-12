@@ -89,6 +89,17 @@ public static class SaveManager
     /// <summary>읽어서 매니저들에 나눠 준다. 결과를 로그로 남긴다.</summary>
     public static SaveLoadResult Load()
     {
+        // 비밀 통로 (결정 2-99) — 디스크가 아니라 메모리로 넘어온 판. 도중에 앱을 끄면 파밍 출발 저장으로 돌아간다.
+        if (carried != null)
+        {
+            SaveData passed = carried;
+            carried = null;
+            LastLoad = SaveLoadResult.Main;
+            Apply(passed);
+            GameLogger.Log("[Save] 비밀 통로 — 들고 있던 그대로 이어 갑니다 (디스크에 쓰지 않았습니다).");
+            return SaveLoadResult.Main;
+        }
+
         SaveLoadResult result = SaveStore.Read(SavePath, out SaveData data);
 
         LastLoad = result;
@@ -148,6 +159,25 @@ public static class SaveManager
         return true;
     }
 
+    // ── 메모리로 넘기기 (결정 2-99) ──────────────────────────────────
+
+    private static SaveData carried;
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    private static void ResetCarried() => carried = null;
+
+    /// <summary>
+    /// 지금 상태를 디스크에 쓰지 않고 다음 씬으로만 넘긴다 — 비밀 통로.
+    /// 파밍 중 저장은 없다는 규칙(머리말)을 지킨다: 넘어간 뒤 앱을 끄면 파밍 출발 때로 돌아간다.
+    /// </summary>
+    public static void CarryToNextScene()
+    {
+        if (Enabled)
+            carried = Capture();
+    }
+
+    public static void ClearCarried() => carried = null;
+
     /// <summary>지우고 처음 상태로 되돌린다. 디버그 도구만 쓴다.</summary>
     public static void Wipe()
     {
@@ -197,6 +227,13 @@ public static class SaveManager
                 if (stack?.Definition != null && !stack.IsEmpty)
                     data.bag.Add(ToSaved(stack));
             }
+
+            // 소켓의 구슬 (결정 2-99) — 가방 줄로 담는다. 소켓은 씬 안의 것이라, 담지 않으면 벙커에서 끼운 채
+            // 앱을 끄거나 파밍을 떠날 때 구슬이 어디에도 없게 된다. 씬을 넘을 때는 SkillManager가 다시 끼운다.
+            // (철수 · 쓰러짐은 저장 전에 소켓을 비우므로 두 번 담기지 않는다)
+            if (SkillManager.HasInstance)
+                foreach (ItemDefinition gem in SkillManager.Instance.EquippedGemItems())
+                    data.bag.Add(new SavedItem { id = gem.Id, count = 1 });
 
             data.equipment = new List<SavedEquip>();
 
@@ -287,11 +324,12 @@ public static class SaveManager
         restored.SetActiveWeapon(restored.WeaponAt(data.activeWeapon) != null ? data.activeWeapon : 0);
         RestoreInto(PlayerInventory.EnsureInstance().Bag, data.bag, "가방");
         RestoreInto(PlayerInventory.Instance.Stash, data.stash, "창고");
-        ShopManager.RestoreDaily(data.shopDaily);   // 재고보다 먼저 (결정 2-98)
-        ShopManager.Restore(data.shop);
         SpringManager.Restore(data.spring);
         BuildingManager.Restore(data.buildings);
         StoryManager.Restore(data.story);
+        // 가게는 이야기 다음 — 오늘의 물건 풀이 열린 장을 본다 (19판 이하는 여기서 새로 뽑는다).
+        ShopManager.RestoreDaily(data.shopDaily);   // 재고보다 먼저 (결정 2-98)
+        ShopManager.Restore(data.shop);
         DifficultyManager.Restore(data.difficulty);
         MapMemory.Restore(data.maps);
         NightClock.Restore(data);

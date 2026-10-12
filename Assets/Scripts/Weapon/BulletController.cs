@@ -28,6 +28,9 @@ public class BulletController : MonoBehaviour, IPoolable
     /// <summary>스킬 합산 결과. 참조만 든다. null이면 보정이 없다(적 탄 등).</summary>
     private WeaponModifiers skillEffects;
 
+    /// <summary>장비(각인 「연소」 등)의 상태이상 위력 배율 (결정 2-99). 적 탄 · 풀 재사용 때 1로.</summary>
+    private float equipmentAilment = 1f;
+
     /// <summary>치명타 확률(0~1). 각인 「정밀」만 이 값을 올린다. 기본은 0이다.</summary>
     private float criticalChance;
 
@@ -142,6 +145,7 @@ public class BulletController : MonoBehaviour, IPoolable
 
     public void OnSpawned()
     {
+        equipmentAilment = 1f;
         isConsumed = false;
         isReturning = false;
 
@@ -234,6 +238,7 @@ public class BulletController : MonoBehaviour, IPoolable
 
         // 적 탄은 행동(관통·갈래 등)도 스킬 보정도 치명타도 갖지 않는다.
         skillEffects = null;
+        equipmentAilment = 1f;
         criticalChance = 0f;
         criticalMultiplier = CombatConstants.BaseCriticalMultiplier;
         behaviourState.Clear();
@@ -278,6 +283,12 @@ public class BulletController : MonoBehaviour, IPoolable
     public void SetSkillEffects(WeaponModifiers source)
     {
         skillEffects = source;
+    }
+
+    /// <summary>장비의 상태이상 위력 배율 (WeaponProfile.AilmentPower). PlayerWeapon이 쏠 때마다 준다.</summary>
+    public void SetEquipmentAilment(float multiplier)
+    {
+        equipmentAilment = Mathf.Max(0f, multiplier);
     }
 
     /// <summary>발사 직후 Skill 보정치를 주입한다. PlayerWeapon이 호출한다.</summary>
@@ -541,7 +552,7 @@ public class BulletController : MonoBehaviour, IPoolable
         {
             // 상태이상 위력은 직접 피해와 분리된 축이다.
             // 「연소」 각인과 속성 보조 젬이 여기만 키운다.
-            float ailmentBase = damage * Mathf.Max(0f, 1f + (skillEffects?.AilmentPower ?? 0f));
+            float ailmentBase = damage * Mathf.Max(0f, 1f + (skillEffects?.AilmentPower ?? 0f)) * equipmentAilment;
 
             target.ApplyStatus(
                 AppliedStatus, ailmentBase, skillEffects?.AilmentDurationMultiplier ?? 1f);

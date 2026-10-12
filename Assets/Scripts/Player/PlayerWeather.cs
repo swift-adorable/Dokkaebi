@@ -81,7 +81,7 @@ public class PlayerWeather : MonoBehaviour
             while (frostTimer >= WeatherTable.FrostbiteInterval)
             {
                 frostTimer -= WeatherTable.FrostbiteInterval;
-                health.TakeDamage(1);
+                health.TakeTickDamage(1);
             }
         }
         else
@@ -101,7 +101,7 @@ public class PlayerWeather : MonoBehaviour
             while (dustTimer >= interval)
             {
                 dustTimer -= interval;
-                health.TakeDamage(1);
+                health.TakeTickDamage(1);
             }
         }
         else

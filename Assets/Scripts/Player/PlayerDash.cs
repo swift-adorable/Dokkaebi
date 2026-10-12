@@ -50,7 +50,7 @@ public class PlayerDash : MonoBehaviour
     public float EffectiveCooldown => dashCooldown * Mathf.Max(0f, CooldownScale);
 
     /// <summary>남은 쿨다운(초).</summary>
-    public float RemainingCooldown => cooldown.RemainingTime(Time.unscaledTime);
+    public float RemainingCooldown => cooldown.RemainingTime(Time.time);
 
     private PlayerNoise noise;
 
@@ -73,9 +73,9 @@ public class PlayerDash : MonoBehaviour
         if (direction.sqrMagnitude <= 0f)
             return false;
 
-        // 쿨다운은 Time.unscaledTime 기준이다.
-        // Time.time을 쓰면 일시정지(timeScale 0) 동안 쿨다운이 흐르지 않는다.
-        if (!cooldown.TryConsume(Time.unscaledTime, EffectiveCooldown + dashDuration))
+        // 쿨다운은 게임 시간(Time.time) 기준이다 (결정 2-99). 창이 뜨면 게임이 멈추므로(결정 2-92)
+        // 실제 시간으로 재면 창을 열고 기다리는 것만으로 대시가 돌아온다.
+        if (!cooldown.TryConsume(Time.time, EffectiveCooldown + dashDuration))
             return false;
 
         // 대시는 큰 소리를 낸다. 「조용히 갈까 빨리 갈까」가 선택이 된다.

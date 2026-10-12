@@ -119,7 +119,7 @@ public static class PlaytestTools
     [MenuItem(Menu + "벙커 — 잡화 가게 열기")]
     public static void OpenShop() => Run(PlaytestActions.OpenShop);
 
-    [MenuItem(Menu + "벙커 — 건물 넷 짓고 놓기 (검증)")]
+    [MenuItem(Menu + "벙커 — 건물 다섯 짓고 놓기 (검증)")]
     public static void BuildAll()
     {
         if (!Application.isPlaying) { Debug.LogError("[Playtest] 플레이 중에만 씁니다."); return; }

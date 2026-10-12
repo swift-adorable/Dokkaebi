@@ -782,7 +782,7 @@ public partial class InventoryScreenUI : MonoBehaviour
         RefreshWeaponBarIfChanged();
 
         // 3 ~ 8 — 퀵슬롯 물건 쓰기 (데스크톱). 1 · 2는 PlayerAmmo가 무기 바꿔 들기로 받는다.
-        if (!IsOpen)
+        if (!IsOpen && !GamePause.IsHeld)
         {
             for (int i = QuickSlots.FirstItemSlot; i < QuickSlots.Count; i++)
                 if (Input.GetKeyDown(KeyCode.Alpha1 + i))
@@ -1789,11 +1789,21 @@ public partial class InventoryScreenUI : MonoBehaviour
     /// </summary>
     private void UseFromMenu(ItemStack stack)
     {
+        // 【구역에서는 가방을 닫고 쓴다】 (결정 2-99) — 가방이 떠 있으면 게임이 멈춰(결정 2-92) 시전이 흐르지 않는다.
+        // 덕코프처럼 쓰는 동안의 위험은 진다. 벙커에서는 시전 없이 바로 쓴다(ConsumableCaster).
+        bool casts = !SceneFlow.InBunker && (stack?.Definition?.Consumable?.CastSeconds ?? 0f) > 0f;
+
+        if (casts && IsOpen)
+            Close();
+
         PlayerConsumables.BeginUse(stack, result =>
         {
             PlayerInventory.EnsureInstance().RefreshCapacity();
 
-            Refresh();
+            if (IsOpen)
+                Refresh();
+            else
+                RefreshQuickSlots();
 
             ShowToast(result);
         });
