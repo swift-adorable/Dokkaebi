@@ -30,7 +30,7 @@ public class RunEndUI : MonoBehaviour
 
         instance.body.text =
             $"가방 · 장비 {lostCount}점을 잃었습니다.\n"
-            + "레벨 · 엽전 · 패시브 · 새김패 · 창고는 남습니다.";
+            + "레벨 · 엽전 · 패시브 · 매듭에 묶은 새김패 · 창고는 남습니다.";
 
         instance.buttonLabel.text = SceneFlow.HasBunker ? "소굴로 돌아가기" : "다시 시작";
 

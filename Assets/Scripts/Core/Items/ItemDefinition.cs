@@ -161,9 +161,10 @@ public class ItemDefinition : ScriptableObject
     public float WeightCost => IsCargo ? weight : 0f;
 
     /// <summary>
-    /// 철수에 실패해도 잃지 않는 아이템인지.
+    /// 【매듭에 묶여 있을 때】 쓰러져도 잃지 않는 아이템인지 — 각인(새김패)만.
     ///
-    /// 각인만 해당한다. 플레이어가 배울 규칙은 하나여야 하므로 예외를 늘리지 않는다.
+    /// 본문 130 「매듭에 묶은 새김패 · 창고에 둔 것은 남는다」 · 덕코프처럼 가방 속 물건은 다 잃는다(결정 2-105).
+    /// 그래서 이 값은 새김패 칸(EquipmentLoadout)에서만 쓴다 — 가방에 든 새김패는 다른 물건과 똑같이 잃는다.
     /// (docs/Dokkaebi_Progression_System.md 6절)
     /// </summary>
     public bool SurvivesDeath => kind == ItemKind.Imprint;

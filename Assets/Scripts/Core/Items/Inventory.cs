@@ -314,9 +314,7 @@ public class Inventory
 
         for (int i = stacks.Count - 1; i >= 0; i--)
         {
-            if (stacks[i].Definition != null && stacks[i].Definition.SurvivesDeath)
-                continue;
-
+            // 가방에 든 새김패도 잃는다 — 남는 것은 매듭에 묶은 것뿐 (결정 2-105 · 본문 130).
             if (safe != null && safe.Contains(stacks[i]))
                 continue;
 
@@ -338,8 +336,8 @@ public class Inventory
 
         for (int i = 0; i < stacks.Count && safe.Count < safeSlots; i++)
         {
-            // 각인은 쓰러져도 남으므로 안전 칸을 쓰지 않는다 (결정 2-101).
-            if (stacks[i].Definition != null && stacks[i].Definition.IsCargo && !stacks[i].Definition.SurvivesDeath)
+            // 가방 속 새김패도 다른 물건처럼 잃으므로 안전 칸을 쓴다 (결정 2-105 — 2-101 ⑤를 바꿈).
+            if (stacks[i].Definition != null && stacks[i].Definition.IsCargo)
                 safe.Add(stacks[i]);
         }
 

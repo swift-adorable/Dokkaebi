@@ -259,7 +259,7 @@ namespace Dokkaebi.Tests
             Assert.AreEqual(0, inv.CountOf(gem), "젬도 장비와 똑같이 잃습니다.");
             Assert.AreEqual(0, inv.CountOf(weapon));
             Assert.AreEqual(0, inv.CountOf(loot));
-            Assert.AreEqual(1, inv.CountOf(imprint), "각인만 남습니다.");
+            Assert.AreEqual(0, inv.CountOf(imprint), "가방에 든 새김패도 잃습니다 — 매듭에 묶은 것만 남습니다 (결정 2-105).");
         }
 
         // ── 내구도 ────────────────────────────────────────────────────

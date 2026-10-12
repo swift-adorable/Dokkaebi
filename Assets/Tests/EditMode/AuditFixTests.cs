@@ -97,8 +97,9 @@ namespace Dokkaebi.Tests
         }
     
         [Test]
-        public void 각인은_안전_칸을_쓰지_않는다()
+        public void 가방_속_새김패는_잃고_안전_칸이_지킬_수_있다()
         {
+            // 결정 2-105 — 덕코프처럼 가방 속 물건은 다 잃는다. 새김패도 매듭(칸)에 묶어야 남는다.
             var imprint = Load<EquipmentDefinition>("Imprints/imp_smoulder_t1.asset");
             var water = Load<ItemDefinition>("Consumables/con_water.asset");
 
@@ -109,7 +110,9 @@ namespace Dokkaebi.Tests
             var safe = bag.SafeStacks(1);
             Assert.AreEqual(1, safe.Count);
             foreach (ItemStack s in safe)
-                Assert.AreSame(water, s.Definition, "각인이 안전 칸을 차지했습니다 (각인은 어차피 남는다).");
+                Assert.AreSame(imprint, s.Definition, "가방 맨 앞의 새김패가 안전 칸에 든다.");
+
+            Assert.AreEqual(2, bag.DropOnDeath(0), "안전 칸이 없으면 새김패 · 물 둘 다 잃는다");
         }
 
     }
