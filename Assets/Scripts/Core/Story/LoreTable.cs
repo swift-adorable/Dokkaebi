@@ -5,7 +5,8 @@ using System.Text.RegularExpressions;
 public enum LoreKind
 {
     Codex = 0,   // (세계관 도감 / …)
-    Popup = 1    // (세계관 팝업 / …)
+    Popup = 1,   // (세계관 팝업 / …)
+    Tutorial = 2 // (UI 튜토리얼 / …) — 튜토리얼 안내가 본문 글을 그대로 쓴다 (결정 2-107)
 }
 
 /// <summary>본문 괄호 줄 하나 — 「(세계관 도감 / 넋불) 사람의 넋은 …」.</summary>
@@ -39,7 +40,7 @@ public sealed class LoreEntry
 /// </summary>
 public static class LoreTable
 {
-    private static readonly Regex Note = new(@"^\((세계관 도감|세계관 팝업) / ([^)]+)\)\s*(.+)$");
+    private static readonly Regex Note = new(@"^\((세계관 도감|세계관 팝업|UI 튜토리얼) / ([^)]+)\)\s*(.+)$");
     private static readonly Regex OpensAfter = new(@"\s*(\d)-(\d) 이후에 열린다.*$");
     private static readonly Regex ZoneHeader = new(@"^(\d)-(\d) · ");
     private static readonly Regex ChapterHeader = new(@"^(\d)장 — ");
@@ -112,7 +113,12 @@ public static class LoreTable
             if (!m.Success)
                 continue;
 
-            LoreKind kind = m.Groups[1].Value == "세계관 팝업" ? LoreKind.Popup : LoreKind.Codex;
+            LoreKind kind = m.Groups[1].Value switch
+            {
+                "세계관 팝업" => LoreKind.Popup,
+                "UI 튜토리얼" => LoreKind.Tutorial,
+                _ => LoreKind.Codex
+            };
             string title = m.Groups[2].Value.Trim();
             string body = m.Groups[3].Value.Trim();
             string after = null;
@@ -131,6 +137,16 @@ public static class LoreTable
         }
 
         return result;
+    }
+
+    /// <summary>그 갈래 · 이름의 본문 글. 없으면 빈 글.</summary>
+    public static string BodyOf(IReadOnlyList<LoreEntry> lore, LoreKind kind, string title)
+    {
+        if (lore != null)
+            foreach (LoreEntry e in lore)
+                if (e.Kind == kind && e.Title == title)
+                    return e.Body;
+        return string.Empty;
     }
 
     /// <summary>열렸는가 — 그 토막을 봤다.</summary>

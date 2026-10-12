@@ -56,6 +56,19 @@ namespace Dokkaebi.Tests
         }
 
         [Test]
+        public void 튜토리얼_안내는_본문_글을_쓴다()
+        {
+            // 결정 2-107 — 「(UI 튜토리얼 / …)」 줄 이름이 단계의 Note와 맞아야 한다.
+            List<LoreEntry> lore = LoreTable.Parse(ScriptText());
+
+            foreach (TutorialStep step in TutorialTable.Steps)
+                if (step.Note != null)
+                    Assert.IsNotEmpty(LoreTable.BodyOf(lore, LoreKind.Tutorial, step.Note), step.Id);
+
+            StringAssert.Contains("매듭에 묶은 새김패", LoreTable.BodyOf(lore, LoreKind.Tutorial, "쓰러짐"));
+        }
+
+        [Test]
         public void 토막을_보면_열린다()
         {
             var progress = new StoryProgress();

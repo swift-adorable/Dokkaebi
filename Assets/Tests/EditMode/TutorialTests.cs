@@ -30,6 +30,12 @@ namespace Dokkaebi.Tests
             Assert.AreEqual("tut_equip", IdAt(TutorialTable.Evaluate(p, f, out _)));
 
             f.WeaponEquipped = true;
+            Assert.AreEqual("tut_ammo", IdAt(TutorialTable.Evaluate(p, f, out _)));
+
+            f.AmmoLoaded = true;
+            Assert.AreEqual("tut_drink", IdAt(TutorialTable.Evaluate(p, f, out _)));
+
+            f.DrankOrAte = true;
             Assert.AreEqual("tut_kill", IdAt(TutorialTable.Evaluate(p, f, out _)));
 
             f.KillsThisStep = 2;
@@ -37,6 +43,47 @@ namespace Dokkaebi.Tests
 
             f.KillsThisStep = 3;
             Assert.AreEqual("tut_loot", IdAt(TutorialTable.Evaluate(p, f, out _)));
+
+            f.CorpseLooted = true;
+            Assert.AreEqual("tut_heal", IdAt(TutorialTable.Evaluate(p, f, out _)));
+
+            f.UsedHeal = true;
+            Assert.AreEqual("tut_extract1", IdAt(TutorialTable.Evaluate(p, f, out _)));
+        }
+
+        [Test]
+        public void 소굴에서는_꺼내기와_쓰러짐_안내를_거친다()
+        {
+            // 결정 2-107 — 본문 96 「넣기 · 꺼내기」 · 130 「(UI 튜토리얼 / 쓰러짐)」
+            var p = new StoryProgress();
+            var f = new TutorialFacts { Arrived = true, StashUsed = true };
+
+            Assert.AreEqual("tut_unstash", IdAt(TutorialTable.Evaluate(p, f, out _)));
+
+            f.StashTaken = true;
+            Assert.AreEqual("tut_death", IdAt(TutorialTable.Evaluate(p, f, out _)));
+
+            p.See(TutorialTable.AckEvent("tut_death"));
+            Assert.AreEqual("tut_depart", IdAt(TutorialTable.Evaluate(p, f, out _)));
+        }
+
+        [Test]
+        public void 영의이에서는_바꿔_지니기와_정기_안내를_거친다()
+        {
+            var p = new StoryProgress();
+            var f = new TutorialFacts
+            {
+                Arrived = true, StashUsed = true, StashTaken = true, Entered02 = true,
+                GiftDropped = true, CoreGemOwned = true, CoreSocketed = true, SocketChangesThisStep = 1
+            };
+
+            Assert.AreEqual("tut_swap", IdAt(TutorialTable.Evaluate(p, f, out _)), "빼기만 해서는 안 된다");
+
+            f.SocketChangesThisStep = 2;
+            Assert.AreEqual("tut_growth", IdAt(TutorialTable.Evaluate(p, f, out _)));
+
+            p.See(TutorialTable.AckEvent("tut_growth"));
+            Assert.AreEqual("tut_extract2", IdAt(TutorialTable.Evaluate(p, f, out _)));
         }
 
         [Test]
@@ -47,7 +94,7 @@ namespace Dokkaebi.Tests
 
             int index = TutorialTable.Evaluate(p, f, out int done);
 
-            Assert.AreEqual("tut_kill", IdAt(index));
+            Assert.AreEqual("tut_ammo", IdAt(index));
             Assert.AreEqual(3, done, "봇짐 · 줍기 · 장착");
         }
 
@@ -122,7 +169,8 @@ namespace Dokkaebi.Tests
             {
                 Assert.IsTrue(ids.Add(step.Id), step.Id);
                 Assert.IsNotEmpty(step.Text);
-                Assert.IsNotEmpty(step.Hint);
+                Assert.IsTrue(!string.IsNullOrEmpty(step.Hint) || !string.IsNullOrEmpty(step.Note),
+                    $"{step.Id} — 힌트도 본문 안내도 없다");
             }
         }
     }

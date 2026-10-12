@@ -15,6 +15,12 @@ public enum TutorialCheck
     CoreGemOwned,      // 핵심 구슬이 가방이나 소켓에
     CoreSocketed,
     Extracted02,
+    AmmoLoaded,        // 화살통(탄창)에 탄이 들었다 (결정 2-107)
+    DrankOrAte,        // 수분 · 에너지를 채우는 것을 먹었다
+    UsedHeal,          // 체력을 채우는 것(소환단)을 썼다
+    StashTaken,        // 창고에서 꺼냈다
+    Acknowledged,      // 본문 안내 창을 읽었다 — 「쓰러짐」 · 「정기」
+    SocketChanges,     // 이 단계 동안 소켓이 바뀐 수 ≥ Count (빼고 다시 끼우기 = 2)
 }
 
 /// <summary>단계가 어디서 하는 일인가 — 안내에 「구역에서 · 소굴에서」를 붙인다.</summary>
@@ -31,9 +37,13 @@ public readonly struct TutorialStep
     public readonly TutorialCheck? SkipWhen;
     public readonly TutorialPlace Place;
 
+    /// <summary>본문 「(UI 튜토리얼 / 이름)」 — 안내 창(Acknowledged)이나 힌트가 그 글을 그대로 쓴다. 없으면 null.</summary>
+    public readonly string Note;
+
     public TutorialStep(string id, TutorialPlace place, string text, string hint, TutorialCheck check,
-        int count = 1, TutorialCheck? skipWhen = null)
+        int count = 1, TutorialCheck? skipWhen = null, string note = null)
     {
+        Note = note;
         Id = id;
         Place = place;
         Text = text;
@@ -48,10 +58,14 @@ public readonly struct TutorialStep
 public struct TutorialFacts
 {
     public bool BundleOpened, WeaponInHand, WeaponEquipped, CorpseLooted, Arrived, StashUsed,
-        Entered02, GiftDropped, CoreGemOwned, CoreSocketed, Extracted02;
+        Entered02, GiftDropped, CoreGemOwned, CoreSocketed, Extracted02,
+        AmmoLoaded, DrankOrAte, UsedHeal, StashTaken;
 
     /// <summary>지금 단계가 시작된 뒤 쓰러뜨린 수.</summary>
     public int KillsThisStep;
+
+    /// <summary>지금 단계가 시작된 뒤 소켓이 바뀐 수.</summary>
+    public int SocketChangesThisStep;
 
     public bool Has(TutorialCheck check, int count) => check switch
     {
@@ -67,6 +81,11 @@ public struct TutorialFacts
         TutorialCheck.CoreGemOwned => CoreGemOwned || CoreSocketed,
         TutorialCheck.CoreSocketed => CoreSocketed,
         TutorialCheck.Extracted02 => Extracted02,
+        TutorialCheck.AmmoLoaded => AmmoLoaded,
+        TutorialCheck.DrankOrAte => DrankOrAte,
+        TutorialCheck.UsedHeal => UsedHeal,
+        TutorialCheck.StashTaken => StashTaken,
+        TutorialCheck.SocketChanges => SocketChangesThisStep >= count,
         _ => false,
     };
 }
@@ -75,9 +94,10 @@ public struct TutorialFacts
 /// 【임시】 0장 튜토리얼 가이드 (결정 2-85) — 본문 0장의 (UI 튜토리얼 / …) 자리를 순서대로 한 줄 안내로.
 /// 화면(튜토리얼 창 · 손가락 표시)은 레이어 · 아트 때. 끝난 단계는 이야기 진행(seen)에 「tut_…」로 적혀 세이브에 남는다.
 ///
-///   0-1   봇짐 열기 → 무기 줍기 → 장착 → 잡귀 셋 → 시체 뒤지기 → 길목에서 철수(쓰러져도 소굴로 온다)
-///   소굴  창고에 맡기기 → 0-2로 출발
-///   0-2   큰 요괴 → 구슬 줍기 → 구슬 지니기 → 길목에서 철수
+///   0-1   봇짐 열기 → 무기 · 화살 줍기 → 장착 → 화살통 채우기 → 식혜 · 미숫가루 → 잡귀 셋 → 시체 뒤지기 → 소환단 → 고목에 닿기
+///   소굴  창고에 맡기기 → 꺼내기 → 쓰러짐 규칙(본문 안내) → 0-2로 출발
+///   0-2   큰 요괴 → 구슬 줍기 → 구슬 지니기 → 바꿔 지니기 → 정기(본문 안내) → 길목에서 철수
+/// (결정 2-107 — 단계마다 하는 자리에서 · 안내 창은 본문 「(UI 튜토리얼 / …)」 글 그대로)
 /// 다 끝나면 「tut_done」 — 그 뒤부터 주운 장비가 빈 자리에 바로 들어간다 (2-84).
 /// </summary>
 public static class TutorialTable
@@ -87,24 +107,44 @@ public static class TutorialTable
 
     private static readonly TutorialStep[] steps =
     {
+        // ── 0-1 (본문 52 ~ 72) ─────────────────────────────────────────
         new("tut_bundle", TutorialPlace.Raid, "길가의 젖은 봇짐을 열어라",
             "봇짐 가까이 가서 「젖은 봇짐」을 누른다", TutorialCheck.BundleOpened, skipWhen: TutorialCheck.Arrived),
-        new("tut_take", TutorialPlace.Raid, "봇짐에서 환목궁을 주워라",
+        new("tut_take", TutorialPlace.Raid, "봇짐에서 환목궁과 화살을 주워라",
             "전리품 창 — 칸을 눌러 「줍기」, 또는 「전부 줍기」", TutorialCheck.WeaponInHand, skipWhen: TutorialCheck.Arrived),
         new("tut_equip", TutorialPlace.Raid, "환목궁을 무기 칸에 걸어라",
-            "가방 화면(장비) → 환목궁 → 「장착」", TutorialCheck.WeaponEquipped, skipWhen: TutorialCheck.Arrived),
+            "가방 화면(장비) → 환목궁 → 「장착」 · 무기 칸 옆이 화살통이다", TutorialCheck.WeaponEquipped, skipWhen: TutorialCheck.Arrived),
+        // 결정 2-107 — 화살 장착 · 장전
+        new("tut_ammo", TutorialPlace.Raid, "화살통에 화살을 채워라",
+            "「채우기」(R) — 가방의 화살이 화살통으로 들어간다 · 비면 쏘지 못한다", TutorialCheck.AmmoLoaded, skipWhen: TutorialCheck.Arrived),
+        // 결정 2-107 — 본문 62 · 64 「(UI 튜토리얼 / 수분 · 에너지)」
+        new("tut_drink", TutorialPlace.Raid, "식혜나 미숫가루를 먹어라",
+            null, TutorialCheck.DrankOrAte, skipWhen: TutorialCheck.Arrived, note: "수분 · 에너지"),
         new("tut_kill", TutorialPlace.Raid, "잡귀를 쓰러뜨려라",
             "조준해 쏜다 · 붉은 빛이 번뜩이면 대시로 피한다", TutorialCheck.Kills, 3, TutorialCheck.Arrived),
         new("tut_loot", TutorialPlace.Raid, "쓰러진 잡귀를 뒤져라",
             "시체 가까이 「파밍」 — 엽전 · 정기는 저절로 들어온다", TutorialCheck.CorpseLooted, skipWhen: TutorialCheck.Arrived),
+        // 결정 2-107 — 본문 68 · 70 「소환단으로 체력 회복」
+        new("tut_heal", TutorialPlace.Raid, "다쳤으면 소환단을 삼켜라",
+            "퀵슬롯의 소환단 — 체력이 줄었을 때 쓴다", TutorialCheck.UsedHeal, skipWhen: TutorialCheck.Arrived, note: "전투 · 회복"),
         // 0-1은 걸어서 고목에 닿는다 — 본문 72 「마침내 늙은 고목 아래에 닿았다」. 철수(길목)는 0-2에서 배운다 (결정 2-104).
         new("tut_extract1", TutorialPlace.Raid, "늙은 고목 아래로 가라",
             "초록 기둥이 선 고목 곁에 닿으면 소굴로 들어간다", TutorialCheck.Arrived),
+
+        // ── 소굴 (본문 74 ~ 150) ─────────────────────────────────────────
         new("tut_stash", TutorialPlace.Bunker, "아까운 것은 창고에 맡겨라",
             "창고 앞 「창고」 → 가방 물건 → 「창고에 넣기」 · 창고에 둔 것은 쓰러져도 남는다",
             TutorialCheck.StashUsed, skipWhen: TutorialCheck.Entered02),
+        // 결정 2-107 — 본문 96 「창고에 넣기 · 꺼내기」
+        new("tut_unstash", TutorialPlace.Bunker, "창고에서 꺼내 보라",
+            "창고 → 넣어 둔 물건 → 「꺼내기」", TutorialCheck.StashTaken, skipWhen: TutorialCheck.Entered02),
+        // 결정 2-107 — 본문 128 · 130 「(UI 튜토리얼 / 쓰러짐)」 — 영감이 일러 주는 규칙
+        new("tut_death", TutorialPlace.Bunker, "쓰러지면 잃는 것",
+            "읽고 닫으면 다음으로", TutorialCheck.Acknowledged, skipWhen: TutorialCheck.Entered02, note: "쓰러짐"),
         new("tut_depart", TutorialPlace.Bunker, "고목 뒤 수풀(0-2)로 나가라",
             "「파밍 출발」 → 0-2 고목 뒤 수풀", TutorialCheck.Entered02),
+
+        // ── 0-2 (본문 134 ~ 146) ─────────────────────────────────────────
         new("tut_gift", TutorialPlace.Raid, "큰 요괴를 쓰러뜨려라",
             "잠시 뒤 큰 요괴가 나타난다", TutorialCheck.GiftDropped, skipWhen: TutorialCheck.Extracted02),
         new("tut_gem", TutorialPlace.Raid, "큰 요괴의 시체에서 구슬을 주워라",
@@ -112,11 +152,21 @@ public static class TutorialTable
         new("tut_socket", TutorialPlace.Raid, "구슬을 몸에 지녀라",
             "가방 화면 「스킬」 → 구슬 → 「장착」 · 밝아진 핵심 칸을 누른다", TutorialCheck.CoreSocketed,
             skipWhen: TutorialCheck.Extracted02),
+        // 결정 2-107 — 본문 114 「구슬 지니기 · 바꿔 지니기」
+        new("tut_swap", TutorialPlace.Raid, "구슬을 빼고 다시 지녀 보라",
+            "가방 화면 「스킬」 → 끼운 구슬 → 「빼기」 → 다시 「장착」 · 구슬은 언제든 바꿔 지닐 수 있다",
+            TutorialCheck.SocketChanges, 2, TutorialCheck.Extracted02),
+        // 결정 2-107 — 본문 112 「(UI 튜토리얼 / 정기)」
+        new("tut_growth", TutorialPlace.Raid, "정기가 쌓이면 자란다",
+            "읽고 닫으면 다음으로", TutorialCheck.Acknowledged, skipWhen: TutorialCheck.Extracted02, note: "정기"),
         new("tut_extract2", TutorialPlace.Raid, "길목에서 철수해 고목 아래로",
             "초록 기둥의 원 안에서 5초 — 철수해야 주운 것이 남는다", TutorialCheck.Extracted02),
     };
 
     public static IReadOnlyList<TutorialStep> Steps => steps;
+
+    /// <summary>안내 창(Acknowledged)을 읽었다고 적는 사건 id (결정 2-107).</summary>
+    public static string AckEvent(string stepId) => $"{stepId}_read";
 
     public static bool IsDone(StoryProgress p) => p.HasSeen(DoneEvent);
 
@@ -139,8 +189,11 @@ public static class TutorialTable
                 continue;
 
             bool skip = step.SkipWhen.HasValue && facts.Has(step.SkipWhen.Value, 1);
+            bool met = step.Check == TutorialCheck.Acknowledged
+                ? p.HasSeen(AckEvent(step.Id))
+                : facts.Has(step.Check, step.Count);
 
-            if (skip || facts.Has(step.Check, step.Count))
+            if (skip || met)
             {
                 p.See(step.Id);
                 if (!skip)

@@ -171,6 +171,9 @@ public class ExchangeWindowUI : MonoBehaviour
     /// <summary>시체를 뒤졌다 — 튜토리얼 「쓰러진 잡귀를 뒤져라」가 듣는다 (결정 2-85).</summary>
     public static event System.Action CorpseOpened;
 
+    /// <summary>창고에서 꺼냈다 — 튜토리얼 「창고에서 꺼내라」가 듣는다 (결정 2-107).</summary>
+    public static event System.Action StashTaken;
+
     /// <summary>시체·상자를 파밍한다.</summary>
     public void Open(CorpseController corpse)
     {
@@ -657,6 +660,8 @@ public class ExchangeWindowUI : MonoBehaviour
     {
         if (TakeInto(index, stack))
         {
+            if (mode == Mode.Stash)
+                StashTaken?.Invoke();
             AutoEquipTaken(new[] { stack });
             AfterMove();
         }
@@ -739,6 +744,8 @@ public class ExchangeWindowUI : MonoBehaviour
 
         if (!moved)
             InventoryScreenUI.ShowToastIfOpen("가방에 자리가 없습니다.");
+        else if (mode == Mode.Stash)
+            StashTaken?.Invoke();
 
         AfterMove();
     }
@@ -808,6 +815,9 @@ public class ExchangeWindowUI : MonoBehaviour
         }
 
         GameLogger.Log($"[ExchangeWindowUI] {moved}칸 회수");
+
+        if (moved > 0 && mode == Mode.Stash)
+            StashTaken?.Invoke();
 
         // 다 집었으면 AfterMove가 알아서 닫는다.
         AfterMove();

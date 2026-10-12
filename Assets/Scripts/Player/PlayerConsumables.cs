@@ -10,6 +10,9 @@ using UnityEngine;
 /// </summary>
 public static class PlayerConsumables
 {
+    /// <summary>소모품을 썼다 — 튜토리얼(수분 · 에너지 · 소환단)이 듣는다 (결정 2-107).</summary>
+    public static event System.Action<ItemDefinition, ConsumableOutcome> Used;
+
     /// <summary>
     /// 가방의 한 칸에서 하나를 쓴다. 결과 문장을 돌려준다.
     ///
@@ -37,6 +40,7 @@ public static class PlayerConsumables
             return ConsumableUse.Explain(outcome.Error);
 
         Apply(health, outcome);
+        Used?.Invoke(definition, outcome);
 
         // 여기까지 와야 값을 치른다.
         string spent = Spend(stack, outcome);
