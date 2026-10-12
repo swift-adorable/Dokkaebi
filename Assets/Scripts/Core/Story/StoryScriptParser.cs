@@ -231,7 +231,7 @@ public static class StoryScriptParser
         return sections;
     }
 
-    private static bool IsArrivalHeader(string line)
+    internal static bool IsArrivalHeader(string line)
         => line != null && line.Trim() == ChapterZeroTable.ArrivalHeader;
 
     private static string FirstLine(string block)
@@ -240,7 +240,7 @@ public static class StoryScriptParser
         return n < 0 ? block : block.Substring(0, n);
     }
 
-    private static int NightNumber(string title)
+    internal static int NightNumber(string title)
     {
         for (int i = 0; i < NightNames.Length; i++)
             if (title.Contains(NightNames[i]))

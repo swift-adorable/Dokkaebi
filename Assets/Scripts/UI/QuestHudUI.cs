@@ -87,7 +87,7 @@ public class QuestHudUI : MonoBehaviour
 
         var button = panel.gameObject.AddComponent<Button>();
         button.targetGraphic = panel;
-        button.onClick.AddListener(() => { expanded = !expanded; Refresh(force: true); });
+        button.onClick.AddListener(QuestScreenUI.Open);   // 퀘스트 창 (결정 2-106)
 
         titleLabel = UIFactory.CreateLabel(panel.transform, string.Empty, 18, FontStyle.Normal,
             new Vector2(0f, 0.55f), new Vector2(1f, 1f), TextAnchor.LowerCenter, UIPalette.TextDim);
@@ -115,6 +115,10 @@ public class QuestHudUI : MonoBehaviour
 
     private void Update()
     {
+        // J — 퀘스트 창 (결정 2-106). 다른 창이 떠 있으면 열지 않는다.
+        if (Input.GetKeyDown(KeyCode.J) && !GamePause.IsHeld && !QuestScreenUI.IsOpen)
+            QuestScreenUI.Open();
+
         pollTimer -= Time.unscaledDeltaTime;
 
         if (pollTimer <= 0f)

@@ -18,6 +18,7 @@ public static class StoryManager
 
     private static StoryProgress progress;
     private static Dictionary<string, StoryPassage> passages;
+    private static List<LoreEntry> lore;
     private static string targetZone;
 
     /// <summary>창고 · 가방이 가득해 아직 못 건넨 상인 보상 (결정 2-101 · 세이브 판 21).</summary>
@@ -31,6 +32,7 @@ public static class StoryManager
     {
         progress = null;
         passages = null;
+        lore = null;
         targetZone = null;
         OnChanged = null;
         pendingRewards.Clear();
@@ -61,6 +63,45 @@ public static class StoryManager
             passages = StoryScriptParser.Parse(asset != null ? asset.text : string.Empty);
             return passages;
         }
+    }
+
+    /// <summary>본문의 세계관 도감 · 팝업 줄 (결정 2-106).</summary>
+    public static IReadOnlyList<LoreEntry> Lore
+    {
+        get
+        {
+            if (lore != null)
+                return lore;
+
+            var asset = Resources.Load<TextAsset>(ScriptResource);
+            lore = LoreTable.Parse(asset != null ? asset.text : string.Empty);
+            return lore;
+        }
+    }
+
+    /// <summary>
+    /// 이야기 토막을 본 것으로 적고, 그 토막에 붙은 세계관 팝업이 있으면 한 번 띄운다 (결정 2-106).
+    /// done은 팝업까지 닫힌 뒤에 부른다.
+    /// </summary>
+    private static void MarkSeen(string eventId, Action done = null)
+    {
+        Progress.See(eventId);
+        ShowPopups(eventId, done);
+    }
+
+    private static void ShowPopups(string eventId, Action done)
+    {
+        foreach (LoreEntry entry in Lore)
+        {
+            if (entry.Kind != LoreKind.Popup || entry.UnlockEvent != eventId || Progress.HasSeen(entry.SeenEvent))
+                continue;
+
+            Progress.See(entry.SeenEvent);
+            StoryDialogueUI.Show(entry.Title, new List<string> { entry.Body }, () => ShowPopups(eventId, done));
+            return;
+        }
+
+        done?.Invoke();
     }
 
     public static StoryPassage Passage(string id)
@@ -111,7 +152,7 @@ public static class StoryManager
             pages.Add($"{Josa.EulReul(boss.Tablet)} 얻었다. ({Progress.Tablets.Count}/{StoryTable.TabletsForGate})");
 
         if (pages.Count > 0)
-            StoryDialogueUI.Show(boss.Name, pages, () => Progress.See(StoryTable.BossEvent(bossId)));
+            StoryDialogueUI.Show(boss.Name, pages, () => MarkSeen(StoryTable.BossEvent(bossId)));
     }
 
     public static void ReportPiece(string pieceId)
@@ -124,7 +165,7 @@ public static class StoryManager
         StoryPassage passage = Passage(StoryTable.PieceEvent(pieceId));
 
         if (passage != null)
-            StoryDialogueUI.Show(passage.Title, passage.Pages, () => Progress.See(passage.Id));
+            StoryDialogueUI.Show(passage.Title, passage.Pages, () => MarkSeen(passage.Id));
     }
 
     /// <summary>
@@ -149,9 +190,11 @@ public static class StoryManager
 
         StoryDialogueUI.Show(passage.Title, passage.Pages, () =>
         {
-            Progress.See(eventId);
-            OnChanged?.Invoke();
-            done?.Invoke();
+            MarkSeen(eventId, () =>
+            {
+                OnChanged?.Invoke();
+                done?.Invoke();
+            });
         }, backdrop);
     }
 

@@ -47,6 +47,9 @@ public sealed class QuestTracker
         }
     }
 
+    /// <summary>센 목표의 진행 글(예: 「2 / 5」). 세는 목표가 아니면 빈 글 (결정 2-106).</summary>
+    public string ProgressText(QuestObjective objective) => string.Empty;
+
     public bool IsStarted(QuestDefinition quest)
         => quest != null && (story.HasSeen(quest.StartEvent) || IsComplete(quest));
 

@@ -63,9 +63,13 @@ public sealed class QuestDefinition
     /// <summary>보상 — 화면에 보이는 글. 실제 아이템은 상인 표(MerchantDefinition.Rewards)가 준다.</summary>
     public readonly string RewardText;
 
+    /// <summary>퀘스트 창의 한 줄 설명 — 본문 「(퀘스트 …) 이름 — 설명」의 설명 부분 그대로 (결정 2-106). 없으면 빈 글.</summary>
+    public readonly string Summary;
+
     public QuestDefinition(string id, QuestKind kind, string title, string giverId, string startEvent,
-        QuestObjective[] objectives, string rewardText = "")
+        QuestObjective[] objectives, string rewardText = "", string summary = "")
     {
+        Summary = summary ?? string.Empty;
         Id = id;
         Kind = kind;
         Title = title;

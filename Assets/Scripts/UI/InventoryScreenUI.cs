@@ -24,9 +24,9 @@ using UnityEngine.UI;
 /// </summary>
 public partial class InventoryScreenUI : MonoBehaviour
 {
-    private enum Tab { Bag = 0, Socket = 1, Passive = 2 }
+    private enum Tab { Bag = 0, Socket = 1, Passive = 2, Codex = 3 }
 
-    private static readonly string[] TabNames = { "장비", "스킬", "패시브" };
+    private static readonly string[] TabNames = { "장비", "스킬", "패시브", "도감" };
 
     // ── 레이아웃 ──────────────────────────────────────────────────────
     // 값은 전부 【안전 영역 기준】의 0~1이다. 노치와 홈 인디케이터는
@@ -1000,7 +1000,8 @@ public partial class InventoryScreenUI : MonoBehaviour
         // 【탭마다 필요한 만큼만 쓴다.】
         //   장비 · 스킬 — 왼쪽 55%만. 나머지는 게임 화면이 그대로 비친다.
         //   패시브      — 폭 전체 + 덮개. 트리를 접으면 볼 수가 없다.
-        bool passive = tab == Tab.Passive;
+        // 도감(결정 2-106)도 패시브처럼 화면을 통째로 쓴다.
+        bool passive = tab == Tab.Passive || tab == Tab.Codex;
 
         bool showLeft = !passive;
         bool showRight = passive;
@@ -1087,7 +1088,10 @@ public partial class InventoryScreenUI : MonoBehaviour
                 UIFactory.CreateRegion("Content", rightPanel, Vector2.zero, Vector2.one),
                 UIFactory.Gap);
 
-            DrawPassivePanel();
+            if (tab == Tab.Codex)
+                DrawCodexPanel();
+            else
+                DrawPassivePanel();
         }
 
         RefreshToggle();
