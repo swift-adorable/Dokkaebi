@@ -154,6 +154,10 @@ public class BunkerStation : MonoBehaviour
     /// <summary>그 일을 한다.</summary>
     public void Use()
     {
+        // 상인이 맡아 둔 보상이 있으면 먼저 건넨다 (결정 2-101) — 자리가 났을 수 있다.
+        if (StoryManager.HasPendingRewards)
+            StoryManager.DeliverPendingRewards();
+
         switch (kind)
         {
             case Kind.Stash:

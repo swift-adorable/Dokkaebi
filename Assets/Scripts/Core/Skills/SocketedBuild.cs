@@ -726,23 +726,29 @@ public class SocketedBuild
             return modifiers;
 
         modifiers.Reset();
+        appliedOnce.Clear();
 
-        IReadOnlyList<SkillDefinition> list = Equipped;
-
-        for (int i = 0; i < list.Count; i++)
+        // 【칸으로 거른다】 (결정 2-101) — 기폭 핵심 젬과 그 소켓은 탄에 싣지 않는다 (Audit A5 · 기폭은 독립 발동, 9절 4).
+        // 전에는 정의로 걸러, 같은 보조 구슬을 탄 핵심과 기폭 핵심에 하나씩 꽂으면 탄 쪽 효과까지 빠졌다.
+        // 【같은 보조 구슬은 한 번만 센다】 (결정 2-101) — 탄 핵심 둘에 같은 것을 꽂아도 두 배가 되지 않는다
+        // (같은 핵심을 둘 꽂지 못하는 규칙과 같은 이유 — 14절 5번).
+        for (int c = 0; c < MaxCores; c++)
         {
-            SkillDefinition definition = list[i];
+            SkillDefinition core = cores[c];
 
-            if (IsNullified(definition))
+            if (core == null || core.Family == CoreFamily.Detonation)
                 continue;
 
-            // 【기폭 핵심 젬과 그 소켓은 탄에 싣지 않는다 (Audit A5).】 기폭은 투사체가 아니라 독립 발동이다(9절 4).
-            // 전에는 「짧은 퓨즈」(기폭 범위 −30%)가 탄의 유효 사거리를, 「유지되는 대지」가 탄 상태의 지속을 바꿨다.
-            if (IsInDetonationCore(definition))
-                continue;
+            ApplyOnce(core);
 
-            modifiers.Apply(definition);
+            for (int s = 0; s < SocketsPerCore; s++)
+                ApplyOnce(sockets[c, s]);
         }
+
+        for (int m = 0; m < MaxMetas; m++)
+            ApplyOnce(GetMeta(m));
+
+        ApplyOnce(herald);
 
         // 합성 발사: 부여 계열 핵심 젬이 생성하는 상태를 탄에 싣는다.
         // 핵심 젬 단위로 계산한다 — 속성 전환과 기능 배타가 둘 다 핵심 젬별이기 때문이다.
@@ -755,6 +761,16 @@ public class SocketedBuild
         isDirty = false;
 
         return modifiers;
+    }
+
+    private readonly HashSet<SkillDefinition> appliedOnce = new();
+
+    private void ApplyOnce(SkillDefinition definition)
+    {
+        if (definition == null || IsNullified(definition) || !appliedOnce.Add(definition))
+            return;
+
+        modifiers.Apply(definition);
     }
 
     // ────────────────────────────────── 기폭 (Audit A5)

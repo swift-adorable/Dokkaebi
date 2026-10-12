@@ -105,6 +105,13 @@ public class PlayerAbsorber : MonoBehaviour
         if (corpse == null)
             return;
 
+        // 다른 적이 죽인 시체 — 정기 · 엽전은 없다, 전리품만 (결정 2-101).
+        if (!corpse.GivesEssence)
+        {
+            corpse.TryMarkAbsorbed();
+            return;
+        }
+
         if (corpse.TryMarkAbsorbed())
         {
             int baseAmount = Mathf.RoundToInt(experiencePerCorpse * corpse.ValueMultiplier);

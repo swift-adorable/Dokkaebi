@@ -95,5 +95,22 @@ namespace Dokkaebi.Tests
                 Assert.IsFalse(ShopTable.TryFind(ShopKind.Apothecary, id, out _), $"{id}를 약탕간이 아직 팝니다.");
             }
         }
+    
+        [Test]
+        public void 각인은_안전_칸을_쓰지_않는다()
+        {
+            var imprint = Load<EquipmentDefinition>("Imprints/imp_smoulder_t1.asset");
+            var water = Load<ItemDefinition>("Consumables/con_water.asset");
+
+            var bag = new Inventory(10, 999f);
+            Assert.IsTrue(bag.TryAddStack(new ItemStack(imprint)));
+            Assert.AreEqual(1, bag.TryAdd(water, 1));
+
+            var safe = bag.SafeStacks(1);
+            Assert.AreEqual(1, safe.Count);
+            foreach (ItemStack s in safe)
+                Assert.AreSame(water, s.Definition, "각인이 안전 칸을 차지했습니다 (각인은 어차피 남는다).");
+        }
+
     }
 }

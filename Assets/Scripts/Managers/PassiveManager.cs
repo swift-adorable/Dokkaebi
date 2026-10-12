@@ -106,12 +106,13 @@ public class PassiveManager : Singleton<PassiveManager>
         }
     }
 
-    /// <summary>지금 상태로 만든 판단 재료. 재료는 가방에서 꺼낸다.</summary>
+    /// <summary>지금 상태로 만든 판단 재료. 재료는 벙커에서는 창고 먼저, 모자라면 가방 (결정 2-101).</summary>
     public PassiveContext Context => new(
         Level,
         gold,
         PlayerInventory.HasInstance ? PlayerInventory.Instance.Bag : null,
-        discoveredRegression);
+        discoveredRegression,
+        PlayerInventory.HasInstance && SceneFlow.InBunker ? PlayerInventory.Instance.Stash : null);
 
     /// <summary>패시브나 계정 상태가 바뀌었을 때 발행된다.</summary>
     public event Action OnChanged;

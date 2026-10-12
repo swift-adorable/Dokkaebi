@@ -404,5 +404,31 @@ namespace Dokkaebi.Tests
 
             Assert.AreEqual(0, state.Count);
         }
+    
+        // ── 재료는 창고 먼저 (결정 2-101) ─────────────────────────────────
+
+        [Test]
+        public void 재료는_창고_먼저_모자라면_가방에서()
+        {
+            ItemDefinition scrap = Item("scrap_test");
+            PassiveNode node = Node("needs_stash", materials: new[] { new PassiveMaterial(scrap, 5) });
+
+            var bag = new Inventory(slots: 10, weight: 100f);
+            var stash = new Inventory(slots: 10, weight: 999f);
+            bag.TryAdd(scrap, 4);
+            stash.TryAdd(scrap, 3);
+
+            var state = new PassiveState();
+            var ctx = new PassiveContext(1, 100000, bag, false, stash);
+
+            Assert.AreEqual(PassiveError.MissingMaterials, state.CanLearn(node, Ctx(materials: new Inventory(10, 100f))),
+                "빈 가방만으로는 못 배운다");
+            Assert.AreEqual(PassiveError.None, state.CanLearn(node, ctx), "창고 3 + 가방 4로 배울 수 있어야 한다");
+
+            state.TryLearn(node, ctx);
+            Assert.AreEqual(0, stash.CountOf(scrap), "창고에서 먼저 뺀다");
+            Assert.AreEqual(2, bag.CountOf(scrap), "모자란 2만 가방에서");
+        }
+
     }
 }

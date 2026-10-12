@@ -326,5 +326,38 @@ namespace Dokkaebi.Tests
             build.TryEquipSupport(Support("sup_a"), 1, 0);
             Assert.AreEqual(1, changes);
         }
+    
+        // ── 같은 보조 구슬 (결정 2-101) ───────────────────────────────────
+
+        [Test]
+        public void 같은_보조_구슬은_탄_핵심_둘에_꽂아도_한_번만_센다()
+        {
+            SocketedBuild build = At(30);
+            SkillDefinition multi = SkillTestFactory.CreateSupport("sup_multi_test", extraProjectiles: 2);
+
+            Assert.IsTrue(build.TryEquipCore(Core("core_a"), 0));
+            Assert.IsTrue(build.TryEquipCore(Core("core_b"), 1));
+            Assert.IsTrue(build.TryEquipSupport(multi, 0, 0));
+            Assert.IsTrue(build.TryEquipSupport(multi, 1, 0));
+
+            Assert.AreEqual(2, build.GetModifiers().ExtraProjectiles, "두 배로 겹쳤습니다.");
+        }
+
+        [Test]
+        public void 기폭_핵심에도_꽂은_보조는_탄_핵심_쪽_효과가_남는다()
+        {
+            SocketedBuild build = At(30);
+            SkillDefinition multi = SkillTestFactory.CreateSupport("sup_multi_det", extraProjectiles: 2);
+            SkillDefinition burst = SkillTestFactory.CreateCore("core_burst_test", SkillTag.Projectile,
+                family: CoreFamily.Detonation);
+
+            Assert.IsTrue(build.TryEquipCore(Core("core_a"), 0));
+            Assert.IsTrue(build.TryEquipCore(burst, 1));
+            Assert.IsTrue(build.TryEquipSupport(multi, 0, 0));
+            Assert.IsTrue(build.TryEquipSupport(multi, 1, 0));
+
+            Assert.AreEqual(2, build.GetModifiers().ExtraProjectiles, "기폭 핵심에도 꽂았다고 탄 쪽 효과가 빠졌습니다.");
+        }
+
     }
 }

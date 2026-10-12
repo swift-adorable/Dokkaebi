@@ -46,6 +46,12 @@ public class CorpseController : MonoBehaviour, IPoolable
     /// <summary>죽은 적이 등급을 넘겨주었는가 — 씬에 직접 놓인 시체는 아니다.</summary>
     private bool rewardSet;
 
+    /// <summary>
+    /// 정기 · 엽전을 주는 시체인가 (결정 2-101) — 내가 쓰러뜨린 것만. 다른 적이 죽인 시체는 전리품만 남는다.
+    /// 씬에 직접 놓인 시체(등급을 넘겨받지 않음)는 예전처럼 준다.
+    /// </summary>
+    public bool GivesEssence => !rewardSet || KilledByPlayer;
+
     /// <summary>등급이 정한 경험치 배율. 정수로 깎지 않는다.</summary>
     public float ExperienceMultiplier => EnemyRewardTable.ExperienceMultiplier(Rarity);
 

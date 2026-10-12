@@ -20,6 +20,9 @@ public static class StoryManager
     private static Dictionary<string, StoryPassage> passages;
     private static string targetZone;
 
+    /// <summary>창고 · 가방이 가득해 아직 못 건넨 상인 보상 (결정 2-101 · 세이브 판 21).</summary>
+    private static readonly List<SavedItem> pendingRewards = new();
+
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     private static void ResetStatics()
     {
@@ -27,6 +30,7 @@ public static class StoryManager
         passages = null;
         targetZone = null;
         OnChanged = null;
+        pendingRewards.Clear();
     }
 
     public static StoryProgress Progress => progress ??= new StoryProgress();
@@ -152,6 +156,7 @@ public static class StoryManager
     {
         progress = null;
         targetZone = null;
+        pendingRewards.Clear();
     }
 
     /// <summary>밤을 보여 주고 지난 것으로 적는다. 그 밤의 상인이 소굴에 온다.</summary>
@@ -174,7 +179,8 @@ public static class StoryManager
 
     /// <summary>
     /// 가게를 지어 줬다 — 그 가게를 부탁한 상인의 보상을 창고에 넣는다.
-    /// 창고가 가득 차면 가방으로, 그래도 안 들어가면 로그만 남긴다.
+    /// 창고가 가득 차면 가방으로, 그래도 안 들어가면 【상인이 맡아 둔다】 (결정 2-101) —
+    /// 벙커에서 아무 자리나 쓰면 다시 건넨다(DeliverPendingRewards). 세이브에 남는다.
     /// </summary>
     public static void GrantBuildingReward(string buildingId)
     {
@@ -182,6 +188,8 @@ public static class StoryManager
 
         if (merchant == null || merchant.Rewards.Length == 0)
             return;
+
+        bool kept = false;
 
         ItemCatalog catalog = ItemCatalog.Load();
         PlayerInventory inventory = PlayerInventory.EnsureInstance();
@@ -202,15 +210,92 @@ public static class StoryManager
                 left -= inventory.Bag.TryAdd(definition, left);
 
             if (left > 0)
-                GameLogger.Warning($"[Story] 창고 · 가방이 가득 차 「{definition.DisplayName}」 {left}개를 받지 못했습니다.");
+            {
+                pendingRewards.Add(new SavedItem { id = itemId, count = left });
+                kept = true;
+            }
         }
 
-        StoryDialogueUI.ShowBanner($"{Josa.IGa(merchant.Name)} 고맙다며 보상을 건넸다. (창고)");
+        StoryDialogueUI.ShowBanner(kept
+            ? $"{Josa.IGa(merchant.Name)} 보상을 건네려다 — 창고가 가득하구나, 자리가 나면 주마."
+            : $"{Josa.IGa(merchant.Name)} 고맙다며 보상을 건넸다. (창고)");
+    }
+
+    /// <summary>맡아 둔 보상이 있는가.</summary>
+    public static bool HasPendingRewards => pendingRewards.Count > 0;
+
+    /// <summary>
+    /// 맡아 둔 상인 보상을 건넨다 (결정 2-101) — 벙커 자리를 쓸 때마다 부른다. 들어간 만큼만 빼고 나머지는 계속 맡는다.
+    /// 건넨 것이 있으면 true.
+    /// </summary>
+    public static bool DeliverPendingRewards()
+    {
+        if (pendingRewards.Count == 0 || !SceneFlow.InBunker)
+            return false;
+
+        ItemCatalog catalog = ItemCatalog.Load();
+        PlayerInventory inventory = PlayerInventory.EnsureInstance();
+        bool any = false;
+
+        for (int i = pendingRewards.Count - 1; i >= 0; i--)
+        {
+            SavedItem row = pendingRewards[i];
+            ItemDefinition definition = catalog != null ? catalog.Find(row.id) : null;
+
+            if (definition == null)
+            {
+                pendingRewards.RemoveAt(i);
+                continue;
+            }
+
+            int given = inventory.Stash.TryAdd(definition, row.count);
+            if (given < row.count)
+                given += inventory.Bag.TryAdd(definition, row.count - given);
+
+            if (given <= 0)
+                continue;
+
+            any = true;
+            row.count -= given;
+            if (row.count <= 0)
+                pendingRewards.RemoveAt(i);
+        }
+
+        if (any)
+        {
+            StoryDialogueUI.ShowBanner(pendingRewards.Count == 0
+                ? "상인이 맡아 두었던 보상을 건넸다. (창고)"
+                : "상인이 맡아 두었던 보상 일부를 건넸다 — 나머지는 자리가 나면.");
+            inventory.RefreshCapacity();
+            SaveManager.Commit("맡아 둔 보상");
+        }
+
+        return any;
     }
 
     // ── 세이브 ───────────────────────────────────────────────────────
 
     public static SavedStory Capture() => Progress.Capture();
+
+    /// <summary>맡아 둔 상인 보상 (결정 2-101 · 판 21).</summary>
+    public static List<SavedItem> CapturePendingRewards()
+    {
+        var list = new List<SavedItem>();
+        foreach (SavedItem row in pendingRewards)
+            list.Add(new SavedItem { id = row.id, count = row.count });
+        return list;
+    }
+
+    public static void RestorePendingRewards(List<SavedItem> saved)
+    {
+        pendingRewards.Clear();
+        if (saved == null)
+            return;
+
+        foreach (SavedItem row in saved)
+            if (row != null && !row.IsEmpty)
+                pendingRewards.Add(new SavedItem { id = row.id, count = row.count });
+    }
 
     public static void Restore(SavedStory saved)
     {

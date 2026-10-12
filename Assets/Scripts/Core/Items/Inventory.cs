@@ -338,7 +338,8 @@ public class Inventory
 
         for (int i = 0; i < stacks.Count && safe.Count < safeSlots; i++)
         {
-            if (stacks[i].Definition != null && stacks[i].Definition.IsCargo)
+            // 각인은 쓰러져도 남으므로 안전 칸을 쓰지 않는다 (결정 2-101).
+            if (stacks[i].Definition != null && stacks[i].Definition.IsCargo && !stacks[i].Definition.SurvivesDeath)
                 safe.Add(stacks[i]);
         }
 

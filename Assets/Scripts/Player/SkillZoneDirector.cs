@@ -126,6 +126,10 @@ public class SkillZoneDirector : MonoBehaviour
         if (enemy == null || enemy.Health == null)
             return;
 
+        // 내가 쓰러뜨린 것에서만 터지고 잔류물이 남는다 (결정 2-101) — 적끼리 싸워 죽은 것은 아니다.
+        if (!enemy.Health.KillContext.killedByPlayer)
+            return;
+
         StatusEffectState status = enemy.Health.Status;
         StatusEffectType picked = SkillZoneTable.PickDetonation(status);
         Vector3 at = enemy.transform.position;

@@ -41,13 +41,17 @@ public struct PassiveContext
     /// <summary>역행 계열을 발견했는지.</summary>
     public bool discoveredRegression;
 
+    /// <summary>재료를 먼저 꺼낼 창고 (결정 2-101 — 건설 · 요리 · 작업대와 같다). null이면 가방만.</summary>
+    public Inventory stash;
+
     public PassiveContext(int level, int gold,
-                          Inventory materials = null, bool discoveredRegression = false)
+                          Inventory materials = null, bool discoveredRegression = false, Inventory stash = null)
     {
         this.level = level;
         this.gold = gold;
         this.materials = materials;
         this.discoveredRegression = discoveredRegression;
+        this.stash = stash;
     }
 
     /// <summary>해당 계열이 지금 보이는지.</summary>
@@ -121,16 +125,16 @@ public class PassiveState
         if (context.gold < node.Cost)
             return PassiveError.NotEnoughGold;
 
-        if (!HasMaterials(node, context.materials))
+        if (!HasMaterials(node, context.materials, context.stash))
             return PassiveError.MissingMaterials;
 
         return PassiveError.None;
     }
 
     /// <summary>필요 재료를 전부 가지고 있는지. 재료 창고가 null이면 검사를 생략한다.</summary>
-    public static bool HasMaterials(PassiveNode node, Inventory source)
+    public static bool HasMaterials(PassiveNode node, Inventory source, Inventory stash = null)
     {
-        if (node == null || !node.NeedsMaterials || source == null)
+        if (node == null || !node.NeedsMaterials || (source == null && stash == null))
             return true;
 
         IReadOnlyList<PassiveMaterial> materials = node.Materials;
@@ -140,7 +144,8 @@ public class PassiveState
             if (!materials[i].IsValid)
                 continue;
 
-            if (source.CountOf(materials[i].item) < materials[i].ClampedCount)
+            int have = (source?.CountOf(materials[i].item) ?? 0) + (stash?.CountOf(materials[i].item) ?? 0);
+            if (have < materials[i].ClampedCount)
                 return false;
         }
 
@@ -157,24 +162,31 @@ public class PassiveState
         if (CanLearn(node, in context) != PassiveError.None)
             return 0;
 
-        ConsumeMaterials(node, context.materials);
+        ConsumeMaterials(node, context.materials, context.stash);
 
         learned.Add(node.Id);
 
         return node.Cost;
     }
 
-    private static void ConsumeMaterials(PassiveNode node, Inventory source)
+    /// <summary>창고 먼저, 모자라면 가방에서 뺀다 (결정 2-101).</summary>
+    private static void ConsumeMaterials(PassiveNode node, Inventory source, Inventory stash)
     {
-        if (node == null || !node.NeedsMaterials || source == null)
+        if (node == null || !node.NeedsMaterials || (source == null && stash == null))
             return;
 
         IReadOnlyList<PassiveMaterial> materials = node.Materials;
 
         for (int i = 0; i < materials.Count; i++)
         {
-            if (materials[i].IsValid)
-                source.Remove(materials[i].item, materials[i].ClampedCount);
+            if (!materials[i].IsValid)
+                continue;
+
+            int need = materials[i].ClampedCount;
+            if (stash != null)
+                need -= stash.Remove(materials[i].item, need);
+            if (need > 0 && source != null)
+                source.Remove(materials[i].item, need);
         }
     }
 
