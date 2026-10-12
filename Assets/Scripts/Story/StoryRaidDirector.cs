@@ -129,6 +129,13 @@ public class StoryRaidDirector : MonoBehaviour
 
             if (health != null)
                 group.Track(health);
+
+            // 각시탈이 알리는 것 — 구미호 (결정 2-103).
+            if (health != null && boss.Id == KaksitalRule.GumihoId)
+            {
+                KaksitalRule.Gumiho = health;
+                KaksitalHudUI.EnsureInstance();
+            }
         }
 
         bossAlive = group.Count > 0;

@@ -189,7 +189,10 @@ public static class UISprites
         Drop = 8,
 
         /// <summary>에너지.</summary>
-        Bolt = 9
+        Bolt = 9,
+
+        /// <summary>각시탈 — 구미호가 가까이 있다 (결정 2-103). 눈 · 입 구멍이 뚫린 갸름한 탈.</summary>
+        Mask = 10
     }
 
     private static readonly Dictionary<Glyph, Sprite> glyphCache = new();
@@ -349,6 +352,18 @@ public static class UISprites
                     -v - 0.86f);
 
                 distance = Mathf.Min(upper, lower);
+                break;
+            }
+
+            case Glyph.Mask:
+            {
+                // 갸름한 얼굴 — 세로로 긴 타원. 눈 둘 · 입 하나를 뚫는다.
+                float face = (Mathf.Sqrt((u / 0.60f) * (u / 0.60f) + (v / 0.82f) * (v / 0.82f)) - 1f) * 0.60f;
+                float eyeL = Mathf.Sqrt((u + 0.24f) * (u + 0.24f) + (v - 0.16f) * (v - 0.16f) * 4f) - 0.11f;
+                float eyeR = Mathf.Sqrt((u - 0.24f) * (u - 0.24f) + (v - 0.16f) * (v - 0.16f) * 4f) - 0.11f;
+                float mouth = Mathf.Sqrt(u * u * 0.6f + (v + 0.40f) * (v + 0.40f) * 6f) - 0.10f;
+                float holes = Mathf.Min(eyeL, Mathf.Min(eyeR, mouth));
+                distance = Mathf.Max(face, -holes);
                 break;
             }
 
