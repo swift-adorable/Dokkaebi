@@ -7,7 +7,7 @@ namespace Dokkaebi.Tests
     ///
     /// 【여기서 강제하는 것】
     ///   1. 달은 판마다 한 칸 돌고 여섯 칸이면 제자리다
-    ///   2. 0장은 늘 맑음, 1장 첫 방문은 비, 눈은 겨울에만
+    ///   2. 0장은 늘 궂은비(결정 2-104), 1장 첫 방문은 비, 눈은 겨울에만
     ///   3. 궂은 날은 계절마다 다르게 아프고, 그 계절의 막이로 막힌다
     ///   4. 6장 꽃비는 해가 없다
     ///   5. 추위는 쌓이고 녹는다
@@ -88,11 +88,12 @@ namespace Dokkaebi.Tests
         }
 
         [Test]
-        public void 튜토리얼은_늘_맑다()
+        public void 영장은_늘_궂은비다()
         {
             RaidWeather w = WeatherTable.For(0, WeatherSlot.Bad2, true, false);
-            Assert.AreEqual(WeatherSlot.Clear, w.Slot);
+            Assert.AreEqual(WeatherSlot.Precipitation, w.Slot);
             Assert.AreEqual(WeatherHazard.None, w.Hazard);
+            Assert.IsFalse(w.Snow);
         }
 
         [Test]

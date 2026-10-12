@@ -227,6 +227,12 @@ public static class StoryTable
     public const string Chambong = "chambong";
     public const string Gildal = "gildal";
 
+    /// <summary>
+    /// 보상을 가방에만 넣는 상인 (결정 2-104) — 본문 346 참봉 「소환단 한 줌과 식혜 몇 병을 어린 도깨비 봇짐에 넣어 주었다」.
+    /// 가방이 가득하면 맡아 두었다가 가방에 자리가 나면 준다. 나머지 상인은 창고 먼저(결정 2-101).
+    /// </summary>
+    public static bool RewardsToBag(string merchantId) => merchantId == Chambong;
+
     private static readonly MerchantDefinition[] merchants =
     {
         // 상인 넷 = 가게 넷 (결정 2-52 · 2-57). 영감의 잡화 가게만 처음부터 지을 수 있다.

@@ -16,6 +16,14 @@ public static class ExtractionTable
     public const float Radius = 2.5f;
     public const float ChannelSeconds = 5f;
 
+    /// <summary>
+    /// 튜토리얼 0-1 — 걸어서 고목에 닿으면 바로 들어간다 (결정 2-104 · 본문 72). 버티기 · 철수 안내는 0-2에서.
+    /// </summary>
+    public static bool ArriveOnTouch(string zoneId, bool tutorialDone) => !tutorialDone && zoneId == "0-1";
+
+    /// <summary>닿기만 하면 되는 경우의 버티는 시간 — 사실상 0.</summary>
+    public const float TouchSeconds = 0.01f;
+
     /// <summary>파밍 구역 바닥의 반 폭 — 바닥은 100m × 100m (Floor 배율 10). 가장자리에서 5m 안쪽까지만 쓴다.</summary>
     public const float AreaHalfExtent = 45f;
 

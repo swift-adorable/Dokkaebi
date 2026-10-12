@@ -65,6 +65,10 @@ public static class BuildingManager
 
     public static bool Place(string id, BuildingPose pose)
     {
+        // 약탕간은 샘 곁에만 (결정 2-104).
+        if (BunkerLayout.TryFixedPose(id, out BuildingPose fixedPose))
+            pose = fixedPose;
+
         if (!State.Place(id, pose))
             return false;
 
@@ -129,7 +133,13 @@ public static class BuildingManager
                 State.Own(id);
 
                 if (row.placed && !State.IsPlaced(id))
-                    State.Place(id, new BuildingPose(row.x, row.z, row.turns));
+                {
+                    // 예전 세이브에서 다른 데 지어 둔 약탕간도 샘 곁으로 옮긴다 (결정 2-104).
+                    BuildingPose pose = BunkerLayout.TryFixedPose(id, out BuildingPose fixedPose)
+                        ? fixedPose
+                        : new BuildingPose(row.x, row.z, row.turns);
+                    State.Place(id, pose);
+                }
             }
         }
 

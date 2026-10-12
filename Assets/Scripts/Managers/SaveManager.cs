@@ -262,6 +262,7 @@ public static class SaveManager
         data.buildings = BuildingManager.Capture();
         data.story = StoryManager.Capture();
         data.pendingRewards = StoryManager.CapturePendingRewards();
+        data.pendingBagRewards = StoryManager.CapturePendingBagRewards();
         data.difficulty = DifficultyManager.Capture();
         data.maps = MapMemory.Capture();
         NightClock.Capture(data);
@@ -329,6 +330,7 @@ public static class SaveManager
         BuildingManager.Restore(data.buildings);
         StoryManager.Restore(data.story);
         StoryManager.RestorePendingRewards(data.pendingRewards);
+        StoryManager.RestorePendingBagRewards(data.pendingBagRewards);
         // 가게는 이야기 다음 — 오늘의 물건 풀이 열린 장을 본다 (19판 이하는 여기서 새로 뽑는다).
         ShopManager.RestoreDaily(data.shopDaily);   // 재고보다 먼저 (결정 2-98)
         ShopManager.Restore(data.shop);

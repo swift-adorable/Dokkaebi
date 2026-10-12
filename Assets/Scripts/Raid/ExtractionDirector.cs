@@ -21,7 +21,10 @@ public class ExtractionDirector : MonoBehaviour
     private Vector3[] points;
     private bool[] discovered;
     private float nextDiscover;
-    private readonly ExtractionChannel channel = new();
+    private ExtractionChannel channel = new();
+
+    /// <summary>튜토리얼 0-1 — 고목에 닿으면 바로 소굴로 (결정 2-104).</summary>
+    private bool arriveOnTouch;
     private Transform player;
     private Health playerHealth;
 
@@ -46,6 +49,14 @@ public class ExtractionDirector : MonoBehaviour
             ? anchors.ToArray()
             : ExtractionTable.PickPoints(start, new System.Random());
         director.discovered = new bool[director.points.Length];
+
+        director.arriveOnTouch = ExtractionTable.ArriveOnTouch(
+            StoryManager.TargetZone, TutorialTable.IsDone(StoryManager.Progress));
+        if (director.arriveOnTouch)
+        {
+            director.channel = new ExtractionChannel(ExtractionTable.TouchSeconds);
+            director.RevealAll();   // 고목은 찾을 것 없이 보인다
+        }
 
         // 「돌아갈 길목」 (결정 2-93) — 찾지 않아도 처음부터 보인다(지도 · 미니맵 · 화살표).
         if (MapPassives.ExtractMark)
@@ -98,13 +109,15 @@ public class ExtractionDirector : MonoBehaviour
         switch (step)
         {
             case ExtractionStep.Started:
-                StoryDialogueUI.ShowBanner($"{Name} — {ExtractionTable.ChannelSeconds:0}초 버티면 철수한다.", 2f);
+                if (!arriveOnTouch)
+                    StoryDialogueUI.ShowBanner($"{Name} — {ExtractionTable.ChannelSeconds:0}초 버티면 철수한다.", 2f);
                 break;
             case ExtractionStep.Cancelled:
                 StoryDialogueUI.ShowBanner("철수가 끊겼다 — 원을 벗어났다.", 1.5f);
                 break;
             case ExtractionStep.Completed:
-                StoryDialogueUI.ShowBanner("철수한다.", 1.5f);
+                if (!arriveOnTouch)
+                    StoryDialogueUI.ShowBanner("철수한다.", 1.5f);
                 ExtractionHudUI.Clear();
                 SceneFlow.Extract();
                 return;

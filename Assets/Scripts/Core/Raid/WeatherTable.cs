@@ -251,7 +251,7 @@ public static class WeatherTable
     }
 
     /// <summary>
-    /// 그 장의 이번 날씨. 0장(튜토리얼)은 늘 맑음, 1장 첫 방문은 비 (결정 2-63).
+    /// 그 장의 이번 날씨. 0장은 늘 궂은비(본문 54 「헛간 밖에는 궂은비가 내리고」 · 결정 2-104), 1장 첫 방문은 비 (결정 2-63).
     /// 날씨 칸은 장과 무관하게 하나를 뽑아 두고 장의 계절로 읽는다.
     /// </summary>
     public static RaidWeather For(int chapter, WeatherSlot slot, bool snow, bool firstVisit)
@@ -260,7 +260,7 @@ public static class WeatherTable
         Season season = c != null ? c.Season : Season.Spring;
 
         if (chapter <= 0)
-            return new RaidWeather(chapter, season, WeatherSlot.Clear, false);
+            return new RaidWeather(chapter, season, WeatherSlot.Precipitation, false);
 
         if (chapter == 1 && firstVisit)
             return new RaidWeather(chapter, season, WeatherSlot.Precipitation, false);

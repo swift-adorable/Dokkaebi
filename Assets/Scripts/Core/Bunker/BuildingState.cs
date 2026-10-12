@@ -222,6 +222,25 @@ public static class BunkerLayout
     /// <summary>고목 뿌리 샘 (결정 2-73) — 창고의 맞은편 벽. 처음부터 있다.</summary>
     public static readonly Vector3 SpringPosition = new(6f, 0f, RoomDepth * 0.5f - 2f);
 
+    /// <summary>
+    /// 약탕간 자리 — 샘 바로 오른쪽 (결정 2-104 · 본문 326 「샘가 저 빈자리에」 · 342 「샘가에 약탕간을 세운다」).
+    /// 샘은 소굴에 하나뿐이고 약탕간은 그 곁에만 선다 — 옮길 수 없다.
+    /// </summary>
+    public static readonly BuildingPose ApothecaryPose = new(8.5f, RoomDepth * 0.5f - 1.7f, 0);
+
+    /// <summary>정해진 자리에만 서는 건물인가 — 지금은 약탕간 하나.</summary>
+    public static bool TryFixedPose(string buildingId, out BuildingPose pose)
+    {
+        if (buildingId == BuildingTable.Apothecary)
+        {
+            pose = ApothecaryPose;
+            return true;
+        }
+
+        pose = default;
+        return false;
+    }
+
     /// <summary>고정 자리가 바닥에서 차지하는 크기 (m).</summary>
     public const float FixedSize = 2f;
 

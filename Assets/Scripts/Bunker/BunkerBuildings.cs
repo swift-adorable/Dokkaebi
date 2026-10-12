@@ -231,6 +231,15 @@ public class BunkerBuildings : MonoBehaviour
 
         EndPlacing();
 
+        // 정해진 자리에만 서는 건물(약탕간 — 샘 곁)은 고르지 않고 바로 놓는다 (결정 2-104).
+        if (BunkerLayout.TryFixedPose(definition.Id, out BuildingPose fixedPose))
+        {
+            BuildingManager.Place(definition.Id, fixedPose);
+            SaveManager.Commit("건설");
+            StoryDialogueUI.ShowBanner($"「{definition.Name}」 — 샘 곁에 놓았습니다.", 2f);
+            return;
+        }
+
         placing = definition;
         placingTurns = 0;
 
@@ -335,6 +344,11 @@ public class BunkerBuildings : MonoBehaviour
         yield return BunkerLayout.FixedRect(BunkerLayout.DeparturePosition);
         yield return BunkerLayout.FixedRect(BunkerLayout.BlueprintPosition);
         yield return BunkerLayout.FixedRect(BunkerLayout.SpringPosition);
+
+        // 샘 곁 약탕간 자리는 비워 둔다 (결정 2-104).
+        BuildingDefinition apothecary = BuildingTable.Find(BuildingTable.Apothecary);
+        if (apothecary != null && exceptId != BuildingTable.Apothecary)
+            yield return BunkerLayout.Footprint(apothecary, BunkerLayout.ApothecaryPose);
 
         if (player != null)
             yield return new Rect(player.position.x - 0.6f, player.position.z - 0.6f, 1.2f, 1.2f);

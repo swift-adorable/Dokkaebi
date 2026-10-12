@@ -97,8 +97,9 @@ public static class TutorialTable
             "조준해 쏜다 · 붉은 빛이 번뜩이면 대시로 피한다", TutorialCheck.Kills, 3, TutorialCheck.Arrived),
         new("tut_loot", TutorialPlace.Raid, "쓰러진 잡귀를 뒤져라",
             "시체 가까이 「파밍」 — 엽전 · 정기는 저절로 들어온다", TutorialCheck.CorpseLooted, skipWhen: TutorialCheck.Arrived),
-        new("tut_extract1", TutorialPlace.Raid, "길목에서 고목 아래로 돌아가라",
-            "화면 가장자리 화살표 → 초록 기둥의 원 안에서 5초", TutorialCheck.Arrived),
+        // 0-1은 걸어서 고목에 닿는다 — 본문 72 「마침내 늙은 고목 아래에 닿았다」. 철수(길목)는 0-2에서 배운다 (결정 2-104).
+        new("tut_extract1", TutorialPlace.Raid, "늙은 고목 아래로 가라",
+            "초록 기둥이 선 고목 곁에 닿으면 소굴로 들어간다", TutorialCheck.Arrived),
         new("tut_stash", TutorialPlace.Bunker, "아까운 것은 창고에 맡겨라",
             "창고 앞 「창고」 → 가방 물건 → 「창고에 넣기」 · 창고에 둔 것은 쓰러져도 남는다",
             TutorialCheck.StashUsed, skipWhen: TutorialCheck.Entered02),
