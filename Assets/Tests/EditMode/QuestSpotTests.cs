@@ -91,6 +91,21 @@ namespace Dokkaebi.Tests
 
             foreach (string e in QuestSpotTable.Embers)
                 p.See(QuestSpotTable.EventOf(e));
+            Assert.IsFalse(QuestSpotTable.IsAvailable(brew, p, t), "새색시가 흩뜨린 불씨를 다시 주워야 한다");
+
+            // 돌아가는 길에 불씨가 하나둘 사라진다 (결정 2-112 · 본문 579).
+            p.See(QuestSpotTable.LostEmbers[0]);
+            p.See(QuestSpotTable.LostEmbers[1]);
+            Assert.AreEqual("3 / 5", t.ProgressText(q.Objectives[1]));
+            Assert.IsFalse(t.IsMet(q.Objectives[1]));
+
+            // 새색시가 물러나며 흩어진 불씨를 주우면 다시 다섯.
+            QuestSpotDefinition scattered = QuestSpotTable.Spot(QuestSpotTable.BrideEmbers);
+            Assert.IsFalse(QuestSpotTable.IsAvailable(scattered, p, t));
+            p.See(QuestSpotTable.BrideSeenEvent);
+            Assert.IsTrue(QuestSpotTable.IsAvailable(scattered, p, t));
+            p.See(scattered.DoneEvent);
+            Assert.AreEqual("5 / 5", t.ProgressText(q.Objectives[1]));
             Assert.IsTrue(QuestSpotTable.IsAvailable(brew, p, t));
         }
 

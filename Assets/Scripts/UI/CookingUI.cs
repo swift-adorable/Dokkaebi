@@ -16,6 +16,8 @@ public class CookingUI : MonoBehaviour
 
     public static void Open()
     {
+        StoryManager.ShowSystemNoteOnce(StoryManager.NoteCooking);   // 결정 2-112
+
         if (instance != null)
         {
             instance.Refresh();

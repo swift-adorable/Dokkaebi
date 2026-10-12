@@ -80,6 +80,12 @@ public class EnemyAggro : MonoBehaviour, IPoolable
     /// <summary>이 개체의 소속. EnemyIdentity가 없으면 야생으로 본다.</summary>
     public Faction Faction => identity != null ? identity.Faction : Faction.Wild;
 
+    /// <summary>잡귀의 갈래 — 같은 진영이라도 서로 다른 잡귀면 싸운다 (결정 2-112). 보스(고유)는 −1.</summary>
+    public int Kin => identity == null || identity.Profile.rarity == EnemyRarity.Unique ? -1 : (int)identity.Archetype;
+
+    /// <summary>문 대상의 갈래. 플레이어 · 없음이면 −1.</summary>
+    public int TargetKin { get; private set; } = -1;
+
     private void Awake()
     {
         health = GetComponent<Health>();
@@ -151,6 +157,7 @@ public class EnemyAggro : MonoBehaviour, IPoolable
             {
                 id = AggroSelector.PlayerId,
                 faction = Faction.Friendly,
+                kin = -1,
                 position = player.position,
                 isPlayer = true,
                 isAlive = !player.TryGetComponent(out Health playerHealth) || !playerHealth.IsDead,
@@ -175,6 +182,7 @@ public class EnemyAggro : MonoBehaviour, IPoolable
             {
                 id = other.SelfId,
                 faction = other.Faction,
+                kin = other.Kin,
                 position = other.transform.position,
                 isPlayer = false,
                 isAlive = other.health == null || !other.health.IsDead,
@@ -199,7 +207,7 @@ public class EnemyAggro : MonoBehaviour, IPoolable
         int before = memory.targetId;
 
         int picked = AggroSelector.Select(
-            Faction, transform.position, in pursuit, ref memory, elapsed, Buffer, SelfId);
+            Faction, transform.position, in pursuit, ref memory, elapsed, Buffer, SelfId, Kin);
 
         if (picked == before && Target != null)
             return;
@@ -266,6 +274,7 @@ public class EnemyAggro : MonoBehaviour, IPoolable
     {
         Target = null;
         TargetFaction = Faction.Friendly;
+        TargetKin = -1;
 
         if (picked == AggroSelector.NoTarget)
             return;
@@ -289,6 +298,7 @@ public class EnemyAggro : MonoBehaviour, IPoolable
 
             Target = other.transform;
             TargetFaction = other.Faction;
+            TargetKin = other.Kin;
             return;
         }
     }

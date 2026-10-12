@@ -92,6 +92,57 @@ public static class StoryManager
         ShowPopups(eventId, done);
     }
 
+    /// <summary>빚쟁이가 판마다 갚는 동전 (결정 2-112 · 본문 294 · 298 · 611 「매일 밤 같은 동전을 갚으러」) [임시값].</summary>
+    public const int DebtorCoin = 10;
+
+    /// <summary>이번에 소굴에 오면 「빚쟁이가 동전을 갚았다」를 알린다.</summary>
+    public static bool DebtorPaidPending { get; private set; }
+
+    /// <summary>
+    /// 한 판이 끝났다(철수 · 쓰러짐) — 빚쟁이가 와 있으면 동전을 갚는다(엽전 10). 소굴에 오면 알린다.
+    /// </summary>
+    public static void DebtorRepays()
+    {
+        if (!Progress.HasMerchant(StoryTable.Debtor))
+            return;
+
+        PassiveManager.EnsureInstance().AddGold(DebtorCoin);
+        DebtorPaidPending = true;
+    }
+
+    /// <summary>소굴에 왔다 — 갚은 동전을 알린다.</summary>
+    public static void AnnounceDebtorCoin()
+    {
+        if (!DebtorPaidPending)
+            return;
+
+        DebtorPaidPending = false;
+        StoryDialogueUI.ShowBanner($"빚쟁이가 동전을 갚았다. (+{DebtorCoin}엽전)", 2.5f);
+    }
+
+    /// <summary>시스템 설명의 이름 (본문 「(시스템 설명 / 이름)」 · 결정 2-112).</summary>
+    public const string NoteBuilding = "거점 건축";
+    public const string NoteCooking = "요리";
+    public const string NoteImprint = "새김패";
+    public const string NoteWeight = "가방 무게";
+
+    /// <summary>
+    /// 그 기능을 처음 쓸 때 본문 「(시스템 설명 / 이름)」 글을 한 번 띄운다 (결정 2-112). 이미 봤으면 아무것도 하지 않는다.
+    /// </summary>
+    public static void ShowSystemNoteOnce(string title)
+    {
+        string seen = $"note_{title}";
+        if (Progress.HasSeen(seen) || StoryDialogueUI.IsShowing)
+            return;
+
+        string body = LoreTable.BodyOf(Lore, LoreKind.System, title);
+        if (string.IsNullOrEmpty(body))
+            return;
+
+        Progress.See(seen);
+        StoryDialogueUI.Show(title, new List<string> { body }, null);
+    }
+
     private static void PlayMemories(string eventId, Action done)
     {
         foreach (LoreEntry entry in Lore)

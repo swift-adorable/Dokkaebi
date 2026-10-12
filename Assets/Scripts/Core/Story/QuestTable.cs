@@ -47,6 +47,12 @@ public sealed class QuestObjective
     /// </summary>
     public readonly string[] ProgressEvents;
 
+    /// <summary>
+    /// 잃은 것 — 이 사건들을 본 만큼 진행에서 뺀다. RecoverEvent를 보면 다시 센다 (결정 2-112 — 식어 가는 불씨).
+    /// </summary>
+    public string[] LostEvents = System.Array.Empty<string>();
+    public string RecoverEvent;
+
     public QuestObjective(string text, QuestCondition condition, string target, int unlocksChapter = 0,
         int count = 0, string[] progressEvents = null)
     {
@@ -127,6 +133,15 @@ public static class QuestTable
 
     private static string Spot(string spotId) => QuestSpotTable.EventOf(spotId);
 
+    // 불씨 — 부엌 가는 길에 하나둘 사라지고(새색시), 흩어진 것을 다시 주우면 돌아온다 (결정 2-112).
+    private static QuestObjective EmberObjective()
+    {
+        QuestObjective o = All("불씨 골목의 꺼져 가는 아궁이에서 불씨를 모은다", Spots(QuestSpotTable.Embers));
+        o.LostEvents = QuestSpotTable.LostEmbers;
+        o.RecoverEvent = Spot(QuestSpotTable.BrideEmbers);
+        return o;
+    }
+
     private static string[] Spots(string[] ids)
     {
         var r = new string[ids.Length];
@@ -169,7 +184,7 @@ public static class QuestTable
         new("sub_chambong_apothecary", QuestKind.Sub, "참봉의 약탕간", StoryTable.Chambong, Night(1), new[]
         {
             Build("쇠붙이 · 숯 · 새끼 뭉치를 모아 와 샘가에 약탕간을 세운다", BuildingTable.Apothecary)
-        }, "소환단 · 식혜 · 가공과 회복이 열린다"),
+        }, "소환단 · 식혜 · 회복이 열린다"),
 
         new("sub_debtor_smithy", QuestKind.Sub, "빚쟁이의 대장간", StoryTable.Debtor, Night(1), new[]
         {
@@ -199,7 +214,7 @@ public static class QuestTable
         new(QuestSpotTable.Chongmyeong, QuestKind.Sub, "총명탕", StoryTable.Chambong, Night(2), new[]
         {
             All("약방골에서 총명탕 약재를 찾는다", Spots(QuestSpotTable.Herbs)),
-            All("불씨 골목의 꺼져 가는 아궁이에서 불씨를 모은다", Spots(QuestSpotTable.Embers)),
+            EmberObjective(),
             SeeAfter("달인 총명탕을 빚쟁이에게 건넨다", Spot(QuestSpotTable.DebtorTonic), new[] { Spot(QuestSpotTable.KitchenBrew) })
         }, "", "약방골에서 총명탕을 달여 와 빚쟁이에게 건넨다"),
 

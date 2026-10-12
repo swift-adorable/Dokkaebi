@@ -249,7 +249,7 @@ public class EnemyAttack : MonoBehaviour
         if (targetHealth.Team == Team.Enemy)
         {
             bool hostile = aggro != null
-                           && FactionTable.IsHostile(aggro.Faction, aggro.TargetFaction);
+                           && FactionTable.IsHostile(aggro.Faction, aggro.TargetFaction, aggro.Kin, aggro.TargetKin);
 
             if (!hostile)
                 return;
@@ -383,7 +383,7 @@ public class EnemyAttack : MonoBehaviour
         if (projectile.TryGetComponent(out BulletController bullet))
         {
             bullet.ConfigureAsEnemyShot(damage, attackRange, armourPenetration, appliedStatus,
-                origin, aggro != null ? aggro.Faction : Faction.Wild);
+                origin, aggro != null ? aggro.Faction : Faction.Wild, aggro != null ? aggro.Kin : -1);
 
             // 플레이어와 겹친 상태로 쏠 때도 같은 문제가 생긴다. 같은 규칙을 적용한다.
             bullet.ResolveMuzzleOverlap(

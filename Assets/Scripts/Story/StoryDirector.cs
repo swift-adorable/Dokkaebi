@@ -45,6 +45,9 @@ public class StoryDirector : MonoBehaviour
 
         // 퀘스트 자리 — 본문 행동대로 (결정 2-108).
         go.AddComponent<QuestSpotDirector>();
+
+        // 시스템 설명 — 처음 생길 때 한 번 (결정 2-112).
+        go.AddComponent<SystemNoteDirector>();
     }
 
     private void Start()
@@ -58,6 +61,9 @@ public class StoryDirector : MonoBehaviour
             gameObject.AddComponent<BunkerScenery>();
         else if (SceneFlow.IsRaidScene(SceneManager.GetActiveScene().name))
             gameObject.AddComponent<StoryScenery>();
+
+        if (SceneFlow.InBunker)
+            StoryManager.AnnounceDebtorCoin();
 
         if (SceneFlow.InBunker)
             PlayBunker();

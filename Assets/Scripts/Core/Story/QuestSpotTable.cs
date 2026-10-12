@@ -93,6 +93,15 @@ public static class QuestSpotTable
     public const string MillMortar = "mill_mortar";
     public const string ElderMillNews = "elder_mill_news";
     public const string KitchenBrew = "kitchen_brew";
+
+    /// <summary>새색시가 삼켰다 흩뜨린 불씨 — 다시 주워 담는다 (결정 2-112 · 본문 579 ~ 595).</summary>
+    public const string BrideEmbers = "bride_embers";
+
+    /// <summary>새색시를 본 사건 — StoryScenery가 적는다.</summary>
+    public const string BrideSeenEvent = "scene_bride";
+
+    /// <summary>부엌 가는 길에 사라진 불씨 — 「화로가 조금씩 식었다. 불씨가 하나둘 사라지고 있었다」.</summary>
+    public static readonly string[] LostEmbers = { "ember_lost_1", "ember_lost_2", "ember_lost_3", "ember_lost_4", "ember_lost_5" };
     public const string DebtorTonic = "debtor_tonic";
     public const string JibangBurn = "jibang_burn";
     public const string SendSoul = "send_soul";
@@ -128,8 +137,10 @@ public static class QuestSpotTable
         new(Embers[2], Chongmyeong, QuestSpotKind.Pickup, "3-2", -40f, -2.5f, "꺼져 가는 아궁이 불씨"),
         new(Embers[3], Chongmyeong, QuestSpotKind.Pickup, "3-2", 40f, -9.5f, "꺼져 가는 아궁이 불씨"),
         new(Embers[4], Chongmyeong, QuestSpotKind.Pickup, "3-2", -36f, -29f, "마지막 아궁이 불씨", requiresBosses: B("dueoksini")),
+        new(BrideEmbers, Chongmyeong, QuestSpotKind.Pickup, "3-2", 10f, 26f, "흩어진 불씨",
+            requiresEvents: new[] { BrideSeenEvent }),
         new(KitchenBrew, Chongmyeong, QuestSpotKind.Talk, "3-1", 4f, 46f, "부엌 아궁이 — 총명탕 달이기",
-            requiresEvents: Concat(E(Herbs), E(Embers))),
+            requiresEvents: Concat(Concat(E(Herbs), E(Embers)), E(BrideEmbers))),
         new(DebtorTonic, Chongmyeong, QuestSpotKind.Talk, Den, 2f, 2.5f, "빚쟁이 — 총명탕", requiresEvents: E(KitchenBrew)),
 
         // ── 장승 지키기 (본문 731 · 733 · 부록 1178) ──────────────────────

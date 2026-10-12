@@ -5,14 +5,18 @@ using UnityEngine;
 /// 【장 맵의 본문 연출 — 임시】 (결정 2-111). 장 맵이 뜨면 이야기 진행에 맞춰 소품 · 빛을 놓는다. StoryDirector가 붙인다.
 ///   1장 1-2  붉은 팥 골목 — 밟으면 발바닥이 따끔(본문 227)
 ///   2장      우레가 가끔 번쩍(본문 370) · 멈춘 물레방아 → 강철이를 쫓으면 강물이 돌아오고 물레방아가 돈다(본문 432)
-///   3장 3-2  두억시니 뒤 약방 처마 밑 — 새색시가 한 번 나타났다 사라진다(본문 583 ~ 593)
+///   3장 3-2  불씨를 다 모으면 돌아가는 길에 불씨가 하나둘 사라진다(본문 579) → 약방 처마 밑 새색시가 나타났다
+///            사라지며 삼켰던 불씨가 흩어진다(본문 583 ~ 593) → 다시 주워 담는다(퀘스트 자리 「흩어진 불씨」 · 결정 2-112)
 ///   6장      새벽 냄새(본문 1079) — 빛이 밝다 · 삼족오를 쫓으면 더 희어진다(부록 1192) · 6-1 꽃밭의 꽃 · 빈 꽃대 → 엔딩 뒤 봉오리(본문 1101)
 ///   6장 6-2  구미호와 싸울 때 각시탈을 쓴다(본문 1063)
 /// 모양 · 수치는 [임시값] — 아트 작업 때 프리팹으로 바꾼다.
 /// </summary>
 public class StoryScenery : MonoBehaviour
 {
-    public const string BrideSeenEvent = "scene_bride";
+    public const string BrideSeenEvent = QuestSpotTable.BrideSeenEvent;
+
+    /// <summary>불씨가 하나 사라지기까지(초) [임시값].</summary>
+    public const float EmberFadeSeconds = 6f;
 
     private int chapter = -1;
     private Transform player;
@@ -27,6 +31,8 @@ public class StoryScenery : MonoBehaviour
 
     private float beanTimer;
     private bool brideStarted;
+    private float emberTimer = EmberFadeSeconds;
+    private bool coolingAnnounced;
     private GameObject mask;
     private GameObject bud;
 
@@ -159,13 +165,35 @@ public class StoryScenery : MonoBehaviour
 
     private void TickBride(StoryProgress p)
     {
-        if (brideStarted || player == null || !p.HasDefeated("dueoksini") || p.HasSeen(BrideSeenEvent))
+        if (brideStarted || player == null || p.HasSeen(BrideSeenEvent) || !AllEmbers(p))
             return;
 
         Vector3 d = player.position - BrideSpot;
         d.y = 0f;
         if (d.magnitude > 9f)
+        {
+            // 부엌으로 돌아가는 길 — 화로가 식으며 불씨가 하나둘 사라진다(본문 579).
+            if (!coolingAnnounced)
+            {
+                coolingAnnounced = true;
+                StoryDialogueUI.ShowBanner("화로가 조금씩 식었다. 불씨가 하나둘 사라지고 있었다.", 3f);
+            }
+
+            emberTimer -= Time.deltaTime;
+            if (emberTimer <= 0f)
+            {
+                emberTimer = EmberFadeSeconds;
+                foreach (string lost in QuestSpotTable.LostEmbers)
+                {
+                    if (p.HasSeen(lost))
+                        continue;
+                    p.See(lost);
+                    StoryManager.NotifyChanged();
+                    break;
+                }
+            }
             return;
+        }
 
         brideStarted = true;
         StartCoroutine(Bride());
@@ -194,6 +222,14 @@ public class StoryScenery : MonoBehaviour
         Destroy(root.gameObject);
 
         StoryManager.Progress.See(BrideSeenEvent);
+    }
+
+    private static bool AllEmbers(StoryProgress p)
+    {
+        foreach (string e in QuestSpotTable.Embers)
+            if (!p.HasSeen(QuestSpotTable.EventOf(e)))
+                return false;
+        return true;
     }
 
     // ── 6장 — 새벽 · 꽃밭 · 각시탈 ───────────────────────────────────

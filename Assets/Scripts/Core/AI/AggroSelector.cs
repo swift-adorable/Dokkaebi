@@ -26,6 +26,9 @@ public struct AggroCandidate
     /// 「무엇을 노릴까」(여기)와 「알아챘는가」(Perception)를 나눈다.
     /// </summary>
     public bool isDetected;
+
+    /// <summary>잡귀의 갈래 — 같은 진영이라도 갈래가 다르면 싸운다 (결정 2-112). −1이면 보지 않는다.</summary>
+    public int kin;
 }
 
 /// <summary>
@@ -94,6 +97,9 @@ public struct AggroMemory
 /// </summary>
 public static class AggroSelector
 {
+    // Select 한 번 동안의 자기 갈래 (결정 2-112) — 메인 스레드에서만 부른다.
+    [System.ThreadStatic] private static int currentKin;
+
     /// <summary>플레이어의 후보 식별자. 적 식별자와 겹치지 않는 값이다.</summary>
     public const int PlayerId = 0;
 
@@ -141,8 +147,10 @@ public static class AggroSelector
         ref AggroMemory memory,
         float elapsed,
         IReadOnlyList<AggroCandidate> candidates,
-        int selfId)
+        int selfId,
+        int selfKin = -1)
     {
+        currentKin = selfKin;
         // 우호는 먼저 싸우지 않는다. 적대만 있으면 구역이 사격장이 된다.
         if (self == Faction.Friendly || candidates == null || candidates.Count == 0)
         {
@@ -243,7 +251,7 @@ public static class AggroSelector
 
         return c.isPlayer
             ? FactionTable.IsHostileToPlayer(self)
-            : FactionTable.IsHostile(self, c.faction);
+            : FactionTable.IsHostile(self, c.faction, currentKin, c.kin);
     }
 
     /// <summary>수평 거리. 높이는 보지 않는다 — 탑다운이다.</summary>

@@ -63,6 +63,22 @@ public static class FactionTable
         return true;
     }
 
+    /// <summary>
+    /// 진영 + 갈래(잡귀의 종류)로 본다 (결정 2-112 · 본문 198 「저희끼리도 서로 물고 뜯었다」) —
+    /// 진영이 다르면 싸우고, 같은 진영이라도 【서로 다른 잡귀】(갈래가 다르면) 싸운다.
+    /// 갈래가 −1이면(보스 · 모름) 갈래로는 싸우지 않는다 — 처녀 · 몽달처럼 한 무리 보스가 서로 싸우지 않게.
+    /// </summary>
+    public static bool IsHostile(Faction a, Faction b, int kinA, int kinB)
+    {
+        if (a == Faction.Friendly || b == Faction.Friendly)
+            return false;
+
+        if (a != b)
+            return true;
+
+        return kinA >= 0 && kinB >= 0 && kinA != kinB;
+    }
+
     /// <summary>플레이어를 공격하는 진영인가. 우호만 아니다.</summary>
     public static bool IsHostileToPlayer(Faction faction)
     {

@@ -27,6 +27,8 @@ public class BuildingScreenUI : MonoBehaviour
 
     public static void Open()
     {
+        StoryManager.ShowSystemNoteOnce(StoryManager.NoteBuilding);   // 결정 2-112
+
         if (instance == null)
         {
             Canvas canvas = UIFactory.CreateCanvas("BuildingScreenCanvas (Runtime)", 1200);

@@ -70,6 +70,53 @@ public partial class InventoryScreenUI
             label.rectTransform.offsetMax = new Vector2(0f, -8f);
         }
 
+        // 기억의 조각 (결정 2-112 · 본문 1112 「수집 0/9」) — 주운 조각의 글을 본문 그대로.
+        int collected = 0;
+        foreach (PieceDefinition piece in StoryTable.Pieces)
+            if (progress.HasPiece(piece.Id))
+                collected++;
+
+        AddCodexRow(list, ref y, $"<b>기억의 조각  {collected} / {StoryTable.Pieces.Count}</b>", 1);
+
+        foreach (PieceDefinition piece in StoryTable.Pieces)
+        {
+            if (!progress.HasPiece(piece.Id))
+            {
+                AddCodexRow(list, ref y, $"<size=21><color=#8C8676>조각 {piece.Number} — 아직 줍지 않았다.</color></size>", 1);
+                continue;
+            }
+
+            StoryPassage passage = StoryManager.Passage(StoryTable.PieceEvent(piece.Id));
+            string title = passage != null && !string.IsNullOrEmpty(passage.Title) ? passage.Title : $"기억의 조각 {piece.Number}";
+            string body = passage != null ? string.Join("\n\n", passage.Pages) : string.Empty;
+
+            int lines = 2;
+            foreach (string para in body.Split('\n'))
+                lines += 1 + para.Length / 44;
+
+            AddCodexRow(list, ref y, $"<b>{title}</b>  <size=16><color=#A8A08C>{piece.ZoneId}</color></size>\n<size=21>{body}</size>", lines);
+        }
+
         list.Content.sizeDelta = new Vector2(0f, y);
+    }
+
+    private static void AddCodexRow(UIFactory.ScrollList list, ref float y, string text, int lines)
+    {
+        Image row = UIFactory.CreatePanel("Row", list.Content, UIPalette.Row, Vector2.zero, Vector2.zero);
+        float height = 24f + Mathf.Max(1, lines) * 27f;
+
+        RectTransform rect = row.rectTransform;
+        rect.anchorMin = new Vector2(0f, 1f);
+        rect.anchorMax = new Vector2(1f, 1f);
+        rect.pivot = new Vector2(0.5f, 1f);
+        rect.offsetMin = new Vector2(6f, -(y + height));
+        rect.offsetMax = new Vector2(-6f, -y);
+        y += height + 8f;
+
+        Text label = UIFactory.CreateLabel(row.transform, text, 24, FontStyle.Normal,
+            new Vector2(0.02f, 0f), new Vector2(0.98f, 1f), TextAnchor.UpperLeft);
+        label.supportRichText = true;
+        label.rectTransform.offsetMin = new Vector2(0f, 8f);
+        label.rectTransform.offsetMax = new Vector2(0f, -8f);
     }
 }

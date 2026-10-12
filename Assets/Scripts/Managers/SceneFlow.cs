@@ -123,6 +123,7 @@ public static class SceneFlow
         SpringManager.RefillAfterRun();
         NightClock.PassNight();   // 달이 한 칸 돌고 날씨를 다시 뽑는다 (결정 2-91)
         ApothecaryManager.OnNightPassed();   // 샘가에 약재가 모인다 (결정 2-97)
+        StoryManager.DebtorRepays();          // 빚쟁이가 동전을 갚는다 (결정 2-112)
 
         // 튜토리얼 마지막 단계 — 0-2에서 철수했다 (결정 2-85). 저장 전에 적어야 남는다.
         if (StoryManager.TargetZone == ChapterZeroTable.GiftZone)

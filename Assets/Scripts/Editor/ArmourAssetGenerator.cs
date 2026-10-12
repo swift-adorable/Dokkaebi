@@ -56,7 +56,7 @@ public static class ArmourAssetGenerator
 
     private static readonly string[] BodyNames =
     {
-        "지갑", "피갑", "쇄자갑", "유엽갑", "두정갑", "면제배갑"
+        "헌 지갑", "피갑", "쇄자갑", "유엽갑", "두정갑", "면제배갑"
     };
 
     // ── 청각 ──────────────────────────────────────────────────────────────

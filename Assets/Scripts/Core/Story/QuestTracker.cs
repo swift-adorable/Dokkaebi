@@ -43,7 +43,7 @@ public sealed class QuestTracker
             case QuestCondition.DefeatBoss: return story.HasDefeated(objective.Target);
             case QuestCondition.ClearZone:  return story.IsCleared(objective.Target);
             case QuestCondition.Build:      return isBuilt(objective.Target);
-            case QuestCondition.SeenCount:  return SeenOf(objective.ProgressEvents) >= objective.Count;
+            case QuestCondition.SeenCount:  return Effective(objective) >= objective.Count;
             default:                        return false;
         }
     }
@@ -54,7 +54,15 @@ public sealed class QuestTracker
         if (objective == null || objective.ProgressEvents.Length == 0)
             return string.Empty;
 
-        return $"{SeenOf(objective.ProgressEvents)} / {objective.ProgressEvents.Length}";
+        return $"{Effective(objective)} / {objective.ProgressEvents.Length}";
+    }
+
+    /// <summary>모은 수 — 잃은 것을 빼고, 되찾았으면 다시 센다 (결정 2-112).</summary>
+    private int Effective(QuestObjective o)
+    {
+        int n = SeenOf(o.ProgressEvents);
+        bool recovered = !string.IsNullOrEmpty(o.RecoverEvent) && story.HasSeen(o.RecoverEvent);
+        return recovered ? n : System.Math.Max(0, n - SeenOf(o.LostEvents));
     }
 
     private int SeenOf(string[] events)

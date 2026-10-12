@@ -7,7 +7,8 @@ public enum LoreKind
     Codex = 0,   // (세계관 도감 / …)
     Popup = 1,   // (세계관 팝업 / …)
     Tutorial = 2, // (UI 튜토리얼 / …) — 튜토리얼 안내가 본문 글을 그대로 쓴다 (결정 2-107)
-    Memory = 3    // (기억 연출) — 5-3에서 아홉 조각의 장면이 겹친다 (결정 2-111)
+    Memory = 3,   // (기억 연출) — 5-3에서 아홉 조각의 장면이 겹친다 (결정 2-111)
+    System = 4    // (시스템 설명 / …) — 그 기능을 처음 쓸 때 한 번 (결정 2-112)
 }
 
 /// <summary>본문 괄호 줄 하나 — 「(세계관 도감 / 넋불) 사람의 넋은 …」.</summary>
@@ -41,7 +42,7 @@ public sealed class LoreEntry
 /// </summary>
 public static class LoreTable
 {
-    private static readonly Regex Note = new(@"^\((세계관 도감|세계관 팝업|UI 튜토리얼) / ([^)]+)\)\s*(.+)$");
+    private static readonly Regex Note = new(@"^\((세계관 도감|세계관 팝업|UI 튜토리얼|시스템 설명) / ([^)]+)\)\s*(.+)$");
     private static readonly Regex MemoryNote = new(@"^\(기억 연출\)\s*(.+)$");
     private static readonly Regex OpensAfter = new(@"\s*(\d)-(\d) 이후에 열린다.*$");
     private static readonly Regex ZoneHeader = new(@"^(\d)-(\d) · ");
@@ -129,6 +130,7 @@ public static class LoreTable
             {
                 "세계관 팝업" => LoreKind.Popup,
                 "UI 튜토리얼" => LoreKind.Tutorial,
+                "시스템 설명" => LoreKind.System,
                 _ => LoreKind.Codex
             };
             string title = m.Groups[2].Value.Trim();

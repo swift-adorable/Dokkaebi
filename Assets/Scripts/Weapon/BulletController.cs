@@ -53,6 +53,7 @@ public class BulletController : MonoBehaviour, IPoolable
     /// Faction은 그 안에서 「누가 누구와 싸우는가」다. 축이 둘이다.
     /// </summary>
     private Faction shooterFaction = Faction.Wild;
+    private int shooterKin = -1;   // 결정 2-112 — 서로 다른 잡귀면 쏜다
 
     /// <summary>적이 쏜 탄인가. 켜지면 Team 대신 진영으로 거른다.</summary>
     private bool useFactionGate;
@@ -169,6 +170,7 @@ public class BulletController : MonoBehaviour, IPoolable
         // 풀링에서 가장 흔한 실패다.
         useFactionGate = false;
         shooterFaction = Faction.Wild;
+        shooterKin = -1;
 
         explosionRadius = 0f;
         explosionShare = 0f;
@@ -222,10 +224,11 @@ public class BulletController : MonoBehaviour, IPoolable
     /// </summary>
     public void ConfigureAsEnemyShot(
         int shotDamage, float range, int penetration, StatusEffectType status, Vector3 origin,
-        Faction faction = Faction.Wild)
+        Faction faction = Faction.Wild, int kin = -1)
     {
         // 적 탄만 진영으로 거른다. 여기서 켠다.
         shooterFaction = faction;
+        shooterKin = kin;
         useFactionGate = true;
 
         damage = Mathf.Max(1, shotDamage);
@@ -496,8 +499,9 @@ public class BulletController : MonoBehaviour, IPoolable
         Faction otherFaction = target.TryGetComponent(out EnemyIdentity identity)
             ? identity.Faction
             : Faction.Wild;
+        int otherKin = identity == null || identity.Profile.rarity == EnemyRarity.Unique ? -1 : (int)identity.Archetype;
 
-        return FactionTable.IsHostile(shooterFaction, otherFaction);
+        return FactionTable.IsHostile(shooterFaction, otherFaction, shooterKin, otherKin);
     }
 
     /// <summary>
