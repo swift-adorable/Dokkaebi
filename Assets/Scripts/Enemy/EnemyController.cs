@@ -195,5 +195,9 @@ public class EnemyController : MonoBehaviour, IPoolable
         // 0-2 큰 요괴의 첫 구슬 (결정 2-79) — 시체 전리품에 넣고 표식을 지운다.
         if (TryGetComponent(out StoryGift gift))
             gift.Deliver(controller);
+
+        // 다시 나온 중간 보스의 고유 장비 (결정 2-109).
+        if (TryGetComponent(out UniqueDrop unique))
+            unique.Deliver(controller);
     }
 }

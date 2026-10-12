@@ -101,6 +101,11 @@ public class StoryRaidDirector : MonoBehaviour
 
         PoolManager pool = PoolManager.EnsureInstance();
         var group = new StoryBossGroup(boss, OnGroupDefeated);
+
+        // 다시 나온 중간 보스는 고유 장비를 걸치고 나온다 — 첫 몸이 떨어뜨린다 (결정 2-109).
+        string uniqueId = BossUniqueTable.DropsOn(boss, StoryManager.Progress.HasDefeated(boss.Id))
+            ? BossUniqueTable.ItemOf(boss.Id)
+            : null;
         Vector2 dir = Random.insideUnitCircle.normalized;
         if (dir == Vector2.zero) dir = Vector2.up;
         Vector3 center = BossCenter(boss, dir);
@@ -129,6 +134,13 @@ public class StoryRaidDirector : MonoBehaviour
 
             if (health != null)
                 group.Track(health);
+
+            if (i == 0 && uniqueId != null)
+            {
+                if (!body.TryGetComponent(out UniqueDrop drop))
+                    drop = body.AddComponent<UniqueDrop>();
+                drop.ItemId = uniqueId;
+            }
 
             // 각시탈이 알리는 것 — 구미호 (결정 2-103).
             if (health != null && boss.Id == KaksitalRule.GumihoId)

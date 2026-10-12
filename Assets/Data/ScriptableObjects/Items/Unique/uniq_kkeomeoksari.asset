@@ -1,0 +1,56 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 680dd67e5b9a24d638effbb25e4da4c2, type: 3}
+  m_Name: uniq_kkeomeoksari
+  m_EditorClassIdentifier: Dokkaebi.Runtime::EquipmentDefinition
+  id: uniq_kkeomeoksari
+  displayName: "\uAEBC\uBA39\uC0B4\uC774 \uC790\uB8E8"
+  description: "\uAE01\uC5B4 \uBAA8\uC740 \uAC83\uC744 \uB2F4\uB358 \uAC80\uC740
+    \uC790\uB8E8. \uB9CE\uC774 \uB4E4\uC5B4\uAC00\uC9C0\uB9CC \uAC78\uC74C\uC774
+    \uCC98\uC9C4\uB2E4."
+  kind: 3
+  tier: 4
+  weight: 2.4
+  icon: {fileID: 0}
+  slotSize: 1
+  stackMax: 1
+  maxDurability: 0
+  baseValue: 9500
+  noExtract: 0
+  noRegister: 0
+  noTrade: 0
+  skill: {fileID: 0}
+  blankGem: 0
+  consumable:
+    category: 0
+    heal: 0
+    water: 0
+    energy: 0
+    waterCost: 0
+    energyCost: 0
+    cure: 0
+    cureStacks: 99
+    useCost: 0
+    castSeconds: 0
+    grant: 0
+  slot: 5
+  stats:
+  - type: 70
+    value: 22
+  - type: 71
+    value: 20
+  - type: 30
+    value: -0.06
+  setFamily: 
+  imprintFamily: 
+  immunity: 0
+  extraImmunities: 

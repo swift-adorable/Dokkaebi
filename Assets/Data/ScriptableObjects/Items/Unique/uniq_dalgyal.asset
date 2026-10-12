@@ -1,0 +1,57 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 680dd67e5b9a24d638effbb25e4da4c2, type: 3}
+  m_Name: uniq_dalgyal
+  m_EditorClassIdentifier: Dokkaebi.Runtime::EquipmentDefinition
+  id: uniq_dalgyal
+  displayName: "\uBA39 \uBC88\uC9C4 \uD0C8"
+  description: "\uBE57\uBB3C\uC5D0 \uBC88\uC9C4 \uBA39 \uAE00\uC528\uCC98\uB7FC \uD750\uB9BF\uD55C
+    \uD0C8. \uBC1C\uC18C\uB9AC\uAC00 \uBB3B\uD788\uC9C0\uB9CC \uADC0\uB3C4 \uBA39\uBA39\uD574\uC9C4\uB2E4."
+  kind: 2
+  tier: 1
+  weight: 0.3
+  icon: {fileID: 0}
+  slotSize: 1
+  stackMax: 1
+  maxDurability: 30
+  baseValue: 500
+  noExtract: 0
+  noRegister: 0
+  noTrade: 0
+  skill: {fileID: 0}
+  blankGem: 0
+  consumable:
+    category: 0
+    heal: 0
+    water: 0
+    energy: 0
+    waterCost: 0
+    energyCost: 0
+    cure: 0
+    cureStacks: 99
+    useCost: 0
+    castSeconds: 0
+    grant: 0
+  slot: 3
+  stats:
+  - type: 12
+    value: 0.08
+  - type: 14
+    value: 0.08
+  - type: 52
+    value: -0.15
+  - type: 50
+    value: -0.1
+  setFamily: 
+  imprintFamily: 
+  immunity: 0
+  extraImmunities: 
