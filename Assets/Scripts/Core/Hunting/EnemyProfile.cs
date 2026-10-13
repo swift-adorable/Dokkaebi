@@ -44,6 +44,9 @@ public struct EnemyProfile
     /// </summary>
     public float regenPerSecond;
 
+    /// <summary>이야기 보스의 몸 — 판 특성의 재생을 받지 않는다(Boss Data 처치 시간이 재생 없이 맞춰져 있다 · 결정 2-117).</summary>
+    public bool isStoryBoss;
+
     /// <summary>발소리를 내는가. 유형이 정한다.</summary>
     public bool makesFootsteps;
 
@@ -66,6 +69,7 @@ public struct EnemyProfile
     public static EnemyProfile ForBoss(BossDefinition boss, int bodyIndex)
     {
         EnemyProfile profile = Build(boss.Bodies[bodyIndex], boss.Rarity, System.Array.Empty<EnemyAffix>());
+        profile.isStoryBoss = true;
         BossStats stats = BossDataTable.Of(boss.Id);
 
         if (stats == null || bodyIndex >= stats.Health.Length || bodyIndex >= stats.Damage.Length)

@@ -125,6 +125,9 @@ public class EnemyIdentity : MonoBehaviour, IPoolable
         if (movement != null)
             movement.BaseSpeedScale = profile.moveScale;
 
+        // 재생 · 껍질 · 분열성 · 육중을 몸에 닿게 한다 (결정 2-117).
+        EnemyAffixEffects.ApplyTo(gameObject, profile);
+
         OnProfileChanged?.Invoke(profile);
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD

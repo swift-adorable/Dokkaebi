@@ -58,6 +58,15 @@ public class Health : MonoBehaviour, IDamageable, IPoolable
     /// <summary>현재 무적 상태인지.</summary>
     public bool IsInvulnerable => !invulnerability.IsReady(Time.time);
 
+    /// <summary>껍질 — 남은 「직접 맞은 한 번을 통째로 막는」 횟수 (적 속성 · 결정 2-117). 상태이상 틱은 막지 않는다.</summary>
+    public int ShellCharges { get; set; }
+
+    /// <summary>껍질이 깨졌다 — 표시용.</summary>
+    public event Action OnShellBroken;
+
+    /// <summary>육중 — 동결 · 마비(행동 불능)에 걸리지 않는다 (적 속성 · 결정 2-117).</summary>
+    public bool ImmuneToIncapacitation { get; set; }
+
     /// <summary>이 대상에게 걸린 상태이상.</summary>
     public StatusEffectState Status { get; } = new StatusEffectState();
 
@@ -158,6 +167,13 @@ public class Health : MonoBehaviour, IDamageable, IPoolable
         bool hadShock = report && Status.Has(StatusEffectType.Shock);
 
         Status.Apply(type, sourceDamage, durationScale);
+
+        // 육중 — 한계치로 넘어간 행동 불능은 바로 지운다(쌓인 냉기 · 감전은 그대로 셈해 둔다).
+        if (ImmuneToIncapacitation)
+        {
+            Status.Clear(StatusEffectType.Freeze);
+            Status.Clear(StatusEffectType.Paralyze);
+        }
 
         StatusEffectSystem.EnsureInstance().Track(this);
 
@@ -286,6 +302,14 @@ public class Health : MonoBehaviour, IDamageable, IPoolable
         // 무적 중에 도트가 멈추면 "맞고 굴렀더니 화상이 사라지는" 이상한 규칙이 된다.
         if (IsInvulnerable && !request.bypassArmour)
             return 0;
+
+        // 껍질 — 첫 직접 피격 한 번은 통째로 막는다. 답은 다중 적중 (Hunting_System 3절).
+        if (!request.bypassArmour && ShellCharges > 0 && request.baseDamage > 0)
+        {
+            ShellCharges--;
+            OnShellBroken?.Invoke();
+            return 0;
+        }
 
         DamageRequest amplified = request;
 

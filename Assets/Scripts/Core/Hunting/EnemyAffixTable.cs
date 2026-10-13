@@ -30,6 +30,16 @@ public static class EnemyAffixTable
     /// </summary>
     public const float RegenPerSecond = 0.02f;
 
+    /// <summary>이번 프레임 재생량(소수 포함) — 최대 체력 × 초당 비율 × 시간. 다 찼거나 죽었으면 0 (결정 2-117).</summary>
+    public static float RegenAmount(int max, int current, float perSecond, float deltaTime)
+        => current <= 0 || current >= max || perSecond <= 0f || deltaTime <= 0f ? 0f : max * perSecond * deltaTime;
+
+    /// <summary>분열성 — 쓰러지면 나오는 작은 몸 수.</summary>
+    public const int SplitCount = 2;
+
+    /// <summary>분열한 몸의 체력 배율(일반 등급 기준) — 하나하나는 약하다.</summary>
+    public const float SplitHealthScale = 0.5f;
+
     /// <summary>「신속」의 이동 배율.</summary>
     public const float SwiftMoveScale = 1.4f;
 
