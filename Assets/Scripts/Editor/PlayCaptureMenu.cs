@@ -194,4 +194,52 @@ public static class PlayCaptureMenu
 
         Debug.Log("[Debug] 지도 패시브 셋 켬 — 길목 전부 · 쓰러진 자리 하나 · 옛 지도");
     }
+
+    /// <summary>
+    /// 【검증】 대장간을 열고 몇 가지를 담는다 (결정 2-120 — 탭 · 값 · 담음 · 합계 · 이유 줄을 한 화면에서 보려고).
+    /// 엽전은 바꾸지 않는다 — 모자라면 모자란 대로 붉게 보여야 한다.
+    /// </summary>
+    [MenuItem("Dokkaebi/Debug/가게 담아 두기 시험 (대장간)")]
+    public static void TryShopCart()
+    {
+        if (!EditorApplication.isPlaying)
+            return;
+
+        ExchangeWindowUI window = ExchangeWindowUI.EnsureInstance();
+        window.OpenShop(ShopKind.Smithy);
+
+        var field = typeof(ExchangeWindowUI).GetField("cart",
+            System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+        if (field?.GetValue(window) is ShopCart cart)
+        {
+            cart.Add(AmmoTable.Arrow, 60);
+            cart.Add("arm_head_t1", 1);
+        }
+
+        window.SendMessage("Refresh", SendMessageOptions.DontRequireReceiver);
+        Debug.Log("[Debug] 대장간 — 화살 60 · 투구 1을 담았다");
+    }
+
+    /// <summary>
+    /// 【검증】 지도 오른쪽 「진행 중 퀘스트」를 보려고 0장을 다 본 것으로 둔다 (결정 2-120).
+    /// 진행은 메모리에만 바뀐다 — 이 실행에서 철수 · 저장을 하지 않으면 세이브는 그대로다.
+    /// </summary>
+    [MenuItem("Dokkaebi/Debug/지도 퀘스트 목록 시험 (0장 끝낸 것으로 · 저장 금지)")]
+    public static void TryMapQuestList()
+    {
+        if (!EditorApplication.isPlaying)
+            return;
+
+        StoryProgress p = StoryManager.Progress;
+        foreach (ZoneDefinition z in StoryTable.Chapter(0).Zones)
+        {
+            p.See(StoryTable.EnterEvent(z.Id));
+            foreach (BossDefinition b in StoryTable.BossesIn(z.Id))
+                p.Defeat(b.Id);
+        }
+
+        WorldMapUI.Close();
+        WorldMapUI.Open();
+        Debug.Log("[Debug] 0장을 끝낸 것으로 두고 지도를 다시 열었다 — 이 실행에서는 저장하지 않는다");
+    }
 }

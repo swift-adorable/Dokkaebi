@@ -315,7 +315,8 @@ public partial class InventoryScreenUI
         }
 
         // 설명은 길이가 제각각이라 넘치면 굴린다. (UIFactory.CreateScrollText)
-        UIFactory.CreateScrollText(detailContent, definition.Description, 25, FontStyle.Normal,
+        // 그 아래에 「얻는 곳 · 쓰는 곳」을 잇는다 (결정 2-120) — 같은 굴림 칸이라 자리를 새로 먹지 않는다.
+        UIFactory.CreateScrollText(detailContent, WithSources(definition), 25, FontStyle.Normal,
             new Vector2(0f, 0.64f), new Vector2(1f, 0.775f), UIPalette.TextDim);
 
         if (definition.IsSkillGem && definition.Skill != null)
@@ -324,6 +325,21 @@ public partial class InventoryScreenUI
             DrawEquipmentInfo(equipment);
 
         DrawDetailActions(definition);
+    }
+
+    /// <summary>설명 + 「얻는 곳 — …」 · 「쓰는 곳 — …」 (결정 2-120). 표에 없으면 설명만.</summary>
+    private static string WithSources(ItemDefinition definition)
+    {
+        ItemCatalog catalog = ItemCatalog.Load();
+
+        string where = ItemSources.Describe(definition.Id,
+            id => catalog != null && catalog.InCorpseLoot(id),
+            id => catalog?.Find(id)?.DisplayName ?? BuildingTable.Find(id)?.Name ?? IngredientTable.NameOf(id));
+
+        if (string.IsNullOrEmpty(where))
+            return definition.Description;
+
+        return string.IsNullOrEmpty(definition.Description) ? where : $"{definition.Description}\n\n{where}";
     }
 
     /// <summary>소켓에 꽂힌 젬 — 가방에 없으므로 무게·가치가 없다.</summary>

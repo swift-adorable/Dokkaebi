@@ -15,6 +15,8 @@ using UnityEngine.UI;
 /// 【보이는 것】 내 자리 · 바라보는 쪽 · 찾은 길목 · 금줄 · 퀘스트 구역 · 내 마커 · 쓰러진 자리 · (옛 지도) 전리품.
 ///   구역 이름은 적지 않는다 · 가 보지 않은 땅은 어둡다 · 적 · 보스 · 조각은 그리지 않는다 (Map_System 4절)
 /// 【마커】 두 번 누르면 찍는다(장마다 5개) · 마커를 두 번 누르면 지운다 — 지도 위에만 있다.
+/// 【진행 중 퀘스트】 (결정 2-120) 오른쪽 위 목록 — 퀘스트마다 다음 목표 한 줄, 누르면 그 구역으로 지도가 옮겨 간다.
+///   「퀘스트」 거르기를 끄면 목록도 감춘다.
 /// </summary>
 public class WorldMapUI : MonoBehaviour
 {
@@ -60,6 +62,9 @@ public class WorldMapUI : MonoBehaviour
     private Slider zoomSlider;
     private GameObject markerList;
     private RectTransform markerListRows;
+    private RectTransform questPanel;
+    private RectTransform questRows;
+    private bool hasQuestRows;
     private readonly Image[] filterButtons = new Image[5];
     private readonly List<MapIcon> icons = new();
     private readonly List<GameObject> builtForMap = new();
@@ -143,6 +148,7 @@ public class WorldMapUI : MonoBehaviour
         BuildLeftBar(safe);
         BuildZoomBar(safe);
         BuildMarkerList(safe);
+        BuildQuestList(safe);
 
         MapMemory.MarkersChanged += OnMarkersChanged;
         root.SetActive(false);
@@ -371,6 +377,125 @@ public class WorldMapUI : MonoBehaviour
         markerList.SetActive(false);
     }
 
+    // ── 진행 중 퀘스트 (결정 2-120) ──────────────────────────────────
+
+    private const float QuestPanelWidth = 400f;
+    private const float QuestRowHeight = 84f;
+    private const float QuestRowGap = 6f;
+    private const int MaxQuestRows = 6;
+
+    private void BuildQuestList(RectTransform safe)
+    {
+        Image panel = UIFactory.CreatePanel("QuestList", safe, BarColor, new Vector2(1f, 1f), new Vector2(1f, 1f));
+        panel.rectTransform.pivot = new Vector2(1f, 1f);
+        panel.rectTransform.anchoredPosition = new Vector2(-12f, -(TopBarHeight + 10f));
+        panel.rectTransform.sizeDelta = new Vector2(QuestPanelWidth, 60f);
+
+        Text title = UIFactory.CreateLabel(panel.transform, "진행 중 퀘스트", 22, FontStyle.Bold,
+            new Vector2(0f, 1f), new Vector2(1f, 1f), TextAnchor.MiddleCenter, Ink);
+        title.rectTransform.offsetMin = new Vector2(0f, -48f);
+
+        questRows = UIFactory.CreateRegion("Rows", panel.transform, Vector2.zero, Vector2.one);
+        questRows.offsetMax = new Vector2(0f, -50f);
+
+        questPanel = panel.rectTransform;
+        questPanel.gameObject.SetActive(false);
+    }
+
+    /// <summary>목록을 새로 — 열 때만 (떠 있는 동안 게임이 멈추므로 퀘스트가 바뀌지 않는다).</summary>
+    private void FillQuestList(MapRuntime runtime)
+    {
+        UIFactory.ClearChildren(questRows);
+
+        QuestTracker tracker = StoryManager.Quests;
+        List<QuestPlace> places = QuestZones.ActiveList(tracker, runtime.Map.Chapter);
+        hasQuestRows = places.Count > 0;
+
+        int shownRows = Mathf.Min(places.Count, MaxQuestRows);
+        bool more = places.Count > MaxQuestRows;
+
+        for (int i = 0; i < shownRows; i++)
+            AddQuestRow(runtime, tracker, places[i], i);
+
+        if (more)
+        {
+            Text rest = UIFactory.CreateLabel(questRows, $"외 {places.Count - MaxQuestRows}개 — 퀘스트 창(J)에서", 18,
+                FontStyle.Normal, new Vector2(0f, 1f), new Vector2(1f, 1f), TextAnchor.MiddleCenter, InkDim);
+            rest.rectTransform.offsetMin = new Vector2(10f, -(shownRows * (QuestRowHeight + QuestRowGap) + 34f));
+            rest.rectTransform.offsetMax = new Vector2(-10f, -(shownRows * (QuestRowHeight + QuestRowGap)));
+        }
+
+        float height = 56f + shownRows * (QuestRowHeight + QuestRowGap) + (more ? 40f : 4f);
+        questPanel.sizeDelta = new Vector2(QuestPanelWidth, height);
+    }
+
+    private void AddQuestRow(MapRuntime runtime, QuestTracker tracker, QuestPlace place, int index)
+    {
+        Image row = UIFactory.CreatePanel($"Quest_{index}", questRows, place.HasPlace ? ButtonOff : new Color(ButtonOff.r, ButtonOff.g, ButtonOff.b, 0.55f),
+            new Vector2(0f, 1f), new Vector2(1f, 1f), UIFactory.Radius);
+        row.rectTransform.offsetMin = new Vector2(10f, -(index * (QuestRowHeight + QuestRowGap) + QuestRowHeight));
+        row.rectTransform.offsetMax = new Vector2(-10f, -(index * (QuestRowHeight + QuestRowGap)));
+
+        var button = row.gameObject.AddComponent<Button>();
+        button.targetGraphic = row;
+        QuestPlace captured = place;
+        button.onClick.AddListener(() => GoToQuest(captured));
+
+        // 갈 곳이 있으면 「!」 마름모 — 지도 위 퀘스트 표시와 같은 모양.
+        Image mark = UIFactory.CreatePanel("Mark", row.transform, place.HasPlace ? QuestColor : InkDim,
+            new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), 0);
+        mark.sprite = UISprites.Of(UISprites.Glyph.Diamond);
+        mark.rectTransform.sizeDelta = new Vector2(30f, 30f);
+        mark.rectTransform.anchoredPosition = new Vector2(26f, 0f);
+        mark.raycastTarget = false;
+        Text bang = UIFactory.CreateLabel(mark.transform, "!", 18, FontStyle.Bold,
+            Vector2.zero, Vector2.one, TextAnchor.MiddleCenter, new Color(0.08f, 0.07f, 0.05f, 1f));
+        bang.raycastTarget = false;
+
+        Text title = UIFactory.CreateLabel(row.transform, QuestHudText.Title(place.Quest), 20, FontStyle.Bold,
+            new Vector2(0f, 0.5f), new Vector2(1f, 1f), TextAnchor.LowerLeft, Ink);
+        title.rectTransform.offsetMin = new Vector2(50f, 0f);
+        title.rectTransform.offsetMax = new Vector2(-10f, -6f);
+        title.horizontalOverflow = HorizontalWrapMode.Overflow;
+
+        string objective = QuestHudText.Objective(tracker, place.Quest);
+        Text line = UIFactory.CreateLabel(row.transform,
+            place.HasPlace ? objective : $"{objective} · 이 장 밖", 17, FontStyle.Normal,
+            new Vector2(0f, 0f), new Vector2(1f, 0.5f), TextAnchor.UpperLeft, place.HasPlace ? QuestColor : InkDim);
+        line.rectTransform.offsetMin = new Vector2(50f, 6f);
+        line.rectTransform.offsetMax = new Vector2(-10f, 0f);
+        line.horizontalOverflow = HorizontalWrapMode.Overflow;
+    }
+
+    /// <summary>그 퀘스트의 다음 목표 구역으로 지도를 옮긴다. 이 장에 없으면 위 줄에 알린다.</summary>
+    private void GoToQuest(QuestPlace place)
+    {
+        MapRuntime runtime = MapRuntime.Current;
+        if (runtime == null || place.Quest == null)
+            return;
+
+        string objective = QuestHudText.Objective(StoryManager.Quests, place.Quest);
+
+        if (!place.HasPlace)
+        {
+            objectiveLabel.text = $"{objective} — 이 장에는 갈 곳이 없다";
+            return;
+        }
+
+        foreach (ZoneArea area in runtime.Map.Areas)
+        {
+            if (area.ZoneId != place.ZoneId)
+                continue;
+
+            shown[(int)Layer.Quest] = true;
+            objectiveLabel.text = $"목표 — {objective}";
+            FocusOn(new Vector3(area.Bounds.center.x, 0f, area.Bounds.center.y), 2f);
+            return;
+        }
+
+        objectiveLabel.text = $"{objective} — 이 장에는 갈 곳이 없다";
+    }
+
     private static RawImage CreateRaw(string name, Transform parent)
     {
         RectTransform rect = UIFactory.CreateRegion(name, parent, Vector2.zero, Vector2.one);
@@ -396,6 +521,7 @@ public class WorldMapUI : MonoBehaviour
 
         root.SetActive(true);
         markerList.SetActive(false);
+        FillQuestList(runtime);
         SetHudHidden(true);
 
         // 열면 2배로 내 자리가 가운데.
@@ -555,6 +681,7 @@ public class WorldMapUI : MonoBehaviour
                 filterButtons[i].color = shown[i] ? ButtonOn : ButtonOff;
 
         outlineLayer.gameObject.SetActive(Shown(Layer.Quest));
+        questPanel.gameObject.SetActive(Shown(Layer.Quest) && hasQuestRows);
 
         if (Shown(Layer.Quest))
             foreach (ZoneArea area in questCache ??= QuestAreas(runtime))

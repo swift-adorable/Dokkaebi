@@ -21,7 +21,10 @@ public enum TradeError
     NotEnoughGold,
 
     /// <summary>가방에 자리가 없다.</summary>
-    NoSpace
+    NoSpace,
+
+    /// <summary>담은 것이 없다 — 한꺼번에 사기 (결정 2-120).</summary>
+    EmptyCart
 }
 
 /// <summary>
@@ -169,6 +172,7 @@ public static class TradeRules
             case TradeError.OutOfStock:       return "재고가 없습니다. 다음 파밍이 끝나면 채워집니다.";
             case TradeError.NotEnoughGold: return "엽전이 모자랍니다.";
             case TradeError.NoSpace:          return "가방에 자리가 없습니다.";
+            case TradeError.EmptyCart:        return "담은 것이 없습니다.";
             default:                          return string.Empty;
         }
     }

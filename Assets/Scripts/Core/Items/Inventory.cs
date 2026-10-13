@@ -91,9 +91,16 @@ public class Inventory
     /// 젬은 칸에 잡히지 않으므로(ItemDefinition.IsCargo) 늘 담을 수 있다.
     /// </summary>
     public bool CanAdd(ItemDefinition definition, int count = 1)
+        => definition != null && count > 0 && SlotsNeeded(definition, count) <= FreeSlots;
+
+    /// <summary>
+    /// 이만큼 담으려면 【새로】 드는 칸 수. 겹칠 수 있는 것은 있던 칸의 여유부터 쓴다.
+    /// 가게의 「한꺼번에 사기」가 여러 줄의 칸을 더해 미리 잰다 (결정 2-120).
+    /// </summary>
+    public int SlotsNeeded(ItemDefinition definition, int count = 1)
     {
         if (definition == null || count <= 0)
-            return false;
+            return 0;
 
         int remaining = count;
 
@@ -108,11 +115,9 @@ public class Inventory
         }
 
         if (remaining <= 0)
-            return true;
+            return 0;
 
-        int newStacks = Mathf.CeilToInt(remaining / (float)definition.StackMax);
-
-        return newStacks * definition.SlotCost <= FreeSlots;
+        return Mathf.CeilToInt(remaining / (float)definition.StackMax) * definition.SlotCost;
     }
 
     /// <summary>담는다. 실제로 담긴 개수를 반환한다. 부분 담기를 허용한다.</summary>

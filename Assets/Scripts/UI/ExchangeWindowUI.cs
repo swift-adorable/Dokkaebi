@@ -60,6 +60,27 @@ public class ExchangeWindowUI : MonoBehaviour
 
     private UIFactory.ScrollList grid;
 
+    // ── 가게 (결정 2-120) — 위쪽 탭 · 담아 두기 · 합계 ──────────────────
+    private RectTransform tabRow;
+    private Text cartSummary;
+    private Text cartReason;
+    private Button clearCartButton;
+    private Button buyCartButton;
+    private Text buyCartLabel;
+
+    /// <summary>담아 둔 것. 가게 창이 떠 있는 동안만 — 닫거나 다른 가게를 열면 비운다.</summary>
+    private readonly ShopCart cart = new();
+
+    /// <summary>고른 탭. 0은 「전체」, 그 뒤는 shopKinds의 순서.</summary>
+    private int shopTab;
+    private readonly List<ItemKind> shopKinds = new();
+
+    // 격자 자리 — 가게는 위에 탭 줄, 아래에 합계 줄이 붙는다.
+    private const float GridBottom = 0.155f;
+    private const float GridTop = 0.875f;
+    private const float ShopGridBottom = 0.30f;
+    private const float ShopGridTopWithTabs = 0.815f;
+
     private Mode mode = Mode.Loot;
     private CorpseController source;
     private LootContainer other;
@@ -162,8 +183,58 @@ public class ExchangeWindowUI : MonoBehaviour
         footLabel = UIFactory.CreateLabel(box, "파밍이 끝나면 재고가 다시 찹니다.", 20,
             FontStyle.Normal, new Vector2(0.04f, 0.035f), new Vector2(0.96f, 0.130f),
             TextAnchor.MiddleCenter, UIPalette.Subtle);
+        footLabel.gameObject.SetActive(false);
+
+        BuildShopParts(box);
 
         panel.SetActive(false);
+    }
+
+    /// <summary>
+    /// 가게에만 붙는 것 (결정 2-120) — 위쪽 탭 줄, 아래 합계 · 이유 한 줄 · 「비우기」 · 「한꺼번에 사기」.
+    /// 「재고가 다시 찬다」는 담은 것이 없을 때 이유 줄에 적는다.
+    /// </summary>
+    private void BuildShopParts(RectTransform box)
+    {
+        tabRow = UIFactory.CreateRegion("ShopTabs", box, new Vector2(0.04f, 0.825f), new Vector2(0.96f, 0.885f));
+
+        cartSummary = UIFactory.CreateLabel(box, string.Empty, 23, FontStyle.Bold,
+            new Vector2(0.04f, 0.225f), new Vector2(0.96f, 0.290f), TextAnchor.MiddleLeft, UIPalette.TextAccent);
+
+        cartReason = UIFactory.CreateLabel(box, string.Empty, 19, FontStyle.Normal,
+            new Vector2(0.04f, 0.150f), new Vector2(0.96f, 0.225f), TextAnchor.MiddleLeft, UIPalette.TextDim);
+
+        clearCartButton = UIFactory.CreateButton(box, "비우기",
+            new Vector2(0.04f, 0.035f), new Vector2(0.30f, 0.135f), UIPalette.Subtle, ClearCart, 24);
+
+        buyCartButton = UIFactory.CreateButton(box, "한꺼번에 사기",
+            new Vector2(0.32f, 0.035f), new Vector2(0.96f, 0.135f), UIPalette.Action, BuyCart, 24);
+        buyCartLabel = buyCartButton.GetComponentInChildren<Text>();
+
+        SetShopPartsActive(false);
+    }
+
+    private void SetShopPartsActive(bool active)
+    {
+        tabRow.gameObject.SetActive(active);
+        cartSummary.gameObject.SetActive(active);
+        cartReason.gameObject.SetActive(active);
+        clearCartButton.gameObject.SetActive(active);
+        buyCartButton.gameObject.SetActive(active);
+    }
+
+    /// <summary>격자가 차지하는 높이를 바꾼다 — 바탕 면과 잘라 내는 면을 같이.</summary>
+    private void SetGridArea(float bottom, float top)
+    {
+        var min = new Vector2(0.04f, bottom);
+        var max = new Vector2(0.96f, top);
+
+        RectTransform well = grid.Well.rectTransform;
+        well.anchorMin = min;
+        well.anchorMax = max;
+
+        grid.Viewport.anchorMin = min;
+        grid.Viewport.anchorMax = max;
     }
 
     // ────────────────────────────────── 열고 닫기
@@ -269,6 +340,8 @@ public class ExchangeWindowUI : MonoBehaviour
         stash = null;
         shopKind = kind;
         otherName = ShopTable.NameOf(kind);
+        cart.Clear();
+        shopTab = 0;
 
         OpenPanel(Mode.Shop);
     }
@@ -314,6 +387,7 @@ public class ExchangeWindowUI : MonoBehaviour
         source = null;
         other = null;
         stash = null;
+        cart.Clear();
 
         // 왼쪽 패널도 같이 닫는다. 파밍이 끝났는데 가방만 남아 있으면
         // 「무엇을 닫는 중인지」가 헷갈린다.
@@ -396,7 +470,18 @@ public class ExchangeWindowUI : MonoBehaviour
         }
 
         takeAllButton.gameObject.SetActive(mode != Mode.Shop);
-        footLabel.gameObject.SetActive(mode == Mode.Shop);
+        SetShopPartsActive(mode == Mode.Shop);
+
+        if (mode == Mode.Shop)
+        {
+            DrawShopTabs();
+            SetGridArea(ShopGridBottom, ShopTabs.Shows(shopKinds) ? ShopGridTopWithTabs : GridTop);
+            UpdateCartBar();
+        }
+        else
+        {
+            SetGridArea(GridBottom, GridTop);
+        }
 
         var label = takeAllButton.GetComponentInChildren<Text>();
 
@@ -486,11 +571,31 @@ public class ExchangeWindowUI : MonoBehaviour
     /// <summary>
     /// 상점 칸. 【팔지 않게 된 것도 자리를 지킨다】 — 품절이 되면 칸이 사라지는
     /// 대신 흐려진다. 자리가 바뀌면 「아까 그거 어디 갔지」를 매번 다시 찾는다.
+    /// 【값을 칸에 적는다】 (결정 2-120) — 남은 엽전(담은 합계를 뺀 것)으로 못 사면 값이 붉다.
+    /// 담은 것은 칸 가운데 「담음 n」.
     /// </summary>
     private void DrawShopGrid()
     {
         ItemCatalog catalog = ItemCatalog.Load();
-        IReadOnlyList<ShopEntry> entries = ShopManager.EntriesOf(shopKind);   // 평소 표 + 오늘의 물건 (결정 2-98)
+        IReadOnlyList<ShopEntry> all = ShopManager.EntriesOf(shopKind);   // 평소 표 + 오늘의 물건 (결정 2-98)
+
+        // 고른 탭의 줄만 (결정 2-120). 0은 전체.
+        var entries = new List<ShopEntry>(all.Count);
+        var definitions = new List<ItemDefinition>(all.Count);
+        ItemKind? only = shopTab > 0 && shopTab <= shopKinds.Count ? shopKinds[shopTab - 1] : null;
+
+        foreach (ShopEntry e in all)
+        {
+            ItemDefinition d = catalog != null ? catalog.Find(e.ItemId) : null;
+            if (only.HasValue && (d == null || d.Kind != only.Value))
+                continue;
+
+            entries.Add(e);
+            definitions.Add(d);
+        }
+
+        int gold = PassiveManager.EnsureInstance().Gold;
+        int budget = gold - CartRules.Total(ShopManager.Resolve(shopKind, cart), ShopManager.BuyDiscountPercent);
 
         UIFactory.SquareGridMetrics(grid.Viewport, Columns, entries.Count, MinRows,
             out int rows, out float height, out float padX, out float padY);
@@ -502,9 +607,7 @@ public class ExchangeWindowUI : MonoBehaviour
             UIFactory.GetCellAnchors(i, Columns, rows, padX, padY,
                 out Vector2 min, out Vector2 max);
 
-            ItemDefinition definition = i < entries.Count && catalog != null
-                ? catalog.Find(entries[i].ItemId)
-                : null;
+            ItemDefinition definition = i < entries.Count ? definitions[i] : null;
 
             // 한 개짜리로 그린다 — 재고 수는 아래 표로 따로 붙인다.
             // 겹치지 않는 물건(환단)은 개수를 셀 수 없어서다.
@@ -518,10 +621,21 @@ public class ExchangeWindowUI : MonoBehaviour
 
             ShopEntry entry = entries[i];
             int remaining = ShopManager.Of(shopKind).Remaining(entry.ItemId);
+            int inCart = cart.CountOf(entry.ItemId);
+            int price = TradeRules.BuyPrice(definition, entry, ShopManager.BuyDiscountPercent);
 
             UIFactory.CreateBadge(cell.transform, remaining > 0 ? $"×{remaining}" : "품절",
                 new Vector2(0.56f, 0.06f), new Vector2(0.96f, 0.30f), 20,
                 remaining > 0 ? Color.white : UIPalette.Warning);
+
+            // 값 — 남은 엽전으로 못 사면 붉다 (결정 2-120).
+            UIFactory.CreateBadge(cell.transform, $"{price:N0}",
+                new Vector2(0.04f, 0.06f), new Vector2(0.54f, 0.30f), 18,
+                price > budget ? UIPalette.Warning : UIPalette.TextAccent);
+
+            if (inCart > 0)
+                UIFactory.CreateBadge(cell.transform, $"담음 {inCart}",
+                    new Vector2(0.08f, 0.36f), new Vector2(0.92f, 0.58f), 17, UIPalette.Gain);
 
             // 오늘의 물건 — 판마다 바뀌는 칸 (결정 2-98)
             if (ShopManager.IsDaily(shopKind, entry.ItemId))
@@ -532,14 +646,150 @@ public class ExchangeWindowUI : MonoBehaviour
                 cell.gameObject.AddComponent<CanvasGroup>().alpha = 0.45f;
 
             var button = cell.GetComponent<Button>();
-
             if (button == null)
                 continue;
 
             RectTransform cellRect = cell.rectTransform;
-
             button.onClick.AddListener(() => OpenShopMenu(cellRect, definition, entry));
         }
+    }
+
+    /// <summary>위쪽 탭 줄 — 이 가게가 파는 종류로 저절로 나뉜다. 종류가 하나면 띄우지 않는다 (결정 2-120).</summary>
+    private void DrawShopTabs()
+    {
+        ItemCatalog catalog = ItemCatalog.Load();
+        var kinds = new List<ItemKind>();
+
+        foreach (ShopEntry e in ShopManager.EntriesOf(shopKind))
+        {
+            ItemDefinition d = catalog != null ? catalog.Find(e.ItemId) : null;
+            if (d != null)
+                kinds.Add(d.Kind);
+        }
+
+        shopKinds.Clear();
+        shopKinds.AddRange(ShopTabs.KindsOf(kinds));
+
+        UIFactory.ClearChildren(tabRow);
+
+        bool show = ShopTabs.Shows(shopKinds);
+        tabRow.gameObject.SetActive(show);
+
+        if (!show || shopTab > shopKinds.Count)
+            shopTab = 0;
+
+        if (!show)
+            return;
+
+        int count = shopKinds.Count + 1;
+        float width = 1f / count;
+
+        for (int i = 0; i < count; i++)
+        {
+            int index = i;
+            string name = i == 0 ? "전체" : ShopTabs.Name(shopKinds[i - 1]);
+
+            UIFactory.CreateButton(tabRow, name,
+                new Vector2(i * width + 0.005f, 0f), new Vector2((i + 1) * width - 0.005f, 1f),
+                i == shopTab ? UIPalette.Action : UIPalette.Subtle,
+                () =>
+                {
+                    shopTab = index;
+                    Refresh();
+                }, 20);
+        }
+    }
+
+    /// <summary>
+    /// 아래 합계 줄 (결정 2-120) — 「담은 것 n가지 · 합계」, 그 아래 이유 한 줄(얼마나 모자란가),
+    /// 막히면 「한꺼번에 사기」가 꺼진다.
+    /// </summary>
+    private void UpdateCartBar()
+    {
+        int gold = PassiveManager.EnsureInstance().Gold;
+        Inventory bag = PlayerInventory.EnsureInstance().Bag;
+        List<CartItem> items = ShopManager.Resolve(shopKind, cart);
+        int total = CartRules.Total(items, ShopManager.BuyDiscountPercent);
+
+        clearCartButton.interactable = !cart.IsEmpty;
+
+        if (cart.IsEmpty)
+        {
+            cartSummary.text = "담은 것 없음 — 칸을 눌러 「담기」";
+            cartSummary.color = UIPalette.TextDim;
+            cartReason.text = "파밍이 끝나면 재고가 다시 찹니다.";
+            cartReason.color = UIPalette.Subtle;
+            buyCartButton.interactable = false;
+            buyCartLabel.text = "한꺼번에 사기";
+            return;
+        }
+
+        cartSummary.text = $"담은 것 {cart.Lines.Count}가지 · 합계 {total:N0}엽전";
+        cartSummary.color = total > gold ? UIPalette.Warning : UIPalette.TextAccent;
+
+        TradeError error = CartRules.CanBuy(items, ShopManager.Of(shopKind).Remaining, gold, bag,
+            ShopManager.BuyDiscountPercent, out int failed);
+
+        if (error == TradeError.None)
+        {
+            cartReason.text = $"사고 나면 {gold - total:N0}엽전이 남습니다.";
+            cartReason.color = UIPalette.TextDim;
+        }
+        else
+        {
+            string name = failed >= 0 && failed < items.Count ? items[failed].Definition?.DisplayName : null;
+            int slotsShort = CartRules.SlotsNeeded(items, bag) - bag.FreeSlots;
+            cartReason.text = CartRules.Explain(error, total - gold, slotsShort, name);
+            cartReason.color = UIPalette.Warning;
+        }
+
+        buyCartButton.interactable = error == TradeError.None;
+        buyCartLabel.text = error == TradeError.None ? $"한꺼번에 사기  −{total:N0}" : "한꺼번에 사기";
+    }
+
+    private void ClearCart()
+    {
+        cart.Clear();
+        Refresh();
+    }
+
+    private void BuyCart()
+    {
+        int lines = cart.Lines.Count;
+        List<CartItem> items = ShopManager.Resolve(shopKind, cart);
+
+        TradeError error = ShopManager.BuyCart(shopKind, cart, out int spent, out int failed);
+
+        if (error == TradeError.None)
+        {
+            InventoryScreenUI.ShowToastIfOpen($"한꺼번에 사기 — {lines}가지 −{spent:N0}엽전");
+        }
+        else
+        {
+            string name = failed >= 0 && failed < items.Count ? items[failed].Definition?.DisplayName : null;
+            InventoryScreenUI.ShowToastIfOpen(CartRules.Explain(error, 0, 0, name));
+        }
+
+        AfterMove();
+    }
+
+    /// <summary>담는다 — 남은 재고에서 이미 담은 만큼을 뺀 데까지.</summary>
+    private void AskAddToCart(ItemDefinition definition, ShopEntry entry, int price)
+    {
+        int room = ShopManager.Of(shopKind).Remaining(entry.ItemId) - cart.CountOf(entry.ItemId);
+        if (room <= 0)
+        {
+            InventoryScreenUI.ShowToastIfOpen("남은 재고를 다 담았습니다.");
+            return;
+        }
+
+        QuantityPopupUI.Ask(definition.DisplayName, "담기", room,
+            n => $"{price * n:N0}엽전",
+            n =>
+            {
+                cart.Add(entry.ItemId, n);
+                Refresh();
+            });
     }
 
     // ────────────────────────────────── 사이드 메뉴
@@ -568,16 +818,18 @@ public class ExchangeWindowUI : MonoBehaviour
     }
 
     /// <summary>
-    /// 상점 칸의 사이드 메뉴 — 「구매」와 「상세보기」.
+    /// 상점 칸의 사이드 메뉴 — 「구매」 · 「담기」(· 「빼기」) · 「상세보기」 (결정 2-120).
     /// 【값을 줄에 적는다.】 누르기 전에 얼마가 빠지는지 알아야 한다.
     /// 못 사는 이유가 있으면 줄을 흐리게 두고, 눌렀을 때 이유를 알린다.
     /// </summary>
     private void OpenShopMenu(RectTransform cell, ItemDefinition definition, ShopEntry entry)
     {
         int price = TradeRules.BuyPrice(definition, entry, ShopManager.BuyDiscountPercent);
+        int remaining = ShopManager.Of(shopKind).Remaining(entry.ItemId);
+        int inCart = cart.CountOf(entry.ItemId);
 
         TradeError error = TradeRules.CanBuy(definition, entry,
-            ShopManager.Of(shopKind).Remaining(entry.ItemId),
+            remaining,
             PassiveManager.EnsureInstance().Gold,
             PlayerInventory.EnsureInstance().Bag,
             ShopManager.BuyDiscountPercent);
@@ -585,9 +837,20 @@ public class ExchangeWindowUI : MonoBehaviour
         var entries = new List<ItemActionMenu.Entry>
         {
             new($"구매 {price:N0}엽전", UIPalette.Action, () => AskBuy(definition, entry, price), error == TradeError.None),
-            new("상세보기", UIPalette.Subtle,
-                () => InventoryScreenUI.OpenReadOnlyDetail(new ItemStack(definition), otherName))
+            // 담기 (결정 2-120) — 엽전이 모자라도 담을 수는 있다. 합계 줄이 얼마나 모자란지 알린다.
+            new(inCart > 0 ? $"더 담기 (담음 {inCart})" : "담기", UIPalette.Subtle,
+                () => AskAddToCart(definition, entry, price), remaining - inCart > 0),
         };
+
+        if (inCart > 0)
+            entries.Add(new ItemActionMenu.Entry("빼기", UIPalette.Subtle, () =>
+            {
+                cart.Remove(entry.ItemId);
+                Refresh();
+            }));
+
+        entries.Add(new ItemActionMenu.Entry("상세보기", UIPalette.Subtle,
+            () => InventoryScreenUI.OpenReadOnlyDetail(new ItemStack(definition), otherName)));
 
         ItemActionMenu.Open(cell, entries);
 

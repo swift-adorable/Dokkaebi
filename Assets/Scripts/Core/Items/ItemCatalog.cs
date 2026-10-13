@@ -21,7 +21,21 @@ public class ItemCatalog : ScriptableObject
     [Tooltip("ItemCatalogBuilder가 자동으로 채운다. 직접 편집하지 않는다.")]
     [SerializeField] private List<ItemDefinition> items = new();
 
+    [Tooltip("시체 전리품 표(LootTable)에 드는 아이템 id — ItemCatalogBuilder가 채운다. 상세의 「얻는 곳」이 쓴다 (결정 2-120).")]
+    [SerializeField] private List<string> corpseLootIds = new();
+
     private Dictionary<string, ItemDefinition> byId;
+    private HashSet<string> corpseLoot;
+
+    /// <summary>시체 전리품 표에 드는가 (결정 2-120 — 상세의 「얻는 곳」).</summary>
+    public bool InCorpseLoot(string id)
+    {
+        if (string.IsNullOrEmpty(id))
+            return false;
+
+        corpseLoot ??= new HashSet<string>(corpseLootIds);
+        return corpseLoot.Contains(id);
+    }
 
     public IReadOnlyList<ItemDefinition> Items => items;
 
@@ -78,6 +92,12 @@ public class ItemCatalog : ScriptableObject
     {
         items = list;
         byId = null;
+    }
+
+    public void EditorSetCorpseLoot(List<string> ids)
+    {
+        corpseLootIds = ids;
+        corpseLoot = null;
     }
 #endif
 }

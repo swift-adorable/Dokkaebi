@@ -290,3 +290,50 @@ MonoBehaviour:
   - {fileID: 11400000, guid: bbdcdeabf48be4659a13c665d6e394c4, type: 2}
   - {fileID: 11400000, guid: 7e752ac7e1ff14b39b0ff8147ddf802b, type: 2}
   - {fileID: 11400000, guid: 3c0d1bb63856c4075b7cb6a51664fa1b, type: 2}
+  corpseLootIds:
+  - ammo_arrow
+  - ammo_arrow_ap
+  - ammo_bolt
+  - ammo_bolt_ap
+  - ammo_dart
+  - ammo_dart_ap
+  - ammo_pyeonjeon
+  - ammo_pyeonjeon_ap
+  - ammo_rocket
+  - ammo_rocket_ap
+  - ammo_scatter
+  - ammo_scatter_ap
+  - ammo_shot
+  - ammo_shot_ap
+  - bio_sample
+  - cell_battery
+  - con_defroster
+  - con_water
+  - food_acorn
+  - food_barley
+  - food_bean
+  - food_boar
+  - food_chestnut
+  - food_chicken
+  - food_ginseng
+  - food_glutinous_rice
+  - food_honey
+  - food_jujube
+  - food_malt
+  - food_persimmon
+  - food_petal
+  - food_pheasant
+  - food_potato
+  - food_pumpkin
+  - food_radish
+  - food_rice
+  - food_rice_cake
+  - food_sesame
+  - food_sweet_potato
+  - food_venison
+  - food_wheat
+  - med_bandage
+  - med_stim
+  - memory_core
+  - scrap_metal
+  - wire_bundle

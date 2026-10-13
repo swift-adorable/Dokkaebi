@@ -91,6 +91,52 @@ public static class ShopManager
         return error;
     }
 
+    /// <summary>담은 줄들을 값을 매길 수 있게 푼다 — 카탈로그 · 가게 줄이 없는 것은 정의를 비워 둔다(CanBuy가 막는다).</summary>
+    public static List<CartItem> Resolve(ShopKind kind, ShopCart cart)
+    {
+        var items = new List<CartItem>();
+
+        if (cart == null)
+            return items;
+
+        ItemCatalog catalog = ItemCatalog.Load();
+
+        foreach (CartLine line in cart.Lines)
+        {
+            TryFindEntry(kind, line.ItemId, out ShopEntry entry);
+            items.Add(new CartItem(catalog != null ? catalog.Find(line.ItemId) : null, entry, line.Count));
+        }
+
+        return items;
+    }
+
+    /// <summary>
+    /// 【한꺼번에 사기】 (결정 2-120) — 전부 아니면 전혀. 사면 담은 것을 비운다.
+    /// </summary>
+    public static TradeError BuyCart(ShopKind kind, ShopCart cart, out int spent, out int failedIndex)
+    {
+        spent = 0;
+        List<CartItem> items = Resolve(kind, cart);
+
+        PassiveManager passive = PassiveManager.EnsureInstance();
+        int gold = passive.Gold;
+
+        TradeError error = CartRules.Buy(Of(kind), items, PlayerInventory.EnsureInstance().Bag, ref gold,
+            BuyDiscountPercent, out failedIndex);
+
+        if (gold != passive.Gold)
+        {
+            spent = passive.Gold - gold;
+            passive.Gold = gold;
+            PlayerInventory.Instance.RefreshCapacity();
+        }
+
+        if (error == TradeError.None)
+            cart.Clear();
+
+        return error;
+    }
+
     /// <summary>가방의 한 칸을 통째로 판다. 어느 상점에서 팔든 값은 같다.</summary>
     public static TradeError Sell(ItemStack stack, out int earned)
         => Sell(stack, stack != null ? stack.Count : 0, out earned);

@@ -49,11 +49,26 @@ public static class ItemCatalogBuilder
 
         catalog.EditorSet(items);
 
+        // 시체 전리품 표에 드는 id — 상세의 「얻는 곳」 (결정 2-120).
+        List<string> lootIds = AssetDatabase
+            .FindAssets("t:LootTable")
+            .Select(AssetDatabase.GUIDToAssetPath)
+            .Select(AssetDatabase.LoadAssetAtPath<LootTable>)
+            .Where(table => table != null)
+            .SelectMany(table => table.Entries)
+            .Where(entry => entry.item != null && entry.weight > 0)
+            .Select(entry => entry.item.Id)
+            .Distinct()
+            .OrderBy(id => id)
+            .ToList();
+
+        catalog.EditorSetCorpseLoot(lootIds);
+
         EditorUtility.SetDirty(catalog);
 
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
 
-        Debug.Log($"[ItemCatalog] 아이템 {items.Count}종 등록");
+        Debug.Log($"[ItemCatalog] 아이템 {items.Count}종 등록 · 시체 전리품 {lootIds.Count}종");
     }
 }
