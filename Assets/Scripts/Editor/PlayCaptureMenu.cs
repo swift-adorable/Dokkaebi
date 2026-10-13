@@ -150,6 +150,21 @@ public static class PlayCaptureMenu
     /// 지도 패시브 셋(돌아갈 길목 · 회수 계약 · 옛 지도)을 이 판에만 켜고, 쓰러진 자리 하나를 옆에 세운다 (결정 2-93 · 검증용).
     /// 저장하지 않는다 — 판이 끝나며 저장되면 배운 것으로 남으니 확인 뒤 플레이를 멈춘다.
     /// </summary>
+    /// <summary>보스 위험 표시 셋(원 · 고리 · 줄)을 플레이어 곁에 4초 띄운다 — 화면으로 확인하려고 (결정 2-114).</summary>
+    [MenuItem("Dokkaebi/Debug/보스 위험 표시 보이기")]
+    public static void ShowTelegraphs()
+    {
+        if (!EditorApplication.isPlaying)
+            return;
+
+        GameObject player = GameObject.FindWithTag("Player");
+        Vector3 at = player != null ? player.transform.position : Vector3.zero;
+        BossTelegraph.Circle(at + new Vector3(4f, 0f, 3f), 2.5f, new Color(0.95f, 0.3f, 0.3f), 4f).PreviewAt(0.5f);
+        BossTelegraph.Ring(at + new Vector3(-7f, 0f, 2f), 2.5f, 6f, new Color(1f, 0.45f, 0.15f), 4f).PreviewAt(0.5f);
+        BossTelegraph.Line(at + new Vector3(-6f, 0f, -5f), Vector3.right, 13.6f, 3.2f, new Color(0.95f, 0.3f, 0.3f), 4f).PreviewAt(0.5f);
+        Debug.Log("[Debug] 보스 위험 표시 셋 — 4초");
+    }
+
     [MenuItem("Dokkaebi/Debug/지도 패시브 셋 시험")]
     public static void TryMapPassives()
     {

@@ -74,6 +74,10 @@ public static class BossPatternTable
     /// <summary>위험 표시 뒤 맞기까지(초) — 피할 틈.</summary>
     public const float TelegraphSeconds = 1.0f;
 
+    /// <summary>위험 표시가 차오른 정도 0~1 — 1이 되는 순간 맞는다 (결정 2-114 · BossTelegraph).</summary>
+    public static float TelegraphProgress(float elapsed, float duration)
+        => duration <= 0f ? 1f : Mathf.Clamp01(elapsed / duration);
+
     // ── 어둑시니 ─────────────────────────────────────────────────────
 
     /// <summary>플레이어가 보고 있는가 — 바라보는 쪽과 어둑시니 쪽이 이만큼 같으면.</summary>

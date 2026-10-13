@@ -5,7 +5,7 @@ using UnityEngine;
 /// <summary>
 /// 【보스 17의 고유 패턴】 (결정 2-110 · BossPatternTable) — 이야기 보스 몸에 붙는다(StoryRaidDirector).
 /// 보통 공격(EnemyAttack)은 그대로 두고, 그 위에 보스마다의 행동을 얹는다.
-///   · 위험 자리는 붉은 원으로 먼저 보이고(TelegraphSeconds) 그다음 맞는다 — 피할 수 있게
+///   · 위험 자리는 먼저 보이고(BossTelegraph — 범위는 테두리, 남은 시간은 차오르는 면) 그다음 맞는다 — 피할 수 있게
 ///   · 받는 피해는 Health.IncomingDamageScale로 바꾼다 — 흐려짐 · 뿌리내림 · 함께 섬
 /// 죽거나 풀로 돌아가면 스스로 지워진다. 모양 · 수치는 [임시값].
 /// </summary>
@@ -357,11 +357,8 @@ public class BossPattern : MonoBehaviour
         if (!Alive) yield break;
 
         Vector3 center = transform.position;
-        GameObject warn = Disc(center, 6f, new Color(1f, 0.45f, 0.15f), 0.25f);
-        GameObject safe = Disc(center + Vector3.up * 0.01f, 2.5f, new Color(0.2f, 0.2f, 0.2f), 0.5f);
+        BossTelegraph.Ring(center, 2.5f, 6f, ColorOf(DamageElement.Fire), BossPatternTable.TelegraphSeconds);
         yield return new WaitForSeconds(BossPatternTable.TelegraphSeconds);
-        Destroy(warn);
-        Destroy(safe);
 
         if (Player != null)
         {
@@ -369,7 +366,7 @@ public class BossPattern : MonoBehaviour
             if (d > 2.5f && d <= 6f)
                 HitPlayer(Damage * 2, DamageElement.Fire, StatusEffectType.Ignite, 1);
         }
-        Flash(center, 6f, new Color(1f, 0.45f, 0.15f));
+        BossTelegraph.Flash(center, 6f, ColorOf(DamageElement.Fire));
     }
 
     /// <summary>백호 — 포효로 둘레를 밀어내고 몸을 굳힌다.</summary>
@@ -399,13 +396,11 @@ public class BossPattern : MonoBehaviour
         Vector3 dir = Flat(Player.position - start).normalized;
         if (dir == Vector3.zero) dir = transform.forward;
 
-        var marks = new List<GameObject>();
-        for (int i = 1; i <= 6; i++)
-            marks.Add(Disc(start + dir * (i * 2f), 1.2f, new Color(0.95f, 0.3f, 0.3f), 0.3f));
+        // 들이받는 길 — 0.5초 × 24m/s = 12m, 몸에서 1.6m 안이면 맞는다.
+        BossTelegraph.Line(start, dir, 12f + 1.6f, 3.2f, ColorOf(DamageElement.Physical), BossPatternTable.TelegraphSeconds);
 
         if (movement != null) movement.IsHalted = true;
         yield return new WaitForSeconds(BossPatternTable.TelegraphSeconds);
-        foreach (GameObject m in marks) Destroy(m);
 
         bool hit = false;
         float t = 0f;
@@ -498,12 +493,11 @@ public class BossPattern : MonoBehaviour
         int statusSource = -1)
     {
         Color color = ColorOf(element);
-        GameObject warn = Disc(at, radius, color, 0.28f);
+        BossTelegraph.Circle(at, radius, color, delay);
         yield return new WaitForSeconds(delay);
-        Destroy(warn);
 
         onHit?.Invoke();
-        Flash(at, radius, color);
+        BossTelegraph.Flash(at, radius, color);
 
         if (Player != null && Flat(Player.position - at).magnitude <= radius)
             HitPlayer(damage, element, status, stacks, statusSource);
@@ -587,23 +581,6 @@ public class BossPattern : MonoBehaviour
         DamageElement.Chaos => new Color(0.45f, 0.8f, 0.2f),
         _ => new Color(0.95f, 0.3f, 0.3f)
     };
-
-    private static GameObject Disc(Vector3 at, float radius, Color color, float alpha)
-    {
-        GameObject disc = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-        disc.name = "BossTelegraph";
-        Destroy(disc.GetComponent<Collider>());
-        disc.transform.position = new Vector3(at.x, 0.04f, at.z);
-        disc.transform.localScale = new Vector3(radius * 2f, 0.01f, radius * 2f);
-        Tint(disc, color, alpha);
-        return disc;
-    }
-
-    private static void Flash(Vector3 at, float radius, Color color)
-    {
-        GameObject f = Disc(at, radius, color, 0.65f);
-        Destroy(f, 0.2f);
-    }
 
     private static GameObject Sphere(Transform parent, Vector3 local, float size, Color color)
     {

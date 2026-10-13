@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using UnityEngine;
 
 namespace Dokkaebi.Tests
 {
@@ -57,6 +58,40 @@ namespace Dokkaebi.Tests
         {
             Assert.GreaterOrEqual(BossPatternTable.GrowDamageTaken(1.8f), 0.75f);
             Assert.GreaterOrEqual(BossPatternTable.PairDamageTaken(true), 0.75f);
+        }
+
+        /// <summary>결정 2-114 — 위험 표시는 범위(테두리)와 남은 시간(차오르는 면)을 보인다.</summary>
+        [Test]
+        public void 위험_표시는_범위와_남은_시간을_보인다()
+        {
+            Assert.AreEqual(0f, BossPatternTable.TelegraphProgress(0f, 1f), 0.0001f);
+            Assert.AreEqual(0.5f, BossPatternTable.TelegraphProgress(0.75f, 1.5f), 0.0001f);
+            Assert.AreEqual(1f, BossPatternTable.TelegraphProgress(3f, 1f), 0.0001f);
+
+            BossTelegraph circle = BossTelegraph.Circle(new Vector3(3f, 0f, 4f), 2.5f, Color.red, 1f);
+            BossTelegraph ring = BossTelegraph.Ring(Vector3.zero, 2.5f, 6f, Color.red, 1f);
+            BossTelegraph line = BossTelegraph.Line(Vector3.zero, Vector3.right, 13.6f, 3.2f, Color.red, 1f);
+            try
+            {
+                LineRenderer edge = circle.GetComponentInChildren<LineRenderer>();
+                Assert.IsNotNull(edge, "테두리");
+                for (int i = 0; i < edge.positionCount; i++)
+                {
+                    Vector3 p = edge.GetPosition(i);
+                    Assert.AreEqual(2.5f, new Vector2(p.x - 3f, p.z - 4f).magnitude, 0.01f, "테두리 = 맞는 범위");
+                }
+                Assert.Less(circle.Fill.localScale.x, 0.01f, "처음엔 비어 있다");
+                Assert.AreEqual(5f, ring.Fill.localScale.x, 0.01f, "고리는 안전한 안쪽(2.5)에서 차오르기 시작");
+                Assert.AreEqual(2, ring.GetComponentsInChildren<LineRenderer>().Length, "고리는 바깥 · 안쪽 테두리 둘");
+                Assert.AreEqual(4, line.GetComponentInChildren<LineRenderer>().positionCount, "줄은 네모 테두리");
+                Assert.IsNull(circle.GetComponentInChildren<Collider>(), "표시는 막지 않는다");
+            }
+            finally
+            {
+                Object.DestroyImmediate(circle.gameObject);
+                Object.DestroyImmediate(ring.gameObject);
+                Object.DestroyImmediate(line.gameObject);
+            }
         }
 
         [Test]
