@@ -65,6 +65,17 @@ public class WeaponModifiers
 
     private readonly List<SkillCondition> conditions = new(2);
 
+    // ── 고유 효과 (결정 2-116 · SupportMechanics) ───────────────────────
+
+    /// <summary>추격 — 탄이 적을 따라간다.</summary>
+    public bool Homing { get; private set; }
+
+    /// <summary>기세 — 움직이는 동안 더해지는 피해 증가율(멈추면 0). 늘 더하지 않는다.</summary>
+    public float MomentumDamageIncrease { get; private set; }
+
+    /// <summary>운율 — 이어 쏠수록 빨라지고 상한에서 과열.</summary>
+    public bool Cadence { get; private set; }
+
     /// <summary>총 동시 발사 수. 최소 1발은 보장한다.</summary>
     public int TotalProjectiles => 1 + Mathf.Max(0, ExtraProjectiles);
 
@@ -108,6 +119,10 @@ public class WeaponModifiers
         AilmentPower = 0f;
         AilmentDurationMultiplier = 1f;
         RangeMultiplier = 1f;
+
+        Homing = false;
+        MomentumDamageIncrease = 0f;
+        Cadence = false;
     }
 
     /// <summary>Skill 하나를 합산한다.</summary>
@@ -133,12 +148,21 @@ public class WeaponModifiers
         if (definition.ExtraProjectiles > 0)
             SpreadAngle = Mathf.Max(SpreadAngle, definition.SpreadAngle);
 
-        FireIntervalMultiplier *= definition.FireIntervalMultiplier;
+        SupportMechanic mechanic = SupportMechanics.Of(definition.Id);
+        if (mechanic == SupportMechanic.Homing) Homing = true;
+        if (mechanic == SupportMechanic.Cadence) Cadence = true;
+
+        // 운율의 빨라짐은 이어 쏜 만큼만 — 늘 곱하지 않는다(결정 2-116).
+        if (mechanic != SupportMechanic.Cadence)
+            FireIntervalMultiplier *= definition.FireIntervalMultiplier;
         LifetimeMultiplier *= definition.LifetimeMultiplier;
         SpeedMultiplier *= definition.SpeedMultiplier;
 
-        // 증가율은 더하고, 배율은 곱한다.
-        DamageIncrease += definition.DamageIncrease;
+        // 증가율은 더하고, 배율은 곱한다. 기세의 증가는 움직이는 동안만 — 따로 둔다(결정 2-116).
+        if (mechanic == SupportMechanic.Momentum)
+            MomentumDamageIncrease += definition.DamageIncrease;
+        else
+            DamageIncrease += definition.DamageIncrease;
         AilmentPower += definition.AilmentPower;
         AilmentDurationMultiplier *= definition.AilmentDurationMultiplier;
         RangeMultiplier *= definition.RangeMultiplier;

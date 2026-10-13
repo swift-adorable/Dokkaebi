@@ -129,8 +129,10 @@ namespace Dokkaebi.Tests
         {
             var modifiers = new WeaponModifiers();
 
-            SkillDefinition a = All().First(s => s.DamageIncrease > 0f);
-            SkillDefinition b = All().First(s => s.DamageIncrease > 0f && s.Id != a.Id);
+            // 기세는 움직이는 동안만 더한다 — 늘 합산되는 증가가 아니다 (결정 2-116).
+            bool Always(SkillDefinition s) => s.DamageIncrease > 0f && SupportMechanics.Of(s.Id) != SupportMechanic.Momentum;
+            SkillDefinition a = All().First(Always);
+            SkillDefinition b = All().First(s => Always(s) && s.Id != a.Id);
 
             modifiers.Apply(a);
             modifiers.Apply(b);

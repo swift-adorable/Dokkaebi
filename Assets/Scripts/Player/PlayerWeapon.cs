@@ -101,6 +101,32 @@ public class PlayerWeapon : MonoBehaviour
             poolManager.Prewarm(bulletPrefab, prewarmCount);
     }
 
+    private SupportMechanics.CadenceState cadence;
+    private SupportMechanics.MomentumState momentum;
+    private Vector3 lastPosition;
+    private bool hasLastPosition;
+
+    /// <summary>운율 과열 — HUD가 듣는다.</summary>
+    public static event System.Action OnCadenceOverheat;
+
+    /// <summary>기세가 붙어 있는가 (결정 2-116).</summary>
+    public bool MomentumActive => momentum.Active;
+
+    /// <summary>운율 — 지금 이어 쏜 수 · 과열 중인가.</summary>
+    public int CadenceStacks => cadence.Stacks;
+    public bool CadenceOverheated => cadence.Overheated(Time.time);
+
+    private void LateUpdate()
+    {
+        // 기세 — 쉬지 않고 움직인 거리를 잰다. 멈추면 바로 0.
+        Vector3 p = transform.position;
+        p.y = 0f;
+        if (hasLastPosition)
+            momentum.Tick(Vector3.Distance(p, lastPosition), Time.deltaTime);
+        lastPosition = p;
+        hasLastPosition = true;
+    }
+
     /// <summary>발사를 시도한다. 연사 간격에 걸리거나 참조가 없으면 false.</summary>
     public bool TryFire()
     {
@@ -122,10 +148,27 @@ public class PlayerWeapon : MonoBehaviour
         WeaponKindInfo? kind = unarmed ? null : PlayerAmmo.CurrentWeapon?.KindInfo;
 
         // 추위가 쌓이면 쏘는 속도가 느려진다 (결정 2-61 · 덕코프 추위 −0.3%/중첩).
-        float interval = shot.FireInterval * GetModifiers().FireIntervalMultiplier * PlayerWeather.FireIntervalScale;
+        WeaponModifiers mods = GetModifiers();
+        float baseInterval = shot.FireInterval * mods.FireIntervalMultiplier * PlayerWeather.FireIntervalScale;
+        float interval = baseInterval;
+
+        // 운율 — 과열 중에는 못 쏘고, 이어 쏜 만큼 빨라진다 (결정 2-116).
+        if (mods.Cadence)
+        {
+            if (cadence.Overheated(Time.time))
+                return false;
+            interval *= cadence.IntervalMultiplier;
+        }
 
         if (!cooldown.TryConsume(Time.time, interval))
             return false;
+
+        if (mods.Cadence)
+        {
+            cadence.OnShot(Time.time, baseInterval);
+            if (cadence.Overheated(Time.time))
+                OnCadenceOverheat?.Invoke();
+        }
 
         Fire(shot, kind);
 
@@ -201,6 +244,7 @@ public class PlayerWeapon : MonoBehaviour
                     penetration);
 
                 controller.SetSkillEffects(modifiers);
+                controller.SetBonusDamageIncrease(momentum.Active ? modifiers.MomentumDamageIncrease : 0f);   // 기세 (결정 2-116)
                 controller.SetEquipmentAilment(shot.AilmentPower);   // 「연소」 각인 (결정 2-99)
                 controller.SetCritical(shot.CriticalChance, shot.CriticalMultiplier);
 

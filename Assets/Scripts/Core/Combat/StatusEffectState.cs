@@ -44,6 +44,18 @@ public sealed class StatusEffectState
         }
     }
 
+    /// <summary>해로운 상태이상이 하나라도 걸려 있는지 — 이로운 상태(축지환 등)는 빼고 (추격 · 결정 2-116).</summary>
+    public bool HasAnyHarmful
+    {
+        get
+        {
+            for (int i = 1; i < TypeCount; i++)
+                if (remaining[i] > 0f && !StatusEffectTable.IsBeneficial((StatusEffectType)i))
+                    return true;
+            return false;
+        }
+    }
+
     public bool Has(StatusEffectType type)
     {
         return IsValid(type) && remaining[(int)type] > 0f;

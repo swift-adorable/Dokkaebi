@@ -27,6 +27,10 @@ public class BulletController : MonoBehaviour, IPoolable
 
     /// <summary>스킬 합산 결과. 참조만 든다. null이면 보정이 없다(적 탄 등).</summary>
     private WeaponModifiers skillEffects;
+    private float bonusDamageIncrease;      // 쏠 때 정해지는 증가(기세) — 결정 2-116
+    private Health homingTarget;            // 추격 — 결정 2-116
+    private float nextHomingSearch;
+    private static readonly Collider[] homingBuffer = new Collider[32];
 
     /// <summary>장비(각인 「연소」 등)의 상태이상 위력 배율 (결정 2-99). 적 탄 · 풀 재사용 때 1로.</summary>
     private float equipmentAilment = 1f;
@@ -147,6 +151,9 @@ public class BulletController : MonoBehaviour, IPoolable
     public void OnSpawned()
     {
         equipmentAilment = 1f;
+        bonusDamageIncrease = 0f;
+        homingTarget = null;
+        nextHomingSearch = 0f;
         isConsumed = false;
         isReturning = false;
 
@@ -288,6 +295,12 @@ public class BulletController : MonoBehaviour, IPoolable
         skillEffects = source;
     }
 
+    /// <summary>쏠 때 정해지는 피해 증가 — 기세(움직이는 동안). 갈라진 탄도 물려받는다 (결정 2-116).</summary>
+    public void SetBonusDamageIncrease(float increase)
+    {
+        bonusDamageIncrease = Mathf.Max(0f, increase);
+    }
+
     /// <summary>장비의 상태이상 위력 배율 (WeaponProfile.AilmentPower). PlayerWeapon이 쏠 때마다 준다.</summary>
     public void SetEquipmentAilment(float multiplier)
     {
@@ -327,6 +340,8 @@ public class BulletController : MonoBehaviour, IPoolable
 
         if (isReturning)
             UpdateReturnHoming();
+        else if (skillEffects != null && skillEffects.Homing && !useFactionGate)
+            UpdatePursuit();
 
         float step = currentSpeed * Time.deltaTime;
 
@@ -371,6 +386,65 @@ public class BulletController : MonoBehaviour, IPoolable
         hitTargets.Clear();
 
         return true;
+    }
+
+    /// <summary>
+    /// 추격 (결정 2-116) — 앞쪽 HomingRadius 안의 적을 골라(상태이상에 걸린 적 먼저) 초당 HomingTurnDegrees만큼 꺾는다.
+    /// 이미 맞힌 적은 쫓지 않는다.
+    /// </summary>
+    private void UpdatePursuit()
+    {
+        if (Time.time >= nextHomingSearch || homingTarget == null || homingTarget.IsDead || !homingTarget.isActiveAndEnabled)
+        {
+            nextHomingSearch = Time.time + SupportMechanics.HomingRetargetSeconds;
+            homingTarget = FindPursuitTarget();
+        }
+
+        if (homingTarget == null)
+            return;
+
+        Vector3 to = homingTarget.transform.position - transform.position;
+        to.y = 0f;
+        if (to.sqrMagnitude < 0.0001f)
+            return;
+
+        Vector3 forward = transform.forward;
+        forward.y = 0f;
+        Vector3 turned = Vector3.RotateTowards(forward.normalized, to.normalized,
+            SupportMechanics.HomingTurnDegrees * Mathf.Deg2Rad * Time.deltaTime, 0f);
+        if (turned.sqrMagnitude > 0.0001f)
+            transform.rotation = Quaternion.LookRotation(turned);
+    }
+
+    private Health FindPursuitTarget()
+    {
+        int count = Physics.OverlapSphereNonAlloc(transform.position, SupportMechanics.HomingRadius, homingBuffer,
+            ~0, QueryTriggerInteraction.Collide);
+
+        Health best = null;
+        float bestScore = float.MaxValue;
+        for (int i = 0; i < count; i++)
+        {
+            Collider c = homingBuffer[i];
+            if (c == null)
+                continue;
+            Health h = c.GetComponentInParent<Health>();
+            if (h == null || h.IsDead || h.Team == Team.Player || hitTargets.Contains(h.transform) || hitTargets.Contains(c.transform))
+                continue;
+
+            Vector3 to = h.transform.position - transform.position;
+            if (!SupportMechanics.InFront(transform.forward, to))
+                continue;
+
+            bool hasStatus = h.Status != null && h.Status.HasAnyHarmful;
+            float score = SupportMechanics.HomingScore(new Vector2(to.x, to.z).magnitude, hasStatus);
+            if (score < bestScore)
+            {
+                bestScore = score;
+                best = h;
+            }
+        }
+        return best;
     }
 
     /// <summary>Return 행동 중에는 발사 지점으로 유도된다.</summary>
@@ -549,7 +623,8 @@ public class BulletController : MonoBehaviour, IPoolable
         if (skillEffects != null)
         {
             increased = skillEffects.DamageIncrease
-                + skillEffects.ConditionalDamageIncrease(distance, effectiveRange, target.Status);
+                + skillEffects.ConditionalDamageIncrease(distance, effectiveRange, target.Status)
+                + bonusDamageIncrease;
         }
 
         if (applyStatus && AppliedStatus != StatusEffectType.None)
@@ -657,6 +732,7 @@ public class BulletController : MonoBehaviour, IPoolable
             // 프리팹 기본 피해(10)로 때려 티어 6 무기가 갈래마다 약해진다.
             bullet.SetWeaponBase(damage, effectiveRange, armourPenetration);
             bullet.SetSkillEffects(skillEffects);
+            bullet.SetBonusDamageIncrease(bonusDamageIncrease);
             bullet.SetCritical(criticalChance, criticalMultiplier);
 
             bullet.Configure(
