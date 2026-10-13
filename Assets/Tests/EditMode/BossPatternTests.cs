@@ -25,12 +25,12 @@ namespace Dokkaebi.Tests
             for (int i = 0; i < 20; i++)
                 s = BossPatternTable.NextScale(s, seen: true, 0.2f);
             Assert.AreEqual(1.8f, s, 0.001f);
-            Assert.AreEqual(0.5f, BossPatternTable.GrowDamageTaken(s), 0.001f);
+            Assert.AreEqual(0.75f, BossPatternTable.GrowDamageTaken(s), 0.001f);
 
             for (int i = 0; i < 20; i++)
                 s = BossPatternTable.NextScale(s, seen: false, 0.2f);
             Assert.AreEqual(0.8f, s, 0.001f);
-            Assert.AreEqual(1.3f, BossPatternTable.GrowDamageTaken(s), 0.001f);
+            Assert.AreEqual(1.2f, BossPatternTable.GrowDamageTaken(s), 0.001f);
         }
 
         [Test]
@@ -38,6 +38,25 @@ namespace Dokkaebi.Tests
         {
             Assert.Less(BossPatternTable.PairDamageTaken(true), 1f);
             Assert.Greater(BossPatternTable.PairDamageTaken(false), 1f);
+        }
+
+        /// <summary>결정 2-113 — 삼족오가 한 번 내리꽂아 쓰러뜨리지 않는다 (6장 방어구 중간값 6.25, 점화는 방어도 무시 · 기준 피해만큼).</summary>
+        [Test]
+        public void 삼족오_내리꽂기는_한_번에_쓰러뜨리지_않는다()
+        {
+            int damage = BossDataTable.Of("samjogo").Damage[0];
+            float hit = damage * BossPatternTable.DiveDamageMultiplier * DamageResolver.ArmourMultiplier(6.25f, 0f);
+            float ignite = damage * BossPatternTable.DiveIgniteMultiplier;
+            Assert.Less(hit + ignite, 40f, $"맞는 {hit:0} + 점화 {ignite:0}");
+            Assert.Greater(BossPatternTable.DiveTelegraphSeconds, BossPatternTable.TelegraphSeconds);
+        }
+
+        /// <summary>결정 2-113 — 어둑시니는 내내 보고 쏘아도 받는 피해가 3/4 아래로 내려가지 않는다(처치 시간이 두 배가 되지 않게).</summary>
+        [Test]
+        public void 어둑시니는_내내_봐도_처치가_두_배가_되지_않는다()
+        {
+            Assert.GreaterOrEqual(BossPatternTable.GrowDamageTaken(1.8f), 0.75f);
+            Assert.GreaterOrEqual(BossPatternTable.PairDamageTaken(true), 0.75f);
         }
 
         [Test]

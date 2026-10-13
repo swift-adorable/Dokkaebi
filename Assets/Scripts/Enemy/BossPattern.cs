@@ -307,14 +307,15 @@ public class BossPattern : MonoBehaviour
         health.IncomingDamageScale = 0f;
         if (movement != null) movement.IsHalted = true;
         SetAlpha(0.2f);
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(BossPatternTable.DiveAirSeconds);
 
         Vector3 target = Player.position;
-        yield return Telegraph(target, 3f, DamageElement.Fire, Damage * 2, StatusEffectType.Ignite, 1, () =>
+        yield return Telegraph(target, BossPatternTable.DiveRadius, DamageElement.Fire,
+            Mathf.RoundToInt(Damage * BossPatternTable.DiveDamageMultiplier), StatusEffectType.Ignite, 1, () =>
         {
             if (ZoneMap.CanSpawnAt(target))
                 Teleport(target);
-        });
+        }, BossPatternTable.DiveTelegraphSeconds, Mathf.RoundToInt(Damage * BossPatternTable.DiveIgniteMultiplier));
 
         SetAlpha(1f);
         if (movement != null) movement.IsHalted = false;
@@ -493,7 +494,8 @@ public class BossPattern : MonoBehaviour
     // ────────────────────────────────── 도움
 
     private IEnumerator Telegraph(Vector3 at, float radius, DamageElement element, int damage,
-        StatusEffectType status, int stacks = 1, System.Action onHit = null, float delay = BossPatternTable.TelegraphSeconds)
+        StatusEffectType status, int stacks = 1, System.Action onHit = null, float delay = BossPatternTable.TelegraphSeconds,
+        int statusSource = -1)
     {
         Color color = ColorOf(element);
         GameObject warn = Disc(at, radius, color, 0.28f);
@@ -504,16 +506,18 @@ public class BossPattern : MonoBehaviour
         Flash(at, radius, color);
 
         if (Player != null && Flat(Player.position - at).magnitude <= radius)
-            HitPlayer(damage, element, status, stacks);
+            HitPlayer(damage, element, status, stacks, statusSource);
     }
 
-    private void HitPlayer(int damage, DamageElement element, StatusEffectType status, int stacks)
+    /// <param name="statusSource">상태이상의 기준 피해. 음수면 맞는 피해와 같다.</param>
+    private void HitPlayer(int damage, DamageElement element, StatusEffectType status, int stacks, int statusSource = -1)
     {
         if (Player == null || !Player.TryGetComponent(out Health target) || target.IsDead)
             return;
 
-        for (int i = 0; i < stacks && status != StatusEffectType.None; i++)
-            target.ApplyStatus(status, damage);
+        int source = statusSource >= 0 ? statusSource : damage;
+        for (int i = 0; i < stacks && status != StatusEffectType.None && source > 0; i++)
+            target.ApplyStatus(status, source);
 
         var request = new DamageRequest
         {

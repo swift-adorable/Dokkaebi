@@ -26,6 +26,8 @@ public enum BossPatternKind
 /// <summary>
 /// 【보스 17의 고유 패턴】 (결정 2-110) — 부록의 「만나는 까닭 → 물러나는 모습」 · 「보스전의 구조」에 적힌 모습을 싸움으로.
 /// 순수 판정 · 수치만 여기 둔다. 실행은 Enemy/BossPattern. 수치는 전부 [임시값].
+/// 결정 2-113 — docs/research/sim/boss_pattern_sim.py로 처치 · 피해를 재서 어둑시니 · 처녀몽달 · 삼족오를 고쳤다
+/// (보통 플레이어 처치 시간이 목표의 1.25배 안, 패턴 때문에 늘어나는 쓰러짐 +5%p 안).
 /// </summary>
 public static class BossPatternTable
 {
@@ -77,19 +79,25 @@ public static class BossPatternTable
     /// <summary>플레이어가 보고 있는가 — 바라보는 쪽과 어둑시니 쪽이 이만큼 같으면.</summary>
     public const float SeenDot = 0.8f;
 
-    /// <summary>어둑시니 크기 — 보고 있으면 커지고(최대 1.8), 안 보면 줄어든다(최소 0.8). 초당 변화.</summary>
-    public static float NextScale(float scale, bool seen, float dt)
-        => Mathf.Clamp(scale + (seen ? 0.5f : -0.6f) * dt, 0.8f, 1.8f);
+    /// <summary>보고 있으면 초당 이만큼 커진다 (2-113: 0.5 → 0.25 — 쏘려면 봐야 하므로 늘 커져 있었다).</summary>
+    public const float GrowPerSecond = 0.25f;
 
-    /// <summary>클수록 단단하다 — 1.8배면 받는 피해 0.5, 0.8배면 1.3.</summary>
-    public static float GrowDamageTaken(float scale) => Mathf.Lerp(1.3f, 0.5f, Mathf.InverseLerp(0.8f, 1.8f, scale));
+    /// <summary>눈을 돌리면 초당 이만큼 줄어든다 (2-113: 0.6 → 1.0 — 잠깐 눈을 돌리는 것이 값어치가 있게).</summary>
+    public const float ShrinkPerSecond = 1.0f;
+
+    /// <summary>어둑시니 크기 — 보고 있으면 커지고(최대 1.8), 안 보면 줄어든다(최소 0.8).</summary>
+    public static float NextScale(float scale, bool seen, float dt)
+        => Mathf.Clamp(scale + (seen ? GrowPerSecond : -ShrinkPerSecond) * dt, 0.8f, 1.8f);
+
+    /// <summary>클수록 단단하다 — 1.8배면 받는 피해 0.75, 0.8배면 1.2 (2-113: 0.5 ~ 1.3에서).</summary>
+    public static float GrowDamageTaken(float scale) => Mathf.Lerp(1.2f, 0.75f, Mathf.InverseLerp(0.8f, 1.8f, scale));
 
     // ── 처녀귀신 · 몽달귀신 ───────────────────────────────────────────
 
     public const float PairRange = 6f;
 
-    /// <summary>짝이 곁(6m)에 살아 있으면 받는 피해 0.5, 떨어져 있으면 1.2.</summary>
-    public static float PairDamageTaken(bool partnerNear) => partnerNear ? 0.5f : 1.2f;
+    /// <summary>짝이 곁(6m)에 살아 있으면 받는 피해 0.75, 떨어져 있으면 1.25 (2-113: 0.5 · 1.2에서 — 둘 다 쫓아와 늘 붙어 있었다).</summary>
+    public static float PairDamageTaken(bool partnerNear) => partnerNear ? 0.75f : 1.25f;
 
     // ── 구미호 ───────────────────────────────────────────────────────
 
@@ -111,6 +119,23 @@ public static class BossPatternTable
 
     /// <summary>둔갑할 때 함께 서는 가짜 수.</summary>
     public const int Decoys = 2;
+
+    // ── 삼족오 ───────────────────────────────────────────────────────
+
+    /// <summary>날아올라 있는 시간 — 그다음 내리꽂을 자리를 보인다.</summary>
+    public const float DiveAirSeconds = 0.5f;
+
+    /// <summary>내리꽂을 자리를 보이고 맞기까지 (2-113: 1.0 → 1.5 — 날아오른 뒤라 보통 패턴보다 길게).</summary>
+    public const float DiveTelegraphSeconds = 1.5f;
+
+    public const float DiveRadius = 3f;
+
+    /// <summary>내리꽂는 한 대 = 보스 한 대 × 이 값 (2-113: 2 → 1.5).</summary>
+    public const float DiveDamageMultiplier = 1.5f;
+
+    /// <summary>점화의 기준 피해 = 보스 한 대 × 이 값 (2-113: 맞는 피해와 같던 2 → 0.5). 점화는 방어도를 무시하고 기준 피해만큼 타서
+    /// 2배면 한 번 맞고 쓰러졌다.</summary>
+    public const float DiveIgniteMultiplier = 0.5f;
 
     // ── 산군 ─────────────────────────────────────────────────────────
 
