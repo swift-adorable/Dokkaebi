@@ -44,7 +44,7 @@ public struct EnemyProfile
     /// </summary>
     public float regenPerSecond;
 
-    /// <summary>이야기 보스의 몸 — 판 특성의 재생을 받지 않는다(Boss Data 처치 시간이 재생 없이 맞춰져 있다 · 결정 2-117).</summary>
+    /// <summary>이야기 보스의 몸 (Boss Data · 결정 2-68). 판 특성 재생은 보스도 받는다 (사용자 2026-10-13).</summary>
     public bool isStoryBoss;
 
     /// <summary>발소리를 내는가. 유형이 정한다.</summary>

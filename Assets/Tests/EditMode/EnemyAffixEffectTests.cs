@@ -38,12 +38,13 @@ namespace Dokkaebi.Tests
         }
 
         [Test]
-        public void 이야기_보스는_재생을_받지_않는다()
+        public void 이야기_보스도_판_특성_재생을_받는다()
         {
             EnemyProfile boss = EnemyProfile.ForBoss(StoryTable.Boss("gumiho"), 0);
             Assert.IsTrue(boss.isStoryBoss);
-            boss.regenPerSecond = EnemyAffixTable.RegenPerSecond;   // 판 특성 「되살아나는 잡귀」가 얹혀도
-            Assert.AreEqual(0f, EnemyAffixEffects.RegenFor(boss), "Boss Data 처치 시간은 재생 없이 맞췄다");
+            Assert.AreEqual(0f, EnemyAffixEffects.RegenFor(boss), "판 특성이 없으면 재생 없음");
+            boss.regenPerSecond = EnemyAffixTable.RegenPerSecond;   // 판 특성 「되살아나는 잡귀」
+            Assert.AreEqual(EnemyAffixTable.RegenPerSecond, EnemyAffixEffects.RegenFor(boss), "보스도 재생한다 (사용자 2026-10-13)");
             Assert.IsFalse(EnemyProfile.Build(EnemyArchetype.Scav, EnemyRarity.Normal, System.Array.Empty<EnemyAffix>()).isStoryBoss);
         }
 

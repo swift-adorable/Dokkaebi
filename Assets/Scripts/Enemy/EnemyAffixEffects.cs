@@ -2,7 +2,7 @@ using UnityEngine;
 
 /// <summary>
 /// 【적 속성 넷의 실제 효과】 (결정 2-117 · Hunting_System 3절) — 지금까지 이름 · 프로필 값만 있고 몸에 닿지 않던 것.
-///   · 재생 — 초당 최대 체력의 2% 회복 (판 특성 「되살아나는 잡귀」도 같은 값). 이야기 보스는 받지 않는다
+///   · 재생 — 초당 최대 체력의 2% 회복 (판 특성 「되살아나는 잡귀」도 같은 값). 이야기 보스도 받는다 (사용자 2026-10-13)
 ///   · 껍질 — 첫 직접 피격 한 번 무효 (Health.ShellCharges)
 ///   · 분열성 — 쓰러지면 같은 유형 일반 몸 둘(체력 절반, 다시 분열하지 않음)
 ///   · 육중(통제 면역) — 동결 · 마비에 걸리지 않는다 (Health.ImmuneToIncapacitation)
@@ -46,8 +46,8 @@ public class EnemyAffixEffects : MonoBehaviour
         }
     }
 
-    /// <summary>이번 판에 실제로 쓰는 재생 비율 — 이야기 보스는 0.</summary>
-    public static float RegenFor(EnemyProfile p) => p.isStoryBoss ? 0f : p.regenPerSecond;
+    /// <summary>이번 판에 실제로 쓰는 재생 비율 — 이야기 보스도 같다 (사용자 2026-10-13).</summary>
+    public static float RegenFor(EnemyProfile p) => p.regenPerSecond;
 
     private void Update()
     {
