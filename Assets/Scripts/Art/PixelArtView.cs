@@ -208,6 +208,52 @@ public class PixelArtView : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 【개발용】 지금 화면을 정한 해상도(예: 휴대폰 1920×1080)로 다시 그려 PNG로 남긴다 — 에디터 창이 작아도
+    /// 실제 기기에서 도트가 어떻게 보이는지 보려고. UI는 빠진다.
+    /// </summary>
+    public static string CapturePreview(string path, int width, int height)
+    {
+        if (instance == null || instance.main == null || instance.pixelCamera == null)
+            return null;
+
+        Camera main = instance.main;
+        Camera pix = instance.pixelCamera;
+        Transform player = QuestSpotDirector.Player;
+        float distance = player != null ? Vector3.Distance(main.transform.position, player.position) : 15f;
+        int s = Mathf.Max(MinScale, ScaleFor(height, main.fieldOfView, distance, CharacterHeight, TargetCharacterPixels));
+
+        var full = new RenderTexture(width, height, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB);
+        var small = new RenderTexture(Mathf.Max(1, width / s), Mathf.Max(1, height / s), 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB)
+        {
+            filterMode = FilterMode.Point
+        };
+
+        RenderTexture oldMain = main.targetTexture, oldPix = pix.targetTexture;
+        main.targetTexture = full;
+        main.Render();
+        pix.targetTexture = small;
+        pix.Render();
+        main.targetTexture = oldMain;
+        pix.targetTexture = oldPix;
+
+        if (instance.composite != null)
+            Graphics.Blit(small, full, instance.composite);
+
+        RenderTexture.active = full;
+        var tex = new Texture2D(width, height, TextureFormat.RGB24, false);
+        tex.ReadPixels(new Rect(0, 0, width, height), 0, 0);
+        tex.Apply();
+        RenderTexture.active = null;
+        System.IO.File.WriteAllBytes(path, tex.EncodeToPNG());
+
+        Destroy(tex);
+        full.Release(); Destroy(full);
+        small.Release(); Destroy(small);
+        Debug.Log($"[PixelArt] {width}×{height} · 배율 {s} → {path}");
+        return path;
+    }
+
     /// <summary>플레이어 · 적에게 픽셀 몸을 붙인다(새로 나온 것 · 몸이 바뀐 것).</summary>
     private void Scan()
     {

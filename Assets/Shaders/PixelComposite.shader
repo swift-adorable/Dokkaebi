@@ -54,7 +54,7 @@ Shader "Dokkaebi/PixelComposite"
                     float levels = max(2.0, _Levels);
                     c.rgb = floor(c.rgb * levels + 0.5) / levels;
                     c.a = 1;
-                    return c * i.color;
+                    return c;
                 }
 
                 float n = tex2D(_MainTex, uv + float2(texel.x, 0)).a
@@ -62,7 +62,7 @@ Shader "Dokkaebi/PixelComposite"
                         + tex2D(_MainTex, uv + float2(0, texel.y)).a
                         + tex2D(_MainTex, uv - float2(0, texel.y)).a;
                 if (n >= _Cutoff)
-                    return fixed4(_OutlineColor.rgb, _OutlineColor.a * i.color.a);
+                    return _OutlineColor;
 
                 return fixed4(0, 0, 0, 0);
             }

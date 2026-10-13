@@ -76,6 +76,31 @@ public static class PixelArtMenu
             Time.timeScale = 1f;
     }
 
+    /// <summary>주인공이 카메라 쪽(비스듬히 앞)을 보게 — 앞모습을 찍으려고.</summary>
+    [MenuItem("Dokkaebi/Art/주인공 앞모습 보기")]
+    public static void FaceCamera()
+    {
+        // 입력이 매 프레임 조준을 덮으므로 잠시 조작을 끈다(다시 켜려면 플레이를 다시 시작).
+        DokkaebiController controller = Object.FindAnyObjectByType<DokkaebiController>();
+        if (controller != null)
+            controller.enabled = false;
+        PlayerAiming aiming = Object.FindAnyObjectByType<PlayerAiming>();
+        if (aiming != null && Camera.main != null)
+        {
+            // 카메라 쪽(비스듬히) — 카메라가 보는 방향의 반대에서 조금 비튼다.
+            Vector3 f = Camera.main.transform.forward;
+            Vector2 toward = -new Vector2(f.x, f.z).normalized;
+            var aim = new Vector2(toward.x - toward.y * 0.4f, toward.y + toward.x * 0.4f);
+            aiming.SetAim(aim);
+            // 시간이 멈춰 있으면(창 뒤) 물리 회전이 돌지 않는다 — 바로 돌려 둔다.
+            Quaternion q = Quaternion.LookRotation(new Vector3(aim.x, 0f, aim.y));
+            aiming.transform.rotation = q;
+            if (aiming.TryGetComponent(out Rigidbody rb))
+                rb.rotation = q;
+        }
+        Debug.Log("[PixelArt] 주인공 앞모습 — 조작을 잠시 껐다");
+    }
+
     [MenuItem("Dokkaebi/Art/화면 2배로 찍기")]
     public static void CaptureLarge()
     {
@@ -85,6 +110,17 @@ public static class PixelArtMenu
         string path = $"Temp/screens/art_{System.DateTime.Now:HHmmss}.png";
         ScreenCapture.CaptureScreenshot(path, 2);
         Debug.Log($"[Capture] {path}");
+    }
+
+    [MenuItem("Dokkaebi/Art/휴대폰 해상도로 찍기 (1920×1080)")]
+    public static void CapturePhone()
+    {
+        if (!EditorApplication.isPlaying)
+            return;
+        System.IO.Directory.CreateDirectory("Temp/screens");
+        string path = $"Temp/screens/phone_{System.DateTime.Now:HHmmss}.png";
+        if (PixelArtView.CapturePreview(path, 1920, 1080) == null)
+            Debug.LogWarning("[PixelArt] 픽셀 캐릭터가 켜져 있어야 한다.");
     }
 
     [MenuItem("Dokkaebi/Art/임시 인형 입히기")]
