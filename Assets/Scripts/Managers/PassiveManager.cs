@@ -66,9 +66,19 @@ public class PassiveManager : Singleton<PassiveManager>
         get => gold;
         set
         {
-            gold = Mathf.Max(0, value);
+            int next = Mathf.Max(0, value);
+            if (next > gold)
+                AchievementManager.RecordEarned(next - gold);   // 업적 「엽전 벌기」 — 늘어난 만큼 (결정 2-118)
+            gold = next;
             OnChanged?.Invoke();
         }
+    }
+
+    /// <summary>세이브에서 읽을 때 — 「번 엽전」에 세지 않는다.</summary>
+    public void RestoreGold(int value)
+    {
+        gold = Mathf.Max(0, value);
+        OnChanged?.Invoke();
     }
 
     /// <summary>

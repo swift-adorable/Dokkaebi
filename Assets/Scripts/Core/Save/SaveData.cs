@@ -56,7 +56,8 @@ public class SaveData
     ///  20 — 가게마다 오늘의 물건(shopDaily — shop · id)을 더했다 (결정 2-98). 19판에는 없어 새로 뽑는다.
     ///  21 — 상인이 맡아 둔 보상(pendingRewards)을 더했다 (결정 2-101). 20판에는 없어 빈 목록. 이야기 줄의 notices는 결정 2-100부터 쓰지 않는다.
     ///  22 — 가방에만 건넬 맡아 둔 보상(pendingBagRewards — 참봉)을 더했다 (결정 2-104). 21판에는 없어 빈 목록.
-    public const int CurrentVersion = 22;
+    ///  23 — 업적(achievements · bossKillCounts · earnedGold · arrivedChapters)을 더했다 (결정 2-118). 22판에는 없어 빈 것으로 읽힌다.
+    public const int CurrentVersion = 23;
 
     public int version = CurrentVersion;
 
@@ -179,6 +180,13 @@ public class SaveData
 
     /// <summary>가방에 자리가 없어 참봉이 맡아 둔 보상 — 가방에만 건넨다 (결정 2-104 · 판 22).</summary>
     public List<SavedItem> pendingBagRewards = new();
+
+    // ── 업적 (결정 2-118 · 판 23) ────────────────────────────────────
+
+    public List<string> achievements = new();
+    public List<SavedCount> bossKillCounts = new();
+    public long earnedGold;
+    public List<int> arrivedChapters = new();
 }
 
 /// <summary>처치 기록 한 줄 (결정 2-97). 갈래 · 등급은 enum 값이다.</summary>

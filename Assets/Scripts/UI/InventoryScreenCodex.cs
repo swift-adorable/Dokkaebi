@@ -97,6 +97,23 @@ public partial class InventoryScreenUI
             AddCodexRow(list, ref y, $"<b>{title}</b>  <size=16><color=#A8A08C>{piece.ZoneId}</color></size>\n<size=21>{body}</size>", lines);
         }
 
+        // 업적 (결정 2-118) — 보상 없이 표시만. 이름은 내용 그대로.
+        AchievementManager.Check(announce: false);
+        AchievementState achievements = AchievementManager.State;
+        int done = 0;
+        foreach (AchievementDefinition a in AchievementTable.All)
+            if (achievements.IsUnlocked(a.Id))
+                done++;
+
+        AddCodexRow(list, ref y, $"<b>업적  {done} / {AchievementTable.All.Count}</b>", 1);
+        foreach (AchievementDefinition a in AchievementTable.All)
+        {
+            bool got = achievements.IsUnlocked(a.Id);
+            string mark = got ? "<color=#E8C45A>●</color>" : "<color=#6E6A60>○</color>";
+            string name = got ? $"<b>{a.Name}</b>" : $"<color=#A8A08C>{a.Name}</color>";
+            AddCodexRow(list, ref y, $"{mark}  {name}  <size=18><color=#A8A08C>{a.Description}</color></size>", 1);
+        }
+
         list.Content.sizeDelta = new Vector2(0f, y);
     }
 

@@ -154,6 +154,7 @@ public static class SceneFlow
         SkillManager.ClearCarried();
         ApothecaryManager.Reset();
         LedgerManager.Reset();
+        AchievementManager.State.Reset();
 
         loading = false;
         Load(HasBunker ? BunkerScene : RaidScene);

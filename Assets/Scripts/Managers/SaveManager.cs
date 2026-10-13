@@ -270,6 +270,7 @@ public static class SaveManager
         WorkbenchManager.Capture(data);
         ApothecaryManager.Capture(data);
         LedgerManager.Capture(data);
+        AchievementManager.Capture(data);
 
         return data;
     }
@@ -314,7 +315,7 @@ public static class SaveManager
 
         PassiveManager passive = PassiveManager.EnsureInstance();
 
-        passive.Gold = data.gold;
+        passive.RestoreGold(data.gold);   // 세이브 읽기는 「번 엽전」에 세지 않는다 (업적 · 결정 2-118)
         passive.DiscoveredRegression = data.discoveredRegression;
         passive.State.Restore(data.learnedPassives);
 
@@ -341,6 +342,7 @@ public static class SaveManager
         WorkbenchManager.Restore(data);
         ApothecaryManager.Restore(data);
         LedgerManager.Restore(data);
+        AchievementManager.Restore(data);
 
         // 레벨이 돌아왔으니 소켓 수도 맞춘다. 알림은 내지 않는다.
         SkillManager.EnsureInstance().ResyncLevel();

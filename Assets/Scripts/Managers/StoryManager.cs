@@ -207,6 +207,9 @@ public static class StoryManager
     {
         BossDefinition boss = StoryTable.Boss(bossId);
 
+        if (boss != null)
+            AchievementManager.RecordBossKill(bossId);   // 업적 — 쓰러뜨릴 때마다 (결정 2-118)
+
         if (boss == null || !Progress.Defeat(bossId))
             return;
 

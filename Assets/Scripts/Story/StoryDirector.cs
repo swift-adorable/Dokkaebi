@@ -52,6 +52,8 @@ public class StoryDirector : MonoBehaviour
 
     private void Start()
     {
+        AchievementManager.EnsureRunning();   // 업적 (결정 2-118)
+
         // 본문 연출 — 도깨비불 · 소굴 소품 · 장 맵 소품 (결정 2-111).
         var movement = FindAnyObjectByType<PlayerMovement>(FindObjectsInactive.Exclude);
         if (movement != null && !movement.TryGetComponent(out PlayerWisp _))
