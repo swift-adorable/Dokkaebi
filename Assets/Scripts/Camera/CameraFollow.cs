@@ -12,6 +12,9 @@ public class CameraFollow : MonoBehaviour
     [Tooltip("0이면 즉시 추적, 값이 클수록 부드럽게 따라온다.")]
     [SerializeField] private float smoothTime = 0.12f;
 
+    /// <summary>【시험용】 따라가는 거리 배율 — 1이면 원래, 작을수록 가까이 (결정 2-115 픽셀 캐릭터 시험).</summary>
+    public static float ZoomScale = 1f;
+
     private Vector3 offset;
     private Vector3 currentVelocity;
     private bool isReady;
@@ -33,7 +36,7 @@ public class CameraFollow : MonoBehaviour
         if (!isReady || target == null)
             return;
 
-        Vector3 desiredPosition = target.position + offset;
+        Vector3 desiredPosition = target.position + offset * ZoomScale;
 
         if (smoothTime <= 0f)
         {
