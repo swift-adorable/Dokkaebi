@@ -85,6 +85,12 @@ namespace Dokkaebi.Tests
                 Assert.AreEqual(2, ring.GetComponentsInChildren<LineRenderer>().Length, "고리는 바깥 · 안쪽 테두리 둘");
                 Assert.AreEqual(4, line.GetComponentInChildren<LineRenderer>().positionCount, "줄은 네모 테두리");
                 Assert.IsNull(circle.GetComponentInChildren<Collider>(), "표시는 막지 않는다");
+                foreach (Renderer r in circle.GetComponentsInChildren<MeshRenderer>())
+                {
+                    Color c = r.sharedMaterial.color;
+                    Assert.AreEqual(BossTelegraph.FillColor.r, c.r, 0.001f, "채우는 색은 빨강");
+                    Assert.AreEqual(BossTelegraph.FillColor.g, c.g, 0.001f, "채우는 색은 빨강");
+                }
             }
             finally
             {

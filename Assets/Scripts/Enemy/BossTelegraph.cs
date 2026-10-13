@@ -3,7 +3,7 @@ using UnityEngine.Rendering;
 
 /// <summary>
 /// 【보스 패턴의 위험 표시】 (결정 2-114) — 범위와 맞기까지 남은 시간을 함께 보인다.
-///   · 범위 = 바닥의 옅은 면 + 또렷한 테두리 (맞는 자리가 정확히 어디까지인지)
+///   · 범위 = 바닥의 옅은 면 + 또렷한 테두리 (맞는 자리가 정확히 어디까지인지). 면은 언제나 빨강, 테두리는 속성 색
 ///   · 시간 = 안에서 차오르는 진한 면. 테두리까지 다 차는 순간 맞는다
 /// 모양은 셋 — 원(대부분) · 고리(주작: 안쪽 원은 안전) · 줄(해태: 들이받는 길).
 /// 스스로 시간을 재고 다 차면 지워진다. 보스가 먼저 죽어도 남은 표시는 제 시간에 사라진다. 색 · 굵기는 [임시값].
@@ -19,6 +19,9 @@ public class BossTelegraph : MonoBehaviour
     private const float FillAlpha = 0.38f;
     private const float EdgeAlpha = 0.95f;
     private const float FlashSeconds = 0.2f;
+
+    /// <summary>범위를 채우는 색 — 패턴 · 속성과 상관없이 빨강 (사용자 2026-10-13). 속성 색은 테두리에만 남긴다.</summary>
+    public static readonly Color FillColor = new(0.9f, 0.1f, 0.08f);
 
     private Shape shape;
     private float duration;
@@ -43,8 +46,8 @@ public class BossTelegraph : MonoBehaviour
     {
         BossTelegraph t = Create("BossTelegraph_Circle", at, Shape.Circle, seconds);
         t.outer = radius;
-        t.Disc(at, radius, color, AreaAlpha, 0);
-        t.fill = t.Disc(at, 0f, color, FillAlpha, 1).transform;
+        t.Disc(at, radius, FillColor, AreaAlpha, 0);
+        t.fill = t.Disc(at, 0f, FillColor, FillAlpha, 1).transform;
         t.Edge(at, radius, color);
         t.Apply();
         return t;
@@ -56,8 +59,8 @@ public class BossTelegraph : MonoBehaviour
         BossTelegraph t = Create("BossTelegraph_Ring", center, Shape.Ring, seconds);
         t.inner = inner;
         t.outer = outer;
-        t.Disc(center, outer, color, AreaAlpha, 0);
-        t.fill = t.Disc(center, inner, color, FillAlpha, 1).transform;
+        t.Disc(center, outer, FillColor, AreaAlpha, 0);
+        t.fill = t.Disc(center, inner, FillColor, FillAlpha, 1).transform;
         t.Disc(center + Vector3.up * 0.01f, inner, new Color(0.08f, 0.08f, 0.1f), 0.55f, 2);
         t.Edge(center, outer, color);
         t.Edge(center, inner, new Color(0.85f, 0.85f, 0.85f));
@@ -75,8 +78,8 @@ public class BossTelegraph : MonoBehaviour
         t.direction = dir;
         t.length = length;
         t.width = width;
-        t.Strip(length, color, AreaAlpha, 0);
-        t.fill = t.Strip(0f, color, FillAlpha, 1).transform;
+        t.Strip(length, FillColor, AreaAlpha, 0);
+        t.fill = t.Strip(0f, FillColor, FillAlpha, 1).transform;
         t.Box(color);
         t.Apply();
         return t;
@@ -87,7 +90,7 @@ public class BossTelegraph : MonoBehaviour
     {
         BossTelegraph t = Create("BossTelegraph_Flash", at, Shape.Circle, FlashSeconds);
         t.outer = radius;
-        t.Disc(at, radius, color, 0.6f, 1);
+        t.Disc(at, radius, FillColor, 0.6f, 1);
         t.fill = null;
     }
 
