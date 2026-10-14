@@ -23,18 +23,34 @@ namespace Dokkaebi.Tests
 
             foreach (ShopKind kind in ShopTable.All)
             {
-                ShopKeeperTable.Keeper keeper = ShopKeeperTable.Of(kind);
+                KeeperTable.Keeper keeper = KeeperTable.OfShop(kind);
                 StringAssert.Contains(keeper.Line, script, $"{ShopTable.NameOf(kind)} 말풍선이 본문에 없다");
                 StringAssert.Contains(keeper.Name, script);
+            }
+
+            // 시설 (결정 2-123) — 주인이 있으면 대사가 본문에 그대로, 없으면(부뚜막 · 작업대) 말풍선이 없다.
+            foreach (Station station in System.Enum.GetValues(typeof(Station)))
+            {
+                KeeperTable.Keeper keeper = KeeperTable.Of(station);
+                if (keeper.IsPerson)
+                {
+                    StringAssert.Contains(keeper.Line, script, $"{station} 말풍선이 본문에 없다");
+                    StringAssert.Contains(keeper.Name, script);
+                }
+                else
+                {
+                    Assert.IsNull(keeper.Line, $"{station}은 주인이 없다 — 말풍선을 짓지 않는다");
+                }
             }
         }
 
         [Test]
         public void 가게마다_주인이_다르다()
         {
-            Assert.AreEqual("영감", ShopKeeperTable.Of(ShopKind.General).Name);
-            Assert.AreEqual("빚쟁이", ShopKeeperTable.Of(ShopKind.Smithy).Name);
-            Assert.AreEqual("참봉", ShopKeeperTable.Of(ShopKind.Apothecary).Name);
+            Assert.AreEqual("영감", KeeperTable.OfShop(ShopKind.General).Name);
+            Assert.AreEqual("빚쟁이", KeeperTable.OfShop(ShopKind.Smithy).Name);
+            Assert.AreEqual("참봉", KeeperTable.OfShop(ShopKind.Apothecary).Name);
+            Assert.AreEqual("길달", KeeperTable.Of(Station.Ledger).Name);
         }
 
         [Test]

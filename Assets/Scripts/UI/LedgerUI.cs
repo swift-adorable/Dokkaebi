@@ -3,8 +3,9 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// 【임시】 장부방 화면 (결정 2-97 · 2-98 · 2-100) — 장 지도 · 처치 기록 · 가게 재고 · 기억의 조각. 장부방 앞에서 누르면 연다.
-/// 떠 있는 동안 게임이 멈춘다(결정 2-92). 모양은 레이어 · 아트 작업 때 다시 만든다.
+/// 장부방 화면 (결정 2-97 · 2-98 · 2-100 · 2-123) — 장 지도 · 처치 기록 · 가게 재고 · 기억의 조각. 장부방 앞에서 누르면 연다.
+/// 틀은 가게와 같다(StationFrame) — 왼쪽 탭 · 목록, 가운데 길달(본문 대사) · 앞판에 지금 사정, 오른쪽 내 가방.
+/// 떠 있는 동안 게임이 멈춘다(결정 2-92).
 /// </summary>
 public class LedgerUI : MonoBehaviour
 {
@@ -20,8 +21,10 @@ public class LedgerUI : MonoBehaviour
     private Text title;
     private Text status;
     private UIFactory.ScrollList list;
-    private readonly List<Image> tabs = new();
+    private StationFrame frame;
     private int shown = MapsTab;
+
+    private static readonly string[] TabNames = { LedgerTable.MapsTab, LedgerTable.KillsTab, LedgerTable.ShopsTab, LedgerTable.PiecesTab };
 
     public static void Open(int tab = MapsTab)
     {
@@ -34,7 +37,8 @@ public class LedgerUI : MonoBehaviour
         Canvas canvas = UIFactory.CreateCanvas("LedgerCanvas (Runtime)", 1200);
         instance = canvas.gameObject.AddComponent<LedgerUI>();
         instance.Build(canvas);
-        instance.Show(tab);
+        instance.shown = tab;
+        instance.StartCoroutine(instance.frame.Show(instance.Refresh));
     }
 
     public static void Close()
@@ -60,32 +64,18 @@ public class LedgerUI : MonoBehaviour
 
     private void Build(Canvas canvas)
     {
-        RectTransform safe = UIFactory.CreateSafeArea(canvas);
-        GamePause.Register(canvas.gameObject);   // 떠 있는 동안 게임이 멈춘다 (결정 2-92)
-        Image dim = UIFactory.CreatePanel("Dim", safe, UIPalette.Dim, Vector2.zero, Vector2.one, 0);
-        Image box = UIFactory.CreatePanel("Box", dim.transform, UIPalette.Panel,
-            new Vector2(0.1f, 0.04f), new Vector2(0.9f, 0.96f));
+        frame = StationFrame.Build(canvas, () => Destroy(gameObject));
+        frame.UseCounterAsNote(true);
+        frame.SetKeeper(KeeperTable.Of(Station.Ledger));
+        title = frame.Title;
+        status = frame.Status;
+        list = frame.List;
+    }
 
-        title = UIFactory.CreateLabel(box.transform, string.Empty, 30, FontStyle.Bold,
-            new Vector2(0.04f, 0.89f), new Vector2(0.78f, 0.98f), TextAnchor.MiddleLeft);
-        UIFactory.CreateButton(box.transform, "닫기", new Vector2(0.8f, 0.9f), new Vector2(0.96f, 0.97f),
-            UIPalette.Header, () => Destroy(gameObject), 22);
-
-        string[] names = { LedgerTable.MapsTab, LedgerTable.KillsTab, LedgerTable.ShopsTab, LedgerTable.PiecesTab };
-        for (int i = 0; i < names.Length; i++)
-        {
-            int captured = i;
-            float x = 0.04f + i * 0.17f;
-            Button tab = UIFactory.CreateButton(box.transform, names[i],
-                new Vector2(x, 0.80f), new Vector2(x + 0.16f, 0.88f), UIPalette.Header, () => Show(captured), 22);
-            tabs.Add(tab.GetComponent<Image>());
-        }
-
-        list = UIFactory.CreateScrollList("LedgerList", box.transform,
-            new Vector2(0.04f, 0.09f), new Vector2(0.96f, 0.785f));
-
-        status = UIFactory.CreateLabel(box.transform, string.Empty, 20, FontStyle.Normal,
-            new Vector2(0.04f, 0.01f), new Vector2(0.96f, 0.08f), TextAnchor.MiddleCenter, UIPalette.TextAccent);
+    private void Update()
+    {
+        if (frame != null && frame.IsOpen && Input.GetKeyDown(KeyCode.Escape))
+            Destroy(gameObject);
     }
 
     private void Show(int tab)
@@ -96,11 +86,15 @@ public class LedgerUI : MonoBehaviour
 
     private void Refresh()
     {
-        title.text = $"{ShopTable.LedgerRoomName}  ·  {LedgerManager.Gold:N0}엽전"
-            + (LedgerManager.Built ? string.Empty : "  (장부방을 지어야 한다)");
+        if (!frame.IsOpen)
+            return;
 
-        for (int i = 0; i < tabs.Count; i++)
-            tabs[i].color = i == shown ? UIPalette.SlotSelected : UIPalette.Header;
+        ItemActionMenu.Close();
+        title.text = ShopTable.LedgerRoomName;
+        frame.SetGold(LedgerManager.Gold);
+        frame.DrawTabs(TabNames, shown, Show);
+        frame.DrawBag(null, StationFrame.DetailOnly);
+        frame.CounterNote.text = LedgerManager.Built ? TabNames[shown] : "장부방을 지어야 한다";
 
         UIFactory.ClearChildren(list.Content);
         float y = 0f;
@@ -139,7 +133,7 @@ public class LedgerUI : MonoBehaviour
                 : LedgerTable.IsFullyRevealed(fog) ? "다 밝혔다"
                 : $"가 본 땅 {percent}% · {Colored($"{LedgerTable.MapPrice(number):N0}엽전", LedgerManager.Gold >= LedgerTable.MapPrice(number))}";
 
-            Image row = UIFactory.CreatePanel("Row", list.Content, UIPalette.Row, Vector2.zero, Vector2.zero);
+            Image row = UIFactory.CreatePanel("Row", list.Content, StationFrame.RowColor, Vector2.zero, Vector2.zero);
             Place(row.rectTransform, ref y, 90f);
 
             Text label = UIFactory.CreateLabel(row.transform,
@@ -147,7 +141,7 @@ public class LedgerUI : MonoBehaviour
                 new Vector2(0.02f, 0f), new Vector2(0.78f, 1f), TextAnchor.MiddleLeft, open ? UIPalette.Text : UIPalette.TextDim);
             label.supportRichText = true;
 
-            Button button = UIFactory.CreateButton(row.transform, "사기", new Vector2(0.80f, 0.15f), new Vector2(0.98f, 0.85f),
+            Button button = StationFrame.Pill(row.transform, "사기", new Vector2(0.80f, 0.15f), new Vector2(0.98f, 0.85f),
                 UIPalette.Action, () => OnBuy(number), 22);
             button.interactable = LedgerManager.CanBuyMap(number) == LedgerError.None;
         }
@@ -206,7 +200,7 @@ public class LedgerUI : MonoBehaviour
                 lines.Add($"<size=16><color=#A8A08C>{next}마리 더 잡으면 더 안다</color></size>");
 
             float height = 34f + lines.Count * 26f;
-            Image row = UIFactory.CreatePanel("Row", list.Content, UIPalette.Row, Vector2.zero, Vector2.zero);
+            Image row = UIFactory.CreatePanel("Row", list.Content, StationFrame.RowColor, Vector2.zero, Vector2.zero);
             Place(row.rectTransform, ref y, height);
 
             Text label = UIFactory.CreateLabel(row.transform, string.Join("\n", lines), 22, FontStyle.Normal,
@@ -242,7 +236,7 @@ public class LedgerUI : MonoBehaviour
             string daily = parts.Count > 0 ? string.Join(" · ", parts) : "들일 물건이 아직 없다";
             string head = open ? ShopTable.NameOf(kind) : $"{ShopTable.NameOf(kind)} (아직 짓지 않았다)";
 
-            Image row = UIFactory.CreatePanel("Row", list.Content, UIPalette.Row, Vector2.zero, Vector2.zero);
+            Image row = UIFactory.CreatePanel("Row", list.Content, StationFrame.RowColor, Vector2.zero, Vector2.zero);
             Place(row.rectTransform, ref y, 120f);
 
             Text label = UIFactory.CreateLabel(row.transform,
@@ -251,12 +245,12 @@ public class LedgerUI : MonoBehaviour
             label.supportRichText = true;
 
             int refill = ShopDailyTable.RefillPrice(kind);
-            Button fill = UIFactory.CreateButton(row.transform, $"지금 채우기 · {refill}엽전",
+            Button fill = StationFrame.Pill(row.transform, $"지금 채우기 · {refill}엽전",
                 new Vector2(0.64f, 0.53f), new Vector2(0.98f, 0.93f), UIPalette.Action,
                 () => OnShop(LedgerManager.Refill(kind), $"{ShopTable.NameOf(kind)} 재고를 가득 채웠다."), 18);
             fill.interactable = LedgerManager.CanRefill(kind) == LedgerError.None;
 
-            Button reroll = UIFactory.CreateButton(row.transform, $"오늘의 물건 다시 뽑기 · {ShopDailyTable.RerollPrice}엽전",
+            Button reroll = StationFrame.Pill(row.transform, $"오늘의 물건 다시 뽑기 · {ShopDailyTable.RerollPrice}엽전",
                 new Vector2(0.64f, 0.07f), new Vector2(0.98f, 0.47f), UIPalette.Subtle,
                 () => OnShop(LedgerManager.Reroll(kind), $"{ShopTable.NameOf(kind)}의 오늘의 물건을 다시 들였다."), 18);
             reroll.interactable = LedgerManager.CanReroll(kind) == LedgerError.None;
@@ -296,7 +290,7 @@ public class LedgerUI : MonoBehaviour
             foreach (string para in body.Split('\n'))
                 lines += 1 + para.Length / 38;
 
-            Image row = UIFactory.CreatePanel("Row", list.Content, UIPalette.Row, Vector2.zero, Vector2.zero);
+            Image row = UIFactory.CreatePanel("Row", list.Content, StationFrame.RowColor, Vector2.zero, Vector2.zero);
             Place(row.rectTransform, ref y, 40f + lines * 25f);
 
             Text label = UIFactory.CreateLabel(row.transform,

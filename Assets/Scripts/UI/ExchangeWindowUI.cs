@@ -141,9 +141,10 @@ public class ExchangeWindowUI : MonoBehaviour
         grid = UIFactory.CreateScrollList("LootGrid", box,
             new Vector2(0.04f, 0.155f), new Vector2(0.96f, 0.875f));
 
-        takeAllButton = UIFactory.CreateButton(box, "전부 줍기",
-            new Vector2(0.04f, 0.035f), new Vector2(0.96f, 0.130f),
-            UIPalette.Action, TakeAll, 26);
+        // 알약 단추 — 가게 · 시설 화면과 같은 모양 (결정 2-123). 싸우는 중에 쓰는 창이라 배치는 그대로 오른쪽 칸.
+        takeAllButton = StationFrame.Pill(box, "전부 줍기",
+            new Vector2(0.04f, 0.035f), new Vector2(0.96f, 0.125f),
+            StationFrame.PillAction, TakeAll, 26);
 
         panel.SetActive(false);
     }
@@ -230,8 +231,17 @@ public class ExchangeWindowUI : MonoBehaviour
         OpenPanel(windowMode);
     }
 
-    /// <summary>창고를 연다. 벙커가 생기면(8단계 뒤쪽) 보관고가 이 길을 부른다.</summary>
+    /// <summary>창고 화면이 「꺼냈다」를 알린다 — 튜토리얼이 이 사건을 듣는다 (결정 2-107 · 2-123).</summary>
+    public static void RaiseStashTaken() => StashTaken?.Invoke();
+
+    /// <summary>창고를 연다 — 【창고 화면(StashScreenUI)으로 넘긴다】 (결정 2-123). 옛 옆 패널 모드는 쓰지 않는다.</summary>
     public void OpenStash()
+    {
+        StashScreenUI.Open();
+    }
+
+    /// <summary>옛 옆 패널 창고 (결정 2-123 전) — 남겨 두되 부르지 않는다.</summary>
+    private void OpenStashPanel()
     {
         sources.Clear();
         source = null;

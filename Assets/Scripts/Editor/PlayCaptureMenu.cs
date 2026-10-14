@@ -60,6 +60,46 @@ public static class PlayCaptureMenu
             WorldMapUI.DebugZoomIn();
     }
 
+    /// <summary>가게 · 시설 화면을 모두 닫는다 — 차례로 열어 찍을 때 (결정 2-123).</summary>
+    [MenuItem("Dokkaebi/Debug/가게 · 시설 화면 모두 닫기")]
+    public static void CloseStations()
+    {
+        if (!EditorApplication.isPlaying)
+            return;
+
+        ShopScreenUI.Close();
+        StashScreenUI.Close();
+        BuildingScreenUI.Close();
+        ApothecaryUI.Close();
+        LedgerUI.Close();
+
+        foreach (CookingUI c in Object.FindObjectsByType<CookingUI>(FindObjectsInactive.Include))
+            Object.Destroy(c.gameObject);
+        foreach (WorkbenchUI w in Object.FindObjectsByType<WorkbenchUI>(FindObjectsInactive.Include))
+            Object.Destroy(w.gameObject);
+    }
+
+    [MenuItem("Dokkaebi/Debug/부뚜막 화면 열기")]
+    public static void OpenCooking()
+    {
+        if (EditorApplication.isPlaying)
+            CookingUI.Open();
+    }
+
+    [MenuItem("Dokkaebi/Debug/건설 화면 열기")]
+    public static void OpenBuilding()
+    {
+        if (EditorApplication.isPlaying)
+            BuildingScreenUI.Open();
+    }
+
+    [MenuItem("Dokkaebi/Debug/창고 화면 열기")]
+    public static void OpenStash()
+    {
+        if (EditorApplication.isPlaying)
+            StashScreenUI.Open();
+    }
+
     [MenuItem("Dokkaebi/Debug/작업대 화면 열기")]
     public static void OpenWorkbench()
     {

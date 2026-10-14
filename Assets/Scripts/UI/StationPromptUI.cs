@@ -82,6 +82,7 @@ public class StationPromptUI : MonoBehaviour
         bool covered = (InventoryScreenUI.HasInstance && InventoryScreenUI.Instance.IsOpen)
                        || ExchangeWindowUI.IsOpenIn(ExchangeWindowUI.Mode.Stash)
                        || ShopScreenUI.IsOpen
+                       || StashScreenUI.IsOpen
                        || BuildingScreenUI.IsOpen
                        || BunkerBuildings.IsPlacing;
 

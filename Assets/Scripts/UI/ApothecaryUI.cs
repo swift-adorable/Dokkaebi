@@ -4,8 +4,9 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// 【임시】 약탕 화면 (결정 2-97) — 달이기 · 샘가. 약탕간 옆 약탕 앞에서 누르면 연다.
-/// 떠 있는 동안 게임이 멈춘다(결정 2-92). 모양은 레이어 · 아트 작업 때 다시 만든다.
+/// 약탕 화면 (결정 2-97 · 2-123) — 달이기 · 샘가. 약탕간 옆 약탕 앞에서 누르면 연다.
+/// 틀은 가게와 같다(StationFrame) — 왼쪽 탭 · 목록, 가운데 참봉(본문 대사) · 앞판에 지금 사정, 오른쪽 내 가방.
+/// 떠 있는 동안 게임이 멈춘다(결정 2-92).
 /// </summary>
 public class ApothecaryUI : MonoBehaviour
 {
@@ -21,8 +22,10 @@ public class ApothecaryUI : MonoBehaviour
     private Text title;
     private Text status;
     private UIFactory.ScrollList list;
-    private readonly List<Image> tabs = new();
+    private StationFrame frame;
     private int shown = BrewTab;
+
+    private static readonly string[] TabNames = { "달이기", ApothecaryTable.SpringsideName };
 
     public static void Open(int tab = BrewTab)
     {
@@ -36,7 +39,8 @@ public class ApothecaryUI : MonoBehaviour
         Canvas canvas = UIFactory.CreateCanvas("ApothecaryCanvas (Runtime)", 1200);
         instance = canvas.gameObject.AddComponent<ApothecaryUI>();
         instance.Build(canvas);
-        instance.Show(tab);
+        instance.shown = tab;
+        instance.StartCoroutine(instance.frame.Show(instance.Refresh));
     }
 
     public static void Close()
@@ -58,32 +62,18 @@ public class ApothecaryUI : MonoBehaviour
     {
         catalog = ItemCatalog.Load();
 
-        RectTransform safe = UIFactory.CreateSafeArea(canvas);
-        GamePause.Register(canvas.gameObject);   // 떠 있는 동안 게임이 멈춘다 (결정 2-92)
-        Image dim = UIFactory.CreatePanel("Dim", safe, UIPalette.Dim, Vector2.zero, Vector2.one, 0);
-        Image box = UIFactory.CreatePanel("Box", dim.transform, UIPalette.Panel,
-            new Vector2(0.1f, 0.04f), new Vector2(0.9f, 0.96f));
+        frame = StationFrame.Build(canvas, () => Destroy(gameObject));
+        frame.UseCounterAsNote(true);
+        frame.SetKeeper(KeeperTable.Of(Station.Brew));
+        title = frame.Title;
+        status = frame.Status;
+        list = frame.List;
+    }
 
-        title = UIFactory.CreateLabel(box.transform, string.Empty, 30, FontStyle.Bold,
-            new Vector2(0.04f, 0.89f), new Vector2(0.78f, 0.98f), TextAnchor.MiddleLeft);
-        UIFactory.CreateButton(box.transform, "닫기", new Vector2(0.8f, 0.9f), new Vector2(0.96f, 0.97f),
-            UIPalette.Header, () => Destroy(gameObject), 22);
-
-        string[] names = { "달이기", ApothecaryTable.SpringsideName };
-        for (int i = 0; i < names.Length; i++)
-        {
-            int captured = i;
-            float x = 0.04f + i * 0.17f;
-            Button tab = UIFactory.CreateButton(box.transform, names[i],
-                new Vector2(x, 0.80f), new Vector2(x + 0.16f, 0.88f), UIPalette.Header, () => Show(captured), 24);
-            tabs.Add(tab.GetComponent<Image>());
-        }
-
-        list = UIFactory.CreateScrollList("ApothecaryList", box.transform,
-            new Vector2(0.04f, 0.09f), new Vector2(0.96f, 0.785f));
-
-        status = UIFactory.CreateLabel(box.transform, string.Empty, 20, FontStyle.Normal,
-            new Vector2(0.04f, 0.01f), new Vector2(0.96f, 0.08f), TextAnchor.MiddleCenter, UIPalette.TextAccent);
+    private void Update()
+    {
+        if (frame != null && frame.IsOpen && Input.GetKeyDown(KeyCode.Escape))
+            Destroy(gameObject);
     }
 
     private void Show(int tab)
@@ -94,10 +84,21 @@ public class ApothecaryUI : MonoBehaviour
 
     private void Refresh()
     {
-        title.text = $"{ApothecaryTable.PotName} — 약탕간" + (ApothecaryManager.Built ? string.Empty : "  (약탕간을 지어야 한다)");
+        if (!frame.IsOpen)
+            return;
 
-        for (int i = 0; i < tabs.Count; i++)
-            tabs[i].color = i == shown ? UIPalette.SlotSelected : UIPalette.Header;
+        ItemActionMenu.Close();
+        title.text = $"{ApothecaryTable.PotName} — 약탕간";
+        frame.SetGold(PassiveManager.EnsureInstance().Gold);
+        frame.DrawTabs(TabNames, shown, Show);
+        frame.DrawBag(null, StationFrame.DetailOnly);
+
+        SpringsideState side = ApothecaryManager.Springside;
+        frame.CounterNote.text = !ApothecaryManager.Built
+            ? "약탕간을 지어야 한다"
+            : shown == SpringsideTab
+                ? (side.IsEmpty ? "샘가가 비어 있다" : "샘가에 모인 것이 있다")
+                : "재료는 창고 먼저, 만든 것은 창고로";
 
         UIFactory.ClearChildren(list.Content);
         float y = 0f;
@@ -116,7 +117,7 @@ public class ApothecaryUI : MonoBehaviour
 
         foreach (CraftRecipe recipe in ApothecaryTable.Brews)
         {
-            Image row = UIFactory.CreatePanel("Row", list.Content, UIPalette.Row, Vector2.zero, Vector2.zero);
+            Image row = UIFactory.CreatePanel("Row", list.Content, StationFrame.RowColor, Vector2.zero, Vector2.zero);
             Place(row.rectTransform, ref y, RowHeight);
 
             string head = recipe.OutputCount > 1 ? $"{NameOf(recipe.OutputId)} ×{recipe.OutputCount}" : NameOf(recipe.OutputId);
@@ -127,7 +128,7 @@ public class ApothecaryUI : MonoBehaviour
                 22, FontStyle.Normal, new Vector2(0.02f, 0f), new Vector2(0.78f, 1f), TextAnchor.MiddleLeft);
             label.supportRichText = true;
 
-            Button button = UIFactory.CreateButton(row.transform, "달이기", new Vector2(0.80f, 0.15f), new Vector2(0.98f, 0.85f),
+            Button button = StationFrame.Pill(row.transform, "달이기", new Vector2(0.80f, 0.15f), new Vector2(0.98f, 0.85f),
                 UIPalette.Action, () => Act(ApothecaryManager.Brew(recipe), $"{Josa.EulReul(NameOf(recipe.OutputId))} 달였다 — 창고에 넣었다."), 22);
             button.interactable = ApothecaryTable.CanBrew(recipe, ApothecaryManager.Built, WorkbenchManager.CountOf) == CraftError.None;
         }
@@ -148,9 +149,9 @@ public class ApothecaryUI : MonoBehaviour
         foreach (MaterialCost c in side.Pending)
             AddLine($"{NameOf(c.ItemId)} ×{c.Count}", ref y, UIPalette.TextAccent);
 
-        Image row = UIFactory.CreatePanel("Collect", list.Content, UIPalette.Row, Vector2.zero, Vector2.zero);
+        Image row = UIFactory.CreatePanel("Collect", list.Content, StationFrame.RowColor, Vector2.zero, Vector2.zero);
         Place(row.rectTransform, ref y, RowHeight);
-        UIFactory.CreateButton(row.transform, "다 거두기", new Vector2(0.30f, 0.15f), new Vector2(0.70f, 0.85f),
+        StationFrame.Pill(row.transform, "다 거두기", new Vector2(0.30f, 0.15f), new Vector2(0.70f, 0.85f),
             UIPalette.Action, OnCollect, 24);
     }
 

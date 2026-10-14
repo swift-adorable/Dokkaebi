@@ -41,8 +41,11 @@ public class ItemActionMenu : MonoBehaviour
 
     // ── 치수 (캔버스 픽셀) ────────────────────────────────────────────
 
-    private const float ButtonWidth = 118f;
+    private const float ButtonWidth = 170f;   // 「바로 사기 1,600엽전」이 한 줄에 들어가게 (결정 2-123)
     private const float ButtonHeight = 54f;
+
+    /// <summary>알약 반지름 — 단추 높이의 절반.</summary>
+    private const int PillRadius = 27;
     private const float ButtonGap = 6f;
 
     /// <summary>칸과 메뉴 사이 틈.</summary>
@@ -254,7 +257,7 @@ public class ItemActionMenu : MonoBehaviour
 
             var image = buttonObject.AddComponent<Image>();
             image.color = entry.Color;
-            image.sprite = UISprites.Rounded(UIFactory.Radius);
+            image.sprite = UISprites.Rounded(PillRadius);   // 알약 (결정 2-123 — 가게 · 시설 화면과 같은 단추)
             image.type = Image.Type.Sliced;
             image.pixelsPerUnitMultiplier = 1f;
 
@@ -271,7 +274,7 @@ public class ItemActionMenu : MonoBehaviour
                 captured?.Invoke();
             });
 
-            UIFactory.CreateOutline(image, UIPalette.Rim, UIFactory.Radius, 2);
+            UIFactory.CreateOutline(image, UIPalette.Rim, PillRadius, 2);
 
             UIFactory.CreateLabel(buttonObject.transform, entry.Label, 23, FontStyle.Bold,
                 new Vector2(0.06f, 0f), new Vector2(0.94f, 1f), TextAnchor.MiddleCenter);

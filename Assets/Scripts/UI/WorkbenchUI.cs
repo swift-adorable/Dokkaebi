@@ -4,8 +4,9 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// 【임시】 작업대 화면 (결정 2-95) — 단계 탭 Ⅰ ~ Ⅳ · 단계 올리기 · 견본 바치기 · 만들기.
-/// 작업대 앞에서 누르면 연다. 떠 있는 동안 게임이 멈춘다(결정 2-92). 모양은 레이어 · 아트 작업 때 다시 만든다.
+/// 작업대 화면 (결정 2-95 · 2-123) — 단계 탭 Ⅰ ~ Ⅳ · 수리 · 분해 · 견본 바치기 · 만들기.
+/// 틀은 가게와 같다(StationFrame) — 왼쪽 탭 · 목록, 가운데 작업대(주인 없음) · 앞판에 지금 단계와 다음 단계 값,
+/// 오른쪽 내 가방 · 아래 「단계 올리기」. 떠 있는 동안 게임이 멈춘다(결정 2-92).
 /// </summary>
 public class WorkbenchUI : MonoBehaviour
 {
@@ -20,7 +21,7 @@ public class WorkbenchUI : MonoBehaviour
     private Button upgradeButton;
     private Text status;
     private UIFactory.ScrollList list;
-    private readonly List<Image> tabs = new();
+    private StationFrame frame;
     private int shownStage = 1;
 
     private const int RepairTab = WorkbenchTable.MaxStage + 1;
@@ -38,6 +39,7 @@ public class WorkbenchUI : MonoBehaviour
         Canvas canvas = UIFactory.CreateCanvas("WorkbenchCanvas (Runtime)", 1200);
         instance = canvas.gameObject.AddComponent<WorkbenchUI>();
         instance.Build(canvas);
+        instance.StartCoroutine(instance.frame.Show(instance.Refresh));
     }
 
     private void OnDestroy()
@@ -50,50 +52,33 @@ public class WorkbenchUI : MonoBehaviour
     {
         catalog = ItemCatalog.Load();
 
-        RectTransform safe = UIFactory.CreateSafeArea(canvas);
-        GamePause.Register(canvas.gameObject);   // 떠 있는 동안 게임이 멈춘다 (결정 2-92)
-        Image dim = UIFactory.CreatePanel("Dim", safe, UIPalette.Dim, Vector2.zero, Vector2.one, 0);
-        Image box = UIFactory.CreatePanel("Box", dim.transform, UIPalette.Panel,
-            new Vector2(0.1f, 0.04f), new Vector2(0.9f, 0.96f));
+        frame = StationFrame.Build(canvas, () => Destroy(gameObject));
+        frame.UseCounterAsNote(true);
+        frame.SetKeeper(KeeperTable.Of(Station.Workbench));
+        title = frame.Title;
+        status = frame.Status;
+        list = frame.List;
+        upgradeLine = frame.CounterNote;
+        upgradeButton = StationFrame.Pill(frame.Buttons, "단계 올리기", Vector2.zero, Vector2.one, StationFrame.PillAction, OnUpgrade);
 
-        title = UIFactory.CreateLabel(box.transform, string.Empty, 30, FontStyle.Bold,
-            new Vector2(0.04f, 0.89f), new Vector2(0.78f, 0.98f), TextAnchor.MiddleLeft);
-        UIFactory.CreateButton(box.transform, "닫기", new Vector2(0.8f, 0.9f), new Vector2(0.96f, 0.97f),
-            UIPalette.Header, () => Destroy(gameObject), 22);
+        shownStage = Mathf.Clamp(WorkbenchManager.State.Stage, 1, WorkbenchTable.MaxStage);
+    }
 
+    private void Update()
+    {
+        if (frame != null && frame.IsOpen && Input.GetKeyDown(KeyCode.Escape))
+            Destroy(gameObject);
+    }
+
+    /// <summary>탭 이름 — Ⅰ ~ Ⅳ · 수리 · 분해.</summary>
+    private static string[] TabNames()
+    {
+        var names = new List<string>();
         for (int stage = 1; stage <= WorkbenchTable.MaxStage; stage++)
-        {
-            int captured = stage;
-            float x = 0.04f + (stage - 1) * 0.095f;
-            Button tab = UIFactory.CreateButton(box.transform, WorkbenchTable.StageName(stage),
-                new Vector2(x, 0.80f), new Vector2(x + 0.088f, 0.88f), UIPalette.Header, () => ShowStage(captured), 26);
-            tabs.Add(tab.GetComponent<Image>());
-        }
-
-        // 수리 · 분해 (결정 2-96) — 작업대만 있으면 된다.
-        string[] extra = { "수리", "분해" };
-        for (int i = 0; i < extra.Length; i++)
-        {
-            int captured = RepairTab + i;
-            float x = 0.04f + (WorkbenchTable.MaxStage + i) * 0.095f;
-            Button tab = UIFactory.CreateButton(box.transform, extra[i],
-                new Vector2(x, 0.80f), new Vector2(x + 0.088f, 0.88f), UIPalette.Header, () => ShowStage(captured), 22);
-            tabs.Add(tab.GetComponent<Image>());
-        }
-
-        upgradeLine = UIFactory.CreateLabel(box.transform, string.Empty, 17, FontStyle.Normal,
-            new Vector2(0.62f, 0.80f), new Vector2(0.80f, 0.88f), TextAnchor.MiddleRight, UIPalette.TextDim);
-        upgradeLine.supportRichText = true;
-        upgradeButton = UIFactory.CreateButton(box.transform, "단계 올리기", new Vector2(0.81f, 0.80f),
-            new Vector2(0.96f, 0.88f), UIPalette.Action, OnUpgrade, 20);
-
-        list = UIFactory.CreateScrollList("WorkbenchList", box.transform,
-            new Vector2(0.04f, 0.09f), new Vector2(0.96f, 0.785f));
-
-        status = UIFactory.CreateLabel(box.transform, string.Empty, 20, FontStyle.Normal,
-            new Vector2(0.04f, 0.01f), new Vector2(0.96f, 0.08f), TextAnchor.MiddleCenter, UIPalette.TextAccent);
-
-        ShowStage(Mathf.Clamp(WorkbenchManager.State.Stage, 1, WorkbenchTable.MaxStage));
+            names.Add(WorkbenchTable.StageName(stage));
+        names.Add("수리");
+        names.Add("분해");
+        return names.ToArray();
     }
 
     private void ShowStage(int stage)
@@ -107,22 +92,25 @@ public class WorkbenchUI : MonoBehaviour
         WorkbenchState state = WorkbenchManager.State;
         int stage = state.Stage;
 
-        title.text = $"작업대 {WorkbenchTable.StageName(stage)}  ·  {WorkbenchManager.Gold:N0}엽전";
+        if (!frame.IsOpen)
+            return;
 
-        for (int i = 0; i < tabs.Count; i++)
-            tabs[i].color = i + 1 == shownStage ? UIPalette.SlotSelected
-                : i + 1 <= stage || i + 1 >= RepairTab ? UIPalette.Header : UIPalette.SlotLocked;
+        ItemActionMenu.Close();
+        title.text = $"작업대 {WorkbenchTable.StageName(stage)}";
+        frame.SetGold(WorkbenchManager.Gold);
+        frame.DrawTabs(TabNames(), shownStage - 1, i => ShowStage(i + 1));
+        frame.DrawBag(null, StationFrame.DetailOnly);
 
-        // 단계 올리기 줄
+        // 단계 올리기 — 앞판에 다음 단계 값, 오른쪽 아래 단추.
         if (stage >= WorkbenchTable.MaxStage)
         {
-            upgradeLine.text = "마지막 단계다";
+            upgradeLine.text = $"작업대 {WorkbenchTable.StageName(stage)}\n<size=18>마지막 단계다</size>";
             upgradeButton.interactable = false;
         }
         else
         {
             StageCost cost = WorkbenchTable.CostToReach(stage + 1);
-            upgradeLine.text = $"{WorkbenchTable.StageName(stage + 1)}로: {CostLine(cost.Materials, cost.Gold)}";
+            upgradeLine.text = $"작업대 {WorkbenchTable.StageName(stage)}\n<size=18>{WorkbenchTable.StageName(stage + 1)}로: {CostLine(cost.Materials, cost.Gold)}</size>";
             upgradeButton.interactable = state.CanUpgrade(WorkbenchManager.Built, WorkbenchManager.Gold,
                 WorkbenchManager.CountOf) == CraftError.None;
         }
@@ -160,7 +148,7 @@ public class WorkbenchUI : MonoBehaviour
         WorkbenchState state = WorkbenchManager.State;
         bool unlocked = state.IsUnlocked(recipe);
 
-        Image row = UIFactory.CreatePanel("Row", list.Content, UIPalette.Row, Vector2.zero, Vector2.zero);
+        Image row = UIFactory.CreatePanel("Row", list.Content, StationFrame.RowColor, Vector2.zero, Vector2.zero);
         Place(row.rectTransform, ref y, RowHeight);
 
         string head = recipe.OutputCount > 1 ? $"{NameOf(recipe.OutputId)} ×{recipe.OutputCount}" : NameOf(recipe.OutputId);
@@ -189,7 +177,7 @@ public class WorkbenchUI : MonoBehaviour
             action = () => Act(WorkbenchManager.Unlock(recipe), $"{NameOf(recipe.OutputId)} 만드는 법을 열었다.");
         }
 
-        Button button = UIFactory.CreateButton(row.transform, verb, new Vector2(0.80f, 0.15f), new Vector2(0.98f, 0.85f),
+        Button button = StationFrame.Pill(row.transform, verb, new Vector2(0.80f, 0.15f), new Vector2(0.98f, 0.85f),
             unlocked ? UIPalette.Action : UIPalette.Subtle, action, 22);
         button.interactable = canAct;
     }
@@ -215,7 +203,7 @@ public class WorkbenchUI : MonoBehaviour
 
         foreach (ItemStack stack in items)
         {
-            Image row = UIFactory.CreatePanel("Row", list.Content, UIPalette.Row, Vector2.zero, Vector2.zero);
+            Image row = UIFactory.CreatePanel("Row", list.Content, StationFrame.RowColor, Vector2.zero, Vector2.zero);
             Place(row.rectTransform, ref y, RowHeight);
 
             string name = stack.Definition.DisplayName;
@@ -250,7 +238,7 @@ public class WorkbenchUI : MonoBehaviour
                 new Vector2(0.02f, 0f), new Vector2(0.78f, 1f), TextAnchor.MiddleLeft);
             label.supportRichText = true;
 
-            Button button = UIFactory.CreateButton(row.transform, repair ? "고치기" : "분해", new Vector2(0.80f, 0.15f),
+            Button button = StationFrame.Pill(row.transform, repair ? "고치기" : "분해", new Vector2(0.80f, 0.15f),
                 new Vector2(0.98f, 0.85f), repair ? UIPalette.Action : UIPalette.Subtle, action, 22);
             button.interactable = canAct;
         }

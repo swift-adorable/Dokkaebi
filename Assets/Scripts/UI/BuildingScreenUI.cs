@@ -13,17 +13,22 @@ using UnityEngine.UI;
 ///   가지지 않음 → 「짓기」 (골드 · 재료를 치르고 배치 모드로)
 ///   가졌지만 놓지 않음 → 「배치」
 ///   놓음 → 「재활용」 (손실 없이 목록으로)
+///
+/// 【틀은 가게와 같다】 (결정 2-123 · StationFrame) — 왼쪽 목록, 가운데 영감(본문 대사), 오른쪽 내 가방.
 /// </summary>
 public class BuildingScreenUI : MonoBehaviour
 {
     private static BuildingScreenUI instance;
 
-    private GameObject panel;
+    private const float RowHeight = 176f;
+    private const float RowGap = 8f;
+
+    private StationFrame frame;
     private Text titleLabel;
     private Text messageLabel;
     private RectTransform list;
 
-    public static bool IsOpen => instance != null && instance.panel != null && instance.panel.activeSelf;
+    public static bool IsOpen => instance != null && instance.frame != null && instance.frame.IsOpen;
 
     public static void Open()
     {
@@ -37,14 +42,13 @@ public class BuildingScreenUI : MonoBehaviour
         }
 
         instance.messageLabel.text = string.Empty;
-        instance.panel.SetActive(true);
-        instance.Redraw();
+        instance.StartCoroutine(instance.frame.Show(instance.Redraw));
     }
 
     public static void Close()
     {
-        if (instance != null && instance.panel != null)
-            instance.panel.SetActive(false);
+        if (instance != null && instance.frame != null)
+            instance.frame.Hide();
     }
 
     private void OnDestroy()
@@ -55,48 +59,42 @@ public class BuildingScreenUI : MonoBehaviour
 
     private void Build(Canvas canvas)
     {
-        RectTransform safe = UIFactory.CreateSafeArea(canvas);
+        frame = StationFrame.Build(canvas, Close);
+        frame.UseCounterAsNote(true);
+        frame.SetKeeper(KeeperTable.Of(Station.Building));
+        titleLabel = frame.Title;
+        messageLabel = frame.Status;
+        list = frame.List.Content;
+    }
 
-        Image shade = UIFactory.CreatePanel("Shade", safe, new Color(0f, 0f, 0f, 0.45f),
-            Vector2.zero, Vector2.one, radius: 0);
-        shade.raycastTarget = true;
-        panel = shade.gameObject;
-        GamePause.Register(panel);   // 떠 있는 동안 게임이 멈춘다 (결정 2-92)
-
-        Image box = UIFactory.CreateGlass("BuildingBox", shade.transform, UIPalette.Panel,
-            new Vector2(0.16f, 0.10f), new Vector2(0.84f, 0.92f), UIFactory.RadiusLarge);
-
-        titleLabel = UIFactory.CreateLabel(box.transform, "건설", 30, FontStyle.Bold,
-            new Vector2(0.04f, 0.90f), new Vector2(0.75f, 0.98f),
-            TextAnchor.MiddleLeft, UIPalette.TextOnGlass);
-
-        UIFactory.CreateButton(box.transform, "닫기",
-            new Vector2(0.80f, 0.905f), new Vector2(0.96f, 0.975f),
-            UIPalette.Subtle, Close, 24);
-
-        messageLabel = UIFactory.CreateLabel(box.transform, string.Empty, 22, FontStyle.Normal,
-            new Vector2(0.04f, 0.02f), new Vector2(0.96f, 0.08f),
-            TextAnchor.MiddleCenter, UIPalette.TextAccent);
-
-        list = UIFactory.CreateRegion("List", box.transform,
-            new Vector2(0.03f, 0.09f), new Vector2(0.97f, 0.89f));
-
-        panel.SetActive(false);
+    private void Update()
+    {
+        if (IsOpen && Input.GetKeyDown(KeyCode.Escape))
+            Close();
     }
 
     private void Redraw()
     {
-        titleLabel.text = $"건설 · {PassiveManager.EnsureInstance().Gold:N0}엽전";
+        if (!frame.IsOpen)
+            return;
+
+        ItemActionMenu.Close();
+        titleLabel.text = "건설";
+        frame.SetGold(PassiveManager.EnsureInstance().Gold);
+        frame.DrawTabs(new[] { "설계도" }, 0, null);
+        frame.DrawBag(null, StationFrame.DetailOnly);
+        frame.CounterNote.text = "재료는 창고와 가방에서 함께 센다";
 
         UIFactory.ClearChildren(list);
 
         IReadOnlyList<BuildingDefinition> all = BuildingTable.All;
-        float rowHeight = 1f / Mathf.Max(4, all.Count);
+        list.sizeDelta = new Vector2(0f, all.Count * (RowHeight + RowGap));
+        float rowHeight = 1f / Mathf.Max(1, all.Count);
 
         for (int i = 0; i < all.Count; i++)
         {
             float top = 1f - i * rowHeight;
-            DrawRow(all[i], new Vector2(0f, top - rowHeight + 0.01f), new Vector2(1f, top - 0.01f));
+            DrawRow(all[i], new Vector2(0f, top - rowHeight), new Vector2(1f, top));
         }
     }
 
@@ -110,22 +108,26 @@ public class BuildingScreenUI : MonoBehaviour
         bool affordable = !owned && error == BuildError.None;
 
         // 덕코프처럼 【지을 수 있으면 초록】.
-        Color rowColor = affordable ? UIPalette.Glassify(UIPalette.Gain, 0.28f) : UIPalette.Row;
+        Color rowColor = affordable ? UIPalette.Glassify(UIPalette.Gain, 0.28f) : StationFrame.RowColor;
 
         Image row = UIFactory.CreatePanel($"Row_{definition.Id}", list, rowColor, min, max);
+        row.rectTransform.offsetMin = new Vector2(4f, RowGap * 0.5f);
+        row.rectTransform.offsetMax = new Vector2(-4f, -RowGap * 0.5f);
+        UIFactory.CreateOutline(row, StationFrame.RowEdge, UIFactory.Radius, 1);
 
-        UIFactory.CreateLabel(row.transform, definition.Name, 26, FontStyle.Bold,
-            new Vector2(0.03f, 0.62f), new Vector2(0.70f, 0.95f),
+        UIFactory.CreateLabel(row.transform, definition.Name, 24, FontStyle.Bold,
+            new Vector2(0.04f, 0.72f), new Vector2(0.74f, 0.95f),
             TextAnchor.MiddleLeft, UIPalette.TextOnGlass);
 
-        UIFactory.CreateLabel(row.transform, definition.Description, 18, FontStyle.Normal,
-            new Vector2(0.03f, 0.36f), new Vector2(0.72f, 0.62f),
-            TextAnchor.MiddleLeft, UIPalette.TextDim);
+        UIFactory.CreateLabel(row.transform, definition.Description, 17, FontStyle.Normal,
+            new Vector2(0.04f, 0.30f), new Vector2(0.74f, 0.72f),
+            TextAnchor.UpperLeft, UIPalette.TextDim);
 
-        UIFactory.CreateLabel(row.transform, owned ? StatusLine(placed) : CostLine(definition),
-            18, FontStyle.Normal,
-            new Vector2(0.03f, 0.05f), new Vector2(0.72f, 0.36f),
+        Text cost = UIFactory.CreateLabel(row.transform, owned ? StatusLine(placed) : CostLine(definition),
+            17, FontStyle.Normal,
+            new Vector2(0.04f, 0.05f), new Vector2(0.74f, 0.30f),
             TextAnchor.MiddleLeft, UIPalette.Text);
+        cost.supportRichText = true;
 
         string label;
         Color color;
@@ -150,8 +152,8 @@ public class BuildingScreenUI : MonoBehaviour
             action = () => OnRecycle(definition);
         }
 
-        UIFactory.CreateButton(row.transform, label,
-            new Vector2(0.76f, 0.22f), new Vector2(0.97f, 0.78f), color, action, 26);
+        StationFrame.Pill(row.transform, label,
+            new Vector2(0.77f, 0.32f), new Vector2(0.97f, 0.68f), color, action, 24);
     }
 
     private static string StatusLine(bool placed)

@@ -18,6 +18,9 @@ public class MinimapUI : MonoBehaviour
     public static readonly Color MarkerColor = new(1f, 0.85f, 0.35f, 1f);
     public static readonly Color PlayerColor = new(1f, 1f, 1f, 1f);
 
+    /// <summary>내 자리 — 전체 지도의 파란 동그라미와 같은 빛 (결정 2-123).</summary>
+    private static readonly Color MeColor = new(0.30f, 0.56f, 0.95f, 1f);
+
     private const float Inner = 6f;      // 틀 안쪽 여백
     private const float EdgeInset = 9f;  // 범위 밖 점을 테두리 안쪽으로
 
@@ -25,6 +28,7 @@ public class MinimapUI : MonoBehaviour
     private RectTransform view;
     private RawImage mapImage;
     private RawImage fogImage;
+    private RawImage closedImage;
     private RectTransform playerArrow;
     private readonly List<Text> icons = new();
     private Text weatherLine;
@@ -76,13 +80,17 @@ public class MinimapUI : MonoBehaviour
         view.gameObject.AddComponent<RectMask2D>();
 
         mapImage = CreateRaw("Map", view);
+        closedImage = CreateRaw("Closed", view);   // 사진 위 닫힌 곳 덮개 (결정 2-121 · 2-123)
         fogImage = CreateRaw("Fog", view);
 
+        // 내 자리 — 전체 지도와 같은 파란 빛 · 흰 테 (결정 2-123).
         Text arrow = UIFactory.CreateLabel(view, "▲", 26, FontStyle.Bold,
-            new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), TextAnchor.MiddleCenter, PlayerColor);
+            new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), TextAnchor.MiddleCenter, MeColor);
         arrow.raycastTarget = false;
         arrow.rectTransform.sizeDelta = new Vector2(30f, 30f);
-        arrow.gameObject.AddComponent<Outline>().effectColor = new Color(0f, 0f, 0f, 0.8f);
+        var ring = arrow.gameObject.AddComponent<Outline>();
+        ring.effectColor = Color.white;
+        ring.effectDistance = new Vector2(1.5f, -1.5f);
         playerArrow = arrow.rectTransform;
 
         Text hint = UIFactory.CreateLabel(frame, "지도", 18, FontStyle.Bold,
@@ -173,8 +181,12 @@ public class MinimapUI : MonoBehaviour
         float vh = MapTable.MinimapRange / map.HalfSize.y;
         var rect = new Rect(uv.x - uw * 0.5f, uv.y - vh * 0.5f, uw, vh);
 
-        mapImage.texture = runtime.MapTexture;
+        // 【전체 지도와 같은 그림】 (결정 2-123) — 구운 지도 사진이 있으면 사진 + 닫힌 곳 덮개, 없으면 옛 지도 그림.
+        mapImage.texture = runtime.HasPhoto ? runtime.Photo : runtime.MapTexture;
         mapImage.uvRect = rect;
+        closedImage.texture = runtime.HasPhoto ? runtime.EnsureClosedOverlay() : null;
+        closedImage.enabled = closedImage.texture != null;
+        closedImage.uvRect = rect;
         fogImage.texture = runtime.FogTexture;
         fogImage.uvRect = rect;
 

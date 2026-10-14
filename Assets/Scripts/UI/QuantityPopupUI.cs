@@ -66,13 +66,15 @@ public class QuantityPopupUI : MonoBehaviour
         Image dim = UIFactory.CreatePanel("Dim", safe, UIPalette.Dim, Vector2.zero, Vector2.one, 0);
         dim.raycastTarget = true;
 
-        Image box = UIFactory.CreatePanel("Box", dim.transform, UIPalette.Panel,
-            new Vector2(0.30f, 0.30f), new Vector2(0.70f, 0.70f));
+        // 가게 · 시설 화면과 같은 꾸밈 (결정 2-123) — 짙은 판 · 보라 테 · 알약 단추.
+        Image box = UIFactory.CreatePanel("Box", dim.transform, new Color(0.08f, 0.08f, 0.11f, 0.97f),
+            new Vector2(0.32f, 0.31f), new Vector2(0.68f, 0.69f), UIFactory.RadiusLarge);
+        UIFactory.CreateOutline(box, StationFrame.Accent, UIFactory.RadiusLarge, 3);
 
         UIFactory.CreateLabel(box.transform, title, 30, FontStyle.Bold,
             new Vector2(0.06f, 0.78f), new Vector2(0.80f, 0.95f), TextAnchor.MiddleLeft);
-        UIFactory.CreateButton(box.transform, "✕", new Vector2(0.84f, 0.80f), new Vector2(0.96f, 0.95f),
-            UIPalette.Subtle, Close, 24);
+        UIFactory.CreateButton(box.transform, "✕", new Vector2(0.86f, 0.80f), new Vector2(0.96f, 0.95f),
+            new Color(0f, 0f, 0f, 0.001f), Close, 30);
 
         info = UIFactory.CreateLabel(box.transform, string.Empty, 24, FontStyle.Normal,
             new Vector2(0.06f, 0.60f), new Vector2(0.94f, 0.76f), TextAnchor.MiddleLeft, UIPalette.TextAccent);
@@ -87,10 +89,10 @@ public class QuantityPopupUI : MonoBehaviour
                 Sync(parsed);
         });
 
-        UIFactory.CreateButton(box.transform, "1개", new Vector2(0.06f, 0.08f), new Vector2(0.30f, 0.28f),
-            UIPalette.Subtle, () => Sync(1), 24);
-        UIFactory.CreateButton(box.transform, verb, new Vector2(0.34f, 0.08f), new Vector2(0.94f, 0.28f),
-            UIPalette.Action, Confirm, 26);
+        StationFrame.Pill(box.transform, "1개", new Vector2(0.06f, 0.08f), new Vector2(0.30f, 0.26f),
+            StationFrame.PillDark, () => Sync(1), 24);
+        StationFrame.Pill(box.transform, verb, new Vector2(0.34f, 0.08f), new Vector2(0.94f, 0.26f),
+            StationFrame.PillAction, Confirm, 26);
 
         Sync(amount);
     }
