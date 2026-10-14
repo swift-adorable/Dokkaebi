@@ -20,7 +20,7 @@ using UnityEngine.SceneManagement;
 /// </summary>
 public static class BunkerSceneGenerator
 {
-    private const string RaidPath = "Assets/Scenes/SampleScene.unity";
+    private const string RaidPath = "Assets/Scenes/Raid.unity";
     private const string BunkerPath = "Assets/Scenes/Bunker.unity";
     private const string MaterialFolder = "Assets/Data/Materials";
 
@@ -52,7 +52,7 @@ public static class BunkerSceneGenerator
 
         if (active.path == BunkerPath)
         {
-            Debug.LogError("[Bunker] 벙커 씬이 열려 있습니다. 구역 씬(SampleScene)을 연 채로 실행하십시오.");
+            Debug.LogError("[Bunker] 벙커 씬이 열려 있습니다. 구역 씬(Raid)을 연 채로 실행하십시오.");
             return;
         }
 
@@ -335,6 +335,6 @@ public static class BunkerSceneGenerator
 
         EditorBuildSettings.scenes = scenes.ToArray();
 
-        Debug.Log("[Bunker] 빌드 설정 — 0: Bunker · 1: SampleScene.");
+        Debug.Log("[Bunker] 빌드 설정 — 0: Bunker · 1: Raid.");
     }
 }

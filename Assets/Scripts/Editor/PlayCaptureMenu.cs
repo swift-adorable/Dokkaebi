@@ -28,6 +28,14 @@ public static class PlayCaptureMenu
     /// 덮는 창(난이도 고르기 등 정렬 1500 이상)을 잠시 끄고 켠다 — 고르지 않은 채로 뒤 화면을 보려고.
     /// 아무것도 고르지 않으니 세이브는 바뀌지 않는다.
     /// </summary>
+    /// <summary>결정 2-125 — 10초 동안 프레임 · GC · 배치를 재서 콘솔에 한 덩어리로 남긴다 (PerfProbe).</summary>
+    [MenuItem("Dokkaebi/Debug/성능 재기 (10초)")]
+    public static void MeasurePerf()
+    {
+        if (EditorApplication.isPlaying)
+            PerfProbe.Begin(10f, GameViewSizeMenu.Tag);
+    }
+
     [MenuItem("Dokkaebi/Debug/덮는 창 잠시 끄고 켜기")]
     public static void ToggleOverlays()
     {

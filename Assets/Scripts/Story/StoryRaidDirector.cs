@@ -11,7 +11,7 @@ using UnityEngine;
 ///
 /// 【자리】 장 맵(결정 2-86 · 2-87)이 있으면 표의 자리 — 보스는 그 구역 보스 순서대로의 보스 자리,
 /// 다시 나온 중간 보스는 그 구역 보스 자리 중 아무 곳, 조각은 본문이 정한 조각 자리, 방은 방 자리 중 하나.
-/// 맵이 없는 씬(SampleScene)에서는 예전처럼 플레이어 둘레.
+/// 맵이 없는 씬(Raid)에서는 예전처럼 플레이어 둘레.
 /// </summary>
 public class StoryRaidDirector : MonoBehaviour
 {

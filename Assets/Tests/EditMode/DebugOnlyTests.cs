@@ -22,7 +22,7 @@ namespace Dokkaebi.Tests
     /// </summary>
     public class DebugOnlyTests
     {
-        private const string ScenePath = "Assets/Scenes/SampleScene.unity";
+        private const string ScenePath = "Assets/Scenes/Raid.unity";
 
         /// <summary>
         /// 출시 빌드에 남으면 안 되는 오브젝트. 경로로 못 박는다.

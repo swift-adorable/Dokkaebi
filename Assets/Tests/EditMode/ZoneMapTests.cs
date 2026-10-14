@@ -25,7 +25,7 @@ namespace Dokkaebi.Tests
             Assert.IsNotNull(map);
             Assert.AreEqual("Chapter0", map.SceneName);
             Assert.IsTrue(ZoneMapTable.IsMapScene("Chapter0"));
-            Assert.IsFalse(ZoneMapTable.IsMapScene("SampleScene"));
+            Assert.IsFalse(ZoneMapTable.IsMapScene("Raid"));
             Assert.IsFalse(ZoneMapTable.IsMapScene("Chapter9"), "표에 없는 장");
         }
 

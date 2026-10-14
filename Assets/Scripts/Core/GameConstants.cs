@@ -19,7 +19,7 @@ public static class GameConstants
     /// <summary>Scene 이름.</summary>
     public static class Scenes
     {
-        public const string SampleScene = "SampleScene";
+        public const string Raid = "Raid";   // 맵이 없는 옛 평지 파밍 씬 (결정 2-125 — 옛 이름 SampleScene)
     }
 
     // TBD — 추후 결정

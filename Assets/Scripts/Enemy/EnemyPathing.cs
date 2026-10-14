@@ -9,7 +9,7 @@ using UnityEngine.AI;
 ///
 ///   · 0.4초(±20%)마다 경로를 다시 구한다 — 적마다 어긋나게 해서 한 프레임에 몰리지 않는다
 ///   · 대상까지 NavMesh 위로 곧장 보이면(NavMesh.Raycast) 경로를 구하지 않고 곧장 간다
-///   · NavMesh가 없는 씬(SampleScene)이면 언제나 곧장 — 예전 그대로
+///   · NavMesh가 없는 씬(Raid)이면 언제나 곧장 — 예전 그대로
 /// 【바꾸는 법】 다른 길찾기(흐름장 등)로 갈아 끼울 때는 Direction만 바꾼다. EnemyMovement는 이 결과만 본다.
 /// </summary>
 public sealed class EnemyPathing

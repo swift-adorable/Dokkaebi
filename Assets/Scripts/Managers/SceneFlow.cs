@@ -17,10 +17,10 @@ public static class SceneFlow
     public const string BunkerScene = "Bunker";
 
     /// <summary>파밍 구역 씬 이름. 6장 구조(9단계)가 생기면 구역마다 나뉜다.</summary>
-    public const string RaidScene = "SampleScene";
+    public const string RaidScene = "Raid";
 
     /// <summary>
-    /// 이 구역을 도는 씬 (결정 2-86) — 그 장의 맵 씬(「Chapter0」…)이 빌드에 있으면 그것, 아니면 옛 평지(SampleScene).
+    /// 이 구역을 도는 씬 (결정 2-86) — 그 장의 맵 씬(「Chapter0」…)이 빌드에 있으면 그것, 아니면 옛 평지(Raid).
     /// </summary>
     public static string RaidSceneFor(string zoneId)
     {

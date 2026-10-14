@@ -10,7 +10,7 @@ using UnityEngine.SceneManagement;
 /// <summary>
 /// 【장 맵 굽기】 (결정 2-86) — ZoneMapTable의 그레이박스를 씬으로 만든다.
 ///
-///   1) 옛 파밍 씬(SampleScene)을 「Chapter0.unity」로 복사한다 — 플레이어 · 카메라 · 매니저 · 스포너가 그대로 온다
+///   1) 옛 파밍 씬(Raid)을 「Chapter0.unity」로 복사한다 — 플레이어 · 카메라 · 매니저 · 스포너가 그대로 온다
 ///   2) 바닥을 맵 크기로 늘리고, 덩어리 · 금줄을 단색 블록으로 얹는다 (맵 뿌리 「Map_Ch0」 + ZoneMap)
 ///   3) 빌드 설정에 넣는다 — SceneFlow가 그 장의 구역을 이 씬에서 돌린다
 ///   4) 덩어리에 레이어를 붙인다 — 키 큰 것 Obstacle(화살 · 시야를 막는다) · 낮은 것 LowCover (ObstacleRules · 결정 2-89)
@@ -19,7 +19,7 @@ using UnityEngine.SceneManagement;
 /// </summary>
 public static class ZoneMapBaker
 {
-    private const string RaidPath = "Assets/Scenes/SampleScene.unity";
+    private const string RaidPath = "Assets/Scenes/Raid.unity";
     private const string MaterialFolder = "Assets/Data/Materials/Map";
 
     [MenuItem("Dokkaebi/Map/장 맵 굽기 (전부)")]
@@ -279,7 +279,7 @@ public static class ZoneMapBaker
         return material;
     }
 
-    /// <summary>빌드 설정에 장 맵을 넣는다 — 벙커(0) · SampleScene 뒤에.</summary>
+    /// <summary>빌드 설정에 장 맵을 넣는다 — 벙커(0) · Raid 뒤에.</summary>
     private static void RegisterInBuild(string path)
     {
         var scenes = new List<EditorBuildSettingsScene>(EditorBuildSettings.scenes);
