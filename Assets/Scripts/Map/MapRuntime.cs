@@ -26,6 +26,28 @@ public class MapRuntime : MonoBehaviour
     /// <summary>양피지 그림의 1m당 화소 — 확대해도 덜 뭉개지게 미니맵보다 촘촘하다.</summary>
     public const int ParchmentPixelsPerMeter = 5;
 
+    // ── 지도 사진 (결정 2-121) ─────────────────────────────────────────
+    /// <summary>구운 지도 사진의 Resources 폴더 (Editor/MapPhotoBaker가 굽는다).</summary>
+    public const string PhotoFolder = "MapPhotos";
+
+    public static string PhotoName(int chapter) => $"Chapter{chapter}";
+
+    /// <summary>장면을 위에서 찍은 지도 — 없으면(아직 안 구웠으면) null, 그때는 양피지 그림을 쓴다.</summary>
+    public Texture2D Photo { get; private set; }
+
+    public bool HasPhoto => Photo != null;
+
+    /// <summary>사진 위에 얹는 덮개 — 닫힌 구역은 어둡게 · 아직 닫힌 금줄은 밝은 줄 (사진은 열고 닫힘을 모른다).</summary>
+    public Texture2D ClosedOverlay { get; private set; }
+
+    /// <summary>덮개의 1m당 화소 — 구역 경계만 그리면 되므로 성기다.</summary>
+    public const int OverlayPixelsPerMeter = 2;
+
+    private bool overlayDirty = true;
+
+    /// <summary>전체 지도에 깔 그림 — 사진이 있으면 사진, 없으면 양피지.</summary>
+    public Texture MapPicture => HasPhoto ? Photo : EnsureParchment();
+
     private bool parchmentDirty = true;
 
     /// <summary>플레이어 (없으면 null).</summary>
@@ -73,6 +95,8 @@ public class MapRuntime : MonoBehaviour
         };
         fogPixels = new Color32[Fog.Width * Fog.Height];
 
+        Photo = Resources.Load<Texture2D>($"{PhotoFolder}/{PhotoName(chapter)}");
+
         RedrawMap();
         RevealAroundPlayer();
         RedrawFog();
@@ -88,6 +112,7 @@ public class MapRuntime : MonoBehaviour
         if (MapTexture != null) Destroy(MapTexture);
         if (FogTexture != null) Destroy(FogTexture);
         if (ParchmentTexture != null) Destroy(ParchmentTexture);
+        if (ClosedOverlay != null) Destroy(ClosedOverlay);
     }
 
     /// <summary>지도를 다시 그린다 — 금줄이 걷혔을 때.</summary>
@@ -99,6 +124,7 @@ public class MapRuntime : MonoBehaviour
         MapTexture.SetPixels32(MapRaster.Render(Map, StoryManager.Progress.IsZoneOpen));
         MapTexture.Apply(false);
         parchmentDirty = true;
+        overlayDirty = true;
         Redrawn?.Invoke();
     }
 
@@ -169,6 +195,35 @@ public class MapRuntime : MonoBehaviour
         ParchmentTexture.Apply(false);
         parchmentDirty = false;
         return ParchmentTexture;
+    }
+
+    /// <summary>사진 위 덮개를 (필요하면 새로) 만들어 돌려준다. 사진이 없으면 null.</summary>
+    public Texture2D EnsureClosedOverlay()
+    {
+        if (Map == null || !HasPhoto)
+            return null;
+
+        if (!overlayDirty && ClosedOverlay != null)
+            return ClosedOverlay;
+
+        int ppm = OverlayPixelsPerMeter;
+        int w = MapRaster.WidthOf(Map, ppm), h = MapRaster.HeightOf(Map, ppm);
+
+        if (ClosedOverlay == null || ClosedOverlay.width != w || ClosedOverlay.height != h)
+        {
+            if (ClosedOverlay != null) Destroy(ClosedOverlay);
+            ClosedOverlay = new Texture2D(w, h, TextureFormat.RGBA32, false)
+            {
+                name = $"Closed_Ch{Chapter}",
+                filterMode = FilterMode.Bilinear,
+                wrapMode = TextureWrapMode.Clamp,
+            };
+        }
+
+        ClosedOverlay.SetPixels32(MapRaster.ClosedOverlay(Map, StoryManager.Progress.IsZoneOpen, ppm));
+        ClosedOverlay.Apply(false);
+        overlayDirty = false;
+        return ClosedOverlay;
     }
 
     /// <summary>월드 자리 → 그림의 0 ~ 1 좌표.</summary>

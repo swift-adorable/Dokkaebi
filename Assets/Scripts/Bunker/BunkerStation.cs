@@ -170,15 +170,15 @@ public class BunkerStation : MonoBehaviour
                 break;
 
             case Kind.GeneralStore:
-                ExchangeWindowUI.EnsureInstance().OpenShop(ShopKind.General);
+                ShopScreenUI.Open(ShopKind.General);
                 break;
 
             case Kind.Smithy:
-                ExchangeWindowUI.EnsureInstance().OpenShop(ShopKind.Smithy);
+                ShopScreenUI.Open(ShopKind.Smithy);
                 break;
 
             case Kind.Apothecary:
-                ExchangeWindowUI.EnsureInstance().OpenShop(ShopKind.Apothecary);
+                ShopScreenUI.Open(ShopKind.Apothecary);
                 break;
 
             case Kind.Cooking:

@@ -1766,9 +1766,8 @@ public partial class InventoryScreenUI : MonoBehaviour
     }
 
     /// <summary>
-    /// 오른쪽에 창고나 상점이 열려 있으면 그 일을 맨 위 줄로 준다. (8-I)
-    /// 【판매 줄에 값을 적는다】 — 누르기 전에 얼마를 받는지 알아야 한다.
-    /// 팔 수 없는 물건(각인 · 값 0)은 줄을 흐리게 둔다.
+    /// 오른쪽에 창고가 열려 있으면 「창고에 넣기」를 맨 위 줄로 준다. (8-I)
+    /// 파는 일은 가게 화면(ShopScreenUI)의 「내 가방」이 맡는다 (결정 2-121).
     /// </summary>
     private static ItemActionMenu.Entry? ExchangeEntry(ItemStack stack)
     {
@@ -1776,19 +1775,7 @@ public partial class InventoryScreenUI : MonoBehaviour
             return new ItemActionMenu.Entry("창고에 넣기", UIPalette.Action,
                 () => ExchangeWindowUI.PutIntoStash(stack));
 
-        // 사 주는 상점이 열려 있을 때만 — 지금은 세 상점 모두다 (결정 2-37).
-        if (!ExchangeWindowUI.IsBuyingShopOpen)
-            return null;
-
-        float bonus = ShopManager.SellBonusPercent;
-        bool sellable = TradeRules.CanSell(stack, bonus) == TradeError.None;
-
-        string label = sellable
-            ? $"판매 +{TradeRules.SellPrice(stack, bonus):N0}엽전"
-            : "판매 불가";
-
-        return new ItemActionMenu.Entry(label, UIPalette.Gain,
-            () => ExchangeWindowUI.SellFromBag(stack), sellable);
+        return null;
     }
 
     /// <summary>

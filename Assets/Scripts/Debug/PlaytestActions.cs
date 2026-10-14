@@ -788,7 +788,7 @@ public static class PlaytestActions
 
     public static string OpenShop()
     {
-        ExchangeWindowUI.EnsureInstance().OpenShop(ShopKind.General);
+        ShopScreenUI.Open(ShopKind.General);
         return $"{ShopTable.GeneralStoreName}를 열었습니다. 골드 {PassiveManager.EnsureInstance().Gold:N0}.\n"
                + "가방 칸을 누르면 「판매」가, 상점 칸을 누르면 「구매」가 뜹니다.";
     }

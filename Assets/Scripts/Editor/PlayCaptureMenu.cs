@@ -46,6 +46,13 @@ public static class PlayCaptureMenu
             WorldMapUI.Toggle();
     }
 
+    [MenuItem("Dokkaebi/Debug/전체 지도 끝까지 축소")]
+    public static void ZoomOutWorldMap()
+    {
+        if (EditorApplication.isPlaying)
+            WorldMapUI.DebugZoomOut();
+    }
+
     [MenuItem("Dokkaebi/Debug/전체 지도 한 칸 확대")]
     public static void ZoomWorldMap()
     {
@@ -205,18 +212,18 @@ public static class PlayCaptureMenu
         if (!EditorApplication.isPlaying)
             return;
 
-        ExchangeWindowUI window = ExchangeWindowUI.EnsureInstance();
-        window.OpenShop(ShopKind.Smithy);
+        // 여는 것은 한 프레임 뒤(흐린 뒤 화면을 찍고) — 담은 것은 열 때 비우므로 Open 다음에 담는다.
+        ShopScreenUI.Open(ShopKind.Smithy);
 
-        var field = typeof(ExchangeWindowUI).GetField("cart",
-            System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
-        if (field?.GetValue(window) is ShopCart cart)
+        const System.Reflection.BindingFlags any = System.Reflection.BindingFlags.Static
+            | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
+        object window = typeof(ShopScreenUI).GetField("instance", any)?.GetValue(null);
+        if (window != null && typeof(ShopScreenUI).GetField("cart", any)?.GetValue(window) is ShopCart cart)
         {
             cart.Add(AmmoTable.Arrow, 60);
             cart.Add("arm_head_t1", 1);
         }
 
-        window.SendMessage("Refresh", SendMessageOptions.DontRequireReceiver);
         Debug.Log("[Debug] 대장간 — 화살 60 · 투구 1을 담았다");
     }
 
@@ -237,6 +244,12 @@ public static class PlayCaptureMenu
             foreach (BossDefinition b in StoryTable.BossesIn(z.Id))
                 p.Defeat(b.Id);
         }
+
+        // 이 장의 첫 구역에 들어간 것으로 — 구역 이름이 보이게 (결정 2-121).
+        MapRuntime runtime = MapRuntime.Current;
+        ChapterDefinition here = runtime != null ? StoryTable.Chapter(runtime.Chapter) : null;
+        if (here != null && here.Zones.Length > 0)
+            p.See(StoryTable.EnterEvent(here.Zones[0].Id));
 
         WorldMapUI.Close();
         WorldMapUI.Open();

@@ -6,14 +6,16 @@ using UnityEngine.UI;
 /// <summary>
 /// 【전체 지도】 (결정 2-90 · 2-94) — 미니맵을 누르거나 M. 떠 있는 동안 게임이 멈춘다(결정 2-92).
 ///
-/// 【모양 — 2026-10-08 사용자 참고 그림】 화면 가득 누런 양피지 지도 · 가장자리는 어둡게 번진다.
-///   · 위: 「‹ 지도 › 1장 › 비 오는 폐장터」 · 목표 한 줄 · 표시 수 · 닫기
-///   · 왼쪽 세로 줄: 표시 거르기(길목 · 마커 · 퀘스트 · 전리품 · 쓰러진 자리) · 목표로 · 마커 목록 · 맨 아래 달 · 날씨
-///   · 아래: − ─── + 확대 막대 · 내 자리로
-///   · 아이콘 아래 이름표 · 퀘스트 구역은 테두리 + 가운데 「!」
+/// 【모양 — 2026-10-13 사용자 참고 그림 (결정 2-121)】 장면을 위에서 찍은 지도가 흐린 게임 화면 위에 떠 있다.
+///   · 그림: 구운 지도 사진(MapPhotoBaker) — 없으면 양피지. 가장자리는 번져 사라진다(UISoftEdge) · 뒤는 흐린 게임 화면(ScreenBlur)
+///   · 위 가운데: 큰 제목(장소) · 그 위 작은 「n장」 · 아래 목표 한 줄 / 왼쪽 위 ‹ · 오른쪽 위 표시 수 · ✕
+///   · 왼쪽 아래 「지도 표시」 판: 거르기(길목 · 마커 · 퀘스트 · 전리품 · 쓰러진 자리) · 목표로 · 마커 목록 · 도움말 한 줄
+///   · 오른쪽: 진행 중 퀘스트(위) · 나침반 · 달 · 날씨 · 확대 막대(아래)
+///   · 지도 위: 가 본 구역의 이름(흰 글씨 · 검은 테) · 아이콘 아래 이름표 · 내 자리는 파란 동그라미 + 「나」 · 퀘스트 구역은 테두리 + 「!」
 /// 【확대 · 이동】 배율 1(장 하나가 다 보인다) ~ 4 · 열면 2배로 내 자리가 가운데 · 끌어서 이동 · 휠 · 두 손가락 확대.
 /// 【보이는 것】 내 자리 · 바라보는 쪽 · 찾은 길목 · 금줄 · 퀘스트 구역 · 내 마커 · 쓰러진 자리 · (옛 지도) 전리품.
-///   구역 이름은 적지 않는다 · 가 보지 않은 땅은 어둡다 · 적 · 보스 · 조각은 그리지 않는다 (Map_System 4절)
+///   구역 이름은 【가 본 구역만】 적는다(사용자 2026-10-13 — 2026-10-08의 「적지 않는다」를 바꿨다) · 가 보지 않은 땅은 어둡다 ·
+///   적 · 보스 · 조각은 그리지 않는다 (Map_System 4절)
 /// 【마커】 두 번 누르면 찍는다(장마다 5개) · 마커를 두 번 누르면 지운다 — 지도 위에만 있다.
 /// 【진행 중 퀘스트】 (결정 2-120) 오른쪽 위 목록 — 퀘스트마다 다음 목표 한 줄, 누르면 그 구역으로 지도가 옮겨 간다.
 ///   「퀘스트」 거르기를 끄면 목록도 감춘다.
@@ -32,10 +34,27 @@ public class WorldMapUI : MonoBehaviour
     private static readonly Color Ink = new(0.96f, 0.92f, 0.82f, 1f);
     private static readonly Color InkDim = new(0.72f, 0.65f, 0.53f, 1f);
     private static readonly Color QuestColor = new(0.42f, 0.86f, 0.86f, 1f);
-    private static readonly Color FogTint = new(0.55f, 0.42f, 0.30f, 0.72f);
+    private static readonly Color FogTint = new(0.10f, 0.11f, 0.14f, 0.72f);
+    private static readonly Color BlurTint = new(0.55f, 0.55f, 0.58f, 1f);
+    private static readonly Color PlayerBlue = new(0.30f, 0.56f, 0.95f, 1f);
 
-    private const float TopBarHeight = 84f;
-    private const float LeftBarWidth = 116f;
+    /// <summary>위 제목 칸의 높이 — 진행 중 퀘스트 목록이 그 아래에서 시작한다.</summary>
+    private const float TopBarHeight = 132f;
+    private const float TitleHeight = 150f;
+
+    // 왼쪽 아래 「지도 표시」 판
+    private const float LegendPad = 14f;
+    private const float LegendHeight = 140f;
+    private const float ToolSize = 84f;
+    private const float ToolGap = 8f;
+
+    private const float CompassSize = 96f;
+
+    /// <summary>구역 이름을 구역 가운데에서 위로 띄우는 높이(화소).</summary>
+    private const float ZoneLabelLift = 44f;
+
+    /// <summary>사진 · 덮개 · 안개 가장자리가 번지는 폭 (그림 한 변의 비율).</summary>
+    private const float EdgeFeather = 0.07f;
 
     /// <summary>표시 거르기 — 켜고 끈 것은 이 실행 동안 남는다.</summary>
     private enum Layer { Extraction = 0, Marker = 1, Quest = 2, Loot = 3, Fallen = 4 }
@@ -51,10 +70,18 @@ public class WorldMapUI : MonoBehaviour
     private RectTransform content;
     private RawImage mapImage;
     private RawImage fogImage;
+    private RawImage closedImage;
+    private RawImage blurImage;
+    private RenderTexture blurTexture;
+    private RectTransform zoneLabelLayer;
+    private readonly List<Text> zoneLabels = new();
+    private RectTransform legend;
     private RectTransform outlineLayer;
     private RectTransform iconLayer;
-    private RectTransform playerArrow;
-    private Text breadcrumb;
+    private RectTransform playerMarker;
+    private RectTransform playerHeading;
+    private Text chapterLabel;
+    private Text titleLabel;
     private Text objectiveLabel;
     private Text markerCount;
     private Text moonLabel;
@@ -135,18 +162,23 @@ public class WorldMapUI : MonoBehaviour
         canvas = host;
 
         // 화면 끝까지 덮는다(노치 밖도). 글자 · 단추는 안전 영역 안에.
+        // 맨 뒤는 어두운 판 — 그 위에 흐린 게임 화면(ScreenBlur)이 찍히면 깔린다.
         Image dim = UIFactory.CreatePanel("Dim", canvas.transform, Backdrop, Vector2.zero, Vector2.one, 0);
         dim.raycastTarget = true;   // 지도 밖을 눌러도 조준이 돌지 않게
         root = dim.gameObject;
         GamePause.Register(root);   // 떠 있는 동안 게임이 멈춘다 (결정 2-92)
 
+        blurImage = CreateRaw("Blur", root.transform);
+        blurImage.color = BlurTint;
+        blurImage.enabled = false;
+
         RectTransform safe = UIFactory.CreateRegion("SafeArea", root.transform, Vector2.zero, Vector2.one);
         safe.gameObject.AddComponent<SafeAreaFitter>();
 
         BuildViewport(safe);
-        BuildTopBar(safe);
-        BuildLeftBar(safe);
-        BuildZoomBar(safe);
+        BuildTitle(safe);
+        BuildLegend(safe);
+        BuildRightColumn(safe);
         BuildMarkerList(safe);
         BuildQuestList(safe);
 
@@ -154,11 +186,22 @@ public class WorldMapUI : MonoBehaviour
         root.SetActive(false);
     }
 
+    /// <summary>글자를 지도 위에서 읽히게 — 검은 테 + 아래 그림자 (참고 그림의 흰 글씨).</summary>
+    private static Text Inked(Text label, float outline = 2f)
+    {
+        var o = label.gameObject.AddComponent<Outline>();
+        o.effectColor = new Color(0f, 0f, 0f, 0.9f);
+        o.effectDistance = new Vector2(outline, -outline);
+        var s = label.gameObject.AddComponent<Shadow>();
+        s.effectColor = new Color(0f, 0f, 0f, 0.55f);
+        s.effectDistance = new Vector2(0f, -outline * 2f);
+        return label;
+    }
+
     private void BuildViewport(RectTransform safe)
     {
+        // 【화면 전체가 지도다】 — 위 · 왼쪽 띠를 걷었다. 단추들은 지도 위에 떠 있다.
         viewport = UIFactory.CreateRegion("Viewport", safe, Vector2.zero, Vector2.one);
-        viewport.offsetMin = new Vector2(LeftBarWidth, 0f);
-        viewport.offsetMax = new Vector2(0f, -TopBarHeight);
         viewport.gameObject.AddComponent<RectMask2D>();
 
         Image catcher = viewport.gameObject.AddComponent<Image>();
@@ -169,130 +212,173 @@ public class WorldMapUI : MonoBehaviour
         content = UIFactory.CreateRegion("Content", viewport, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
         content.pivot = new Vector2(0.5f, 0.5f);
 
+        // 사진 · 닫힌 곳 덮개 · 안개 — 셋 다 가장자리가 번진다 (UISoftEdge).
+        Material soft = ScreenBlur.SoftEdge(EdgeFeather);
         mapImage = CreateRaw("MapImage", content);
+        closedImage = CreateRaw("ClosedOverlay", content);
         fogImage = CreateRaw("FogImage", content);
         fogImage.color = FogTint;
+        mapImage.material = soft;
+        closedImage.material = soft;
+        fogImage.material = soft;
+
         outlineLayer = UIFactory.CreateRegion("QuestOutlines", content, Vector2.zero, Vector2.one);
 
         RawImage vignette = CreateRaw("Vignette", viewport);
         vignette.texture = VignetteTexture();
-        vignette.color = new Color(Backdrop.r, Backdrop.g, Backdrop.b, 1f);
+        vignette.color = new Color(0f, 0f, 0f, 0.55f);
 
+        // 구역 이름이 아이콘보다 아래 — 아이콘의 이름표를 가리지 않게.
+        zoneLabelLayer = UIFactory.CreateRegion("ZoneNames", viewport, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
         iconLayer = UIFactory.CreateRegion("Icons", viewport, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
 
-        Text arrow = UIFactory.CreateLabel(iconLayer, "▲", 34, FontStyle.Bold,
-            new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), TextAnchor.MiddleCenter, MinimapUI.PlayerColor);
-        arrow.rectTransform.sizeDelta = new Vector2(40f, 40f);
-        arrow.raycastTarget = false;
-        arrow.gameObject.AddComponent<Outline>().effectColor = new Color(0f, 0f, 0f, 0.9f);
-        playerArrow = arrow.rectTransform;
-
-        Text hint = UIFactory.CreateLabel(viewport, "두 번 눌러 표시 · 표시를 두 번 누르면 지운다 · 끌어서 이동", 18,
-            FontStyle.Normal, new Vector2(1f, 0f), new Vector2(1f, 0f), TextAnchor.LowerRight, InkDim);
-        hint.rectTransform.pivot = new Vector2(1f, 0f);
-        hint.rectTransform.sizeDelta = new Vector2(620f, 30f);
-        hint.rectTransform.anchoredPosition = new Vector2(-18f, 12f);
-        hint.raycastTarget = false;
+        BuildPlayerMarker();
     }
 
-    private void BuildTopBar(RectTransform safe)
+    /// <summary>내 자리 — 파란 동그라미(흰 테) · 바라보는 쪽으로 도는 작은 세모 · 아래 「나」 (참고 그림의 「자신 / 나」).</summary>
+    private void BuildPlayerMarker()
     {
-        RectTransform bar = UIFactory.CreateRegion("TopBar", safe, new Vector2(0f, 1f), new Vector2(1f, 1f));
-        bar.offsetMin = new Vector2(0f, -TopBarHeight);
-        Image back = bar.gameObject.AddComponent<Image>();
-        back.color = BarColor;
+        playerMarker = UIFactory.CreateRegion("Player", iconLayer, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
+        playerMarker.sizeDelta = new Vector2(44f, 44f);
 
-        Button backButton = UIFactory.CreateButton(bar, "‹", new Vector2(0f, 0f), new Vector2(0f, 1f), ButtonOff, Hide, 44);
-        Inset((RectTransform)backButton.transform, 10f, LeftBarWidth - 10f);
+        playerHeading = UIFactory.CreateRegion("Heading", playerMarker, Vector2.zero, Vector2.one);
+        Image tip = UIFactory.CreatePanel("Tip", playerHeading, Color.white, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), 0);
+        tip.sprite = UISprites.Of(UISprites.Glyph.Triangle);
+        tip.rectTransform.sizeDelta = new Vector2(20f, 16f);
+        tip.rectTransform.anchoredPosition = new Vector2(0f, 6f);
+        tip.raycastTarget = false;
 
-        breadcrumb = UIFactory.CreateLabel(bar, "", 32, FontStyle.Bold,
-            new Vector2(0f, 0f), new Vector2(0.55f, 1f), TextAnchor.MiddleLeft, Ink);
-        breadcrumb.rectTransform.offsetMin = new Vector2(LeftBarWidth + 14f, 0f);
-        breadcrumb.horizontalOverflow = HorizontalWrapMode.Overflow;
+        Image ring = UIFactory.CreatePanel("Ring", playerMarker, Color.white, Vector2.zero, Vector2.one, 0);
+        ring.sprite = UISprites.Of(UISprites.Glyph.Circle);
+        ring.raycastTarget = false;
+        ring.gameObject.AddComponent<Shadow>().effectColor = new Color(0f, 0f, 0f, 0.6f);
 
-        objectiveLabel = UIFactory.CreateLabel(bar, "", 20, FontStyle.Normal,
-            new Vector2(0.45f, 0f), new Vector2(0.84f, 1f), TextAnchor.MiddleRight, QuestColor);
-        objectiveLabel.rectTransform.offsetMax = new Vector2(-12f, 0f);
+        Image dot = UIFactory.CreatePanel("Dot", playerMarker, PlayerBlue, Vector2.zero, Vector2.one, 0);
+        dot.sprite = UISprites.Of(UISprites.Glyph.Circle);
+        dot.rectTransform.offsetMin = new Vector2(4f, 4f);
+        dot.rectTransform.offsetMax = new Vector2(-4f, -4f);
+        dot.raycastTarget = false;
 
-        markerCount = UIFactory.CreateLabel(bar, "", 22, FontStyle.Normal,
-            new Vector2(0.84f, 0f), new Vector2(0.93f, 1f), TextAnchor.MiddleCenter, InkDim);
-
-        Button close = UIFactory.CreateButton(bar, "✕", new Vector2(1f, 0f), new Vector2(1f, 1f), ButtonOff, Hide, 34);
-        var closeRect = (RectTransform)close.transform;
-        closeRect.offsetMin = new Vector2(-96f, 10f);
-        closeRect.offsetMax = new Vector2(-12f, -10f);
+        Text me = Inked(UIFactory.CreateLabel(playerMarker, "나", 22, FontStyle.Bold,
+            new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), TextAnchor.UpperCenter, Color.white));
+        me.rectTransform.pivot = new Vector2(0.5f, 1f);
+        me.rectTransform.sizeDelta = new Vector2(80f, 28f);
+        me.rectTransform.anchoredPosition = new Vector2(0f, -4f);
     }
 
-    private static void Inset(RectTransform rect, float pad, float width)
+    /// <summary>위 — 가운데 큰 제목(장소) · 그 위 「n장」 · 아래 목표 한 줄 / 왼쪽 ‹ · 오른쪽 표시 수 · ✕.</summary>
+    private void BuildTitle(RectTransform safe)
     {
-        rect.offsetMin = new Vector2(pad, pad);
-        rect.offsetMax = new Vector2(width, -pad);
+        RectTransform bar = UIFactory.CreateRegion("Title", safe, new Vector2(0f, 1f), new Vector2(1f, 1f));
+        bar.offsetMin = new Vector2(0f, -TitleHeight);
+
+        // 위쪽만 살짝 어둡게 — 띠가 아니라 그늘 (제목이 지도 위에서도 읽히게).
+        RawImage shade = CreateRaw("Shade", bar);
+        shade.texture = TopShadeTexture();
+        shade.color = new Color(0f, 0f, 0f, 0.6f);
+
+        chapterLabel = Inked(UIFactory.CreateLabel(bar, "", 24, FontStyle.Bold,
+            new Vector2(0.2f, 0.70f), new Vector2(0.8f, 0.94f), TextAnchor.MiddleCenter, InkDim));
+
+        titleLabel = Inked(UIFactory.CreateLabel(bar, "", 58, FontStyle.Bold,
+            new Vector2(0.15f, 0.26f), new Vector2(0.85f, 0.74f), TextAnchor.MiddleCenter, Color.white), 3f);
+        titleLabel.horizontalOverflow = HorizontalWrapMode.Overflow;
+
+        objectiveLabel = Inked(UIFactory.CreateLabel(bar, "", 22, FontStyle.Bold,
+            new Vector2(0.15f, 0f), new Vector2(0.85f, 0.26f), TextAnchor.MiddleCenter, QuestColor));
+
+        Button backButton = RoundButton(bar, "‹", new Vector2(0f, 1f), new Vector2(18f, -18f), Hide, 44);
+        backButton.name = "Back";
+
+        Button close = RoundButton(bar, "✕", new Vector2(1f, 1f), new Vector2(-18f, -18f), Hide, 34);
+        close.name = "Close";
+
+        markerCount = Inked(UIFactory.CreateLabel(bar, "", 22, FontStyle.Bold,
+            new Vector2(1f, 1f), new Vector2(1f, 1f), TextAnchor.MiddleRight, Ink));
+        markerCount.rectTransform.pivot = new Vector2(1f, 1f);
+        markerCount.rectTransform.sizeDelta = new Vector2(200f, 72f);
+        markerCount.rectTransform.anchoredPosition = new Vector2(-108f, -18f);
     }
 
-    private void BuildLeftBar(RectTransform safe)
+    /// <summary>둥근 단추 하나 — 지도 위에 떠 있는 ‹ · ✕.</summary>
+    private static Button RoundButton(Transform parent, string text, Vector2 anchor, Vector2 position,
+                                      UnityEngine.Events.UnityAction action, int fontSize)
     {
-        RectTransform bar = UIFactory.CreateRegion("LeftBar", safe, new Vector2(0f, 0f), new Vector2(0f, 1f));
-        bar.offsetMin = Vector2.zero;
-        bar.offsetMax = new Vector2(LeftBarWidth, -TopBarHeight);
-        Image back = bar.gameObject.AddComponent<Image>();
-        back.color = BarColor;
-
-        float y = 10f;
-        AddFilter(bar, Layer.Extraction, UISprites.Glyph.Circle, "", ExtractionDirector.Name, MinimapUI.ExtractionColor, ref y);
-        AddFilter(bar, Layer.Marker, UISprites.Glyph.Diamond, "", "마커", MinimapUI.MarkerColor, ref y);
-        AddFilter(bar, Layer.Quest, UISprites.Glyph.Diamond, "!", "퀘스트", QuestColor, ref y);
-        AddFilter(bar, Layer.Loot, UISprites.Glyph.Square, "", "전리품", MapLootMarks.BundleColor, ref y);
-        AddFilter(bar, Layer.Fallen, UISprites.Glyph.Circle, "", "쓰러진 자리", MapLootMarks.FallenColor, ref y);
-
-        y += 14f;
-        AddTool(bar, UISprites.Glyph.Triangle, "", "목표로", QuestColor, GoToObjective, ref y);
-        AddTool(bar, UISprites.Glyph.Square, "", "마커 목록", MinimapUI.MarkerColor, ToggleMarkerList, ref y);
-
-        // 맨 아래 — 오늘 밤의 달 · 날씨 (참고 그림의 시간 · 날씨 자리).
-        moonLabel = UIFactory.CreateLabel(bar, "", 20, FontStyle.Bold,
-            new Vector2(0f, 0f), new Vector2(1f, 0f), TextAnchor.MiddleCenter, Ink);
-        moonLabel.rectTransform.offsetMin = new Vector2(4f, 58f);
-        moonLabel.rectTransform.offsetMax = new Vector2(-4f, 92f);
-
-        weatherLabel = UIFactory.CreateLabel(bar, "", 18, FontStyle.Normal,
-            new Vector2(0f, 0f), new Vector2(1f, 0f), TextAnchor.MiddleCenter, InkDim);
-        weatherLabel.rectTransform.offsetMin = new Vector2(4f, 14f);
-        weatherLabel.rectTransform.offsetMax = new Vector2(-4f, 56f);
+        Button button = UIFactory.CreateButton(parent, text, anchor, anchor, ButtonOff, action, fontSize, 36);
+        var rect = (RectTransform)button.transform;
+        rect.pivot = anchor;
+        rect.sizeDelta = new Vector2(72f, 72f);
+        rect.anchoredPosition = position;
+        return button;
     }
 
-    private const float ToolHeight = 84f;
-    private const float ToolGap = 6f;
+    /// <summary>
+    /// 왼쪽 아래 「지도 표시」 판 (참고 그림) — 거르기 다섯 · 목표로 · 마커 목록을 한 줄로, 위에 이름과 도움말 한 줄.
+    /// </summary>
+    private void BuildLegend(RectTransform safe)
+    {
+        const int tools = 7;
+        float width = LegendPad * 2f + tools * ToolSize + (tools - 1) * ToolGap;
 
-    private void AddFilter(RectTransform bar, Layer layer, UISprites.Glyph shape, string inner, string label, Color color, ref float y)
+        Image panel = UIFactory.CreatePanel("Legend", safe, BarColor, Vector2.zero, Vector2.zero, UIFactory.RadiusLarge);
+        panel.rectTransform.pivot = Vector2.zero;
+        panel.rectTransform.sizeDelta = new Vector2(width, LegendHeight);
+        panel.rectTransform.anchoredPosition = new Vector2(18f, 18f);
+        legend = panel.rectTransform;
+
+        Text title = UIFactory.CreateLabel(panel.transform, "지도 표시", 22, FontStyle.Bold,
+            new Vector2(0f, 1f), new Vector2(0f, 1f), TextAnchor.MiddleLeft, Ink);
+        title.rectTransform.pivot = new Vector2(0f, 1f);
+        title.rectTransform.sizeDelta = new Vector2(120f, 40f);
+        title.rectTransform.anchoredPosition = new Vector2(LegendPad, -4f);
+
+        Text hint = UIFactory.CreateLabel(panel.transform, "두 번 눌러 표시 · 표시를 두 번 누르면 지운다 · 끌어서 이동", 16,
+            FontStyle.Normal, new Vector2(0f, 1f), new Vector2(1f, 1f), TextAnchor.MiddleLeft, InkDim);
+        hint.rectTransform.pivot = new Vector2(0f, 1f);
+        hint.rectTransform.offsetMin = new Vector2(LegendPad + 116f, -44f);
+        hint.rectTransform.offsetMax = new Vector2(-LegendPad, -4f);
+
+        float x = LegendPad;
+        AddFilter(panel.transform, Layer.Extraction, UISprites.Glyph.Circle, "", ExtractionDirector.Name, MinimapUI.ExtractionColor, ref x);
+        AddFilter(panel.transform, Layer.Marker, UISprites.Glyph.Diamond, "", "마커", MinimapUI.MarkerColor, ref x);
+        AddFilter(panel.transform, Layer.Quest, UISprites.Glyph.Diamond, "!", "퀘스트", QuestColor, ref x);
+        AddFilter(panel.transform, Layer.Loot, UISprites.Glyph.Square, "", "전리품", MapLootMarks.BundleColor, ref x);
+        AddFilter(panel.transform, Layer.Fallen, UISprites.Glyph.Circle, "", "쓰러진 자리", MapLootMarks.FallenColor, ref x);
+        AddTool(panel.transform, UISprites.Glyph.Triangle, "", "목표로", QuestColor, GoToObjective, ref x);
+        AddTool(panel.transform, UISprites.Glyph.Square, "", "마커 목록", MinimapUI.MarkerColor, ToggleMarkerList, ref x);
+    }
+
+    private void AddFilter(Transform bar, Layer layer, UISprites.Glyph shape, string inner, string label, Color color, ref float x)
     {
         Layer captured = layer;
         Image button = AddTool(bar, shape, inner, label, color, () =>
         {
             shown[(int)captured] = !shown[(int)captured];
             Refresh();
-        }, ref y);
+        }, ref x);
 
         filterButtons[(int)layer] = button;
     }
 
-    private Image AddTool(RectTransform bar, UISprites.Glyph shape, string inner, string label, Color color,
-                          UnityEngine.Events.UnityAction action, ref float y)
+    private Image AddTool(Transform bar, UISprites.Glyph shape, string inner, string label, Color color,
+                          UnityEngine.Events.UnityAction action, ref float x)
     {
-        Image image = UIFactory.CreatePanel($"Tool_{label}", bar, ButtonOff,
-            new Vector2(0f, 1f), new Vector2(1f, 1f), UIFactory.Radius);
-        image.rectTransform.offsetMin = new Vector2(10f, -(y + ToolHeight));
-        image.rectTransform.offsetMax = new Vector2(-10f, -y);
-        y += ToolHeight + ToolGap;
+        Image image = UIFactory.CreatePanel($"Tool_{label}", bar, ButtonOff, Vector2.zero, Vector2.zero, UIFactory.Radius);
+        image.rectTransform.pivot = Vector2.zero;
+        image.rectTransform.sizeDelta = new Vector2(ToolSize, ToolSize);
+        image.rectTransform.anchoredPosition = new Vector2(x, LegendPad);
+        x += ToolSize + ToolGap;
 
         var button = image.gameObject.AddComponent<Button>();
         button.targetGraphic = image;
         button.onClick.AddListener(action);
 
         Image icon = UIFactory.CreatePanel("Shape", image.transform, color,
-            new Vector2(0.5f, 0.66f), new Vector2(0.5f, 0.66f), 0);
+            new Vector2(0.5f, 0.64f), new Vector2(0.5f, 0.64f), 0);
         icon.sprite = UISprites.Of(shape);
-        icon.rectTransform.sizeDelta = new Vector2(30f, 30f);
+        icon.rectTransform.sizeDelta = new Vector2(32f, 32f);
         icon.raycastTarget = false;
+        icon.gameObject.AddComponent<Shadow>().effectColor = new Color(0f, 0f, 0f, 0.6f);
 
         if (!string.IsNullOrEmpty(inner))
         {
@@ -301,20 +387,22 @@ public class WorldMapUI : MonoBehaviour
             t.raycastTarget = false;
         }
 
-        Text l = UIFactory.CreateLabel(image.transform, label, 18, FontStyle.Bold,
-            new Vector2(0f, 0f), new Vector2(1f, 0.4f), TextAnchor.MiddleCenter, Ink);
+        Text l = UIFactory.CreateLabel(image.transform, label, 16, FontStyle.Bold,
+            new Vector2(0f, 0f), new Vector2(1f, 0.36f), TextAnchor.MiddleCenter, Ink);
         l.raycastTarget = false;
         l.horizontalOverflow = HorizontalWrapMode.Overflow;
 
         return image;
     }
 
-    private void BuildZoomBar(RectTransform safe)
+    /// <summary>오른쪽 아래 — 나침반(북쪽이 늘 위) · 달 · 날씨 · 확대 막대 · 내 자리.</summary>
+    private void BuildRightColumn(RectTransform safe)
     {
-        RectTransform bar = UIFactory.CreateRegion("ZoomBar", safe, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f));
-        bar.pivot = new Vector2(0.5f, 0f);
-        bar.sizeDelta = new Vector2(660f, 80f);
-        bar.anchoredPosition = new Vector2(LeftBarWidth * 0.5f, 52f);
+        // 확대 막대 — 오른쪽 아래.
+        RectTransform bar = UIFactory.CreateRegion("ZoomBar", safe, new Vector2(1f, 0f), new Vector2(1f, 0f));
+        bar.pivot = new Vector2(1f, 0f);
+        bar.sizeDelta = new Vector2(560f, 80f);
+        bar.anchoredPosition = new Vector2(-18f, 18f);
 
         Image back = bar.gameObject.AddComponent<Image>();
         back.sprite = UISprites.Rounded(UIFactory.RadiusLarge);
@@ -344,6 +432,54 @@ public class WorldMapUI : MonoBehaviour
         var meRect = (RectTransform)me.transform;
         meRect.offsetMin = new Vector2(-106f, 10f);
         meRect.offsetMax = new Vector2(-10f, -10f);
+
+        // 나침반 — 확대 막대 위 오른쪽. 지도는 늘 북쪽이 위라 바늘이 돌지 않는다.
+        RectTransform compass = UIFactory.CreateRegion("Compass", safe, new Vector2(1f, 0f), new Vector2(1f, 0f));
+        compass.pivot = new Vector2(1f, 0f);
+        compass.sizeDelta = new Vector2(CompassSize, CompassSize);
+        compass.anchoredPosition = new Vector2(-30f, 118f);
+
+        Image ring = UIFactory.CreatePanel("Ring", compass, new Color(1f, 1f, 1f, 0.85f), Vector2.zero, Vector2.one, 0);
+        ring.sprite = UISprites.RoundedOutline(Mathf.RoundToInt(CompassSize * 0.5f), 3);
+        ring.type = Image.Type.Sliced;
+        ring.raycastTarget = false;
+
+        Image needle = UIFactory.CreatePanel("North", compass, new Color(0.92f, 0.25f, 0.22f, 1f),
+            new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), 0);
+        needle.sprite = UISprites.Of(UISprites.Glyph.Triangle);
+        needle.rectTransform.sizeDelta = new Vector2(22f, 22f);
+        needle.rectTransform.anchoredPosition = new Vector2(0f, -16f);
+        needle.raycastTarget = false;
+
+        Image hub = UIFactory.CreatePanel("Hub", compass, Color.white, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), 0);
+        hub.sprite = UISprites.Of(UISprites.Glyph.Circle);
+        hub.rectTransform.sizeDelta = new Vector2(12f, 12f);
+        hub.raycastTarget = false;
+
+        Text north = Inked(UIFactory.CreateLabel(compass, "북", 18, FontStyle.Bold,
+            new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), TextAnchor.LowerCenter, Ink));
+        north.rectTransform.pivot = new Vector2(0.5f, 0f);
+        north.rectTransform.sizeDelta = new Vector2(40f, 24f);
+        north.rectTransform.anchoredPosition = new Vector2(0f, 2f);
+
+        // 달 · 날씨 — 나침반 왼쪽 (참고 그림의 시간 · 날씨 자리).
+        moonLabel = Inked(UIFactory.CreateLabel(safe, "", 22, FontStyle.Bold,
+            new Vector2(1f, 0f), new Vector2(1f, 0f), TextAnchor.LowerRight, Ink));
+        moonLabel.rectTransform.pivot = new Vector2(1f, 0f);
+        moonLabel.rectTransform.sizeDelta = new Vector2(260f, 30f);
+        moonLabel.rectTransform.anchoredPosition = new Vector2(-(46f + CompassSize), 166f);
+
+        weatherLabel = Inked(UIFactory.CreateLabel(safe, "", 18, FontStyle.Normal,
+            new Vector2(1f, 0f), new Vector2(1f, 0f), TextAnchor.UpperRight, InkDim));
+        weatherLabel.rectTransform.pivot = new Vector2(1f, 1f);
+        weatherLabel.rectTransform.sizeDelta = new Vector2(260f, 50f);
+        weatherLabel.rectTransform.anchoredPosition = new Vector2(-(46f + CompassSize), 164f);
+    }
+
+    private static void Inset(RectTransform rect, float pad, float width)
+    {
+        rect.offsetMin = new Vector2(pad, pad);
+        rect.offsetMax = new Vector2(width, -pad);
     }
 
     private static void Tint(Slider slider)
@@ -359,12 +495,13 @@ public class WorldMapUI : MonoBehaviour
                 image.color = new Color(0.22f, 0.18f, 0.13f, 1f);
     }
 
+    /// <summary>마커 목록 — 「지도 표시」 판 바로 위에 뜬다.</summary>
     private void BuildMarkerList(RectTransform safe)
     {
-        Image panel = UIFactory.CreatePanel("MarkerList", safe, BarColor, new Vector2(0f, 1f), new Vector2(0f, 1f));
-        panel.rectTransform.pivot = new Vector2(0f, 1f);
+        Image panel = UIFactory.CreatePanel("MarkerList", safe, BarColor, Vector2.zero, Vector2.zero, UIFactory.RadiusLarge);
+        panel.rectTransform.pivot = Vector2.zero;
         panel.rectTransform.sizeDelta = new Vector2(300f, 60f + MapTable.MaxMarkers * 58f);
-        panel.rectTransform.anchoredPosition = new Vector2(LeftBarWidth + 8f, -(TopBarHeight + 10f + 6 * (ToolHeight + ToolGap) + 14f));
+        panel.rectTransform.anchoredPosition = new Vector2(18f, 18f + LegendHeight + 10f);
 
         Text title = UIFactory.CreateLabel(panel.transform, "내 마커", 22, FontStyle.Bold,
             new Vector2(0f, 1f), new Vector2(1f, 1f), TextAnchor.MiddleCenter, Ink);
@@ -506,23 +643,45 @@ public class WorldMapUI : MonoBehaviour
 
     // ── 열고 닫기 ─────────────────────────────────────────────────────
 
+    /// <summary>흐린 뒤 화면을 찍는 중 — 그동안 또 열지 않는다.</summary>
+    private bool opening;
+
     private void Show()
     {
         MapRuntime runtime = MapRuntime.Current;
-        if (runtime == null)
+        if (runtime == null || opening)
             return;
 
+        // HUD를 먼저 감추고, 이번 프레임 끝에서 화면을 찍어 흐리게 깐 다음 연다 (결정 2-121).
+        opening = true;
+        SetHudHidden(true);
+        StartCoroutine(ScreenBlur.Capture(shot =>
+        {
+            opening = false;
+            ScreenBlur.Release(ref blurTexture);
+            blurTexture = shot;
+            blurImage.texture = shot;
+            blurImage.enabled = shot != null;
+
+            if (MapRuntime.Current == runtime)
+                ShowNow(runtime);
+            else
+                SetHudHidden(false);
+        }));
+    }
+
+    private void ShowNow(MapRuntime runtime)
+    {
         if (drawnFor != runtime)
             BuildForMap(runtime);
 
-        mapImage.texture = runtime.EnsureParchment();
+        ApplyPicture(runtime);
         fogImage.texture = runtime.FogTexture;
         questCache = null;
 
         root.SetActive(true);
         markerList.SetActive(false);
         FillQuestList(runtime);
-        SetHudHidden(true);
 
         // 열면 2배로 내 자리가 가운데.
         zoom = MapView.OpenZoom;
@@ -540,6 +699,17 @@ public class WorldMapUI : MonoBehaviour
 
         root.SetActive(false);
         SetHudHidden(false);
+        blurImage.texture = null;
+        blurImage.enabled = false;
+        ScreenBlur.Release(ref blurTexture);
+    }
+
+    /// <summary>지도 그림 — 사진이 있으면 사진 + 닫힌 곳 덮개, 없으면 양피지(덮개 없이 — 양피지가 이미 어둡게 그린다).</summary>
+    private void ApplyPicture(MapRuntime runtime)
+    {
+        mapImage.texture = runtime.MapPicture;
+        closedImage.texture = runtime.EnsureClosedOverlay();
+        closedImage.enabled = closedImage.texture != null;
     }
 
     private static void SetHudHidden(bool hidden)
@@ -565,11 +735,9 @@ public class WorldMapUI : MonoBehaviour
         aspect = map.HalfSize.x / map.HalfSize.y;
 
         ChapterDefinition chapter = StoryTable.Chapter(map.Chapter);
-        breadcrumb.text = chapter != null
-            ? $"지도  ›  {chapter.Number}장  ›  {chapter.Place}"
-            : "지도";
-
-        // 구역 이름 · 「(닫힘)」은 적지 않는다 — 장 하나가 한 맵으로 보이게 (2026-10-08 사용자).
+        chapterLabel.text = chapter != null ? $"{chapter.Number}장" : string.Empty;
+        titleLabel.text = chapter != null ? chapter.Place : "지도";
+        // 퀘스트 구역 테두리 (구역 이름은 Refresh가 가 본 곳만 적는다 — 결정 2-121).
         foreach (ZoneArea area in QuestAreas(runtime))
         {
             Vector2 min = runtime.UvOf(new Vector3(area.Bounds.xMin, 0f, area.Bounds.yMin));
@@ -608,9 +776,9 @@ public class WorldMapUI : MonoBehaviour
         fogImage.texture = runtime.FogTexture;
         questCache = null;
 
-        // 금줄이 걷혔으면 양피지도 새로 — 열려 있을 때만 바로 그린다(닫혀 있으면 다음에 열 때).
+        // 금줄이 걷혔으면 그림(양피지 · 사진 덮개)도 새로 — 열려 있을 때만 바로(닫혀 있으면 다음에 열 때).
         if (IsOpen)
-            mapImage.texture = runtime.EnsureParchment();
+            ApplyPicture(runtime);
     }
 
     private void OnMarkersChanged(int chapter)
@@ -683,6 +851,8 @@ public class WorldMapUI : MonoBehaviour
         outlineLayer.gameObject.SetActive(Shown(Layer.Quest));
         questPanel.gameObject.SetActive(Shown(Layer.Quest) && hasQuestRows);
 
+        PlaceZoneNames(runtime, size);
+
         if (Shown(Layer.Quest))
             foreach (ZoneArea area in questCache ??= QuestAreas(runtime))
             {
@@ -695,7 +865,7 @@ public class WorldMapUI : MonoBehaviour
             for (int i = 0; i < extraction.Points.Length; i++)
                 if (extraction.IsDiscovered(i))
                     PlaceIcon(ref used, runtime, extraction.Points[i], size, UISprites.Glyph.Circle, "",
-                        ExtractionDirector.Name, MinimapUI.ExtractionColor, 30);
+                        ExtractionDirector.Name, MinimapUI.ExtractionColor, 38);
 
         foreach (MapLootMarks.Mark m in MapLootMarks.Collect())
         {
@@ -719,14 +889,14 @@ public class WorldMapUI : MonoBehaviour
         if (runtime.Player != null)
         {
             Vector2 at = MapView.ToView(runtime.UvOf(runtime.Player.position), center, size);
-            playerArrow.gameObject.SetActive(InView(at));
-            playerArrow.anchoredPosition = at;
-            playerArrow.localRotation = Quaternion.Euler(0f, 0f, -runtime.Player.eulerAngles.y);
-            playerArrow.SetAsLastSibling();
+            playerMarker.gameObject.SetActive(InView(at));
+            playerMarker.anchoredPosition = at;
+            playerHeading.localRotation = Quaternion.Euler(0f, 0f, -runtime.Player.eulerAngles.y);
+            playerMarker.SetAsLastSibling();
         }
         else
         {
-            playerArrow.gameObject.SetActive(false);
+            playerMarker.gameObject.SetActive(false);
         }
 
         SetText(markerCount, $"표시 {markers.Count}/{MapTable.MaxMarkers}");
@@ -736,6 +906,74 @@ public class WorldMapUI : MonoBehaviour
         SetText(weatherLabel, night.weather.Chapter > 0
             ? $"{WeatherTable.SeasonName(night.weather.Season)}\n{night.weather.Name}"
             : night.weather.Name);
+    }
+
+    /// <summary>
+    /// 【가 본 구역의 이름】 (결정 2-121 · 사용자 2026-10-13) — 구역마다 그 땅 가운데에 흰 글씨 · 검은 테.
+    /// 들어가 본 구역(EnterEvent를 본 것)만 — 가 보지 않은 곳의 이름을 미리 알려 주지 않는다. 이름은 본문 그대로(StoryTable).
+    /// </summary>
+    private void PlaceZoneNames(MapRuntime runtime, Vector2 size)
+    {
+        int used = 0;
+
+        foreach ((string zoneId, Vector3 middle) in ZoneCenters(runtime.Map))
+        {
+            if (!StoryManager.Progress.HasSeen(StoryTable.EnterEvent(zoneId)))
+                continue;
+
+            ZoneDefinition zone = StoryTable.Zone(zoneId);
+            if (zone == null)
+                continue;
+
+            Vector2 at = MapView.ToView(runtime.UvOf(middle), center, size);
+            if (!InView(at))
+                continue;
+
+            while (zoneLabels.Count <= used)
+            {
+                Text t = Inked(UIFactory.CreateLabel(zoneLabelLayer, "", 30, FontStyle.Bold,
+                    new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), TextAnchor.MiddleCenter, Color.white), 2.5f);
+                t.rectTransform.sizeDelta = new Vector2(360f, 44f);
+                t.horizontalOverflow = HorizontalWrapMode.Overflow;
+                zoneLabels.Add(t);
+            }
+
+            Text label = zoneLabels[used++];
+            label.gameObject.SetActive(true);
+            SetText(label, zone.Name);
+            // 구역 가운데에는 퀘스트 「!」가 설 수 있다 — 이름은 그 위로 비켜 선다.
+            label.rectTransform.anchoredPosition = at + new Vector2(0f, ZoneLabelLift);
+        }
+
+        for (int i = used; i < zoneLabels.Count; i++)
+            zoneLabels[i].gameObject.SetActive(false);
+    }
+
+    /// <summary>구역마다 한 자리 — 구역이 땅 여럿이면 그 땅들을 감싼 사각형의 가운데.</summary>
+    private static List<(string, Vector3)> ZoneCenters(ChapterMap map)
+    {
+        var bounds = new Dictionary<string, Rect>();
+        var order = new List<string>();
+
+        foreach (ZoneArea area in map.Areas)
+        {
+            if (bounds.TryGetValue(area.ZoneId, out Rect r))
+            {
+                bounds[area.ZoneId] = Rect.MinMaxRect(Mathf.Min(r.xMin, area.Bounds.xMin), Mathf.Min(r.yMin, area.Bounds.yMin),
+                    Mathf.Max(r.xMax, area.Bounds.xMax), Mathf.Max(r.yMax, area.Bounds.yMax));
+            }
+            else
+            {
+                bounds[area.ZoneId] = area.Bounds;
+                order.Add(area.ZoneId);
+            }
+        }
+
+        var list = new List<(string, Vector3)>(order.Count);
+        foreach (string id in order)
+            list.Add((id, new Vector3(bounds[id].center.x, 0f, bounds[id].center.y)));
+
+        return list;
     }
 
     /// <summary>같은 글이면 넣지 않는다 — 넣을 때마다 글자 메시를 다시 만든다.</summary>
@@ -842,6 +1080,13 @@ public class WorldMapUI : MonoBehaviour
     {
         if (IsOpen)
             instance.ZoomBy(MapView.ZoomStep);
+    }
+
+    /// <summary>검증 도구 — 장 하나가 다 보이게 끝까지 줄인다.</summary>
+    public static void DebugZoomOut()
+    {
+        if (IsOpen)
+            instance.SetZoom(MapView.MinZoom, Vector2.zero);
     }
 
     /// <summary>배율을 바꾼다 — anchorView(화면 가운데 기준)가 가리킨 곳을 그대로 붙든다.</summary>
@@ -1046,6 +1291,34 @@ public class WorldMapUI : MonoBehaviour
     }
 
     // ── 가장자리 번짐 ─────────────────────────────────────────────────
+
+    private static Texture2D topShade;
+
+    /// <summary>위가 짙고 아래로 사라지는 세로 그늘 — 제목 뒤.</summary>
+    private static Texture2D TopShadeTexture()
+    {
+        if (topShade != null)
+            return topShade;
+
+        const int n = 32;
+        topShade = new Texture2D(1, n, TextureFormat.RGBA32, false)
+        {
+            wrapMode = TextureWrapMode.Clamp,
+            filterMode = FilterMode.Bilinear,
+            name = "MapTopShade (Runtime)"
+        };
+
+        var pixels = new Color32[n];
+        for (int y = 0; y < n; y++)
+        {
+            float t = (y + 0.5f) / n;   // 0 = 아래, 1 = 위
+            pixels[y] = new Color32(255, 255, 255, (byte)(Mathf.SmoothStep(0f, 1f, t) * 255f));
+        }
+
+        topShade.SetPixels32(pixels);
+        topShade.Apply();
+        return topShade;
+    }
 
     private static Texture2D vignette;
 

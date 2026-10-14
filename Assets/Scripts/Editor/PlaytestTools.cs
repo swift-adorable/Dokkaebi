@@ -130,7 +130,7 @@ public static class PlaytestTools
     public static void OpenSmithy()
     {
         if (!Application.isPlaying) { Debug.LogError("[Playtest] 플레이 중에만 씁니다."); return; }
-        ExchangeWindowUI.EnsureInstance().OpenShop(ShopKind.Smithy);
-        Debug.Log($"[Playtest] 대장간 — 가방 칸의 판매 줄 {(ExchangeWindowUI.IsBuyingShopOpen ? "뜬다" : "안 뜬다")}");
+        ShopScreenUI.Open(ShopKind.Smithy);
+        Debug.Log("[Playtest] 대장간을 열었다 — 오른쪽 「내 가방」에서 판다");
     }
 }

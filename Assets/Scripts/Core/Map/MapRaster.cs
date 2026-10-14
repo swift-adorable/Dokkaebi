@@ -79,6 +79,32 @@ public static class MapRaster
         return pixels;
     }
 
+    /// <summary>
+    /// 【지도 사진 위 덮개】 (결정 2-121) — 사진은 구울 때의 모습이라 열고 닫힘을 모른다.
+    /// 닫힌 구역은 반투명 검정 · 아직 닫힌 금줄은 밝은 줄 · 나머지는 투명.
+    /// </summary>
+    public static Color32[] ClosedOverlay(ChapterMap map, Func<string, bool> isOpen, int pixelsPerMeter)
+    {
+        int w = WidthOf(map, pixelsPerMeter), h = HeightOf(map, pixelsPerMeter);
+        var pixels = new Color32[w * h];
+        var clear = new Color32(0, 0, 0, 0);
+        var closed = new Color32(0, 0, 0, (byte)Mathf.RoundToInt((1f - ClosedDim) * 255f));
+
+        for (int y = 0; y < h; y++)
+        for (int x = 0; x < w; x++)
+        {
+            string zone = map.ZoneAt(WorldOf(map, x, y, pixelsPerMeter));
+            pixels[y * w + x] = zone != null && isOpen != null && !isOpen(zone) ? closed : clear;
+        }
+
+        foreach (MapGate g in map.Gates)
+            if (isOpen != null && !isOpen(g.ZoneId))
+                Fill(map, pixels, w, h, g.Block.Center, Mathf.Max(g.Block.Size.x, 1.5f), Mathf.Max(g.Block.Size.z, 1.5f),
+                    GateColor, null, pixelsPerMeter);
+
+        return pixels;
+    }
+
     /// <summary>화소 가운데의 월드 자리.</summary>
     public static Vector3 WorldOf(ChapterMap map, int x, int y, int ppm = MapTable.PixelsPerMeter)
         => new(-map.HalfSize.x + (x + 0.5f) / ppm, 0f, -map.HalfSize.y + (y + 0.5f) / ppm);
