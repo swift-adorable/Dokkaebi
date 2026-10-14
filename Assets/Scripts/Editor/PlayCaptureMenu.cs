@@ -77,6 +77,8 @@ public static class PlayCaptureMenu
             Object.Destroy(c.gameObject);
         foreach (WorkbenchUI w in Object.FindObjectsByType<WorkbenchUI>(FindObjectsInactive.Include))
             Object.Destroy(w.gameObject);
+        foreach (DepartureUI d in Object.FindObjectsByType<DepartureUI>(FindObjectsInactive.Include))
+            Object.Destroy(d.gameObject);
     }
 
     [MenuItem("Dokkaebi/Debug/부뚜막 화면 열기")]

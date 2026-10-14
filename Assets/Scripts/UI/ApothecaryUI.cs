@@ -174,6 +174,7 @@ public class ApothecaryUI : MonoBehaviour
     {
         Text theme = UIFactory.CreateLabel(list.Content, text, 20, FontStyle.Bold, Vector2.zero, Vector2.zero,
             TextAnchor.MiddleLeft, UIPalette.TextAccent);
+        StationFrame.Shrink(theme, 14);
         Place(theme.rectTransform, ref y, 44f);
     }
 

@@ -18,7 +18,10 @@ public class ShopScreenUI : MonoBehaviour
     public static bool IsOpen => instance != null && instance.frame != null && instance.frame.IsOpen;
 
     private const int CounterSlots = 6;
-    private const float IconInset = 10f;
+    private const float IconInset = 9f;
+
+    /// <summary>계산대 칸 한 변의 최대 (화소) — 앞판이 넓어도 담은 물건 칸이 커지지 않게.</summary>
+    private const float CounterSlotMax = 84f;
 
     private StationFrame frame;
     private RectTransform counterSlots;
@@ -250,27 +253,27 @@ public class ShopScreenUI : MonoBehaviour
         float left = IconInset * 2f + icon;
 
         // 세 줄 — 같은 간격(위 · 가운데 · 아래 1/3씩).
-        Text name = UIFactory.CreateLabel(row.transform, definition.DisplayName, 24, FontStyle.Bold,
+        Text name = UIFactory.CreateLabel(row.transform, definition.DisplayName, 22, FontStyle.Bold,
             new Vector2(0f, 0.64f), new Vector2(1f, 0.94f), TextAnchor.MiddleLeft, soldOut ? UIPalette.TextDim : Color.white);
         name.rectTransform.offsetMin = new Vector2(left, 0f);
-        name.rectTransform.offsetMax = new Vector2(inCart > 0 ? -104f : -12f, 0f);
+        name.rectTransform.offsetMax = new Vector2(inCart > 0 ? -94f : -12f, 0f);
 
         Image coin = UIFactory.CreatePanel("Coin", row.transform, StationFrame.Coin, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), 0);
         coin.sprite = UISprites.Of(UISprites.Glyph.Circle);
-        coin.rectTransform.sizeDelta = new Vector2(18f, 18f);
-        coin.rectTransform.anchoredPosition = new Vector2(left + 9f, 0f);
+        coin.rectTransform.sizeDelta = new Vector2(16f, 16f);
+        coin.rectTransform.anchoredPosition = new Vector2(left + 8f, 0f);
         coin.raycastTarget = false;
 
-        Text cost = UIFactory.CreateLabel(row.transform, $"{price:N0}", 24, FontStyle.Bold,
+        Text cost = UIFactory.CreateLabel(row.transform, $"{price:N0}", 21, FontStyle.Bold,
             new Vector2(0f, 0.35f), new Vector2(1f, 0.65f), TextAnchor.MiddleLeft,
             price > budget ? UIPalette.Warning : StationFrame.Coin);
-        cost.rectTransform.offsetMin = new Vector2(left + 26f, 0f);
+        cost.rectTransform.offsetMin = new Vector2(left + 22f, 0f);
 
         string third = soldOut
             ? "재고 없음 — 파밍이 끝나면 채워집니다"
             : ShopManager.IsDaily(kind, entry.ItemId) ? $"오늘의 물건 · 남은 재고 {remaining}" : $"남은 재고 {remaining}";
 
-        Text stock = UIFactory.CreateLabel(row.transform, third, 18, FontStyle.Normal,
+        Text stock = UIFactory.CreateLabel(row.transform, third, 16, FontStyle.Normal,
             new Vector2(0f, 0.06f), new Vector2(1f, 0.35f), TextAnchor.MiddleLeft,
             soldOut ? UIPalette.Warning : StationFrame.Limit);
         stock.rectTransform.offsetMin = new Vector2(left, 0f);
@@ -280,16 +283,16 @@ public class ShopScreenUI : MonoBehaviour
             // 참고 그림처럼 그림 칸 위에 「구매 불가」.
             Image veil = UIFactory.CreatePanel("Veil", cell.transform, new Color(0f, 0f, 0f, 0.62f), Vector2.zero, Vector2.one, UIFactory.Radius);
             veil.raycastTarget = false;
-            UIFactory.CreateLabel(veil.transform, "구매\n불가", 20, FontStyle.Bold, Vector2.zero, Vector2.one,
+            UIFactory.CreateLabel(veil.transform, "구매\n불가", 17, FontStyle.Bold, Vector2.zero, Vector2.one,
                 TextAnchor.MiddleCenter, Color.white);
         }
 
         if (inCart > 0)
         {
             Text badge = UIFactory.CreateBadge(row.transform, $"담음 {inCart}",
-                new Vector2(1f, 0.62f), new Vector2(1f, 0.92f), 18, UIPalette.Gain);
+                new Vector2(1f, 0.62f), new Vector2(1f, 0.92f), 16, UIPalette.Gain);
             var pill = (RectTransform)badge.transform.parent;
-            pill.offsetMin = new Vector2(-96f, 0f);
+            pill.offsetMin = new Vector2(-86f, 0f);
             pill.offsetMax = new Vector2(-10f, 0f);
         }
     }
@@ -385,10 +388,11 @@ public class ShopScreenUI : MonoBehaviour
         int pages = Mathf.Max(1, (lines.Count + CounterSlots - 1) / CounterSlots);
         counterPage = Mathf.Clamp(counterPage, 0, pages - 1);
 
-        // 정사각형 칸 여섯 — 앞판 높이에 맞추고 가로로 고르게 벌린다.
+        // 정사각형 칸 여섯 — 한 변은 CounterSlotMax까지, 간격은 한 변의 1/6, 여섯 칸 묶음을 앞판 가운데에.
         Rect area = counterSlots.rect;
-        float size = Mathf.Min(area.height, (area.width - (CounterSlots - 1) * 8f) / CounterSlots);
-        float gap = CounterSlots > 1 ? (area.width - size * CounterSlots) / (CounterSlots - 1) : 0f;
+        float size = Mathf.Min(CounterSlotMax, area.height, area.width / (CounterSlots + (CounterSlots - 1) / 6f));
+        float gap = size / 6f;
+        float startX = (area.width - (size * CounterSlots + gap * (CounterSlots - 1))) * 0.5f;
 
         for (int s = 0; s < CounterSlots; s++)
         {
@@ -399,7 +403,7 @@ public class ShopScreenUI : MonoBehaviour
             RectTransform slot = UIFactory.CreateRegion($"Slot_{s}", counterSlots, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f));
             slot.pivot = new Vector2(0f, 0.5f);
             slot.sizeDelta = new Vector2(size, size);
-            slot.anchoredPosition = new Vector2(s * (size + gap), 0f);
+            slot.anchoredPosition = new Vector2(startX + s * (size + gap), 0f);
 
             if (d == null)
             {

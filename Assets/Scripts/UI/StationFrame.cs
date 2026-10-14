@@ -30,6 +30,9 @@ public sealed class StationFrame
     public const float RightStart = 1f - Edge - 0.30f;             // 0.688
     public const float CenterEnd = RightStart - Gutter;            // 0.676
 
+    /// <summary>가운데 무대의 가로/세로 — 16:9(1920×1080 기준)에서의 가운데 칸 모양.</summary>
+    public const float StageAspect = (CenterEnd - CenterStart) * UIFactory.ReferenceWidth / ((BodyTop - BodyBottom) * UIFactory.ReferenceHeight);
+
     // ── 빛깔 [임시 — 아트 때] ─────────────────────────────────────────
     public static readonly Color Backdrop = new(0.05f, 0.05f, 0.07f, 0.98f);
     public static readonly Color BlurTint = new(0.30f, 0.30f, 0.34f, 1f);
@@ -52,9 +55,9 @@ public sealed class StationFrame
     private static readonly Color Cloth2 = new(0.50f, 0.36f, 0.24f, 1f);
 
     public const int PillRadius = 30;
-    public const float RowHeight = 104f;
+    public const float RowHeight = 86f;   // 참고 그림의 줄 높이 (1080 기준) — 2-123의 104는 너무 컸다
     public const float RowGap = 8f;
-    private const int BagColumns = 4;
+    private const int BagColumns = 6;     // 칸 한 변 ≈ 90 (가방 화면 칸과 비슷하게)
 
     // ── 자리 ──────────────────────────────────────────────────────────
     public GameObject Root { get; private set; }
@@ -127,6 +130,16 @@ public sealed class StationFrame
         return f;
     }
 
+    /// <summary>글자가 칸보다 길면 min 크기까지 줄여 칸 안에 넣는다 (결정 2-124) — 좁은 4:3 화면에서 넘치지 않게.</summary>
+    public static Text Shrink(Text label, int min)
+    {
+        label.resizeTextMaxSize = label.fontSize;
+        label.resizeTextMinSize = Mathf.Min(min, label.fontSize);
+        label.resizeTextForBestFit = true;
+        label.verticalOverflow = VerticalWrapMode.Truncate;   // 넘침 허용이면 줄이지 않는다
+        return label;
+    }
+
     private static Text Inked(Text label)
     {
         label.gameObject.AddComponent<Outline>().effectColor = new Color(0f, 0f, 0f, 0.85f);
@@ -154,7 +167,8 @@ public sealed class StationFrame
         var layout = gold.gameObject.AddComponent<HorizontalLayoutGroup>();
         layout.childAlignment = TextAnchor.MiddleCenter;
         layout.spacing = 10f;
-        layout.childControlWidth = false;
+        // 너비는 그룹이 직접 잰다 — 글자 칸의 ContentSizeFitter에 맡기면 처음 열 때 옛 너비로 놓여 동그라미가 떨어진다.
+        layout.childControlWidth = true;
         layout.childControlHeight = false;
         layout.childForceExpandWidth = false;
 
@@ -162,11 +176,11 @@ public sealed class StationFrame
         coin.sprite = UISprites.Of(UISprites.Glyph.Circle);
         coin.rectTransform.sizeDelta = new Vector2(26f, 26f);
         coin.raycastTarget = false;
+        coin.gameObject.AddComponent<LayoutElement>().preferredWidth = 26f;
 
         Gold = Inked(UIFactory.CreateLabel(gold, "", 30, FontStyle.Bold, Vector2.zero, Vector2.zero, TextAnchor.MiddleLeft, Color.white));
         Gold.horizontalOverflow = HorizontalWrapMode.Overflow;
         Gold.rectTransform.sizeDelta = new Vector2(200f, 40f);
-        Gold.gameObject.AddComponent<ContentSizeFitter>().horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
 
         Button close = UIFactory.CreateButton(bar, "✕", new Vector2(1f, 0f), new Vector2(1f, 1f), new Color(0f, 0f, 0f, 0.001f),
             () => onClose?.Invoke(), 40);
@@ -190,34 +204,42 @@ public sealed class StationFrame
     {
         Center = UIFactory.CreateRegion("Center", Safe, new Vector2(CenterStart, BodyBottom), new Vector2(CenterEnd, BodyTop));
 
+        // 무대 — 16:9에서의 가운데 칸 모양을 그대로 지킨다 (결정 2-124). 4:3 태블릿에서 계산대 · 주인이
+        // 위아래로 늘어나거나, 20:9 휴대폰에서 옆으로 퍼지지 않도록 비율을 고정하고 남는 자리는 비워 둔다.
+        RectTransform stage = UIFactory.CreateRegion("Stage", Center, Vector2.zero, Vector2.one);
+        stage.pivot = new Vector2(0.5f, 0.4f);
+        var fit = stage.gameObject.AddComponent<AspectRatioFitter>();
+        fit.aspectMode = AspectRatioFitter.AspectMode.FitInParent;
+        fit.aspectRatio = StageAspect;
+
         // 차양 · 기둥 【임시 도형】 — 상인 뒤 노점.
-        RectTransform shade = UIFactory.CreateRegion("Canopy", Center, new Vector2(0.10f, 0.585f), new Vector2(0.90f, 0.665f));
+        RectTransform shade = UIFactory.CreateRegion("Canopy", stage, new Vector2(0.10f, 0.585f), new Vector2(0.90f, 0.665f));
         const int stripes = 9;
         for (int i = 0; i < stripes; i++)
             UIFactory.CreatePanel($"Stripe_{i}", shade, i % 2 == 0 ? Cloth1 : Cloth2,
                 new Vector2(i / (float)stripes, 0f), new Vector2((i + 1) / (float)stripes, 1f), 0).raycastTarget = false;
         UIFactory.CreatePanel("Valance", shade, WoodDark, new Vector2(0f, -0.14f), new Vector2(1f, 0f), 0).raycastTarget = false;
         foreach (float x in new[] { 0.115f, 0.86f })
-            UIFactory.CreatePanel("Post", Center, WoodDark, new Vector2(x, 0.43f), new Vector2(x + 0.025f, 0.585f), 0).raycastTarget = false;
+            UIFactory.CreatePanel("Post", stage, WoodDark, new Vector2(x, 0.43f), new Vector2(x + 0.025f, 0.585f), 0).raycastTarget = false;
         canopy = shade.gameObject;
 
         // 주인 【임시 도형】 — 몸 · 머리. 계산대가 아랫몸을 가린다.
-        keeperBody = UIFactory.CreatePanel("KeeperBody", Center, Color.gray, new Vector2(0.34f, 0.40f), new Vector2(0.66f, 0.62f), 40);
-        keeperHead = UIFactory.CreatePanel("KeeperHead", Center, Color.white, new Vector2(0.5f, 0.62f), new Vector2(0.5f, 0.62f), 0);
+        keeperBody = UIFactory.CreatePanel("KeeperBody", stage, Color.gray, new Vector2(0.34f, 0.40f), new Vector2(0.66f, 0.62f), 40);
+        keeperHead = UIFactory.CreatePanel("KeeperHead", stage, Color.white, new Vector2(0.5f, 0.62f), new Vector2(0.5f, 0.62f), 0);
         keeperHead.sprite = UISprites.Of(UISprites.Glyph.Circle);
         keeperHead.rectTransform.sizeDelta = new Vector2(112f, 112f);
         keeperHead.rectTransform.anchoredPosition = new Vector2(0f, 36f);
 
         // 시설 도형 (주인이 없을 때) — 단 위에 놓인 것.
-        Image block = UIFactory.CreatePanel("Prop", Center, WoodDark, new Vector2(0.22f, 0.44f), new Vector2(0.78f, 0.62f), 12);
+        Image block = UIFactory.CreatePanel("Prop", stage, WoodDark, new Vector2(0.22f, 0.44f), new Vector2(0.78f, 0.62f), 12);
         UIFactory.CreateOutline(block, Wood, 12, 3);
         prop = block.gameObject;
 
         // 이름표 — 머리 위 노란 글씨. 말풍선 — 이름표 위 흰 판 · 검은 테 · 아래 꼬리.
-        keeperName = Inked(UIFactory.CreateLabel(Center, "", 30, FontStyle.Bold,
+        keeperName = Inked(UIFactory.CreateLabel(stage, "", 30, FontStyle.Bold,
             new Vector2(0.1f, 0.725f), new Vector2(0.9f, 0.775f), TextAnchor.MiddleCenter, NameTag));
 
-        Image b = UIFactory.CreatePanel("Bubble", Center, new Color(0.98f, 0.97f, 0.94f, 0.97f),
+        Image b = UIFactory.CreatePanel("Bubble", stage, new Color(0.98f, 0.97f, 0.94f, 0.97f),
             new Vector2(0.17f, 0.80f), new Vector2(0.83f, 0.935f), 14);
         UIFactory.CreateOutline(b, new Color(0.15f, 0.13f, 0.12f, 0.9f), 14, 2);
         Image tail = UIFactory.CreatePanel("Tail", b.transform, b.color, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), 0);
@@ -228,11 +250,12 @@ public sealed class StationFrame
         keeperLine = UIFactory.CreateLabel(b.transform, "", 23, FontStyle.Normal,
             new Vector2(0.06f, 0.08f), new Vector2(0.94f, 0.92f), TextAnchor.MiddleCenter, new Color(0.12f, 0.11f, 0.10f, 1f));
         keeperLine.lineSpacing = 1.1f;
+        Shrink(keeperLine, 16);   // 긴 대사(건설 · 영감)도 판 안에 들어가게 — 23에서 16까지 줄인다
         bubble = b.gameObject;
 
         // 계산대 — 윗판 · 앞판.
-        UIFactory.CreatePanel("CounterTop", Center, Wood, new Vector2(0f, 0.405f), new Vector2(1f, 0.44f), 6).raycastTarget = false;
-        Image front = UIFactory.CreatePanel("Counter", Center, WoodDark, new Vector2(0.03f, 0.205f), new Vector2(0.97f, 0.41f), 6);
+        UIFactory.CreatePanel("CounterTop", stage, Wood, new Vector2(0f, 0.405f), new Vector2(1f, 0.44f), 6).raycastTarget = false;
+        Image front = UIFactory.CreatePanel("Counter", stage, WoodDark, new Vector2(0.03f, 0.205f), new Vector2(0.97f, 0.41f), 6);
         UIFactory.CreateOutline(front, Wood, 6, 3);
         Counter = front.rectTransform;
 
@@ -240,7 +263,7 @@ public sealed class StationFrame
             TextAnchor.MiddleCenter, new Color(1f, 0.93f, 0.80f, 1f));
         CounterNote.supportRichText = true;
 
-        Image totals = UIFactory.CreatePanel("Totals", Center, new Color(0f, 0f, 0f, 0.78f),
+        Image totals = UIFactory.CreatePanel("Totals", stage, new Color(0f, 0f, 0f, 0.78f),
             new Vector2(0.22f, 0.075f), new Vector2(0.78f, 0.185f), 10);
         UIFactory.CreateOutline(totals, Accent, 10, 2);
         TotalsBox = totals.rectTransform;

@@ -15,7 +15,7 @@ public class StashScreenUI : MonoBehaviour
 
     public static bool IsOpen => instance != null && instance.frame != null && instance.frame.IsOpen;
 
-    private const int Columns = 5;
+    private const int Columns = 7;   // 칸 한 변 ≈ 90 — 내 가방 칸과 같은 크기
 
     private StationFrame frame;
     private Button takeAllButton;

@@ -135,6 +135,7 @@ public class WorkbenchUI : MonoBehaviour
             + (state.Stage < shownStage ? "   (작업대를 이 단계로 올려야 한다)" : string.Empty),
             22, FontStyle.Bold, Vector2.zero, Vector2.zero, TextAnchor.MiddleLeft,
             state.Stage < shownStage ? UIPalette.TextDim : UIPalette.TextAccent);
+        StationFrame.Shrink(theme, 14);
         Place(theme.rectTransform, ref y, 44f);
 
         foreach (CraftRecipe recipe in WorkbenchTable.InStage(shownStage))
@@ -189,6 +190,7 @@ public class WorkbenchUI : MonoBehaviour
                 ? "수리 — 엽전으로 고친다 · 티어 4 이상은 고칠 때마다 최대 내구도가 조금 준다"
                 : "분해 — 가방 · 창고의 장비를 재료로 되돌린다 · 닳을수록 덜 나온다",
             20, FontStyle.Bold, Vector2.zero, Vector2.zero, TextAnchor.MiddleLeft, UIPalette.TextAccent);
+        StationFrame.Shrink(theme, 14);
         Place(theme.rectTransform, ref y, 44f);
 
         List<ItemStack> items = repair ? WorkbenchManager.Repairable() : WorkbenchManager.Dismantlable();

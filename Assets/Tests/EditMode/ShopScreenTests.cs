@@ -72,5 +72,26 @@ namespace Dokkaebi.Tests
             Assert.Greater(dark, 0, "닫힌 구역은 어둡다");
             Assert.Less(dark, allClosed.Length, "구역 밖(끊긴 밤길)은 사진 그대로");
         }
+
+        /// <summary>결정 2-124 — 가운데 무대(주인 · 계산대)는 16:9의 가운데 칸 모양을 지킨다. 4:3 · 20:9에서는 남는 자리만 빈다.</summary>
+        [Test]
+        public void 가운데_무대는_16대9_가운데_칸_모양이다()
+        {
+            float width = (StationFrame.CenterEnd - StationFrame.CenterStart) * UIFactory.ReferenceWidth;
+            float height = (StationFrame.BodyTop - StationFrame.BodyBottom) * UIFactory.ReferenceHeight;
+            Assert.AreEqual(width / height, StationFrame.StageAspect, 0.0001f);
+
+            // 4:3(세로가 남는다)과 20:9(가로가 남는다) 모두 무대가 칸 안에 들어간다 — 캔버스 비율은 화면 비율 그대로.
+            foreach (float screenAspect in new[] { 4f / 3f, 16f / 9f, 20f / 9f })
+            {
+                float columnAspect = (StationFrame.CenterEnd - StationFrame.CenterStart) * screenAspect
+                                     / (StationFrame.BodyTop - StationFrame.BodyBottom);
+                float stageW = Mathf.Min(1f, StationFrame.StageAspect / columnAspect);   // 칸 너비에 대한 몫
+                float stageH = Mathf.Min(1f, columnAspect / StationFrame.StageAspect);   // 칸 높이에 대한 몫
+                Assert.LessOrEqual(stageW, 1f);
+                Assert.LessOrEqual(stageH, 1f);
+                Assert.IsTrue(Mathf.Approximately(stageW, 1f) || Mathf.Approximately(stageH, 1f), "한쪽은 칸을 꽉 채운다");
+            }
+        }
     }
 }
