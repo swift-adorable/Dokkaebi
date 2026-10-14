@@ -71,8 +71,7 @@ public class Health : MonoBehaviour, IDamageable, IPoolable
     public StatusEffectState Status { get; } = new StatusEffectState();
 
     /// <summary>
-    /// 마지막으로 들어온 타격이 치명타였는가. 조건부 드롭이 읽는다.
-    /// 「온전한 신경절 — 치명타가 아닌 공격으로 처치」 (Hunting 6-3절)
+    /// 마지막으로 들어온 타격이 치명타였는가 (KillContext에 담긴다).
     /// </summary>
     public bool LastHitWasCritical { get; private set; }
 

@@ -16,6 +16,8 @@ public class CameraFollow : MonoBehaviour
     public static float ZoomScale = 1f;
 
     private Vector3 offset;
+    private Camera cam;
+    private float baseOrthoSize;
     private Vector3 currentVelocity;
     private bool isReady;
 
@@ -28,6 +30,8 @@ public class CameraFollow : MonoBehaviour
         }
 
         offset = transform.position - target.position;
+        if (TryGetComponent(out cam) && cam.orthographic)
+            baseOrthoSize = cam.orthographicSize;   // 2.5D 정사영 카메라(결정 2-127) — 확대는 거리 대신 보이는 크기로
         isReady = true;
     }
 
@@ -35,6 +39,9 @@ public class CameraFollow : MonoBehaviour
     {
         if (!isReady || target == null)
             return;
+
+        if (cam != null && cam.orthographic && baseOrthoSize > 0f)
+            cam.orthographicSize = baseOrthoSize * ZoomScale;
 
         Vector3 desiredPosition = target.position + offset * ZoomScale;
 

@@ -143,10 +143,7 @@ public class PlayerAbsorber : MonoBehaviour
                 PassiveManager.EnsureInstance().AddGold(gainedGold);
 
             GameLogger.Log(
-                $"[PlayerAbsorber] {corpse.Rarity} 흡수 — 경험치 +{gainedXP} · 골드 +{gainedGold}"
-                + (corpse.ConditionalDrops != ConditionalDrop.None
-                    ? $" · 조건 {corpse.ConditionalDrops}"
-                    : string.Empty));
+                $"[PlayerAbsorber] {corpse.Rarity} 흡수 — 경험치 +{gainedXP} · 골드 +{gainedGold}");
         }
 
     }

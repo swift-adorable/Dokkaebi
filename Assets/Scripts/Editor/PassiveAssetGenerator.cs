@@ -181,10 +181,7 @@ public static class PassiveAssetGenerator
 
         // ── 역행 — 조우해야 보인다 ────────────────────────────────────
         // 【교차 선행】 다른 계열의 칸을 요구한다. 한 갈래만 파면 닿지 않는다.
-        rows.Add(N("reg_bench", "옛 도면",
-            "오래된 도면. 작업대에서 역행 전용 물건을 만들 수 있게 된다. [작업대 제작과 함께 열린다]",
-            PassiveBranch.Regression, PassiveEffectType.CraftBench, 1, level: 1, cost: 3000,
-            column: 1, row: 0, materials: new[] { ("memory_core", 1) }));
+        // 「옛 도면」(작업대 역행 물건)은 뺐다 — 만들 물건이 없고 본문에도 없다 (결정 2-127).
 
         // 「구슬 깨기」(젬 분해)는 뺐다 — 젬은 강화 · 분해 없이 그대로 쓰기만 한다 (결정 2-74).
 
@@ -193,7 +190,7 @@ public static class PassiveAssetGenerator
         rows.Add(N("reg_map", "옛 지도",
             "지도에 봇짐 · 열매 나무 · 쓰러뜨린 적의 시체가 표시된다.",
             PassiveBranch.Regression, PassiveEffectType.MapLoot, 1, level: 1, cost: 8000,
-            column: 1, row: 2, prereq: new[] { "reg_bench", "meta_absorb_2" },
+            column: 1, row: 0, prereq: new[] { "meta_absorb_2" },
             materials: new[] { ("memory_core", 4), ("cell_battery", 8) }));
 
         return rows;

@@ -21,7 +21,7 @@ public static class MapPhotoBaker
     public const int PixelsPerMeter = 8;
 
     /// <summary>씬 자체를 찍는가 — 아트가 들어오면 켠다. 꺼져 있으면 표로 세운 모형을 찍는다.</summary>
-    public static bool UseSceneArt = false;
+    public static bool UseSceneArt = true;   // 결정 2-127 — 장 꾸미기(2.5D)가 들어가 씬을 찍는다
     private const int MaxSize = 2048;
     private const string Folder = "Assets/Resources/" + MapRuntime.PhotoFolder;
 

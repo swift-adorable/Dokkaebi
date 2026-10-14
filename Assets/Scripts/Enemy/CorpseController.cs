@@ -33,7 +33,6 @@ public class CorpseController : MonoBehaviour, IPoolable
     public EnemyRarity Rarity { get; private set; } = EnemyRarity.Normal;
 
     /// <summary>이 개체가 만족시킨 조건부 드롭. (Hunting 6-3절)</summary>
-    public ConditionalDrop ConditionalDrops { get; private set; } = ConditionalDrop.None;
 
     /// <summary>
     /// 경험치·추첨에 곱하는 배율.
@@ -67,7 +66,6 @@ public class CorpseController : MonoBehaviour, IPoolable
     public void SetReward(EnemyRarity rarity, in KillContext context)
     {
         Rarity = rarity;
-        ConditionalDrops = ConditionalDropTable.Evaluate(in context);
         KilledByPlayer = context.killedByPlayer;
         rewardSet = true;
 
@@ -146,7 +144,6 @@ public class CorpseController : MonoBehaviour, IPoolable
         // 풀에서 재사용될 때 이전 개체의 등급·조건이 남으면
         // 일반 적에게서 고유 보상이 나온다.
         Rarity = EnemyRarity.Normal;
-        ConditionalDrops = ConditionalDrop.None;
         KilledByPlayer = false;
 
         Loot.Clear();

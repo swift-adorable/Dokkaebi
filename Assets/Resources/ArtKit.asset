@@ -1,0 +1,547 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 12b4380efae4c4dd1a0466a12f238b8a, type: 3}
+  m_Name: ArtKit
+  m_EditorClassIdentifier: Dokkaebi.Runtime::ArtKit
+  Entries:
+  - Key: Grass
+    Material: {fileID: 2100000, guid: 662bbdaa6d87646079a82277f4c13fa2, type: 2}
+    Aspect: 1
+  - Key: GrassDark
+    Material: {fileID: 2100000, guid: c482f8c48c52c44a1902cd66a6ca88fd, type: 2}
+    Aspect: 1
+  - Key: Dirt
+    Material: {fileID: 2100000, guid: bd192096fea374b74babdf654010acd1, type: 2}
+    Aspect: 1
+  - Key: ForestFloor
+    Material: {fileID: 2100000, guid: d797f7e15a1b04d1785faaba3c971270, type: 2}
+    Aspect: 1
+  - Key: Leaf0
+    Material: {fileID: 2100000, guid: 4d0854b6cceac4119bbebb1c2a218faf, type: 2}
+    Aspect: 1
+  - Key: Leaf1
+    Material: {fileID: 2100000, guid: 105a032d52a944caf86bc28c1f618e13, type: 2}
+    Aspect: 1
+  - Key: Leaf2
+    Material: {fileID: 2100000, guid: c08d3fe965c3c449aa8867a93944cd40, type: 2}
+    Aspect: 1
+  - Key: Leaf3
+    Material: {fileID: 2100000, guid: b767949d51af14940b374c6c7da5c090, type: 2}
+    Aspect: 1
+  - Key: Deep0
+    Material: {fileID: 2100000, guid: f57265c65e38341318c72ef28c0a6cfa, type: 2}
+    Aspect: 1
+  - Key: Deep1
+    Material: {fileID: 2100000, guid: 55d66ab9dea9d49ce902f48062075e27, type: 2}
+    Aspect: 1
+  - Key: Deep2
+    Material: {fileID: 2100000, guid: ebeeeaf96fd0643d38fdf6e7868fabf3, type: 2}
+    Aspect: 1
+  - Key: Pine
+    Material: {fileID: 2100000, guid: b5eb939b2a2ca4f19964fe7e79770730, type: 2}
+    Aspect: 1
+  - Key: Trunk
+    Material: {fileID: 2100000, guid: 6f769536199194e779d411c9acae223e, type: 2}
+    Aspect: 1
+  - Key: BambooStem
+    Material: {fileID: 2100000, guid: a465928ac0c184203a4e4f8fbdad3093, type: 2}
+    Aspect: 1
+  - Key: BambooLeaf
+    Material: {fileID: 2100000, guid: a291edd1993844ff2bdc393f7ef77810, type: 2}
+    Aspect: 1
+  - Key: Rock
+    Material: {fileID: 2100000, guid: 5c29c00852a434b2b8769eca70c153d1, type: 2}
+    Aspect: 1
+  - Key: RockDark
+    Material: {fileID: 2100000, guid: 77eba1439035140a78848113b0b9d558, type: 2}
+    Aspect: 1
+  - Key: Wood
+    Material: {fileID: 2100000, guid: 30442426470fe4e9b9ae27b4b3d0477a, type: 2}
+    Aspect: 1
+  - Key: WoodDark
+    Material: {fileID: 2100000, guid: fd6a0c5f5f2bc43b8b9a099439206e9f, type: 2}
+    Aspect: 1
+  - Key: Plaster
+    Material: {fileID: 2100000, guid: 9bfaa6a64fc9d47da98acbdbf475c220, type: 2}
+    Aspect: 1
+  - Key: Tile
+    Material: {fileID: 2100000, guid: 3b300190860324f93b1e045caebcec0d, type: 2}
+    Aspect: 1
+  - Key: Thatch
+    Material: {fileID: 2100000, guid: 3f67e6a352ec943cda2b69055d182b86, type: 2}
+    Aspect: 1
+  - Key: Cloth
+    Material: {fileID: 2100000, guid: 71ba5bc1c2ef3439597f4721a539cf69, type: 2}
+    Aspect: 1
+  - Key: Snow
+    Material: {fileID: 2100000, guid: f694e178d427543b7a3dae90affbae28, type: 2}
+    Aspect: 1
+  - Key: Water
+    Material: {fileID: 2100000, guid: 518336bf8430a4b4eb3dd746563d829b, type: 2}
+    Aspect: 1
+  - Key: Rope
+    Material: {fileID: 2100000, guid: 38f8f3b6076f645a6963122c3c9932a2, type: 2}
+    Aspect: 1
+  - Key: Paper
+    Material: {fileID: 2100000, guid: 56dec7923e5c44a1182299785a70d6bb, type: 2}
+    Aspect: 1
+  - Key: Pepper
+    Material: {fileID: 2100000, guid: 2ffb36226a51d4995aea9770d4bf5854, type: 2}
+    Aspect: 1
+  - Key: Charcoal
+    Material: {fileID: 2100000, guid: 1b2047111fa274898b27fc94ff9b5faa, type: 2}
+    Aspect: 1
+  - Key: FlowerPink
+    Material: {fileID: 2100000, guid: f35ff3f744e1d42679f31eee03415424, type: 2}
+    Aspect: 1
+  - Key: FlowerYellow
+    Material: {fileID: 2100000, guid: 05891f44024694df08763db84d76b122, type: 2}
+    Aspect: 1
+  - Key: FlowerWhite
+    Material: {fileID: 2100000, guid: 9e0d5c4728edc4a669605e1b67494a7d, type: 2}
+    Aspect: 1
+  - Key: S:Assets/The Higalina Vault/Trees/Icons/without_shadow/tree_medium_02.png
+    Material: {fileID: 2100000, guid: 5e230d5d93f234deeb2f4dfff479f52d, type: 2}
+    Aspect: 0.77734375
+  - Key: S:Assets/The Higalina Vault/Trees/Icons/without_shadow/tree_medium_04.png
+    Material: {fileID: 2100000, guid: 8ecac0535e87b48c58cfbcaae9dcc073, type: 2}
+    Aspect: 0.73828125
+  - Key: S:Assets/The Higalina Vault/Trees/Icons/without_shadow/tree_medium_06.png
+    Material: {fileID: 2100000, guid: 5176363b1624b4bbb95f8fb9b7a40fb5, type: 2}
+    Aspect: 0.578125
+  - Key: S:Assets/The Higalina Vault/Trees/Icons/without_shadow/tree_medium_08.png
+    Material: {fileID: 2100000, guid: c4180c9f3b8ab4e1ab770b8279219347, type: 2}
+    Aspect: 0.45898438
+  - Key: S:Assets/The Higalina Vault/Trees/Icons/without_shadow/tree_medium_11.png
+    Material: {fileID: 2100000, guid: 00a6f49f9b32a4237b28e069f21ab039, type: 2}
+    Aspect: 1.1252748
+  - Key: S:Assets/The Higalina Vault/Trees/Icons/without_shadow/tree_medium_14.png
+    Material: {fileID: 2100000, guid: 3b4a72f003c214eeca58a7b5aafc9fd0, type: 2}
+    Aspect: 0.9472656
+  - Key: S:Assets/The Higalina Vault/Trees/Icons/without_shadow/tree_medium_17.png
+    Material: {fileID: 2100000, guid: ffb17a6af9cb34ba3943c3bdf9a65e44, type: 2}
+    Aspect: 1.0343435
+  - Key: S:Assets/The Higalina Vault/Trees/Icons/without_shadow/tree_medium_20.png
+    Material: {fileID: 2100000, guid: ea8bef8b8389046ec9bae2a874e2da42, type: 2}
+    Aspect: 0.7949219
+  - Key: S:Assets/The Higalina Vault/Trees/Icons/without_shadow/tree_medium_32.png
+    Material: {fileID: 2100000, guid: 5577c877fcf6d4b568bd05bf08600c10, type: 2}
+    Aspect: 0.8515625
+  - Key: S:Assets/The Higalina Vault/Trees/Icons/without_shadow/tree_medium_35.png
+    Material: {fileID: 2100000, guid: acedd74a44ac142889e1296c94483dd8, type: 2}
+    Aspect: 0.78125
+  - Key: S:Assets/The Higalina Vault/Trees/Icons/without_shadow/tree_medium_46.png
+    Material: {fileID: 2100000, guid: 12f979d308cb243a8b34e91870b26e56, type: 2}
+    Aspect: 0.796875
+  - Key: S:Assets/The Higalina Vault/Trees/Icons/without_shadow/tree_medium_51.png
+    Material: {fileID: 2100000, guid: ece25862a1ea54f1384c26ce75aa6b01, type: 2}
+    Aspect: 0.7558594
+  - Key: S:Assets/The Higalina Vault/Trees/Icons/without_shadow/tree_medium_61.png
+    Material: {fileID: 2100000, guid: 4a3827ea66d64459497ee5e5f08d99d8, type: 2}
+    Aspect: 0.97265625
+  - Key: S:Assets/The Higalina Vault/Trees/Icons/without_shadow/tree_medium_23.png
+    Material: {fileID: 2100000, guid: d37bd94a489d541e18669c814aa2be0a, type: 2}
+    Aspect: 0.6777344
+  - Key: S:Assets/The Higalina Vault/Trees/Icons/without_shadow/tree_medium_37.png
+    Material: {fileID: 2100000, guid: 9260fc5b3cc4b442bb5fd0ceb3d3b0a4, type: 2}
+    Aspect: 1.3617021
+  - Key: S:Assets/The Higalina Vault/Trees/Icons/without_shadow/tree_medium_39.png
+    Material: {fileID: 2100000, guid: 4a9f838cb7e2c425bb1bc91049ea8de0, type: 2}
+    Aspect: 1.1256831
+  - Key: S:Assets/The Higalina Vault/Trees/Icons/without_shadow/tree_medium_41.png
+    Material: {fileID: 2100000, guid: 6daed13a179ad43f09191e5616cec5b7, type: 2}
+    Aspect: 1.0940171
+  - Key: S:Assets/The Higalina Vault/Trees/Icons/without_shadow/tree_medium_26.png
+    Material: {fileID: 2100000, guid: 2778733403e3d46b79e9c88ea9d984c3, type: 2}
+    Aspect: 0.84375
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Gray_Snow/rock_giant_01_gray_snow.png
+    Material: {fileID: 2100000, guid: 9f77ed7b05ecf48b6b1d26deb3939b8b, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Gray_Snow/rock_giant_02_gray_snow.png
+    Material: {fileID: 2100000, guid: d9629c2daa38f4e3686918cddcdf5dfd, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Gray_Snow/rock_giant_03_gray_snow.png
+    Material: {fileID: 2100000, guid: 845d39f745bbb4f558df7f905fe33539, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Gray_Snow/rock_giant_04_gray_snow.png
+    Material: {fileID: 2100000, guid: 68f16abea3492431b93892ffc3ec7bcf, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Gray_Snow/rock_angular_01_gray_snow.png
+    Material: {fileID: 2100000, guid: c45ccc3c185cb47a79c2a2f93bf13ff6, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Gray_Snow/rock_angular_02_gray_snow.png
+    Material: {fileID: 2100000, guid: a8e2f2fc8b5cf434387f5ec27cad2b91, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Gray_Snow/rock_angular_03_gray_snow.png
+    Material: {fileID: 2100000, guid: 21237458be64a4bc3b05f6a4cf31c83e, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Gray_Snow/rock_angular_04_gray_snow.png
+    Material: {fileID: 2100000, guid: d7eed1eeab26b4d528cc334d844c3805, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Gray_Snow/rock_round_01_gray_snow.png
+    Material: {fileID: 2100000, guid: aea9d1fe0ad0240e5868aaecf9d15478, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Gray_Snow/rock_round_02_gray_snow.png
+    Material: {fileID: 2100000, guid: c5679d67eab55483194358df33337a1b, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Gray_Snow/rock_round_03_gray_snow.png
+    Material: {fileID: 2100000, guid: 31f2e937c14ef4db4a6820adf3a6f531, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Gray_Snow/rock_cracked_01_gray_snow.png
+    Material: {fileID: 2100000, guid: 7e919f513742045a4b71881461aeed05, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Gray_Snow/rock_cracked_02_gray_snow.png
+    Material: {fileID: 2100000, guid: 088bed570428646d38a3f2fdf868b8b6, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Gray_Snow/rock_cluster_01_gray_snow.png
+    Material: {fileID: 2100000, guid: eeffa1f033e714abc9e557179f855067, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Gray_Snow/rock_cluster_02_gray_snow.png
+    Material: {fileID: 2100000, guid: af2c8f37961ff4c518b459c25f70c3b4, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Gray_Snow/stone_cluster_01_gray_snow.png
+    Material: {fileID: 2100000, guid: 18a08da801e774a739d2d6d2b83bd0c0, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Gray_Snow/stone_cluster_02_gray_snow.png
+    Material: {fileID: 2100000, guid: 7b18aec4c38ef4d1abcfc7c68b0d123c, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Gray_Snow/stone_cluster_03_gray_snow.png
+    Material: {fileID: 2100000, guid: ff49b5e4e804c4916a8a9b610c5a10c8, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Gray_Snow/stone_pebbles_01_gray_snow.png
+    Material: {fileID: 2100000, guid: c323a210b17c9443f96d089c377d2329, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Gray_Snow/stone_pebbles_02_gray_snow.png
+    Material: {fileID: 2100000, guid: d8763375276ef4147936fd32cc77fad1, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Gray_Snow/stone_round_01_gray_snow.png
+    Material: {fileID: 2100000, guid: c75a99c51ccd64dacad17f426cdadfba, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Gray_Snow/stone_round_02_gray_snow.png
+    Material: {fileID: 2100000, guid: 4a7a2ac4c83724194a7fbfb3f85c1da5, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Gray_Snow/stone_flat_01_gray_snow.png
+    Material: {fileID: 2100000, guid: b864772af0e5843209d0d89bb0a1157f, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Gray_Snow/stone_pointy_01_gray_snow.png
+    Material: {fileID: 2100000, guid: 74d0a35b365334fa4b1bc1112c613927, type: 2}
+    Aspect: 1
+  - Key: S:Assets/The Higalina Vault/Trees/Icons/without_shadow/tree_medium_01.png
+    Material: {fileID: 2100000, guid: 2f834f3c92a6e406cac87be1b19c29b6, type: 2}
+    Aspect: 0.77734375
+  - Key: S:Assets/The Higalina Vault/Trees/Icons/without_shadow/tree_medium_03.png
+    Material: {fileID: 2100000, guid: 9d79f4fc444b546ce8854af4f65b0b6e, type: 2}
+    Aspect: 0.73828125
+  - Key: S:Assets/The Higalina Vault/Trees/Icons/without_shadow/tree_medium_05.png
+    Material: {fileID: 2100000, guid: 8d0a1475f8e1c43dd9edb94aa6318435, type: 2}
+    Aspect: 0.578125
+  - Key: S:Assets/The Higalina Vault/Trees/Icons/without_shadow/tree_medium_09.png
+    Material: {fileID: 2100000, guid: e112f9cc62242499883e2ab416302898, type: 2}
+    Aspect: 1.1252748
+  - Key: S:Assets/The Higalina Vault/Trees/Icons/without_shadow/tree_medium_15.png
+    Material: {fileID: 2100000, guid: 3cee4e3926ed34f13a61a121a379b46b, type: 2}
+    Aspect: 1.0343435
+  - Key: S:Assets/The Higalina Vault/Trees/Icons/without_shadow/tree_medium_18.png
+    Material: {fileID: 2100000, guid: bfbacc27e22184c1fa89c90038d86f18, type: 2}
+    Aspect: 0.7949219
+  - Key: S:Assets/The Higalina Vault/Trees/Icons/without_shadow/tree_medium_47.png
+    Material: {fileID: 2100000, guid: 2f2ce2c6f3d784e56a2be5764f07c1a3, type: 2}
+    Aspect: 0.7558594
+  - Key: S:Assets/The Higalina Vault/Trees/Icons/without_shadow/tree_medium_57.png
+    Material: {fileID: 2100000, guid: 69ae445b0032c4658bc1201c6771cb52, type: 2}
+    Aspect: 0.97265625
+  - Key: S:Assets/The Higalina Vault/Trees/Icons/without_shadow/tree_medium_62.png
+    Material: {fileID: 2100000, guid: 8d1754f81ee344415b1ff560a019dad8, type: 2}
+    Aspect: 0.84375
+  - Key: S:Assets/The Higalina Vault/Trees/Icons/without_shadow/tree_medium_67.png
+    Material: {fileID: 2100000, guid: e022bddeeb32b42e28b03064738fa07d, type: 2}
+    Aspect: 0.8144531
+  - Key: S:Assets/The Higalina Vault/Trees/Icons/without_shadow/tree_medium_84.png
+    Material: {fileID: 2100000, guid: 3f5c20464169b4ef0b32d29d0d5a3096, type: 2}
+    Aspect: 0.8046875
+  - Key: S:Assets/The Higalina Vault/Trees/Icons/without_shadow/tree_medium_48.png
+    Material: {fileID: 2100000, guid: 2e1fb2da146f447f8916d74d2e64ec85, type: 2}
+    Aspect: 0.7558594
+  - Key: S:Assets/The Higalina Vault/Trees/Icons/without_shadow/tree_medium_63.png
+    Material: {fileID: 2100000, guid: 7e3eac3e8debf4e4ebb25f1475b35041, type: 2}
+    Aspect: 0.84375
+  - Key: S:Assets/The Higalina Vault/Trees/Icons/without_shadow/tree_medium_52.png
+    Material: {fileID: 2100000, guid: a063a246b848547da9682a3f34b4d3dd, type: 2}
+    Aspect: 0.77734375
+  - Key: S:Assets/The Higalina Vault/Trees/Icons/without_shadow/tree_medium_36.png
+    Material: {fileID: 2100000, guid: c852a140125634791ab5187eae0d715c, type: 2}
+    Aspect: 1.3617021
+  - Key: S:Assets/The Higalina Vault/Trees/Icons/without_shadow/tree_medium_38.png
+    Material: {fileID: 2100000, guid: 248fde54fe0ea4eb083dc0c5f75c3fa4, type: 2}
+    Aspect: 1.1256831
+  - Key: S:Assets/The Higalina Vault/Trees/Icons/without_shadow/tree_medium_24.png
+    Material: {fileID: 2100000, guid: c71242f1098cb4ac5af2d00d43b2b69d, type: 2}
+    Aspect: 0.84375
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Gray/rock_giant_01_gray.png
+    Material: {fileID: 2100000, guid: c7c9160e8aaf4438b8cb640da834afb9, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Gray/rock_giant_02_gray.png
+    Material: {fileID: 2100000, guid: f90a69df88b37454fb7b7ef500577e7c, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Gray/rock_giant_03_gray.png
+    Material: {fileID: 2100000, guid: 630b2fb40bfdd49938f621bc927de1b2, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Gray/rock_giant_04_gray.png
+    Material: {fileID: 2100000, guid: cc7c6219f6a694c2e89b8f6536c61d94, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Gray/rock_angular_01_gray.png
+    Material: {fileID: 2100000, guid: 3dec875e927c84625985777df4ed7aa2, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Gray/rock_angular_02_gray.png
+    Material: {fileID: 2100000, guid: b386661ed20a64c4693318b0e7585eac, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Gray/rock_angular_03_gray.png
+    Material: {fileID: 2100000, guid: 2aaab5283ecf54e77a3e317c4ccf8554, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Gray/rock_angular_04_gray.png
+    Material: {fileID: 2100000, guid: 67ce4a15269124ef4a53d96361d42a01, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Gray/rock_round_01_gray.png
+    Material: {fileID: 2100000, guid: 1a28575a4898447a78b544ebd133ff03, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Gray/rock_round_02_gray.png
+    Material: {fileID: 2100000, guid: e3c28609411634b5aa583bccfc42d44e, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Gray/rock_round_03_gray.png
+    Material: {fileID: 2100000, guid: 577838db6be1140dfbeae6490a9506ca, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Gray/rock_cracked_01_gray.png
+    Material: {fileID: 2100000, guid: fc469e1b2ea324e898b1ed6b4b8c5b80, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Gray/rock_cracked_02_gray.png
+    Material: {fileID: 2100000, guid: 953c2bc382dae4faaa00b65aec500ced, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Gray/rock_cluster_01_gray.png
+    Material: {fileID: 2100000, guid: bd9a7c893d7344d358bf4d0bf55dac45, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Gray/rock_cluster_02_gray.png
+    Material: {fileID: 2100000, guid: 8978d4e81ac764d4d855a13abfbf68f2, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Gray/stone_cluster_01_gray.png
+    Material: {fileID: 2100000, guid: 33e259147e31c4e0f9f86f47aa5a51fd, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Gray/stone_cluster_02_gray.png
+    Material: {fileID: 2100000, guid: 8a8761c6b771d4dd9a1fed29b221ddb9, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Gray/stone_cluster_03_gray.png
+    Material: {fileID: 2100000, guid: 80472b14f5b234d658ce36d278ce9693, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Gray/stone_pebbles_01_gray.png
+    Material: {fileID: 2100000, guid: b3a5afcd6257346d6b029997bba463cf, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Gray/stone_pebbles_02_gray.png
+    Material: {fileID: 2100000, guid: 348237f5054f44e96b8e0cacecfde649, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Gray/stone_round_01_gray.png
+    Material: {fileID: 2100000, guid: 5a44ebcadd7db4b038f770a3d1f2921c, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Gray/stone_round_02_gray.png
+    Material: {fileID: 2100000, guid: d4bbdff28a62f4233a78396ac0224a00, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Gray/stone_flat_01_gray.png
+    Material: {fileID: 2100000, guid: f6a763d6a2b854524b14842a4ce0317f, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Gray/stone_pointy_01_gray.png
+    Material: {fileID: 2100000, guid: 8441928df56b34ba08dbbe35d3c55b4f, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Moss/rock_giant_01_moss.png
+    Material: {fileID: 2100000, guid: 105a0235f15ed4840aa0695c9aa46511, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Moss/rock_giant_02_moss.png
+    Material: {fileID: 2100000, guid: 1398b671bb0954dda9682435b26579da, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Moss/rock_giant_03_moss.png
+    Material: {fileID: 2100000, guid: ca7005d3ab0cd446eb6cfd9c27b0282e, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Moss/rock_giant_04_moss.png
+    Material: {fileID: 2100000, guid: 1c93b098780e54756999a2004ef1e6f0, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Moss/rock_angular_01_moss.png
+    Material: {fileID: 2100000, guid: a4b6770e07c274f74b904abbbff14744, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Moss/rock_angular_02_moss.png
+    Material: {fileID: 2100000, guid: bcfb95a5c2a2249349320907314572f8, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Moss/rock_angular_03_moss.png
+    Material: {fileID: 2100000, guid: 27c52790fa11b4d25a10696bc6fc3dee, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Moss/rock_angular_04_moss.png
+    Material: {fileID: 2100000, guid: d672e1688c6df40e9b0ad8b632772bc0, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Moss/rock_round_01_moss.png
+    Material: {fileID: 2100000, guid: ba64a3f6cf2fd40e8853afec85bd3fdb, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Moss/rock_round_02_moss.png
+    Material: {fileID: 2100000, guid: dcbf58f25eb7347958eec2ab358982a1, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Moss/rock_round_03_moss.png
+    Material: {fileID: 2100000, guid: 74ada832b39444ffe9872b70ac8eae37, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Moss/rock_cracked_01_moss.png
+    Material: {fileID: 2100000, guid: 030bfbf44ffbe4f5aac5b74e713f52ca, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Moss/rock_cracked_02_moss.png
+    Material: {fileID: 2100000, guid: fd3496fe71ad24e51b8c1082d7c157a8, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Moss/rock_cluster_01_moss.png
+    Material: {fileID: 2100000, guid: 09afa691c942746b598ea07bce7b1039, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Moss/rock_cluster_02_moss.png
+    Material: {fileID: 2100000, guid: a1f8f4c00121942778c9b990ec45d579, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Moss/stone_cluster_01_moss.png
+    Material: {fileID: 2100000, guid: 2d6d8e644b6404be68179e31dc7a570a, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Moss/stone_cluster_02_moss.png
+    Material: {fileID: 2100000, guid: 45fd964bc18b04b7e811a04488e20d89, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Moss/stone_cluster_03_moss.png
+    Material: {fileID: 2100000, guid: 88c8e1dedcd0c406a85117fbe9a4815c, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Moss/stone_pebbles_01_moss.png
+    Material: {fileID: 2100000, guid: 1166922c0334146f4b7e74a2ab0cb0d3, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Moss/stone_pebbles_02_moss.png
+    Material: {fileID: 2100000, guid: 1c382d0238d3a4fbda6b7a37f667d40d, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Moss/stone_round_01_moss.png
+    Material: {fileID: 2100000, guid: ee7caef335c314ef3a049e2548f59a2c, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Moss/stone_round_02_moss.png
+    Material: {fileID: 2100000, guid: fbb81986f9c2644b1a252d354e85de76, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Moss/stone_flat_01_moss.png
+    Material: {fileID: 2100000, guid: 5c48e2b4c73e743aaaa5c27c8753b4dc, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Moss/stone_pointy_01_moss.png
+    Material: {fileID: 2100000, guid: a3122c618bef64041bc4ab7a548c93c5, type: 2}
+    Aspect: 1
+  - Key: S:Assets/The Higalina Vault/Trees/Icons/without_shadow/tree_medium_12.png
+    Material: {fileID: 2100000, guid: d363ecd88bfd44621ae5c7e532614059, type: 2}
+    Aspect: 0.9472656
+  - Key: S:Assets/The Higalina Vault/Trees/Icons/without_shadow/tree_medium_27.png
+    Material: {fileID: 2100000, guid: c229e92a634014d2cb775dc5a545a8f1, type: 2}
+    Aspect: 0.8300781
+  - Key: S:Assets/The Higalina Vault/Trees/Icons/without_shadow/tree_medium_30.png
+    Material: {fileID: 2100000, guid: bedc5a67505dc4ead911aa5208781baf, type: 2}
+    Aspect: 0.8515625
+  - Key: S:Assets/The Higalina Vault/Trees/Icons/without_shadow/tree_medium_33.png
+    Material: {fileID: 2100000, guid: 2ca221c08768744d78639a0a7c505577, type: 2}
+    Aspect: 0.78125
+  - Key: S:Assets/The Higalina Vault/Trees/Icons/without_shadow/tree_medium_21.png
+    Material: {fileID: 2100000, guid: 9bc8641621baf431baf7843c904481e2, type: 2}
+    Aspect: 0.6777344
+  - Key: S:Assets/The Higalina Vault/Trees/Icons/without_shadow/tree_medium_64.png
+    Material: {fileID: 2100000, guid: 51e9c4b0f86934333903060c5c7ed280, type: 2}
+    Aspect: 0.84375
+  - Key: S:Assets/The Higalina Vault/Trees/Icons/without_shadow/tree_medium_69.png
+    Material: {fileID: 2100000, guid: 701012e10b3fc411c9ff0092284939d6, type: 2}
+    Aspect: 0.8144531
+  - Key: S:Assets/The Higalina Vault/Trees/Icons/without_shadow/tree_medium_13.png
+    Material: {fileID: 2100000, guid: 1dfab731ca97c44ba83ad920b6eb7d3e, type: 2}
+    Aspect: 0.9472656
+  - Key: S:Assets/The Higalina Vault/Trees/Icons/without_shadow/tree_medium_40.png
+    Material: {fileID: 2100000, guid: 27bd0ef86cca341eea875faaf8f144b3, type: 2}
+    Aspect: 1.0940171
+  - Key: S:Assets/The Higalina Vault/Trees/Icons/without_shadow/tree_medium_25.png
+    Material: {fileID: 2100000, guid: 91983d75eb24c4654bf204f66d188be9, type: 2}
+    Aspect: 0.84375
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Brown/rock_giant_01_brown.png
+    Material: {fileID: 2100000, guid: 9ac18864390d0439589b879be5f911cd, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Brown/rock_giant_02_brown.png
+    Material: {fileID: 2100000, guid: 084665ddc642d451db7f9707c9102233, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Brown/rock_giant_03_brown.png
+    Material: {fileID: 2100000, guid: 21552aba0af7d4302ab7581325a990bb, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Brown/rock_giant_04_brown.png
+    Material: {fileID: 2100000, guid: 65e83b2851bd243a3b7de8455cfd4582, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Brown/rock_angular_01_brown.png
+    Material: {fileID: 2100000, guid: 868758f00f132439d93372aa05e7f5fd, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Brown/rock_angular_02_brown.png
+    Material: {fileID: 2100000, guid: 945a5debfd9b2479cbdc7da37e8f3ed5, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Brown/rock_angular_03_brown.png
+    Material: {fileID: 2100000, guid: 5c92223279dc24c67830fcacd2f50ed7, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Brown/rock_angular_04_brown.png
+    Material: {fileID: 2100000, guid: 406221cc3b01d4dbab846d3cced89aae, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Brown/rock_round_01_brown.png
+    Material: {fileID: 2100000, guid: 0c937ec7410314a7f906e4a0710c8137, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Brown/rock_round_02_brown.png
+    Material: {fileID: 2100000, guid: 33c5b0bb36e0b4078890907e11e66e5c, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Brown/rock_round_03_brown.png
+    Material: {fileID: 2100000, guid: 63fbe97feb15d40248f7687e56e9c21b, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Brown/rock_cracked_01_brown.png
+    Material: {fileID: 2100000, guid: 5ce32d7f7f3a74a2a8cc8b26e296a15f, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Brown/rock_cracked_02_brown.png
+    Material: {fileID: 2100000, guid: 1e77cb577def142bb81ec4b3e19f11cf, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Brown/rock_cluster_01_brown.png
+    Material: {fileID: 2100000, guid: 05f543df827184125bc2145e4fbfc779, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Brown/rock_cluster_02_brown.png
+    Material: {fileID: 2100000, guid: 84b5ef543dafa4bb791319283f9ce56c, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Brown/stone_cluster_01_brown.png
+    Material: {fileID: 2100000, guid: 1ac89e03faf864aa5915eaabee6e5cd2, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Brown/stone_cluster_02_brown.png
+    Material: {fileID: 2100000, guid: 78fedef628340440d8228ebfe2858e99, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Brown/stone_cluster_03_brown.png
+    Material: {fileID: 2100000, guid: 17967afddeec147ee989a39e480bb7f4, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Brown/stone_pebbles_01_brown.png
+    Material: {fileID: 2100000, guid: 02b428b52d30046538d4289b0e23821c, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Brown/stone_pebbles_02_brown.png
+    Material: {fileID: 2100000, guid: 7c6392941e9a04a14ba6b6b8fc2385ee, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Brown/stone_round_01_brown.png
+    Material: {fileID: 2100000, guid: 894269d5e99ae444f85bad8e31413c9a, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Brown/stone_round_02_brown.png
+    Material: {fileID: 2100000, guid: ac9ae7f8feb234ce09c59a5d6c2b889d, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Brown/stone_flat_01_brown.png
+    Material: {fileID: 2100000, guid: f4327030072324be4bcfb3a591d8bc0e, type: 2}
+    Aspect: 1
+  - Key: S:Assets/KebapGuy/StoneRockPack/Sprites/Brown/stone_pointy_01_brown.png
+    Material: {fileID: 2100000, guid: 16ba8d5899a654942a3d2278486766d4, type: 2}
+    Aspect: 1
+  Meshes:
+  - {fileID: 4451762236180895086, guid: bfc4e24f751ed43f68c23413f762ece8, type: 2}
+  - {fileID: -2146849695230274514, guid: bfc4e24f751ed43f68c23413f762ece8, type: 2}
+  - {fileID: -3805739576697367632, guid: bfc4e24f751ed43f68c23413f762ece8, type: 2}
+  - {fileID: -8906979663152537952, guid: bfc4e24f751ed43f68c23413f762ece8, type: 2}
+  - {fileID: 3395686104795317369, guid: bfc4e24f751ed43f68c23413f762ece8, type: 2}
+  - {fileID: 6682842577221993382, guid: bfc4e24f751ed43f68c23413f762ece8, type: 2}
+  - {fileID: 1468038497237780422, guid: bfc4e24f751ed43f68c23413f762ece8, type: 2}
+  - {fileID: 7816454986100071271, guid: bfc4e24f751ed43f68c23413f762ece8, type: 2}
+  - {fileID: 4766225215287238310, guid: bfc4e24f751ed43f68c23413f762ece8, type: 2}
+  - {fileID: 925494141368396473, guid: bfc4e24f751ed43f68c23413f762ece8, type: 2}
+  - {fileID: 2178449792609568979, guid: bfc4e24f751ed43f68c23413f762ece8, type: 2}
+  - {fileID: 6547277111885569801, guid: bfc4e24f751ed43f68c23413f762ece8, type: 2}
