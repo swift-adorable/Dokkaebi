@@ -12,7 +12,7 @@ using UnityEngine.UI;
 ///   · 왼쪽 아래 「지도 표시」 판: 거르기(길목 · 마커 · 퀘스트 · 전리품 · 쓰러진 자리) · 목표로 · 마커 목록 · 도움말 한 줄
 ///   · 오른쪽: 진행 중 퀘스트(위) · 나침반 · 달 · 날씨 · 확대 막대(아래)
 ///   · 지도 위: 가 본 구역의 이름(흰 글씨 · 검은 테) · 아이콘 아래 이름표 · 내 자리는 파란 동그라미 + 「나」 · 퀘스트 구역은 테두리 + 「!」
-/// 【확대 · 이동】 배율 1(장 하나가 다 보인다) ~ 4 · 열면 2배로 내 자리가 가운데 · 끌어서 이동 · 휠 · 두 손가락 확대.
+/// 【확대 · 이동】 배율 1(장 하나가 다 보인다) ~ 4 · 열면 배율 1 (결정 2-122) · 끌어서 이동 · 휠 · 두 손가락 확대.
 /// 【보이는 것】 내 자리 · 바라보는 쪽 · 찾은 길목 · 금줄 · 퀘스트 구역 · 내 마커 · 쓰러진 자리 · (옛 지도) 전리품.
 ///   구역 이름은 【가 본 구역만】 적는다(사용자 2026-10-13 — 2026-10-08의 「적지 않는다」를 바꿨다) · 가 보지 않은 땅은 어둡다 ·
 ///   적 · 보스 · 조각은 그리지 않는다 (Map_System 4절)
@@ -34,7 +34,7 @@ public class WorldMapUI : MonoBehaviour
     private static readonly Color Ink = new(0.96f, 0.92f, 0.82f, 1f);
     private static readonly Color InkDim = new(0.72f, 0.65f, 0.53f, 1f);
     private static readonly Color QuestColor = new(0.42f, 0.86f, 0.86f, 1f);
-    private static readonly Color FogTint = new(0.10f, 0.11f, 0.14f, 0.72f);
+    private static readonly Color FogTint = new(0.08f, 0.10f, 0.12f, 0.58f);
     private static readonly Color BlurTint = new(0.55f, 0.55f, 0.58f, 1f);
     private static readonly Color PlayerBlue = new(0.30f, 0.56f, 0.95f, 1f);
 
@@ -683,7 +683,7 @@ public class WorldMapUI : MonoBehaviour
         markerList.SetActive(false);
         FillQuestList(runtime);
 
-        // 열면 2배로 내 자리가 가운데.
+        // 열면 장 하나가 다 보인다 (결정 2-122 — 참고 그림). 확대하면 내 자리 쪽에서 시작한다.
         zoom = MapView.OpenZoom;
         center = runtime.Player != null ? runtime.UvOf(runtime.Player.position) : new Vector2(0.5f, 0.5f);
         objectiveLabel.text = string.Empty;

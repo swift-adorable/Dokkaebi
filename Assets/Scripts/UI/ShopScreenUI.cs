@@ -24,15 +24,24 @@ public class ShopScreenUI : MonoBehaviour
 
     // ── 빛깔 [임시 — 아트 때] ─────────────────────────────────────────
     private static readonly Color Backdrop = new(0.05f, 0.05f, 0.07f, 0.98f);
-    private static readonly Color BlurTint = new(0.42f, 0.42f, 0.46f, 1f);
-    private static readonly Color PanelColor = new(0.08f, 0.09f, 0.12f, 0.82f);
-    private static readonly Color RowColor = new(0.16f, 0.17f, 0.21f, 0.92f);
+    private static readonly Color BlurTint = new(0.30f, 0.30f, 0.34f, 1f);
+    private static readonly Color PanelColor = new(0.05f, 0.05f, 0.07f, 0.55f);
+    private static readonly Color RowColor = new(0.13f, 0.13f, 0.16f, 0.94f);
+    private static readonly Color RowEdge = new(1f, 1f, 1f, 0.07f);
+    private static readonly Color TabOn = new(0.80f, 0.73f, 0.60f, 1f);
+    private static readonly Color TabOff = new(0.18f, 0.17f, 0.17f, 0.92f);
+    private static readonly Color TabInkOn = new(0.20f, 0.16f, 0.12f, 1f);
+    private static readonly Color Limit = new(0.95f, 0.82f, 0.36f, 1f);
+    private static readonly Color Accent = new(0.58f, 0.46f, 0.92f, 1f);
+    private static readonly Color PillDark = new(0.44f, 0.38f, 0.33f, 0.95f);
+    private static readonly Color Cloth1 = new(0.62f, 0.46f, 0.30f, 1f);
+    private static readonly Color Cloth2 = new(0.50f, 0.36f, 0.24f, 1f);
     private static readonly Color RowDim = new(0.10f, 0.10f, 0.12f, 0.92f);
     private static readonly Color Wood = new(0.36f, 0.24f, 0.15f, 1f);
     private static readonly Color WoodDark = new(0.24f, 0.15f, 0.09f, 1f);
     private static readonly Color Coin = new(0.95f, 0.76f, 0.32f, 1f);
     private static readonly Color NameTag = new(1f, 0.84f, 0.30f, 1f);
-    private static readonly Color BuyColor = new(0.36f, 0.66f, 0.70f, 0.95f);
+    private static readonly Color BuyColor = new(0.40f, 0.68f, 0.72f, 0.98f);
 
     private const int CounterSlots = 6;
     private const int BagColumns = 4;
@@ -194,7 +203,8 @@ public class ShopScreenUI : MonoBehaviour
     {
         RectTransform bar = UIFactory.CreateRegion("Top", safe, new Vector2(0f, 0.905f), new Vector2(1f, 1f));
 
-        Button back = UIFactory.CreateButton(bar, "‹", new Vector2(0f, 0.1f), new Vector2(0f, 0.9f), UIPalette.Subtle, Hide, 44);
+        Button back = UIFactory.CreateButton(bar, "‹", new Vector2(0f, 0.1f), new Vector2(0f, 0.9f), new Color(0f, 0f, 0f, 0.001f), Hide, 56);
+        Inked(back.GetComponentInChildren<Text>());
         var backRect = (RectTransform)back.transform;
         backRect.pivot = new Vector2(0f, 0.5f);
         backRect.sizeDelta = new Vector2(80f, 0f);
@@ -202,7 +212,7 @@ public class ShopScreenUI : MonoBehaviour
 
         titleLabel = Inked(UIFactory.CreateLabel(bar, "", 38, FontStyle.Bold,
             new Vector2(0f, 0f), new Vector2(0.4f, 1f), TextAnchor.MiddleLeft, Color.white));
-        titleLabel.rectTransform.offsetMin = new Vector2(112f, 0f);
+        titleLabel.rectTransform.offsetMin = new Vector2(100f, 0f);
 
         Image coin = UIFactory.CreatePanel("Coin", bar, Coin, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), 0);
         coin.sprite = UISprites.Of(UISprites.Glyph.Circle);
@@ -216,7 +226,8 @@ public class ShopScreenUI : MonoBehaviour
         goldLabel.rectTransform.pivot = new Vector2(0f, 0.5f);
         goldLabel.rectTransform.anchoredPosition = new Vector2(-66f, 0f);
 
-        Button close = UIFactory.CreateButton(bar, "✕", new Vector2(1f, 0.1f), new Vector2(1f, 0.9f), UIPalette.Subtle, Hide, 34);
+        Button close = UIFactory.CreateButton(bar, "✕", new Vector2(1f, 0.1f), new Vector2(1f, 0.9f), new Color(0f, 0f, 0f, 0.001f), Hide, 40);
+        Inked(close.GetComponentInChildren<Text>());
         var closeRect = (RectTransform)close.transform;
         closeRect.pivot = new Vector2(1f, 0.5f);
         closeRect.sizeDelta = new Vector2(80f, 0f);
@@ -237,6 +248,23 @@ public class ShopScreenUI : MonoBehaviour
     /// <summary>가운데 위 — 상인 【임시 도형】 · 이름표 · 말풍선.</summary>
     private void BuildKeeper(RectTransform safe)
     {
+        // 좌판 차양 【임시 도형】 — 상인 뒤의 줄무늬 천 · 기둥 둘 (참고 그림의 노점 수레 자리).
+        RectTransform canopy = UIFactory.CreateRegion("Canopy", safe, new Vector2(0.37f, 0.53f), new Vector2(0.63f, 0.62f));
+        const int stripes = 9;
+        for (int i = 0; i < stripes; i++)
+        {
+            Image s = UIFactory.CreatePanel($"Stripe_{i}", canopy, i % 2 == 0 ? Cloth1 : Cloth2,
+                new Vector2(i / (float)stripes, 0f), new Vector2((i + 1) / (float)stripes, 1f), 0);
+            s.raycastTarget = false;
+        }
+        Image valance = UIFactory.CreatePanel("Valance", canopy, WoodDark, new Vector2(0f, -0.12f), new Vector2(1f, 0f), 0);
+        valance.raycastTarget = false;
+        foreach (float x in new[] { 0.375f, 0.615f })
+        {
+            Image post = UIFactory.CreatePanel("Post", safe, WoodDark, new Vector2(x, 0.37f), new Vector2(x + 0.01f, 0.53f), 0);
+            post.raycastTarget = false;
+        }
+
         // 몸 · 머리 — 계산대 뒤에 선다(계산대가 아랫몸을 가린다).
         keeperBody = UIFactory.CreatePanel("KeeperBody", safe, new Color(0.30f, 0.42f, 0.36f, 1f),
             new Vector2(0.445f, 0.36f), new Vector2(0.555f, 0.58f), 40);
@@ -253,6 +281,7 @@ public class ShopScreenUI : MonoBehaviour
         // 말풍선 — 이름표 위 흰 판 · 검은 글씨 · 아래 꼬리.
         Image bubble = UIFactory.CreatePanel("Bubble", safe, new Color(0.98f, 0.97f, 0.94f, 0.97f),
             new Vector2(0.39f, 0.715f), new Vector2(0.61f, 0.86f), 14);
+        UIFactory.CreateOutline(bubble, new Color(0.15f, 0.13f, 0.12f, 0.9f), 14, 2);
         Image tail = UIFactory.CreatePanel("Tail", bubble.transform, bubble.color, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), 0);
         tail.sprite = UISprites.Of(UISprites.Glyph.Triangle);
         tail.rectTransform.sizeDelta = new Vector2(24f, 16f);
@@ -274,13 +303,22 @@ public class ShopScreenUI : MonoBehaviour
         counterSlots = UIFactory.CreateRegion("Slots", front.transform, new Vector2(0.03f, 0.22f), new Vector2(0.97f, 0.92f));
         counterDots = UIFactory.CreateRegion("Dots", front.transform, new Vector2(0.3f, 0.03f), new Vector2(0.7f, 0.18f));
 
-        Image box = UIFactory.CreatePanel("Totals", safe, new Color(0f, 0f, 0f, 0.72f),
+        Image box = UIFactory.CreatePanel("Totals", safe, new Color(0f, 0f, 0f, 0.78f),
             new Vector2(0.415f, 0.085f), new Vector2(0.585f, 0.175f), 10);
+        UIFactory.CreateOutline(box, Accent, 10, 2);
 
         UIFactory.CreateLabel(box.transform, "합계", 24, FontStyle.Bold,
             new Vector2(0.06f, 0.5f), new Vector2(0.4f, 1f), TextAnchor.MiddleLeft, Color.white);
         UIFactory.CreateLabel(box.transform, "보유", 24, FontStyle.Bold,
             new Vector2(0.06f, 0f), new Vector2(0.4f, 0.5f), TextAnchor.MiddleLeft, Color.white);
+
+        foreach (float y in new[] { 0.75f, 0.25f })
+        {
+            Image coin = UIFactory.CreatePanel("Coin", box.transform, Coin, new Vector2(0.42f, y), new Vector2(0.42f, y), 0);
+            coin.sprite = UISprites.Of(UISprites.Glyph.Circle);
+            coin.rectTransform.sizeDelta = new Vector2(20f, 20f);
+            coin.raycastTarget = false;
+        }
 
         totalLabel = UIFactory.CreateLabel(box.transform, "0", 24, FontStyle.Bold,
             new Vector2(0.4f, 0.5f), new Vector2(0.94f, 1f), TextAnchor.MiddleRight, Coin);
@@ -294,11 +332,13 @@ public class ShopScreenUI : MonoBehaviour
     /// <summary>오른쪽 — 내 가방 (참고 그림의 보관함 자리 · 사용자).</summary>
     private void BuildBag(RectTransform safe)
     {
-        UIFactory.CreatePanel("BagBack", safe, PanelColor, new Vector2(0.70f, 0.145f), new Vector2(0.99f, 0.895f),
-            UIFactory.RadiusLarge);
+        // 참고 그림의 보관함처럼 — 큰 판 없이 위에 테두리 이름표 하나, 아래는 칸만.
+        Image chip = UIFactory.CreatePanel("BagChip", safe, new Color(0.04f, 0.04f, 0.07f, 0.85f),
+            new Vector2(0.80f, 0.835f), new Vector2(0.985f, 0.89f), 12);
+        UIFactory.CreateOutline(chip, Accent, 12, 3);
 
-        bagTitle = UIFactory.CreateLabel(safe, "내 가방", 26, FontStyle.Bold,
-            new Vector2(0.71f, 0.835f), new Vector2(0.98f, 0.885f), TextAnchor.MiddleLeft, Color.white);
+        bagTitle = Inked(UIFactory.CreateLabel(chip.transform, "내 가방", 24, FontStyle.Bold,
+            Vector2.zero, Vector2.one, TextAnchor.MiddleCenter, Color.white));
 
         bagGrid = UIFactory.CreateScrollList("Bag", safe, new Vector2(0.705f, 0.20f), new Vector2(0.985f, 0.83f), 6f);
 
@@ -308,16 +348,16 @@ public class ShopScreenUI : MonoBehaviour
 
     private void BuildButtons(RectTransform safe)
     {
-        clearButton = UIFactory.CreateButton(safe, "비우기", new Vector2(0.70f, 0.035f), new Vector2(0.80f, 0.125f),
-            UIPalette.Subtle, () =>
+        clearButton = UIFactory.CreateButton(safe, "비우기", new Vector2(0.70f, 0.035f), new Vector2(0.80f, 0.115f),
+            PillDark, () =>
             {
                 cart.Clear();
                 counterPage = 0;
                 Refresh();
-            }, 26);
+            }, 26, 40);
 
-        buyButton = UIFactory.CreateButton(safe, "구매", new Vector2(0.81f, 0.035f), new Vector2(0.99f, 0.125f),
-            BuyColor, BuyCart, 30);
+        buyButton = UIFactory.CreateButton(safe, "구매", new Vector2(0.81f, 0.035f), new Vector2(0.99f, 0.115f),
+            BuyColor, BuyCart, 30, 40);
         buyLabel = buyButton.GetComponentInChildren<Text>();
 
         // 꺼진 단추가 눈에 띄게 — 기본 회색 틴트는 너무 옅다.
@@ -410,14 +450,16 @@ public class ShopScreenUI : MonoBehaviour
             int index = i;
             string name = i == 0 ? (split ? "전체" : "구매") : ShopTabs.Name(kinds[i - 1]);
 
-            UIFactory.CreateButton(tabRow, name,
+            // 참고 그림의 맨 위 「구매」 알약 — 고른 탭은 밝은 베이지 · 짙은 글씨.
+            Button tab = UIFactory.CreateButton(tabRow, name,
                 new Vector2(i * width + 0.005f, 0f), new Vector2((i + 1) * width - 0.005f, 1f),
-                i == shopTab ? UIPalette.Action : UIPalette.Subtle,
+                i == shopTab ? TabOn : TabOff,
                 () =>
                 {
                     shopTab = index;
                     Refresh();
-                }, 20);
+                }, 20, 30);
+            tab.GetComponentInChildren<Text>().color = i == shopTab ? TabInkOn : UIPalette.TextDim;
         }
     }
 
@@ -457,6 +499,7 @@ public class ShopScreenUI : MonoBehaviour
         row.rectTransform.pivot = new Vector2(0.5f, 1f);
         row.rectTransform.offsetMin = new Vector2(4f, -(index * (RowHeight + RowGap) + RowHeight));
         row.rectTransform.offsetMax = new Vector2(-4f, -(index * (RowHeight + RowGap)));
+        UIFactory.CreateOutline(row, RowEdge, UIFactory.Radius, 1);
 
         var button = row.gameObject.AddComponent<Button>();
         button.targetGraphic = row;
@@ -496,7 +539,7 @@ public class ShopScreenUI : MonoBehaviour
 
         Text stock = UIFactory.CreateLabel(row.transform, third, 18, FontStyle.Normal,
             new Vector2(0f, 0.04f), new Vector2(1f, 0.34f), TextAnchor.MiddleLeft,
-            soldOut ? UIPalette.Warning : UIPalette.TextAccent);
+            soldOut ? UIPalette.Warning : Limit);
         stock.rectTransform.offsetMin = new Vector2(left, 0f);
 
         if (soldOut)

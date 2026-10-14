@@ -26,7 +26,7 @@ namespace Dokkaebi.Tests
         {
             Assert.AreEqual(MapView.MinZoom, MapView.ClampZoom(0.2f));
             Assert.AreEqual(MapView.MaxZoom, MapView.ClampZoom(9f));
-            Assert.AreEqual(2f, MapView.OpenZoom);
+            Assert.AreEqual(1f, MapView.OpenZoom, "열면 장 하나가 다 보인다 (결정 2-122)");
         }
 
         [Test]

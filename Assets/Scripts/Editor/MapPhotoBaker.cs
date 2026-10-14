@@ -7,8 +7,9 @@ using UnityEngine.SceneManagement;
 
 /// <summary>
 /// 【지도 사진 굽기】 (결정 2-121) — 장 맵 씬을 바로 위에서 내려다본 그림으로 굽는다. 전체 지도가 이 그림을 쓴다.
-/// 참고 그림(사용자 2026-10-13)처럼 「실제 장면을 위에서 찍은 지도」다. 지금은 그레이박스라 덩어리가 보이고,
-/// 아트가 들어오면 【다시 굽기만 하면】 그 장면이 그대로 지도가 된다.
+/// 참고 그림(사용자 2026-10-13)처럼 「실제 장면을 위에서 찍은 지도」다.
+/// 【지금은 모형을 찍는다】 (결정 2-122) — 씬이 그레이박스라 그대로 찍으면 색 판뿐이라, 같은 표로 풀밭 · 흙길 · 나무 덩이 · 지붕 ·
+/// 숲을 세운 모형(MapDiorama)을 찍는다. 아트가 들어오면 UseSceneArt를 켜고 씬을 찍는다.
 ///
 ///   · 화면 1m에 PixelsPerMeter 화소 · 북쪽이 위 · 맵 가운데가 월드 원점 (MapRaster와 같은 자리)
 ///   · 금줄(Gate_)은 끄고 찍는다 — 닫힌 금줄은 지도가 덮개로 따로 그린다(열리면 사라져야 하므로)
@@ -18,6 +19,9 @@ using UnityEngine.SceneManagement;
 public static class MapPhotoBaker
 {
     public const int PixelsPerMeter = 8;
+
+    /// <summary>씬 자체를 찍는가 — 아트가 들어오면 켠다. 꺼져 있으면 표로 세운 모형을 찍는다.</summary>
+    public static bool UseSceneArt = false;
     private const int MaxSize = 2048;
     private const string Folder = "Assets/Resources/" + MapRuntime.PhotoFolder;
 
@@ -123,6 +127,16 @@ public static class MapPhotoBaker
         int pixel = LayerMask.NameToLayer("PixelChar");
         if (ui >= 0) mask &= ~(1 << ui);
         if (pixel >= 0) mask &= ~(1 << pixel);
+        mask &= ~(1 << MapDiorama.Layer);
+
+        MapDiorama diorama = null;
+        if (!UseSceneArt)
+        {
+            diorama = new MapDiorama(map);
+            mask = 1 << MapDiorama.Layer;
+            cam.backgroundColor = new Color(0.16f, 0.24f, 0.14f);
+        }
+
         cam.cullingMask = mask;
 
         var rt = new RenderTexture(w, h, 24, RenderTextureFormat.ARGB32) { antiAliasing = 4 };
@@ -141,6 +155,7 @@ public static class MapPhotoBaker
         Object.DestroyImmediate(rt);
         Object.DestroyImmediate(go);
         Object.DestroyImmediate(sunObject);
+        diorama?.Dispose();
 
         if (shadowProp != null && shadowBefore != null)
             shadowProp.SetValue(pipeline, shadowBefore);

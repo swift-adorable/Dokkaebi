@@ -2,7 +2,7 @@ using UnityEngine;
 
 /// <summary>
 /// 전체 지도의 확대 · 이동 셈 (2026-10-08 사용자 결정 「확대 · 이동 넣기」).
-///   · 배율 1 = 장 하나가 화면에 다 들어온다 · 4까지 · 열면 2배로 내 자리가 가운데
+///   · 배율 1 = 장 하나가 화면에 다 들어온다 · 4까지 · 【열면 장 하나가 다 보인다】(결정 2-122 — 참고 그림. 옛: 2배로 내 자리)
 ///   · 가운데(그림의 0 ~ 1 좌표)는 그림이 화면 밖으로 빠지지 않게 잡는다 — 화면보다 작으면 한가운데
 /// MonoBehaviour 의존 없음 — EditMode 테스트 대상.
 /// </summary>
@@ -10,7 +10,7 @@ public static class MapView
 {
     public const float MinZoom = 1f;
     public const float MaxZoom = 4f;
-    public const float OpenZoom = 2f;
+    public const float OpenZoom = 1f;
 
     /// <summary>+ · − 단추 한 번.</summary>
     public const float ZoomStep = 0.5f;
