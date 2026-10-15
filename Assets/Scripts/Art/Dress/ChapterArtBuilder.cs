@@ -392,14 +392,19 @@ public sealed class ChapterArtBuilder
             list.Add(new CombineInstance { mesh = mesh, transform = m });
         }
 
+        // 【플레이 중에는 저장 안 함 표시를 달지 않는다】 (결정 2-128) — 에디터에서는 씬 파일에 들어가지 않게
+        // DontSave를 달지만, 플레이 중에는 씬과 함께 사라지고 메쉬는 씬을 바꿀 때 안 쓰는 애셋 정리가 거둔다.
+        HideFlags meshFlags = Application.isPlaying ? HideFlags.None : HideFlags.DontSave;
+        HideFlags objectFlags = Application.isPlaying ? HideFlags.NotEditable : HideFlags.DontSave | HideFlags.NotEditable;
+
         foreach (var g in groups)
         {
-            var mesh = new Mesh { name = $"~{g.Key.Item1}_{g.Key.Item2}_{g.Key.Item3}", indexFormat = UnityEngine.Rendering.IndexFormat.UInt32, hideFlags = HideFlags.DontSave };
+            var mesh = new Mesh { name = $"~{g.Key.Item1}_{g.Key.Item2}_{g.Key.Item3}", indexFormat = UnityEngine.Rendering.IndexFormat.UInt32, hideFlags = meshFlags };
             mesh.CombineMeshes(g.Value.ToArray(), true, true);
             mesh.RecalculateBounds();
             mesh.UploadMeshData(true);
 
-            var go = new GameObject(mesh.name) { hideFlags = HideFlags.DontSave | HideFlags.NotEditable };
+            var go = new GameObject(mesh.name) { hideFlags = objectFlags };
             go.transform.SetParent(parent, false);
             go.AddComponent<MeshFilter>().sharedMesh = mesh;
             var r = go.AddComponent<MeshRenderer>();

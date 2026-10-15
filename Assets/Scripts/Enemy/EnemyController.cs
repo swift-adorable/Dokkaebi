@@ -65,8 +65,15 @@ public class EnemyController : MonoBehaviour, IPoolable
             GameLogger.Error("[EnemyController] corpsePrefab이 할당되지 않았습니다.", this);
     }
 
+    /// <summary>
+    /// 멀어져도 풀로 되돌리지 않는다 — 이야기 보스 · 0-2 큰 요괴 · 지키기 잡귀 (결정 2-128).
+    /// 보스 자리가 플레이어에게서 40m 넘게 떨어진 구역(5-1 등)에서 나오자마자 사라져 구역을 끝낼 수 없었다.
+    /// </summary>
+    public bool KeepWhenFar { get; set; }
+
     public void OnSpawned()
     {
+        KeepWhenFar = false;
         isReturning = false;
 
         if (attack != null)

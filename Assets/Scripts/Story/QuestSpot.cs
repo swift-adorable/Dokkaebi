@@ -161,6 +161,9 @@ public class QuestSpot : MonoBehaviour
             if (body == null)
                 continue;
 
+            if (body.TryGetComponent(out EnemyController keep))
+                keep.KeepWhenFar = true;   // 지키기 잡귀 — 떼어 내야 끝나므로 사라지면 안 된다 (결정 2-128)
+
             if (body.TryGetComponent(out EnemyIdentity identity))
                 identity.Apply(RaidManager.Current.Apply(EnemyProfile.Build(
                     EnemyArchetype.Scav, EnemyRarity.Normal, System.Array.Empty<EnemyAffix>())));

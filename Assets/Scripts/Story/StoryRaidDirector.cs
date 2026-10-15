@@ -125,6 +125,9 @@ public class StoryRaidDirector : MonoBehaviour
             if (body == null)
                 continue;
 
+            if (body.TryGetComponent(out EnemyController keep))
+                keep.KeepWhenFar = true;   // 보스 자리가 멀어도 사라지지 않게 (결정 2-128)
+
             var identity = body.GetComponent<EnemyIdentity>();
 
             if (identity != null)
@@ -256,6 +259,9 @@ public class StoryRaidDirector : MonoBehaviour
 
         if (body == null)
             return;
+
+        if (body.TryGetComponent(out EnemyController keep))
+            keep.KeepWhenFar = true;   // 0-2 큰 요괴도 멀어져도 남는다 (결정 2-128)
 
         if (body.TryGetComponent(out EnemyIdentity identity))
             identity.Apply(RaidManager.Current.Apply(EnemyProfile.Build(

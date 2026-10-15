@@ -261,9 +261,21 @@ public class EnemyBrain : MonoBehaviour, IEnemySteering
         return pool.TryAcquire(tokenId, Time.time);
     }
 
+    /// <summary>
+    /// 차례를 놓는다. 【있는 매니저에만 놓고 새로 만들지 않는다.】
+    /// OnDisable에서도 불리는데, 철수로 씬이 닫힐 때는 EnemyManager가 먼저 사라졌을 수 있다.
+    /// 그때 EnsureInstance로 새로 만들면 닫히는 씬에 「EnemyManager (Runtime)」이 남아
+    /// 「Some objects were not cleaned up when closing the scene」이 났다 (결정 2-128).
+    /// 매니저가 없으면 놓을 차례도 없다.
+    /// </summary>
     private void ReleaseToken()
     {
-        TokenPool()?.Release(tokenId);
+        EnemyManager manager = enemyManager != null
+            ? enemyManager
+            : EnemyManager.HasInstance ? EnemyManager.Instance : null;
+
+        if (manager != null)
+            manager.AttackTokens.Release(tokenId);
     }
 
     private AttackTokenPool TokenPool()

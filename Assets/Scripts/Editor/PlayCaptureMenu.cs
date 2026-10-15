@@ -28,6 +28,17 @@ public static class PlayCaptureMenu
     /// 덮는 창(난이도 고르기 등 정렬 1500 이상)을 잠시 끄고 켠다 — 고르지 않은 채로 뒤 화면을 보려고.
     /// 아무것도 고르지 않으니 세이브는 바뀌지 않는다.
     /// </summary>
+    /// <summary>결정 2-128 — 새 게임부터 엔딩까지 이야기 흐름을 자동으로 밟는다(따로 저장 · Logs/playthrough).</summary>
+    [MenuItem("Dokkaebi/Debug/한 판 끝까지 자동 진행 (따로 저장)")]
+    public static void RunWholeGame()
+    {
+        if (EditorApplication.isPlaying)
+            StoryRunner.Begin();
+    }
+
+    [MenuItem("Dokkaebi/Debug/한 판 자동 진행 멈추기")]
+    public static void StopWholeGame() => StoryRunner.Stop();
+
     /// <summary>결정 2-125 — 10초 동안 프레임 · GC · 배치를 재서 콘솔에 한 덩어리로 남긴다 (PerfProbe).</summary>
     [MenuItem("Dokkaebi/Debug/성능 재기 (10초)")]
     public static void MeasurePerf()

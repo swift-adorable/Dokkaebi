@@ -148,6 +148,9 @@ public class EnemyManager : Singleton<EnemyManager>
                 continue;
             }
 
+            if (enemy.KeepWhenFar)
+                continue;   // 이야기 보스 등 — 멀어져도 남는다 (결정 2-128)
+
             float sqrDistance = (enemy.transform.position - player.position).sqrMagnitude;
 
             if (sqrDistance > sqrLimit)

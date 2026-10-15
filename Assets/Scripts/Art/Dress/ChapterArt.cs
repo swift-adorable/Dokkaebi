@@ -19,7 +19,18 @@ public class ChapterArt : MonoBehaviour
     }
 
     private void OnEnable() => Rebuild();
-    private void OnDisable() => Clear();
+
+    /// <summary>
+    /// 【플레이 중에는 꺼질 때 치우지 않는다】 (결정 2-128) — 철수로 구역 씬이 닫힐 때 여기서 Destroy를 걸면,
+    /// 그 지연 삭제가 소굴 씬을 읽는 동안 처리되면서 에디터가 멈췄다(MeshRenderer 정리 ↔ 씬 읽기 스레드가
+    /// 서로 잠금을 기다림 — 프로세스 샘플로 확인). 플레이 중의 조각은 씬과 함께 사라지고, 메쉬는 씬을 바꿀 때
+    /// 안 쓰는 애셋 정리가 거둔다. 에디터(플레이 아님)에서는 예전처럼 바로 치운다.
+    /// </summary>
+    private void OnDisable()
+    {
+        if (!Application.isPlaying)
+            Clear();
+    }
 
     public void Rebuild()
     {
