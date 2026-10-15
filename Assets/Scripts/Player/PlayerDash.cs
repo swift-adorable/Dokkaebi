@@ -103,7 +103,7 @@ public class PlayerDash : MonoBehaviour
             // 충돌로 속도가 깎여도 남은 시간 동안 계속 밀어붙이기 위함이다.
             rb.linearVelocity = new Vector3(
                 direction.x * speed,
-                rb.linearVelocity.y,
+                0f,
                 direction.z * speed);
 
             yield return new WaitForFixedUpdate();

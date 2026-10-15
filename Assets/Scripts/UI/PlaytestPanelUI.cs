@@ -19,14 +19,6 @@ public class PlaytestPanelUI : MonoBehaviour
 
     private GameObject panel;
     private GameObject toggle;
-    private RectTransform toggleRect;
-
-    /// <summary>씬이 바뀌면 미니맵 유무가 달라진다 — 디버그 버튼 자리를 늘 맞춘다 (결정 2-130).</summary>
-    private void LateUpdate()
-    {
-        if (toggleRect != null)
-            toggleRect.anchoredPosition = new Vector2(HudLayout.DebugButtonX, -ButtonMargin);
-    }
     private Text output;
 
     private static readonly (string label, System.Func<string> action)[] Actions =
@@ -206,13 +198,12 @@ public class PlaytestPanelUI : MonoBehaviour
         // 900이기 때문이며, 의도한 것이다 — 지급이 끝나면 가방이 자동으로
         // 열리므로 흐름에 지장이 없다.
         var rect = image.rectTransform;
-        // 【왼쪽 위, 미니맵 오른쪽】 (결정 2-130 — 사용자 「디버그 버튼은 미니맵 우측」). 씬마다 미니맵 유무가 달라 LateUpdate에서 맞춘다.
-        rect.anchorMin = new Vector2(0f, 1f);
-        rect.anchorMax = new Vector2(0f, 1f);
-        rect.pivot = new Vector2(0f, 1f);
+        // 【왼쪽 아래】 (결정 2-131 — 사용자 「디버그 버튼 다시 화면 좌하단으로」).
+        rect.anchorMin = new Vector2(0f, 0f);
+        rect.anchorMax = new Vector2(0f, 0f);
+        rect.pivot = new Vector2(0f, 0f);
         rect.sizeDelta = new Vector2(ButtonWidth, ButtonHeight);
-        rect.anchoredPosition = new Vector2(HudLayout.DebugButtonX, -ButtonMargin);
-        toggleRect = rect;
+        rect.anchoredPosition = new Vector2(ButtonMargin, ButtonMargin);
 
         var button = image.gameObject.AddComponent<Button>();
         button.targetGraphic = image;

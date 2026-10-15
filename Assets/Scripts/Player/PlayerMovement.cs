@@ -50,6 +50,10 @@ public class PlayerMovement : MonoBehaviour
     {
         rb = GetComponent<Rigidbody>();
         health = GetComponent<Health>();
+
+        // 【높이를 묶는다】 (결정 2-131) — 중력을 쓰지 않는데 위아래 속도는 그대로 두어서, 적 · 덩어리 모서리에
+        // 한 번 밀려 올라가면 내려오지 않고 계속 떠올랐다(「캐릭터가 하늘을 나는 듯」). 땅은 평평하므로 높이를 묶는다.
+        rb.constraints |= RigidbodyConstraints.FreezePositionY;
     }
 
     /// <summary>입력을 갱신한다. 실제 물리 적용은 FixedUpdate에서 일어난다.</summary>
@@ -67,16 +71,16 @@ public class PlayerMovement : MonoBehaviour
 
         float speed = EffectiveSpeed;
 
-        // y축 속도는 보존한다. 중력이나 외력의 수직 성분을 덮어쓰지 않기 위함이다.
+        // 높이는 묶여 있다(Awake) — 위아래 속도는 늘 0.
         rb.linearVelocity = new Vector3(
             direction.x * speed,
-            rb.linearVelocity.y,
+            0f,
             direction.z * speed);
     }
 
     /// <summary>수평 속도를 즉시 0으로 만든다.</summary>
     public void StopHorizontal()
     {
-        rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
+        rb.linearVelocity = Vector3.zero;
     }
 }

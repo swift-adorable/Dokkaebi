@@ -188,11 +188,36 @@ public partial class InventoryScreenUI
 
     // ── 틀 ────────────────────────────────────────────────────────────
 
+    private RectTransform detailHost;
+
+    /// <summary>
+    /// 상세를 붙일 자리. 【가방 화면이 닫혀 있으면 가방 판에 붙이지 않는다】 (결정 2-131) —
+    /// 창고 · 가게 · 시설에서 「상세보기」를 누르면 가방 판(꺼져 있음) 아래에 만들어져 보이지 않았다.
+    /// 그때는 가방 판과 같은 크기의 빈 자리(늘 켜짐)에 붙인다.
+    /// </summary>
+    private Transform DetailParent()
+    {
+        if (panel.activeInHierarchy)
+            return panel.transform;
+
+        if (detailHost == null)
+        {
+            var source = (RectTransform)panel.transform;
+            detailHost = UIFactory.CreateRegion("DetailHost", source.parent, source.anchorMin, source.anchorMax);
+            detailHost.pivot = source.pivot;
+            detailHost.offsetMin = source.offsetMin;
+            detailHost.offsetMax = source.offsetMax;
+        }
+        detailHost.gameObject.SetActive(true);
+        detailHost.SetAsLastSibling();
+        return detailHost;
+    }
+
     private void BuildDetailPopup()
     {
         // 덮개. 상세 밖을 누르면 닫힌다 — 모바일에서 가장 기대되는 동작이다.
         // 패널은 바깥 여백만큼 안으로 들어와 있으므로 넉넉히 넘겨 덮는다.
-        Image shade = UIFactory.CreatePanel("DetailShade", panel.transform,
+        Image shade = UIFactory.CreatePanel("DetailShade", DetailParent(),
             UIPalette.Dim, new Vector2(-0.2f, -0.2f), new Vector2(1.2f, 1.2f));
 
         shade.raycastTarget = true;
