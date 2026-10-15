@@ -55,7 +55,7 @@ public sealed class StationFrame
     private static readonly Color Cloth2 = new(0.50f, 0.36f, 0.24f, 1f);
 
     public const int PillRadius = 30;
-    public const float RowHeight = 86f;   // 참고 그림의 줄 높이 (1080 기준) — 2-123의 104는 너무 컸다
+    public const float RowHeight = 86f * UIFactory.FontScale;   // 참고 그림의 줄 높이 86(1080 기준)에 글자 배율을 곱한다 (결정 2-134)
     public const float RowGap = 8f;
     private const int BagColumns = 6;     // 칸 한 변 ≈ 90 (가방 화면 칸과 비슷하게)
 

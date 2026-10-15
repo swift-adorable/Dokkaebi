@@ -612,7 +612,7 @@ public partial class InventoryScreenUI : MonoBehaviour
 
         // 탭 옆 좁은 자리 — 긴 안내(구슬 고르는 중)는 두 줄 · 글자를 줄여 넣는다.
         topInfoLabel.resizeTextForBestFit = true;
-        topInfoLabel.resizeTextMinSize = 14;
+        topInfoLabel.resizeTextMinSize = 10;
         topInfoLabel.resizeTextMaxSize = UIFactory.Scaled(22);
         topInfoLabel.horizontalOverflow = HorizontalWrapMode.Wrap;
 

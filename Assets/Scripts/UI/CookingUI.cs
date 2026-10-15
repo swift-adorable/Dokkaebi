@@ -11,7 +11,7 @@ public class CookingUI : MonoBehaviour
 {
     private static CookingUI instance;
 
-    private const float RowHeight = 96f;
+    private const float RowHeight = 96f * UIFactory.FontScale;   // 글자 배율만큼 (결정 2-134)
     private const float RowGap = 8f;
 
     private static readonly string[] TabNames = { "작음", "보통", "큼" };

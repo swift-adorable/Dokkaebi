@@ -12,8 +12,8 @@ public class TutorialHudUI : MonoBehaviour
 {
     private static TutorialHudUI instance;
 
-    private const float Width = 440f;
-    private const float Height = 112f;
+    private const float Width = 520f;
+    private const float Height = 140f;
     private const float Margin = 10f;
     private const float ButtonRow = 62f;   // 오른쪽 위 버튼 높이 (InventoryScreenUI.HudButtonHeight)
     private const float FlashSeconds = 0.8f;
@@ -25,30 +25,17 @@ public class TutorialHudUI : MonoBehaviour
     private bool docked;
 
     /// <summary>
-    /// 창이 떠 있으면(가방 · 창고 · 가게 …) 오른쪽 위에 두면 창의 머리 · 탭을 덮는다(결정 2-133 — 사용자 「다른 창 위로 겹쳐 보임」).
-    /// 그동안은 아래 가운데로 내려 둔다. 가방 안에서 하는 단계(무기 걸기 · 화살 채우기 · 창고)가 있어 숨기지는 않는다.
+    /// 창이 떠 있으면(가방 · 창고 · 가게 · 대화 …) 퀘스트 띠처럼 숨긴다 (결정 2-134 — 사용자 「아래로 내리지 말고 숨겨」).
     /// </summary>
-    private void Dock(bool bottom)
+    private void Dock(bool hide)
     {
-        docked = bottom;
-        if (bottom)
-        {
-            cardRect.anchorMin = cardRect.anchorMax = new Vector2(0.5f, 0f);
-            cardRect.pivot = new Vector2(0.5f, 0f);
-            cardRect.sizeDelta = new Vector2(DockedWidth, DockedHeight);
-            cardRect.anchoredPosition = new Vector2(0f, Margin);
-        }
-        else
-        {
-            cardRect.anchorMin = cardRect.anchorMax = new Vector2(1f, 1f);
-            cardRect.pivot = new Vector2(1f, 1f);
-            cardRect.sizeDelta = new Vector2(Width, Height);
-            cardRect.anchoredPosition = new Vector2(-Margin, HudLayout.TopRightButtonsY - ButtonRow - Margin);
-        }
+        docked = hide;
+        card.gameObject.SetActive(!hide);
+        cardRect.anchorMin = cardRect.anchorMax = new Vector2(1f, 1f);
+        cardRect.pivot = new Vector2(1f, 1f);
+        cardRect.sizeDelta = new Vector2(Width, Height);
+        cardRect.anchoredPosition = new Vector2(-Margin, HudLayout.TopRightButtonsY - ButtonRow - Margin);
     }
-
-    private const float DockedWidth = 620f;
-    private const float DockedHeight = 96f;
     private Text header;
     private Text title;
     private Text hint;
@@ -102,6 +89,7 @@ public class TutorialHudUI : MonoBehaviour
             t.raycastTarget = false;
 
         // 폭이 좁아졌으므로 긴 문장은 글씨를 줄여 칸 안에 넣는다.
+        StationFrame.Shrink(header, 13);
         StationFrame.Shrink(title, 15);
         StationFrame.Shrink(hint, 12);
     }

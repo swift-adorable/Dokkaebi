@@ -17,7 +17,7 @@ public class QuestHudUI : MonoBehaviour
     private static QuestHudUI instance;
 
     private const float Width = 520f;
-    private const float Height = 66f;
+    private const float Height = 66f * 1.3f;   // 글자를 키운 만큼 (결정 2-134)
     private const float Margin = 16f;
     private const float PollInterval = 0.5f;
     private const float ToastSeconds = 3.5f;
@@ -94,6 +94,8 @@ public class QuestHudUI : MonoBehaviour
         objectiveLabel = UIFactory.CreateLabel(panel.transform, string.Empty, 22, FontStyle.Bold,
             new Vector2(0f, 0f), new Vector2(1f, 0.55f), TextAnchor.UpperCenter);
         titleLabel.raycastTarget = false;
+        StationFrame.Shrink(titleLabel, 14);
+        StationFrame.Shrink(objectiveLabel, 16);
         objectiveLabel.raycastTarget = false;
 
         // 알림 — 판 바로 아래.

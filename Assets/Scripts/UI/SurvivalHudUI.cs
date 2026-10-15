@@ -61,9 +61,9 @@ public class SurvivalHudUI : MonoBehaviour
     // 게이지 판(왼쪽 위 · 미니맵 오른쪽)의 **바로 아래로** 쌓는다 (결정 2-131).
     // 위로 쌓으면 화면 밖으로 나간다. 옆에 두면 게이지가 밀린다.
 
-    private const float StatusRowHeight = 30f;
+    private const float StatusRowHeight = 30f * UIFactory.FontScale;   // 글자 배율만큼 (결정 2-134)
     private const float StatusRowGap = 4f;
-    private const float StatusWidth = 176f;
+    private const float StatusWidth = 176f * UIFactory.FontScale;
 
     /// <summary>
     /// 한 번에 보여 주는 줄 수.

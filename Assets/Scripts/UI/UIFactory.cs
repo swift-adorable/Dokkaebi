@@ -25,7 +25,7 @@ public static class UIFactory
     /// 【글자 배율】 (결정 2-133 — 사용자 「글자 폰트 너무 작은 것들이 많아, 좀 크게」) — 휴대폰에서 읽히게
     /// 모든 글자를 이만큼 키운다. 글자를 만드는 곳(CreateLabel 등)과 글자 크기 상한을 주는 곳이 같이 쓴다.
     /// </summary>
-    public const float FontScale = 1.2f;
+    public const float FontScale = 1.4f;   // 2-133에서 1.2 → 2-134에서 1.4 (사용자 「아직 작아 보여 · 빠듯하면 스크롤로」)
 
     public static int Scaled(int size) => Mathf.RoundToInt(size * FontScale);
 

@@ -12,7 +12,7 @@ public class ApothecaryUI : MonoBehaviour
 {
     private static ApothecaryUI instance;
 
-    private const float RowHeight = 96f;
+    private const float RowHeight = 96f * UIFactory.FontScale;   // 글자 배율만큼 줄도 키운다 (결정 2-134)
     private const float RowGap = 8f;
 
     private const int BrewTab = 0;
