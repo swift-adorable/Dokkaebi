@@ -115,7 +115,7 @@ public class MinimapUI : MonoBehaviour
         weatherLine.rectTransform.offsetMax = new Vector2(-4f, 0f);
         weatherLine.resizeTextForBestFit = true;
         weatherLine.resizeTextMinSize = 10;
-        weatherLine.resizeTextMaxSize = 16;
+        weatherLine.resizeTextMaxSize = UIFactory.Scaled(16);
     }
 
     /// <summary>미니맵 띠에 적을 한 줄 — 「보름 · 한파 · 방한 0/2 · 추위 23」.</summary>

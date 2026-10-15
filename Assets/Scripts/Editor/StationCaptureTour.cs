@@ -26,6 +26,18 @@ public static class StationCaptureTour
         ("hud", () => { }),   // 아무것도 안 연 화면 — 미니맵 · 체력 등 HUD
     };
 
+    /// <summary>가방 화면 네 탭 (결정 2-133 — 장비 판 비율 · 글씨 크기 점검).</summary>
+    private static readonly List<(string name, Action open)> BagSteps = new()
+    {
+        ("equip", () => InventoryScreenUI.EnsureInstance().Open(0)),
+        ("skill", () => InventoryScreenUI.EnsureInstance().Open(1)),
+        ("passive", () => InventoryScreenUI.EnsureInstance().Open(2)),
+        ("codex", () => InventoryScreenUI.EnsureInstance().Open(3)),
+    };
+
+    [MenuItem("Dokkaebi/Debug/가방 화면 네 탭 찍기")]
+    public static void RunBag() => Start(BagSteps);
+
     /// <summary>들판 판 — 전체 지도와 HUD(미니맵)만.</summary>
     private static readonly List<(string name, Action open)> FieldSteps = new()
     {

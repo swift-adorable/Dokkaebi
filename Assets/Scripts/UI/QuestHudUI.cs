@@ -115,6 +115,10 @@ public class QuestHudUI : MonoBehaviour
 
     private void Update()
     {
+        // 창이 뜨면 바로 숨긴다 — 다음 갱신(PollInterval)까지 기다리면 잠깐 창 위에 남는다 (결정 2-133).
+        if (GamePause.IsHeld && root != null && root.gameObject.activeSelf)
+            root.gameObject.SetActive(false);
+
         // J — 퀘스트 창 (결정 2-106). 다른 창이 떠 있으면 열지 않는다.
         if (Input.GetKeyDown(KeyCode.J) && !GamePause.IsHeld && !QuestScreenUI.IsOpen)
             QuestScreenUI.Open();
@@ -152,7 +156,8 @@ public class QuestHudUI : MonoBehaviour
 
         QuestDefinition tracked = tracker.Tracked();
 
-        bool show = !hiddenByScreen && (tracked != null || toastTimer > 0f || expanded);
+        // 창(가방 · 가게 · 출발 · 대화 …)이 떠 있으면 숨긴다 — 창 위에 겹쳐 보였다 (결정 2-133).
+        bool show = !hiddenByScreen && !GamePause.IsHeld && (tracked != null || toastTimer > 0f || expanded);
         root.gameObject.SetActive(show);
 
         if (!show)

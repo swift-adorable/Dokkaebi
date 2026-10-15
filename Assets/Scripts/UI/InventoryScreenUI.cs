@@ -613,7 +613,7 @@ public partial class InventoryScreenUI : MonoBehaviour
         // 탭 옆 좁은 자리 — 긴 안내(구슬 고르는 중)는 두 줄 · 글자를 줄여 넣는다.
         topInfoLabel.resizeTextForBestFit = true;
         topInfoLabel.resizeTextMinSize = 14;
-        topInfoLabel.resizeTextMaxSize = 22;
+        topInfoLabel.resizeTextMaxSize = UIFactory.Scaled(22);
         topInfoLabel.horizontalOverflow = HorizontalWrapMode.Wrap;
 
         equipmentGrid = UIFactory.CreateRegion("TopBand", content,
@@ -1201,9 +1201,6 @@ public partial class InventoryScreenUI : MonoBehaviour
                 EquipmentSlot.ImprintA, EquipmentSlot.ImprintB,
             };
 
-        if (!exchangeLayout)
-            DrawWeaponSetTabs(loadout);
-
         // 【가로와 세로 여백을 같게 만든다.】
         // 정규화 여백 0.008 하나를 두 축에 쓰면, 가로로 긴 칸에서는
         // 가로 6px · 세로 2px이 된다. 세로만 답답해 보이던 이유다.
@@ -1212,6 +1209,28 @@ public partial class InventoryScreenUI : MonoBehaviour
 
         float gridWidth = Mathf.Max(1f, equipmentGrid.rect.width);
         float gridHeight = Mathf.Max(1f, equipmentGrid.rect.height);
+
+        // 【인형 판은 비율을 지킨다】 (결정 2-133 — 사용자 「장비 UI 패널의 비율이 너무 이상해」) —
+        // 칸 자리를 판 전체의 비율로 잡았더니, 판이 세로로 길면(휴대폰 가로 화면의 왼쪽 판) 작은 칸이
+        // 가는 기둥이 되어 「얼굴 · 윤도 · 가방 · 새김패」 글자가 세로로 섰다. 정해진 비율(3 × 4.6)의 판을
+        // 가운데에 두고 그 안에 칸을 놓는다.
+        Transform host = equipmentGrid;
+        if (!exchangeLayout)
+        {
+            float w = gridWidth, h = gridHeight;
+            if (w / h > DollAspect)
+                w = h * DollAspect;
+            else
+                h = w / DollAspect;
+
+            RectTransform doll = UIFactory.CreateRegion("Doll", equipmentGrid, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
+            doll.sizeDelta = new Vector2(w, h);
+            host = doll;
+            gridWidth = w;
+            gridHeight = h;
+
+            DrawWeaponSetTabs(loadout, doll);
+        }
 
         float padX = CellGapPixels / gridWidth;
         float padY = CellGapPixels / gridHeight;
@@ -1254,7 +1273,7 @@ public partial class InventoryScreenUI : MonoBehaviour
                         ? UIPalette.Inset
                         : UIPalette.Glassify(kind, 0.34f);
 
-            Image cell = UIFactory.CreatePanel($"Equip_{slots[i]}", equipmentGrid,
+            Image cell = UIFactory.CreatePanel($"Equip_{slots[i]}", host,
                 body, min, max);
 
             // 낄 수 있는 자리는 테두리까지 밝혀 준다. 바탕색만 바꾸면
@@ -1282,7 +1301,7 @@ public partial class InventoryScreenUI : MonoBehaviour
             // 0.07(가로) / 0.05(세로)로 두었더니 칸이 가로로 길어
             // 왼쪽은 14px, 위는 3px이 됐다. 글자가 천장에 붙어 보였다.
             // 작은 칸(얼굴 · 윤도 · 가방 · 새김패)은 글자를 줄인다 — 「새김패 2」가 칸을 넘었다.
-            bool smallCell = max.x - min.x < 0.15f;
+            bool smallCell = exchangeLayout ? max.x - min.x < 0.15f : IsSmallSlot(slots[i]);
 
             if (EquipmentLoadout.IsAmmoSlot(slots[i]))
             {
@@ -1326,29 +1345,44 @@ public partial class InventoryScreenUI : MonoBehaviour
         }
     }
 
+    /// <summary>인형 판의 비율(가로 ÷ 세로) — 세 기둥 × 4.6줄 (결정 2-133).</summary>
+    private const float DollAspect = 3f / DollRows;
+    private const float DollRows = 4.6f;
+
+    private static bool IsSmallSlot(EquipmentSlot slot)
+        => slot is EquipmentSlot.Face or EquipmentSlot.Ears or EquipmentSlot.Backpack
+            or EquipmentSlot.ImprintA or EquipmentSlot.ImprintB;
+
     /// <summary>
-    /// 착용 칸 자리 (장비 판 0 ~ 1) — PoE2 소지품창을 따랐다 (결정 2-82).
-    ///   왼쪽 큰 칸 = 무기 · 오른쪽 큰 칸 = 그 무기의 화살통 · 탄창 (PoE2의 보조 손 · 화살통 자리), 위에 I · II 탭
-    ///   가운데 = 머리 · 갑옷 · 가방(허리띠 자리), 그 아래 작은 두 칸 = 얼굴 · 윤도
-    ///   왼쪽 아래 · 오른쪽 아래 = 새김패 1 · 2 (장갑 · 신발 자리)
+    /// 착용 칸 자리 (인형 판 0 ~ 1) — PoE2 소지품창을 따랐다 (결정 2-82 → 2-133).
+    ///   맨 위 = 무기 I · II 탭(왼쪽 · 오른쪽 기둥)
+    ///   왼쪽 기둥 = 무기(큰 칸) · 오른쪽 기둥 = 그 무기의 화살통 · 탄창 · 가운데 = 머리 위, 갑옷 아래
+    ///   그 아래 한 줄 = 얼굴 · 윤도 · 가방, 맨 아래 = 새김패 1 · 2
+    /// 줄 단위는 위에서부터(0 ~ 4.6), 기둥은 왼쪽부터(0 ~ 3).
     /// </summary>
     private static void EquipRect(EquipmentSlot slot, out Vector2 min, out Vector2 max)
     {
-        // 다섯 기둥 — 큰 칸(무기) · 작은 칸 · 가운데 · 작은 칸 · 큰 칸(화살통) (결정 2-83 · 사용자 그림).
         switch (slot)
         {
             case EquipmentSlot.Weapon:
-            case EquipmentSlot.Weapon2:  min = new(0.00f, 0.44f); max = new(0.22f, 0.88f); return;
+            case EquipmentSlot.Weapon2:  Cell(0f, 0.5f, 1f, 2.5f, out min, out max); return;
             case EquipmentSlot.Ammo:
-            case EquipmentSlot.Ammo2:    min = new(0.78f, 0.44f); max = new(1.00f, 0.88f); return;
-            case EquipmentSlot.Head:     min = new(0.38f, 0.78f); max = new(0.62f, 0.98f); return;
-            case EquipmentSlot.Face:     min = new(0.38f, 0.63f); max = new(0.62f, 0.76f); return;
-            case EquipmentSlot.Ears:     min = new(0.64f, 0.63f); max = new(0.76f, 0.76f); return;
-            case EquipmentSlot.Body:     min = new(0.38f, 0.32f); max = new(0.62f, 0.61f); return;
-            case EquipmentSlot.Backpack: min = new(0.64f, 0.47f); max = new(0.76f, 0.61f); return;
-            case EquipmentSlot.ImprintA: min = new(0.64f, 0.30f); max = new(0.76f, 0.45f); return;
-            default:                     min = new(0.24f, 0.30f); max = new(0.36f, 0.45f); return;   // ImprintB
+            case EquipmentSlot.Ammo2:    Cell(2f, 0.5f, 3f, 2.5f, out min, out max); return;
+            case EquipmentSlot.Head:     Cell(1f, 0.5f, 2f, 1.45f, out min, out max); return;
+            case EquipmentSlot.Body:     Cell(1f, 1.55f, 2f, 2.5f, out min, out max); return;
+            case EquipmentSlot.Face:     Cell(0f, 2.6f, 1f, 3.5f, out min, out max); return;
+            case EquipmentSlot.Ears:     Cell(1f, 2.6f, 2f, 3.5f, out min, out max); return;
+            case EquipmentSlot.Backpack: Cell(2f, 2.6f, 3f, 3.5f, out min, out max); return;
+            case EquipmentSlot.ImprintA: Cell(0.5f, 3.6f, 1.5f, 4.5f, out min, out max); return;
+            default:                     Cell(1.5f, 3.6f, 2.5f, 4.5f, out min, out max); return;   // ImprintB
         }
+    }
+
+    /// <summary>기둥 x0 ~ x1, 줄 top ~ bottom(위에서부터)을 판의 0 ~ 1 앵커로.</summary>
+    private static void Cell(float x0, float top, float x1, float bottom, out Vector2 min, out Vector2 max)
+    {
+        min = new Vector2(x0 / 3f, 1f - bottom / DollRows);
+        max = new Vector2(x1 / 3f, 1f - top / DollRows);
     }
 
     /// <summary>옛 배치(전리품 · 창고 · 상점 창이 떴을 때)의 착용 칸 순서 — 6 × 2 (결정 2-83).</summary>
@@ -1361,23 +1395,25 @@ public partial class InventoryScreenUI : MonoBehaviour
     /// <summary>
     /// 무기 칸 · 통 칸 위의 I · II 탭 — 누르면 그 무기를 든다(퀵슬롯 1 · 2와 같다). 든 쪽이 밝다.
     /// </summary>
-    private void DrawWeaponSetTabs(EquipmentLoadout loadout)
+    private void DrawWeaponSetTabs(EquipmentLoadout loadout, Transform doll)
     {
         string[] names = { "I", "II" };
-        float[] lefts = { 0.00f, 0.78f };
+        float[] lefts = { 0f, 2f / 3f };   // 무기 기둥 · 통 기둥 (결정 2-133)
+        float half = 1f / 6f;
+        float y0 = 1f - 0.42f / DollRows, y1 = 1f;
 
         foreach (float left in lefts)
         {
             for (int k = 0; k < 2; k++)
             {
                 int index = k;
-                float x0 = left + k * 0.11f + 0.005f;
-                float x1 = left + (k + 1) * 0.11f - 0.005f;
+                float x0 = left + k * half + 0.006f;
+                float x1 = left + (k + 1) * half - 0.006f;
                 bool on = loadout.ActiveWeapon == k;
                 bool has = loadout.WeaponAt(k) != null;
 
-                Button tabButton = UIFactory.CreateButton(equipmentGrid, names[k],
-                    new Vector2(x0, 0.90f), new Vector2(x1, 0.99f),
+                Button tabButton = UIFactory.CreateButton(doll, names[k],
+                    new Vector2(x0, y0), new Vector2(x1, y1),
                     on ? UIPalette.Action : UIPalette.Subtle,
                     () => OnWeaponSetTabClicked(index), 22);
 
@@ -1839,7 +1875,7 @@ public partial class InventoryScreenUI : MonoBehaviour
     /// </summary>
     private static void FitName(Text label, int size)
     {
-        label.fontSize = size;
+        label.fontSize = UIFactory.Scaled(size);
 
         label.gameObject.AddComponent<EllipsisLabel>().SetText(label.text);
     }

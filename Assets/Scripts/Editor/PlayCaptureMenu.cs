@@ -117,6 +117,8 @@ public static class PlayCaptureMenu
 
         ShopScreenUI.Close();
         StashScreenUI.Close();
+        if (InventoryScreenUI.Instance != null && InventoryScreenUI.Instance.IsOpen)
+            InventoryScreenUI.Instance.Close();
         BuildingScreenUI.Close();
         ApothecaryUI.Close();
         LedgerUI.Close();

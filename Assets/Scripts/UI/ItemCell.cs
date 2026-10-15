@@ -104,6 +104,7 @@ public static class ItemCell
     /// </summary>
     public static void WrapName(Text label, int size)
     {
+        size = UIFactory.Scaled(size);
         label.horizontalOverflow = HorizontalWrapMode.Wrap;
         label.verticalOverflow = VerticalWrapMode.Truncate;
         label.resizeTextForBestFit = true;

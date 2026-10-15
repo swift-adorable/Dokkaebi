@@ -21,6 +21,14 @@ public static class UIFactory
 
     private static Font font;
 
+    /// <summary>
+    /// 【글자 배율】 (결정 2-133 — 사용자 「글자 폰트 너무 작은 것들이 많아, 좀 크게」) — 휴대폰에서 읽히게
+    /// 모든 글자를 이만큼 키운다. 글자를 만드는 곳(CreateLabel 등)과 글자 크기 상한을 주는 곳이 같이 쓴다.
+    /// </summary>
+    public const float FontScale = 1.2f;
+
+    public static int Scaled(int size) => Mathf.RoundToInt(size * FontScale);
+
     /// <summary>공용 글꼴. 내장 글꼴을 쓰므로 에셋 의존이 없다.</summary>
     public static Font Font =>
         font ??= Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
@@ -292,7 +300,7 @@ public static class UIFactory
         var label = labelObject.AddComponent<Text>();
         label.font = Font;
         label.text = text;
-        label.fontSize = fontSize;
+        label.fontSize = Scaled(fontSize);
         label.fontStyle = style;
         label.alignment = alignment;
         label.color = color ?? UIPalette.Text;
@@ -459,7 +467,7 @@ public static class UIFactory
         var label = contentObject.AddComponent<Text>();
         label.font = Font;
         label.text = text;
-        label.fontSize = fontSize;
+        label.fontSize = Scaled(fontSize);
         label.fontStyle = style;
         label.alignment = TextAnchor.UpperLeft;
         label.color = color ?? UIPalette.Text;
@@ -501,8 +509,14 @@ public static class UIFactory
         if (action != null)
             button.onClick.AddListener(action);
 
-        CreateLabel(image.transform, text, fontSize, FontStyle.Bold,
+        Text label = CreateLabel(image.transform, text, fontSize, FontStyle.Bold,
             Vector2.zero, Vector2.one, TextAnchor.MiddleCenter);
+
+        // 【버튼 글자는 칸에 맞춰 줄인다】 (결정 2-133) — 글자를 키우자 좁은 탭(「패시브」)이 두 줄로 접혔다.
+        label.resizeTextMaxSize = label.fontSize;
+        label.resizeTextMinSize = Mathf.Max(12, Mathf.RoundToInt(label.fontSize * 0.55f));
+        label.resizeTextForBestFit = true;
+        label.verticalOverflow = VerticalWrapMode.Truncate;
 
         return button;
     }

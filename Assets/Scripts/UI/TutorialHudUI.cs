@@ -21,6 +21,34 @@ public class TutorialHudUI : MonoBehaviour
     private static readonly Color Normal = new(0.08f, 0.10f, 0.14f, 0.72f);
 
     private Image card;
+    private RectTransform cardRect;
+    private bool docked;
+
+    /// <summary>
+    /// 창이 떠 있으면(가방 · 창고 · 가게 …) 오른쪽 위에 두면 창의 머리 · 탭을 덮는다(결정 2-133 — 사용자 「다른 창 위로 겹쳐 보임」).
+    /// 그동안은 아래 가운데로 내려 둔다. 가방 안에서 하는 단계(무기 걸기 · 화살 채우기 · 창고)가 있어 숨기지는 않는다.
+    /// </summary>
+    private void Dock(bool bottom)
+    {
+        docked = bottom;
+        if (bottom)
+        {
+            cardRect.anchorMin = cardRect.anchorMax = new Vector2(0.5f, 0f);
+            cardRect.pivot = new Vector2(0.5f, 0f);
+            cardRect.sizeDelta = new Vector2(DockedWidth, DockedHeight);
+            cardRect.anchoredPosition = new Vector2(0f, Margin);
+        }
+        else
+        {
+            cardRect.anchorMin = cardRect.anchorMax = new Vector2(1f, 1f);
+            cardRect.pivot = new Vector2(1f, 1f);
+            cardRect.sizeDelta = new Vector2(Width, Height);
+            cardRect.anchoredPosition = new Vector2(-Margin, HudLayout.TopRightButtonsY - ButtonRow - Margin);
+        }
+    }
+
+    private const float DockedWidth = 620f;
+    private const float DockedHeight = 96f;
     private Text header;
     private Text title;
     private Text hint;
@@ -59,7 +87,8 @@ public class TutorialHudUI : MonoBehaviour
         RectTransform rect = card.rectTransform;
         rect.pivot = new Vector2(1f, 1f);
         rect.sizeDelta = new Vector2(Width, Height);
-        rect.anchoredPosition = new Vector2(-Margin, HudLayout.TopRightButtonsY - ButtonRow - Margin);
+        cardRect = rect;
+        Dock(false);
         UIFactory.CreateOutline(card, UIPalette.TextAccent, UIFactory.Radius, 2);
 
         header = UIFactory.CreateLabel(card.transform, "", 17, FontStyle.Bold,
@@ -89,6 +118,9 @@ public class TutorialHudUI : MonoBehaviour
 
     private void Update()
     {
+        if (cardRect != null && docked != GamePause.IsHeld)
+            Dock(GamePause.IsHeld);
+
         bool flashing = Time.unscaledTime < flashUntil;
         card.color = flashing ? new Color(0.16f, 0.42f, 0.22f, 0.9f) : Normal;
     }
