@@ -2,7 +2,8 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// 【임시】 튜토리얼 안내 카드 (결정 2-85) — 화면 위 가운데, 퀘스트 HUD 바로 아래.
+/// 【임시】 튜토리얼 안내 카드 (결정 2-85 → 2-132) — **오른쪽 위, 장비 · 스킬 · 패시브 · 도감 버튼 바로 아래**.
+/// 가운데에 두니 싸울 때 화면을 가렸다(사용자 「너무 거슬려」) — 퀘스트 목록을 오른쪽에 두는 게임들처럼 옮겼다.
 ///   「튜토리얼 3/12 · 구역」 / 「환목궁을 무기 칸에 걸어라」 / 작은 글씨로 하는 법
 /// 가방 화면(1000)보다 위에 그린다 — 장착 · 줍기처럼 가방 화면 안에서 하는 단계가 있다.
 /// 단계를 마치면 잠깐 초록으로 깜빡인다. 튜토리얼 창 · 손가락 표시는 레이어 · 아트 때.
@@ -11,9 +12,13 @@ public class TutorialHudUI : MonoBehaviour
 {
     private static TutorialHudUI instance;
 
-    private const float Width = 640f;
-    private const float Height = 104f;
+    private const float Width = 440f;
+    private const float Height = 112f;
+    private const float Margin = 10f;
+    private const float ButtonRow = 62f;   // 오른쪽 위 버튼 높이 (InventoryScreenUI.HudButtonHeight)
     private const float FlashSeconds = 0.8f;
+
+    private static readonly Color Normal = new(0.08f, 0.10f, 0.14f, 0.72f);
 
     private Image card;
     private Text header;
@@ -48,24 +53,28 @@ public class TutorialHudUI : MonoBehaviour
     {
         RectTransform safe = UIFactory.CreateSafeArea(canvas);
 
-        card = UIFactory.CreatePanel("TutorialCard", safe, new Color(0.08f, 0.10f, 0.14f, 0.82f),
-            new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), UIFactory.Radius);
+        card = UIFactory.CreatePanel("TutorialCard", safe, Normal,
+            new Vector2(1f, 1f), new Vector2(1f, 1f), UIFactory.Radius);
         card.raycastTarget = false;
         RectTransform rect = card.rectTransform;
-        rect.pivot = new Vector2(0.5f, 1f);
+        rect.pivot = new Vector2(1f, 1f);
         rect.sizeDelta = new Vector2(Width, Height);
-        rect.anchoredPosition = new Vector2(0f, -96f);   // 퀵 HUD(66 + 여백) 아래
+        rect.anchoredPosition = new Vector2(-Margin, HudLayout.TopRightButtonsY - ButtonRow - Margin);
         UIFactory.CreateOutline(card, UIPalette.TextAccent, UIFactory.Radius, 2);
 
         header = UIFactory.CreateLabel(card.transform, "", 17, FontStyle.Bold,
             new Vector2(0.03f, 0.70f), new Vector2(0.97f, 0.97f), TextAnchor.MiddleLeft, UIPalette.TextAccent);
-        title = UIFactory.CreateLabel(card.transform, "", 25, FontStyle.Bold,
+        title = UIFactory.CreateLabel(card.transform, "", 22, FontStyle.Bold,
             new Vector2(0.03f, 0.34f), new Vector2(0.97f, 0.72f), TextAnchor.MiddleLeft, UIPalette.TextOnGlass);
-        hint = UIFactory.CreateLabel(card.transform, "", 17, FontStyle.Normal,
+        hint = UIFactory.CreateLabel(card.transform, "", 16, FontStyle.Normal,
             new Vector2(0.03f, 0.04f), new Vector2(0.97f, 0.36f), TextAnchor.MiddleLeft, UIPalette.TextDim);
 
         foreach (Text t in new[] { header, title, hint })
             t.raycastTarget = false;
+
+        // 폭이 좁아졌으므로 긴 문장은 글씨를 줄여 칸 안에 넣는다.
+        StationFrame.Shrink(title, 15);
+        StationFrame.Shrink(hint, 12);
     }
 
     public void Show(int number, int total, string text, string howTo, string place)
@@ -81,6 +90,6 @@ public class TutorialHudUI : MonoBehaviour
     private void Update()
     {
         bool flashing = Time.unscaledTime < flashUntil;
-        card.color = flashing ? new Color(0.16f, 0.42f, 0.22f, 0.9f) : new Color(0.08f, 0.10f, 0.14f, 0.82f);
+        card.color = flashing ? new Color(0.16f, 0.42f, 0.22f, 0.9f) : Normal;
     }
 }

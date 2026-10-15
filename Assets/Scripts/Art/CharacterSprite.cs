@@ -6,8 +6,8 @@ using UnityEngine.SceneManagement;
 /// <summary>
 /// 【도트 캐릭터 그림】 (결정 2-129) — PixelLab에서 만든 8방향 그림(서 있기 1장 · 걷기 8장)을 나무 · 돌처럼
 /// 카메라 쪽으로 세운 판(기울기 ArtCatalog.Pitch)에 붙여 그린다. 빛 · 그림자는 나무 판과 같은 재질을 쓴다.
-/// 원래 몸(캡슐)은 그리지 않는다 — 충돌 · 물리는 그대로. 몸은 조준 방향을 돌지만 그림 판은 돌지 않고
-/// 조준 방향에 맞는 그림을 고른다. 움직이면 걷기, 멈추면 서 있기.
+/// 원래 몸(캡슐)은 그리지 않는다 — 충돌 · 물리는 그대로. 그림 판은 돌지 않고 8방향 그림을 고른다 —
+/// 쏘는 동안은 조준 쪽, 아니면 걷는 쪽(결정 2-132). 움직이면 걷기, 멈추면 서 있기.
 /// 그림: Resources/Characters/{이름}/idle_{방향}.png · walk_{방향}_{0~7}.png (68×68, 아래 11칸이 발 밑 여백).
 /// 주인공(어린 도깨비)은 씬이 열릴 때 저절로 입힌다.
 /// </summary>
@@ -47,6 +47,10 @@ public class CharacterSprite : MonoBehaviour
     private Renderer bodyRenderer;
     private Collider bodyCollider;
     private Rigidbody body;
+    private PlayerWeapon weapon;
+
+    /// <summary>쏜 뒤 이만큼은 조준 쪽을 본다 — 연사 사이에 걷는 쪽으로 휙휙 돌지 않게.</summary>
+    private const float AttackFacingSeconds = 0.6f;
     private float walkClock;
     private Texture2D shown;
 
@@ -113,6 +117,7 @@ public class CharacterSprite : MonoBehaviour
         }
 
         body = GetComponent<Rigidbody>();
+        weapon = GetComponent<PlayerWeapon>();
         bodyCollider = GetComponent<Collider>();
         if (TryGetComponent(out bodyRenderer))
             bodyRenderer.forceRenderingOff = true;   // 켜짐 표시는 남긴다 — 다른 코드가 몸을 끄면 그림도 숨는다
@@ -175,17 +180,20 @@ public class CharacterSprite : MonoBehaviour
         if (behindRenderer != null)
             behindRenderer.enabled = cardRenderer.enabled;
 
-        // 방향 — 조준(몸이 바라보는 쪽)을 8방향으로. 북 = 화면 위(+z).
-        Vector3 f = transform.forward;
+        Vector3 v = body != null ? body.linearVelocity : Vector3.zero;
+        float speed = new Vector2(v.x, v.z).magnitude;
+        Walking = speed > 0.3f;
+
+        // 방향 (결정 2-132) — 1. 공격하는 방향: 막 쏜 동안은 조준(몸이 바라보는 쪽)
+        //                    2. 움직이는 방향: 쏘지 않고 걸으면 걷는 쪽
+        //                    둘 다 아니면 마지막 방향 그대로. 북 = 화면 위(+z).
+        bool attacking = weapon != null && Time.time - weapon.LastShotTime < AttackFacingSeconds;
+        Vector3 f = attacking ? transform.forward : Walking ? new Vector3(v.x, 0f, v.z) : Vector3.zero;
         if (f.x * f.x + f.z * f.z > 0.0001f)
         {
             float angle = Mathf.Atan2(f.x, f.z) * Mathf.Rad2Deg;
             Direction = ((Mathf.RoundToInt(angle / 45f) % 8) + 8) % 8;
         }
-
-        Vector3 v = body != null ? body.linearVelocity : Vector3.zero;
-        float speed = new Vector2(v.x, v.z).magnitude;
-        Walking = speed > 0.3f;
 
         if (Walking)
         {

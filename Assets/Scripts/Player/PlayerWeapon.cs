@@ -186,8 +186,13 @@ public class PlayerWeapon : MonoBehaviour
         => WeaponProfile.Create(null,
             PlayerInventory.HasInstance ? PlayerInventory.Instance.Loadout.Modifiers : null);
 
+    /// <summary>마지막으로 쏜 때(Time.time). 그림이 「공격하는 방향」을 먼저 보게 한다 (결정 2-132).</summary>
+    public float LastShotTime { get; private set; } = -999f;
+
     private void Fire(WeaponProfile shot, WeaponKindInfo? kind)
     {
+        LastShotTime = Time.time;
+
         if (poolManager == null)
             poolManager = PoolManager.EnsureInstance();
 
