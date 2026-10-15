@@ -36,6 +36,35 @@ public static class PlayCaptureMenu
             StoryRunner.Begin();
     }
 
+    /// <summary>결정 2-130 — 주인공 그림 앞을 가리는 렌더러를 콘솔에 적는다(카메라 → 그림 가운데 선과 겹치는 것).</summary>
+    [MenuItem("Dokkaebi/Debug/주인공 앞을 가리는 것 찾기")]
+    public static void FindOccluders()
+    {
+        if (!EditorApplication.isPlaying)
+            return;
+        var sprite = Object.FindAnyObjectByType<CharacterSprite>();
+        Camera cam = Camera.main;
+        if (sprite == null || sprite.CardRenderer == null || cam == null)
+        {
+            Debug.LogWarning("[Occluder] 주인공 그림 또는 카메라가 없다.");
+            return;
+        }
+        Vector3 target = sprite.CardRenderer.bounds.center;
+        var ray = new Ray(target - cam.transform.forward * 200f, cam.transform.forward);
+        float targetDist = Vector3.Dot(target - ray.origin, ray.direction);
+        var sb = new System.Text.StringBuilder($"[Occluder] 그림 {target:F1} · 카메라 {cam.transform.position:F1}\n");
+        foreach (Renderer r in Object.FindObjectsByType<Renderer>(FindObjectsInactive.Exclude, FindObjectsSortMode.None))
+        {
+            if (!r.enabled || r == sprite.CardRenderer || r.forceRenderingOff)
+                continue;
+            if (r.bounds.IntersectRay(ray, out float d) && d < targetDist - 0.05f)
+                sb.AppendLine($"  {d:F1}m · {r.GetType().Name} · {Path(r.transform)} · 재질 {(r.sharedMaterial != null ? r.sharedMaterial.name + " / " + r.sharedMaterial.shader.name + " q" + r.sharedMaterial.renderQueue : "없음")} · 크기 {r.bounds.size:F1}");
+        }
+        Debug.Log(sb.ToString());
+    }
+
+    private static string Path(Transform t) => t.parent == null ? t.name : Path(t.parent) + "/" + t.name;
+
     [MenuItem("Dokkaebi/Debug/한 판 자동 진행 멈추기")]
     public static void StopWholeGame() => StoryRunner.Stop();
 

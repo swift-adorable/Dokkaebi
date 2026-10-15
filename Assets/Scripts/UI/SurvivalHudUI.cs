@@ -58,8 +58,8 @@ public class SurvivalHudUI : MonoBehaviour
     private Health health;
 
     // ── 상태이상 줄 ───────────────────────────────────────────────────
-    // 게이지 판 **바로 아래로** 쌓는다. 위로 쌓으면 화면 밖으로 나간다 —
-    // 판이 이미 화면 맨 위에 붙어 있기 때문이다. 옆에 두면 게이지가 밀린다.
+    // 게이지 판이 **왼쪽 아래**에 있으므로(결정 2-130) 판 **바로 위로** 쌓는다.
+    // 아래로 쌓으면 화면 밖으로 나간다. 옆에 두면 게이지가 밀린다.
 
     private const float StatusRowHeight = 30f;
     private const float StatusRowGap = 4f;
@@ -194,11 +194,12 @@ public class SurvivalHudUI : MonoBehaviour
         GameObject panel = UIFactory.CreateChild("SurvivalHud", safe);
 
         root = panel.GetComponent<RectTransform>();
-        root.anchorMin = new Vector2(0f, 1f);
-        root.anchorMax = new Vector2(0f, 1f);
-        root.pivot = new Vector2(0f, 1f);
+        // 왼쪽 아래 (결정 2-130 — 사용자 「체력 · 수분 · 에너지 · 상태이상 설명은 좌하단」).
+        root.anchorMin = new Vector2(0f, 0f);
+        root.anchorMax = new Vector2(0f, 0f);
+        root.pivot = new Vector2(0f, 0f);
         root.sizeDelta = new Vector2(PanelWidth, PanelHeight);
-        root.anchoredPosition = new Vector2(Margin, -Margin);
+        root.anchoredPosition = new Vector2(Margin, Margin);
 
         float cursor = 0f;
 
@@ -223,7 +224,7 @@ public class SurvivalHudUI : MonoBehaviour
     }
 
     /// <summary>
-    /// 상태이상 줄이 쌓이는 자리. 게이지 판 **바로 아래**에서 아래로 자란다.
+    /// 상태이상 줄이 쌓이는 자리. 게이지 판 **바로 위**에서 위로 자란다 (결정 2-130).
     ///
     /// 【줄을 미리 만들어 두고 켰다 끈다.】 매 프레임 Destroy/Instantiate를
     /// 하면 상태가 자주 바뀌는 교전 중에 쓰레기가 쏟아진다.
@@ -232,13 +233,13 @@ public class SurvivalHudUI : MonoBehaviour
     {
         GameObject columnObject = UIFactory.CreateChild("Status", root);
 
-        // 판의 왼쪽 **아래** 모서리에 걸고, 위쪽을 기준점으로 삼아 아래로 자란다.
+        // 판의 왼쪽 **위** 모서리에 걸고, 아래쪽을 기준점으로 삼아 위로 자란다.
         statusColumn = columnObject.GetComponent<RectTransform>();
-        statusColumn.anchorMin = new Vector2(0f, 0f);
-        statusColumn.anchorMax = new Vector2(0f, 0f);
-        statusColumn.pivot = new Vector2(0f, 1f);
+        statusColumn.anchorMin = new Vector2(0f, 1f);
+        statusColumn.anchorMax = new Vector2(0f, 1f);
+        statusColumn.pivot = new Vector2(0f, 0f);
         statusColumn.sizeDelta = new Vector2(StatusWidth, 0f);
-        statusColumn.anchoredPosition = new Vector2(0f, -6f);
+        statusColumn.anchoredPosition = new Vector2(0f, 6f);
 
         for (int i = 0; i < MaxStatusRows; i++)
             statusRows.Add(BuildStatusRow(i));
@@ -249,13 +250,13 @@ public class SurvivalHudUI : MonoBehaviour
         GameObject rowObject = UIFactory.CreateChild($"Status_{index}", statusColumn);
 
         var rect = rowObject.GetComponent<RectTransform>();
-        rect.anchorMin = new Vector2(0f, 1f);
-        rect.anchorMax = new Vector2(1f, 1f);
-        rect.pivot = new Vector2(0.5f, 1f);
+        rect.anchorMin = new Vector2(0f, 0f);
+        rect.anchorMax = new Vector2(1f, 0f);
+        rect.pivot = new Vector2(0.5f, 0f);
         rect.offsetMin = Vector2.zero;
         rect.offsetMax = Vector2.zero;
         rect.sizeDelta = new Vector2(0f, StatusRowHeight);
-        rect.anchoredPosition = new Vector2(0f, -index * (StatusRowHeight + StatusRowGap));
+        rect.anchoredPosition = new Vector2(0f, index * (StatusRowHeight + StatusRowGap));
 
         var back = rowObject.AddComponent<Image>();
         back.color = UIPalette.Inset;

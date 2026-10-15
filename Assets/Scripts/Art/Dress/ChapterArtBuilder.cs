@@ -324,9 +324,33 @@ public sealed class ChapterArtBuilder
                     blocked = true;
                     break;
                 }
-            if (!blocked)
-                TreeAt(p, Range(5f, 7.5f), deep: true);
+            if (blocked)
+                continue;
+
+            // 【구역 남쪽 숲은 키를 줄인다】 (결정 2-130) — 카메라 쪽으로 세운 나무는 제 키의 1.3배만큼 뒤(북쪽) 땅을 가린다.
+            // 구역 바로 남쪽의 큰 나무가 출발 자리의 주인공을 통째로 가렸다(1-1 등). 가리는 범위가 구역에 닿지 않게 키를 줄이고,
+            // 너무 낮아지면 덤불로, 그것도 안 되면 비운다.
+            float h = Range(5f, 7.5f);
+            float limit = (RoomNorth(p) - 0.5f) * PitchSin;
+            if (limit >= h)
+                TreeAt(p, h, deep: true);
+            else if (limit >= 2.6f)
+                TreeAt(p, limit, deep: true);
+            else if (limit >= 1.2f)
+                Card(TreeOf(ArtCatalog.Bushes(season)), p, Mathf.Min(limit, Range(1.5f, 2.1f)));
         }
+    }
+
+    private static readonly float PitchSin = Mathf.Sin(ArtCatalog.Pitch * Mathf.Deg2Rad);
+
+    /// <summary>p에서 북쪽(+z)으로 구역에 닿기까지의 거리. 나무 폭을 생각해 좌우 1.5m도 본다. 12m 안에 없으면 무한.</summary>
+    private float RoomNorth(Vector3 p)
+    {
+        for (float s = 0f; s <= 12f; s += 0.5f)
+            for (float dx = -1.5f; dx <= 1.5f; dx += 1.5f)
+                if (DistanceToZones(new Vector3(p.x + dx, 0f, p.z + s)) <= 0f)
+                    return s;
+        return float.PositiveInfinity;
     }
 
     /// <summary>빈 땅에 잔돌 · 덤불 · 나무를 드문드문 — 바람의나라처럼 땅이 비어 보이지 않게. 길 · 마당 · 덩어리 가까이는 비운다.</summary>

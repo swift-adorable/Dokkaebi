@@ -66,11 +66,12 @@ public class MinimapUI : MonoBehaviour
     {
         RectTransform safe = UIFactory.CreateSafeArea(canvas);
 
-        Image back = UIFactory.CreateGlass("Minimap", safe, UIPalette.Panel, Vector2.one, Vector2.one);
+        // 왼쪽 위 (결정 2-130 — 사용자 「미니맵을 좌상단에」).
+        Image back = UIFactory.CreateGlass("Minimap", safe, UIPalette.Panel, new Vector2(0f, 1f), new Vector2(0f, 1f));
         frame = back.rectTransform;
-        frame.pivot = Vector2.one;
+        frame.pivot = new Vector2(0f, 1f);
         frame.sizeDelta = new Vector2(HudLayout.MinimapSize, HudLayout.MinimapSize);
-        frame.anchoredPosition = new Vector2(-HudLayout.Margin, -HudLayout.Margin);
+        frame.anchoredPosition = new Vector2(HudLayout.Margin, -HudLayout.Margin);
 
         var button = back.gameObject.AddComponent<Button>();
         button.targetGraphic = back;
@@ -140,6 +141,22 @@ public class MinimapUI : MonoBehaviour
         return string.Join(" · ", parts);
     }
 
+    /// <summary>잘라 볼 칸(full) 가운데 그림 안쪽(inside)만 그 비율 자리에 그린다.</summary>
+    private static void Place(RawImage image, Rect full, Rect inside)
+    {
+        bool any = inside.width > 0f && inside.height > 0f;
+        image.gameObject.SetActive(any);
+        if (!any)
+            return;
+
+        image.uvRect = inside;
+        RectTransform t = image.rectTransform;
+        t.anchorMin = new Vector2((inside.xMin - full.xMin) / full.width, (inside.yMin - full.yMin) / full.height);
+        t.anchorMax = new Vector2((inside.xMax - full.xMin) / full.width, (inside.yMax - full.yMin) / full.height);
+        t.offsetMin = Vector2.zero;
+        t.offsetMax = Vector2.zero;
+    }
+
     private static RawImage CreateRaw(string name, Transform parent)
     {
         RectTransform rect = UIFactory.CreateRegion(name, parent, Vector2.zero, Vector2.one);
@@ -183,12 +200,18 @@ public class MinimapUI : MonoBehaviour
 
         // 【전체 지도와 같은 그림】 (결정 2-123) — 구운 지도 사진이 있으면 사진 + 닫힌 곳 덮개, 없으면 옛 지도 그림.
         mapImage.texture = runtime.HasPhoto ? runtime.Photo : runtime.MapTexture;
-        mapImage.uvRect = rect;
         closedImage.texture = runtime.HasPhoto ? runtime.EnsureClosedOverlay() : null;
         closedImage.enabled = closedImage.texture != null;
-        closedImage.uvRect = rect;
         fogImage.texture = runtime.FogTexture;
-        fogImage.uvRect = rect;
+
+        // 【그림 밖은 늘이지 않는다】 (결정 2-130) — 맵 가장자리에 서면 잘라 볼 칸이 그림 밖으로 나가는데,
+        // 그대로 두면 가장자리 한 줄이 끝까지 늘어나 줄무늬로 깨져 보였다. 그림 안쪽만 잘라 그 자리에만 그리고
+        // 바깥은 미니맵 바탕을 둔다.
+        Rect inside = Rect.MinMaxRect(Mathf.Max(0f, rect.xMin), Mathf.Max(0f, rect.yMin),
+            Mathf.Min(1f, rect.xMax), Mathf.Min(1f, rect.yMax));
+        Place(mapImage, rect, inside);
+        Place(closedImage, rect, inside);
+        Place(fogImage, rect, inside);
 
         playerArrow.localRotation = Quaternion.Euler(0f, 0f, -runtime.Player.eulerAngles.y);
 

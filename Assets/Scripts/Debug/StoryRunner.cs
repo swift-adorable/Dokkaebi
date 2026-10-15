@@ -458,6 +458,19 @@ public class StoryRunner : MonoBehaviour
     {
         string path = $"{Folder}/{shot++:00}_{tag}.png";
         ScreenCapture.CaptureScreenshot(path);
+
+        // 사진마다 주인공 · 카메라 자리와 주인공이 화면 어디에 있는지 적는다 — 「화면에 주인공이 안 보인다」를 사진만으로 가리기 어려웠다.
+        var players = FindObjectsByType<PlayerMovement>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+        Camera cam = Camera.main;
+        foreach (PlayerMovement p in players)
+        {
+            Vector3 v = cam != null ? cam.WorldToViewportPoint(p.transform.position) : Vector3.zero;
+            bool dressed = p.TryGetComponent(out CharacterSprite sprite) && sprite.enabled;
+            string card = dressed && sprite.CardRenderer != null
+                ? $" · 판 {sprite.CardRenderer.bounds.center:F1} 켜짐 {sprite.CardRenderer.enabled} 보임 {sprite.CardRenderer.isVisible}"
+                : string.Empty;
+            Write($"  - 📷 {tag} · 주인공 {p.name} ({p.transform.position.x:F1}, {p.transform.position.y:F1}, {p.transform.position.z:F1}) · 화면 ({v.x:F2}, {v.y:F2}) · 그림 {(dressed ? "있음" : "없음")}{card} · 카메라 {(cam != null ? cam.transform.position.ToString("F1") : "없음")}");
+        }
     }
 
     private int Nights()

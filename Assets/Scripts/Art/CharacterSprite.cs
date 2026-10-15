@@ -42,12 +42,16 @@ public class CharacterSprite : MonoBehaviour
     private Set set;
     private Transform card;
     private MeshRenderer cardRenderer;
+    private MeshRenderer behindRenderer;   // 나무 · 집 뒤에 가려지면 비치는 실루엣 (결정 2-130)
     private MaterialPropertyBlock block;
     private Renderer bodyRenderer;
     private Collider bodyCollider;
     private Rigidbody body;
     private float walkClock;
     private Texture2D shown;
+
+    /// <summary>그림 판 렌더러 (점검용).</summary>
+    public Renderer CardRenderer => cardRenderer;
 
     public int Direction { get; private set; } = 4;
     public bool Walking { get; private set; }
@@ -133,6 +137,18 @@ public class CharacterSprite : MonoBehaviour
         cardRenderer.receiveShadows = true;
         block = new MaterialPropertyBlock();
 
+        Material behind = BehindMaterial();
+        if (behind != null)
+        {
+            var ghost = new GameObject("~Behind");
+            ghost.transform.SetParent(card, false);
+            ghost.AddComponent<MeshFilter>().sharedMesh = Quad();
+            behindRenderer = ghost.AddComponent<MeshRenderer>();
+            behindRenderer.sharedMaterial = behind;
+            behindRenderer.shadowCastingMode = ShadowCastingMode.Off;
+            behindRenderer.receiveShadows = false;
+        }
+
         float metersPerPixel = height / BodyPixels;
         float size = CanvasPixels * metersPerPixel;
         card.localScale = Vector3.one;   // 실제 크기는 LateUpdate에서 뿌리 크기를 되돌려 맞춘다
@@ -156,6 +172,8 @@ public class CharacterSprite : MonoBehaviour
 
         // 몸을 끄면(사망 · 숨기기 등) 그림도 숨는다.
         cardRenderer.enabled = bodyRenderer == null || bodyRenderer.enabled;
+        if (behindRenderer != null)
+            behindRenderer.enabled = cardRenderer.enabled;
 
         // 방향 — 조준(몸이 바라보는 쪽)을 8방향으로. 북 = 화면 위(+z).
         Vector3 f = transform.forward;
@@ -197,6 +215,22 @@ public class CharacterSprite : MonoBehaviour
         cardRenderer.GetPropertyBlock(block);
         block.SetTexture(BaseMap, tex);
         cardRenderer.SetPropertyBlock(block);
+        if (behindRenderer != null)
+            behindRenderer.SetPropertyBlock(block);
+    }
+
+    private static Material behindMaterial;
+
+    /// <summary>가려졌을 때만 비치는 실루엣 재질. 셰이더는 Resources/Shaders에 두어 빌드에 늘 들어간다.</summary>
+    private static Material BehindMaterial()
+    {
+        if (behindMaterial != null)
+            return behindMaterial;
+        Shader shader = Resources.Load<Shader>("Shaders/CharacterBehind");
+        if (shader == null || !shader.isSupported)
+            return null;
+        behindMaterial = new Material(shader) { name = "CharacterBehind" };
+        return behindMaterial;
     }
 
     // ── 공유 부품 ──────────────────────────────────────────────────
