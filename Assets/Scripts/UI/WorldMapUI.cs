@@ -517,7 +517,7 @@ public class WorldMapUI : MonoBehaviour
     // ── 진행 중 퀘스트 (결정 2-120) ──────────────────────────────────
 
     private const float QuestPanelWidth = 400f;
-    private const float QuestRowHeight = 84f * UIFactory.FontScale;   // 글자 배율만큼 (결정 2-134)
+    private const float QuestRowHeight = 84f * UIFactory.RowScale;   // 글자 배율만큼 (결정 2-134)
     private const float QuestRowGap = 6f;
     private const int MaxQuestRows = 6;
 

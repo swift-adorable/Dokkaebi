@@ -12,7 +12,7 @@ public class ApothecaryUI : MonoBehaviour
 {
     private static ApothecaryUI instance;
 
-    private const float RowHeight = 96f * UIFactory.FontScale;   // 글자 배율만큼 줄도 키운다 (결정 2-134)
+    private const float RowHeight = 96f * UIFactory.RowScale;   // 글자 배율만큼 줄도 키운다 (결정 2-134)
     private const float RowGap = 8f;
 
     private const int BrewTab = 0;
@@ -124,7 +124,7 @@ public class ApothecaryUI : MonoBehaviour
             string effect = catalog?.Find(recipe.OutputId)?.Description ?? string.Empty;
 
             Text label = UIFactory.CreateLabel(row.transform,
-                $"<b>{head}</b>  <size=16><color=#A8A08C>{effect}</color></size>\n<size=18>재료: {CostLine(recipe.Inputs)}</size>",
+                $"<b>{head}</b>  <size={UIFactory.Scaled(16)}><color=#A8A08C>{effect}</color></size>\n<size={UIFactory.Scaled(18)}>재료: {CostLine(recipe.Inputs)}</size>",
                 22, FontStyle.Normal, new Vector2(0.02f, 0f), new Vector2(0.78f, 1f), TextAnchor.MiddleLeft);
             label.supportRichText = true;
 

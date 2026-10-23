@@ -216,7 +216,7 @@ public partial class InventoryScreenUI : MonoBehaviour
     private RectTransform screenTabs;
 
     /// <summary>머리글에서 탭 줄이 차지하는 폭 — 나머지(오른쪽)는 엽전 · 안내.</summary>
-    private const float ScreenTabsRight = 0.60f;
+    private const float ScreenTabsRight = 0.64f;
 
     /// <summary>머리글 오른쪽의 보조 정보 — 「다음 개방 Lv.3 (소켓 1)」.</summary>
     private Text topInfoLabel;
@@ -611,10 +611,9 @@ public partial class InventoryScreenUI : MonoBehaviour
             TextAnchor.MiddleRight, UIPalette.TextDim);
 
         // 탭 옆 좁은 자리 — 긴 안내(구슬 고르는 중)는 두 줄 · 글자를 줄여 넣는다.
-        topInfoLabel.resizeTextForBestFit = true;
-        topInfoLabel.resizeTextMinSize = 10;
-        topInfoLabel.resizeTextMaxSize = UIFactory.Scaled(22);
-        topInfoLabel.horizontalOverflow = HorizontalWrapMode.Wrap;
+        // 【Best Fit은 세로 넘침이 Overflow면 줄이지 않는다】 (결정 2-135) —
+        // 「Lv.2 · 다음 개방 Lv.3 (소켓 1)」이 두 줄로 접혀 아래 소켓 위로 넘쳤다.
+        FitTextBlock.Apply(topInfoLabel, 12);
 
         equipmentGrid = UIFactory.CreateRegion("TopBand", content,
             new Vector2(0f, EquipBandBottom), new Vector2(1f, TopBandTop));
@@ -700,6 +699,9 @@ public partial class InventoryScreenUI : MonoBehaviour
         weightLabel = UIFactory.CreateLabel(weightCard, string.Empty, 21, FontStyle.Bold,
             new Vector2(0.62f, 0f), new Vector2(0.96f, 1f),
             TextAnchor.MiddleRight, UIPalette.TextDim);
+
+        // 「9.6 / 30.0 kg」이 두 줄로 접히던 자리 (결정 2-135) — 한 줄로 두고 크기만 줄인다.
+        OneLineText.Apply(weightLabel, 12);
 
         // 가운데(0.40~0.86)는 비워 둔다 — 화면에 늘 떠 있는 퀵슬롯 줄이
         // 그 자리에 겹쳐 뜬다. 열려 있든 닫혀 있든 같은 자리에 있게 하려는 것이다.
@@ -1300,8 +1302,7 @@ public partial class InventoryScreenUI : MonoBehaviour
             // 【여백을 비율이 아니라 픽셀로 준다.】
             // 0.07(가로) / 0.05(세로)로 두었더니 칸이 가로로 길어
             // 왼쪽은 14px, 위는 3px이 됐다. 글자가 천장에 붙어 보였다.
-            // 작은 칸(얼굴 · 윤도 · 가방 · 새김패)은 글자를 줄인다 — 「새김패 2」가 칸을 넘었다.
-            bool smallCell = exchangeLayout ? max.x - min.x < 0.15f : IsSmallSlot(slots[i]);
+            // 작은 칸이라고 미리 줄이지 않는다 — 안 들어갈 때만 OneLineText가 줄인다 (결정 2-135).
 
             if (EquipmentLoadout.IsAmmoSlot(slots[i]))
             {
@@ -1309,10 +1310,13 @@ public partial class InventoryScreenUI : MonoBehaviour
                 continue;
             }
 
-            UIFactory.Inset(
-                UIFactory.CreateLabel(cell.transform, EquipmentSlotName(slots[i]), smallCell ? 15 : 20,
+            // 【부위 이름은 모든 칸이 같은 크기】 (결정 2-135) — 작은 칸만 15 · 큰 칸 20이라
+            // 한 판 안에서 글자 크기가 들쭉날쭉했다. 같은 크기로 두고, 안 들어가는 칸만 한 줄로 줄인다.
+            Text slotLabel = OneLineText.Apply(
+                UIFactory.CreateLabel(cell.transform, EquipmentSlotName(slots[i]), SlotLabelSize,
                     FontStyle.Bold, new Vector2(0f, 0.5f), Vector2.one,
-                    TextAnchor.UpperLeft, UIPalette.TextDim).rectTransform,
+                    TextAnchor.UpperLeft, UIPalette.TextDim), 12);
+            UIFactory.Inset(slotLabel.rectTransform,
                 left: SlotPad, bottom: 0f, right: SlotPad, top: SlotPad);
 
             if (stack?.Definition == null)
@@ -1335,23 +1339,23 @@ public partial class InventoryScreenUI : MonoBehaviour
             // 장비 탭이 폭을 다 쓰게 되면서 칸이 두 배로 넓어졌으므로
             // 실제로 줄어드는 경우는 아주 긴 이름뿐이다.
             Text equipName = UIFactory.CreateLabel(strip.transform,
-                stack.Definition.DisplayName, smallCell ? 16 : 21, FontStyle.Bold,
+                stack.Definition.DisplayName, SlotNameSize, FontStyle.Bold,
                 new Vector2(0.05f, 0f), new Vector2(0.95f, 1f),
                 TextAnchor.MiddleLeft, Color.white);
 
-            FitName(equipName, smallCell ? 16 : 21);
+            FitName(equipName, SlotNameSize);
 
             DrawDurabilityBar(cell.transform, stack);
         }
     }
 
+    /// <summary>장비 칸 부위 이름 · 장비 이름 글자 크기 — 칸 크기와 상관없이 하나 (결정 2-135).</summary>
+    private const int SlotLabelSize = 16;
+    private const int SlotNameSize = 17;
+
     /// <summary>인형 판의 비율(가로 ÷ 세로) — 세 기둥 × 4.6줄 (결정 2-133).</summary>
     private const float DollAspect = 3f / DollRows;
     private const float DollRows = 4.6f;
-
-    private static bool IsSmallSlot(EquipmentSlot slot)
-        => slot is EquipmentSlot.Face or EquipmentSlot.Ears or EquipmentSlot.Backpack
-            or EquipmentSlot.ImprintA or EquipmentSlot.ImprintB;
 
     /// <summary>
     /// 착용 칸 자리 (인형 판 0 ~ 1) — PoE2 소지품창을 따랐다 (결정 2-82 → 2-133).
@@ -1452,9 +1456,9 @@ public partial class InventoryScreenUI : MonoBehaviour
         string holder = weapon != null ? weapon.KindInfo.HolderName : "화살통";
 
         UIFactory.Inset(
-            UIFactory.CreateLabel(cell.transform, holder, 20,
+            OneLineText.Apply(UIFactory.CreateLabel(cell.transform, holder, SlotLabelSize,
                 FontStyle.Bold, new Vector2(0f, 0.5f), Vector2.one,
-                TextAnchor.UpperLeft, UIPalette.TextDim).rectTransform,
+                TextAnchor.UpperLeft, UIPalette.TextDim), 12).rectTransform,
             left: SlotPad, bottom: 0f, right: SlotPad, top: SlotPad);
 
         string text = weapon == null
@@ -1466,10 +1470,10 @@ public partial class InventoryScreenUI : MonoBehaviour
         UIFactory.Inset(strip.rectTransform, left: SlotPad, bottom: SlotPad, right: SlotPad, top: 0f);
         strip.raycastTarget = false;
 
-        Text label = UIFactory.CreateLabel(strip.transform, text, 21, FontStyle.Bold,
+        Text label = UIFactory.CreateLabel(strip.transform, text, SlotNameSize, FontStyle.Bold,
             new Vector2(0.05f, 0f), new Vector2(0.95f, 1f), TextAnchor.MiddleLeft,
             weapon != null && loadout.LoadedAt(index) == 0 ? UIPalette.Warning : Color.white);
-        FitName(label, 21);
+        FitName(label, SlotNameSize);
     }
 
     private static string EquipmentSlotName(EquipmentSlot slot)

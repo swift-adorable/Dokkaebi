@@ -44,8 +44,8 @@ public partial class InventoryScreenUI
 
             bool unlocked = LoreTable.IsUnlocked(e, progress);
             string text = unlocked
-                ? $"<b>{e.Title}</b>\n<size=21>{e.Body.Replace(" · ", "\n· ")}</size>"
-                : "<b>???</b>\n<size=21><color=#8C8676>아직 모른다.</color></size>";
+                ? $"<b>{e.Title}</b>\n<size={UIFactory.Scaled(21)}>{e.Body.Replace(" · ", "\n· ")}</size>"
+                : $"<b>???</b>\n<size={UIFactory.Scaled(21)}><color=#8C8676>아직 모른다.</color></size>";
 
             int lines = 2;
             if (unlocked)
@@ -82,7 +82,7 @@ public partial class InventoryScreenUI
         {
             if (!progress.HasPiece(piece.Id))
             {
-                AddCodexRow(list, ref y, $"<size=21><color=#8C8676>조각 {piece.Number} — 아직 줍지 않았다.</color></size>", 1);
+                AddCodexRow(list, ref y, $"<size={UIFactory.Scaled(21)}><color=#8C8676>조각 {piece.Number} — 아직 줍지 않았다.</color></size>", 1);
                 continue;
             }
 
@@ -94,7 +94,7 @@ public partial class InventoryScreenUI
             foreach (string para in body.Split('\n'))
                 lines += 1 + para.Length / 44;
 
-            AddCodexRow(list, ref y, $"<b>{title}</b>  <size=16><color=#A8A08C>{piece.ZoneId}</color></size>\n<size=21>{body}</size>", lines);
+            AddCodexRow(list, ref y, $"<b>{title}</b>  <size={UIFactory.Scaled(16)}><color=#A8A08C>{piece.ZoneId}</color></size>\n<size={UIFactory.Scaled(21)}>{body}</size>", lines);
         }
 
         // 업적 (결정 2-118) — 보상 없이 표시만. 이름은 내용 그대로.
@@ -111,7 +111,7 @@ public partial class InventoryScreenUI
             bool got = achievements.IsUnlocked(a.Id);
             string mark = got ? "<color=#E8C45A>●</color>" : "<color=#6E6A60>○</color>";
             string name = got ? $"<b>{a.Name}</b>" : $"<color=#A8A08C>{a.Name}</color>";
-            AddCodexRow(list, ref y, $"{mark}  {name}  <size=18><color=#A8A08C>{a.Description}</color></size>", 1);
+            AddCodexRow(list, ref y, $"{mark}  {name}  <size={UIFactory.Scaled(18)}><color=#A8A08C>{a.Description}</color></size>", 1);
         }
 
         list.Content.sizeDelta = new Vector2(0f, y);

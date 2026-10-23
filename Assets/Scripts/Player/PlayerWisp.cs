@@ -26,9 +26,14 @@ public class PlayerWisp : MonoBehaviour
         glow.shadows = LightShadows.None;
     }
 
+    /// <summary>
+    /// 【씬이 닫히며 지워질 때는 불을 따로 지우지 않는다】 (결정 2-135) — 철수로 구역이 닫힐 때 여기서 건
+    /// Destroy가 소굴 씬을 읽는 동안 처리되며 에디터가 멈췄다(2-128의 ChapterArt와 같은 교착 — 프로세스 샘플:
+    /// MeshRenderer 정리 ↔ 씬 읽기 스레드). 불은 같은 씬에 있으므로 씬과 함께 사라진다.
+    /// </summary>
     private void OnDestroy()
     {
-        if (flame != null)
+        if (flame != null && gameObject.scene.isLoaded)
             Destroy(flame.gameObject);
     }
 

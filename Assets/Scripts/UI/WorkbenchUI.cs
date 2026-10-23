@@ -12,7 +12,7 @@ public class WorkbenchUI : MonoBehaviour
 {
     private static WorkbenchUI instance;
 
-    private const float RowHeight = 96f * UIFactory.FontScale;   // 글자 배율만큼 (결정 2-134)
+    private const float RowHeight = 96f * UIFactory.RowScale;   // 글자 배율만큼 (결정 2-134)
     private const float RowGap = 8f;
 
     private ItemCatalog catalog;
@@ -104,13 +104,13 @@ public class WorkbenchUI : MonoBehaviour
         // 단계 올리기 — 앞판에 다음 단계 값, 오른쪽 아래 단추.
         if (stage >= WorkbenchTable.MaxStage)
         {
-            upgradeLine.text = $"작업대 {WorkbenchTable.StageName(stage)}\n<size=18>마지막 단계다</size>";
+            upgradeLine.text = $"작업대 {WorkbenchTable.StageName(stage)}\n<size={UIFactory.Scaled(18)}>마지막 단계다</size>";
             upgradeButton.interactable = false;
         }
         else
         {
             StageCost cost = WorkbenchTable.CostToReach(stage + 1);
-            upgradeLine.text = $"작업대 {WorkbenchTable.StageName(stage)}\n<size=18>{WorkbenchTable.StageName(stage + 1)}로: {CostLine(cost.Materials, cost.Gold)}</size>";
+            upgradeLine.text = $"작업대 {WorkbenchTable.StageName(stage)}\n<size={UIFactory.Scaled(18)}>{WorkbenchTable.StageName(stage + 1)}로: {CostLine(cost.Materials, cost.Gold)}</size>";
             upgradeButton.interactable = state.CanUpgrade(WorkbenchManager.Built, WorkbenchManager.Gold,
                 WorkbenchManager.CountOf) == CraftError.None;
         }
@@ -157,7 +157,7 @@ public class WorkbenchUI : MonoBehaviour
             ? $"재료: {CostLine(recipe.Inputs, recipe.Gold)}"
             : $"바칠 것: {CostLine(recipe.UnlockCost, 0)}";
 
-        Text label = UIFactory.CreateLabel(row.transform, $"<b>{head}</b>\n<size=18>{line}</size>", 22, FontStyle.Normal,
+        Text label = UIFactory.CreateLabel(row.transform, $"<b>{head}</b>\n<size={UIFactory.Scaled(18)}>{line}</size>", 22, FontStyle.Normal,
             new Vector2(0.02f, 0f), new Vector2(0.78f, 1f), TextAnchor.MiddleLeft);
         label.supportRichText = true;
 
@@ -236,7 +236,7 @@ public class WorkbenchUI : MonoBehaviour
                 action = () => Act(WorkbenchManager.Dismantle(stack), $"{Josa.EulReul(name)} 분해했다 — 재료는 창고에.");
             }
 
-            Text label = UIFactory.CreateLabel(row.transform, $"<b>{name}</b>\n<size=18>{line}</size>", 22, FontStyle.Normal,
+            Text label = UIFactory.CreateLabel(row.transform, $"<b>{name}</b>\n<size={UIFactory.Scaled(18)}>{line}</size>", 22, FontStyle.Normal,
                 new Vector2(0.02f, 0f), new Vector2(0.78f, 1f), TextAnchor.MiddleLeft);
             label.supportRichText = true;
 

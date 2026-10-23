@@ -180,7 +180,12 @@ public class PixelCharacter : MonoBehaviour
     /// <summary>떼어 원래대로 돌린다(복제본 지우고 그림자 되돌림). 지울 때도 부른다.</summary>
     public void Release() => Detach();
 
-    private void OnDestroy() => Detach();
+    // 씬이 닫히며 지워질 때는 복제본을 따로 지우지 않는다 — 씬과 함께 사라진다(교착 방지 · 결정 2-135).
+    private void OnDestroy()
+    {
+        if (gameObject.scene.isLoaded)
+            Detach();
+    }
 
     private static void Kill(GameObject go)
     {

@@ -150,13 +150,17 @@ public class PixelArtView : MonoBehaviour
         if (main != null)
             main.cullingMask |= 1 << Layer;
 
-        foreach (PixelCharacter c in attached)
-            if (c != null)
-                Destroy(c);
+        // 씬이 닫히는 중이면 렌더러 달린 것은 따로 지우지 않는다 — 씬과 함께 사라진다(교착 방지 · 결정 2-135).
+        bool unloading = !gameObject.scene.isLoaded;
+
+        if (!unloading)
+            foreach (PixelCharacter c in attached)
+                if (c != null)
+                    Destroy(c);
         attached.Clear();
 
-        if (pixelCamera != null) Destroy(pixelCamera.gameObject);
-        if (canvas != null) Destroy(canvas.gameObject);
+        if (!unloading && pixelCamera != null) Destroy(pixelCamera.gameObject);
+        if (!unloading && canvas != null) Destroy(canvas.gameObject);
         if (texture != null) { texture.Release(); Destroy(texture); }
         if (composite != null) Destroy(composite);
         texture = null;

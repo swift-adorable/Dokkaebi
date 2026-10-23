@@ -3,37 +3,41 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// 【임시】 퀘스트 추적 HUD — 화면 위 가운데 두 줄 + 목표가 바뀔 때 잠깐 뜨는 알림.
-/// 누르면 받은 퀘스트 전부를 글로 펼친다(임시 목록).
-///
-/// 퀘스트 창 · 아트는 레이어 · 아트 작업 때 한 번에 만든다 (2026-10-06 사용자 결정).
-/// 지금은 0장 Vertical Slice에서 「다음 목표가 보이는가」를 확인하는 용도다.
+/// 【퀘스트 목록】 (결정 2-106 → 2-135) — 오른쪽 위, 장비 · 스킬 · 패시브 · 도감 버튼 바로 아래.
+/// 튜토리얼 · 메인 · 서브 퀘스트를 **한 목록**에 줄로 쌓는다(사용자 「퀘스트 및 튜토리얼 관련은 전부 그 패널(리스트)에」).
+///   맨 위 = 튜토리얼 단계(있으면) → 진행 중 메인 → 진행 중 서브, 넘치면 「외 n개」
+///   목표가 바뀌면 그 위에 잠깐 알림 줄(새 퀘스트 · 목표 갱신 · 완료)
+/// 누르면 퀘스트 창. 창(가방 · 가게 · 출발 · 대화 …)이 떠 있으면 숨는다(결정 2-133).
 ///
 /// 【계산은 QuestTracker가 한다】 이 화면은 0.5초마다 묻고 글만 바꾼다.
-/// 진행이 바뀌는 곳(보스 · 조각 · 사건 · 밤 · 건물)이 여럿이라 이벤트를 하나하나 걸지 않는다.
 /// </summary>
 public class QuestHudUI : MonoBehaviour
 {
     private static QuestHudUI instance;
 
-    private const float Width = 520f;
-    private const float Height = 66f * 1.3f;   // 글자를 키운 만큼 (결정 2-134)
-    private const float Margin = 16f;
+    private const float Width = 558f;          // 오른쪽 위 버튼 줄(132 × 4 + 10 × 3)과 같은 폭
+    private const float ButtonRow = 62f;       // InventoryScreenUI.HudButtonHeight
+    private const float Margin = 10f;
     private const float PollInterval = 0.5f;
     private const float ToastSeconds = 3.5f;
+    private const int MaxQuests = 4;           // 이보다 많으면 「외 n개」
+
+    private static readonly Color EntryBack = new(0.08f, 0.10f, 0.14f, 0.78f);
+    private static readonly Color FlashBack = new(0.16f, 0.42f, 0.22f, 0.9f);
+    private static readonly Color MainColor = new(1f, 0.82f, 0.38f);
+    private static readonly Color SubColor = new(0.6f, 0.82f, 1f);
+    private static readonly Color TutorialColor = new(0.55f, 0.95f, 0.6f);
 
     private RectTransform root;
-    private Image panel;
-    private Text titleLabel;
-    private Text objectiveLabel;
-    private Text toastLabel;
-    private GameObject listObject;
-    private Text listLabel;
+    private readonly List<(Image back, Text text)> entries = new();
 
     private float pollTimer;
     private float toastTimer;
+    private string toastText = string.Empty;
     private bool hiddenByScreen;
-    private bool expanded;
+    private int tutorialVersion = -1;
+    private string drawn;
+    private int tutorialEntry = -1;
 
     private Dictionary<string, (QuestState state, int met)> last;
     private readonly Queue<string> toasts = new();
@@ -63,7 +67,7 @@ public class QuestHudUI : MonoBehaviour
             return;
 
         instance.hiddenByScreen = hidden;
-        instance.Refresh(force: true);
+        instance.Refresh();
     }
 
     private void OnDestroy()
@@ -76,43 +80,51 @@ public class QuestHudUI : MonoBehaviour
     {
         RectTransform safe = UIFactory.CreateSafeArea(canvas);
 
-        GameObject go = UIFactory.CreateChild("QuestHud", safe);
+        GameObject go = UIFactory.CreateChild("QuestList", safe);
         root = go.GetComponent<RectTransform>();
-        root.anchorMin = root.anchorMax = new Vector2(0.5f, 1f);
-        root.pivot = new Vector2(0.5f, 1f);
-        root.sizeDelta = new Vector2(Width, Height);
-        root.anchoredPosition = new Vector2(0f, -Margin);
+        root.anchorMin = root.anchorMax = new Vector2(1f, 1f);
+        root.pivot = new Vector2(1f, 1f);
+        root.sizeDelta = new Vector2(Width, 0f);
+        root.anchoredPosition = new Vector2(-Margin, HudLayout.TopRightButtonsY - ButtonRow - Margin);
 
-        panel = UIFactory.CreatePanel("Back", root, UIPalette.Panel, Vector2.zero, Vector2.one);
+        var layout = go.AddComponent<VerticalLayoutGroup>();
+        layout.spacing = 6f;
+        layout.childControlWidth = true;
+        layout.childControlHeight = true;
+        layout.childForceExpandWidth = true;
+        layout.childForceExpandHeight = false;
 
-        var button = panel.gameObject.AddComponent<Button>();
-        button.targetGraphic = panel;
-        button.onClick.AddListener(QuestScreenUI.Open);   // 퀘스트 창 (결정 2-106)
+        var fitter = go.AddComponent<ContentSizeFitter>();
+        fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
-        titleLabel = UIFactory.CreateLabel(panel.transform, string.Empty, 18, FontStyle.Normal,
-            new Vector2(0f, 0.55f), new Vector2(1f, 1f), TextAnchor.LowerCenter, UIPalette.TextDim);
-        objectiveLabel = UIFactory.CreateLabel(panel.transform, string.Empty, 22, FontStyle.Bold,
-            new Vector2(0f, 0f), new Vector2(1f, 0.55f), TextAnchor.UpperCenter);
-        titleLabel.raycastTarget = false;
-        StationFrame.Shrink(titleLabel, 14);
-        StationFrame.Shrink(objectiveLabel, 16);
-        objectiveLabel.raycastTarget = false;
+        Refresh();
+    }
 
-        // 알림 — 판 바로 아래.
-        toastLabel = UIFactory.CreateLabel(root, string.Empty, 22, FontStyle.Bold,
-            new Vector2(0f, -0.7f), new Vector2(1f, 0f), TextAnchor.MiddleCenter, UIPalette.TextAccent);
-        toastLabel.raycastTarget = false;
+    private (Image back, Text text) Entry(int index)
+    {
+        while (entries.Count <= index)
+        {
+            Image back = UIFactory.CreatePanel($"Entry_{entries.Count}", root, EntryBack, Vector2.zero, Vector2.one, UIFactory.Radius);
+            var pad = back.gameObject.AddComponent<VerticalLayoutGroup>();
+            pad.padding = new RectOffset(14, 14, 10, 10);
+            pad.childControlWidth = true;
+            pad.childControlHeight = true;
+            pad.childForceExpandWidth = true;
+            pad.childForceExpandHeight = false;
 
-        // 임시 목록 — 판을 누르면 아래로 펼친다.
-        Image list = UIFactory.CreatePanel("List", root, UIPalette.Dim, new Vector2(0f, -6f), new Vector2(1f, -0.8f));
-        listObject = list.gameObject;
-        listLabel = UIFactory.CreateLabel(list.transform, string.Empty, 18, FontStyle.Normal,
-            Vector2.zero, Vector2.one, TextAnchor.UpperLeft);
-        UIFactory.Inset(listLabel.rectTransform, 12f);
-        listLabel.raycastTarget = false;
-        listObject.SetActive(false);
+            var button = back.gameObject.AddComponent<Button>();
+            button.targetGraphic = back;
+            button.onClick.AddListener(QuestScreenUI.Open);   // 퀘스트 창 (결정 2-106)
 
-        Refresh(force: true);
+            Text text = UIFactory.CreateLabel(back.transform, string.Empty, 20, FontStyle.Normal,
+                Vector2.zero, Vector2.one, TextAnchor.UpperLeft, UIPalette.Text);
+            text.supportRichText = true;
+            text.raycastTarget = false;
+
+            entries.Add((back, text));
+        }
+
+        return entries[index];
     }
 
     private void Update()
@@ -125,53 +137,115 @@ public class QuestHudUI : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.J) && !GamePause.IsHeld && !QuestScreenUI.IsOpen)
             QuestScreenUI.Open();
 
-        pollTimer -= Time.unscaledDeltaTime;
+        TutorialHudUI tutorial = TutorialHudUI.Current;
+        int version = tutorial != null ? tutorial.Version : -1;
+        if (version != tutorialVersion)
+        {
+            tutorialVersion = version;
+            Refresh();
+        }
 
+        // 튜토리얼 단계를 마쳤다 — 그 줄이 잠깐 초록.
+        if (tutorial != null && tutorialEntry >= 0 && tutorialEntry < entries.Count && entries[tutorialEntry].back.gameObject.activeSelf)
+            entries[tutorialEntry].back.color = tutorial.Flashing ? FlashBack : EntryBack;
+
+        pollTimer -= Time.unscaledDeltaTime;
         if (pollTimer <= 0f)
         {
             pollTimer = PollInterval;
-            Refresh(force: false);
+            Refresh();
         }
 
         if (toastTimer > 0f)
         {
             toastTimer -= Time.unscaledDeltaTime;
-
             if (toastTimer <= 0f)
                 ShowNextToast();
         }
     }
 
-    private void Refresh(bool force)
+    private void Refresh()
     {
+        if (root == null)
+            return;
+
         QuestTracker tracker = StoryManager.Quests;
 
         Dictionary<string, (QuestState, int)> now = QuestHudText.Snapshot(tracker);
-
         foreach (string t in QuestHudText.Diff(last, now))
             toasts.Enqueue(t);
-
         last = now;
 
         if (toastTimer <= 0f && toasts.Count > 0)
             ShowNextToast();
 
-        QuestDefinition tracked = tracker.Tracked();
+        // ── 줄 모으기 ──
+        var lines = new List<(string text, bool tutorial)>();
 
-        // 창(가방 · 가게 · 출발 · 대화 …)이 떠 있으면 숨긴다 — 창 위에 겹쳐 보였다 (결정 2-133).
-        bool show = !hiddenByScreen && !GamePause.IsHeld && (tracked != null || toastTimer > 0f || expanded);
+        if (toastTimer > 0f && !string.IsNullOrEmpty(toastText))
+            lines.Add((Rich(UIPalette.TextAccent, toastText, 20, bold: true), false));
+
+        TutorialHudUI tutorial = TutorialHudUI.Current;
+        if (tutorial != null)
+        {
+            string text = Rich(TutorialColor, tutorial.Header, 16) + "\n" + Rich(UIPalette.Text, tutorial.Title, 20, bold: true);
+            if (!string.IsNullOrEmpty(tutorial.Hint))
+                text += "\n" + Rich(UIPalette.TextDim, tutorial.Hint, 16);
+            lines.Add((text, true));
+        }
+
+        int shown = 0, hidden = 0;
+        foreach (QuestDefinition q in tracker.Visible())
+        {
+            if (tracker.StateOf(q) != QuestState.Active)
+                continue;
+            if (shown >= MaxQuests)
+            {
+                hidden++;
+                continue;
+            }
+
+            string objective = QuestHudText.Objective(tracker, q);
+            string text = Rich(q.Kind == QuestKind.Main ? MainColor : SubColor, QuestHudText.Title(q), 16);
+            if (!string.IsNullOrEmpty(objective))
+                text += "\n" + Rich(UIPalette.Text, objective, 20, bold: true);
+            lines.Add((text, false));
+            shown++;
+        }
+
+        if (hidden > 0)
+            lines.Add((Rich(UIPalette.TextDim, $"외 {hidden}개 — 눌러서 전부 보기", 16), false));
+
+        bool show = !hiddenByScreen && !GamePause.IsHeld && lines.Count > 0;
         root.gameObject.SetActive(show);
-
         if (!show)
             return;
 
-        titleLabel.text = tracked != null ? QuestHudText.Title(tracked) : "퀘스트";
-        objectiveLabel.text = tracked != null ? QuestHudText.Objective(tracker, tracked) : string.Empty;
+        // 같은 글이면 다시 그리지 않는다.
+        string key = string.Join("\u0001", lines.ConvertAll(l => l.text));
+        if (key == drawn)
+            return;
+        drawn = key;
 
-        listObject.SetActive(expanded);
+        tutorialEntry = -1;
+        for (int i = 0; i < lines.Count; i++)
+        {
+            (Image back, Text text) e = Entry(i);
+            e.back.gameObject.SetActive(true);
+            e.back.color = EntryBack;
+            e.text.text = lines[i].text;
+            if (lines[i].tutorial)
+                tutorialEntry = i;
+        }
+        for (int i = lines.Count; i < entries.Count; i++)
+            entries[i].back.gameObject.SetActive(false);
+    }
 
-        if (expanded)
-            listLabel.text = QuestHudText.List(tracker);
+    /// <summary>한 덩이 글 — 색 · 크기(글자 배율 적용) · 굵기.</summary>
+    private static string Rich(Color color, string text, int size, bool bold = false)
+    {
+        string body = bold ? $"<b>{text}</b>" : text;
+        return $"<size={UIFactory.Scaled(size)}><color=#{ColorUtility.ToHtmlStringRGB(color)}>{body}</color></size>";
     }
 
     private void ShowNextToast()
@@ -179,11 +253,13 @@ public class QuestHudUI : MonoBehaviour
         if (toasts.Count == 0)
         {
             toastTimer = 0f;
-            toastLabel.text = string.Empty;
+            toastText = string.Empty;
+            drawn = null;
             return;
         }
 
-        toastLabel.text = toasts.Dequeue();
+        toastText = toasts.Dequeue();
         toastTimer = ToastSeconds;
+        drawn = null;
     }
 }

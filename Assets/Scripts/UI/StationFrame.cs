@@ -55,7 +55,7 @@ public sealed class StationFrame
     private static readonly Color Cloth2 = new(0.50f, 0.36f, 0.24f, 1f);
 
     public const int PillRadius = 30;
-    public const float RowHeight = 86f * UIFactory.FontScale;   // 참고 그림의 줄 높이 86(1080 기준)에 글자 배율을 곱한다 (결정 2-134)
+    public const float RowHeight = 86f * UIFactory.RowScale;   // 참고 그림의 줄 높이 86(1080 기준)에 글자 배율을 곱한다 (결정 2-134)
     public const float RowGap = 8f;
     private const int BagColumns = 6;     // 칸 한 변 ≈ 90 (가방 화면 칸과 비슷하게)
 
@@ -240,7 +240,7 @@ public sealed class StationFrame
             new Vector2(0.1f, 0.725f), new Vector2(0.9f, 0.775f), TextAnchor.MiddleCenter, NameTag));
 
         Image b = UIFactory.CreatePanel("Bubble", stage, new Color(0.98f, 0.97f, 0.94f, 0.97f),
-            new Vector2(0.17f, 0.80f), new Vector2(0.83f, 0.935f), 14);
+            new Vector2(0.08f, 0.795f), new Vector2(0.92f, 0.975f), 14);
         UIFactory.CreateOutline(b, new Color(0.15f, 0.13f, 0.12f, 0.9f), 14, 2);
         Image tail = UIFactory.CreatePanel("Tail", b.transform, b.color, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), 0);
         tail.sprite = UISprites.Of(UISprites.Glyph.Triangle);
@@ -250,7 +250,9 @@ public sealed class StationFrame
         keeperLine = UIFactory.CreateLabel(b.transform, "", 23, FontStyle.Normal,
             new Vector2(0.06f, 0.08f), new Vector2(0.94f, 0.92f), TextAnchor.MiddleCenter, new Color(0.12f, 0.11f, 0.10f, 1f));
         keeperLine.lineSpacing = 1.1f;
-        Shrink(keeperLine, 16);   // 긴 대사(건설 · 영감)도 판 안에 들어가게 — 23에서 16까지 줄인다
+        // 긴 대사(건설 · 영감)도 판 안에 들어가게 줄인다 — 판을 넓히고 높여서(결정 2-135)
+        // 세 줄 대사가 다른 글보다 눈에 띄게 작아지던 것(16까지 줄었다)을 막는다.
+        FitTextBlock.Apply(keeperLine, UIFactory.Scaled(17));
         bubble = b.gameObject;
 
         // 계산대 — 윗판 · 앞판.

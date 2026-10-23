@@ -1,54 +1,37 @@
 using UnityEngine;
-using UnityEngine.UI;
 
 /// <summary>
-/// 【임시】 튜토리얼 안내 카드 (결정 2-85 → 2-132) — **오른쪽 위, 장비 · 스킬 · 패시브 · 도감 버튼 바로 아래**.
-/// 가운데에 두니 싸울 때 화면을 가렸다(사용자 「너무 거슬려」) — 퀘스트 목록을 오른쪽에 두는 게임들처럼 옮겼다.
+/// 【튜토리얼 안내】 (결정 2-85 → 2-135) — 지금 단계의 글만 들고 있다. 화면에는 따로 카드를 띄우지 않고
+/// 퀘스트 목록(QuestHudUI, 오른쪽 위)의 맨 위 줄로 보인다 — 사용자 「퀘스트 및 튜토리얼 관련은 전부 그 목록에」.
 ///   「튜토리얼 3/12 · 구역」 / 「환목궁을 무기 칸에 걸어라」 / 작은 글씨로 하는 법
-/// 가방 화면(1000)보다 위에 그린다 — 장착 · 줍기처럼 가방 화면 안에서 하는 단계가 있다.
-/// 단계를 마치면 잠깐 초록으로 깜빡인다. 튜토리얼 창 · 손가락 표시는 레이어 · 아트 때.
+/// 단계를 마치면 잠깐 초록으로 깜빡인다(Flashing).
 /// </summary>
 public class TutorialHudUI : MonoBehaviour
 {
     private static TutorialHudUI instance;
 
-    private const float Width = 520f;
-    private const float Height = 140f;
-    private const float Margin = 10f;
-    private const float ButtonRow = 62f;   // 오른쪽 위 버튼 높이 (InventoryScreenUI.HudButtonHeight)
     private const float FlashSeconds = 0.8f;
 
-    private static readonly Color Normal = new(0.08f, 0.10f, 0.14f, 0.72f);
+    public string Header { get; private set; } = string.Empty;
+    public string Title { get; private set; } = string.Empty;
+    public string Hint { get; private set; } = string.Empty;
 
-    private Image card;
-    private RectTransform cardRect;
-    private bool docked;
+    /// <summary>글이 바뀔 때마다 오른다 — 목록이 바로 다시 그리게.</summary>
+    public int Version { get; private set; }
 
-    /// <summary>
-    /// 창이 떠 있으면(가방 · 창고 · 가게 · 대화 …) 퀘스트 띠처럼 숨긴다 (결정 2-134 — 사용자 「아래로 내리지 말고 숨겨」).
-    /// </summary>
-    private void Dock(bool hide)
-    {
-        docked = hide;
-        card.gameObject.SetActive(!hide);
-        cardRect.anchorMin = cardRect.anchorMax = new Vector2(1f, 1f);
-        cardRect.pivot = new Vector2(1f, 1f);
-        cardRect.sizeDelta = new Vector2(Width, Height);
-        cardRect.anchoredPosition = new Vector2(-Margin, HudLayout.TopRightButtonsY - ButtonRow - Margin);
-    }
-    private Text header;
-    private Text title;
-    private Text hint;
     private float flashUntil;
+
+    /// <summary>지금 보여 줄 단계가 있는가. 없으면 null.</summary>
+    public static TutorialHudUI Current => instance != null && !string.IsNullOrEmpty(instance.Title) ? instance : null;
+
+    public bool Flashing => Time.unscaledTime < flashUntil;
 
     public static TutorialHudUI EnsureInstance()
     {
         if (instance != null)
             return instance;
 
-        Canvas canvas = UIFactory.CreateCanvas("TutorialHudCanvas (Runtime)", 1100);
-        instance = canvas.gameObject.AddComponent<TutorialHudUI>();
-        instance.Build(canvas);
+        instance = new GameObject("TutorialHud (Runtime)").AddComponent<TutorialHudUI>();
         return instance;
     }
 
@@ -56,6 +39,7 @@ public class TutorialHudUI : MonoBehaviour
     {
         if (instance != null)
             Destroy(instance.gameObject);
+        instance = null;
     }
 
     private void OnDestroy()
@@ -64,52 +48,22 @@ public class TutorialHudUI : MonoBehaviour
             instance = null;
     }
 
-    private void Build(Canvas canvas)
-    {
-        RectTransform safe = UIFactory.CreateSafeArea(canvas);
-
-        card = UIFactory.CreatePanel("TutorialCard", safe, Normal,
-            new Vector2(1f, 1f), new Vector2(1f, 1f), UIFactory.Radius);
-        card.raycastTarget = false;
-        RectTransform rect = card.rectTransform;
-        rect.pivot = new Vector2(1f, 1f);
-        rect.sizeDelta = new Vector2(Width, Height);
-        cardRect = rect;
-        Dock(false);
-        UIFactory.CreateOutline(card, UIPalette.TextAccent, UIFactory.Radius, 2);
-
-        header = UIFactory.CreateLabel(card.transform, "", 17, FontStyle.Bold,
-            new Vector2(0.03f, 0.70f), new Vector2(0.97f, 0.97f), TextAnchor.MiddleLeft, UIPalette.TextAccent);
-        title = UIFactory.CreateLabel(card.transform, "", 22, FontStyle.Bold,
-            new Vector2(0.03f, 0.34f), new Vector2(0.97f, 0.72f), TextAnchor.MiddleLeft, UIPalette.TextOnGlass);
-        hint = UIFactory.CreateLabel(card.transform, "", 16, FontStyle.Normal,
-            new Vector2(0.03f, 0.04f), new Vector2(0.97f, 0.36f), TextAnchor.MiddleLeft, UIPalette.TextDim);
-
-        foreach (Text t in new[] { header, title, hint })
-            t.raycastTarget = false;
-
-        // 폭이 좁아졌으므로 긴 문장은 글씨를 줄여 칸 안에 넣는다.
-        StationFrame.Shrink(header, 13);
-        StationFrame.Shrink(title, 15);
-        StationFrame.Shrink(hint, 12);
-    }
-
     public void Show(int number, int total, string text, string howTo, string place)
     {
-        header.text = $"튜토리얼 {number}/{total} · {place}";
-        title.text = text;
-        hint.text = howTo;
+        string header = $"튜토리얼 {number}/{total} · {place}";
+        if (header == Header && text == Title && howTo == Hint)
+            return;
+
+        Header = header;
+        Title = text ?? string.Empty;
+        Hint = howTo ?? string.Empty;
+        Version++;
     }
 
     /// <summary>단계를 마쳤다 — 잠깐 초록.</summary>
-    public void Flash() => flashUntil = Time.unscaledTime + FlashSeconds;
-
-    private void Update()
+    public void Flash()
     {
-        if (cardRect != null && docked != GamePause.IsHeld)
-            Dock(GamePause.IsHeld);
-
-        bool flashing = Time.unscaledTime < flashUntil;
-        card.color = flashing ? new Color(0.16f, 0.42f, 0.22f, 0.9f) : Normal;
+        flashUntil = Time.unscaledTime + FlashSeconds;
+        Version++;
     }
 }

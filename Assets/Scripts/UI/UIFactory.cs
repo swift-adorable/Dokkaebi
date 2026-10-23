@@ -22,12 +22,15 @@ public static class UIFactory
     private static Font font;
 
     /// <summary>
-    /// 【글자 배율】 (결정 2-133 — 사용자 「글자 폰트 너무 작은 것들이 많아, 좀 크게」) — 휴대폰에서 읽히게
-    /// 모든 글자를 이만큼 키운다. 글자를 만드는 곳(CreateLabel 등)과 글자 크기 상한을 주는 곳이 같이 쓴다.
+    /// 【글자 크기 단계】 (결정 2-133 → 2-135) — 휴대폰에서 읽히게 키우되, **작은 글자는 많이 · 큰 글자는 조금** 키운다.
+    /// 전부 같은 배율(1.4)로 키웠더니 큰 제목 · 숫자는 너무 커지고(「9.6 / 30.0 kg」이 두 줄) 작은 설명은 여전히 작아
+    /// 크기 차이가 오히려 벌어졌다(사용자 「폰트 크기 비율이 잘못됐다 · 일관성 있게」). 12 → 18 · 16 → 22 · 20 → 26 ·
+    /// 24 → 30 · 28 → 32 · 30 → 34 · 36 → 38 · 40 이상 그대로.
     /// </summary>
-    public const float FontScale = 1.4f;   // 2-133에서 1.2 → 2-134에서 1.4 (사용자 「아직 작아 보여 · 빠듯하면 스크롤로」)
+    public static int Scaled(int size) => size + Mathf.RoundToInt(6f * Mathf.Clamp01((40f - size) / 16f));
 
-    public static int Scaled(int size) => Mathf.RoundToInt(size * FontScale);
+    /// <summary>목록 줄 높이 배율 — 글자가 커진 만큼 줄도 키운다 (결정 2-134).</summary>
+    public const float RowScale = 1.3f;
 
     /// <summary>공용 글꼴. 내장 글꼴을 쓰므로 에셋 의존이 없다.</summary>
     public static Font Font =>
@@ -512,11 +515,12 @@ public static class UIFactory
         Text label = CreateLabel(image.transform, text, fontSize, FontStyle.Bold,
             Vector2.zero, Vector2.one, TextAnchor.MiddleCenter);
 
-        // 【버튼 글자는 칸에 맞춰 줄인다】 (결정 2-133) — 글자를 키우자 좁은 탭(「패시브」)이 두 줄로 접혔다.
-        label.resizeTextMaxSize = label.fontSize;
-        label.resizeTextMinSize = Mathf.Max(12, Mathf.RoundToInt(label.fontSize * 0.55f));
-        label.resizeTextForBestFit = true;
-        label.verticalOverflow = VerticalWrapMode.Truncate;
+        // 【버튼 글자는 접지 않고, 나란한 버튼끼리 같은 크기로】 (결정 2-135) — 좁은 탭(「패시브」)이 두 줄로 접히거나
+        // 혼자 작아지던 것. 원래 크기를 적어 두고, 부모의 UniformButtonText가 한 줄에 들어가는 크기 하나로 맞춘다.
+        label.horizontalOverflow = HorizontalWrapMode.Overflow;
+        label.gameObject.AddComponent<UniformButtonText.Base>().Max = label.fontSize;
+        if (parent != null && !parent.TryGetComponent(out UniformButtonText _))
+            parent.gameObject.AddComponent<UniformButtonText>();
 
         return button;
     }

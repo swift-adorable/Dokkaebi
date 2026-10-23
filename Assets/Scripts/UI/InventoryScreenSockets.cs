@@ -147,9 +147,11 @@ public partial class InventoryScreenUI
                     : occupant != null ? occupant.DisplayName
                     : $"{emptyLabel}\n비어 있음";
 
-        UIFactory.CreateLabel(cell.transform, text, 23, FontStyle.Bold,
+        // 【소켓 글자는 가방 칸 이름과 같은 크기에서 시작한다】 (결정 2-135) — 23이던 것이
+        // 세 줄로 접혀 칸을 꽉 채웠다. 칸 안에 들어가게 줄이기만 한다.
+        FitTextBlock.Apply(UIFactory.CreateLabel(cell.transform, text, 17, FontStyle.Bold,
             new Vector2(0.06f, 0.06f), new Vector2(0.94f, 0.94f), TextAnchor.MiddleCenter,
-            unlocked ? UIPalette.Text : UIPalette.TextDim);
+            unlocked ? UIPalette.Text : UIPalette.TextDim), 12);
     }
 
     /// <summary>

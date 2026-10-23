@@ -82,7 +82,7 @@ public class StashScreenUI : MonoBehaviour
         frame.DrawTabs(new[] { "창고" }, 0, null);
 
         Inventory stash = Stash;
-        frame.CounterNote.text = $"창고 <b>{stash.UsedSlots} / {stash.SlotCapacity}</b>칸\n<size=18>창고에 둔 것은 쓰러져도 남는다</size>";
+        frame.CounterNote.text = $"창고 <b>{stash.UsedSlots} / {stash.SlotCapacity}</b>칸\n<size={UIFactory.Scaled(18)}>창고에 둔 것은 쓰러져도 남는다</size>";
 
         Canvas.ForceUpdateCanvases();
         DrawStash();

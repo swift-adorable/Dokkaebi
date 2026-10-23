@@ -137,7 +137,7 @@ public class LedgerUI : MonoBehaviour
             Place(row.rectTransform, ref y, 90f);
 
             Text label = UIFactory.CreateLabel(row.transform,
-                $"<b>{number}장 · {chapter.Place}</b>\n<size=18>{state}</size>", 22, FontStyle.Normal,
+                $"<b>{number}장 · {chapter.Place}</b>\n<size={UIFactory.Scaled(18)}>{state}</size>", 22, FontStyle.Normal,
                 new Vector2(0.02f, 0f), new Vector2(0.78f, 1f), TextAnchor.MiddleLeft, open ? UIPalette.Text : UIPalette.TextDim);
             label.supportRichText = true;
 
@@ -171,7 +171,7 @@ public class LedgerUI : MonoBehaviour
             if (level == 0)
             {
                 lines.Add("<b>???</b>");
-                lines.Add("<size=18>아직 쓰러뜨린 적이 없다.</size>");
+                lines.Add($"<size={UIFactory.Scaled(18)}>아직 쓰러뜨린 적이 없다.</size>");
             }
             else
             {
@@ -183,21 +183,21 @@ public class LedgerUI : MonoBehaviour
                     if (n > 0) byRarity.Add($"{LedgerTable.RarityName((EnemyRarity)r)} {n}");
                 }
 
-                lines.Add($"<b>{EnemyArchetypeTable.Name(archetype)}</b>  <size=18>쓰러뜨림 {count} ({string.Join(" · ", byRarity)})</size>");
+                lines.Add($"<b>{EnemyArchetypeTable.Name(archetype)}</b>  <size={UIFactory.Scaled(18)}>쓰러뜨림 {count} ({string.Join(" · ", byRarity)})</size>");
 
                 if (level >= 2)
-                    lines.Add($"<size=18>요구하는 답 — {LedgerTable.AnswerName(stats.answer)}</size>");
+                    lines.Add($"<size={UIFactory.Scaled(18)}>요구하는 답 — {LedgerTable.AnswerName(stats.answer)}</size>");
 
                 if (level >= 3)
-                    lines.Add($"<size=18>받는 피해 — {ResistLine(stats.resistances)}</size>");
+                    lines.Add($"<size={UIFactory.Scaled(18)}>받는 피해 — {ResistLine(stats.resistances)}</size>");
 
                 if (level >= 4)
-                    lines.Add($"<size=18>체력 {stats.health} · 피해 {stats.damage} · 방어 {stats.armour:0.#} · 관통 {stats.armourPenetration} (일반 등급)</size>");
+                    lines.Add($"<size={UIFactory.Scaled(18)}>체력 {stats.health} · 피해 {stats.damage} · 방어 {stats.armour:0.#} · 관통 {stats.armourPenetration} (일반 등급)</size>");
             }
 
             int next = LedgerTable.ToNextLevel(count);
             if (next > 0 && level > 0)
-                lines.Add($"<size=16><color=#A8A08C>{next}마리 더 잡으면 더 안다</color></size>");
+                lines.Add($"<size={UIFactory.Scaled(16)}><color=#A8A08C>{next}마리 더 잡으면 더 안다</color></size>");
 
             float height = 34f + lines.Count * 26f;
             Image row = UIFactory.CreatePanel("Row", list.Content, StationFrame.RowColor, Vector2.zero, Vector2.zero);
@@ -240,7 +240,7 @@ public class LedgerUI : MonoBehaviour
             Place(row.rectTransform, ref y, 120f);
 
             Text label = UIFactory.CreateLabel(row.transform,
-                $"<b>{head}</b>\n<size=18>오늘의 물건 — {daily}</size>", 22, FontStyle.Normal,
+                $"<b>{head}</b>\n<size={UIFactory.Scaled(18)}>오늘의 물건 — {daily}</size>", 22, FontStyle.Normal,
                 new Vector2(0.02f, 0f), new Vector2(0.62f, 1f), TextAnchor.MiddleLeft, open ? UIPalette.Text : UIPalette.TextDim);
             label.supportRichText = true;
 
@@ -294,7 +294,7 @@ public class LedgerUI : MonoBehaviour
             Place(row.rectTransform, ref y, 40f + lines * 25f);
 
             Text label = UIFactory.CreateLabel(row.transform,
-                $"<b>{title}</b>  <size=16><color=#A8A08C>{piece.ZoneId}</color></size>\n<size=19>{body}</size>", 21, FontStyle.Normal,
+                $"<b>{title}</b>  <size={UIFactory.Scaled(16)}><color=#A8A08C>{piece.ZoneId}</color></size>\n<size={UIFactory.Scaled(19)}>{body}</size>", 21, FontStyle.Normal,
                 new Vector2(0.02f, 0f), new Vector2(0.98f, 1f), TextAnchor.UpperLeft);
             label.supportRichText = true;
             label.rectTransform.offsetMin = new Vector2(0f, 8f);

@@ -11,7 +11,7 @@ public class CookingUI : MonoBehaviour
 {
     private static CookingUI instance;
 
-    private const float RowHeight = 96f * UIFactory.FontScale;   // 글자 배율만큼 (결정 2-134)
+    private const float RowHeight = 96f * UIFactory.RowScale;   // 글자 배율만큼 (결정 2-134)
     private const float RowGap = 8f;
 
     private static readonly string[] TabNames = { "작음", "보통", "큼" };
@@ -97,7 +97,7 @@ public class CookingUI : MonoBehaviour
             Place(row.rectTransform, ref y, RowHeight);
 
             Text label = UIFactory.CreateLabel(row.transform,
-                $"<b>{NameOf(recipe.OutputId)}</b>\n<size=18>재료: {string.Join(" · ", parts)}</size>",
+                $"<b>{NameOf(recipe.OutputId)}</b>\n<size={UIFactory.Scaled(18)}>재료: {string.Join(" · ", parts)}</size>",
                 22, FontStyle.Normal, new Vector2(0.03f, 0f), new Vector2(0.76f, 1f), TextAnchor.MiddleLeft);
             label.supportRichText = true;
 

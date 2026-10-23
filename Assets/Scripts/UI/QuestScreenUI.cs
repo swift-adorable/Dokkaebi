@@ -122,13 +122,13 @@ public class QuestScreenUI : MonoBehaviour
         string kind = q.Kind == QuestKind.Main ? "메인" : "서브";
         MerchantDefinition giver = StoryTable.Merchant(q.GiverId);
 
-        sb.Append($"<b>{q.Title}</b>  <size=16><color=#A8A08C>{kind}");
+        sb.Append($"<b>{q.Title}</b>  <size={UIFactory.Scaled(16)}><color=#A8A08C>{kind}");
         if (giver != null)
             sb.Append($" · {giver.Name}");
         sb.Append("</color></size>");
 
         if (!string.IsNullOrEmpty(q.Summary))
-            sb.Append($"\n<size=18><color=#C9C2B0>{q.Summary}</color></size>");
+            sb.Append($"\n<size={UIFactory.Scaled(18)}><color=#C9C2B0>{q.Summary}</color></size>");
 
         QuestObjective next = tracker.NextObjective(q);
         int lines = 2 + (string.IsNullOrEmpty(q.Summary) ? 0 : 1 + q.Summary.Length / 40);
@@ -145,7 +145,7 @@ public class QuestScreenUI : MonoBehaviour
 
         if (!string.IsNullOrEmpty(q.RewardText))
         {
-            sb.Append($"\n<size=17><color=#E0B860>보상 — {q.RewardText}</color></size>");
+            sb.Append($"\n<size={UIFactory.Scaled(17)}><color=#E0B860>보상 — {q.RewardText}</color></size>");
             lines++;
         }
 

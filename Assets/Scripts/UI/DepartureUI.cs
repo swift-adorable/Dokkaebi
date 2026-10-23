@@ -20,7 +20,7 @@ public class DepartureUI : MonoBehaviour
     private UIFactory.ScrollList list;
     private Text nightLabel;
 
-    private const float RowHeight = 92f * UIFactory.FontScale;   // 글자 배율만큼 (결정 2-134)
+    private const float RowHeight = 92f * UIFactory.RowScale;   // 글자 배율만큼 (결정 2-134)
     private const float RowGap = 10f;
 
     public static void Open()
