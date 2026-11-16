@@ -199,9 +199,12 @@ public class BuildingState
 /// </summary>
 public static class BunkerLayout
 {
-    /// <summary>방 크기 (m). 가로 22 · 세로 14. 벙커 체류는 3분 이내다(Progression 2절).</summary>
-    public const float RoomWidth = 22f;
-    public const float RoomDepth = 14f;
+    /// <summary>
+    /// 방 크기 (m). 가로 32 · 세로 20. 벙커 체류는 3분 이내다(Progression 2절).
+    /// 22 × 14 에서 넓혔다 — 건물 그림(PixelLab 정면 도트, 캐릭터와 같은 도트 굵기)이 가로 5~7m 라 다섯 채가 들어가게 (2026-11-16).
+    /// </summary>
+    public const float RoomWidth = 32f;
+    public const float RoomDepth = 20f;
 
     /// <summary>벽에서 띄우는 거리. 벽에 붙이면 뒤로 돌아갈 수 없다.</summary>
     public const float WallMargin = 0.75f;
@@ -213,20 +216,20 @@ public static class BunkerLayout
     public static readonly Vector3 Spawn = Vector3.zero;
 
     /// <summary>고정 자리 — 창고 · 파밍 출발 · 설계도 테이블.</summary>
-    public static readonly Vector3 StashPosition = new(-6f, 0f, RoomDepth * 0.5f - 2f);
+    public static readonly Vector3 StashPosition = new(-9f, 0f, RoomDepth * 0.5f - 2f);
     public static readonly Vector3 DeparturePosition = new(0f, 0f, -RoomDepth * 0.5f + 2f);
 
     /// <summary>덕코프처럼 「플레이어 스폰 지점 오른쪽」 [확인됨 — 위키 가이드].</summary>
     public static readonly Vector3 BlueprintPosition = new(3f, 0f, 0f);
 
     /// <summary>고목 뿌리 샘 (결정 2-73) — 창고의 맞은편 벽. 처음부터 있다.</summary>
-    public static readonly Vector3 SpringPosition = new(6f, 0f, RoomDepth * 0.5f - 2f);
+    public static readonly Vector3 SpringPosition = new(7f, 0f, RoomDepth * 0.5f - 2f);
 
     /// <summary>
     /// 약탕간 자리 — 샘 바로 오른쪽 (결정 2-104 · 본문 326 「샘가 저 빈자리에」 · 342 「샘가에 약탕간을 세운다」).
     /// 샘은 소굴에 하나뿐이고 약탕간은 그 곁에만 선다 — 옮길 수 없다.
     /// </summary>
-    public static readonly BuildingPose ApothecaryPose = new(8.5f, RoomDepth * 0.5f - 1.7f, 0);
+    public static readonly BuildingPose ApothecaryPose = new(10.75f, RoomDepth * 0.5f - 3.25f, 0);   // 샘 자리 오른쪽 끝에서 0.5m · 깊이 4.5m 가 북쪽 벽 안에 들게
 
     /// <summary>정해진 자리에만 서는 건물인가 — 지금은 약탕간 하나.</summary>
     public static bool TryFixedPose(string buildingId, out BuildingPose pose)

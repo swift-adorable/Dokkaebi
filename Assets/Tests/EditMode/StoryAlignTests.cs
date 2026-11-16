@@ -39,9 +39,11 @@ namespace Dokkaebi.Tests
                 BunkerLayout.FixedRect(BunkerLayout.BlueprintPosition)
             }));
 
-            // 샘 곁 — 2m 안.
-            Vector2 spring = new(BunkerLayout.SpringPosition.x, BunkerLayout.SpringPosition.z);
-            Assert.Less(Vector2.Distance(rect.center, spring), 3f);
+            // 샘 곁 — 약탕간 자리 가장자리가 샘 자리에서 1m 안 (건물이 커져 가운데끼리 거리 대신 틈을 잰다).
+            Rect spring = BunkerLayout.FixedRect(BunkerLayout.SpringPosition);
+            float gapX = Mathf.Max(0f, Mathf.Max(spring.xMin - rect.xMax, rect.xMin - spring.xMax));
+            float gapZ = Mathf.Max(0f, Mathf.Max(spring.yMin - rect.yMax, rect.yMin - spring.yMax));
+            Assert.LessOrEqual(Mathf.Max(gapX, gapZ), 1f);
         }
 
         [Test]

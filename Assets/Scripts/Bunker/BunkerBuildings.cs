@@ -167,6 +167,9 @@ public class BunkerBuildings : MonoBehaviour
             pot.AddComponent<BunkerStation>().Setup(BunkerStation.Kind.Brewing, 1.4f);
         }
 
+        // 도트 한옥 그림이 있으면 상자 대신 그림판을 세운다 (부딪힘 · 자리는 그대로).
+        BuildingSprite.TryAttach(root.transform, definition);
+
         return root;
     }
 

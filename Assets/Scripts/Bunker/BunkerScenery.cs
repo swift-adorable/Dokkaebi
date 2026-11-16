@@ -11,7 +11,7 @@ using UnityEngine;
 public class BunkerScenery : MonoBehaviour
 {
     private static readonly Vector3 BroomAt = new(-2.6f, 0f, 5.6f);
-    private static readonly Vector3 GateAt = new(0f, 0f, 6.5f);
+    private static readonly Vector3 GateAt = new(0f, 0f, BunkerLayout.RoomDepth * 0.5f - 0.5f);   // 북쪽 벽 바로 앞
 
     private static readonly (string tablet, Color color)[] Tablets =
     {
@@ -131,7 +131,12 @@ public class BunkerScenery : MonoBehaviour
             MerchantDefinition def = StoryTable.Merchant(m.id);
             if (def != null && !string.IsNullOrEmpty(def.BuildingId)
                 && BuildingManager.State.TryGetPose(def.BuildingId, out BuildingPose pose))
-                at = new Vector3(pose.X, 0f, pose.Z - 1.4f);
+            {
+                // 가게 앞 — 건물 자리 앞쪽 가장자리에서 0.6m 앞에 선다.
+                BuildingDefinition building = BuildingTable.Find(def.BuildingId);
+                float front = building != null ? building.Depth * 0.5f + 0.6f : 1.4f;
+                at = new Vector3(pose.X, 0f, pose.Z - front);
+            }
 
             if (existing == null)
             {
