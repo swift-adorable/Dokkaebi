@@ -57,7 +57,7 @@ public sealed class StationFrame
     public const int PillRadius = 30;
     public const float RowHeight = 86f * UIFactory.RowScale;   // 참고 그림의 줄 높이 86(1080 기준)에 글자 배율을 곱한다 (결정 2-134)
     public const float RowGap = 8f;
-    private const int BagColumns = 6;     // 칸 한 변 ≈ 90 (가방 화면 칸과 비슷하게)
+    private const int FallbackBagColumns = 6;     // 칸 크기는 UIFactory.ItemCellSize — 열 수는 폭에서 정한다
 
     // ── 자리 ──────────────────────────────────────────────────────────
     public GameObject Root { get; private set; }
@@ -96,6 +96,21 @@ public sealed class StationFrame
     private Text bagTitle;
     private Text bagFoot;
     private UIFactory.ScrollList bagGrid;
+
+    // ── 여러 개 고르기 (사용자 2026-11-17 「상점 · 창고 다중 선택해서 판매 혹은 창고에 넣기」) ──
+    // 화면이 EnableMultiSelect 로 켜면 내 가방 위에 「여러 개 선택」 단추가 생긴다. 고르는 동안 칸을 누르면
+    // 상세 메뉴 대신 고름 · 풂이 바뀌고, 아래에 「n개 팔기 +엽전」 같은 한 번에 처리하는 단추가 뜬다.
+    private Button selectToggle;
+    private Text selectToggleLabel;
+    private Button batchButton;
+    private Text batchLabel;
+    private bool selecting;
+    private readonly List<ItemStack> selected = new();
+    private Func<List<ItemStack>, string> batchDescribe;
+    private Action<List<ItemStack>> batchApply;
+    private Func<ItemStack, bool> lastUsable;
+    private Action<RectTransform, ItemStack> lastTap;
+    private string lastFoot;
     private readonly Action onClose;
 
     // ────────────────────────────────── 만들기
@@ -290,6 +305,14 @@ public sealed class StationFrame
         bagFoot = UIFactory.CreateLabel(Right, "", 18, FontStyle.Normal,
             new Vector2(0.01f, 0.115f), new Vector2(1f, 0.165f), TextAnchor.MiddleLeft, UIPalette.TextDim);
 
+        selectToggle = Pill(Right, "여러 개 선택", new Vector2(0f, 0.93f), new Vector2(0.36f, 1f), PillDark, ToggleSelecting, 20);
+        selectToggleLabel = selectToggle.GetComponentInChildren<Text>();
+        selectToggle.gameObject.SetActive(false);
+
+        batchButton = Pill(Right, "", new Vector2(0f, 0.107f), new Vector2(1f, 0.168f), PillAction, ApplyBatch, 22);
+        batchLabel = batchButton.GetComponentInChildren<Text>();
+        batchButton.gameObject.SetActive(false);
+
         Buttons = UIFactory.CreateRegion("Buttons", Right, new Vector2(0f, 0f), new Vector2(1f, 0.095f));
     }
 
@@ -323,6 +346,15 @@ public sealed class StationFrame
     /// <summary>닫는다 — 흐린 뒤 화면을 놓아준다. HUD는 HudGuard가 되돌린다.</summary>
     public void Hide()
     {
+        if (selecting)
+        {
+            selecting = false;
+            selected.Clear();
+            selectToggleLabel.text = "여러 개 선택";
+            selectToggle.image.color = PillDark;
+            batchButton.gameObject.SetActive(false);
+            bagFoot.gameObject.SetActive(true);
+        }
         ItemActionMenu.Close();
         if (Root != null)
             Root.SetActive(false);
@@ -400,19 +432,76 @@ public sealed class StationFrame
     }
 
     /// <summary>
+    /// 내 가방에서 여러 개를 골라 한 번에 처리하게 한다 — 화면을 만들 때 한 번 부른다.
+    /// describe: 고른 것들 → 단추 글 (예: 「3개 팔기 +120엽전」) · apply: 고른 것들을 처리한다(끝나면 화면이 다시 그린다).
+    /// 고를 수 있는 칸은 DrawBag 의 usable 이 true 인 칸뿐이다.
+    /// </summary>
+    public void EnableMultiSelect(Func<List<ItemStack>, string> describe, Action<List<ItemStack>> apply)
+    {
+        batchDescribe = describe;
+        batchApply = apply;
+        selectToggle.gameObject.SetActive(true);
+        SetSelecting(false);
+    }
+
+    private void ToggleSelecting() => SetSelecting(!selecting);
+
+    private void SetSelecting(bool on)
+    {
+        selecting = on;
+        selected.Clear();
+        ItemActionMenu.Close();
+        selectToggleLabel.text = on ? "선택 끝" : "여러 개 선택";
+        selectToggle.image.color = on ? Accent : PillDark;
+        RedrawBag();
+    }
+
+    private void RedrawBag()
+    {
+        if (IsOpen && (lastTap != null || lastUsable != null))
+            DrawBag(lastUsable, lastTap, lastFoot);
+    }
+
+    private void ToggleChosen(ItemStack stack)
+    {
+        if (!selected.Remove(stack))
+            selected.Add(stack);
+        RedrawBag();
+    }
+
+    private void ApplyBatch()
+    {
+        if (selected.Count == 0 || batchApply == null)
+            return;
+        var chosen = new List<ItemStack>(selected);
+        selecting = false;
+        selected.Clear();
+        selectToggleLabel.text = "여러 개 선택";
+        selectToggle.image.color = PillDark;
+        batchApply(chosen);   // 화면이 처리한 뒤 다시 그린다(DrawBag)
+    }
+
+    /// <summary>
     /// 오른쪽 내 가방 — 가방 칸 순서 그대로. usable이 false인 칸은 어둡게. 칸을 누르면 onTap(칸, 물건).
     /// </summary>
     public void DrawBag(Func<ItemStack, bool> usable, Action<RectTransform, ItemStack> onTap, string foot = null)
     {
         UIFactory.ClearChildren(bagGrid.Content);
+        lastUsable = usable;
+        lastTap = onTap;
+        lastFoot = foot;
 
         Inventory bag = PlayerInventory.EnsureInstance().Bag;
         IReadOnlyList<ItemStack> stacks = bag.Stacks;
+
+        // 팔거나 옮겨서 가방에서 빠진 것은 고른 목록에서도 뺀다.
+        selected.RemoveAll(s => s == null || s.IsEmpty || !Contains(stacks, s));
 
         bagTitle.text = $"내 가방 ({bag.UsedSlots}/{bag.SlotCapacity})";
         bagFoot.text = foot ?? $"무게 {bag.TotalWeight:0.0} / {bag.WeightLimit:0.0} kg";
 
         int cells = Mathf.Max(bag.SlotCapacity, stacks.Count);
+        int BagColumns = UIFactory.ItemColumns(bagGrid.Viewport, FallbackBagColumns);
         UIFactory.SquareGridMetrics(bagGrid.Viewport, BagColumns, cells, 3,
             out int rows, out float height, out float padX, out float padY);
         bagGrid.Content.sizeDelta = new Vector2(0f, height);
@@ -422,20 +511,45 @@ public sealed class StationFrame
             UIFactory.GetCellAnchors(i, BagColumns, rows, padX, padY, out Vector2 min, out Vector2 max);
             ItemStack stack = i < stacks.Count ? stacks[i] : null;
 
-            Image cell = ItemCell.Draw($"Bag_{i}", bagGrid.Content, min, max, stack, chosen: false, null);
+            bool chosen = selecting && stack != null && selected.Contains(stack);
+            Image cell = ItemCell.Draw($"Bag_{i}", bagGrid.Content, min, max, stack, chosen, null);
             if (stack?.Definition == null)
                 continue;
 
-            if (usable != null && !usable(stack))
+            bool canUse = usable == null || usable(stack);
+            if (!canUse)
                 cell.gameObject.AddComponent<CanvasGroup>().alpha = 0.38f;
 
-            if (onTap == null || !cell.TryGetComponent(out Button button))
+            if (!cell.TryGetComponent(out Button button))
                 continue;
 
             RectTransform cellRect = cell.rectTransform;
             ItemStack captured = stack;
-            button.onClick.AddListener(() => onTap(cellRect, captured));
+            if (selecting)
+            {
+                if (canUse)
+                    button.onClick.AddListener(() => ToggleChosen(captured));
+            }
+            else if (onTap != null)
+                button.onClick.AddListener(() => onTap(cellRect, captured));
         }
+
+        // 고르는 중이면 아래 무게 줄 자리에 「n개 팔기」 단추를 띄운다.
+        bool showBatch = selecting && selected.Count > 0 && batchDescribe != null;
+        batchButton.gameObject.SetActive(showBatch);
+        bagFoot.gameObject.SetActive(!showBatch);
+        if (showBatch)
+            batchLabel.text = batchDescribe(new List<ItemStack>(selected));
+        else if (selecting)
+            bagFoot.text = "팔거나 넣을 칸을 누르세요 — 다시 누르면 풀립니다";
+    }
+
+    private static bool Contains(IReadOnlyList<ItemStack> stacks, ItemStack stack)
+    {
+        for (int i = 0; i < stacks.Count; i++)
+            if (stacks[i] == stack)
+                return true;
+        return false;
     }
 
     /// <summary>가방 칸을 눌렀을 때 기본 — 상세보기 하나.</summary>

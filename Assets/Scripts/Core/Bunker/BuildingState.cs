@@ -202,9 +202,10 @@ public static class BunkerLayout
     /// <summary>
     /// 방 크기 (m). 가로 32 · 세로 20. 벙커 체류는 3분 이내다(Progression 2절).
     /// 22 × 14 에서 넓혔다 — 건물 그림(PixelLab 정면 도트, 캐릭터와 같은 도트 굵기)이 가로 5~7m 라 다섯 채가 들어가게 (2026-11-16).
+    /// 32 × 20 에서 40 × 26 으로 한 번 더 — 사용자 「소굴이 좀 작은 것 같아」 (2026-11-17).
     /// </summary>
-    public const float RoomWidth = 32f;
-    public const float RoomDepth = 20f;
+    public const float RoomWidth = 40f;
+    public const float RoomDepth = 26f;
 
     /// <summary>벽에서 띄우는 거리. 벽에 붙이면 뒤로 돌아갈 수 없다.</summary>
     public const float WallMargin = 0.75f;
@@ -248,6 +249,22 @@ public static class BunkerLayout
     public const float FixedSize = 2f;
 
     public static float SnapValue(float value) => Mathf.Round(value / Snap) * Snap;
+
+    /// <summary>
+    /// 배치 그림자 앞쪽 가장자리와 플레이어 사이 틈 (m). 화면 위쪽이 +Z다.
+    /// 깊이 4.5m 건물을 2.5m 앞에 두었더니 플레이어 자리와 겹쳐 어디서나 빨간색이었다 — 거리를 건물 깊이에 맞춘다.
+    /// </summary>
+    public const float GhostGap = 1f;
+
+    /// <summary>플레이어가 선 바닥 — 그 위에는 놓지 못한다(몸이 건물 안에 갇힌다).</summary>
+    public static Rect PlayerRect(Vector3 player) => new(player.x - 0.6f, player.z - 0.6f, 1.2f, 1.2f);
+
+    /// <summary>플레이어 앞(+Z)에 건물을 놓을 자리 — 앞쪽 가장자리가 플레이어 자리에서 GhostGap 만큼 떨어진다.</summary>
+    public static BuildingPose PoseAhead(BuildingDefinition definition, Vector3 player, int turns)
+    {
+        float depth = (turns & 1) == 1 ? definition.Width : definition.Depth;   // 옆으로 돌리면 폭이 깊이가 된다
+        return new BuildingPose(SnapValue(player.x), SnapValue(player.z + depth * 0.5f + GhostGap), turns);
+    }
 
     /// <summary>회전을 반영한 바닥 사각형.</summary>
     public static Rect Footprint(BuildingDefinition definition, BuildingPose pose)

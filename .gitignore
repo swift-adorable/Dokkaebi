@@ -124,3 +124,29 @@ TestRun-*.log
 
 # iOS 빌드 출력 (프로젝트 루트에 만든 경우)
 /iOS/
+
+# ── 받은 무료 팩 그림 — 이 저장소는 공개라 「재배포 금지」 그림은 올리지 않는다 (2026-11-18) ──
+# 출처 · 조건: ~/Dokkaebi-art/sources.csv · ~/Dokkaebi-art/inbox/받은_팩_라이선스.md (이 Mac 에만 있다)
+# nanasha Samurai Tales (재배포 금지 · AI 학습 금지)
+/Assets/Resources/Wild/
+/Assets/Resources/Wild.meta
+# nanasha Dark Dungeons clutter
+/Assets/Resources/Props/
+/Assets/Resources/Props.meta
+# vibeforge Korean Folklore Enemies (재배포 금지)
+/Assets/Resources/Enemies/
+/Assets/Resources/Enemies.meta
+# 불꽃 팩
+/Assets/Resources/Wisp/
+/Assets/Resources/Wisp.meta
+# Texture Pixel (조건 확인 안 됨)
+/Assets/Resources/Floor/tex_*
+# nanasha 바닥 타일
+/Assets/Art/PixelSource/
+/Assets/Art/PixelSource.meta
+# nanasha 타일로 구운 바닥
+/Assets/Art/Generated/Chapter0_PixelGround.png
+/Assets/Art/Generated/Chapter0_PixelGround.png.meta
+# 플레이 중 찌꺼기
+/Assets/_Recovery/
+/Assets/_Recovery.meta

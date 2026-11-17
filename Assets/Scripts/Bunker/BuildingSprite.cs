@@ -12,6 +12,7 @@ using UnityEngine.Rendering;
 ///   · 도트 밀도를 캐릭터와 맞춘다 — 캐릭터는 키 2m 가 47칸(CharacterSprite.BodyPixels)이라, 건물 그림도 1m 에 같은 칸 수가
 ///     되도록 불러올 때 줄여 쓴다(파일은 그대로). 줄인 그림은 점 필터라 캐릭터처럼 또렷한 도트로 보인다
 ///   · 이름표 — 가게 이름은 지붕 위로, 부뚜막 · 약탕 이름은 건물 앞 땅 위로 옮긴다
+///   · 등불 — 소굴이 어두워 그림 앞에 따뜻한 점 빛 하나를 단다 (BunkerMood.Lamp)
 ///   · 그림자 — 캐릭터 판처럼 판이 해 그림자를 땅에 드리우고, 다른 그림자도 받는다
 /// 그림이 없으면 아무것도 하지 않는다(상자 그대로).
 /// </summary>
@@ -34,9 +35,15 @@ public static class BuildingSprite
 
     public static bool TryAttach(Transform root, BuildingDefinition definition)
     {
-        Texture2D source = Resources.Load<Texture2D>($"{Folder}/{definition.Id}");
-        if (source == null)
-            return false;
+        // 정적 캐시에 붙잡아 둔다 — 그림이 MaterialPropertyBlock 에만 걸려 있으면 장면을 새로 불러온 뒤
+        // 안 쓰는 에셋 정리(UnloadUnusedAssets)에 내려가 회색 판만 남았다 (파밍에서 돌아오거나 죽고 돌아올 때, 2026-11-17).
+        if (!cache.TryGetValue(definition.Id, out Texture2D source) || source == null)
+        {
+            source = Resources.Load<Texture2D>($"{Folder}/{definition.Id}");
+            if (source == null)
+                return false;
+            cache[definition.Id] = source;
+        }
 
         // 진짜 도트 그림(작은 그림)은 그림 한 칸 = 캐릭터 한 칸으로 그대로 세운다 — 크기는 그림이 정한다.
         // 큰 그림(AI 가 1024 로 그린 가짜 도트)만 건물 자리 폭에 맞춰 캐릭터 밀도로 줄인다.
@@ -68,6 +75,9 @@ public static class BuildingSprite
         block.SetTexture("_BaseMap", tex);
         block.SetTexture("_MainTex", tex);
         renderer.SetPropertyBlock(block);
+
+        // 소굴은 어두워 가게 앞에 등불 하나 (BunkerMood).
+        BunkerMood.Lamp(card.transform.parent, "Shop", front + new Vector3(0f, 1f, -1f), BunkerMood.Fire, 6f, 7f);
 
         // 이름표가 그림 한가운데를 가리지 않게 — 가게 이름은 지붕 위, 곁 시설(부뚜막 · 약탕) 이름은 건물 앞 땅 위.
         Vector3 roofTop = front + tilt * Vector3.up * (height + 0.4f);
@@ -144,7 +154,7 @@ public static class BuildingSprite
     }
 
     /// <summary>아래 가운데가 원점인 1×1 판. 앞이 -z(카메라 쪽).</summary>
-    private static Mesh Quad()
+    internal static Mesh Quad()
     {
         if (quad != null)
             return quad;
@@ -161,7 +171,7 @@ public static class BuildingSprite
     /// 캐릭터 판과 같은 재질(빛 받음 · 알파 잘라내기 · 양면) — 아트 꾸러미의 나무 판 재질을 복사한다.
     /// 깊이를 써서 캐릭터와 앞뒤가 맞고, 밤 · 날씨 빛도 캐릭터와 똑같이 받는다. 꾸러미가 없으면 URP Lit에 같은 설정.
     /// </summary>
-    private static Material Material()
+    internal static Material Material()
     {
         if (material != null)
             return material;

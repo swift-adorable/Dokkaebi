@@ -298,5 +298,20 @@ namespace Dokkaebi.Tests
 
             ShopManager.Reset();
         }
+
+        [Test]
+        public void 배치_그림자는_플레이어_자리와_겹치지_않는다()
+        {
+            // 깊이 4.5m 건물을 2.5m 앞에 두면 플레이어 자리와 겹쳐 어디서나 빨간색이었다 (2026-11-17).
+            var spots = new[] { Vector3.zero, new Vector3(-1.2f, 0f, -3.3f), new Vector3(4.74f, 0f, 2.26f), new Vector3(-7.76f, 0f, 0.24f) };
+            foreach (BuildingDefinition definition in BuildingTable.All)
+                for (int turns = 0; turns < 4; turns++)
+                    foreach (Vector3 player in spots)
+                    {
+                        Rect footprint = BunkerLayout.Footprint(definition, BunkerLayout.PoseAhead(definition, player, turns));
+                        Assert.IsFalse(footprint.Overlaps(BunkerLayout.PlayerRect(player)),
+                            $"{definition.Id} · 회전 {turns} · 플레이어 {player}");
+                    }
+        }
     }
 }

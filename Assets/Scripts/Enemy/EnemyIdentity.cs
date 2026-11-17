@@ -128,6 +128,9 @@ public class EnemyIdentity : MonoBehaviour, IPoolable
         // 재생 · 껍질 · 분열성 · 육중을 몸에 닿게 한다 (결정 2-117).
         EnemyAffixEffects.ApplyTo(gameObject, profile);
 
+        // 도트 그림 — 유형에 맞는 설화 적 그림을 입힌다(없는 유형은 예전 몸).
+        EnemySprite.Dress(gameObject, profile.archetype);
+
         OnProfileChanged?.Invoke(profile);
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD

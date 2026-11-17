@@ -43,6 +43,8 @@ public class ChapterArt : MonoBehaviour
         var builder = new ChapterArtBuilder(map, kit);
         builder.BuildAll();
         Pieces = builder.Emit(transform);
+        if (PixelDress.Has(chapter))
+            Pieces += PixelDress.Build(chapter, transform);   // 도트 꾸밈 — 자식 이름이 「~px_」라 Clear 가 같이 치운다
     }
 
     private void Clear()

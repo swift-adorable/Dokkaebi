@@ -255,6 +255,8 @@ public class StoryRaidDirector : MonoBehaviour
         Vector3 at = giftSpots.Count > 0
             ? giftSpots[0]
             : player.position + new Vector3(dir.x, 0f, dir.y) * ChapterZeroTable.GiftDistance;
+        // 자리 표(ZoneMap)는 땅 높이(y = 0)라 그대로 놓으면 몸 가운데가 땅에 닿아 아래 절반이 묻혔다 (2026-11-17 「땅에 박힌 것처럼」).
+        at.y = prefab.transform.position.y;
         GameObject body = PoolManager.EnsureInstance().Spawn(prefab, at, Quaternion.identity);
 
         if (body == null)

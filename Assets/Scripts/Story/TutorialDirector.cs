@@ -100,6 +100,16 @@ public class TutorialDirector : MonoBehaviour
             if (completed > 0 && currentIndex >= 0)
                 TutorialHudUI.EnsureInstance().Flash();
 
+            // 튜토리얼인 줄 알게 (결정 2-138) — 처음 뜰 때 소개 한 줄, 그 뒤 단계가 바뀔 때마다 가운데에 「튜토리얼 · 할 일」.
+            if (index >= 0)
+            {
+                string what = TutorialTable.Steps[index].Text;
+                if (currentIndex < 0 && index == 0)
+                    StoryDialogueUI.ShowBanner("튜토리얼 — 0장에서 싸우고 줍고 철수하는 법을 익힌다 · 할 일은 오른쪽 위 초록 줄", 4f);
+                else
+                    StoryDialogueUI.ShowBanner($"튜토리얼 · {what}", 2.5f);
+            }
+
             currentIndex = index;
         }
 

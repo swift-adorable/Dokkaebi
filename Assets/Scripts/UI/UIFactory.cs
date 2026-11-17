@@ -402,6 +402,24 @@ public static class UIFactory
     /// 가로와 세로의 기준 길이가 다르므로 같은 픽셀 간격이라도 값이 다르다.
     /// 이 환산을 빼먹으면 세로 여백만 벌어진다 (여러 번 겪은 실수다).
     /// </summary>
+    /// <summary>
+    /// 아이템 칸 한 변의 목표 길이 (기준 해상도 1920 × 1080 의 캔버스 px) — 모든 아이템 격자가 같은 칸 크기를 쓴다.
+    /// 예전엔 화면마다 열 수를 정해 칸이 ≈ 85~90 (가방 · 가게 · 창고)과 ≈ 116 (전리품)으로 갈렸다.
+    /// 사용자 「중간쯤으로」 (2026-11-17) → 100. 판 폭이 정해져 있어 열 수로 나누면 화면마다 ±8 정도 차이는 남는다.
+    /// </summary>
+    public const float ItemCellSize = 100f;
+
+    /// <summary>격자 폭에서 열 수를 정한다 — 칸이 ItemCellSize 에 가장 가깝게. 폭을 아직 모르면 fallback.</summary>
+    public static int ItemColumns(RectTransform viewport, int fallback, int min = 3)
+    {
+        Canvas.ForceUpdateCanvases();
+        float width = viewport != null ? viewport.rect.width : 0f;
+        return ItemColumns(width, fallback, min);
+    }
+
+    public static int ItemColumns(float width, int fallback, int min = 3)
+        => width > 1f ? Mathf.Max(min, Mathf.RoundToInt(width / ItemCellSize)) : fallback;
+
     public static void SquareGridMetrics(
         RectTransform viewport, int columns, int cellCount, int minRows,
         out int rows, out float contentHeight, out float paddingX, out float paddingY)

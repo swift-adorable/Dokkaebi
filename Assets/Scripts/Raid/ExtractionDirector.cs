@@ -23,7 +23,7 @@ public class ExtractionDirector : MonoBehaviour
     private float nextDiscover;
     private ExtractionChannel channel = new();
 
-    /// <summary>튜토리얼 0-1 — 고목에 닿으면 바로 소굴로 (결정 2-104).</summary>
+    /// <summary>닿기만 하면 들어가는 구역 — 지금은 없다(결정 2-138, 전에는 튜토리얼 0-1 · 2-104).</summary>
     private bool arriveOnTouch;
     private Transform player;
     private Health playerHealth;

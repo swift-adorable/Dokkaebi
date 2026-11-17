@@ -35,7 +35,7 @@ public class ExchangeWindowUI : MonoBehaviour
         Stash = 1
     }
 
-    private const int Columns = 5;
+    private const int FallbackColumns = 5;   // 칸 크기는 UIFactory.ItemCellSize — 열 수는 폭에서 정한다
 
     /// <summary>격자가 최소한 이만큼은 줄을 그린다. 빈 칸이 곧 남은 자리다.</summary>
     private const int MinRows = 2;
@@ -410,6 +410,7 @@ public class ExchangeWindowUI : MonoBehaviour
             ? Mathf.Max(stash.SlotCapacity, stashStacks.Count)
             : Mathf.Max(other.Capacity, lootCells.Count);
 
+        int Columns = UIFactory.ItemColumns(grid.Viewport, FallbackColumns);
         UIFactory.SquareGridMetrics(grid.Viewport, Columns, cells, MinRows,
             out int rows, out float height, out float padX, out float padY);
 

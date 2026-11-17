@@ -21,12 +21,20 @@ public class QuestHudUI : MonoBehaviour
     private const float PollInterval = 0.5f;
     private const float ToastSeconds = 3.5f;
     private const int MaxQuests = 4;           // 이보다 많으면 「외 n개」
+    /// <summary>
+    /// 목록 아래 끝은 화면 위에서 이 비율까지 — 오른쪽 아래 터치 버튼(대시 · 파밍 · 시설) 더미를 덮지 않게.
+    /// 넘치면 퀘스트를 뒤에서부터 「외 n개」로 접는다 (2026-11-17 사용자 「버튼이 다른 UI에 가려지는 것 없나」).
+    /// </summary>
+    private const float MaxBottom = 0.41f;   // 구역의 시설 버튼(파밍 위) 윗끝이 화면 위에서 약 43%
 
     private static readonly Color EntryBack = new(0.08f, 0.10f, 0.14f, 0.78f);
     private static readonly Color FlashBack = new(0.16f, 0.42f, 0.22f, 0.9f);
     private static readonly Color MainColor = new(1f, 0.82f, 0.38f);
     private static readonly Color SubColor = new(0.6f, 0.82f, 1f);
     private static readonly Color TutorialColor = new(0.55f, 0.95f, 0.6f);
+    /// <summary>튜토리얼 줄 바탕 — 퀘스트 줄(짙은 남색)과 다른 짙은 초록. 새 단계면 밝은 초록과 오가며 숨 쉰다 (결정 2-138).</summary>
+    private static readonly Color TutorialBack = new(0.07f, 0.24f, 0.14f, 0.9f);
+    private static readonly Color TutorialGlow = new(0.18f, 0.48f, 0.28f, 0.95f);
 
     private RectTransform root;
     private readonly List<(Image back, Text text)> entries = new();
@@ -147,7 +155,9 @@ public class QuestHudUI : MonoBehaviour
 
         // 튜토리얼 단계를 마쳤다 — 그 줄이 잠깐 초록.
         if (tutorial != null && tutorialEntry >= 0 && tutorialEntry < entries.Count && entries[tutorialEntry].back.gameObject.activeSelf)
-            entries[tutorialEntry].back.color = tutorial.Flashing ? FlashBack : EntryBack;
+            entries[tutorialEntry].back.color = tutorial.Flashing ? FlashBack
+                : tutorial.IsNew ? Color.Lerp(TutorialBack, TutorialGlow, 0.5f + 0.5f * Mathf.Sin(Time.unscaledTime * 6f))
+                : TutorialBack;
 
         pollTimer -= Time.unscaledDeltaTime;
         if (pollTimer <= 0f)
@@ -188,18 +198,42 @@ public class QuestHudUI : MonoBehaviour
         TutorialHudUI tutorial = TutorialHudUI.Current;
         if (tutorial != null)
         {
-            string text = Rich(TutorialColor, tutorial.Header, 16) + "\n" + Rich(UIPalette.Text, tutorial.Title, 20, bold: true);
+            string text = Rich(TutorialColor, tutorial.Header, 16, bold: true) + "\n" + Rich(UIPalette.Text, tutorial.Title, 20, bold: true);
             if (!string.IsNullOrEmpty(tutorial.Hint))
                 text += "\n" + Rich(UIPalette.TextDim, tutorial.Hint, 16);
             lines.Add((text, true));
         }
 
+        int fixedLines = lines.Count;
+        for (int cap = MaxQuests; cap >= 0; cap--)
+        {
+            lines.RemoveRange(fixedLines, lines.Count - fixedLines);
+            AddQuestLines(tracker, lines, cap);
+            if (!Draw(lines) || cap == 0 || Fits())
+                return;
+            drawn = null;   // 줄여서 다시 그린다 — 같은 글 건너뛰기에 걸리지 않게
+        }
+    }
+
+    /// <summary>목록이 화면 위 MaxBottom 안에 드는가.</summary>
+    private bool Fits()
+    {
+        LayoutRebuilder.ForceRebuildLayoutImmediate(root);
+        var parent = root.parent as RectTransform;
+        if (parent == null)
+            return true;
+        float bottom = -root.anchoredPosition.y + root.rect.height;
+        return bottom <= parent.rect.height * MaxBottom;
+    }
+
+    private static void AddQuestLines(QuestTracker tracker, List<(string text, bool tutorial)> lines, int cap)
+    {
         int shown = 0, hidden = 0;
         foreach (QuestDefinition q in tracker.Visible())
         {
             if (tracker.StateOf(q) != QuestState.Active)
                 continue;
-            if (shown >= MaxQuests)
+            if (shown >= cap)
             {
                 hidden++;
                 continue;
@@ -215,16 +249,20 @@ public class QuestHudUI : MonoBehaviour
 
         if (hidden > 0)
             lines.Add((Rich(UIPalette.TextDim, $"외 {hidden}개 — 눌러서 전부 보기", 16), false));
+    }
 
+    /// <summary>줄들을 그린다. 보이지 않거나 같은 글이라 그릴 것이 없으면 false.</summary>
+    private bool Draw(List<(string text, bool tutorial)> lines)
+    {
         bool show = !hiddenByScreen && !GamePause.IsHeld && lines.Count > 0;
         root.gameObject.SetActive(show);
         if (!show)
-            return;
+            return false;
 
         // 같은 글이면 다시 그리지 않는다.
         string key = string.Join("\u0001", lines.ConvertAll(l => l.text));
         if (key == drawn)
-            return;
+            return false;
         drawn = key;
 
         tutorialEntry = -1;
@@ -232,13 +270,14 @@ public class QuestHudUI : MonoBehaviour
         {
             (Image back, Text text) e = Entry(i);
             e.back.gameObject.SetActive(true);
-            e.back.color = EntryBack;
+            e.back.color = lines[i].tutorial ? TutorialBack : EntryBack;
             e.text.text = lines[i].text;
             if (lines[i].tutorial)
                 tutorialEntry = i;
         }
         for (int i = lines.Count; i < entries.Count; i++)
             entries[i].back.gameObject.SetActive(false);
+        return true;
     }
 
     /// <summary>한 덩이 글 — 색 · 크기(글자 배율 적용) · 굵기.</summary>

@@ -16,9 +16,6 @@ using UnityEngine;
 /// </summary>
 public class BunkerBuildings : MonoBehaviour
 {
-    /// <summary>그림자가 플레이어 앞으로 떨어진 거리 (m). 화면 위쪽이 +Z다.</summary>
-    private const float GhostDistance = 2.5f;
-
     private static BunkerBuildings instance;
 
     private readonly List<GameObject> spawned = new();
@@ -38,6 +35,9 @@ public class BunkerBuildings : MonoBehaviour
     {
         instance = this;
         BuildingManager.OnChanged += Rebuild;
+        BunkerFloor.Ensure();
+        BunkerMood.Apply();
+        BunkerProps.Ensure();
         EnsureSpring();
         Rebuild();
     }
@@ -64,6 +64,7 @@ public class BunkerBuildings : MonoBehaviour
         pool.transform.localScale = new Vector3(1.6f, 0.05f, 1.6f);
         Tint(pool, new Color(0.30f, 0.55f, 0.80f));
 
+        BunkerFloor.SyncSpring();   // 바닥에 샘물을 그렸으면 임시 원판은 숨긴다
         AddLabel(spring.transform, SpringTable.Name);
         spring.AddComponent<BunkerStation>().Setup(BunkerStation.Kind.Spring, 1.8f);
     }
@@ -95,6 +96,8 @@ public class BunkerBuildings : MonoBehaviour
             if (definition != null)
                 spawned.Add(Spawn(definition, pair.Value));
         }
+
+        BunkerProps.Refresh();   // 건물 자리와 겹친 소품은 숨긴다
     }
 
     /// <summary>잡화 가게 자리의 오른쪽 끝에 붙는 부뚜막의 폭(m).</summary>
@@ -305,11 +308,7 @@ public class BunkerBuildings : MonoBehaviour
     private BuildingPose CurrentPose()
     {
         Vector3 anchor = player != null ? player.position : BunkerLayout.Spawn;
-
-        return new BuildingPose(
-            BunkerLayout.SnapValue(anchor.x),
-            BunkerLayout.SnapValue(anchor.z + GhostDistance),
-            placingTurns);
+        return BunkerLayout.PoseAhead(placing, anchor, placingTurns);
     }
 
     private void Update()
@@ -354,7 +353,7 @@ public class BunkerBuildings : MonoBehaviour
             yield return BunkerLayout.Footprint(apothecary, BunkerLayout.ApothecaryPose);
 
         if (player != null)
-            yield return new Rect(player.position.x - 0.6f, player.position.z - 0.6f, 1.2f, 1.2f);
+            yield return BunkerLayout.PlayerRect(player.position);
 
         foreach (KeyValuePair<string, BuildingPose> pair in BuildingManager.State.Placed)
         {

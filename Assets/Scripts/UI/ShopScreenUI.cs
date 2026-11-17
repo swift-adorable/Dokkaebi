@@ -142,6 +142,11 @@ public class ShopScreenUI : MonoBehaviour
 
         buyButton = StationFrame.Pill(frame.Buttons, "구매", new Vector2(0.39f, 0f), new Vector2(1f, 1f), StationFrame.PillAction, BuyCart, 30);
         buyLabel = buyButton.GetComponentInChildren<Text>();
+
+        // 여러 개 골라 한 번에 팔기 — 고른 묶음은 통째로 판다.
+        frame.EnableMultiSelect(
+            chosen => $"{chosen.Count}개 팔기  +{SellTotal(chosen):N0}엽전",
+            SellAll);
     }
 
     // ────────────────────────────────── 다시 그리기
@@ -545,6 +550,39 @@ public class ShopScreenUI : MonoBehaviour
                 Toast(error == TradeError.None ? $"판매 — 「{name}」 ×{n} +{earned:N0}엽전" : TradeRules.Explain(error));
                 AfterTrade();
             });
+    }
+
+    private static int SellTotal(List<ItemStack> stacks)
+    {
+        float bonus = ShopManager.SellBonusPercent;
+        int sum = 0;
+        foreach (ItemStack stack in stacks)
+            if (stack != null && !stack.IsEmpty)
+                sum += QuantityTransfer.SellPrice(stack, stack.Count, bonus);
+        return sum;
+    }
+
+    /// <summary>고른 묶음을 통째로 판다. 못 판 것은 남기고 몇 개를 못 팔았는지 알린다.</summary>
+    private void SellAll(List<ItemStack> stacks)
+    {
+        int sold = 0, failed = 0, earnedTotal = 0;
+        foreach (ItemStack stack in stacks)
+        {
+            if (stack == null || stack.IsEmpty)
+                continue;
+            TradeError error = ShopManager.Sell(stack, stack.Count, out int earned);
+            if (error == TradeError.None)
+            {
+                sold++;
+                earnedTotal += earned;
+            }
+            else
+                failed++;
+        }
+        Toast(failed == 0
+            ? $"판매 — {sold}개 +{earnedTotal:N0}엽전"
+            : $"판매 — {sold}개 +{earnedTotal:N0}엽전 · {failed}개는 팔지 못했습니다");
+        AfterTrade();
     }
 
     private void AfterTrade()

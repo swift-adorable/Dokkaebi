@@ -94,7 +94,7 @@ public struct TutorialFacts
 /// 【임시】 0장 튜토리얼 가이드 (결정 2-85) — 본문 0장의 (UI 튜토리얼 / …) 자리를 순서대로 한 줄 안내로.
 /// 화면(튜토리얼 창 · 손가락 표시)은 레이어 · 아트 때. 끝난 단계는 이야기 진행(seen)에 「tut_…」로 적혀 세이브에 남는다.
 ///
-///   0-1   봇짐 열기 → 무기 · 화살 줍기 → 장착 → 화살통 채우기 → 식혜 · 미숫가루 → 잡귀 셋 → 시체 뒤지기 → 소환단 → 고목에 닿기
+///   0-1   봇짐 열기 → 무기 · 화살 줍기 → 장착 → 화살통 채우기 → 식혜 · 미숫가루 → 잡귀 셋 → 시체 뒤지기 → 소환단 → 고목 곁 길목에서 5초 철수
 ///   소굴  창고에 맡기기 → 꺼내기 → 쓰러짐 규칙(본문 안내) → 0-2로 출발
 ///   0-2   큰 요괴 → 구슬 줍기 → 구슬 지니기 → 바꿔 지니기 → 정기(본문 안내) → 길목에서 철수
 /// (결정 2-107 — 단계마다 하는 자리에서 · 안내 창은 본문 「(UI 튜토리얼 / …)」 글 그대로)
@@ -127,9 +127,9 @@ public static class TutorialTable
         // 결정 2-107 — 본문 68 · 70 「소환단으로 체력 회복」
         new("tut_heal", TutorialPlace.Raid, "다쳤으면 소환단을 삼켜라",
             "퀵슬롯의 소환단 — 체력이 줄었을 때 쓴다", TutorialCheck.UsedHeal, skipWhen: TutorialCheck.Arrived, note: "전투 · 회복"),
-        // 0-1은 걸어서 고목에 닿는다 — 본문 72 「마침내 늙은 고목 아래에 닿았다」. 철수(길목)는 0-2에서 배운다 (결정 2-104).
-        new("tut_extract1", TutorialPlace.Raid, "늙은 고목 아래로 가라",
-            "초록 기둥이 선 고목 곁에 닿으면 소굴로 들어간다", TutorialCheck.Arrived),
+        // 0-1부터 길목에서 5초 버텨 철수한다 (결정 2-138 — 전에는 닿기만 하면 들어갔다, 2-104).
+        new("tut_extract1", TutorialPlace.Raid, "늙은 고목 곁 길목에서 철수하라",
+            "초록 기둥의 원 안에서 5초 버티면 소굴로 — 원을 벗어나면 끊긴다", TutorialCheck.Arrived),
 
         // ── 소굴 (본문 74 ~ 150) ─────────────────────────────────────────
         new("tut_stash", TutorialPlace.Bunker, "아까운 것은 창고에 맡겨라",
@@ -160,7 +160,7 @@ public static class TutorialTable
         new("tut_growth", TutorialPlace.Raid, "정기가 쌓이면 자란다",
             "읽고 닫으면 다음으로", TutorialCheck.Acknowledged, skipWhen: TutorialCheck.Extracted02, note: "정기"),
         new("tut_extract2", TutorialPlace.Raid, "길목에서 철수해 고목 아래로",
-            "초록 기둥의 원 안에서 5초 — 철수해야 주운 것이 남는다", TutorialCheck.Extracted02),
+            "0-1처럼 초록 기둥의 원 안에서 5초 — 철수해야 주운 것이 남는다", TutorialCheck.Extracted02),
     };
 
     public static IReadOnlyList<TutorialStep> Steps => steps;

@@ -20,6 +20,11 @@ public class TutorialHudUI : MonoBehaviour
     public int Version { get; private set; }
 
     private float flashUntil;
+    private float newUntil;
+
+    /// <summary>새 단계가 막 떴다 — 목록의 튜토리얼 줄이 몇 초 동안 밝게 숨 쉰다 (결정 2-138).</summary>
+    public bool IsNew => Time.unscaledTime < newUntil;
+    private const float NewSeconds = 4f;
 
     /// <summary>지금 보여 줄 단계가 있는가. 없으면 null.</summary>
     public static TutorialHudUI Current => instance != null && !string.IsNullOrEmpty(instance.Title) ? instance : null;
@@ -50,10 +55,12 @@ public class TutorialHudUI : MonoBehaviour
 
     public void Show(int number, int total, string text, string howTo, string place)
     {
-        string header = $"튜토리얼 {number}/{total} · {place}";
+        string header = $"◆ 튜토리얼 {number}/{total} · {place}에서";
         if (header == Header && text == Title && howTo == Hint)
             return;
 
+        if (text != Title)
+            newUntil = Time.unscaledTime + NewSeconds;
         Header = header;
         Title = text ?? string.Empty;
         Hint = howTo ?? string.Empty;

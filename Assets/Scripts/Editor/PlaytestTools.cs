@@ -126,6 +126,59 @@ public static class PlaytestTools
         Debug.Log("[Playtest] " + PlaytestActions.BuildAllForTest());
     }
 
+    [MenuItem(Menu + "벙커 — 작업대 배치 모드 (그림자 색 확인)")]
+    public static void PlaceWorkbench()
+    {
+        if (!Application.isPlaying || BunkerBuildings.Instance == null) { Debug.LogError("[Playtest] 벙커 플레이 중에만 씁니다."); return; }
+        BuildingDefinition workbench = BuildingTable.Find(BuildingTable.Workbench);
+        if (!BuildingManager.State.Owns(workbench.Id)) { Debug.LogError("[Playtest] 작업대를 먼저 지으세요 (건물 다섯 짓고 놓기)."); return; }
+        BunkerBuildings.Instance.BeginPlacing(workbench);
+        Debug.Log("[Playtest] 작업대 배치 모드 — 그림자가 초록이면 놓을 수 있다");
+    }
+
+    [MenuItem(Menu + "벙커 바닥 — PixelLab 타일")]
+    public static void FloorTiles()
+    {
+        BunkerFloor.BlendBase = "";
+        SetFloor("");
+    }
+
+    [MenuItem(Menu + "벙커 바닥 — 텍스처 그대로 (뿌리 10)")]
+    public static void FloorTextureHd() => SetFloor("tex_hd_roots10");
+
+    [MenuItem(Menu + "벙커 바닥 — 흙 + 벽가 뿌리 (도트 밀도)")]
+    public static void FloorBlend()
+    {
+        BunkerFloor.BlendBase = "tex_px_mud1";
+        SetFloor("");
+    }
+
+    [MenuItem(Menu + "벙커 바닥 — 텍스처 도트 밀도 (뿌리 10)")]
+    public static void FloorTexturePx() => SetFloor("tex_px_roots10");
+
+    private static void SetFloor(string texture)
+    {
+        if (!Application.isPlaying) { Debug.LogError("[Playtest] 플레이 중에만 씁니다."); return; }
+        BunkerFloor.TextureName = texture;
+        BunkerFloor.Rebuild();
+        if (BunkerFloor.Current != null && BunkerFloor.Current.isReadable)
+            System.IO.File.WriteAllBytes("Temp/screens/floor_full.png", BunkerFloor.Current.EncodeToPNG());   // 바닥 한 장 전체 (확인용)
+        Debug.Log($"[Playtest] 벙커 바닥 — {(texture == "" ? "PixelLab 타일" : texture)}");
+    }
+
+    [MenuItem(Menu + "도깨비불 — 둥근 불 (G4-5)")]
+    public static void WispRound() { PlayerWisp.Shape = "g4-5"; PlayerWisp.DebugShow = true; }
+
+    [MenuItem(Menu + "도깨비불 — 길쭉한 불 (G4-4)")]
+    public static void WispTall() { PlayerWisp.Shape = "g4-4"; PlayerWisp.DebugShow = true; }
+
+    [MenuItem(Menu + "전리품 창 열기 (빈 상자 · 화면 확인)")]
+    public static void OpenTestLoot()
+    {
+        if (!Application.isPlaying) { Debug.LogError("[Playtest] 플레이 중에만 씁니다."); return; }
+        ExchangeWindowUI.EnsureInstance().Open(new LootContainer(), "전리품", ExchangeWindowUI.Mode.Loot);
+    }
+
     [MenuItem(Menu + "벙커 — 대장간 열기")]
     public static void OpenSmithy()
     {

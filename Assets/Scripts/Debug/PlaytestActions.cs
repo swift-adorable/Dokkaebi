@@ -872,13 +872,13 @@ public static class PlaytestActions
 
         var spots = new System.Collections.Generic.Dictionary<string, BuildingPose>
         {
-            // 방 32 × 20 · 건물 자리 4.5~5.5 × 4.5 — 앞 건물 그림(키 5~6m)이 뒤 건물 기단을 가리지 않게
-            // 앞줄(아래)과 뒷줄(위)을 11m 띄운다: 아래 줄 작업대 · 대장간 · 잡화 가게, 위 줄 장부방 · 약탕간
-            [BuildingTable.Workbench]    = new BuildingPose(-12.5f, -6.5f, 0),
-            [BuildingTable.Smithy]       = new BuildingPose(-5.5f, -6.5f, 0),
-            [BuildingTable.GeneralStore] = new BuildingPose(11f, -6.5f, 0),
+            // 방 40 × 26 · 건물 자리 4.5~5.5 × 4.5 — 앞 건물 그림(키 5~6m)이 뒤 건물 기단을 가리지 않게
+            // 앞줄(아래)과 뒷줄(위)을 크게 띄운다: 아래 줄 작업대 · 대장간 · 잡화 가게, 위 줄 장부방 · 약탕간
+            [BuildingTable.Workbench]    = new BuildingPose(-15.5f, -8.5f, 0),
+            [BuildingTable.Smithy]       = new BuildingPose(-7.5f, -8.5f, 0),
+            [BuildingTable.GeneralStore] = new BuildingPose(13.5f, -8.5f, 0),
             [BuildingTable.Apothecary]   = BunkerLayout.ApothecaryPose,
-            [BuildingTable.LedgerRoom]   = new BuildingPose(-13f, 4.5f, 0),
+            [BuildingTable.LedgerRoom]   = new BuildingPose(-16f, 6.5f, 0),
         };
 
         var log = new System.Text.StringBuilder();

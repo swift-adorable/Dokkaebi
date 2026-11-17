@@ -17,9 +17,10 @@ public static class ExtractionTable
     public const float ChannelSeconds = 5f;
 
     /// <summary>
-    /// 튜토리얼 0-1 — 걸어서 고목에 닿으면 바로 들어간다 (결정 2-104 · 본문 72). 버티기 · 철수 안내는 0-2에서.
+    /// 닿기만 하면 들어가는 구역 — 지금은 없다. 전에는 튜토리얼 0-1이 고목에 닿으면 바로 들어갔는데(결정 2-104),
+    /// 사용자가 「바로 철수되는데?」 → 「5초로 바꾸고」 (결정 2-138) — 0-1부터 길목 원 안에서 5초 버티기를 배운다.
     /// </summary>
-    public static bool ArriveOnTouch(string zoneId, bool tutorialDone) => !tutorialDone && zoneId == "0-1";
+    public static bool ArriveOnTouch(string zoneId, bool tutorialDone) => false;
 
     /// <summary>닿기만 하면 되는 경우의 버티는 시간 — 사실상 0.</summary>
     public const float TouchSeconds = 0.01f;

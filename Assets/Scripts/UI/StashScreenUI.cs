@@ -15,7 +15,7 @@ public class StashScreenUI : MonoBehaviour
 
     public static bool IsOpen => instance != null && instance.frame != null && instance.frame.IsOpen;
 
-    private const int Columns = 7;   // 칸 한 변 ≈ 90 — 내 가방 칸과 같은 크기
+    private const int FallbackColumns = 7;   // 칸 크기는 UIFactory.ItemCellSize — 열 수는 폭에서 정한다
 
     private StationFrame frame;
     private Button takeAllButton;
@@ -64,6 +64,9 @@ public class StashScreenUI : MonoBehaviour
         frame = StationFrame.Build(canvas, () => frame.Hide());
         frame.UseCounterAsNote(true);
         takeAllButton = StationFrame.Pill(frame.Buttons, "전부 꺼내기", Vector2.zero, Vector2.one, StationFrame.PillAction, TakeAll);
+
+        // 여러 개 골라 한 번에 창고에 넣기 — 고른 묶음은 통째로 옮긴다.
+        frame.EnableMultiSelect(chosen => $"{chosen.Count}개 창고에 넣기", StoreAll);
     }
 
     private static Inventory Stash => PlayerInventory.EnsureInstance().Stash;
@@ -99,6 +102,7 @@ public class StashScreenUI : MonoBehaviour
         IReadOnlyList<ItemStack> stacks = stash.Stacks;
         int cells = Mathf.Max(stash.SlotCapacity, stacks.Count);
 
+        int Columns = UIFactory.ItemColumns(frame.List.Viewport, FallbackColumns);
         UIFactory.SquareGridMetrics(frame.List.Viewport, Columns, cells, 3,
             out int rows, out float height, out float padX, out float padY);
         frame.List.Content.sizeDelta = new Vector2(0f, height);
@@ -145,6 +149,24 @@ public class StashScreenUI : MonoBehaviour
             PlayerInventory.EnsureInstance().RefreshCapacity();
             Refresh();
         });
+    }
+
+    private void StoreAll(List<ItemStack> stacks)
+    {
+        Inventory stash = Stash, bag = Bag;
+        int moved = 0, failed = 0;
+        foreach (ItemStack stack in stacks)
+        {
+            if (stack == null || stack.IsEmpty)
+                continue;
+            if (Inventory.MoveStack(bag, stash, stack))
+                moved++;
+            else
+                failed++;
+        }
+        Toast(failed == 0 ? $"창고에 넣음 — {moved}개" : $"창고에 넣음 — {moved}개 · {failed}개는 창고에 자리가 없습니다");
+        PlayerInventory.EnsureInstance().RefreshCapacity();
+        Refresh();
     }
 
     private void TakeAll()

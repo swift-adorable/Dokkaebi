@@ -48,8 +48,13 @@ public sealed class ChapterArtBuilder
 
     public void BuildAll()
     {
+        // 도트 꾸밈 장(PixelDress)은 그쪽이 숲 · 대숲 · 바위 · 물가 · 흩뿌림을 맡는다. 여기는 아직 도트 그림이 없는 집 · 좌판 · 우물 · 기둥 · 금줄만.
+        bool pixel = PixelDress.Has(map.Chapter);
         foreach (MapBlock b in map.Blocks)
-            Block(b);
+            if (!pixel || b.Kind is MapBlockKind.Building or MapBlockKind.Stall or MapBlockKind.Well or MapBlockKind.Post or MapBlockKind.Geumjul)
+                Block(b);
+        if (pixel)
+            return;
         OuterForest();
         Scatter();
     }

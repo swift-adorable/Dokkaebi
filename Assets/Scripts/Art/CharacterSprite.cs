@@ -22,17 +22,22 @@ public class CharacterSprite : MonoBehaviour
     public const int FeetPadPixels = 11;     // 68칸 그림에서 발 밑 빈칸
     public const int BodyPixels = 47;        // 발끝 ~ 머리끝
     public const int WalkFrames = 8;
+    public const int ShootFrames = 9;        // 기준 자세 1 + 당기기 · 놓기 · 돌아오기 8 (결정 2-136)
 
     [Tooltip("발끝 ~ 머리끝 실제 키(m). 원래 캡슐은 2m.")]
     [SerializeField] private float height = 1.8f;
     [Tooltip("이동 속도 5m/s일 때 걷기 그림 초당 장수.")]
     [SerializeField] private float walkFps = 10f;
+    [Tooltip("활 쏘기 그림 초당 장수 — 9장이 약 0.45초.")]
+    [SerializeField] private float shootFps = 20f;
 
     private sealed class Set
     {
         public Texture2D[] Idle = new Texture2D[8];
         public Texture2D[,] Walk = new Texture2D[8, WalkFrames];
+        public Texture2D[,] Shoot = new Texture2D[8, ShootFrames];
         public bool Complete;
+        public bool HasShoot;   // 활 쏘기 그림은 없어도 된다 — 없으면 예전처럼 서 있는 그림으로 쏜다
     }
 
     private static readonly Dictionary<string, Set> Sets = new();
@@ -52,6 +57,8 @@ public class CharacterSprite : MonoBehaviour
     /// <summary>쏜 뒤 이만큼은 조준 쪽을 본다 — 연사 사이에 걷는 쪽으로 휙휙 돌지 않게.</summary>
     private const float AttackFacingSeconds = 0.6f;
     private float walkClock;
+    private float shootClock = -1f;   // 0 이상이면 활 쏘기 그림을 돌리는 중
+    private float lastShot = float.NegativeInfinity;
     private Texture2D shown;
 
     /// <summary>그림 판 렌더러 (점검용).</summary>
@@ -99,6 +106,14 @@ public class CharacterSprite : MonoBehaviour
                 ok &= s.Walk[d, f] != null;
             }
         }
+        bool shoot = true;
+        for (int d = 0; d < 8; d++)
+            for (int f = 0; f < ShootFrames; f++)
+            {
+                s.Shoot[d, f] = Resources.Load<Texture2D>($"Characters/{name}/shoot_{Directions[d]}_{f}");
+                shoot &= s.Shoot[d, f] != null;
+            }
+        s.HasShoot = shoot;
         s.Complete = ok;
         Sets[name] = s;
         return s;
@@ -195,6 +210,25 @@ public class CharacterSprite : MonoBehaviour
             Direction = ((Mathf.RoundToInt(angle / 45f) % 8) + 8) % 8;
         }
 
+        // 【활 쏘기】 (결정 2-136) — 한 발 쏠 때마다 처음부터 한 번 돌린다. 걷거나 서 있는 그림보다 먼저.
+        if (weapon != null && set.HasShoot && weapon.LastShotTime != lastShot && Time.time - weapon.LastShotTime < 0.1f)
+        {
+            lastShot = weapon.LastShotTime;
+            shootClock = 0f;
+        }
+        if (shootClock >= 0f)
+        {
+            int frame = (int)shootClock;
+            shootClock += Time.deltaTime * shootFps;
+            if (frame < ShootFrames)
+            {
+                Show(set.Shoot[Direction, frame]);
+                PlaceCard();
+                return;
+            }
+            shootClock = -1f;
+        }
+
         if (Walking)
         {
             walkClock += Time.deltaTime * walkFps * Mathf.Clamp(speed / 5f, 0.6f, 1.6f);
@@ -206,6 +240,11 @@ public class CharacterSprite : MonoBehaviour
             Show(set.Idle[Direction]);
         }
 
+        PlaceCard();
+    }
+
+    private void PlaceCard()
+    {
         // 판 — 몸의 회전 · 크기와 무관하게 카메라 쪽으로 세운다. 발끝이 땅에 닿게.
         float ground = bodyCollider != null ? bodyCollider.bounds.min.y : transform.position.y;
         Quaternion tilt = Quaternion.Euler(ArtCatalog.Pitch, 0f, 0f);

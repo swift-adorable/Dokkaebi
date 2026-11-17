@@ -164,7 +164,7 @@ public partial class InventoryScreenUI : MonoBehaviour
     /// 가방 · 구슬 기둥은 오른쪽 끝에 붙어 가운데가 비어 보인다 (결정 2-82). 전리품 · 창고 · 상점 창은 가운데(0.31 ~ 0.69)에 뜬다.
     /// </summary>
     private const float EquipColumnRight = 0.30f;
-    private const float BagColumnLeft = 0.70f;
+    private const float BagColumnLeft = 0.64f;   // 0.70 → 0.64 — 가방 한 줄 5칸이 다른 화면 칸 크기로 들어가게 (사용자 2026-11-17)
 
     /// <summary>
     /// 전리품 · 창고 · 상점 창이 뜨면 옛 배치 (결정 2-83) — 왼쪽 한 판(0 ~ 0.60)에 위 착용 칸 · 아래 가방, 오른쪽 0.615부터 그 창.
@@ -382,6 +382,9 @@ public partial class InventoryScreenUI : MonoBehaviour
     private const float QuickNumberGap = 6f;
 
     private const float QuickCellGap = 8f;
+
+    /// <summary>화면 맨 아래 빠른 칸 줄의 높이 (기준 해상도 px) — 다른 아래쪽 UI 가 이 위로 비켜 선다 (배치 버튼 등).</summary>
+    public const float QuickBarHeight = QuickCellSize + QuickNumberBand + QuickNumberGap;
 
     private readonly List<Button> hudButtons = new();
 
@@ -1530,7 +1533,12 @@ public partial class InventoryScreenUI : MonoBehaviour
         float viewWidth = bagViewport.rect.width;
         float viewHeight = bagViewport.rect.height;
 
-        int columns = BagColumns;
+        // 【모든 아이템 격자와 같은 칸 크기】 (UIFactory.ItemCellSize) — 열 수는 폭에서 정한다.
+        // 전리품 창이 떠서 가방 판이 넓어져도 칸은 커지지 않고 한 줄에 더 들어간다.
+        // 가방만 열린 화면(오른쪽 기둥)은 한 줄 5칸으로 고정한다 — 사용자 「가방을 좀 더 넓혀서 5칸으로」.
+        int columns = exchangeLayout || tab == Tab.Socket
+            ? UIFactory.ItemColumns(viewWidth, BagColumns)
+            : BagColumns;
 
         // 【칸을 정사각형으로 만든다.】
         // 가로를 열 수로 나눈 값이 한 칸의 변이다. 내용물 높이를

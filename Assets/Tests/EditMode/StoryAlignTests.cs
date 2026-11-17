@@ -47,11 +47,13 @@ namespace Dokkaebi.Tests
         }
 
         [Test]
-        public void 튜토리얼_영의일은_닿으면_들어간다()
+        public void 튜토리얼_영의일도_오초_버텨야_철수한다()
         {
-            Assert.IsTrue(ExtractionTable.ArriveOnTouch("0-1", tutorialDone: false));
-            Assert.IsFalse(ExtractionTable.ArriveOnTouch("0-1", tutorialDone: true));   // 다시 들어온 0-1은 보통 철수
-            Assert.IsFalse(ExtractionTable.ArriveOnTouch("0-2", tutorialDone: false));  // 철수는 0-2에서 배운다
+            // 결정 2-138 — 0-1(튜토리얼)도 길목 원 안에서 5초. 닿기만 하면 들어가는 구역은 없다.
+            Assert.IsFalse(ExtractionTable.ArriveOnTouch("0-1", tutorialDone: false));
+            Assert.IsFalse(ExtractionTable.ArriveOnTouch("0-1", tutorialDone: true));
+            Assert.IsFalse(ExtractionTable.ArriveOnTouch("0-2", tutorialDone: false));
+            Assert.AreEqual(5f, ExtractionTable.ChannelSeconds);
 
             var channel = new ExtractionChannel(ExtractionTable.TouchSeconds);
             Assert.AreEqual(ExtractionStep.Completed, channel.Tick(true, 0.02f));

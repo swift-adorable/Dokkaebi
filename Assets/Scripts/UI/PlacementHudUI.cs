@@ -6,6 +6,7 @@ using UnityEngine.UI;
 ///
 /// 【가운데 아래에 둔다】 — 왼쪽 아래는 이동 조이스틱, 오른쪽 아래는 조준 · 대시다.
 /// 배치 중에도 걸어 다녀야 하므로 조이스틱을 덮지 않는다.
+/// 【빠른 칸 줄 위에 선다】 — 맨 아래 빠른 칸(무기 1 · 2 …) 캔버스가 더 위에 그려져 버튼을 가렸다 (2026-11-17 폰에서).
 /// </summary>
 public class PlacementHudUI : MonoBehaviour
 {
@@ -60,8 +61,12 @@ public class PlacementHudUI : MonoBehaviour
     {
         RectTransform safe = UIFactory.CreateSafeArea(canvas);
 
-        root = UIFactory.CreateRegion("Placement", safe,
-            new Vector2(0.32f, 0.02f), new Vector2(0.68f, 0.26f)).gameObject;
+        RectTransform region = UIFactory.CreateRegion("Placement", safe,
+            new Vector2(0.32f, 0f), new Vector2(0.68f, 0f));
+        float bottom = InventoryScreenUI.QuickBarHeight + 14f;
+        region.offsetMin = new Vector2(0f, bottom);
+        region.offsetMax = new Vector2(0f, bottom + 190f);
+        root = region.gameObject;
 
         Transform parent = root.transform;
 
