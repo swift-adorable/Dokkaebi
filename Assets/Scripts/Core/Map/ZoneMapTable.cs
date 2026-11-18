@@ -824,5 +824,47 @@ public static class ZoneMapTable
             G("6-2", 0, 36, 12, 2),
         });
 
-    private static readonly ChapterMap[] maps = { chapter0, chapter1, chapter2, chapter3, chapter4, chapter5, chapter6 };
+    /// <summary>
+    /// 0장 배율 (결정 2-149 · 2026-11-18 사용자 「지금 맵이 너무 작은거 같아 덕코프는 훨씬 크잖아」) — 160×90m → 320×180m.
+    /// 표의 자리 · 덩어리를 그대로 두고 통째로 늘린다(본문 순서 · 구역 나눔은 그대로). 집처럼 「한 채」인 것은 크기를 둔다(고목 덩어리는 금줄과 맞물려야 해서 같이 늘린다). 냇물은 폭만 1.5배(무릎 냇물). 늘어난 빈 땅은 숲 덩어리 · 파밍 집(LockSiteTable)이 채운다.
+    /// </summary>
+    public const float Chapter0Scale = 2f;
+
+    private static ChapterMap Scaled(ChapterMap m, float k)
+    {
+        static float Len(float v, float k) => v * k;   // 담 · 울타리 · 금줄 두께도 늘린다 — 구역 사이 틈(2m)이 4m가 되어 두께를 두면 새는 틈이 생겼다
+        var blocks = new MapBlock[m.Blocks.Length];
+        for (int i = 0; i < blocks.Length; i++)
+        {
+            MapBlock b = m.Blocks[i];
+            bool keep = b.Kind is MapBlockKind.Building or MapBlockKind.Stall or MapBlockKind.Well or MapBlockKind.Post;
+            float sx = keep ? b.Size.x : Len(b.Size.x, k), sz = keep ? b.Size.z : Len(b.Size.z, k);
+            if (b.Kind == MapBlockKind.Water)
+            {
+                if (b.Size.x < b.Size.z) sx = b.Size.x * 1.5f; else sz = b.Size.z * 1.5f;
+            }
+            blocks[i] = new MapBlock(b.Kind, b.Center.x * k, b.Center.y * k, sx, b.Size.y, sz);
+        }
+        var areas = new ZoneArea[m.Areas.Length];
+        for (int i = 0; i < areas.Length; i++)
+        {
+            Rect r = m.Areas[i].Bounds;
+            areas[i] = new ZoneArea(m.Areas[i].ZoneId, r.xMin * k, r.yMin * k, r.xMax * k, r.yMax * k);
+        }
+        var anchors = new MapAnchor[m.Anchors.Length];
+        for (int i = 0; i < anchors.Length; i++)
+        {
+            MapAnchor a = m.Anchors[i];
+            anchors[i] = new MapAnchor(a.Kind, a.ZoneId, a.Position.x * k, a.Position.z * k, a.Label);
+        }
+        var gates = new MapGate[m.Gates.Length];
+        for (int i = 0; i < gates.Length; i++)
+        {
+            MapBlock g = m.Gates[i].Block;
+            gates[i] = new MapGate(m.Gates[i].ZoneId, g.Center.x * k, g.Center.y * k, Len(g.Size.x, k), Len(g.Size.z, k));
+        }
+        return new ChapterMap(m.Chapter, m.SceneName, m.HalfSize * k, blocks, areas, anchors, gates);
+    }
+
+    private static readonly ChapterMap[] maps = { Scaled(chapter0, Chapter0Scale), chapter1, chapter2, chapter3, chapter4, chapter5, chapter6 };
 }

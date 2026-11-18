@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea17f4877b7bf48069bd560938e26492, type: 3}
+  m_Name: adapt_slots_4
+  m_EditorClassIdentifier: Dokkaebi.Runtime::PassiveNode
+  id: adapt_slots_4
+  displayName: "\uAC00\uBC29 \uC815\uB9AC 4"
+  description: "\uC791\uC740 \uAC83\uC740 \uC791\uC740 \uAC83\uB07C\uB9AC. \uAC00\uBC29
+    \uACF5\uAC04 +3."
+  branch: 0
+  effect: 1
+  value: 3
+  requiredLevel: 16
+  cost: 12000
+  materials:
+  - item: {fileID: 11400000, guid: abf245023c6dc4773a272254e9082cc0, type: 2}
+    count: 3
+  prerequisites:
+  - adapt_slots_3
+  column: 2
+  row: 4

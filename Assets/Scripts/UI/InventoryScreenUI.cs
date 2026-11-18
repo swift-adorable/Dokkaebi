@@ -397,9 +397,26 @@ public partial class InventoryScreenUI : MonoBehaviour
         BuildCastBar(parent);
     }
 
+    /// <summary>
+    /// 【오른쪽 위 둥근 아이콘 줄】 (결정 2-146 — 「도깨비의 세계」 HUD: 오른쪽 위 둥근 아이콘 + 아래 짧은 이름).
+    /// 글자 알약 넷(장비 · 스킬 · 패시브 · 도감)이던 것을 금빛 테 동그란 단추 + 도형으로 바꿨다. 이름은 단추 아래 작게.
+    /// 도형은 임시(방패 · 육각 구슬 · 마름모 · 네모 책) — 아이콘 그림이 생기면 sprite만 바꾼다.
+    /// </summary>
+    public const float HudIconSize = 96f;
+    public const float HudIconLabel = 28f;
+    public const float HudRowHeight = HudIconSize + HudIconLabel;
+    private const float HudIconGap = 16f;
+
+    private static readonly UISprites.Glyph[] TabGlyphs =
+        { UISprites.Glyph.Shield, UISprites.Glyph.Hexagon, UISprites.Glyph.Diamond, UISprites.Glyph.Square };
+
+    private static readonly Color HudDisc = new(0.07f, 0.065f, 0.07f, 0.86f);
+    private readonly List<Text> hudLabels = new();
+
     private void BuildHudButtons(Transform parent)
     {
         hudButtons.Clear();
+        hudLabels.Clear();
 
         for (int i = 0; i < TabNames.Length; i++)
         {
@@ -409,42 +426,54 @@ public partial class InventoryScreenUI : MonoBehaviour
             rect.anchorMin = Vector2.one;
             rect.anchorMax = Vector2.one;
             rect.pivot = Vector2.one;
-            rect.sizeDelta = new Vector2(HudButtonWidth, HudButtonHeight);
+            rect.sizeDelta = new Vector2(HudIconSize, HudRowHeight);
 
-            // 오른쪽부터 역순으로 쌓는다 — 패시브가 가장 오른쪽.
+            // 오른쪽부터 역순으로 쌓는다 — 도감이 가장 오른쪽.
             int fromRight = TabNames.Length - 1 - i;
-
-            // 장 맵에서는 미니맵 아래 (결정 2-90 · HudLayout).
             rect.anchoredPosition = new Vector2(
-                -(10f + fromRight * (HudButtonWidth + HudButtonGap)), HudLayout.TopRightButtonsY);
+                -(10f + fromRight * (HudIconSize + HudIconGap)), HudLayout.TopRightButtonsY);
 
-            var image = buttonObject.AddComponent<Image>();
-            image.color = UIPalette.Header;
-            image.sprite = UISprites.Rounded(UIFactory.RadiusLarge);
-            image.type = Image.Type.Sliced;
+            // 금빛 테 → 어두운 동그란 판 → 도형.
+            Image rim = UIFactory.CreatePanel("Rim", buttonObject.transform, UIPalette.Edge,
+                new Vector2(0f, HudIconLabel / HudRowHeight), Vector2.one, radius: 0);
+            rim.sprite = UISprites.Of(UISprites.Glyph.Circle);
+
+            Image disc = UIFactory.CreatePanel("Disc", rim.transform, HudDisc,
+                Vector2.zero, Vector2.one, radius: 0);
+            disc.sprite = UISprites.Of(UISprites.Glyph.Circle);
+            disc.rectTransform.offsetMin = new Vector2(3f, 3f);
+            disc.rectTransform.offsetMax = new Vector2(-3f, -3f);
+
+            Image glyph = UIFactory.CreatePanel("Glyph", disc.transform, UIPalette.TextAccent,
+                new Vector2(0.27f, 0.27f), new Vector2(0.73f, 0.73f), radius: 0);
+            glyph.sprite = UISprites.Of(TabGlyphs[i]);
+            glyph.preserveAspect = true;
+            glyph.raycastTarget = false;
 
             var button = buttonObject.AddComponent<Button>();
-            button.targetGraphic = image;
+            button.targetGraphic = disc;
 
             int captured = i;
             button.onClick.AddListener(() => ToggleTab((Tab)captured));
 
-            UIFactory.CreateOutline(image, UIPalette.Rim, UIFactory.RadiusLarge, 2);
-
-            UIFactory.CreateLabel(buttonObject.transform, TabNames[i], 30, FontStyle.Bold,
-                Vector2.zero, Vector2.one, TextAnchor.MiddleCenter);
+            Text name = UIFactory.CreateLabel(buttonObject.transform, TabNames[i], 20, FontStyle.Bold,
+                Vector2.zero, new Vector2(1f, HudIconLabel / HudRowHeight), TextAnchor.MiddleCenter, UIPalette.TextOnGlass);
+            name.horizontalOverflow = HorizontalWrapMode.Overflow;
+            name.raycastTarget = false;
+            name.gameObject.AddComponent<Outline>().effectColor = new Color(0f, 0f, 0f, 0.85f);
 
             hudButtons.Add(button);
+            hudLabels.Add(name);
 
-            // 빈 소켓 알림 점은 「스킬」 버튼에만 붙인다.
+            // 빈 소켓 알림 점은 「스킬」 단추에만 붙인다.
             if ((Tab)i != Tab.Socket)
                 continue;
 
-            socketDot = UIFactory.CreatePanel("SocketDot", buttonObject.transform,
-                UIPalette.TextAccent, new Vector2(-0.10f, 0.60f), new Vector2(0.36f, 1.18f),
+            socketDot = UIFactory.CreatePanel("SocketDot", rim.transform,
+                UIPalette.TextAccent, new Vector2(0.62f, 0.62f), new Vector2(1.08f, 1.08f),
                 radius: 14);
 
-            UIFactory.CreateLabel(socketDot.transform, "0", 22, FontStyle.Bold,
+            UIFactory.CreateLabel(socketDot.transform, "0", 20, FontStyle.Bold,
                 Vector2.zero, Vector2.one, TextAnchor.MiddleCenter,
                 new Color(0.08f, 0.08f, 0.1f));
 
@@ -955,31 +984,17 @@ public partial class InventoryScreenUI : MonoBehaviour
     }
 
     /// <summary>
-    /// 화면 탭 — 장비 · 스킬 · 패시브 (결정 2-84). 고른 탭이 밝다.
-    /// 전리품 · 창고 · 상점 창이 떠 있으면 그리지 않는다 — 그 창은 장비 탭(옛 배치)에만 맞는다.
+    /// 머리글 — 예전 화면 탭(장비 · 스킬 · 패시브 · 도감, 결정 2-84) 자리. 2026-11-18 사용자 「장비 패널 왼쪽 위 버튼들 빼버려」로
+    /// 탭을 빼고 지금 화면 이름만 적는다. 다른 화면은 닫고 화면 위 버튼(장비 · 스킬 · 패시브 · 도감)으로 연다.
+    /// 전리품 · 창고 창이 떠 있으면 비운다(예전과 같다).
     /// </summary>
     private void DrawScreenTabs(RectTransform area)
     {
         UIFactory.ClearChildren(area);
-
-        if (ExchangeWindowUI.AnyOpen)
-            return;
-
-        float width = 1f / TabNames.Length;
-
-        for (int i = 0; i < TabNames.Length; i++)
-        {
-            Tab target = (Tab)i;
-
-            UIFactory.CreateButton(area, TabNames[i],
-                new Vector2(i * width + 0.012f, 0f), new Vector2((i + 1) * width - 0.012f, 1f),
-                tab == target ? UIPalette.Action : UIPalette.Subtle,
-                () =>
-                {
-                    if (tab != target)
-                        SelectTab(target);
-                }, 24);
-        }
+        bool title = !ExchangeWindowUI.AnyOpen;
+        equipTitleLabel.gameObject.SetActive(title);
+        if (title)
+            equipTitleLabel.text = TabNames[(int)tab];
     }
 
     private void SelectTab(Tab next)
@@ -1157,12 +1172,12 @@ public partial class InventoryScreenUI : MonoBehaviour
             bool active = IsOpen && (Tab)i == tab;
 
             if (hudButtons[i].targetGraphic is Image image)
-                image.color = active ? UIPalette.Action : UIPalette.Header;
+                image.color = active ? UIPalette.Action : HudDisc;
 
-            var label = hudButtons[i].GetComponentInChildren<Text>();
+            Text label = i < hudLabels.Count ? hudLabels[i] : null;   // 이름 줄 — 소켓 점 숫자와 헷갈리지 않게 따로 쥔다 (결정 2-146)
 
             if (label != null)
-                label.color = active ? UIPalette.Text : UIPalette.TextDim;
+                label.color = active ? UIPalette.TextAccent : UIPalette.TextOnGlass;
         }
 
         if (socketDot == null || !SkillManager.HasInstance)
@@ -1189,7 +1204,6 @@ public partial class InventoryScreenUI : MonoBehaviour
 
     private void RefreshEquipment()
     {
-        equipTitleLabel.text = "장비";
 
         EquipmentLoadout loadout = PlayerInventory.EnsureInstance().Loadout;
 
@@ -1792,7 +1806,8 @@ public partial class InventoryScreenUI : MonoBehaviour
             blankEntries.Add(new ItemActionMenu.Entry("상세보기", UIPalette.Subtle, () => OpenItemDetail(stack)));
             blankEntries.Add(new ItemActionMenu.Entry("버리기", UIPalette.Warning, () => OpenDiscardPopup(stack)));
 
-            ItemActionMenu.Open(cell, blankEntries);
+            // 두 번 누르면 바로 구슬 고르기 (2026-11-18 — 아직 스킬을 고르지 않은 구슬).
+            ItemActionMenu.Open(cell, blankEntries, () => GemPickerUI.Open(definition, Refresh));
             return;
         }
 
@@ -1810,7 +1825,39 @@ public partial class InventoryScreenUI : MonoBehaviour
             detail: () => OpenItemDetail(stack),
             exchange: ExchangeEntry(stack));
 
-        ItemActionMenu.Open(cell, entries);
+        // 【열쇠고리에 걸기】 (결정 2-143) — 소굴에서 · 작업대가 있으면. 걸면 열쇠는 사라지고 그 문은 늘 열린다.
+        if (KeyRing.IsDoorKey(definition) && SceneFlow.InBunker)
+            entries.Insert(0, KeyRing.IsRegistered(definition.Id)
+                ? new ItemActionMenu.Entry("이미 열쇠고리에 있다", UIPalette.Subtle, () => ShowToast("같은 열쇠가 이미 걸려 있다 — 팔아도 된다."))
+                : new ItemActionMenu.Entry("열쇠고리에 걸기", UIPalette.Action, () => RegisterKey(stack)));
+
+        // 두 번 누르면 장착 · 사용 (2026-11-18). 창고 · 파밍 · 가게가 열린 동안은 메뉴만 — 그때 할 일은 사용자가 정한 뒤에.
+        System.Action twice = ExchangeWindowUI.IsOpenIn(ExchangeWindowUI.Mode.Stash) ? () => ExchangeWindowUI.PutIntoStash(stack)
+            : ExchangeWindowUI.AnyOpen ? null
+            : definition.IsSkillGem && definition.Skill != null ? () => AutoPlaceGem(stack)
+            : equippable ? () => EquipFromMenu(stack)
+            : PlayerConsumables.CanUse(definition) ? () => UseFromMenu(stack)
+            : null;
+        ItemActionMenu.Open(cell, entries, twice);
+    }
+
+    /// <summary>열쇠고리에 건다 — 작업대가 있어야 한다 (결정 2-143 · 덕코프 「열쇠 등록기」는 작업대 업그레이드).</summary>
+    private void RegisterKey(ItemStack stack)
+    {
+        if (!BuildingManager.IsOpen(BuildingTable.Workbench))
+        {
+            ShowToast("작업대를 먼저 지어야 열쇠고리를 걸 수 있다.");
+            return;
+        }
+
+        if (stack?.Definition == null || !PlayerInventory.EnsureInstance().Bag.RemoveStack(stack))
+            return;
+
+        KeyRing.Register(stack.Definition.Id);
+        PlayerInventory.EnsureInstance().RefreshCapacity();
+        SaveManager.Commit("열쇠고리");
+        ShowToast($"{stack.Definition.DisplayName} — 열쇠고리에 걸었다. 이제 들고 가지 않아도 열린다.");
+        Refresh();
     }
 
     /// <summary>
@@ -2191,16 +2238,22 @@ public partial class InventoryScreenUI : MonoBehaviour
     {
         PlayerInventory inventory = PlayerInventory.EnsureInstance();
 
+        ItemStack stack = inventory.Quick.Get(index);
+
         if (IsOpen)
         {
-            // 가방 안에서는 넣고 빼는 자리다. 여기서는 빼기만 한다 —
-            // 넣는 것은 「무엇을」이 있어야 하므로 아이템 상세에서 고른다.
+            // 【한 번 누르면 쓴다】 (2026-11-18 사용자 「퀵 슬롯에선 한번만 클릭해도 사용하게」) — 가방이 열려 있어도.
+            // 가방에서 쓰는 길(UseFromMenu)로 쓴다. 지금 쓸 수 없는 것이면 예전처럼 퀵슬롯에서 뺀다.
+            if (stack?.Definition != null && PlayerConsumables.CanUse(stack.Definition))
+            {
+                UseFromMenu(stack);
+                RefreshQuickSlots();
+                return;
+            }
             inventory.Quick.Clear(index);
             RefreshQuickSlots();
             return;
         }
-
-        ItemStack stack = inventory.Quick.Get(index);
 
         if (stack?.Definition == null)
             return;

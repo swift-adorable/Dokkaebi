@@ -3421,7 +3421,7 @@ MonoBehaviour:
   rangedEnemyPrefab: {fileID: 1437810378520409102, guid: 03193a9ea1739479ba18b70000d5a181, type: 3}
   rangedRatio: 0.35
   player: {fileID: 0}
-  spawnInterval: 2
+  spawnInterval: 7
   spawnRadius: 12
   spawnOnRingOnly: 1
   prewarmCount: 16

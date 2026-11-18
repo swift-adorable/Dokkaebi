@@ -12,7 +12,8 @@ public class EnemyManager : Singleton<EnemyManager>
 {
     [Header("Limits")]
     [Tooltip("동시에 존재할 수 있는 최대 적 수. 모바일 프레임 방어선이다.")]
-    [SerializeField] private int maxActiveEnemies = 60;
+    // 60 → 14 (2026-11-18 사용자 「몬스터가 너무 끊임없이 나오는데?」) — 스폰 간격 2 → 7초와 함께.
+    [SerializeField] private int maxActiveEnemies = 40;   // 미리 배치(결정 2-140)가 한 구역에 36마리까지 세운다
 
     [Tooltip("플레이어로부터 이 거리를 넘으면 자동으로 풀에 반납한다.")]
     [SerializeField] private float despawnDistance = 40f;

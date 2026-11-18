@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea17f4877b7bf48069bd560938e26492, type: 3}
+  m_Name: train_hp_4
+  m_EditorClassIdentifier: Dokkaebi.Runtime::PassiveNode
+  id: train_hp_4
+  displayName: "\uAC15\uACE8"
+  description: "\uBF08\uAC00 \uAD75\uC5B4\uC84C\uB2E4. \uCD5C\uB300 \uCCB4\uB825
+    +10."
+  branch: 5
+  effect: 50
+  value: 10
+  requiredLevel: 13
+  cost: 9000
+  materials:
+  - item: {fileID: 11400000, guid: 69bb7210d5d424e1bb2ff19fd17aa70c, type: 2}
+    count: 8
+  prerequisites:
+  - train_hp_3
+  column: 0
+  row: 5

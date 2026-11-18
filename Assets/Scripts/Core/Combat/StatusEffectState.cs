@@ -107,7 +107,11 @@ public sealed class StatusEffectState
 
         // 더 센 공격으로 다시 걸면 기준 피해도 올라간다.
         // 낮은 피해로 덮어써서 도트를 약화시킬 수 없게 한다.
-        if (baseDamage > sourceDamage[i])
+        // 【이로운 상태는 덮어쓴다】 (결정 2-142) — 이 자리는 세기 배율이다. 희석판을 다시 쓰면 희석판 세기가 된다
+        // (같은 분류는 덮어쓴다 — 소모품 문서 6절). 지속시간도 위에서 이미 새로 잡혔다.
+        if (StatusEffectTable.IsBeneficial(type))
+            sourceDamage[i] = baseDamage;
+        else if (baseDamage > sourceDamage[i])
             sourceDamage[i] = baseDamage;
 
         // 【최대 중첩 = 한계치】 차는 순간 질적으로 다른 것이 된다.
@@ -243,7 +247,7 @@ public sealed class StatusEffectState
             // 쓰는 이유도 같다 — 틱을 잘게 쪼갤수록 총량이 부풀면 안 된다.
             if (type == StatusEffectType.Regen)
             {
-                pendingHeal += StatusEffectTable.RegenPerSecond * elapsed;
+                pendingHeal += StatusEffectTable.RegenPerSecond * PotencyOf(StatusEffectType.Regen) * elapsed;
 
                 if (expired)
                     MarkAftermath(type);
@@ -392,7 +396,7 @@ public sealed class StatusEffectState
             // 상태가 된다. 곱이면 0.75 × 1.25 = 0.94로, 둘 다 걸려 있다는
             // 사실이 수치에 남는다.
             if (Has(StatusEffectType.Haste))
-                scale *= 1f + StatusEffectTable.HasteSpeedBonus;
+                scale *= 1f + StatusEffectTable.HasteSpeedBonus * PotencyOf(StatusEffectType.Haste);
 
             if (Has(StatusEffectType.Fatigue))
                 scale *= 1f - StatusEffectTable.FatigueSpeedPenalty;
@@ -402,6 +406,18 @@ public sealed class StatusEffectState
 
             return scale;
         }
+    }
+
+    /// <summary>
+    /// 이로운 상태의 세기 배율 (결정 2-142) — 걸 때 넘긴 값. 기본 약은 1, 강화판 2, 희석판 0.4 같은 것.
+    /// 걸려 있지 않거나 값이 없으면 1.
+    /// </summary>
+    public float PotencyOf(StatusEffectType type)
+    {
+        int i = (int)type;
+        if (i <= 0 || i >= sourceDamage.Length || sourceDamage[i] <= 0f)
+            return 1f;
+        return sourceDamage[i];
     }
 
     /// <summary>행동 불능인지. 동결 또는 마비. 이동도 공격도 하지 못한다.</summary>
@@ -423,7 +439,7 @@ public sealed class StatusEffectState
     /// 남의 상태이상이 반으로 깎으면 녹용을 쓸 이유가 사라진다.
     /// </summary>
     public float ArmourBonus
-        => (Has(StatusEffectType.Bolster) ? StatusEffectTable.BolsterArmourBonus : 0f)
+        => (Has(StatusEffectType.Bolster) ? StatusEffectTable.BolsterArmourBonus * PotencyOf(StatusEffectType.Bolster) : 0f)
          + (Has(StatusEffectType.Frenzy) ? StatusEffectTable.FrenzyArmourBonus : 0f);
 
     /// <summary>
@@ -439,7 +455,7 @@ public sealed class StatusEffectState
     /// <summary>소지 중량 증가(공진단)가 곱하는 최대 소지 중량 배율.</summary>
     public float CarryWeightMultiplier
         => Has(StatusEffectType.Overload)
-            ? StatusEffectTable.OverloadWeightMultiplier
+            ? 1f + (StatusEffectTable.OverloadWeightMultiplier - 1f) * PotencyOf(StatusEffectType.Overload)
             : 1f;
 
     /// <summary>

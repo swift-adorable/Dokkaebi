@@ -105,20 +105,20 @@ public class PlayerLoadout : MonoBehaviour
         // 생존 페널티(탈수·허기)를 여기서 함께 곱한다. PlayerSurvival이 직접
         // 쓰면 다음 Refresh에서 장비 값으로 덮여 페널티가 깜빡거린다.
         if (movement != null)
-            movement.SpeedScale = snapshot.MoveScale * SurvivalMoveScale() * WeatherMoveScale();
+            movement.SpeedScale = snapshot.MoveScale * SurvivalMoveScale() * WeatherMoveScale() * PassiveCombat.MoveScale;   // 패시브 이동 (결정 2-141)
 
         if (dash != null)
         {
             dash.DistanceScale = snapshot.DashDistanceScale;
-            dash.CooldownScale = snapshot.DashCooldownScale;
+            dash.CooldownScale = snapshot.DashCooldownScale * PassiveCombat.DashCooldownScale;   // 패시브 대시 (결정 2-141)
         }
 
         if (health == null)
             return;
 
         health.SetDefence(
-            snapshot.Defence.headArmour,
-            snapshot.Defence.bodyArmour,
+            snapshot.Defence.headArmour + PassiveCombat.ArmourBonus,   // 패시브 방어 (결정 2-141)
+            snapshot.Defence.bodyArmour + PassiveCombat.ArmourBonus,
             snapshot.Defence.resistances);
 
         // 최대 체력이 줄어드는 각인을 뺐을 때 회복시키지 않는다.
@@ -126,7 +126,7 @@ public class PlayerLoadout : MonoBehaviour
         //
         // 폭주(부자탕)의 +10도 여기서 더한다. 끝나면 상한이 도로 줄고 넘친 체력은
         // 잘린다 — 늘린 10을 회복약으로 채워 두고 끝난 뒤에도 가져가지 못한다.
-        int max = snapshot.MaxHealth + health.Status.MaxHealthBonus;
+        int max = snapshot.MaxHealth + health.Status.MaxHealthBonus + PassiveCombat.MaxHealthBonus;   // 패시브 체력 (결정 2-141)
 
         // 【처음 한 번은 가득 채운다】 — 씬의 Health는 옛 기본값(10)으로 깨어난다. 상한만 100으로 올리면
         // 현재 체력이 10에 남아 판을 10/100으로 시작했다 (2026-10-08 확인). 판은 늘 가득 찬 채 시작한다.

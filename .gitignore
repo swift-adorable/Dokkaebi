@@ -139,14 +139,12 @@ TestRun-*.log
 # 불꽃 팩
 /Assets/Resources/Wisp/
 /Assets/Resources/Wisp.meta
-# Texture Pixel (조건 확인 안 됨)
+# Texture Pixel (lynocs · CC0 1.0 — 2026-11-18 확인, 커밋 가능) — 소굴용 tex_* 는 원본 크기 그대로라 저장소가 커져 빼 둔다
 /Assets/Resources/Floor/tex_*
 # nanasha 바닥 타일
 /Assets/Art/PixelSource/
 /Assets/Art/PixelSource.meta
-# nanasha 타일로 구운 바닥
-/Assets/Art/Generated/Chapter0_PixelGround.png
-/Assets/Art/Generated/Chapter0_PixelGround.png.meta
+# (결정 2-148) 0장 바닥은 Texture Pixel(CC0) 타일(Assets/Art/Floors)로 다시 구워 커밋한다 — nanasha 타일은 더는 안 쓴다
 # 플레이 중 찌꺼기
 /Assets/_Recovery/
 /Assets/_Recovery.meta

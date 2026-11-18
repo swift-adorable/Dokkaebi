@@ -100,6 +100,7 @@ public static class SceneFlow
 
         SkillManager.CarryAcrossScene();   // 벙커에서 끼운 구슬을 구역에서도 그대로 (결정 2-99)
         SaveManager.Commit("파밍 출발");
+        RaidLedger.Begin(RaidSummaryUI.CarriedValue(), Time.time, StoryManager.TargetZone);   // 철수 결산 (결정 2-142)
         Load(RaidSceneFor(StoryManager.TargetZone));
     }
 
@@ -115,6 +116,9 @@ public static class SceneFlow
     {
         if (loading || InBunker)
             return;
+
+        // 철수 결산 (결정 2-142) — 구슬이 가방으로 돌아오기 전에 잰다(출발 때도 구슬은 소켓에 있었다).
+        RaidLedger.End(RaidSummaryUI.CarriedValue(), Time.time);
 
         if (SkillManager.HasInstance)
             SkillManager.Instance.ResetRun();
@@ -187,6 +191,7 @@ public static class SceneFlow
         Time.timeScale = 1f;
 
         ItemActionMenu.Close();
+        BossRumor.Clear();   // 소문 영역은 그 씬의 보스 자리다 (결정 2-142)
 
         GameLogger.Log($"[SceneFlow] → {scene}");
 

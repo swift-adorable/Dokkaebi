@@ -35,13 +35,27 @@ public static class ItemCell
 
         Image cell = UIFactory.CreatePanel(name, parent, body, min, max);
 
+        // 【등급 색 테두리】 (결정 2-142) — 흔한 것(흰)은 예전처럼 종류 색, 쓸만함부터 등급 색.
+        int grade = empty ? 0 : ItemGrade.Of(stack.Definition);
+
         // 빈 칸에는 광택을 얹지 않는다. 격자 전체가 번들거려 아이템이 묻힌다.
         UIFactory.CreateOutline(cell,
             empty ? UIPalette.EdgeSoft
                   : chosen ? UIPalette.Brighten(UIPalette.SlotSelected, 0.22f)
-                           : UIPalette.Glassify(UIPalette.Brighten(kind, 0.34f), 0.70f),
+                           : grade > 0 ? ItemGrade.ColorOf(grade)
+                                       : UIPalette.Glassify(UIPalette.Brighten(kind, 0.34f), 0.70f),
             UIFactory.Radius,
-            chosen ? 3 : 2);
+            chosen ? 3 : grade >= 3 ? 4 : grade > 0 ? 3 : 2);
+
+        // 귀함부터는 칸 아래에 등급 빛을 깐다 — 한눈에 「좋은 것이 있다」가 들어온다.
+        if (!empty && grade >= 3 && !chosen)
+        {
+            Color glow = ItemGrade.ColorOf(grade);
+            glow.a = 0.30f;
+            Image band = UIFactory.CreatePanel("GradeGlow", cell.transform, glow,
+                new Vector2(0f, 0f), new Vector2(1f, 0.42f), radius: UIFactory.Radius);
+            band.raycastTarget = false;
+        }
 
         var button = cell.gameObject.AddComponent<Button>();
         button.targetGraphic = cell;
@@ -94,8 +108,47 @@ public static class ItemCell
         }
 
         DrawDurabilityBar(cell.transform, stack);
+        DrawOwnedCount(cell.transform, stack);
+
+        // 열쇠고리에 이미 건 열쇠 — 초록 ✓ (결정 2-143 · 덕코프 모드 「Better Key Indicator」 130만).
+        if (KeyRing.IsDoorKey(stack.Definition) && KeyRing.IsRegistered(stack.Definition.Id))
+        {
+            Text check = UIFactory.CreateLabel(cell.transform, "✓", 30, FontStyle.Bold,
+                new Vector2(0.62f, 0.30f), new Vector2(0.96f, 0.70f), TextAnchor.MiddleRight, UIPalette.Gain);
+            check.raycastTarget = false;
+            check.gameObject.AddComponent<Outline>().effectColor = new Color(0f, 0f, 0f, 0.85f);
+        }
 
         return cell;
+    }
+
+    /// <summary>
+    /// 【가진 개수】 (결정 2-142 · 덕코프 모드 「Show inventory Count」 132만) — 가방 + 창고에 모두 몇 개 있는지.
+    /// 이 칸의 개수보다 많을 때만 왼쪽 아래에 「모두 12」. 내구도 막대가 있는 물건(장비)은 그 자리를 쓰므로 뺀다.
+    /// </summary>
+    public static void DrawOwnedCount(Transform cell, ItemStack stack)
+    {
+        if (stack?.Definition == null || stack.Definition.HasDurability || !PlayerInventory.HasInstance)
+            return;
+
+        int owned = OwnedCount(stack.Definition);
+        if (owned <= stack.Count)
+            return;
+
+        Text label = UIFactory.CreateLabel(cell, $"모두 {owned}", 15, FontStyle.Bold,
+            new Vector2(0.05f, 0.04f), new Vector2(0.60f, 0.26f), TextAnchor.LowerLeft, UIPalette.TextDim);
+        label.horizontalOverflow = HorizontalWrapMode.Overflow;   // 한 줄로 — 꺾이면 그림과 겹친다
+        label.raycastTarget = false;
+        label.gameObject.AddComponent<Outline>().effectColor = new Color(0f, 0f, 0f, 0.85f);
+    }
+
+    /// <summary>가방 + 창고에 든 이 물건의 수.</summary>
+    public static int OwnedCount(ItemDefinition definition)
+    {
+        if (!PlayerInventory.HasInstance || definition == null)
+            return 0;
+        PlayerInventory inventory = PlayerInventory.Instance;
+        return (inventory.Bag?.CountOf(definition) ?? 0) + (inventory.Stash?.CountOf(definition) ?? 0);
     }
 
     /// <summary>

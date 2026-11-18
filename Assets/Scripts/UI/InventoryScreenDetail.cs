@@ -339,6 +339,11 @@ public partial class InventoryScreenUI
                 $"×{detailStack.Count}", UIPalette.Text);
         }
 
+        // 등급 칩 (결정 2-142) — 칸 테두리 색과 같은 색.
+        int grade = ItemGrade.Of(definition);
+        float gradeX = (ChipWidth + ChipGap) * 2f + (detailStack.Count > 1 ? ChipWidth * 0.7f + ChipGap : 0f);
+        DrawChip(gradeX, 0.795f, 0.2f, ItemGrade.NameOf(grade), ItemGrade.ColorOf(grade));
+
         // 설명은 길이가 제각각이라 넘치면 굴린다. (UIFactory.CreateScrollText)
         // 그 아래에 「얻는 곳 · 쓰는 곳」을 잇는다 (결정 2-120) — 같은 굴림 칸이라 자리를 새로 먹지 않는다.
         UIFactory.CreateScrollText(detailContent, WithSources(definition), 25, FontStyle.Normal,

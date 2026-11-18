@@ -224,13 +224,15 @@ public partial class InventoryScreenUI
             float cellHeight = TreeHeight / rows;
 
             // row 0이 맨 아래다. 트리가 아래에서 위로 자란다.
+            // 줄이 많으면(8줄 — 결정 2-141) 칸 사이를 좁혀 칸을 키운다.
+            float insetY = rows > 6 ? NodeInsetY * 0.3f : NodeInsetY;
             var min = new Vector2(
                 node.Column * cellWidth + NodeInsetX,
-                node.Row * cellHeight + NodeInsetY);
+                node.Row * cellHeight + insetY);
 
             var max = new Vector2(
                 (node.Column + 1) * cellWidth - NodeInsetX,
-                (node.Row + 1) * cellHeight - NodeInsetY);
+                (node.Row + 1) * cellHeight - insetY);
 
             DrawPassiveNode(area, manager, node, min, max);
         }
@@ -355,11 +357,13 @@ public partial class InventoryScreenUI
             ? UIPalette.Text
             : UIPalette.TextDim;
 
-        UIFactory.CreateLabel(cell.transform, node.DisplayName, 22, FontStyle.Bold,
-            new Vector2(0.06f, 0.46f), new Vector2(0.94f, 0.95f), TextAnchor.LowerCenter,
+        // 줄이 많으면 글자를 줄여 이름 · 효과가 겹치지 않게 (결정 2-141 — 8줄).
+        bool dense = manager.Tree.Rows > 6;
+        UIFactory.CreateLabel(cell.transform, node.DisplayName, dense ? 17 : 22, FontStyle.Bold,
+            new Vector2(0.06f, 0.5f), new Vector2(0.94f, 0.97f), TextAnchor.LowerCenter,
             textColor);
 
-        UIFactory.CreateLabel(cell.transform, learned ? "배움" : node.EffectText, 19,
+        UIFactory.CreateLabel(cell.transform, learned ? "배움" : node.EffectText, dense ? 14 : 19,
             FontStyle.Normal, new Vector2(0.06f, 0.06f), new Vector2(0.94f, 0.44f),
             TextAnchor.UpperCenter, learned ? UIPalette.TextAccent : UIPalette.TextDim);
 

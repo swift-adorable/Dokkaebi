@@ -58,6 +58,14 @@ public class ConsumableEffect
     [Tooltip("거는 이로운 상태. 지속시간은 상태이상 표가 정한다.")]
     [SerializeField] private StatusEffectType grant = StatusEffectType.None;
 
+    [Min(0.05f)]
+    [Tooltip("이로운 상태의 세기 배율 (결정 2-142 강화판 · 희석판). 1이면 기본.")]
+    [SerializeField] private float grantPotency = 1f;
+
+    [Min(0.1f)]
+    [Tooltip("이로운 상태의 지속시간 배율 (결정 2-142). 1이면 상태이상 표 그대로.")]
+    [SerializeField] private float grantDurationScale = 1f;
+
     public ConsumableCategory Category => category;
 
     public int Heal => Mathf.Max(0, heal);
@@ -103,6 +111,12 @@ public class ConsumableEffect
     /// 「축지환은 120초인데 표에는 90초」 같은 것이 생긴다.
     /// </summary>
     public StatusEffectType Grant => grant;
+
+    /// <summary>세기 배율 — 축지환 강화판 2, 희석판 0.4 같은 것. 옛 에셋(0)은 1로 읽는다.</summary>
+    public float GrantPotency => grantPotency > 0f ? grantPotency : 1f;
+
+    /// <summary>지속시간 배율. 옛 에셋(0)은 1로 읽는다.</summary>
+    public float GrantDurationScale => grantDurationScale > 0f ? grantDurationScale : 1f;
 
     public bool Grants => grant != StatusEffectType.None;
 

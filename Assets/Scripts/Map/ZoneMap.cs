@@ -22,7 +22,11 @@ public class ZoneMap : MonoBehaviour
 
     public void EditorSetChapter(int value) => chapter = value;
 
-    private void Awake() => Current = this;
+    private void Awake()
+    {
+        Current = this;
+        ChapterLighting.Apply(gameObject, chapter);   // 장마다 빛깔 (결정 2-144) — StoryScenery가 해 세기를 읽기 전에
+    }
 
     private void OnDestroy()
     {
@@ -112,6 +116,7 @@ public class ZoneMap : MonoBehaviour
     public static bool CanSpawnAt(Vector3 p)
     {
         ChapterMap map = Current != null ? Current.Map : null;
-        return map == null || map.CanStand(p, StoryManager.Progress.IsZoneOpen);
+        // 잠긴 곳(담 안 · 문 앞)에는 나오지 않는다 (결정 2-143).
+        return map == null || (map.CanStand(p, StoryManager.Progress.IsZoneOpen) && !LockedSite.Occupies(p));
     }
 }

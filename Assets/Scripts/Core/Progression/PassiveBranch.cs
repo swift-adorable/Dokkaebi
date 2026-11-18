@@ -22,7 +22,13 @@ public enum PassiveBranch
     Brokerage = 3,
 
     /// <summary>역행 — 조우해야 보인다. (덕코프 「이상한 개조」)</summary>
-    Regression = 4
+    Regression = 4,
+
+    /// <summary>단련 — 몸을 단련한다: 체력 · 이동 · 대시 · 방어. (덕코프 「피지컬 강화」 · 결정 2-141)</summary>
+    Training = 5,
+
+    /// <summary>무예 — 무기를 다룬다: 피해 · 재장전. (덕코프 「스킬 강화」 · 결정 2-141)</summary>
+    Martial = 6
 }
 
 /// <summary>
@@ -42,8 +48,8 @@ public enum PassiveUnlockKind
 
 public static class PassiveBranchInfo
 {
-    /// <summary>계열의 수. 화면 한 장에 들어와야 하므로 늘리지 않는다. (6절 4번)</summary>
-    public const int Count = 5;
+    /// <summary>계열의 수 — 5 → 7 (결정 2-141, 전투 수치를 넣으며 단련 · 무예를 더했다). 화면 한 장에 탭 7개까지.</summary>
+    public const int Count = 7;
 
     public static string Name(PassiveBranch branch)
     {
@@ -54,6 +60,8 @@ public static class PassiveBranchInfo
             case PassiveBranch.Recovery:   return "회수";
             case PassiveBranch.Brokerage:  return "중개";
             case PassiveBranch.Regression: return "역행";
+            case PassiveBranch.Training:   return "단련";
+            case PassiveBranch.Martial:    return "무예";
             default:                       return "?";
         }
     }
@@ -67,6 +75,8 @@ public static class PassiveBranchInfo
             case PassiveBranch.Recovery:   return "죽어도 무엇이 남는가";
             case PassiveBranch.Brokerage:  return "소굴에서 무엇을 하는가";
             case PassiveBranch.Regression: return "기록되지 않은 것";
+            case PassiveBranch.Training:   return "얼마나 버티고 달리는가";
+            case PassiveBranch.Martial:    return "얼마나 잘 쏘는가";
             default:                       return string.Empty;
         }
     }
@@ -90,6 +100,8 @@ public static class PassiveBranchInfo
             case PassiveBranch.Metabolism: return new Color(0.30f, 0.52f, 0.36f, 0.95f);
             case PassiveBranch.Recovery:   return new Color(0.62f, 0.42f, 0.24f, 0.95f);
             case PassiveBranch.Brokerage:  return new Color(0.56f, 0.46f, 0.20f, 0.95f);
+            case PassiveBranch.Training:   return new Color(0.62f, 0.28f, 0.26f, 0.95f);
+            case PassiveBranch.Martial:    return new Color(0.26f, 0.50f, 0.56f, 0.95f);
             default:                       return new Color(0.48f, 0.30f, 0.56f, 0.95f);
         }
     }

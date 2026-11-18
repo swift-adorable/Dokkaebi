@@ -46,6 +46,9 @@ public class QuantityPopupUI : MonoBehaviour
         instance.Build(canvas, title, verb);
     }
 
+    /// <summary>떠 있는가 — 전리품 창이 뒤지기를 잠시 멈춘다 (결정 2-142).</summary>
+    public static bool IsOpen => instance != null;
+
     public static void Close()
     {
         if (instance != null)

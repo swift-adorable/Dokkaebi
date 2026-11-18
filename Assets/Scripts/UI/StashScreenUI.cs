@@ -85,7 +85,8 @@ public class StashScreenUI : MonoBehaviour
         frame.DrawTabs(new[] { "창고" }, 0, null);
 
         Inventory stash = Stash;
-        frame.CounterNote.text = $"창고 <b>{stash.UsedSlots} / {stash.SlotCapacity}</b>칸\n<size={UIFactory.Scaled(18)}>창고에 둔 것은 쓰러져도 남는다</size>";
+        // 창고 총가치 (결정 2-142 · 덕코프 모드 「창고 가치」).
+        frame.CounterNote.text = $"창고 <b>{stash.UsedSlots} / {stash.SlotCapacity}</b>칸 · 총가치 <b>{stash.TotalValue:N0}</b>엽전\n<size={UIFactory.Scaled(18)}>창고에 둔 것은 쓰러져도 남는다</size>";
 
         Canvas.ForceUpdateCanvases();
         DrawStash();
@@ -122,7 +123,7 @@ public class StashScreenUI : MonoBehaviour
             {
                 new("꺼내기", UIPalette.Action, () => Move(captured, Stash, Bag, "꺼내기", true)),
                 new("상세보기", UIPalette.Subtle, () => InventoryScreenUI.OpenReadOnlyDetail(captured, "창고")),
-            }));
+            }, () => MoveAll(captured, Stash, Bag, true)));   // 두 번 누르면 통째로 꺼낸다 (2026-11-18)
         }
     }
 
@@ -131,7 +132,20 @@ public class StashScreenUI : MonoBehaviour
         {
             new("창고에 넣기", UIPalette.Action, () => Move(stack, Bag, Stash, "넣기", false)),
             new("상세보기", UIPalette.Subtle, () => InventoryScreenUI.OpenReadOnlyDetail(stack, "내 가방")),
-        });
+        }, () => MoveAll(stack, Bag, Stash, false));   // 두 번 누르면 통째로 넣는다 (2026-11-18)
+
+    /// <summary>두 번 누름 — 몇 개인지 묻지 않고 한 칸을 통째로 옮긴다.</summary>
+    private void MoveAll(ItemStack stack, Inventory from, Inventory to, bool taking)
+    {
+        if (stack == null || stack.IsEmpty)
+            return;
+        if (!Inventory.MoveStack(from, to, stack))
+            Toast(taking ? "가방에 자리가 없습니다." : "창고에 자리가 없습니다.");
+        else if (taking)
+            ExchangeWindowUI.RaiseStashTaken();
+        PlayerInventory.EnsureInstance().RefreshCapacity();
+        Refresh();
+    }
 
     /// <summary>옮긴다 — 겹친 물건은 몇 개를 옮길지 묻는다 (결정 2-77).</summary>
     private void Move(ItemStack stack, Inventory from, Inventory to, string verb, bool taking)

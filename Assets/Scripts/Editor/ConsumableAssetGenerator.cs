@@ -38,6 +38,8 @@ public static class ConsumableAssetGenerator
         public int maxDurability;
         public float castSeconds;
         public StatusEffectType grant;
+        public float potency;
+        public float durationScale;
         public float weight;
         public int stackMax;
         public int value;
@@ -150,6 +152,16 @@ public static class ConsumableAssetGenerator
             "더 들고 갈 수 있다. 끝나면 그대로 주저앉는다.",
             StatusEffectType.Overload, waterCost: 10f, energyCost: 0f,
             weight: 0.21f, value: 648));
+
+        // ── 강화판 · 희석판 (결정 2-142 · 덕코프 모드 「원판 주사약 확장」) — 약탕간에서만 달인다 ──
+        //
+        // 【진(眞)】 세기 2배 · 지속 1.5배 — 대신 수분 · 에너지를 2.5배 태운다. 값도 비싸다.
+        // 【묽은】 세기 0.4배 · 지속 2배 — 대가 절반, 값 30%. 길게 뛰는 판에 싸게 쓴다.
+        // 축지환 진 = 이동 +50% (덕코프 강화형 노란 주사 +50%와 같다), 묽은 = +10% (희석형 +10%와 같다). [임시값]
+        AddVariants(list, "con_stim", "축지환", StatusEffectType.Haste, 15f, 5f, 0.2f, 629);
+        AddVariants(list, "con_coagulant", "녹용", StatusEffectType.Bolster, 5f, 5f, 0.2f, 648);
+        AddVariants(list, "con_regen", "경옥고", StatusEffectType.Regen, 7f, 0f, 0.2f, 875);
+        AddVariants(list, "con_expander", "공진단", StatusEffectType.Overload, 10f, 0f, 0.21f, 648);
 
         // ── 부자탕 — 보스 약품 (문서 4-2) ─────────────────────────────
         //
@@ -371,6 +383,27 @@ public static class ConsumableAssetGenerator
         };
     }
 
+    /// <summary>강화판(진) · 희석판(묽은) 한 쌍 (결정 2-142).</summary>
+    private static void AddVariants(List<Row> list, string baseId, string baseName, StatusEffectType grant,
+                                    float waterCost, float energyCost, float weight, int value)
+    {
+        Row strong = Shot($"{baseId}_strong", $"진{baseName}",
+            $"{baseName}을 졸여 세게 만든 것. 두 배로 듣고 오래 가지만, 몸이 그만큼 마른다.",
+            grant, waterCost * 2.5f, energyCost * 2.5f, weight, Mathf.RoundToInt(value * 2.5f));
+        strong.potency = 2f;
+        strong.durationScale = 1.5f;
+        strong.stackMax = 2;
+        list.Add(strong);
+
+        Row thin = Shot($"{baseId}_thin", $"묽은 {baseName}",
+            $"{baseName}에 물을 탄 것. 약하게 듣지만 오래 가고 몸도 덜 마른다.",
+            grant, waterCost * 0.5f, energyCost * 0.5f, weight, Mathf.RoundToInt(value * 0.3f));
+        thin.potency = 0.4f;
+        thin.durationScale = 2f;
+        thin.stackMax = 5;
+        list.Add(thin);
+    }
+
     /// <summary>저항 주사약. 수치는 덕코프 저항 주사약 4종 그대로다.</summary>
     private static Row Ward(string id, string name, string desc, StatusEffectType grant)
     {
@@ -480,6 +513,8 @@ public static class ConsumableAssetGenerator
         effect.FindPropertyRelative("useCost").intValue = row.useCost;
         effect.FindPropertyRelative("castSeconds").floatValue = row.castSeconds;
         effect.FindPropertyRelative("grant").intValue = (int)row.grant;
+        effect.FindPropertyRelative("grantPotency").floatValue = row.potency > 0f ? row.potency : 1f;
+        effect.FindPropertyRelative("grantDurationScale").floatValue = row.durationScale > 0f ? row.durationScale : 1f;
 
         so.ApplyModifiedPropertiesWithoutUndo();
 

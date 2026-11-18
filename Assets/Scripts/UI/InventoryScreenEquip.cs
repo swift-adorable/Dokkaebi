@@ -58,7 +58,8 @@ public partial class InventoryScreenUI
             remove: () => UnequipFromSlot(slot),
             detail: () => OpenItemDetail(current, slot));
 
-        ItemActionMenu.Open(cell, entries);
+        // 두 번 누르면 장착 해제 (2026-11-18).
+        ItemActionMenu.Open(cell, entries, () => UnequipFromSlot(slot));
     }
 
     /// <summary>

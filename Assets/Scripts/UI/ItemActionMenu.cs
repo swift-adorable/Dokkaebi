@@ -190,10 +190,32 @@ public class ItemActionMenu : MonoBehaviour
     /// 칸 옆에 연다.
     /// </summary>
     /// <param name="cell">누른 칸. 이 칸의 오른쪽에 붙인다.</param>
-    public static void Open(RectTransform cell, IReadOnlyList<Entry> entries)
+    public static void Open(RectTransform cell, IReadOnlyList<Entry> entries) => Open(cell, entries, null);
+
+    /// <summary>두 번 누름으로 볼 간격 (초).</summary>
+    public const float DoubleTapSeconds = 0.35f;
+    private static RectTransform lastTapCell;
+    private static float lastTapTime = -10f;
+
+    /// <summary>
+    /// 칸 옆에 연다. 【같은 칸을 빠르게 두 번 누르면 doubleTap 을 바로 한다】 (2026-11-18 사용자 「아이템에 더블 클릭 기능」)
+    /// — 가방: 사용 · 장착, 장비 칸: 장착 해제, 파밍: 줍기. doubleTap 이 없으면 메뉴만.
+    /// </summary>
+    public static void Open(RectTransform cell, IReadOnlyList<Entry> entries, Action doubleTap)
     {
         if (cell == null || entries == null || entries.Count == 0)
             return;
+
+        bool twice = cell == lastTapCell && Time.unscaledTime - lastTapTime <= DoubleTapSeconds;
+        lastTapCell = twice ? null : cell;
+        lastTapTime = Time.unscaledTime;
+        if (twice && doubleTap != null)
+        {
+            Close();
+            suppressed = null;
+            doubleTap();
+            return;
+        }
 
         // 【같은 칸을 다시 누르면 닫는다.】 열고 닫는 데 쓰는 버튼이
         // 칸 자신이면, 메뉴를 치우려고 빈 곳을 찾을 필요가 없다.
@@ -228,9 +250,12 @@ public class ItemActionMenu : MonoBehaviour
             instance.shade.SetActive(false);
     }
 
-    private void Show(RectTransform cell, IReadOnlyList<Entry> entries)
+    private void Show(RectTransform cell, IReadOnlyList<Entry> given)
     {
         owner = cell;
+
+        // 맨 아래 「닫기」 — 바깥을 눌러도 닫히지만, 손가락으로는 닫는 버튼이 있어야 안심한다 (2026-11-18 사용자 「닫기 버튼이 없네」).
+        var entries = new List<Entry>(given) { new Entry("닫기", UIPalette.Subtle, null) };
 
         shade.SetActive(true);
 

@@ -57,7 +57,8 @@ public class SaveData
     ///  21 — 상인이 맡아 둔 보상(pendingRewards)을 더했다 (결정 2-101). 20판에는 없어 빈 목록. 이야기 줄의 notices는 결정 2-100부터 쓰지 않는다.
     ///  22 — 가방에만 건넬 맡아 둔 보상(pendingBagRewards — 참봉)을 더했다 (결정 2-104). 21판에는 없어 빈 목록.
     ///  23 — 업적(achievements · bossKillCounts · earnedGold · arrivedChapters)을 더했다 (결정 2-118). 22판에는 없어 빈 것으로 읽힌다.
-    public const int CurrentVersion = 23;
+    ///  24 — 열쇠고리에 건 열쇠(registeredKeys)를 더했다 (결정 2-143). 23판에는 없어 빈 목록.
+    public const int CurrentVersion = 24;
 
     public int version = CurrentVersion;
 
@@ -159,6 +160,9 @@ public class SaveData
 
     /// <summary>바쳐 연 제작법 (만드는 것의 id).</summary>
     public List<string> craftUnlocks = new();
+
+    /// <summary>열쇠고리에 건 열쇠 id (결정 2-143 · 판 24).</summary>
+    public List<string> registeredKeys = new();
 
     // ── 약탕간 · 장부방 (결정 2-97 · 판 19) ──────────────────────────
 

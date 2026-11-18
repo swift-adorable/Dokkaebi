@@ -218,7 +218,7 @@ public class PlayerWeapon : MonoBehaviour
         // 방어 관통탄 (결정 2-95) — 통에 든 탄이 방어 관통 + · 피해 × 를 얹는다.
         string loaded = kind.HasValue && PlayerInventory.HasInstance ? PlayerInventory.Instance.Loadout.LoadedAmmoId : null;
         int penetration = shot.ArmourPenetration + AmmoTable.PenetrationBonusOf(loaded);
-        float pelletDamage = shot.Damage * AmmoTable.DamageScaleOf(loaded) / pellets;
+        float pelletDamage = shot.Damage * AmmoTable.DamageScaleOf(loaded) * PassiveCombat.DamageScale / pellets;   // 패시브 무기 피해 (결정 2-141)
 
         // 여러 발이면 정면을 중심으로 좌우 대칭이 되도록 각도를 배분한다.
         float spread = pellets > 1 ? Mathf.Max(modifiers.SpreadAngle, kind.Value.PelletSpread) : modifiers.SpreadAngle;

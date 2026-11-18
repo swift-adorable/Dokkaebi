@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea17f4877b7bf48069bd560938e26492, type: 3}
+  m_Name: meta_scav_2
+  m_EditorClassIdentifier: Dokkaebi.Runtime::PassiveNode
+  id: meta_scav_2
+  displayName: "\uC0C5\uC0C5\uC774"
+  description: "\uC2DC\uCCB4\uB97C \uD55C \uBC88 \uB354 \uB4A4\uC9C4\uB2E4. \uC804\uB9AC\uD488
+    \uCD94\uCCA8 +1."
+  branch: 1
+  effect: 12
+  value: 1
+  requiredLevel: 14
+  cost: 9000
+  materials:
+  - item: {fileID: 11400000, guid: 2cea37fa128934109856e90e89807614, type: 2}
+    count: 12
+  prerequisites:
+  - meta_rare
+  column: 0
+  row: 4

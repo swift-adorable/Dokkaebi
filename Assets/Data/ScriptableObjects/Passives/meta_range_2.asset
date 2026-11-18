@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea17f4877b7bf48069bd560938e26492, type: 3}
+  m_Name: meta_range_2
+  m_EditorClassIdentifier: Dokkaebi.Runtime::PassiveNode
+  id: meta_range_2
+  displayName: "\uAE34 \uC190 2"
+  description: "\uAC70\uB450\uB294 \uBC94\uC704 +1.5m."
+  branch: 1
+  effect: 11
+  value: 1.5
+  requiredLevel: 20
+  cost: 18000
+  materials:
+  - item: {fileID: 11400000, guid: b7d8f76632b14415590786fd22094645, type: 2}
+    count: 6
+  prerequisites:
+  - meta_absorb_3
+  column: 2
+  row: 6

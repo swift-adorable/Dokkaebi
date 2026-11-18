@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -270,7 +271,42 @@ public partial class InventoryScreenUI
             remove: () => TakeGemOut(slot),
             detail: () => OpenSocketDetail(occupant, slot));
 
-        ItemActionMenu.Open(cell, entries);
+        // 두 번 누르면 빼기 (2026-11-18).
+        ItemActionMenu.Open(cell, entries, () => TakeGemOut(slot));
+    }
+
+    /// <summary>
+    /// 두 번 누름 — 끼울 수 있는 첫 빈 자리(핵심 → 소켓 → 발동 → 전령)에 바로 끼운다 (2026-11-18).
+    /// 빈 자리가 없으면 예전처럼 끼울 자리를 밝혀 고르게 한다.
+    /// </summary>
+    private void AutoPlaceGem(ItemStack stack)
+    {
+        BeginPlacingGem(stack);
+        SkillDefinition picked = PickedSkill();
+        if (picked == null)
+            return;
+
+        var order = new List<SlotRef>();
+        for (int c = 0; c < SocketedBuild.MaxCores; c++)
+            order.Add(new SlotRef(SlotKind.Core, c, 0));
+        for (int c = 0; c < SocketedBuild.MaxCores; c++)
+            for (int i = 0; i < SocketedBuild.SocketsPerCore; i++)
+                order.Add(new SlotRef(SlotKind.Support, c, i));
+        for (int i = 0; i < SocketedBuild.MaxMetas; i++)
+            order.Add(new SlotRef(SlotKind.Meta, 0, i));
+        order.Add(new SlotRef(SlotKind.Herald, 0, 0));
+
+        foreach (SlotRef slot in order)
+            if (OccupantOf(slot) == null && CanPlace(slot, picked))
+            {
+                PlaceGem(slot);
+                placingGem = null;
+                selected = null;
+                Refresh();
+                return;
+            }
+
+        ShowToast("끼울 빈 자리가 없습니다 — 밝은 자리를 눌러 바꿔 끼우십시오.");
     }
 
     private static SkillDefinition OccupantOf(SlotRef slot)

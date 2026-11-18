@@ -48,7 +48,7 @@ public class AmmoHudUI : MonoBehaviour
             new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), TextAnchor.MiddleCenter, UIPalette.TextOnGlass);
         label.rectTransform.pivot = new Vector2(0.5f, 0f);
         label.rectTransform.sizeDelta = new Vector2(640f, 34f);
-        label.rectTransform.anchoredPosition = new Vector2(0f, 190f);   // 퀵슬롯 줄 위
+        label.rectTransform.anchoredPosition = new Vector2(0f, 226f);   // 체력 줄 위 (결정 2-146 — 체력이 퀵슬롯 바로 위로 내려왔다)
         label.horizontalOverflow = HorizontalWrapMode.Overflow;
         label.raycastTarget = false;
         label.gameObject.AddComponent<Outline>().effectColor = new Color(0f, 0f, 0f, 0.75f);
@@ -58,7 +58,7 @@ public class AmmoHudUI : MonoBehaviour
             new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), TextAnchor.MiddleCenter, UIPalette.TextDim);
         triggerLabel.rectTransform.pivot = new Vector2(0.5f, 0f);
         triggerLabel.rectTransform.sizeDelta = new Vector2(640f, 28f);
-        triggerLabel.rectTransform.anchoredPosition = new Vector2(0f, 226f);
+        triggerLabel.rectTransform.anchoredPosition = new Vector2(0f, 262f);
         triggerLabel.horizontalOverflow = HorizontalWrapMode.Overflow;
         triggerLabel.raycastTarget = false;
         triggerLabel.gameObject.AddComponent<Outline>().effectColor = new Color(0f, 0f, 0f, 0.75f);

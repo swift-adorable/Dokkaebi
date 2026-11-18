@@ -166,10 +166,12 @@ public static class MobileInputUIFactory
 
         var image = buttonObject.AddComponent<Image>();
         image.sprite = GetCircleSprite();
-        image.color = new Color(0.25f, 0.6f, 1f, 0.5f);
+        // 【오른쪽 아래 행동 단추 묶음】 (결정 2-146) — 어두운 판 + 금빛 테, 이름은 한글. 파밍 · 시설 단추(청록)가 그 위로 쌓인다.
+        image.color = UIPalette.Edge;   // 판 자체가 금빛 테, 안쪽 원이 어두운 판
         image.raycastTarget = true;
+        AddDisc(buttonObject.transform, new Color(0.07f, 0.065f, 0.07f, 0.78f));
 
-        CreateLabel(buttonObject.transform, "DASH", 34);
+        CreateLabel(buttonObject.transform, "대시", 36);
 
         return buttonObject.AddComponent<VirtualButton>();
     }
@@ -193,8 +195,9 @@ public static class MobileInputUIFactory
 
         var image = promptObject.AddComponent<Image>();
         image.sprite = GetCircleSprite();
-        image.color = new Color(0.35f, 0.9f, 0.45f, 0.8f);
+        image.color = UIPalette.Edge;
         image.raycastTarget = true;
+        AddDisc(promptObject.transform, UIPalette.Action);   // 청록 — 시설 단추와 같은 「누르면 무언가 연다」 색 (결정 2-146)
 
         CreateLabel(promptObject.transform, "파밍", 28);
 
@@ -205,6 +208,21 @@ public static class MobileInputUIFactory
         promptObject.AddComponent<AbsorbPrompt>();
 
         return button;
+    }
+
+    /// <summary>안쪽 원 — 단추 판(금빛 테) 안에 4px 들여 깐다. 글자보다 먼저 만들어 뒤에 깔린다 (결정 2-146).</summary>
+    private static void AddDisc(Transform button, Color color)
+    {
+        GameObject discObject = CreateUIObject("Disc", button);
+        var rect = discObject.GetComponent<RectTransform>();
+        rect.anchorMin = Vector2.zero;
+        rect.anchorMax = Vector2.one;
+        rect.offsetMin = new Vector2(4f, 4f);
+        rect.offsetMax = new Vector2(-4f, -4f);
+        var image = discObject.AddComponent<Image>();
+        image.sprite = GetCircleSprite();
+        image.color = color;
+        image.raycastTarget = false;
     }
 
     private static RectTransform CreateCircle(Transform parent, string name, float size, Color color)

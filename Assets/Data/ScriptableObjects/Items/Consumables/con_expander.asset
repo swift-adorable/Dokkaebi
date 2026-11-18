@@ -41,3 +41,5 @@ MonoBehaviour:
     useCost: 0
     castSeconds: 0
     grant: 14
+    grantPotency: 1
+    grantDurationScale: 1

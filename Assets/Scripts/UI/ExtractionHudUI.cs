@@ -93,7 +93,7 @@ public class ExtractionHudUI : MonoBehaviour
         var barRect = back.rectTransform;
         barRect.pivot = new Vector2(0.5f, 0f);
         barRect.sizeDelta = new Vector2(BarWidth, BarHeight);
-        barRect.anchoredPosition = new Vector2(0f, 180f);
+        barRect.anchoredPosition = new Vector2(0f, 300f);   // 체력 줄 · 탄 줄 위 (결정 2-146)
 
         Image fill = UIFactory.CreatePanel("Fill", barRect, new Color(0.30f, 0.80f, 0.40f, 0.85f),
             Vector2.zero, new Vector2(0f, 1f));

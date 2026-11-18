@@ -126,10 +126,10 @@ public static class PlayerConsumables
         if (outcome.Cure != StatusEffectType.None)
             health.Status.RemoveStacks(outcome.Cure, outcome.CureStacks);
 
-        // sourceDamage는 도트 계산용이라 이로운 상태에는 쓰이지 않지만,
-        // Health.ApplyStatus가 0 이하면 그대로 돌아가므로 1을 넘긴다.
+        // 이로운 상태에는 sourceDamage 자리에 【세기 배율】을 넘긴다 (결정 2-142 강화판 · 희석판).
+        // 기본 약은 1 — 예전과 같다. Health.ApplyStatus는 0 이하면 돌아가므로 세기는 늘 0보다 크다.
         if (outcome.Grant != StatusEffectType.None)
-            health.ApplyStatus(outcome.Grant, 1f);
+            health.ApplyStatus(outcome.Grant, outcome.GrantPotency, outcome.GrantDurationScale);
 
         if (!PlayerSurvival.HasInstance)
             return;
@@ -203,9 +203,10 @@ public static class PlayerConsumables
 
         if (outcome.Grant != StatusEffectType.None)
         {
-            float seconds = StatusEffectTable.Get(outcome.Grant).Duration;
+            float seconds = StatusEffectTable.Get(outcome.Grant).Duration * outcome.GrantDurationScale;
+            string power = Mathf.Approximately(outcome.GrantPotency, 1f) ? "" : $" ×{outcome.GrantPotency:0.##}";
 
-            parts.Add($"{StatusEffectNames.Of(outcome.Grant)} {seconds:0}초");
+            parts.Add($"{StatusEffectNames.Of(outcome.Grant)}{power} {seconds:0}초");
         }
 
         if (outcome.EnergyCost > 0f)

@@ -88,6 +88,10 @@ public readonly struct ConsumableOutcome
     /// <summary>걸릴 이로운 상태. None이면 없다.</summary>
     public readonly StatusEffectType Grant;
 
+    /// <summary>이로운 상태의 세기 · 지속 배율 (결정 2-142).</summary>
+    public readonly float GrantPotency;
+    public readonly float GrantDurationScale;
+
     public bool Ok => Error == ConsumableError.None;
 
     public ConsumableOutcome(ConsumableError error, int heal = 0,
@@ -95,9 +99,12 @@ public readonly struct ConsumableOutcome
                              float waterCost = 0f, float energyCost = 0f,
                              StatusEffectType cure = StatusEffectType.None,
                              int cureStacks = 0, int useCost = 0,
-                             StatusEffectType grant = StatusEffectType.None)
+                             StatusEffectType grant = StatusEffectType.None,
+                             float grantPotency = 1f, float grantDurationScale = 1f)
     {
         Grant = grant;
+        GrantPotency = grantPotency;
+        GrantDurationScale = grantDurationScale;
         CureStacks = cureStacks;
         UseCost = useCost;
         Error = error;
@@ -166,7 +173,7 @@ public static class ConsumableUse
             cures ? effect.Cure : StatusEffectType.None,
             cures ? effect.CureStacks : 0,
             effect.UseCost,
-            effect.Grant);
+            effect.Grant, effect.GrantPotency, effect.GrantDurationScale);
     }
 
     /// <summary>화면과 결과 줄이 함께 쓰는 한국어 사유.</summary>

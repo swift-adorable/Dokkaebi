@@ -43,6 +43,8 @@ public class FallenStash : MonoBehaviour
         if (container.IsEmpty)
             return null;
 
+        container.RevealAll();   // 내가 떨군 것 — 뒤질 필요 없이 다 보인다 (결정 2-142)
+
         var root = new GameObject("FallenStash (Runtime)");
         root.transform.position = new Vector3(saved.x, 0f, saved.z);
 

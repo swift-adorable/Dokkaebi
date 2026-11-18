@@ -22,9 +22,53 @@ public class LootContainer
 
     private readonly ItemStack[] slots;
 
+    /// <summary>
+    /// 【뒤져서 드러난 칸】 (결정 2-142 · 덕코프 「뒤지기」) — 처음 열면 물건이 「?」로 가려져 있고 하나씩 드러난다.
+    /// 드러난 것만 줍는다. 한 번 드러난 칸은 창을 닫았다 열어도 그대로다.
+    /// 내 봇짐(쓰러진 자리)처럼 내가 넣은 것은 RevealAll로 처음부터 다 보인다.
+    /// </summary>
+    private readonly bool[] revealed;
+
     public LootContainer(int capacity = DefaultCapacity)
     {
         slots = new ItemStack[Mathf.Max(1, capacity)];
+        revealed = new bool[slots.Length];
+    }
+
+    public bool IsRevealed(int index) => index >= 0 && index < revealed.Length && revealed[index];
+
+    public void Reveal(int index)
+    {
+        if (index >= 0 && index < revealed.Length)
+            revealed[index] = true;
+    }
+
+    public void RevealAll()
+    {
+        for (int i = 0; i < revealed.Length; i++)
+            revealed[i] = true;
+    }
+
+    /// <summary>아직 가려진 물건이 있는 첫 칸. 없으면 −1.</summary>
+    public int FirstHidden()
+    {
+        for (int i = 0; i < slots.Length; i++)
+            if (Get(i) != null && !revealed[i])
+                return i;
+        return -1;
+    }
+
+    /// <summary>드러난 칸만 가방으로 옮긴다 — 「전부 줍기」. 옮긴 칸 수.</summary>
+    public int TakeRevealedTo(Inventory bag)
+    {
+        if (bag == null)
+            return 0;
+
+        int moved = 0;
+        for (int i = 0; i < slots.Length; i++)
+            if (revealed[i] && TryTakeTo(i, bag))
+                moved++;
+        return moved;
     }
 
     public int Capacity => slots.Length;
@@ -73,6 +117,7 @@ public class LootContainer
                 continue;
 
             slots[i] = stack;
+            revealed[i] = false;
 
             return true;
         }

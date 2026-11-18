@@ -52,6 +52,9 @@ public class SurvivalHudUI : MonoBehaviour
     private Image energyIcon;
 
     private Text healthLabel;
+    private GameObject coinChip;
+    private Text coinLabel;
+    private int shownGold = -1;
     private Text waterLabel;
     private Text energyLabel;
 
@@ -183,6 +186,8 @@ public class SurvivalHudUI : MonoBehaviour
 
         if (instance.root != null)
             instance.root.gameObject.SetActive(!hidden);
+        if (instance.coinChip != null)
+            instance.coinChip.SetActive(!hidden);
     }
 
     // ────────────────────────────────── 생성
@@ -195,9 +200,10 @@ public class SurvivalHudUI : MonoBehaviour
 
         root = panel.GetComponent<RectTransform>();
         // 왼쪽 위 · 미니맵 오른쪽 (결정 2-131 — 사용자 「체력 · 수분 · 에너지는 미니맵 우측 옆, 그 아래 상태이상」).
-        root.anchorMin = new Vector2(0f, 1f);
-        root.anchorMax = new Vector2(0f, 1f);
-        root.pivot = new Vector2(0f, 1f);
+        // 【아래 가운데 · 퀵슬롯 바로 위】 (결정 2-146 — 「도깨비의 세계」 HUD: 체력 막대는 아래 가운데). 2-131(미니맵 옆)을 바꿨다.
+        root.anchorMin = new Vector2(0.5f, 0f);
+        root.anchorMax = new Vector2(0.5f, 0f);
+        root.pivot = new Vector2(0.5f, 0f);
         root.sizeDelta = new Vector2(PanelWidth, PanelHeight);
         PlaceBesideMinimap();
 
@@ -221,6 +227,35 @@ public class SurvivalHudUI : MonoBehaviour
             out energyIcon, out energyFill, out energyLabel);
 
         BuildStatusColumn();
+        BuildCoinChip(safe);
+    }
+
+    /// <summary>
+    /// 【위 가운데 재화】 (결정 2-146 — 「도깨비의 세계」 HUD: 재화는 위 가운데 한 줄). 장비창에만 있던 엽전을 늘 보이게.
+    /// </summary>
+    private void BuildCoinChip(RectTransform safe)
+    {
+        Image chip = UIFactory.CreatePanel("CoinChip", safe, UIPalette.NameStrip, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), radius: 16);
+        chip.raycastTarget = false;
+        chip.rectTransform.pivot = new Vector2(0.5f, 1f);
+        chip.rectTransform.sizeDelta = new Vector2(220f, 40f);
+        chip.rectTransform.anchoredPosition = new Vector2(0f, -10f);
+        coinChip = chip.gameObject;
+
+        coinLabel = UIFactory.CreateLabel(chip.transform, string.Empty, 22, FontStyle.Bold,
+            Vector2.zero, Vector2.one, TextAnchor.MiddleCenter, UIPalette.TextAccent);
+        coinLabel.raycastTarget = false;
+    }
+
+    private void RefreshCoin()
+    {
+        if (coinLabel == null)
+            return;
+        int gold = PassiveManager.EnsureInstance().Gold;
+        if (gold == shownGold)
+            return;
+        shownGold = gold;
+        coinLabel.text = $"● {gold:N0}엽전";
     }
 
     /// <summary>
@@ -233,13 +268,13 @@ public class SurvivalHudUI : MonoBehaviour
     {
         GameObject columnObject = UIFactory.CreateChild("Status", root);
 
-        // 판의 왼쪽 **아래** 모서리에 걸고, 위쪽을 기준점으로 삼아 아래로 자란다.
+        // 판의 왼쪽 옆에 걸고 위로 자란다 (결정 2-146 — 판이 아래 가운데로 내려가서).
         statusColumn = columnObject.GetComponent<RectTransform>();
         statusColumn.anchorMin = new Vector2(0f, 0f);
         statusColumn.anchorMax = new Vector2(0f, 0f);
-        statusColumn.pivot = new Vector2(0f, 1f);
+        statusColumn.pivot = new Vector2(1f, 0f);
         statusColumn.sizeDelta = new Vector2(StatusWidth, 0f);
-        statusColumn.anchoredPosition = new Vector2(0f, -6f);
+        statusColumn.anchoredPosition = new Vector2(-12f, 0f);
 
         for (int i = 0; i < MaxStatusRows; i++)
             statusRows.Add(BuildStatusRow(i));
@@ -250,13 +285,13 @@ public class SurvivalHudUI : MonoBehaviour
         GameObject rowObject = UIFactory.CreateChild($"Status_{index}", statusColumn);
 
         var rect = rowObject.GetComponent<RectTransform>();
-        rect.anchorMin = new Vector2(0f, 1f);
-        rect.anchorMax = new Vector2(1f, 1f);
-        rect.pivot = new Vector2(0.5f, 1f);
+        rect.anchorMin = new Vector2(0f, 0f);
+        rect.anchorMax = new Vector2(1f, 0f);
+        rect.pivot = new Vector2(0.5f, 0f);
         rect.offsetMin = Vector2.zero;
         rect.offsetMax = Vector2.zero;
         rect.sizeDelta = new Vector2(0f, StatusRowHeight);
-        rect.anchoredPosition = new Vector2(0f, -index * (StatusRowHeight + StatusRowGap));
+        rect.anchoredPosition = new Vector2(0f, index * (StatusRowHeight + StatusRowGap));   // 위로 쌓는다 (결정 2-146)
 
         var back = rowObject.AddComponent<Image>();
         back.color = UIPalette.Inset;
@@ -407,8 +442,9 @@ public class SurvivalHudUI : MonoBehaviour
     /// 막대 세 개를 읽는 비용은 무시할 수준이다.
     /// </summary>
     /// <summary>미니맵 오른쪽 (미니맵 없는 씬에서는 구석). 씬마다 달라 매 프레임 맞춘다.</summary>
+    /// <summary>퀵슬롯 줄 바로 위 (결정 2-146). 이름은 옛 자리(미니맵 옆)에서 왔다.</summary>
     private void PlaceBesideMinimap()
-        => root.anchoredPosition = new Vector2(HudLayout.BesideMinimapX, -HudLayout.Margin);
+        => root.anchoredPosition = new Vector2(0f, InventoryScreenUI.QuickBarHeight + 14f);
 
     private void LateUpdate()
     {
@@ -419,6 +455,7 @@ public class SurvivalHudUI : MonoBehaviour
         RefreshHealth();
         RefreshSurvival();
         RefreshStatus();
+        RefreshCoin();
     }
 
     /// <summary>

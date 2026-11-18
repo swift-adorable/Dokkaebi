@@ -10,12 +10,12 @@ public static class MapShots
     private static readonly (string name, float x, float z, float half)[] Ch0 =
     {
         ("all", 0f, 0f, 0f),
-        ("start", -66f, -28f, 9.5f),
-        ("bamboo", -52f, 8f, 9.5f),
-        ("stream", -24f, 0f, 9.5f),
-        ("mill", -6f, 18f, 9.5f),
-        ("oldtree", 18f, 0f, 9.5f),
-        ("bush", 48f, 0f, 9.5f),
+        ("start", -132f, -56f, 9.5f),
+        ("bamboo", -104f, 16f, 9.5f),
+        ("stream", -48f, 0f, 9.5f),
+        ("mill", -12f, 40f, 9.5f),
+        ("oldtree", 36f, 0f, 9.5f),
+        ("bush", 96f, 0f, 9.5f),
     };
 
     [MenuItem("Dokkaebi/Debug/장 맵 찍기 (열린 씬)")]
@@ -23,6 +23,17 @@ public static class MapShots
     {
         ChapterMap map = ZoneMapTable.Of(ZoneMapTable.ChapterOfScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name));
         System.IO.Directory.CreateDirectory("Temp/screens");
+        // 열린 집 미리보기 (결정 2-149 — 판이 열릴 때 런타임이 세우는 것을 사진에도)
+        var preview = new System.Collections.Generic.List<GameObject>();
+        LockedSite.PreviewOnly = true;
+        if (map != null)
+            foreach (ZoneArea a in map.Areas)
+                foreach (LockSite s in LockSiteTable.OpenHouses(map, a.ZoneId))
+                {
+                    LockedSite site = LockedSite.Create(s);
+                    preview.Add(site.gameObject);
+                }
+        LockedSite.PreviewOnly = false;
         foreach (var (name, x, z, half) in Ch0)
         {
             float h = half;
@@ -34,6 +45,8 @@ public static class MapShots
             }
             Shot($"Temp/screens/map_{name}.png", new Vector3(x, 0f, z), h, w, hp);
         }
+        foreach (GameObject g in preview)
+            Object.DestroyImmediate(g);
         Debug.Log("[MapShots] Temp/screens/map_*.png");
     }
 

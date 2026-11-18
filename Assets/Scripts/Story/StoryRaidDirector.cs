@@ -109,6 +109,7 @@ public class StoryRaidDirector : MonoBehaviour
         Vector2 dir = Random.insideUnitCircle.normalized;
         if (dir == Vector2.zero) dir = Vector2.up;
         Vector3 center = BossCenter(boss, dir);
+        BossRumor.OnBossPlaced(boss, center);   // 소문을 들었으면 대략의 영역 (결정 2-142)
 
         for (int i = 0; i < boss.Bodies.Length; i++)
         {
@@ -193,6 +194,7 @@ public class StoryRaidDirector : MonoBehaviour
     private void OnGroupDefeated(BossDefinition boss)
     {
         bossAlive = false;
+        BossRumor.Remove(boss.Id);
 
         bool first = !StoryManager.Progress.HasDefeated(boss.Id);
         StoryManager.ReportBossDefeated(boss.Id);

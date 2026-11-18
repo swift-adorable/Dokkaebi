@@ -867,11 +867,35 @@ public class WorldMapUI : MonoBehaviour
                     PlaceIcon(ref used, runtime, extraction.Points[i], size, UISprites.Glyph.Circle, "",
                         ExtractionDirector.Name, MinimapUI.ExtractionColor, 38);
 
+        // 보스 소문 영역 (결정 2-142) — 점이 아니라 넓은 원. 퀘스트 층과 같이 켜고 끈다.
+        if (Shown(Layer.Quest))
+            foreach (BossRumor.Area area in BossRumor.Areas)
+            {
+                Vector2 a = MapView.ToView(runtime.UvOf(area.Center), center, size);
+                Vector2 b = MapView.ToView(runtime.UvOf(area.Center + new Vector3(area.Radius, 0f, 0f)), center, size);
+                PlaceIcon(ref used, runtime, area.Center, size, UISprites.Glyph.Circle, "?",
+                    $"{area.Name} 소문", BossRumor.FillColor, Mathf.Max(60f, (b - a).magnitude * 2f));
+            }
+
         foreach (MapLootMarks.Mark m in MapLootMarks.Collect())
         {
             bool fallen = m.kind == MapLootMarks.Kind.Fallen;
-            if (!Shown(fallen ? Layer.Fallen : Layer.Loot))
+            bool quest = m.kind == MapLootMarks.Kind.Quest;
+            if (!Shown(fallen ? Layer.Fallen : quest ? Layer.Quest : Layer.Loot))
                 continue;
+
+            if (m.kind is MapLootMarks.Kind.Lock or MapLootMarks.Kind.LockOpen)
+            {
+                if (Shown(Layer.Quest))
+                    PlaceIcon(ref used, runtime, m.position, size, UISprites.Glyph.Square, "", null, MapLootMarks.ColorOf(m.kind), 30);
+                continue;
+            }
+
+            if (quest)
+            {
+                PlaceIcon(ref used, runtime, m.position, size, UISprites.Glyph.Diamond, "!", null, MapLootMarks.QuestColor, 34);
+                continue;
+            }
 
             PlaceIcon(ref used, runtime, m.position, size, ShapeOf(m.kind), fallen ? "!" : "",
                 fallen ? FallenStash.Name : null, MapLootMarks.ColorOf(m.kind), fallen ? 34 : 22);

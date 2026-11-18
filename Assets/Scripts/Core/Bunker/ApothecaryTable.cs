@@ -30,7 +30,20 @@ public static class ApothecaryTable
         new("con_antidote",     1, 0, new[] { new MaterialCost(Herb, 1), new MaterialCost("food_bean", 1), new MaterialCost("con_water", 1) }, 0),
         new("con_antacid",      1, 0, new[] { new MaterialCost(Herb, 2) }, 0),
         new("con_relaxant",     1, 0, new[] { new MaterialCost(Herb, 2), new MaterialCost("food_ginseng", 1) }, 0),
+
+        // 강화판(진) · 희석판(묽은) — 결정 2-142 · 덕코프 모드 「원판 주사약 확장」. 여기서만 만든다 [임시값].
+        //   진 = 원래 약 2 + 인삼 1 + 약재 1 → 1 · 묽은 = 원래 약 1 + 물 2 + 약재 1 → 2 (약탕간 약은 전부 약재를 쓴다)
+        Strong("con_stim"), Thin("con_stim"),
+        Strong("con_coagulant"), Thin("con_coagulant"),
+        Strong("con_regen"), Thin("con_regen"),
+        Strong("con_expander"), Thin("con_expander"),
     };
+
+    private static CraftRecipe Strong(string baseId)
+        => new($"{baseId}_strong", 1, 0, new[] { new MaterialCost(baseId, 2), new MaterialCost("food_ginseng", 1), new MaterialCost(Herb, 1) }, 0);
+
+    private static CraftRecipe Thin(string baseId)
+        => new($"{baseId}_thin", 2, 0, new[] { new MaterialCost(baseId, 1), new MaterialCost("con_water", 2), new MaterialCost(Herb, 1) }, 0);
 
     public static IReadOnlyList<CraftRecipe> Brews => brews;
 

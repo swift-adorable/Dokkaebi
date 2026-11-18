@@ -94,7 +94,10 @@ public class PlayerSurvival : MonoBehaviour
             PlayerInventory.EnsureInstance().Encumbrance);
 
         // 날씨 — 폭염 · 독안개는 수분, 추위는 에너지를 더 태운다 (결정 2-61 · PlayerWeather).
-        int damage = state.Tick(Time.deltaTime, multiplier, PlayerWeather.WaterDrainScale, PlayerWeather.EnergyDrainScale);
+        // 패시브 「물 아끼기 · 허기 참기」 — 소모를 줄인다 (결정 2-139). 아무리 쌓아도 소모의 30%는 남긴다.
+        int damage = state.Tick(Time.deltaTime, multiplier,
+            PlayerWeather.WaterDrainScale * PassiveDrainScale(PassiveEffectType.WaterDrain),
+            PlayerWeather.EnergyDrainScale * PassiveDrainScale(PassiveEffectType.EnergyDrain));
 
         if (damage > 0 && health != null && !health.IsDead)
             health.TakeTickDamage(damage);   // 무적을 켜지 않는다 (결정 2-99)
@@ -140,6 +143,10 @@ public class PlayerSurvival : MonoBehaviour
     }
 
     /// <summary>강화 소모품의 대가. 「버프를 쓸수록 물이 급해진다」.</summary>
+    /// <summary>패시브가 깎는 소모 배율 (1 = 그대로). 최소 0.3.</summary>
+    public static float PassiveDrainScale(PassiveEffectType type)
+        => PassiveManager.HasInstance ? Mathf.Max(0.3f, 1f - PassiveManager.Instance.Total(type) * 0.01f) : 1f;
+
     public void Drain(float water, float energy)
     {
         state.Drain(water, energy);

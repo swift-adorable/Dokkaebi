@@ -17,6 +17,12 @@ public class QuestSpot : MonoBehaviour
 
     public QuestSpotDefinition Definition => definition;
 
+    /// <summary>지금 서 있는 퀘스트 자리 — 지도 · 미니맵이 「!」로 찍는다 (결정 2-142).</summary>
+    public static readonly List<QuestSpot> Active = new();
+
+    private void OnEnable() => Active.Add(this);
+    private void OnDisable() => Active.Remove(this);
+
     /// <summary>버튼 글.</summary>
     public string Prompt => definition != null ? definition.Label : string.Empty;
 

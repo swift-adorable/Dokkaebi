@@ -146,7 +146,7 @@ public class PlayerAmmo : MonoBehaviour
 
         AmmoFeedEvent e = feed.Tick(
             weapon != null, loadout.LoadedAmmo, loadout.AmmoCapacity, InBag(),
-            weapon != null ? weapon.KindInfo.ReloadSeconds : 0f, Time.deltaTime, reloadRequested);
+            weapon != null ? weapon.KindInfo.ReloadSeconds * PassiveCombat.ReloadScale : 0f, Time.deltaTime, reloadRequested);   // 패시브 재장전 (결정 2-141)
 
         reloadRequested = false;
 

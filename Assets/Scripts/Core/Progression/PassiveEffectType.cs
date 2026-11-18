@@ -1,3 +1,5 @@
+using UnityEngine;
+
 /// <summary>
 /// 패시브가 줄 수 있는 것. (docs/Dokkaebi_Passive_System.md 5절)
 ///
@@ -38,6 +40,12 @@ public enum PassiveEffectType
     /// <summary>희귀 드롭 확률 +n%.</summary>
     RareDropRate = 13,
 
+    /// <summary>수분 소모 −n% (덕코프 「영양 관리」 · 2026-11-18 결정 2-139).</summary>
+    WaterDrain = 14,
+
+    /// <summary>에너지(기력) 소모 −n% (덕코프 「영양 관리」 · 결정 2-139).</summary>
+    EnergyDrain = 15,
+
     // ── 회수 : 죽어도 남는 것 ─────────────────────────────────────────
     /// <summary>
     /// 사망해도 지키는 가방 칸 +n.
@@ -75,7 +83,21 @@ public enum PassiveEffectType
     GemSalvage = 42,
 
     /// <summary>【해금】 지도에 전리품 위치 표시 — 봇짐 · 열매 나무 · 내가 쓰러뜨린 적의 시체 (결정 2-93).</summary>
-    MapLoot = 43
+    MapLoot = 43,
+
+    // ── 단련 · 무예 : 전투 수치 (결정 2-141 — 사용자 「전투 수치도 넣기」, 덕코프 「피지컬 강화 · 스킬 강화」) ──
+    /// <summary>최대 체력 +n.</summary>
+    MaxHealth = 50,
+    /// <summary>이동 속도 +n%.</summary>
+    MoveSpeed = 51,
+    /// <summary>대시 재사용 대기 −n%. 아무리 쌓아도 60%까지만 줄인다.</summary>
+    DashCooldown = 52,
+    /// <summary>무기 피해 +n%.</summary>
+    WeaponDamage = 53,
+    /// <summary>재장전 시간 −n%. 60%까지만 줄인다.</summary>
+    ReloadSpeed = 54,
+    /// <summary>머리 · 몸 방어도 +n.</summary>
+    Armour = 55
 }
 
 /// <summary>패시브 효과의 표시 이름과 성질.</summary>
@@ -127,12 +149,23 @@ public static class PassiveEffectInfo
             case PassiveEffectType.RareDropRate:
             case PassiveEffectType.SellPrice:
             case PassiveEffectType.ShopRefresh:
+            case PassiveEffectType.WaterDrain:
+            case PassiveEffectType.EnergyDrain:
+            case PassiveEffectType.MoveSpeed:
+            case PassiveEffectType.DashCooldown:
+            case PassiveEffectType.WeaponDamage:
+            case PassiveEffectType.ReloadSpeed:
                 return true;
 
             default:
                 return false;
         }
     }
+
+    /// <summary>값 깎기 — 값이 양수여도 「−」로 보인다.</summary>
+    public static bool IsReduction(PassiveEffectType type)
+        => type is PassiveEffectType.ShopRefresh or PassiveEffectType.WaterDrain or PassiveEffectType.EnergyDrain
+            or PassiveEffectType.DashCooldown or PassiveEffectType.ReloadSpeed;
 
     /// <summary>수치 뒤에 붙는 단위.</summary>
     public static string Unit(PassiveEffectType type)
@@ -159,7 +192,7 @@ public static class PassiveEffectInfo
             return Name(type);
 
         // 값 깎기는 값이 양수여도 「−」로 보여야 뜻이 맞는다.
-        string sign = type == PassiveEffectType.ShopRefresh ? "−" : "+";
+        string sign = IsReduction(type) ? "−" : "+";
 
         return $"{Name(type)} {sign}{value:0.#}{Unit(type)}";
     }
@@ -174,6 +207,14 @@ public static class PassiveEffectInfo
             case PassiveEffectType.AbsorbRange:    return "거두는 범위";
             case PassiveEffectType.LootRolls:      return "전리품 추첨";
             case PassiveEffectType.RareDropRate:   return "희귀 드롭";
+            case PassiveEffectType.WaterDrain:     return "수분 소모";
+            case PassiveEffectType.EnergyDrain:    return "기력 소모";
+            case PassiveEffectType.MaxHealth:      return "최대 체력";
+            case PassiveEffectType.MoveSpeed:      return "이동 속도";
+            case PassiveEffectType.DashCooldown:   return "대시 대기";
+            case PassiveEffectType.WeaponDamage:   return "무기 피해";
+            case PassiveEffectType.ReloadSpeed:    return "재장전 시간";
+            case PassiveEffectType.Armour:         return "방어도";
             case PassiveEffectType.SafeSlots:      return "보존 칸";
             case PassiveEffectType.CorpseRecovery: return "쓰러진 자리 되찾기";
             case PassiveEffectType.ExtractMark:    return "길목 표시";
@@ -188,4 +229,17 @@ public static class PassiveEffectInfo
             default:                               return "없음";
         }
     }
+}
+
+/// <summary>패시브 전투 수치를 게임에 거는 곳 (결정 2-141). 패시브 관리자가 없으면 늘 기본값.</summary>
+public static class PassiveCombat
+{
+    private static float Total(PassiveEffectType t) => PassiveManager.HasInstance ? PassiveManager.Instance.Total(t) : 0f;
+
+    public static int MaxHealthBonus => Mathf.RoundToInt(Total(PassiveEffectType.MaxHealth));
+    public static float MoveScale => 1f + Total(PassiveEffectType.MoveSpeed) * 0.01f;
+    public static float DashCooldownScale => Mathf.Max(0.4f, 1f - Total(PassiveEffectType.DashCooldown) * 0.01f);
+    public static float DamageScale => 1f + Total(PassiveEffectType.WeaponDamage) * 0.01f;
+    public static float ReloadScale => Mathf.Max(0.4f, 1f - Total(PassiveEffectType.ReloadSpeed) * 0.01f);
+    public static float ArmourBonus => Total(PassiveEffectType.Armour);
 }

@@ -23,7 +23,7 @@ public static class PassiveAssetGenerator
 
     /// <summary>한 계열의 격자. 계열마다 같은 크기를 쓴다.</summary>
     private const int Columns = 3;
-    private const int Rows = 4;
+    private const int Rows = 8;   // 4 → 6 (결정 2-139) → 8 (결정 2-141 — 단련 · 무예와 위 단계)
 
     private struct Row
     {
@@ -96,6 +96,22 @@ public static class PassiveAssetGenerator
             column: 1, row: 3, prereq: new[] { "adapt_frame" },
             materials: new[] { ("memory_core", 2) }));
 
+        // 결정 2-139 — 위로 두 줄: 자루 꿰매기 · 가방 정리 4 → 봇짐장수 (모두 가방 칸 — 중량은 상한)
+        rows.Add(N("adapt_weight_2", "자루 꿰매기", "자루 안쪽에 주머니를 덧댔다. 가방 공간 +2. (소지 중량은 상한 15kg에 이미 닿아 칸으로)",
+            PassiveBranch.Adapt, PassiveEffectType.CarrySlots, 2, level: 14, cost: 9000,
+            column: 0, row: 4, prereq: new[] { "adapt_slots_3" },
+            materials: new[] { ("wire_bundle", 12) }));
+
+        rows.Add(N("adapt_slots_4", "가방 정리 4", "작은 것은 작은 것끼리. 가방 공간 +3.",
+            PassiveBranch.Adapt, PassiveEffectType.CarrySlots, 3, level: 16, cost: 12000,
+            column: 2, row: 4, prereq: new[] { "adapt_slots_3" },
+            materials: new[] { ("memory_core", 3) }));
+
+        rows.Add(N("adapt_master", "봇짐장수", "장터 길을 평생 걸은 사람처럼 챙긴다. 가방 공간 +2.",
+            PassiveBranch.Adapt, PassiveEffectType.CarrySlots, 2, level: 20, cost: 20000,
+            column: 1, row: 5, prereq: new[] { "adapt_weight_2", "adapt_slots_4" },
+            materials: new[] { ("memory_core", 4), ("cell_battery", 6) }));
+
         // ── 대사 — 얼마나 얻는가 ──────────────────────────────────────
         rows.Add(N("meta_absorb_1", "정기 거두기 1", "허물에서 더 많은 것을 끌어낸다.",
             PassiveBranch.Metabolism, PassiveEffectType.AbsorbAmount, 15, level: 1, cost: 700,
@@ -120,6 +136,45 @@ public static class PassiveAssetGenerator
             PassiveBranch.Metabolism, PassiveEffectType.RareDropRate, 12, level: 11, cost: 6800,
             column: 1, row: 3, prereq: new[] { "meta_absorb_2" },
             materials: new[] { ("memory_core", 2), ("bio_sample", 6) }));
+
+        // 결정 2-139 — 덕코프 「영양 관리」: 수분 · 기력 소모를 줄인다(양 옆 줄). 위로 두 줄: 샅샅이 · 보는 눈 · 정기 거두기 3 → 소식
+        rows.Add(N("meta_water_1", "물 아끼기 1", "목을 축이는 법을 안다. 수분 소모 −10%.",
+            PassiveBranch.Metabolism, PassiveEffectType.WaterDrain, 10, level: 2, cost: 1200,
+            column: 0, row: 0));
+
+        rows.Add(N("meta_food_1", "허기 참기 1", "배고픔을 오래 참는다. 기력 소모 −10%.",
+            PassiveBranch.Metabolism, PassiveEffectType.EnergyDrain, 10, level: 2, cost: 1200,
+            column: 2, row: 0));
+
+        rows.Add(N("meta_water_2", "물 아끼기 2", "수분 소모 −10%.",
+            PassiveBranch.Metabolism, PassiveEffectType.WaterDrain, 10, level: 6, cost: 3000,
+            column: 0, row: 2, prereq: new[] { "meta_water_1", "meta_range" },
+            materials: new[] { ("bio_sample", 4) }));
+
+        rows.Add(N("meta_food_2", "허기 참기 2", "기력 소모 −10%.",
+            PassiveBranch.Metabolism, PassiveEffectType.EnergyDrain, 10, level: 6, cost: 3000,
+            column: 2, row: 2, prereq: new[] { "meta_food_1", "meta_scav_1" },
+            materials: new[] { ("bio_sample", 4) }));
+
+        rows.Add(N("meta_scav_2", "샅샅이", "시체를 한 번 더 뒤진다. 전리품 추첨 +1.",
+            PassiveBranch.Metabolism, PassiveEffectType.LootRolls, 1, level: 14, cost: 9000,
+            column: 0, row: 4, prereq: new[] { "meta_rare" },
+            materials: new[] { ("scrap_metal", 12) }));
+
+        rows.Add(N("meta_rare_2", "보는 눈", "값진 것이 먼저 보인다. 희귀 드롭 +15%.",
+            PassiveBranch.Metabolism, PassiveEffectType.RareDropRate, 15, level: 17, cost: 14000,
+            column: 1, row: 4, prereq: new[] { "meta_rare" },
+            materials: new[] { ("memory_core", 3) }));
+
+        rows.Add(N("meta_absorb_3", "정기 거두기 3", "정기 획득 +25%.",
+            PassiveBranch.Metabolism, PassiveEffectType.AbsorbAmount, 25, level: 15, cost: 10000,
+            column: 2, row: 4, prereq: new[] { "meta_rare" },
+            materials: new[] { ("bio_sample", 10) }));
+
+        rows.Add(N("meta_diet", "소식", "적게 먹고 오래 버틴다. 기력 소모 −15%.",
+            PassiveBranch.Metabolism, PassiveEffectType.EnergyDrain, 15, level: 18, cost: 15000,
+            column: 1, row: 5, prereq: new[] { "meta_water_2", "meta_food_2", "meta_rare_2" },
+            materials: new[] { ("memory_core", 3), ("bio_sample", 8) }));
 
         // ── 회수 — 죽어도 무엇이 남는가 ───────────────────────────────
         // 【사망 규칙의 유일한 예외 계열이다.】 예외를 늘리지 않기 위해 여기 밖에 두지 않는다.
@@ -179,6 +234,20 @@ public static class PassiveAssetGenerator
             PassiveBranch.Brokerage, PassiveEffectType.ShopSlots, 1, level: 1, cost: 6200,
             column: 2, row: 3, prereq: new[] { "brok_slots_1" }));
 
+        // 결정 2-139 — 덕코프 「창고 확장」 · 블랙마켓처럼 위로 두 줄: 흥정 3 · 창고 정리 3 → 큰 곳간
+        rows.Add(N("brok_sell_3", "흥정 3", "판매가 +8%.",
+            PassiveBranch.Brokerage, PassiveEffectType.SellPrice, 8, level: 1, cost: 9000,
+            column: 0, row: 4, prereq: new[] { "brok_refresh_2" }));
+
+        rows.Add(N("brok_stash_3", "창고 정리 3", "시렁을 하나 더 달았다. 창고 칸 +30.",
+            PassiveBranch.Brokerage, PassiveEffectType.StashSlots, 30, level: 1, cost: 8000,
+            column: 2, row: 4, prereq: new[] { "brok_slots_2" }));
+
+        rows.Add(N("brok_stash_4", "큰 곳간", "곳간 벽을 헐어 넓혔다. 창고 칸 +40.",
+            PassiveBranch.Brokerage, PassiveEffectType.StashSlots, 40, level: 1, cost: 16000,
+            column: 1, row: 5, prereq: new[] { "brok_sell_3", "brok_stash_3" },
+            materials: new[] { ("scrap_metal", 20), ("wire_bundle", 10) }));
+
         // ── 역행 — 조우해야 보인다 ────────────────────────────────────
         // 【교차 선행】 다른 계열의 칸을 요구한다. 한 갈래만 파면 닿지 않는다.
         // 「옛 도면」(작업대 역행 물건)은 뺐다 — 만들 물건이 없고 본문에도 없다 (결정 2-127).
@@ -192,6 +261,61 @@ public static class PassiveAssetGenerator
             PassiveBranch.Regression, PassiveEffectType.MapLoot, 1, level: 1, cost: 8000,
             column: 1, row: 0, prereq: new[] { "meta_absorb_2" },
             materials: new[] { ("memory_core", 4), ("cell_battery", 8) }));
+
+        // ══ 결정 2-141 — 전투 수치(사용자 「전투 수치도 넣기」) · 덕코프 「피지컬 강화 · 스킬 강화」 참고 ══════════
+
+        // ── 단련 — 체력(왼쪽) · 이동/대시(가운데) · 방어(오른쪽). 아래에서 위로 ──
+        var T = PassiveBranch.Training;
+        rows.Add(N("train_hp_1", "줄넘기", "숨이 덜 찬다. 최대 체력 +5.", T, PassiveEffectType.MaxHealth, 5, level: 1, cost: 800, column: 0, row: 0));
+        rows.Add(N("train_run_1", "달리기", "발이 가볍다. 이동 속도 +3%.", T, PassiveEffectType.MoveSpeed, 3, level: 1, cost: 800, column: 1, row: 0));
+        rows.Add(N("train_dash_1", "날랜 발 1", "몸을 빼는 데 망설임이 줄었다. 대시 대기 −5%.", T, PassiveEffectType.DashCooldown, 5, level: 3, cost: 1400, column: 1, row: 1, prereq: new[] { "train_run_1" }));
+        rows.Add(N("train_hp_2", "씨름", "버티는 몸. 최대 체력 +5.", T, PassiveEffectType.MaxHealth, 5, level: 3, cost: 1400, column: 0, row: 1, prereq: new[] { "train_hp_1" }));
+        rows.Add(N("train_arm_1", "굳은살", "맞아도 덜 아프다. 방어도 +1.", T, PassiveEffectType.Armour, 1, level: 4, cost: 1800, column: 2, row: 1, prereq: new[] { "train_hp_1", "train_run_1" }, materials: new[] { ("wire_bundle", 4) }));
+        rows.Add(N("train_run_2", "산길 달리기", "비탈도 평지처럼. 이동 속도 +3%.", T, PassiveEffectType.MoveSpeed, 3, level: 6, cost: 3000, column: 1, row: 2, prereq: new[] { "train_dash_1" }, materials: new[] { ("bio_sample", 3) }));
+        rows.Add(N("train_hp_3", "지게 버티기", "무거운 것을 지고도 선다. 최대 체력 +8.", T, PassiveEffectType.MaxHealth, 8, level: 7, cost: 3600, column: 0, row: 3, prereq: new[] { "train_hp_2" }, materials: new[] { ("scrap_metal", 8) }));
+        rows.Add(N("train_dash_2", "날랜 발 2", "대시 대기 −5%.", T, PassiveEffectType.DashCooldown, 5, level: 8, cost: 4200, column: 1, row: 3, prereq: new[] { "train_run_2" }, materials: new[] { ("wire_bundle", 6) }));
+        rows.Add(N("train_arm_2", "쇠가죽", "방어도 +1.", T, PassiveEffectType.Armour, 1, level: 9, cost: 5000, column: 2, row: 3, prereq: new[] { "train_arm_1" }, materials: new[] { ("scrap_metal", 10) }));
+        rows.Add(N("train_run_3", "바람걸음", "이동 속도 +4%.", T, PassiveEffectType.MoveSpeed, 4, level: 11, cost: 7000, column: 1, row: 4, prereq: new[] { "train_dash_2" }, materials: new[] { ("cell_battery", 4) }));
+        rows.Add(N("train_hp_4", "강골", "뼈가 굵어졌다. 최대 체력 +10.", T, PassiveEffectType.MaxHealth, 10, level: 13, cost: 9000, column: 0, row: 5, prereq: new[] { "train_hp_3" }, materials: new[] { ("bio_sample", 8) }));
+        rows.Add(N("train_dash_3", "날랜 발 3", "대시 대기 −8%.", T, PassiveEffectType.DashCooldown, 8, level: 14, cost: 10000, column: 1, row: 5, prereq: new[] { "train_run_3" }, materials: new[] { ("cell_battery", 5) }));
+        rows.Add(N("train_arm_3", "돌가죽", "방어도 +2.", T, PassiveEffectType.Armour, 2, level: 15, cost: 12000, column: 2, row: 5, prereq: new[] { "train_arm_2" }, materials: new[] { ("memory_core", 2), ("scrap_metal", 12) }));
+        rows.Add(N("train_run_4", "축지", "땅을 접어 걷는다. 이동 속도 +5%.", T, PassiveEffectType.MoveSpeed, 5, level: 18, cost: 16000, column: 1, row: 6, prereq: new[] { "train_dash_3" }, materials: new[] { ("memory_core", 3) }));
+        rows.Add(N("train_hp_5", "금강", "쉽게 쓰러지지 않는다. 최대 체력 +12.", T, PassiveEffectType.MaxHealth, 12, level: 20, cost: 20000, column: 0, row: 7, prereq: new[] { "train_hp_4", "train_run_4" }, materials: new[] { ("memory_core", 4), ("bio_sample", 10) }));
+        rows.Add(N("train_dash_4", "날랜 발 4", "대시 대기 −8%.", T, PassiveEffectType.DashCooldown, 8, level: 20, cost: 20000, column: 1, row: 7, prereq: new[] { "train_run_4" }, materials: new[] { ("memory_core", 4), ("cell_battery", 6) }));
+        rows.Add(N("train_arm_4", "무쇠몸", "방어도 +2.", T, PassiveEffectType.Armour, 2, level: 22, cost: 24000, column: 2, row: 7, prereq: new[] { "train_arm_3", "train_run_4" }, materials: new[] { ("memory_core", 5), ("scrap_metal", 20) }));
+
+        // ── 무예 — 피해(왼쪽) · 재장전(가운데) · 급소(오른쪽, 피해) ──
+        var M = PassiveBranch.Martial;
+        rows.Add(N("mart_dmg_1", "무기 다루기 1", "손에 익었다. 무기 피해 +3%.", M, PassiveEffectType.WeaponDamage, 3, level: 1, cost: 900, column: 0, row: 0));
+        rows.Add(N("mart_reload_1", "빠른 손 1", "재장전 시간 −5%.", M, PassiveEffectType.ReloadSpeed, 5, level: 2, cost: 1100, column: 1, row: 0));
+        rows.Add(N("mart_vital_1", "급소 노리기 1", "어디를 쏠지 안다. 무기 피해 +2%.", M, PassiveEffectType.WeaponDamage, 2, level: 4, cost: 1800, column: 2, row: 1, prereq: new[] { "mart_dmg_1", "mart_reload_1" }));
+        rows.Add(N("mart_dmg_2", "무기 다루기 2", "무기 피해 +4%.", M, PassiveEffectType.WeaponDamage, 4, level: 5, cost: 2600, column: 0, row: 2, prereq: new[] { "mart_dmg_1" }, materials: new[] { ("scrap_metal", 8) }));
+        rows.Add(N("mart_reload_2", "빠른 손 2", "재장전 시간 −8%.", M, PassiveEffectType.ReloadSpeed, 8, level: 6, cost: 3000, column: 1, row: 2, prereq: new[] { "mart_reload_1" }, materials: new[] { ("wire_bundle", 6) }));
+        rows.Add(N("mart_vital_2", "급소 노리기 2", "무기 피해 +2%.", M, PassiveEffectType.WeaponDamage, 2, level: 9, cost: 5000, column: 2, row: 3, prereq: new[] { "mart_vital_1" }, materials: new[] { ("bio_sample", 5) }));
+        rows.Add(N("mart_dmg_3", "무기 다루기 3", "무기 피해 +5%.", M, PassiveEffectType.WeaponDamage, 5, level: 10, cost: 6500, column: 0, row: 4, prereq: new[] { "mart_dmg_2" }, materials: new[] { ("scrap_metal", 12) }));
+        rows.Add(N("mart_reload_3", "빠른 손 3", "재장전 시간 −10%.", M, PassiveEffectType.ReloadSpeed, 10, level: 11, cost: 7000, column: 1, row: 4, prereq: new[] { "mart_reload_2" }, materials: new[] { ("cell_battery", 4) }));
+        rows.Add(N("mart_vital_3", "급소 노리기 3", "무기 피해 +3%.", M, PassiveEffectType.WeaponDamage, 3, level: 15, cost: 11000, column: 2, row: 5, prereq: new[] { "mart_vital_2" }, materials: new[] { ("memory_core", 2) }));
+        rows.Add(N("mart_dmg_4", "무기 다루기 4", "무기 피해 +6%.", M, PassiveEffectType.WeaponDamage, 6, level: 16, cost: 13000, column: 0, row: 6, prereq: new[] { "mart_dmg_3" }, materials: new[] { ("memory_core", 3) }));
+        rows.Add(N("mart_reload_4", "빠른 손 4", "재장전 시간 −12%.", M, PassiveEffectType.ReloadSpeed, 12, level: 17, cost: 14000, column: 1, row: 6, prereq: new[] { "mart_reload_3" }, materials: new[] { ("memory_core", 3), ("wire_bundle", 10) }));
+        rows.Add(N("mart_master", "백발백중", "쏘면 맞고, 맞으면 깊다. 무기 피해 +7%.", M, PassiveEffectType.WeaponDamage, 7, level: 22, cost: 26000, column: 1, row: 7, prereq: new[] { "mart_dmg_4", "mart_reload_4", "mart_vital_3" }, materials: new[] { ("memory_core", 5), ("cell_battery", 8) }));
+
+        // ── 기존 갈래 위 단계 (줄 6 · 7) ──
+        rows.Add(N("adapt_slots_5", "가방 정리 5", "가방 공간 +3. (칸 상한: 장비 최대치의 절반)",
+            PassiveBranch.Adapt, PassiveEffectType.CarrySlots, 3, level: 24, cost: 26000, column: 1, row: 7,
+            prereq: new[] { "adapt_master" }, materials: new[] { ("memory_core", 5) }));
+        rows.Add(N("meta_water_3", "물 아끼기 3", "수분 소모 −10%.", PassiveBranch.Metabolism, PassiveEffectType.WaterDrain, 10,
+            level: 20, cost: 18000, column: 0, row: 6, prereq: new[] { "meta_scav_2" }, materials: new[] { ("bio_sample", 10) }));
+        rows.Add(N("meta_range_2", "긴 손 2", "거두는 범위 +1.5m.", PassiveBranch.Metabolism, PassiveEffectType.AbsorbRange, 1.5f,
+            level: 20, cost: 18000, column: 2, row: 6, prereq: new[] { "meta_absorb_3" }, materials: new[] { ("cell_battery", 6) }));
+        rows.Add(N("meta_absorb_4", "정기 거두기 4", "정기 획득 +30%.", PassiveBranch.Metabolism, PassiveEffectType.AbsorbAmount, 30,
+            level: 24, cost: 26000, column: 1, row: 7, prereq: new[] { "meta_diet", "meta_water_3", "meta_range_2" }, materials: new[] { ("memory_core", 5) }));
+        rows.Add(N("brok_slots_3", "단골 3", "가게 물건마다 재고 +1.", PassiveBranch.Brokerage, PassiveEffectType.ShopSlots, 1,
+            level: 1, cost: 12000, column: 0, row: 6, prereq: new[] { "brok_stash_4" }));
+        rows.Add(N("brok_refresh_3", "거래선 3", "가게에서 사는 값 −10%.", PassiveBranch.Brokerage, PassiveEffectType.ShopRefresh, 10,
+            level: 1, cost: 14000, column: 2, row: 6, prereq: new[] { "brok_stash_4" }));
+        rows.Add(N("brok_stash_5", "광", "광을 하나 더 지었다. 창고 칸 +50.", PassiveBranch.Brokerage, PassiveEffectType.StashSlots, 50,
+            level: 1, cost: 30000, column: 1, row: 7, prereq: new[] { "brok_slots_3", "brok_refresh_3" },
+            materials: new[] { ("scrap_metal", 30), ("wire_bundle", 20) }));
 
         return rows;
     }

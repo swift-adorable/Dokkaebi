@@ -68,6 +68,15 @@ public class BunkerStation : MonoBehaviour
         /// <summary>퀘스트 자리 — 줍기 · 말 걸기 · 건네기 (결정 2-108). 구역 · 소굴에 선다.</summary>
         QuestSpot = 17,
 
+        /// <summary>맵 상자 — 장독 · 궤 · 약단지 · 광주리 (결정 2-140 · 덕코프 상자 파밍). 구역에 선다.</summary>
+        LootBox = 18,
+
+        /// <summary>잠긴 대문 · 방문 — 열쇠로 연다 (결정 2-143).</summary>
+        LockedDoor = 19,
+
+        /// <summary>금 간 담 — 화약 뭉치로 무너뜨린다 (결정 2-143).</summary>
+        CrackedWall = 20,
+
         /// <summary>여는 것이 없다.</summary>
         None = 99
     }
@@ -87,6 +96,9 @@ public class BunkerStation : MonoBehaviour
         ? passage.Prompt
         : kind == Kind.QuestSpot && TryGetComponent(out QuestSpot spot)
             ? spot.Prompt
+            : kind == Kind.LootBox && TryGetComponent(out LootBox box) ? box.Label
+            : kind == Kind.LockedDoor && TryGetComponent(out LockedSiteStation door) && door.Owner != null ? door.Owner.DoorPrompt
+            : kind == Kind.CrackedWall && TryGetComponent(out LockedSiteStation crack) && crack.Owner != null ? crack.Owner.CrackPrompt
             : LabelOf(kind);
 
     public static string LabelOf(Kind kind)
@@ -102,6 +114,9 @@ public class BunkerStation : MonoBehaviour
             case Kind.BerryTree:    return BerryTree.Name;
             case Kind.StoryBundle:  return ChapterZeroTable.BundleName;
             case Kind.FallenStash:  return FallenStash.Name;
+            case Kind.LootBox:      return "상자";
+            case Kind.LockedDoor:   return "잠긴 문";
+            case Kind.CrackedWall:  return "금 간 담";
             case Kind.Workbench:    return "작업대";
             case Kind.Brewing:      return ApothecaryManager.Springside.IsEmpty
                                         ? ApothecaryTable.PotName
@@ -220,6 +235,21 @@ public class BunkerStation : MonoBehaviour
             case Kind.QuestSpot:
                 if (TryGetComponent(out QuestSpot spot))
                     spot.Use();
+                break;
+
+            case Kind.LootBox:
+                if (TryGetComponent(out LootBox lootBox))
+                    lootBox.Open();
+                break;
+
+            case Kind.LockedDoor:
+                if (TryGetComponent(out LockedSiteStation doorAt) && doorAt.Owner != null)
+                    doorAt.Owner.UseDoor();
+                break;
+
+            case Kind.CrackedWall:
+                if (TryGetComponent(out LockedSiteStation crackAt) && crackAt.Owner != null)
+                    crackAt.Owner.UseCrack();
                 break;
 
             case Kind.Spring:

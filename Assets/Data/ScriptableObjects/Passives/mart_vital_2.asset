@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea17f4877b7bf48069bd560938e26492, type: 3}
+  m_Name: mart_vital_2
+  m_EditorClassIdentifier: Dokkaebi.Runtime::PassiveNode
+  id: mart_vital_2
+  displayName: "\uAE09\uC18C \uB178\uB9AC\uAE30 2"
+  description: "\uBB34\uAE30 \uD53C\uD574 +2%."
+  branch: 6
+  effect: 53
+  value: 2
+  requiredLevel: 9
+  cost: 5000
+  materials:
+  - item: {fileID: 11400000, guid: 69bb7210d5d424e1bb2ff19fd17aa70c, type: 2}
+    count: 5
+  prerequisites:
+  - mart_vital_1
+  column: 2
+  row: 3

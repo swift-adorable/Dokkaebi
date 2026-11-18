@@ -66,37 +66,31 @@ namespace Dokkaebi.Tests
         // ── 전투 수치 금지 ────────────────────────────────────────────────
 
         [Test]
-        public void 패시브_효과에_전투_수치가_없다()
+        public void 전투_수치는_단련과_무예에만_있다()
         {
-            // 방어도·피해·체력·이동·시야·감지·대시는 전부 장비의 몫이다.
-            // 덕코프는 「생존 본능 = 최대 생명력 +5」를 패시브로 주지만 따르지 않는다.
-            // 우리 장비는 옵션이 25종이라 겹치면 장비를 고를 이유가 사라진다.
-            string[] forbidden =
+            // 결정 2-141 — 사용자 「전투 수치도 넣기」. 예전 규칙(전투 수치 금지)을 거두고,
+            // 전투 수치는 단련 · 무예 두 갈래에만 둔다 — 다른 갈래에 섞이면 「어디를 찍어야 세지나」가 흐려진다.
+            var combat = new[]
             {
-                "Armour", "Damage", "Health", "Resist", "Penetration",
-                "Move", "Dash", "View", "Critical", "Hearing", "Speed", "Reload"
+                PassiveEffectType.MaxHealth, PassiveEffectType.MoveSpeed, PassiveEffectType.DashCooldown,
+                PassiveEffectType.WeaponDamage, PassiveEffectType.ReloadSpeed, PassiveEffectType.Armour
             };
-
-            foreach (PassiveEffectType type in System.Enum.GetValues(typeof(PassiveEffectType)))
-            {
-                string name = type.ToString();
-
-                foreach (string word in forbidden)
-                {
-                    Assert.IsFalse(name.Contains(word),
-                        $"PassiveEffectType.{name} 은 전투 수치입니다. 장비가 담당해야 합니다.");
-                }
-            }
+            PassiveTree tree = PassiveTree.Load();
+            Assert.IsNotNull(tree);
+            foreach (PassiveNode node in tree.Nodes)
+                if (System.Array.IndexOf(combat, node.Effect) >= 0)
+                    Assert.IsTrue(node.Branch == PassiveBranch.Training || node.Branch == PassiveBranch.Martial,
+                        $"{node.Id} 의 전투 수치는 단련 · 무예에만 둔다.");
         }
 
         [Test]
-        public void 계열은_다섯_개다()
+        public void 계열은_일곱_개다()
         {
-            // 화면 한 장에 들어와야 한다. 6개 이상으로 늘리지 않는다. (6절 4번)
+            // 화면 한 장에 들어와야 한다 — 단련 · 무예를 더해 7 (결정 2-141). 더 늘리지 않는다.
             Assert.AreEqual(PassiveBranchInfo.Count,
                 System.Enum.GetValues(typeof(PassiveBranch)).Length);
 
-            Assert.AreEqual(5, PassiveBranchInfo.Count);
+            Assert.AreEqual(7, PassiveBranchInfo.Count);
         }
 
         [Test]

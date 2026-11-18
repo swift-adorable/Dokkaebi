@@ -3,8 +3,10 @@ using UnityEngine;
 /// <summary>
 /// 화면 전체가 공유하는 색. 창마다 색을 직접 적으면 화면이 따로 논다.
 ///
-/// 덕코프 스크린샷의 색 구성을 기준으로 잡았다 —
-/// 어두운 남색 반투명 패널 / 한 단계 밝은 칸 / 분류별 테두리 색.
+/// 처음엔 덕코프 스크린샷(어두운 남색 반투명 패널)을 기준으로 잡았다.
+/// 【결정 2-145 — 색감 통일 2단계】 「도깨비의 세계」 메뉴 28장 · 장면 159장을 본 결과로 바꿨다 —
+/// 반투명 검정(살짝 따뜻한) 패널 · 얇은 금빛 테두리 · 주 동작은 청록 알약 · 고른 칸은 금빛.
+/// 가게 · 시설 틀(StationFrame)이 먼저 이 방향(어두운 중성 · 베이지 탭)이었다 — 이제 가방 · 전리품 · HUD도 같은 집안이다.
 ///
 /// 【불투명도의 기준】
 /// 「비쳐 보인다」와 「읽힌다」는 서로 잡아당긴다.
@@ -16,22 +18,22 @@ using UnityEngine;
 public static class UIPalette
 {
     /// <summary>화면 전체를 덮는 어두운 막.</summary>
-    public static readonly Color Dim = new(0.01f, 0.02f, 0.04f, 0.88f);
+    public static readonly Color Dim = new(0.02f, 0.02f, 0.025f, 0.88f);
 
     /// <summary>패널 배경.</summary>
-    public static readonly Color Panel = new(0.13f, 0.17f, 0.24f, 0.80f);
+    public static readonly Color Panel = new(0.085f, 0.08f, 0.085f, 0.82f);
 
     /// <summary>패널 안 머리글 띠.</summary>
-    public static readonly Color Header = new(0.19f, 0.25f, 0.35f, 0.86f);
+    public static readonly Color Header = new(0.17f, 0.15f, 0.13f, 0.88f);
 
     /// <summary>빈 칸.</summary>
-    public static readonly Color Slot = new(0.20f, 0.26f, 0.35f, 0.62f);
+    public static readonly Color Slot = new(0.17f, 0.16f, 0.16f, 0.64f);
 
     /// <summary>내용이 있는 칸.</summary>
-    public static readonly Color SlotFilled = new(0.25f, 0.33f, 0.44f, 0.72f);
+    public static readonly Color SlotFilled = new(0.24f, 0.22f, 0.20f, 0.74f);
 
     /// <summary>선택된 칸.</summary>
-    public static readonly Color SlotSelected = new(0.34f, 0.58f, 0.92f, 0.85f);
+    public static readonly Color SlotSelected = new(0.80f, 0.63f, 0.30f, 0.86f);
 
     /// <summary>
     /// 고른 장비가 들어갈 수 있는 자리. 선택색(파랑)과 확실히 달라야 한다 —
@@ -40,19 +42,19 @@ public static class UIPalette
     public static readonly Color SlotEquippable = new(0.24f, 0.66f, 0.46f, 0.80f);
 
     /// <summary>잠긴 칸.</summary>
-    public static readonly Color SlotLocked = new(0.07f, 0.09f, 0.12f, 0.72f);
+    public static readonly Color SlotLocked = new(0.07f, 0.065f, 0.065f, 0.74f);
 
     /// <summary>주 동작 버튼.</summary>
-    public static readonly Color Action = new(0.24f, 0.50f, 0.86f, 0.90f);
+    public static readonly Color Action = new(0.30f, 0.58f, 0.60f, 0.94f);
 
     /// <summary>보조 동작 버튼.</summary>
-    public static readonly Color Subtle = new(0.30f, 0.36f, 0.46f, 0.78f);
+    public static readonly Color Subtle = new(0.30f, 0.28f, 0.26f, 0.82f);
 
     /// <summary>본문 글자.</summary>
     public static readonly Color Text = new(0.93f, 0.95f, 0.97f, 1f);
 
     /// <summary>보조 설명 글자.</summary>
-    public static readonly Color TextDim = new(0.66f, 0.71f, 0.78f, 1f);
+    public static readonly Color TextDim = new(0.76f, 0.72f, 0.66f, 1f);
 
     /// <summary>수치·강조 글자.</summary>
     public static readonly Color TextAccent = new(1f, 0.85f, 0.45f, 1f);
@@ -66,7 +68,7 @@ public static class UIPalette
     /// 검은색이 아니라 투명한 회색이다 — 새까만 알약은 유리판 위에서
     /// 구멍처럼 보인다. 회색은 칸 색을 비쳐 주면서도 숫자를 띄운다.
     /// </summary>
-    public static readonly Color Badge = new(0.30f, 0.34f, 0.42f, 0.55f);
+    public static readonly Color Badge = new(0.34f, 0.31f, 0.27f, 0.58f);
 
     /// <summary>
     /// 이름을 얹는 띠. 반투명 검정이라 어떤 칸 색 위에서도 흰 글자가 읽힌다.
@@ -77,18 +79,18 @@ public static class UIPalette
     public static readonly Color GlyphTint = new(1f, 1f, 1f, 0.16f);
 
     /// <summary>패널 윤곽선. 면과 면을 갈라 준다.</summary>
-    public static readonly Color Edge = new(0.62f, 0.72f, 0.88f, 0.34f);
+    public static readonly Color Edge = new(0.86f, 0.70f, 0.42f, 0.48f);
 
     /// <summary>칸 윤곽선. 패널보다 약하다.</summary>
-    public static readonly Color EdgeSoft = new(0.60f, 0.70f, 0.86f, 0.20f);
+    public static readonly Color EdgeSoft = new(0.70f, 0.64f, 0.54f, 0.13f);
 
     /// <summary>패널 안쪽을 한 단계 눌러 깊이를 만든다.</summary>
-    public static readonly Color Inset = new(0.04f, 0.055f, 0.085f, 0.66f);
+    public static readonly Color Inset = new(0.045f, 0.04f, 0.04f, 0.68f);
 
     /// <summary>표 형태의 줄. 홀짝으로 번갈아 깐다.</summary>
-    public static readonly Color Row = new(0.40f, 0.50f, 0.66f, 0.26f);
+    public static readonly Color Row = new(0.55f, 0.50f, 0.44f, 0.24f);
 
-    public static readonly Color RowAlt = new(0.40f, 0.50f, 0.66f, 0.12f);
+    public static readonly Color RowAlt = new(0.55f, 0.50f, 0.44f, 0.11f);
 
     /// <summary>이득 수치(초록) / 대가 수치(주황).</summary>
     // ── 생존 게이지 (Survival_System 7절) ─────────────────────────────
@@ -162,7 +164,7 @@ public static class UIPalette
     /// <summary>
     /// 유리판의 테두리. 안쪽보다 밝아야 「모서리에 빛이 맺혔다」로 읽힌다.
     /// </summary>
-    public static readonly Color Rim = new(0.78f, 0.86f, 1f, 0.30f);
+    public static readonly Color Rim = new(1f, 0.88f, 0.66f, 0.26f);
 
     /// <summary>
     /// 반투명 위에 올릴 때 쓰는 글자색. 배경이 비쳐도 읽히도록

@@ -291,12 +291,12 @@ namespace Dokkaebi.Tests
             ChapterMap map = ZoneMapTable.Of(0);
             System.Func<string, bool> only01 = z => z == "0-1";
 
-            Assert.IsTrue(map.CanStand(new Vector3(-72f, 0f, -30f), only01), "0-1 출발 자리");
-            Assert.IsFalse(map.CanStand(new Vector3(40f, 0f, 0f), only01), "0-2가 닫혀 있다");
-            Assert.IsTrue(map.CanStand(new Vector3(40f, 0f, 0f), z => true));
-            Assert.IsFalse(map.CanStand(new Vector3(-73f, 0f, -40f), z => true), "헛간 안");
-            Assert.IsTrue(map.CanStand(new Vector3(-21f, 0f, 10f), z => true), "냇물은 막히지 않는다");
-            Assert.IsFalse(map.CanStand(new Vector3(200f, 0f, 0f), z => true), "바닥 밖");
+            Assert.IsTrue(map.CanStand(new Vector3(-72f, 0f, -30f) * ZoneMapTable.Chapter0Scale, only01), "0-1 출발 자리");
+            Assert.IsFalse(map.CanStand(new Vector3(60f, 0f, 0f) * ZoneMapTable.Chapter0Scale, only01), "0-2가 닫혀 있다");
+            Assert.IsTrue(map.CanStand(new Vector3(60f, 0f, 0f) * ZoneMapTable.Chapter0Scale, z => true));
+            Assert.IsFalse(map.CanStand(new Vector3(-73f, 0f, -40f) * ZoneMapTable.Chapter0Scale, z => true), "헛간 안");
+            Assert.IsTrue(map.CanStand(new Vector3(-21f, 0f, 10f) * ZoneMapTable.Chapter0Scale, z => true), "냇물은 막히지 않는다");
+            Assert.IsFalse(map.CanStand(new Vector3(200f, 0f, 0f) * ZoneMapTable.Chapter0Scale, z => true), "바닥 밖");
 
             ChapterMap ch6 = ZoneMapTable.Of(6);
             Assert.IsTrue(ch6.CanStand(new Vector3(0f, 0f, 0f), z => true), "꽃밭은 막히지 않는다");

@@ -137,6 +137,7 @@ public class DokkaebiController : MonoBehaviour
         if (gameManager != null)
             gameManager.GameOver();
 
+        RaidLedger.Abort();   // 죽으면 결산 없음 (결정 2-142)
         RunEndUI.ShowDeath(lost);
     }
 

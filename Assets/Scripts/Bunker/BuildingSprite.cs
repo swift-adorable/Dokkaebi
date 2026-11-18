@@ -92,6 +92,9 @@ public static class BuildingSprite
         return true;
     }
 
+    /// <summary>그림을 이 폭(m)에 맞는 도트 밀도로 줄인 것 — 잠긴 곳(LockedSite)도 쓴다 (결정 2-143).</summary>
+    public static Texture2D CardTexture(string id, Texture2D source, float widthMeters) => Load(id, source, widthMeters);
+
     private static Texture2D Load(string id, Texture2D source, float widthMeters)
     {
         int targetW = Mathf.Max(8, Mathf.RoundToInt(widthMeters * PixelsPerMeter));

@@ -72,6 +72,10 @@ public class ExchangeWindowUI : MonoBehaviour
     private Inventory stash;
     private string otherName = "전리품";
 
+    // ── 뒤지기 (결정 2-142) ─────────────────────────────────────────
+    private float searchTimer;
+    private RectTransform searchFill;
+
     public bool IsOpen => panel != null && panel.activeSelf;
 
     /// <summary>전리품 · 창고 · 상점 창이 떠 있는가 — 가방 화면이 옛 배치(착용 칸 + 가방 한 판)로 바뀐다 (결정 2-83).</summary>
@@ -255,6 +259,7 @@ public class ExchangeWindowUI : MonoBehaviour
     private void OpenPanel(Mode windowMode)
     {
         mode = windowMode;
+        searchTimer = 0f;
 
         panel.SetActive(true);
 
@@ -337,6 +342,62 @@ public class ExchangeWindowUI : MonoBehaviour
             instance.Close();
     }
 
+    // ────────────────────────────────── 뒤지기 (결정 2-142)
+
+    /// <summary>
+    /// 【가려진 물건을 하나씩 드러낸다】 — 덕코프처럼 처음 열면 「?」이고, 위에서부터 한 칸씩 뒤진다.
+    /// 좋은 물건일수록 오래 걸리고(ItemGrade.SearchSeconds), 드러날 때 등급 소리가 난다.
+    /// 화면이 떠 있는 동안 게임은 멈춰 있으므로 실제 시간(unscaled)으로 센다.
+    /// 메뉴 · 수량 창이 떠 있으면 잠시 멈춘다 — 다시 그리면 누르던 칸이 사라진다.
+    /// </summary>
+    private void Update()
+    {
+        if (!IsOpen || mode != Mode.Loot || ItemActionMenu.IsOpen || QuantityPopupUI.IsOpen)
+            return;
+
+        int cell = SearchingCell();
+        if (cell < 0)
+            return;
+
+        (LootContainer box, int local) = lootCells[cell];
+        ItemStack stack = box.Get(local);
+        int grade = ItemGrade.Of(stack?.Definition);
+        float seconds = ItemGrade.SearchSeconds(grade);
+
+        searchTimer += Time.unscaledDeltaTime;
+
+        if (searchFill != null)
+            searchFill.anchorMax = new Vector2(Mathf.Clamp01(searchTimer / seconds), searchFill.anchorMax.y);
+
+        if (searchTimer < seconds)
+            return;
+
+        searchTimer = 0f;
+        box.Reveal(local);
+        UISound.PlayGrade(grade);
+        Refresh();
+    }
+
+    /// <summary>지금 뒤지는 칸 — 그린 순서(lootCells)에서 처음 가려진 것. 없으면 −1.</summary>
+    private int SearchingCell()
+    {
+        for (int i = 0; i < lootCells.Count; i++)
+            if (!lootCells[i].box.IsRevealed(lootCells[i].index))
+                return i;
+        return -1;
+    }
+
+    private bool AnyRevealed
+    {
+        get
+        {
+            foreach ((LootContainer box, int index) c in lootCells)
+                if (c.box.IsRevealed(c.index))
+                    return true;
+            return false;
+        }
+    }
+
     // ────────────────────────────────── 다시 그리기
 
     /// <summary>바깥(줍기·버리기)에서 내용이 바뀌었을 때.</summary>
@@ -370,6 +431,19 @@ public class ExchangeWindowUI : MonoBehaviour
                 break;
         }
 
+        // 그리기 전에 칸 목록을 먼저 만든다 — 「뒤지는 중」 · 「전부 줍기」가 이 목록을 본다.
+        if (mode == Mode.Loot)
+        {
+            lootCells.Clear();
+            foreach (LootContainer box in Boxes)
+                for (int b = 0; b < box.Capacity; b++)
+                    if (box.Get(b) != null)
+                        lootCells.Add((box, b));
+
+            if (SearchingCell() >= 0)
+                titleLabel.text += " — 뒤지는 중";
+        }
+
         var label = takeAllButton.GetComponentInChildren<Text>();
 
         if (label != null)
@@ -377,7 +451,7 @@ public class ExchangeWindowUI : MonoBehaviour
 
         takeAllButton.interactable = mode == Mode.Stash
             ? stash.Stacks.Count > 0
-            : mode == Mode.Loot && !AllLootEmpty;
+            : mode == Mode.Loot && !AllLootEmpty && AnyRevealed;
 
         // 칸 크기를 픽셀로 환산하려면 실제 크기가 확정되어 있어야 한다.
         // 다시 그리면 사이드 메뉴가 가리키던 칸이 사라진다.
@@ -396,15 +470,9 @@ public class ExchangeWindowUI : MonoBehaviour
         // 패시브가 줄어 칸이 모자라도 이미 든 것은 그대로다. 둘 다 보여야 한다.
         IReadOnlyList<ItemStack> stashStacks = mode == Mode.Stash ? stash.Stacks : null;
 
-        // 전리품은 열린 상자들의 물건을 이어 붙인다 (겹친 시체 — 결정 2-77).
-        if (mode == Mode.Loot)
-        {
-            lootCells.Clear();
-            foreach (LootContainer box in Boxes)
-                for (int b = 0; b < box.Capacity; b++)
-                    if (box.Get(b) != null)
-                        lootCells.Add((box, b));
-        }
+        // 전리품은 열린 상자들의 물건을 이어 붙인다 (겹친 시체 — 결정 2-77). 목록은 Refresh가 만든다.
+        searchFill = null;
+        int searching = mode == Mode.Loot ? SearchingCell() : -1;
 
         int cells = mode == Mode.Stash
             ? Mathf.Max(stash.SlotCapacity, stashStacks.Count)
@@ -428,6 +496,13 @@ public class ExchangeWindowUI : MonoBehaviour
 
             int captured = i;
 
+            // 가려진 칸 — 「?」. 지금 뒤지는 칸에는 차오르는 막대.
+            if (mode == Mode.Loot && stack != null && !lootCells[i].box.IsRevealed(lootCells[i].index))
+            {
+                DrawHiddenCell(i, min, max, i == searching);
+                continue;
+            }
+
             // 【누르면 칸 옆에 사이드 메뉴가 뜬다.】 바로 줍지 않는다.
             // 한 번 눌러 바로 줍게 해 뒀더니 「줍기」 말고는 아무것도 할 수
             // 없었다. 총을 주울지, 먼저 볼지, 그 자리에서 갈아 끼울지를
@@ -448,6 +523,27 @@ public class ExchangeWindowUI : MonoBehaviour
 
             button.onClick.AddListener(() => OpenMenu(cellRect, captured, capturedStack));
         }
+    }
+
+    private void DrawHiddenCell(int i, Vector2 min, Vector2 max, bool searching)
+    {
+        Image cell = ItemCell.Draw($"Loot_{i}", grid.Content, min, max, null, chosen: false, null);
+
+        Text mark = UIFactory.CreateLabel(cell.transform, searching ? "…" : "?", 40, FontStyle.Bold,
+            new Vector2(0f, 0.2f), new Vector2(1f, 0.9f), TextAnchor.MiddleCenter, UIPalette.TextDim);
+        mark.raycastTarget = false;
+
+        if (!searching)
+            return;
+
+        Image track = UIFactory.CreatePanel("SearchTrack", cell.transform, UIPalette.NameStrip,
+            new Vector2(0.10f, 0.10f), new Vector2(0.90f, 0.20f), radius: 3);
+        track.raycastTarget = false;
+
+        Image fill = UIFactory.CreatePanel("SearchFill", track.transform, UIPalette.TextAccent,
+            new Vector2(0f, 0f), new Vector2(0f, 1f), radius: 3);
+        fill.raycastTarget = false;
+        searchFill = fill.rectTransform;
     }
 
     // ────────────────────────────────── 사이드 메뉴
@@ -472,7 +568,8 @@ public class ExchangeWindowUI : MonoBehaviour
             detail: () => InventoryScreenUI.OpenReadOnlyDetail(stack, otherName),
             takeLabel: mode == Mode.Stash ? "꺼내기" : "줍기");
 
-        ItemActionMenu.Open(cell, entries);
+        // 두 번 누르면 줍기 — 파밍(전리품)만. 창고 꺼내기는 사용자가 정한 뒤에 (2026-11-18).
+        ItemActionMenu.Open(cell, entries, () => AskTake(index, stack));   // 두 번 누르면 줍기 · 꺼내기 (2026-11-18)
     }
 
     /// <summary>
@@ -639,11 +736,12 @@ public class ExchangeWindowUI : MonoBehaviour
             var equipment = new List<ItemStack>();
             foreach (LootContainer box in Boxes)
                 for (int i = 0; i < box.Capacity; i++)
-                    if (box.Get(i)?.Definition is EquipmentDefinition)
+                    if (box.IsRevealed(i) && box.Get(i)?.Definition is EquipmentDefinition)
                         equipment.Add(box.Get(i));
 
+            // 드러난 것만 — 아직 뒤지는 중인 칸은 남는다 (결정 2-142).
             foreach (LootContainer box in Boxes)
-                moved += box.TakeAllTo(bag);
+                moved += box.TakeRevealedTo(bag);
 
             AutoEquipTaken(equipment);
         }

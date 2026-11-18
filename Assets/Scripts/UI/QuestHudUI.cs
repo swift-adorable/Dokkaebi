@@ -16,7 +16,7 @@ public class QuestHudUI : MonoBehaviour
     private static QuestHudUI instance;
 
     private const float Width = 558f;          // 오른쪽 위 버튼 줄(132 × 4 + 10 × 3)과 같은 폭
-    private const float ButtonRow = 62f;       // InventoryScreenUI.HudButtonHeight
+    private const float ButtonRow = InventoryScreenUI.HudRowHeight;   // 둥근 아이콘 줄 높이 (결정 2-146)
     private const float Margin = 10f;
     private const float PollInterval = 0.5f;
     private const float ToastSeconds = 3.5f;
@@ -27,10 +27,10 @@ public class QuestHudUI : MonoBehaviour
     /// </summary>
     private const float MaxBottom = 0.41f;   // 구역의 시설 버튼(파밍 위) 윗끝이 화면 위에서 약 43%
 
-    private static readonly Color EntryBack = new(0.08f, 0.10f, 0.14f, 0.78f);
+    private static readonly Color EntryBack = new(0.035f, 0.035f, 0.04f, 0.72f);   // 반투명 검정 (결정 2-145)
     private static readonly Color FlashBack = new(0.16f, 0.42f, 0.22f, 0.9f);
     private static readonly Color MainColor = new(1f, 0.82f, 0.38f);
-    private static readonly Color SubColor = new(0.6f, 0.82f, 1f);
+    private static readonly Color SubColor = new(0.93f, 0.84f, 0.60f);   // 메인보다 엷은 금빛 (결정 2-145 — 참고: 노란 제목)
     private static readonly Color TutorialColor = new(0.55f, 0.95f, 0.6f);
     /// <summary>튜토리얼 줄 바탕 — 퀘스트 줄(짙은 남색)과 다른 짙은 초록. 새 단계면 밝은 초록과 오가며 숨 쉰다 (결정 2-138).</summary>
     private static readonly Color TutorialBack = new(0.07f, 0.24f, 0.14f, 0.9f);
@@ -119,6 +119,14 @@ public class QuestHudUI : MonoBehaviour
             pad.childControlHeight = true;
             pad.childForceExpandWidth = true;
             pad.childForceExpandHeight = false;
+
+            // 왼쪽 금빛 띠 (결정 2-145) — 참고 화면의 금테 퀘스트 줄. 줄 세우기에서 빠진다.
+            Image accent = UIFactory.CreatePanel("Accent", back.transform, UIPalette.Edge,
+                new Vector2(0f, 0.12f), new Vector2(0f, 0.88f), radius: 0);
+            accent.rectTransform.sizeDelta = new Vector2(4f, 0f);
+            accent.rectTransform.anchoredPosition = new Vector2(3f, 0f);
+            accent.raycastTarget = false;
+            accent.gameObject.AddComponent<LayoutElement>().ignoreLayout = true;
 
             var button = back.gameObject.AddComponent<Button>();
             button.targetGraphic = back;
@@ -240,7 +248,8 @@ public class QuestHudUI : MonoBehaviour
             }
 
             string objective = QuestHudText.Objective(tracker, q);
-            string text = Rich(q.Kind == QuestKind.Main ? MainColor : SubColor, QuestHudText.Title(q), 16);
+            Color head = q.Kind == QuestKind.Main ? MainColor : SubColor;
+            string text = Rich(head, "◆ " + QuestHudText.Title(q), 16, bold: true);   // 금빛 제목 (결정 2-145)
             if (!string.IsNullOrEmpty(objective))
                 text += "\n" + Rich(UIPalette.Text, objective, 20, bold: true);
             lines.Add((text, false));

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -22,7 +23,7 @@ public class EnemySpawner : MonoBehaviour
 
     [Header("Spawn")]
     [Tooltip("스폰 간격(초)")]
-    [SerializeField] private float spawnInterval = 2f;
+    [SerializeField] private float spawnInterval = 7f;   // 2 → 7초 (2026-11-18 「너무 끊임없이」) — 장 맵은 미리 배치라 옛 평지(Raid)에서만 쓴다
 
     [Tooltip("플레이어로부터의 스폰 거리")]
     [SerializeField] private float spawnRadius = 10f;
@@ -79,6 +80,10 @@ public class EnemySpawner : MonoBehaviour
             {
                 ExtractionDirector.SpawnForRaid(player.position);
 
+                // 맵 상자 (결정 2-140) — 장독 · 궤 · 약단지 · 광주리. 판마다 새로 채운다.
+                LockedSite.SpawnForRaid(player.position);   // 잠긴 곳 먼저 — 상자 · 적이 그 안을 피한다 (결정 2-143)
+                LootBox.SpawnForRaid(player.position);
+
                 // 쓰러진 자리 (결정 2-93) — 이 장에 남아 있으면 이 판에 한 번 세운다.
                 string scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
                 if (ZoneMapTable.IsMapScene(scene))
@@ -101,7 +106,84 @@ public class EnemySpawner : MonoBehaviour
 
         if (useArchetypes)
             LoadArchetypes();
+
+        // 【미리 배치】 (결정 2-140) — 장 맵에서는 판이 열릴 때 이번 구역의 적을 전부 세워 두고, 더 낳지 않는다.
+        if (!SceneFlow.InBunker && ZoneMap.Current != null && player != null)
+            Populate();
     }
+
+    // ── 미리 배치 (결정 2-140) ─────────────────────────────────────────
+    // 사용자 2026-11-18 「한 파밍에서 끊임없이 생성되는 게 아니라, 들어갔을 때 이미 마리 수가 정해져 등장해 있고
+    // 그것들을 다 잡으면 끝」 — 덕코프도 맵이 열릴 때 정해진 자리 · 무리로 깔려 있고 다시 나오지 않는다.
+
+    private bool populated;
+    private readonly HashSet<EnemyController> population = new();
+    private bool clearedAnnounced;
+
+    /// <summary>이번 판에 미리 세운 적 중 아직 살아 있는 수.</summary>
+    public int PopulationLeft => population.Count;
+
+    private void Populate()
+    {
+        ChapterMap map = ZoneMap.Current.Map;
+        // 이번 구역 — 모르면(에디터에서 씬을 바로 켠 경우 등) 플레이어가 선 구역.
+        ZoneArea? area = map?.AreaOf(ZoneMap.Zone) ?? map?.AreaOf(map.ZoneAt(player.position));
+        if (map == null || !area.HasValue)
+            return;
+
+        Rect r = area.Value.Bounds;
+        int chapter = CurrentChapter();
+        int target = PopulationTable.Count(chapter, r.width * r.height);
+        var packs = new List<Vector3>();
+        List<Vector3> extractions = ZoneMap.Anchors(MapAnchorKind.Extraction);
+        var rng = new System.Random();
+        int placed = 0, tries = 0;
+
+        while (placed < target && tries++ < 400)
+        {
+            var p = new Vector3(Mathf.Lerp(r.xMin + 3f, r.xMax - 3f, (float)rng.NextDouble()), player.position.y,
+                                Mathf.Lerp(r.yMin + 3f, r.yMax - 3f, (float)rng.NextDouble()));
+            if (Flat(p - player.position) < PopulationTable.MinFromStart || !ZoneMap.CanSpawnAt(p))
+                continue;
+            bool near = false;
+            foreach (Vector3 e in extractions)
+                near |= Flat(p - e) < PopulationTable.MinFromExtraction;
+            foreach (Vector3 q in packs)
+                near |= Flat(p - q) < PopulationTable.PackGap;
+            if (near || !EnemyPathing.IsReachable(p, player.position, spawnPath ??= new UnityEngine.AI.NavMeshPath()))
+                continue;
+
+            packs.Add(p);
+            GameObject firstPrefab = PickPrefab(out EnemyArchetype first);
+            int count = catalog != null ? Mathf.Max(1, ZoneDataTable.PackSize(chapter, first, Random.value)) : 1;
+            for (int i = 0; i < count && placed < target; i++)
+            {
+                Vector3 at = p + (i == 0 ? Vector3.zero : RandomFlat(Random.insideUnitCircle * GroupSpacing));
+                GameObject body = poolManager.Spawn(i == 0 ? firstPrefab : PickPrefab(out _), at, Quaternion.Euler(0f, Random.Range(0f, 360f), 0f));
+                if (body == null || !body.TryGetComponent(out EnemyController enemy))
+                    continue;
+                enemy.KeepWhenFar = true;   // 멀어져도 풀로 돌려보내지 않는다 — 그 자리에 남아 있어야 한다
+                population.Add(enemy);
+                placed++;
+            }
+        }
+
+        populated = true;
+        EnemyController.Killed += OnPopulationKilled;
+        GameLogger.Log($"[EnemySpawner] 미리 배치 — {placed}마리 · 무리 {packs.Count} (목표 {target})");
+    }
+
+    private void OnPopulationKilled(EnemyController enemy)
+    {
+        if (!population.Remove(enemy) || population.Count > 0 || clearedAnnounced)
+            return;
+        clearedAnnounced = true;
+        StoryDialogueUI.ShowBanner("이 구역의 잡귀를 모두 쓰러뜨렸다 — 더는 나오지 않는다.", 3f);
+    }
+
+    private void OnDestroy() => EnemyController.Killed -= OnPopulationKilled;
+
+    private static float Flat(Vector3 v) => new Vector2(v.x, v.z).magnitude;
 
     /// <summary>
     /// 유형 9종을 불러 온다. 카탈로그가 없거나 비었으면 예전처럼 둘만 낸다 —
@@ -144,6 +226,10 @@ public class EnemySpawner : MonoBehaviour
             return;
 
         if (enemyPrefab == null || player == null)
+            return;
+
+        // 미리 배치한 판은 더 낳지 않는다 (결정 2-140).
+        if (populated)
             return;
 
         if (Time.time < nextSpawnTime)

@@ -16,6 +16,7 @@ public static class UiTourMenu
     {
         ("inventory_bag",   () => InventoryScreenUI.EnsureInstance().Open(0), () => InventoryScreenUI.Instance?.Close()),
         ("inventory_skill", () => InventoryScreenUI.EnsureInstance().Open(1), () => InventoryScreenUI.Instance?.Close()),
+        ("inventory_passive", () => InventoryScreenUI.EnsureInstance().Open(2), () => InventoryScreenUI.Instance?.Close()),
         ("inventory_codex", () => InventoryScreenUI.EnsureInstance().Open(3), () => InventoryScreenUI.Instance?.Close()),
         ("stash",           StashScreenUI.Open,                    StashScreenUI.Close),
         ("loot",            () => ExchangeWindowUI.EnsureInstance().Open(new LootContainer(), "전리품", ExchangeWindowUI.Mode.Loot),
@@ -211,5 +212,274 @@ public static class TouchControlsProbe
     {
         if (!EditorApplication.isPlaying) return;
         TutorialHudUI.EnsureInstance().Show(6, 19, "잡귀를 쓰러뜨려라 (0/3)", "조준해 쏜다 · 붉은 빛이 번뜩이면 대시로 피한다", "구역");
+    }
+}
+
+/// <summary>
+/// 【개발용】 결정 2-142 화면 점검 — 등급 색 · 뒤지기 · 철수 결산을 차례로 찍는다 (Temp/screens/m142_*.png). 소굴에서 플레이 중.
+///   1) 가치가 다른 물건 6개를 넣은 상자를 연다 → 0.5초 뒤(뒤지는 중) · 6초 뒤(다 드러남) 찍기
+///   2) 결산(가짜 기록)을 띄워 찍기
+/// </summary>
+public static class Decision142Probe
+{
+    private static int phase;
+    private static double nextAt;
+
+    [MenuItem("Dokkaebi/Debug/결정 2-142 화면 점검 (등급 · 뒤지기 · 결산)")]
+    public static void Run()
+    {
+        if (!EditorApplication.isPlaying)
+        {
+            Debug.LogWarning("[2-142] 플레이 중에만 쓴다.");
+            return;
+        }
+        System.IO.Directory.CreateDirectory("Temp/screens");
+        phase = 0;
+        nextAt = EditorApplication.timeSinceStartup;
+        EditorApplication.update -= Tick;
+        EditorApplication.update += Tick;
+    }
+
+    private static LootContainer Filled()
+    {
+        var box = new LootContainer();
+        ItemCatalog catalog = ItemCatalog.Load();
+        int[] wants = { 20, 150, 500, 1500, 5000, 20000 };
+        foreach (int want in wants)
+        {
+            ItemDefinition best = null;
+            foreach (ItemDefinition d in catalog.Items)
+                if (d != null && ItemGrade.Of(d) == ItemGrade.Of(want) && !d.IsSkillGem)
+                { best = d; break; }
+            if (best != null)
+                box.TryPut(best, 1);
+        }
+        return box;
+    }
+
+    private static void Shot(string name) => ScreenCapture.CaptureScreenshot($"Temp/screens/m142_{name}.png");
+
+    private static void Tick()
+    {
+        if (EditorApplication.timeSinceStartup < nextAt)
+            return;
+        if (!EditorApplication.isPlaying)
+        {
+            EditorApplication.update -= Tick;
+            return;
+        }
+
+        switch (phase++)
+        {
+            case 0: ExchangeWindowUI.EnsureInstance().Open(Filled(), "반닫이 궤", ExchangeWindowUI.Mode.Loot); nextAt += 0.9; break;
+            case 1: Shot("loot_searching"); nextAt += 7.0; break;
+            case 2: Shot("loot_revealed"); nextAt += 0.3; break;
+            case 3: ExchangeWindowUI.CloseIfOpen(); InventoryScreenUI.Instance?.Close(); nextAt += 0.4; break;
+            case 4:
+                RaidLedger.Begin(1200, 0f, "1-1");
+                RaidLedger.CountKill(); RaidLedger.CountKill(); RaidLedger.CountKill();
+                RaidLedger.End(5480, 754f);
+                nextAt += 1.6;
+                break;
+            case 5: Shot("summary"); nextAt += 0.3; break;
+            default:
+                EditorApplication.update -= Tick;
+                Debug.Log("[2-142] 끝");
+                break;
+        }
+    }
+}
+
+/// <summary>
+/// 【개발용】 결정 2-143 화면 점검 — 장 맵에서 플레이 중. 잠긴 곳으로 순간 이동해 찍는다 (Temp/screens/m143_*.png).
+///   마당 대문 앞 → 열쇠로 연 뒤 → 집 바깥 → 집 안(지붕 걷힘)
+/// </summary>
+public static class Decision143Probe
+{
+    private static int phase;
+    private static double nextAt;
+
+    [MenuItem("Dokkaebi/Debug/결정 2-143 화면 점검 (마당 · 집)")]
+    public static void Run()
+    {
+        if (!EditorApplication.isPlaying)
+            return;
+        System.IO.Directory.CreateDirectory("Temp/screens");
+        phase = 0;
+        nextAt = EditorApplication.timeSinceStartup + 0.2;
+        EditorApplication.update -= Tick;
+        EditorApplication.update += Tick;
+    }
+
+    private static LockedSite Find(LockSiteKind kind)
+    {
+        foreach (LockedSite s in LockedSite.Active)
+            if (s != null && s.Site.Kind == kind)
+                return s;
+        return null;
+    }
+
+    private static void MoveTo(Vector3 p)
+    {
+        var movement = UnityEngine.Object.FindAnyObjectByType<PlayerMovement>();
+        if (movement == null)
+            return;
+        p.y = movement.transform.position.y;
+        if (movement.TryGetComponent(out Rigidbody body))
+        {
+            body.position = p;
+            body.linearVelocity = Vector3.zero;
+        }
+        movement.transform.position = p;
+    }
+
+    private static void Shot(string name) => ScreenCapture.CaptureScreenshot($"Temp/screens/m143_{name}.png");
+
+    private static void Tick()
+    {
+        if (EditorApplication.timeSinceStartup < nextAt || !EditorApplication.isPlaying)
+            return;
+
+        LockedSite yard = Find(LockSiteKind.Compound);
+        LockedSite house = Find(LockSiteKind.House);
+        switch (phase++)
+        {
+            case 0:
+                if (yard == null && house == null && ZoneMap.Current != null)
+                {
+                    ChapterMap map = ZoneMap.Current.Map;
+                    foreach (ZoneArea a in map.Areas)
+                        if (LockSiteTable.For(map, a.ZoneId).Count == 2)
+                        {
+                            foreach (LockSite site in LockSiteTable.For(map, a.ZoneId))
+                                LockedSite.Create(site);
+                            break;
+                        }
+                    yard = Find(LockSiteKind.Compound);
+                    house = Find(LockSiteKind.House);
+                }
+                Debug.Log($"[2-143] 마당 {(yard != null ? yard.Site.Id : "없음")} · 집 {(house != null ? house.Site.Id : "없음")}");
+                if (yard != null) MoveTo(yard.Site.Door + new Vector3(0f, 0f, -2.5f));
+                nextAt += 1.0; break;
+            case 1: Shot("yard_locked"); nextAt += 0.3; break;
+            case 2:
+                if (yard != null)
+                {
+                    KeyRing.Register(yard.Site.KeyId);
+                    yard.UseDoor();
+                }
+                nextAt += 1.8; break;
+            case 3:
+                if (yard != null) MoveTo(new Vector3(yard.Site.Center.x, 0f, yard.Site.Center.y - 1f));
+                nextAt += 0.8; break;
+            case 4: Shot("yard_open_inside"); nextAt += 0.3; break;
+            case 5:
+                if (house != null) MoveTo(house.Site.Door + new Vector3(0f, 0f, -2.5f));
+                nextAt += 0.8; break;
+            case 6: Shot("house_outside"); nextAt += 0.3; break;
+            case 7:
+                if (house != null) MoveTo(new Vector3(house.Site.Center.x, 0f, house.Site.Center.y));
+                nextAt += 0.8; break;
+            case 8: Shot("house_inside"); nextAt += 0.3; break;
+            default:
+                KeyRing.Reset();
+                EditorApplication.update -= Tick;
+                Debug.Log("[2-143] 끝");
+                break;
+        }
+    }
+}
+
+/// <summary>
+/// 【개발용】 결정 2-144 장 빛깔 전후 — 플레이 중에 부르면 0 ~ 6장 맵을 차례로 열어 같은 자리를 「빛깔 끔 / 켬」으로 찍는다
+/// (Temp/screens/mood_ch{n}_off.png · _on.png).
+/// </summary>
+public static class ChapterMoodProbe
+{
+    private static int chapter, phase;
+    private static double nextAt;
+
+    [MenuItem("Dokkaebi/Debug/결정 2-144 장 빛깔 전후 찍기")]
+    public static void Run()
+    {
+        if (!EditorApplication.isPlaying)
+            return;
+        System.IO.Directory.CreateDirectory("Temp/screens");
+        chapter = 0;
+        phase = 0;
+        nextAt = EditorApplication.timeSinceStartup;
+        EditorApplication.update -= Tick;
+        EditorApplication.update += Tick;
+    }
+
+    [MenuItem("Dokkaebi/Debug/장 빛깔 켜기 · 끄기")]
+    public static void Toggle() => ChapterLighting.SetEnabled(!ChapterLighting.Enabled);
+
+    private static void Tick()
+    {
+        if (EditorApplication.timeSinceStartup < nextAt || !EditorApplication.isPlaying)
+            return;
+
+        if (StoryDialogueUI.IsShowing)
+        {
+            var ui = UnityEngine.Object.FindAnyObjectByType<StoryDialogueUI>();
+            typeof(StoryDialogueUI).GetMethod("Finish", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.Invoke(ui, null);
+            nextAt = EditorApplication.timeSinceStartup + 0.4;
+            return;
+        }
+
+        switch (phase)
+        {
+            case 0:
+                if (chapter > 6) { EditorApplication.update -= Tick; Debug.Log("[2-144] 끝"); return; }
+                UnityEngine.SceneManagement.SceneManager.LoadScene(ZoneMapTable.SceneFor(chapter));
+                phase = 1; nextAt = EditorApplication.timeSinceStartup + 3.0; return;
+            case 1:
+                ChapterLighting.SetEnabled(false);
+                phase = 2; nextAt = EditorApplication.timeSinceStartup + 0.5; return;
+            case 2:
+                ScreenCapture.CaptureScreenshot($"Temp/screens/mood_ch{chapter}_off.png");
+                phase = 3; nextAt = EditorApplication.timeSinceStartup + 0.4; return;
+            case 3:
+                ChapterLighting.SetEnabled(true);
+                phase = 4; nextAt = EditorApplication.timeSinceStartup + 0.5; return;
+            case 4:
+                ScreenCapture.CaptureScreenshot($"Temp/screens/mood_ch{chapter}_on.png");
+                Debug.Log($"[2-144] {chapter}장");
+                chapter++;
+                phase = 0; nextAt = EditorApplication.timeSinceStartup + 0.4; return;
+        }
+    }
+}
+
+/// <summary>【개발용】 결정 2-146 HUD 전후 — 터치 조작을 켜고 HUD를 찍는다 (Temp/screens/hud_touch_{before|after}.png). 장 맵에서 플레이 중.</summary>
+public static class HudProbe
+{
+    private static string tag;
+    private static double at;
+
+    [MenuItem("Dokkaebi/Debug/HUD 찍기 — 전")]
+    public static void Before() => Run("before");
+
+    [MenuItem("Dokkaebi/Debug/HUD 찍기 — 후")]
+    public static void After() => Run("after");
+
+    private static void Run(string t)
+    {
+        if (!EditorApplication.isPlaying) return;
+        TouchControlsProbe.Force();
+        tag = t;
+        at = EditorApplication.timeSinceStartup + 1.2;
+        EditorApplication.update -= Tick;
+        EditorApplication.update += Tick;
+    }
+
+    private static void Tick()
+    {
+        if (EditorApplication.timeSinceStartup < at) return;
+        EditorApplication.update -= Tick;
+        System.IO.Directory.CreateDirectory("Temp/screens");
+        ScreenCapture.CaptureScreenshot($"Temp/screens/hud_touch_{tag}.png");
+        Debug.Log($"[HudProbe] {tag}");
     }
 }

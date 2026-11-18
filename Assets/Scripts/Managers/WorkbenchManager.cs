@@ -230,9 +230,18 @@ public static class WorkbenchManager
     {
         data.workbenchStage = State.Stage;
         data.craftUnlocks = new List<string>(State.Unlocked);
+        data.registeredKeys = KeyRing.Capture();   // 열쇠고리 — 작업대 곁에 건다 (결정 2-143)
     }
 
-    public static void Restore(SaveData data) => State.Restore(data.workbenchStage, data.craftUnlocks);
+    public static void Restore(SaveData data)
+    {
+        State.Restore(data.workbenchStage, data.craftUnlocks);
+        KeyRing.Restore(data.registeredKeys);
+    }
 
-    public static void Reset() => State.Reset();
+    public static void Reset()
+    {
+        State.Reset();
+        KeyRing.Reset();
+    }
 }

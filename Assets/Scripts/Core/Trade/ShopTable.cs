@@ -68,6 +68,10 @@ public static class ShopTable
         new("cell_battery", 3, 1.50f),
         new("wire_bundle",  3, 1.50f),
 
+        // 연장 (결정 2-143) — 잠긴 궤를 비트는 쇠지레 · 금 간 담을 무너뜨리는 화약 [임시값]
+        new("tool_crowbar", 1, 1.20f),
+        new("tool_powder",  2, 1.20f),
+
         // 탄 (결정 2-80) — 1티어 무기(환목궁 · 세총통)의 탄만. 대장간이 열리기 전(0장 · 1장)에도 살 수 있게 [임시값 — 재고]
         new(AmmoTable.Arrow, 300, 1.00f),
         new(AmmoTable.Shot,  300, 1.00f),

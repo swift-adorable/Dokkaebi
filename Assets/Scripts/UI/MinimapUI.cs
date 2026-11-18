@@ -67,18 +67,29 @@ public class MinimapUI : MonoBehaviour
         RectTransform safe = UIFactory.CreateSafeArea(canvas);
 
         // 왼쪽 위 (결정 2-130 — 사용자 「미니맵을 좌상단에」).
-        Image back = UIFactory.CreateGlass("Minimap", safe, UIPalette.Panel, new Vector2(0f, 1f), new Vector2(0f, 1f));
-        frame = back.rectTransform;
-        frame.pivot = new Vector2(0f, 1f);
-        frame.sizeDelta = new Vector2(HudLayout.MinimapSize, HudLayout.MinimapSize);
-        frame.anchoredPosition = new Vector2(HudLayout.Margin, -HudLayout.Margin);
+        // 【둥근 미니맵】 (결정 2-146 · 「도깨비의 세계」 HUD) — 금빛 테 · 동그란 판 · 아래에 구역 이름 · 달 · 날씨 한 줄.
+        Image rim = UIFactory.CreatePanel("MinimapRim", safe, UIPalette.Edge, new Vector2(0f, 1f), new Vector2(0f, 1f), radius: 0);
+        rim.sprite = UISprites.Of(UISprites.Glyph.Circle);
+        rim.rectTransform.pivot = new Vector2(0f, 1f);
+        rim.rectTransform.sizeDelta = new Vector2(HudLayout.MinimapSize, HudLayout.MinimapSize);
+        rim.rectTransform.anchoredPosition = new Vector2(HudLayout.Margin, -HudLayout.Margin);
+        rim.raycastTarget = false;
+        frame = rim.rectTransform;
+
+        Image back = UIFactory.CreatePanel("Minimap", frame, UIPalette.Panel, Vector2.zero, Vector2.one, radius: 0);
+        back.sprite = UISprites.Of(UISprites.Glyph.Circle);
+        back.rectTransform.offsetMin = new Vector2(3f, 3f);
+        back.rectTransform.offsetMax = new Vector2(-3f, -3f);
 
         var button = back.gameObject.AddComponent<Button>();
         button.targetGraphic = back;
         button.onClick.AddListener(WorldMapUI.Open);
 
-        view = UIFactory.Inset(UIFactory.CreateRegion("View", frame, Vector2.zero, Vector2.one), Inner);
-        view.gameObject.AddComponent<RectMask2D>();
+        view = UIFactory.Inset(UIFactory.CreateRegion("View", back.rectTransform, Vector2.zero, Vector2.one), Inner);
+        var maskImage = view.gameObject.AddComponent<Image>();
+        maskImage.sprite = UISprites.Of(UISprites.Glyph.Circle);
+        maskImage.raycastTarget = false;
+        view.gameObject.AddComponent<Mask>().showMaskGraphic = false;
 
         mapImage = CreateRaw("Map", view);
         closedImage = CreateRaw("Closed", view);   // 사진 위 닫힌 곳 덮개 (결정 2-121 · 2-123)
@@ -94,18 +105,12 @@ public class MinimapUI : MonoBehaviour
         ring.effectDistance = new Vector2(1.5f, -1.5f);
         playerArrow = arrow.rectTransform;
 
-        Text hint = UIFactory.CreateLabel(frame, "지도", 18, FontStyle.Bold,
-            new Vector2(0f, 0f), new Vector2(1f, 0f), TextAnchor.LowerRight, UIPalette.TextDim);
-        hint.rectTransform.offsetMin = new Vector2(0f, 6f);
-        hint.rectTransform.offsetMax = new Vector2(-10f, 30f);
-        hint.raycastTarget = false;
-
-        // 달 · 날씨 · 막이 한 줄 (결정 2-91) — 미니맵 위쪽 띠.
+        // 구역 이름 · 달 · 날씨 (결정 2-91 → 2-146) — 둥근 판 바로 아래 알약 한 줄.
         Image strip = UIFactory.CreatePanel("WeatherStrip", frame, UIPalette.NameStrip,
-            new Vector2(0f, 1f), new Vector2(1f, 1f), radius: 0);
+            new Vector2(0f, 0f), new Vector2(1f, 0f), radius: 14);
         strip.raycastTarget = false;
-        strip.rectTransform.offsetMin = new Vector2(Inner, -Inner - 30f);
-        strip.rectTransform.offsetMax = new Vector2(-Inner, -Inner);
+        strip.rectTransform.offsetMin = new Vector2(8f, -38f);
+        strip.rectTransform.offsetMax = new Vector2(-8f, -4f);
 
         weatherLine = UIFactory.CreateLabel(strip.transform, string.Empty, 16, FontStyle.Bold,
             Vector2.zero, Vector2.one, TextAnchor.MiddleCenter, UIPalette.TextOnGlass);
@@ -185,8 +190,11 @@ public class MinimapUI : MonoBehaviour
         {
             weatherRefresh = 0.25f;
             PlayerWeather pw = PlayerWeather.Current;
-            weatherLine.text = WeatherText(RaidManager.Current,
+            string weather = WeatherText(RaidManager.Current,
                 pw != null ? pw.Protection : 0, pw != null ? pw.Deficit : 0, pw != null ? pw.ColdStacks : 0f);
+            // 구역 이름을 앞에 (결정 2-146 — 참고 화면: 미니맵 곁 구역 이름).
+            string zone = StoryTable.Zone(ZoneMap.Zone)?.Name;
+            weatherLine.text = string.IsNullOrEmpty(zone) ? weather : $"<color=#{ColorUtility.ToHtmlStringRGB(UIPalette.TextAccent)}>{zone}</color> · {weather}";
         }
 
         Vector3 center = runtime.Player.position;
@@ -225,14 +233,32 @@ public class MinimapUI : MonoBehaviour
                     Place(ref used, "●", ExtractionColor, extraction.Points[i], center, half, 22);
 
         // 쓰러진 자리는 범위 밖이면 테두리 점으로, 전리품(옛 지도)은 범위 안의 것만 (결정 2-93).
+        // 보스 소문 영역 (결정 2-142) — 범위 안이면 영역 크기의 원, 밖이면 테두리에 「?」.
+        foreach (BossRumor.Area area in BossRumor.Areas)
+        {
+            if (InRange(area.Center, center))
+            {
+                int ring = Mathf.Clamp(Mathf.RoundToInt(area.Radius / MapTable.MinimapRange * half * 2.4f), 24, 160);
+                Place(ref used, "◯", BossRumor.RingColor, area.Center, center, half, ring);
+            }
+            else
+            {
+                Place(ref used, "?", BossRumor.RingColor, area.Center, center, half, 22);
+            }
+        }
+
         foreach (MapLootMarks.Mark m in MapLootMarks.Collect())
         {
-            bool fallen = m.kind == MapLootMarks.Kind.Fallen;
-            if (!fallen && !InRange(m.position, center))
+            // 쓰러진 자리 · 퀘스트 자리는 범위 밖이어도 테두리에 붙여 방향을 알린다.
+            bool pinned = m.kind is MapLootMarks.Kind.Fallen or MapLootMarks.Kind.Quest;
+            bool lockMark = m.kind is MapLootMarks.Kind.Lock or MapLootMarks.Kind.LockOpen;
+            if (lockMark && !InRange(m.position, center))
+                continue;
+            if (!pinned && !InRange(m.position, center))
                 continue;
 
             Place(ref used, MapLootMarks.Glyph(m.kind), MapLootMarks.ColorOf(m.kind), m.position, center, half,
-                fallen ? 24 : 18);
+                pinned ? 24 : 18);
         }
 
         IReadOnlyList<Vector2> markers = MapMemory.Markers(runtime.Chapter);
@@ -270,7 +296,7 @@ public class MinimapUI : MonoBehaviour
 
         Vector2 local = new Vector2(world.x - center.x, world.z - center.z) / MapTable.MinimapRange * half;
         float limit = half - EdgeInset;
-        float k = Mathf.Max(Mathf.Abs(local.x), Mathf.Abs(local.y)) / limit;
+        float k = local.magnitude / limit;   // 둥근 판 — 테두리 점은 원을 따라 (결정 2-146)
         if (k > 1f)
             local /= k;
 
@@ -285,6 +311,8 @@ public class MinimapUI : MonoBehaviour
             Text t = UIFactory.CreateLabel(view, "", 20, FontStyle.Bold,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), TextAnchor.MiddleCenter);
             t.rectTransform.sizeDelta = new Vector2(28f, 28f);
+            t.horizontalOverflow = HorizontalWrapMode.Overflow;   // 소문 원(◯)은 칸보다 크다 (결정 2-142)
+            t.verticalOverflow = VerticalWrapMode.Overflow;
             t.raycastTarget = false;
             t.gameObject.AddComponent<Outline>().effectColor = new Color(0f, 0f, 0f, 0.85f);
             icons.Add(t);
