@@ -39,6 +39,7 @@ public static class ObstacleRules
         MapBlockKind.Rock => true,
         MapBlockKind.Building => true,
         MapBlockKind.Tree => true,
+        MapBlockKind.Forest => true,
         MapBlockKind.Fence => true,
         MapBlockKind.Post => true,
         _ => false,   // Bush · Stall · Well · Geumjul (낮다) · Water · Flowerbed (막지 않는다)

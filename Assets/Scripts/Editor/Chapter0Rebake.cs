@@ -16,6 +16,9 @@ public static class Chapter0Rebake
         ChapterMap map = ZoneMapTable.Of(0);
         LockSiteTable.ClearCache();
         DressPlan.ClearCache();
+        // 0장이 열린 유일한 씬이면 Bake 가 닫지 못해, 옛 내용 위에 새 맵을 또 얹어 저장했다(굽기마다 Map_Ch0 가 하나씩 쌓여 19개 —
+        // 옛 대숲 · 경계의 보이지 않는 충돌체가 새 집 방을 막았다). 빈 씬을 먼저 열어 0장을 닫히게 한다.
+        EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
         ZoneMapBaker.Bake(map);
         Scene scene = EditorSceneManager.OpenScene(ZoneMapBaker.PathFor(map), OpenSceneMode.Single);
         SceneArtDresser.Dress(scene, map);

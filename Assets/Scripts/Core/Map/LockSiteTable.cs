@@ -26,9 +26,12 @@ public sealed class LockSite
     public readonly string Name;
     /// <summary>집 그림 (Resources/Locks) — 열린 집만. 잠긴 집은 LockedSite 가 고른다.</summary>
     public readonly string Art;
+    /// <summary>집 짜임 갈래 (결정 2-151 v5) — ㅁ자 · ㄷ자 · 二자 · 겹집 · ㄱ자 · ㅡ자 … 열린 집만.</summary>
+    public readonly string Variant;
 
-    public LockSite(string zoneId, int chapter, LockSiteKind kind, Vector2 center, Vector2 size, string name, int index = 0, string art = null)
+    public LockSite(string zoneId, int chapter, LockSiteKind kind, Vector2 center, Vector2 size, string name, int index = 0, string art = null, string variant = null)
     {
+        Variant = variant;
         ZoneId = zoneId;
         Chapter = chapter;
         Kind = kind;
@@ -131,8 +134,22 @@ public static class LockSiteTable
         ("house_ruin", new Vector2(12f, 9f), "무너진 초가"),
     };
 
+    /// <summary>
+    /// 【짜임 갈래 표】 (결정 2-151 v6 · 2026-11-19 한옥 참고 사진 175장을 보고 처음부터 다시)
+    /// 이제 한 채가 아니라 집터(담 · 여러 채 · 마당) — 표는 HanokPlan.Table. 장 안의 집들은 이 표를 위에서부터 겹치지 않게 나눠 갖는다.
+    /// 큰 집터(양반가 26×24m)가 자리를 못 찾으면 다음 갈래로.
+    /// </summary>
+    public static readonly (string Variant, string Art, Vector2 Size, string Name)[] HouseVariants =
+        System.Array.ConvertAll(HanokPlan.Table, e => (e.Variant, $"house_{e.Art}", e.Size, e.Name));
+
     /// <summary>구역마다 열린 집 수 — 0장은 맵을 2배로 늘려(결정 2-149) 넉넉히, 다른 장은 아직 원래 크기라 하나.</summary>
     public static int OpenHousesPerZone(int chapter) => chapter == 0 ? 3 : 1;
+
+    /// <summary>
+    /// 마을 · 야영지(Landmark)마다 집 몇 채 (결정 2-150 · 제로존: 집은 야영지 · 길가 마을에 모여 있다).
+    /// 그 구역에 마을 자리가 있으면 이 수 × 마을 수, 없으면 OpenHousesPerZone.
+    /// </summary>
+    public const int HousesPerVillage = 2;
 
     private static readonly Dictionary<string, List<LockSite>> openCache = new();
 
@@ -151,12 +168,34 @@ public static class LockSiteTable
         {
             var taken = new List<LockSite>(For(map, zoneId));
             var rng = new System.Random(StableSeed(zoneId + "/open"));
-            int n = OpenHousesPerZone(map.Chapter);
-            int type = rng.Next(OpenHouseTypes.Length);
-            for (int i = 0; i < n; i++, type++)
+            List<MapAnchor> villages = map.Chapter == 0 ? map.AnchorsOf(MapAnchorKind.Landmark, zoneId) : new List<MapAnchor>();   // 다른 장 Landmark 는 아직 마을 뜻이 아니다 (1 ~ 6장 짤 때 같이)
+            int n = villages.Count > 0 ? villages.Count * HousesPerVillage : OpenHousesPerZone(map.Chapter);
+            // 짜임은 장 전체에서 겹치지 않게 — 앞 구역들의 집이 쓴 짜임은 건너뛰고 표 순서대로 (큰 집터가 먼저).
+            // 다 써 버렸거나 남은 짜임이 자리를 못 찾으면 그때만 이미 쓴 짜임을 다시 쓴다.
+            var used = new HashSet<string>();
+            foreach (ZoneArea a in map.Areas)
             {
-                var (art, size, name) = OpenHouseTypes[type % OpenHouseTypes.Length];
-                LockSite site = PlaceOpen(map, area.Value, size, name, art, i, rng, taken);
+                if (a.ZoneId == zoneId) break;
+                foreach (LockSite h in OpenHouses(map, a.ZoneId)) if (h.Variant != null) used.Add(h.Variant);
+            }
+            for (int i = 0; i < n; i++)
+            {
+                LockSite site = null;
+                // 집터가 커져(v7 · 1.4배) 한 마을 둘레에 자리가 모자랄 수 있다 — 제 마을부터, 안 되면 그 구역의 다른 마을 둘레에서도 찾는다
+                int tryVillages = Mathf.Max(1, villages.Count);
+                for (int pass = 0; pass < 2 && site == null; pass++)
+                    foreach (var (variant, art, size, name) in HouseVariants)
+                    {
+                        if ((pass == 0) == used.Contains(variant)) continue;
+                        for (int v = 0; v < tryVillages && site == null; v++)
+                        {
+                            Vector2? near = villages.Count > 0 ? new Vector2(villages[(i + v) % villages.Count].Position.x, villages[(i + v) % villages.Count].Position.z) : null;
+                            site = PlaceOpen(map, area.Value, size, name, art, i, rng, taken, near, variant);
+                        }
+                        if (site == null && villages.Count > 0)   // 마을 둘레가 꽉 찼으면 구역 안 길가 빈 땅 (덕코프도 길가에 외딴 건물이 있다)
+                            site = PlaceOpen(map, area.Value, size, name, art, i, rng, taken, null, variant);
+                        if (site != null) { used.Add(variant); break; }
+                    }
                 if (site == null)
                     continue;
                 taken.Add(site);
@@ -167,7 +206,7 @@ public static class LockSiteTable
         return list;
     }
 
-    private static LockSite PlaceOpen(ChapterMap map, ZoneArea area, Vector2 size, string name, string art, int index, System.Random rng, List<LockSite> taken)
+    private static LockSite PlaceOpen(ChapterMap map, ZoneArea area, Vector2 size, string name, string art, int index, System.Random rng, List<LockSite> taken, Vector2? near = null, string variant = null)
     {
         Rect b = area.Bounds;
         float marginX = size.x * 0.5f + 3f, marginZ = size.y * 0.5f + 3f + DoorClear;
@@ -177,9 +216,22 @@ public static class LockSiteTable
         float bestRoad = float.MaxValue;
         for (int tries = 0; tries < 900; tries++)
         {
-            float x = Mathf.Round(Mathf.Lerp(b.xMin + marginX, b.xMax - marginX, (float)rng.NextDouble()) * 2f) * 0.5f;
-            float z = Mathf.Round(Mathf.Lerp(b.yMin + marginZ, b.yMax - marginZ, (float)rng.NextDouble()) * 2f) * 0.5f;
-            var site = new LockSite(area.ZoneId, map.Chapter, LockSiteKind.OpenHouse, new Vector2(x, z), size, name, index, art);
+            float x, z;
+            if (near.HasValue)
+            {
+                // 마을 자리 둘레에서만 — 처음엔 26m 안, 못 찾으면 34m 까지 넓힌다(구역 아무 데나로 흩어지지 않게)
+                float a = (float)rng.NextDouble() * Mathf.PI * 2f, r = 6f + (float)rng.NextDouble() * (tries < 600 ? 26f : 40f);   // v7 — 집터가 커져 46m 까지
+                x = Mathf.Clamp(near.Value.x + Mathf.Cos(a) * r, b.xMin + marginX, b.xMax - marginX);
+                z = Mathf.Clamp(near.Value.y + Mathf.Sin(a) * r, b.yMin + marginZ, b.yMax - marginZ);
+            }
+            else
+            {
+                x = Mathf.Lerp(b.xMin + marginX, b.xMax - marginX, (float)rng.NextDouble());
+                z = Mathf.Lerp(b.yMin + marginZ, b.yMax - marginZ, (float)rng.NextDouble());
+            }
+            x = Mathf.Round(x * 2f) * 0.5f;
+            z = Mathf.Round(z * 2f) * 0.5f;
+            var site = new LockSite(area.ZoneId, map.Chapter, LockSiteKind.OpenHouse, new Vector2(x, z), size, name, index, art, variant);
             if (!Fits(map, site, taken))
                 continue;
             // 길이 있으면 문 앞이 길에서 4 ~ 14m 인 자리를 좋아한다(마을처럼 길을 따라). 길 위에는 세우지 않는다.
@@ -188,9 +240,13 @@ public static class LockSiteTable
                 return site;
             float road = PixelDress.PathDistance(map.Chapter, new Vector2(x, z - size.y * 0.5f - 1f));
             float body = PixelDress.PathDistance(map.Chapter, new Vector2(x, z));
-            if (body < size.magnitude * 0.5f + 3f)
+            // 길이 집터를 지나지 않는가 — 예전엔 대각선 반(+3m) 안에 길이 없어야 했는데, 집터가 커지자(26×24m) 마을 둘레에 자리가 없었다.
+            // 이제 집터 테두리를 2.5m 마다 재어 길이 테두리를 넘지 않으면 된다 (길은 길게 이어지니 안을 지나면 테두리를 넘는다).
+            if (body < Mathf.Min(size.x, size.y) * 0.5f + 1f || !ClearOfPaths(map.Chapter, new Rect(x - size.x * 0.5f, z - size.y * 0.5f, size.x, size.y)))
                 continue;
-            float score = Mathf.Abs(road - 8f);
+            if (!near.HasValue && road > 14f)   // 외딴 집은 길가에만 (숲 속에 홀로 서지 않게)
+                continue;
+            float score = Mathf.Abs(road - 8f) + (near.HasValue ? Vector2.Distance(near.Value, new Vector2(x, z)) * 0.35f : 0f);
             if (score < bestRoad)
             {
                 bestRoad = score;
@@ -198,6 +254,17 @@ public static class LockSiteTable
             }
         }
         return best;
+    }
+
+    private static bool ClearOfPaths(int chapter, Rect r)
+    {
+        foreach (var (p0, p1) in new[] { (r.min, new Vector2(r.xMax, r.yMin)), (new Vector2(r.xMax, r.yMin), r.max), (r.max, new Vector2(r.xMin, r.yMax)), (new Vector2(r.xMin, r.yMax), r.min) })
+        {
+            int n = Mathf.Max(1, Mathf.CeilToInt((p1 - p0).magnitude / 2.5f));
+            for (int i = 0; i < n; i++)
+                if (PixelDress.PathDistance(chapter, Vector2.Lerp(p0, p1, i / (float)n)) < 1f) return false;
+        }
+        return true;
     }
 
     /// <summary>이 점이 어떤 집(잠긴 곳 · 열린 집) 자리 안인가 — 소품 · 바닥 굽기가 비운다.</summary>

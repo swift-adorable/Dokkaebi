@@ -75,8 +75,12 @@ public static class PixelGroundBaker
         int w = Mathf.RoundToInt(halfX * 2f * Ppm), h = Mathf.RoundToInt(halfZ * 2f * Ppm);
         var outPx = new Color32[w * h];
         var rocks = new List<MapBlock>();
+        var shutBlocks = new List<MapBlock>();
         foreach (MapBlock b in map.Blocks)
+        {
             if (b.Kind == MapBlockKind.Rock) rocks.Add(b);
+            if (b.Kind is MapBlockKind.Bamboo or MapBlockKind.Rock or MapBlockKind.Tree or MapBlockKind.Bush or MapBlockKind.Forest) shutBlocks.Add(b);
+        }
 
         // 배치 틀 (결정 2-147) — 공터 · 디딤돌은 DressPlan이 정한다. 디딤돌은 1m 칸으로 묶어 빨리 찾는다.
         DressPlan.ClearCache();
@@ -88,59 +92,161 @@ public static class PixelGroundBaker
             l.Add(st);
         }
 
+        // 【거리 밭】 (결정 2-150 v2) — 길이 곡선이 되며 점이 많아져 칸마다 길 거리를 재면 느리다. 4칸(약 0.17m) 간격으로 미리 재 두고 사이는 겹선형으로.
+        const int G = 4;
+        int lw = w / G + 2, lh = h / G + 2;
+        var roadField = new float[lw * lh];
+        var clearField = new float[lw * lh];
+        for (int j = 0; j < lh; j++)
+        for (int i = 0; i < lw; i++)
+        {
+            var q0 = new Vector2(-halfX + (i * G + 0.5f) / Ppm, -halfZ + (j * G + 0.5f) / Ppm);
+            roadField[j * lw + i] = PixelDress.PathDistance(map.Chapter, q0);
+            clearField[j * lw + i] = DressPlan.ClearingDistance(map, q0, out _);
+        }
+        float Sample(float[] f, int x, int y)
+        {
+            float fx = x / (float)G, fy = y / (float)G;
+            int i0 = Mathf.Min((int)fx, lw - 2), j0 = Mathf.Min((int)fy, lh - 2);
+            float tx = fx - i0, ty = fy - j0;
+            return Mathf.Lerp(Mathf.Lerp(f[j0 * lw + i0], f[j0 * lw + i0 + 1], tx), Mathf.Lerp(f[(j0 + 1) * lw + i0], f[(j0 + 1) * lw + i0 + 1], tx), ty);
+        }
+
+        // 1) 칸마다 어느 바닥인지 — 예전과 같은 규칙
+        var kind = new byte[w * h];
+        var flags = new byte[w * h];   // 1 = 디딤돌(또렷하게) · 2 = 길가 그늘 · 4 = 막힌 곳
         for (int y = 0; y < h; y++)
         for (int x = 0; x < w; x++)
         {
             var p = new Vector3(-halfX + (x + 0.5f) / Ppm, 0f, -halfZ + (y + 0.5f) / Ppm);
             var q = new Vector2(p.x, p.z);
-            // 2칸 덩이 디더 — 경계가 도트 계단처럼 흩어진다
             float d = (Hash(x >> 1, y >> 1) & 1023) / 1023f - 0.5f;
             float n = Mathf.PerlinNoise(p.x * 0.045f + 11f, p.z * 0.045f + 3f);
             float n2 = Mathf.PerlinNoise(p.x * 0.2f + 7f, p.z * 0.2f + 19f);
+            float nLow = Mathf.PerlinNoise(p.x * 0.07f + 40f, p.z * 0.07f + 9f);   // 길 폭이 천천히 넓어졌다 좁아졌다
 
             int t;
+            byte f = 0;
             if (map.ZoneAt(p) == null && (Mathf.Abs(p.x) > map.HalfSize.x - 0.5f || Mathf.Abs(p.z) > map.HalfSize.y - 0.5f))
                 t = Dark;
             else
             {
                 float wet = DressPlan.WaterDistance(map, q, out bool inWater);
-                float road = PixelDress.PathDistance(map.Chapter, q);
-                float clear = DressPlan.ClearingDistance(map, q, out _);
+                float road = Sample(roadField, x, y);
+                float clear = Sample(clearField, x, y);
                 bool rocky = false;
                 foreach (MapBlock b in rocks)
-                    if (b.Contains(p, 1.6f + (n2 - 0.5f) * 2f + d))
+                    if (b.Contains(p, (Mathf.PerlinNoise(p.x * 0.06f + 3f, p.z * 0.06f + 71f) - 0.5f) * 9f + (n2 - 0.5f) * 2f))   // 바위 땅도 노이즈 윤곽 (v4 — 네모였다)
                         rocky = true;
                 bool stone = false;
                 if (stoneGrid.TryGetValue((Mathf.FloorToInt(q.x), Mathf.FloorToInt(q.y)), out var near))
                     foreach (Vector2 st in near)
                         stone |= (st - q).sqrMagnitude < DressPlan.StoneRadius * DressPlan.StoneRadius;
-                if (!stone)   // 칸 경계에 걸친 돌
+                if (!stone)
                     for (int ox = -1; ox <= 1 && !stone; ox++)
                     for (int oz = -1; oz <= 1 && !stone; oz++)
                         if ((ox != 0 || oz != 0) && stoneGrid.TryGetValue((Mathf.FloorToInt(q.x) + ox, Mathf.FloorToInt(q.y) + oz), out var n3))
                             foreach (Vector2 st in n3)
                                 stone |= (st - q).sqrMagnitude < DressPlan.StoneRadius * DressPlan.StoneRadius;
 
+                float roadW = DressPlan.PathHalfWidth + (nLow - 0.5f) * 1.1f + (n2 - 0.5f) * 0.4f;
+                if (clear > 0.6f && road >= roadW - 0.1f && road < roadW + 0.5f) f |= 2;
                 float edgeOfMap = Mathf.Min(map.HalfSize.x - Mathf.Abs(p.x), map.HalfSize.y - Mathf.Abs(p.z));
 
                 if (inWater) t = Stream;
-                else if (wet < 0.9f + (n2 - 0.5f) * 0.6f + d * 0.4f) t = RockG;          // 물가 돌 테 (결정 2-147)
+                else if (wet < 0.9f + (n2 - 0.5f) * 0.6f + d * 0.4f) t = RockG;
                 else if (wet < 1.9f + (n2 - 0.5f) * 1.2f + d * 0.6f) t = Mud;
-                else if (stone) t = RockG;                                                 // 디딤돌
-                else if (clear < (n2 - 0.5f) * 1.6f + d * 0.6f) t = Dirt;                  // 둥근 흙 공터
-                else if (road < DressPlan.PathHalfWidth + (n2 - 0.5f) * 1.0f + d * 0.6f) t = Trail;
+                else if (stone) { t = RockG; f |= 1; }
+                else if (clear < (n2 - 0.5f) * 1.6f + (nLow - 0.5f) * 1.5f) t = Dirt;
+                else if (road < roadW) t = Trail;
                 else if (ArtCatalog.YardAmount(map, p) > 0.55f + (n2 - 0.5f) * 0.4f + d * 0.25f) t = Dirt;
-                else if (LockSiteTable.InAnySite(map, q, 1.4f + (n2 - 0.5f) * 1.6f + d * 0.6f)) t = Dirt;   // 집 마당 (결정 2-149)
+                else if (LockSiteTable.InAnySite(map, q, 1.4f + (n2 - 0.5f) * 1.6f + d * 0.6f)) t = Dirt;
                 else if (rocky) t = RockG;
-                else if (edgeOfMap < 7f + (n - 0.5f) * 4f) t = Dark;                        // 장 가장자리는 짙은 숲 바닥
+                else if (edgeOfMap < 7f + (n - 0.5f) * 4f) t = Dark;
                 else
                 {
-                    float v = n + d * 0.08f;
-                    t = v < 0.32f ? Dark : v < 0.58f ? Grass : Moss;   // 짙은 얼룩은 줄였다 (v3 — 그림자처럼 보였다)
+                    float v = n - Mathf.Clamp01((road - 12f) / 14f) * 0.3f;
+                    t = v < 0.32f ? Dark : v < 0.58f ? Grass : Moss;
                 }
             }
-            int ts = sizes[t];
-            outPx[y * w + x] = tiles[t][(y % ts) * ts + (x % ts)];
+            float wob = (Mathf.PerlinNoise(p.x * 0.06f + 3f, p.z * 0.06f + 71f) - 0.5f) * 9f + (Mathf.PerlinNoise(p.x * 0.2f + 5f, p.z * 0.2f + 13f) - 0.5f) * 3f;   // ±4.5m 큰 흔들림 + 잔 흔들림
+            foreach (MapBlock b in shutBlocks)
+                if (b.Contains(p, wob - 0.5f)) { f |= 4; break; }
+            if ((f & 4) != 0 && t != Stream) t = Dark;
+            kind[y * w + x] = (byte)t;
+            flags[y * w + x] = f;
+        }
+
+        // 2) 【바닥 섞기】 (결정 2-150 v2 · 사용자 「뜬금없이 색감이 변한 것처럼 보이는 부분」) — 칸마다 한 타일만 고르면 경계에서 색이 뚝 바뀐다.
+        //    4칸 덩이로 종류별 비율을 세고 두 번 흐려(약 1.3m 폭) 경계에서 타일끼리 서서히 섞는다. 막힌 곳 어둡기도 같이 흐린다.
+        int nk = names.Length;
+        var weight = new float[nk + 1][];
+        for (int c = 0; c <= nk; c++) weight[c] = new float[lw * lh];
+        for (int y = 0; y < h; y++)
+        for (int x = 0; x < w; x++)
+        {
+            int cell = (y / G) * lw + x / G;
+            weight[kind[y * w + x]][cell] += 1f;
+            if ((flags[y * w + x] & 4) != 0) weight[nk][cell] += 1f;
+        }
+        var tmp = new float[lw * lh];
+        const int R = 4;
+        foreach (float[] wf in weight)
+            for (int pass = 0; pass < 2; pass++)
+            {
+                for (int j = 0; j < lh; j++)   // 가로
+                {
+                    float acc = 0f; int cnt = 0;
+                    for (int i = -R; i < lw + R; i++)
+                    {
+                        if (i + R < lw) { acc += wf[j * lw + i + R]; cnt++; }
+                        if (i - R - 1 >= 0) { acc -= wf[j * lw + i - R - 1]; cnt--; }
+                        if (i >= 0 && i < lw) tmp[j * lw + i] = acc / Mathf.Max(1, cnt);
+                    }
+                }
+                for (int i = 0; i < lw; i++)   // 세로
+                {
+                    float acc = 0f; int cnt = 0;
+                    for (int j = -R; j < lh + R; j++)
+                    {
+                        if (j + R < lh) { acc += tmp[(j + R) * lw + i]; cnt++; }
+                        if (j - R - 1 >= 0) { acc -= tmp[(j - R - 1) * lw + i]; cnt--; }
+                        if (j >= 0 && j < lh) wf[j * lw + i] = acc / Mathf.Max(1, cnt);
+                    }
+                }
+            }
+
+        var wv = new float[nk + 1];
+        for (int y = 0; y < h; y++)
+        for (int x = 0; x < w; x++)
+        {
+            byte f = flags[y * w + x];
+            Color32 col;
+            if ((f & 1) != 0)   // 디딤돌은 또렷하게
+            {
+                int ts0 = sizes[RockG];
+                col = tiles[RockG][(y % ts0) * ts0 + (x % ts0)];
+            }
+            else
+            {
+                float total = 0f;
+                for (int c = 0; c <= nk; c++) { wv[c] = Sample(weight[c], x, y); if (c < nk) total += wv[c]; }
+                float r = 0f, g = 0f, bl = 0f;
+                for (int c = 0; c < nk; c++)
+                {
+                    if (wv[c] < 0.02f * total) continue;
+                    int ts = sizes[c];
+                    Color32 tc = tiles[c][(y % ts) * ts + (x % ts)];
+                    float k = wv[c] / total;
+                    r += tc.r * k; g += tc.g * k; bl += tc.b * k;
+                }
+                // 막힌 곳 어둡기도 흐린 비율만큼 (가장자리가 서서히 어두워진다)
+                float shutK = Mathf.Clamp01(wv[nk] / Mathf.Max(1f, total));
+                r *= Mathf.Lerp(1f, 0.62f, shutK); g *= Mathf.Lerp(1f, 0.66f, shutK); bl *= Mathf.Lerp(1f, 0.72f, shutK);
+                // 길가 그늘 띠는 뺐다 (v3 — 섞인 바닥 위에서 혼자 또렷한 직선으로 남아 풀밭을 가르는 금처럼 보였다)
+                col = new Color32((byte)Mathf.Clamp(r, 0f, 255f), (byte)Mathf.Clamp(g, 0f, 255f), (byte)Mathf.Clamp(bl, 0f, 255f), 255);
+            }
+            outPx[y * w + x] = col;
         }
 
         // 조각으로 나눠 굽는다 (결정 2-149 — 맵을 2배로 늘려 한 장이 4096칸을 넘는다). 조각마다 그림 · 재질 · 판 하나.

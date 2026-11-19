@@ -67,7 +67,7 @@ public static class DressPlan
 
         // 길 갈림 — 세 갈래 이상이 만나는 점.
         foreach (Vector2 j in Junctions(PixelDress.Paths(map.Chapter)))
-            list.Add(new Clearing(j, 5.5f));
+            list.Add(new Clearing(j, 4f));   // 갈림 공터 — 길이 많아져(결정 2-150) 작게
 
         // 막힌 덩어리 안에 박힌 공터는 버린다(보스 자리 등이 대숲 안이면 안 된다 — 표가 정한 자리라 대개 비어 있다).
         list.RemoveAll(c => map.IsBlocked(new Vector3(c.Center.x, 0f, c.Center.y), 0.5f));

@@ -94,6 +94,10 @@ public static class ZoneMapBaker
             Debug.LogWarning("[ZoneMap] 복사한 씬에 Floor가 없습니다.");
         }
 
+        // 옛 맵이 남아 있으면 지운다 — 한 씬에 맵 덩어리 사본이 쌓이면 보이지 않는 충돌체가 길 · 집을 막는다 (결정 2-151 플레이 점검)
+        foreach (GameObject old in scene.GetRootGameObjects())
+            if (old.name == $"Map_Ch{map.Chapter}")
+                Object.DestroyImmediate(old);
         var rootObject = new GameObject($"Map_Ch{map.Chapter}");
         SceneManager.MoveGameObjectToScene(rootObject, scene);
 
@@ -246,6 +250,7 @@ public static class ZoneMapBaker
         MapBlockKind.Building => new Color(0.42f, 0.30f, 0.20f),
         MapBlockKind.Bush => new Color(0.30f, 0.40f, 0.20f),
         MapBlockKind.Tree => new Color(0.30f, 0.22f, 0.14f),
+        MapBlockKind.Forest => new Color(0.16f, 0.30f, 0.18f),
         MapBlockKind.Water => new Color(0.24f, 0.42f, 0.60f),
         MapBlockKind.Fence => new Color(0.36f, 0.26f, 0.16f),
         MapBlockKind.Stall => new Color(0.62f, 0.48f, 0.30f),

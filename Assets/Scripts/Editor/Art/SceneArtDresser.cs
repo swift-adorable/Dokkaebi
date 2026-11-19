@@ -322,11 +322,21 @@ public static class SceneArtDresser
         {
             if (!cam.CompareTag("MainCamera"))
                 continue;
+            // 주인공 찾기 — 「Player」 태그가 없어(Dokkaebi 는 Untagged) 예전엔 늘 못 찾고 카메라 앞 18m 를 초점으로 잡아,
+            // 구울 때마다 카메라가 12m 씩 뒤로 물러났다(0장 12번 → 높이 197m · 그림 거리 120m 밖이라 화면이 회색). PlayerMovement 로 찾는다.
             GameObject player = null;
             foreach (GameObject rr in scene.GetRootGameObjects())
-                if (rr.CompareTag("Player"))
-                    player = rr;
-            Vector3 focus = player != null ? player.transform.position : cam.transform.position + cam.transform.forward * 18f;
+            {
+                if (rr.CompareTag("Player")) { player = rr; break; }
+                PlayerMovement pm = rr.GetComponentInChildren<PlayerMovement>(true);
+                if (pm != null) { player = pm.gameObject; break; }
+            }
+            if (player == null)
+            {
+                Debug.LogWarning("[SceneArtDresser] 주인공을 못 찾아 카메라 자리는 그대로 둔다");
+                continue;
+            }
+            Vector3 focus = player.transform.position;
             cam.orthographic = true;
             cam.orthographicSize = ArtCatalog.OrthoSize;
             cam.nearClipPlane = 0.3f;

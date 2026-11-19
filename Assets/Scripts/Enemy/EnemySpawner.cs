@@ -139,10 +139,11 @@ public class EnemySpawner : MonoBehaviour
         var rng = new System.Random();
         int placed = 0, tries = 0;
 
-        while (placed < target && tries++ < 400)
+        while (placed < target && tries++ < 800)
         {
-            var p = new Vector3(Mathf.Lerp(r.xMin + 3f, r.xMax - 3f, (float)rng.NextDouble()), player.position.y,
-                                Mathf.Lerp(r.yMin + 3f, r.yMax - 3f, (float)rng.NextDouble()));
+            // 덕코프처럼 — 마을 · 야영지 둘레와 길가에 몰아서 (결정 2-150 · SpawnBias)
+            var p = SpawnBias.Sample(map, area.Value.ZoneId, r, rng, SpawnBias.Mobs);
+            p.y = player.position.y;
             if (Flat(p - player.position) < PopulationTable.MinFromStart || !ZoneMap.CanSpawnAt(p))
                 continue;
             bool near = false;

@@ -31,7 +31,7 @@ public class LootBox : MonoBehaviour
     /// <summary>상자 수 기준 — 0-1 넓이에 10개.</summary>
     public const int BaseCount = 10;
     /// <summary>한 구역 바깥 상자 최대 (예전 18 — 맵 2배 뒤 30). 열린 집 안 상자는 따로.</summary>
-    public const int MaxCount = 30;
+    public const int MaxCount = 40;   // 결정 2-150 — 덕코프 상자 자리는 우리의 3배(1천㎡당 2.9 · 우리 1.0). 집 안 가구가 들어오면 더 는다
     public const float PixelsPerMeter = 23.5f;
 
     private static readonly Dictionary<string, Texture2D> textures = new();
@@ -141,8 +141,9 @@ public class LootBox : MonoBehaviour
             else if (b.Kind is MapBlockKind.Bamboo or MapBlockKind.Rock or MapBlockKind.Bush)
                 candidates.Add(c + new Vector3((float)(rng.NextDouble() * 2 - 1) * b.Size.x * 0.5f, 0f, -b.Size.z * 0.5f - 1.4f));
         }
-        for (int k = 0; k < 40 + target * 4; k++)   // 넓은 구역은 빈 땅 후보도 넉넉히
-            candidates.Add(new Vector3(Mathf.Lerp(r.xMin + 3f, r.xMax - 3f, (float)rng.NextDouble()), 0f, Mathf.Lerp(r.yMin + 3f, r.yMax - 3f, (float)rng.NextDouble())));
+        // 덕코프처럼 — 마을 · 야영지에 몰고 길가에 몇 개씩 (결정 2-150 · SpawnBias)
+        for (int k = 0; k < 40 + target * 6; k++)
+            candidates.Add(SpawnBias.Sample(map, area.Value.ZoneId, r, rng, SpawnBias.Boxes));
 
         foreach (Vector3 p in candidates)
         {

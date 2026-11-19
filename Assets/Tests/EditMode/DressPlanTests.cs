@@ -24,8 +24,8 @@ namespace Dokkaebi.Tests
         {
             var junctions = DressPlan.Junctions(PixelDress.Paths(0));
             Assert.GreaterOrEqual(junctions.Count, 3, "고목 앞 · 0-2 갈래 · 방앗간 갈림");
-            Assert.IsTrue(junctions.Exists(j => (j - new Vector2(13f, 0f) * ZoneMapTable.Chapter0Scale).sqrMagnitude < 4f), "고목 앞 두 갈래");
-            Assert.IsTrue(junctions.Exists(j => (j - new Vector2(32f, 0f) * ZoneMapTable.Chapter0Scale).sqrMagnitude < 4f), "0-2 갈래");
+            Assert.IsTrue(junctions.Exists(j => (j - new Vector2(20f, 0f)).sqrMagnitude < 4f), "고목 앞 두 갈래");
+            Assert.IsTrue(junctions.Exists(j => (j - new Vector2(64f, 0f)).sqrMagnitude < 4f), "0-2 갈래");
         }
 
         [Test]

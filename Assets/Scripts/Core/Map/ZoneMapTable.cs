@@ -32,6 +32,8 @@ public enum MapBlockKind
     Flowerbed,
     /// <summary>장 끝의 금줄 — 그 너머는 끊긴 밤길(들어갈 수 없다). 구역 사이의 금줄(MapGate)과 다르다.</summary>
     Geumjul,
+    /// <summary>【숲 덩어리】 (결정 2-150) — 덕코프 제로존처럼 맵 가장자리(섬 모양 경계)와 길 사이를 메우는 빽빽한 나무숲. 걷지 못하고 시야를 막는다.</summary>
+    Forest,
 }
 
 /// <summary>맵 위 자리 표시 — 런타임이 보스 · 조각 · 길목 등을 여기 놓는다 (결정 2-86).</summary>
@@ -259,75 +261,98 @@ public static class ZoneMapTable
     //
     // 본문 0-1: 헛간 뒤 대숲으로 → 길가의 젖은 봇짐 → 잡귀 셋 → 언덕 · 무릎까지 오는 강물 · 불 꺼진 방앗간 → 늙은 고목.
     // 본문 0-2: 고목 뒤편 수풀 — 큰 요괴가 불을 싣는 구슬을 떨어뜨린다.
-    // 서쪽 끝 헛간에서 동쪽 고목까지가 0-1, 고목 너머(동쪽)가 0-2. 둘 사이는 고목 양옆 길 두 갈래(금줄).
+    // 【짜임 = 덕코프 「제로존」】 (결정 2-150 · 2026-11-19 사용자 「지도는 무조건 덕코프 지도 참고해 — 크기 · 소품 · 건물 배치」)
+    //   · 크기: 제로존 걷는 땅 298×212m → 340×230m 판에 걷는 땅 약 300×200m
+    //   · 경계: 네모가 아니라 섬 모양 — 가장자리를 깊이가 제각각인 숲 덩어리(Forest)가 감싼다
+    //   · 큰길 하나(헛간 → 언덕 → 냇물 → 고목 → 동쪽 두 길목)에 흙길이 그물처럼 갈라진다(PixelDress.Chapter0Paths)
+    //   · 마을 · 야영지(Landmark)에 집이 모이고(LockSiteTable.OpenHouses) 상자 · 적도 거기 몰린다
+    //   · 길 사이 빈 땅은 안쪽 숲 덩어리가 메운다 — 제로존처럼 숲 · 길 · 공터가 갈린다
+    // 좌표는 미터(배율 없음). 이전 판(160×90 → 2배)과 이야기 자리 순서 · 대략의 위치는 같다.
     private static readonly ChapterMap chapter0 = new(
-        0, SceneFor(0), new Vector2(80f, 45f),
+        0, SceneFor(0), new Vector2(170f, 115f),
         new[]
         {
             // 가장자리 담
-            B(MapBlockKind.Boundary, 0f, 46f, 162f, 4f, 2f),
-            B(MapBlockKind.Boundary, 0f, -46f, 162f, 4f, 2f),
-            B(MapBlockKind.Boundary, -81f, 0f, 2f, 4f, 94f),
-            B(MapBlockKind.Boundary, 81f, 0f, 2f, 4f, 94f),
+            B(MapBlockKind.Boundary, 0f, 116f, 342f, 4f, 2f),
+            B(MapBlockKind.Boundary, 0f, -116f, 342f, 4f, 2f),
+            B(MapBlockKind.Boundary, -171f, 0f, 2f, 4f, 234f),
+            B(MapBlockKind.Boundary, 171f, 0f, 2f, 4f, 234f),
+
+            // 섬 모양 경계 — 가장자리 숲 (깊이 제각각 · 길목 자리는 비운다)
+            B(MapBlockKind.Forest, -150f, 100f, 40f, 8f, 30f), B(MapBlockKind.Forest, -105f, 106f, 50f, 8f, 18f),
+            B(MapBlockKind.Forest, -60f, 102f, 40f, 8f, 26f), B(MapBlockKind.Forest, -20f, 108f, 40f, 8f, 14f),
+            B(MapBlockKind.Forest, 55f, 104f, 30f, 8f, 22f), B(MapBlockKind.Forest, 100f, 100f, 60f, 8f, 30f),
+            B(MapBlockKind.Forest, 152f, 104f, 36f, 8f, 22f),
+            B(MapBlockKind.Forest, -150f, -104f, 40f, 8f, 22f), B(MapBlockKind.Forest, -100f, -100f, 40f, 8f, 30f),
+            B(MapBlockKind.Forest, -55f, -106f, 30f, 8f, 18f), B(MapBlockKind.Forest, -15f, -104f, 20f, 8f, 22f),
+            B(MapBlockKind.Forest, 50f, -100f, 40f, 8f, 30f), B(MapBlockKind.Forest, 95f, -106f, 40f, 8f, 18f),
+            B(MapBlockKind.Forest, 150f, -102f, 40f, 8f, 26f),
+            B(MapBlockKind.Forest, -162f, 40f, 16f, 8f, 60f), B(MapBlockKind.Forest, -160f, -30f, 20f, 8f, 40f),
+            B(MapBlockKind.Forest, 162f, -20f, 16f, 8f, 60f), B(MapBlockKind.Forest, 160f, 40f, 20f, 8f, 30f),
 
             // 0-1 — 헛간(출발 뒤) · 대숲 · 언덕 · 냇물 · 방앗간
-            B(MapBlockKind.Building, -73f, -40f, 12f, 5f, 6f),        // 헛간
-            B(MapBlockKind.Bamboo, -62f, -6f, 14f, 6f, 26f),          // 첫 대숲 — 길은 그 아래로 동쪽
-            B(MapBlockKind.Bamboo, -72f, 26f, 14f, 6f, 30f),
-            B(MapBlockKind.Bamboo, -46f, 30f, 10f, 6f, 20f),
-            B(MapBlockKind.Bamboo, -40f, -32f, 12f, 6f, 10f),
-            B(MapBlockKind.Rock, -36f, 6f, 8f, 3f, 10f),              // 언덕
-            B(MapBlockKind.Water, -21f, 0f, 6f, 0.08f, 90f),          // 무릎까지 오는 냇물(막히지 않는다)
-            B(MapBlockKind.Building, -6f, 24f, 8f, 5f, 8f),           // 불 꺼진 방앗간
-            B(MapBlockKind.Bamboo, -8f, -24f, 10f, 6f, 14f),          // 강 건너 대숲
-            B(MapBlockKind.Bamboo, 4f, 36f, 10f, 6f, 16f),
+            B(MapBlockKind.Building, -140f, -86f, 12f, 5f, 6f),       // 헛간
+            B(MapBlockKind.Bamboo, -124f, 30f, 26f, 6f, 40f),         // 첫 대숲
+            B(MapBlockKind.Bamboo, -80f, 62f, 22f, 6f, 30f),
+            B(MapBlockKind.Bamboo, -30f, -60f, 22f, 6f, 26f),         // 강 건너 대숲
+            B(MapBlockKind.Rock, -72f, 16f, 20f, 3f, 22f),            // 언덕 (제로존 「낮은 산」 자리)
+            B(MapBlockKind.Water, -40f, 0f, 9f, 0.08f, 230f),         // 무릎까지 오는 냇물(막히지 않는다)
+            B(MapBlockKind.Water, 8f, 62f, 14f, 0.08f, 10f),          // 방앗간 못 (제로존 도로 야영지 곁 못)
+            B(MapBlockKind.Building, -14f, 56f, 8f, 5f, 8f),          // 불 꺼진 방앗간
+            B(MapBlockKind.Forest, -92f, -36f, 24f, 8f, 20f),         // 길 사이 숲
+            B(MapBlockKind.Forest, 4f, 32f, 22f, 8f, 18f),
 
             // 고목과 그 양옆 울타리 — 길은 두 갈래(금줄 자리)
-            B(MapBlockKind.Tree, 20f, 0f, 12f, 12f, 12f),
-            B(MapBlockKind.Fence, 20f, -30.5f, 2f, 3f, 29f),          // z -45 ~ -16
-            B(MapBlockKind.Fence, 20f, 30.5f, 2f, 3f, 29f),           // z 16 ~ 45
+            B(MapBlockKind.Tree, 40f, 0f, 24f, 12f, 24f),
+            B(MapBlockKind.Fence, 40f, -73.5f, 4f, 3f, 83f),          // z -115 ~ -32
+            B(MapBlockKind.Fence, 40f, 73.5f, 4f, 3f, 83f),           // z 32 ~ 115
 
-            // 0-2 — 고목 뒤 수풀
-            B(MapBlockKind.Bush, 40f, -25f, 10f, 1.4f, 6f),
-            B(MapBlockKind.Bush, 50f, 25f, 8f, 1.4f, 10f),
-            B(MapBlockKind.Bush, 66f, -10f, 6f, 1.4f, 12f),
-            B(MapBlockKind.Bush, 46f, 4f, 6f, 1.4f, 6f),
-            B(MapBlockKind.Rock, 58f, -34f, 8f, 3f, 6f),
-            B(MapBlockKind.Bamboo, 72f, 14f, 8f, 6f, 8f),
+            // 0-2 — 고목 뒤 수풀 · 동쪽 야영지
+            B(MapBlockKind.Bush, 106f, 40f, 12f, 1.4f, 10f),
+            B(MapBlockKind.Bush, 140f, -56f, 10f, 1.4f, 8f),
+            B(MapBlockKind.Bamboo, 140f, -20f, 16f, 6f, 24f),
+            B(MapBlockKind.Forest, 70f, -40f, 16f, 8f, 24f),
+            B(MapBlockKind.Forest, 112f, 60f, 24f, 8f, 16f),
         },
         new[]
         {
-            new ZoneArea("0-1", -80f, -45f, 19f, 45f),
-            new ZoneArea("0-2", 21f, -45f, 80f, 45f),
+            new ZoneArea("0-1", -170f, -115f, 38f, 115f),
+            new ZoneArea("0-2", 42f, -115f, 170f, 115f),
         },
         new[]
         {
-            A(MapAnchorKind.Start, "0-1", -72f, -30f),
-            A(MapAnchorKind.Bundle, "0-1", -66f, -30f),
-            A(MapAnchorKind.Extraction, "0-1", 8f, -36f),
-            A(MapAnchorKind.Extraction, "0-1", 10f, 18f),
-            A(MapAnchorKind.Pickup, "0-1", -48f, 12f),
-            A(MapAnchorKind.Pickup, "0-1", -14f, -36f),
-            A(MapAnchorKind.BerryTree, "0-1", -56f, 22f),
-            A(MapAnchorKind.BerryTree, "0-1", -28f, -38f),
-            A(MapAnchorKind.BerryTree, "0-1", -4f, -6f),
-            A(MapAnchorKind.SecretExit, "0-1", -21f, -20f, "무릎 냇물 — 1장 우물에서"),
+            A(MapAnchorKind.Start, "0-1", -126f, -72f),
+            A(MapAnchorKind.Bundle, "0-1", -112f, -70f),
+            A(MapAnchorKind.Extraction, "0-1", 18f, -100f),
+            A(MapAnchorKind.Extraction, "0-1", 22f, 96f),
+            A(MapAnchorKind.Pickup, "0-1", -96f, 40f),
+            A(MapAnchorKind.Pickup, "0-1", -24f, -84f),
+            A(MapAnchorKind.BerryTree, "0-1", -110f, 56f),
+            A(MapAnchorKind.BerryTree, "0-1", -56f, -80f),
+            A(MapAnchorKind.BerryTree, "0-1", -6f, -14f),
+            A(MapAnchorKind.SecretExit, "0-1", -40f, -40f, "무릎 냇물 — 1장 우물에서"),
+            // 마을 · 야영지 — 집(열린 집)과 상자 · 적이 모인다 (제로존 「북서 야영지 · 도로 야영지 · 숲길」 자리)
+            L("0-1", -142f, -56f, "헛간 마을"),
+            L("0-1", 26f, 64f, "방앗간 마을"),
+            L("0-1", -76f, -80f, "냇가 쉼터"),
 
-            A(MapAnchorKind.Start, "0-2", 32f, 0f),
-            A(MapAnchorKind.Gift, "0-2", 60f, 12f),
-            A(MapAnchorKind.Extraction, "0-2", 74f, -38f),
-            A(MapAnchorKind.Extraction, "0-2", 74f, 36f),
-            A(MapAnchorKind.Pickup, "0-2", 52f, -30f),
-            A(MapAnchorKind.Pickup, "0-2", 38f, 32f),
-            A(MapAnchorKind.BerryTree, "0-2", 60f, -22f),
-            A(MapAnchorKind.BerryTree, "0-2", 70f, 2f),
-            A(MapAnchorKind.BerryTree, "0-2", 36f, -38f),
+            A(MapAnchorKind.Start, "0-2", 64f, 0f),
+            A(MapAnchorKind.Gift, "0-2", 122f, 26f),
+            A(MapAnchorKind.Extraction, "0-2", 150f, -82f),
+            A(MapAnchorKind.Extraction, "0-2", 150f, 82f),
+            A(MapAnchorKind.Pickup, "0-2", 104f, -62f),
+            A(MapAnchorKind.Pickup, "0-2", 78f, 70f),
+            A(MapAnchorKind.BerryTree, "0-2", 120f, -30f),
+            A(MapAnchorKind.BerryTree, "0-2", 140f, 4f),
+            A(MapAnchorKind.BerryTree, "0-2", 76f, -80f),
+            L("0-2", 118f, -46f, "동쪽 야영지"),
+            L("0-2", 96f, -8f, "고목 너머 움막"),
         },
         new[]
         {
             // 고목 양옆 두 갈래 — 0-2가 열리기 전에는 금줄이 막는다.
-            new MapGate("0-2", 20f, -11f, 2f, 10f),
-            new MapGate("0-2", 20f, 11f, 2f, 10f),
+            new MapGate("0-2", 40f, -22f, 4f, 20f),
+            new MapGate("0-2", 40f, 22f, 4f, 20f),
         });
 
     // ── 1장 — 비 오는 폐장터 (젖은 장터길 · 북 · 현무) ─────────────────────
@@ -828,7 +853,7 @@ public static class ZoneMapTable
     /// 0장 배율 (결정 2-149 · 2026-11-18 사용자 「지금 맵이 너무 작은거 같아 덕코프는 훨씬 크잖아」) — 160×90m → 320×180m.
     /// 표의 자리 · 덩어리를 그대로 두고 통째로 늘린다(본문 순서 · 구역 나눔은 그대로). 집처럼 「한 채」인 것은 크기를 둔다(고목 덩어리는 금줄과 맞물려야 해서 같이 늘린다). 냇물은 폭만 1.5배(무릎 냇물). 늘어난 빈 땅은 숲 덩어리 · 파밍 집(LockSiteTable)이 채운다.
     /// </summary>
-    public const float Chapter0Scale = 2f;
+    public const float Chapter0Scale = 1f;   // 결정 2-150 — 표를 미터로 새로 짰다(제로존 기준). 늘리는 배율은 더 쓰지 않는다
 
     private static ChapterMap Scaled(ChapterMap m, float k)
     {
@@ -866,5 +891,5 @@ public static class ZoneMapTable
         return new ChapterMap(m.Chapter, m.SceneName, m.HalfSize * k, blocks, areas, anchors, gates);
     }
 
-    private static readonly ChapterMap[] maps = { Scaled(chapter0, Chapter0Scale), chapter1, chapter2, chapter3, chapter4, chapter5, chapter6 };
+    private static readonly ChapterMap[] maps = { chapter0, chapter1, chapter2, chapter3, chapter4, chapter5, chapter6 };
 }

@@ -59,47 +59,79 @@ public static class PixelDress
     /// </summary>
     public static readonly Vector2[][] Chapter0Paths =
     {
-        new Vector2[] { new(-72f, -36f), new(-70f, -30f), new(-63f, -27f), new(-54f, -24f), new(-46f, -19f), new(-38f, -9f), new(-29f, -4f), new(-21f, -2f), new(-12f, -1f), new(-2f, 0f), new(8f, 0f), new(13f, 0f) },
-        new Vector2[] { new(-8f, -1f), new(-7f, 8f), new(-6f, 17f) },                       // 방앗간 갈림
-        new Vector2[] { new(-2f, 0f), new(4f, -14f), new(8f, -30f), new(8f, -36f) },        // 남쪽 길목
-        new Vector2[] { new(-6f, 17f), new(4f, 18f), new(10f, 18f) },                       // 북쪽 길목
-        new Vector2[] { new(13f, 0f), new(17f, -11f), new(24f, -11f), new(32f, 0f) },       // 고목 남쪽 갈래
-        new Vector2[] { new(13f, 0f), new(17f, 11f), new(24f, 11f), new(32f, 0f) },         // 고목 북쪽 갈래
-        new Vector2[] { new(32f, 0f), new(44f, -6f), new(56f, -12f), new(64f, -24f), new(74f, -38f) },
-        new Vector2[] { new(32f, 0f), new(46f, 12f), new(60f, 12f), new(68f, 24f), new(74f, 36f) },
+        // 【큰길】 (제로존의 포장길 자리) — 헛간 → 언덕 남쪽 → 냇물 → 고목 앞 갈림
+        new Vector2[] { new(-126f, -70f), new(-104f, -62f), new(-80f, -52f), new(-62f, -30f), new(-48f, -8f), new(-30f, -2f), new(-14f, 0f), new(0f, 0f), new(20f, 0f) },
+        // 고목 양옆 두 갈래 (금줄 자리) → 0-2 출발
+        new Vector2[] { new(20f, 0f), new(26f, -22f), new(48f, -22f), new(64f, 0f) },
+        new Vector2[] { new(20f, 0f), new(26f, 22f), new(48f, 22f), new(64f, 0f) },
+        // 0-2 큰길 — 동남 길목 · 동북 길목(선물 자리를 지난다)
+        new Vector2[] { new(64f, 0f), new(88f, -12f), new(112f, -24f), new(128f, -48f), new(150f, -82f) },
+        new Vector2[] { new(64f, 0f), new(92f, 22f), new(120f, 24f), new(132f, 48f), new(150f, 82f) },
+        // 방앗간 길 → 북쪽 길목 · 남쪽 길목
+        new Vector2[] { new(-14f, 0f), new(-12f, 20f), new(-10f, 44f), new(4f, 78f), new(22f, 96f) },
+        new Vector2[] { new(0f, 0f), new(6f, -30f), new(16f, -60f), new(18f, -100f) },
+        // 흙길 그물 (제로존 숲길처럼 큰길에서 갈라져 마을 · 줍기 자리로)
+        new Vector2[] { new(-104f, -62f), new(-118f, -30f), new(-104f, 0f), new(-96f, 40f), new(-110f, 56f), new(-130f, 70f) },
+        new Vector2[] { new(-48f, -8f), new(-56f, 30f), new(-50f, 56f), new(-30f, 58f), new(-10f, 44f) },
+        new Vector2[] { new(-80f, -52f), new(-76f, -78f), new(-56f, -80f), new(-24f, -84f), new(12f, -66f) },
+        new Vector2[] { new(-126f, -70f), new(-140f, -56f), new(-146f, -30f) },
+        new Vector2[] { new(88f, -12f), new(90f, -40f), new(104f, -62f), new(118f, -46f) },
+        new Vector2[] { new(92f, 22f), new(84f, 48f), new(78f, 70f) },
+        new Vector2[] { new(112f, -24f), new(140f, 4f) },
+        new Vector2[] { new(-10f, 44f), new(12f, 50f), new(26f, 64f) },
     };
 
-    private static Vector2[][] scaledPaths;
+    /// <summary>길마다 반폭 (m) — 큰길은 넓게(제로존 포장길), 흙길은 기본(DressPlan.PathHalfWidth).</summary>
+    public static readonly float[] Chapter0PathHalfWidths = { 3.4f, 2.6f, 2.6f, 3.0f, 3.0f, 2.6f, 2.6f, 1.9f, 1.9f, 1.9f, 1.9f, 1.9f, 1.9f, 1.9f, 1.9f };
 
-    /// <summary>그 장의 길 — 0장은 맵 배율(ZoneMapTable.Chapter0Scale)만큼 늘린 것.</summary>
-    public static Vector2[][] Paths(int chapter)
+    /// <summary>그 장의 길 (미터). 지금은 0장만.</summary>
+    public static Vector2[][] Paths(int chapter) => chapter == 0 ? (smooth0 ??= Smooth(Chapter0Paths)) : System.Array.Empty<Vector2[]>();
+
+    private static Vector2[][] smooth0;
+
+    /// <summary>
+    /// 꺾은선 길을 부드러운 곡선으로 (결정 2-150 v2 · 사용자 「각지게 만든 부분들을 좀 더 자연스럽게」) — 캐트멀-롬 곡선으로 2m 남짓 간격 점을 다시 찍는다.
+    /// 끝점은 그대로라 갈림(Junctions) · 길목 자리는 바뀌지 않는다.
+    /// </summary>
+    private static Vector2[][] Smooth(Vector2[][] lines)
     {
-        if (chapter != 0)
-            return System.Array.Empty<Vector2[]>();
-        if (scaledPaths == null)
+        var result = new Vector2[lines.Length][];
+        for (int k = 0; k < lines.Length; k++)
         {
-            scaledPaths = new Vector2[Chapter0Paths.Length][];
-            for (int i = 0; i < Chapter0Paths.Length; i++)
+            Vector2[] l = lines[k];
+            var pts = new List<Vector2> { l[0] };
+            for (int i = 0; i < l.Length - 1; i++)
             {
-                scaledPaths[i] = new Vector2[Chapter0Paths[i].Length];
-                for (int j = 0; j < Chapter0Paths[i].Length; j++)
-                    scaledPaths[i][j] = Chapter0Paths[i][j] * ZoneMapTable.Chapter0Scale;
+                Vector2 p0 = l[Mathf.Max(0, i - 1)], p1 = l[i], p2 = l[i + 1], p3 = l[Mathf.Min(l.Length - 1, i + 2)];
+                int steps = Mathf.Max(2, Mathf.CeilToInt(Vector2.Distance(p1, p2) / 2f));
+                for (int s = 1; s <= steps; s++)
+                {
+                    float t = s / (float)steps, t2 = t * t, t3 = t2 * t;
+                    pts.Add(0.5f * (2f * p1 + (-p0 + p2) * t + (2f * p0 - 5f * p1 + 4f * p2 - p3) * t2 + (-p0 + 3f * p1 - 3f * p2 + p3) * t3));
+                }
             }
+            result[k] = pts.ToArray();
         }
-        return scaledPaths;
+        return result;
     }
 
     /// <summary>길까지의 거리 (m).</summary>
     public static float PathDistance(int chapter, Vector2 q)
     {
         float best = float.MaxValue;
-        foreach (Vector2[] line in Paths(chapter))
+        Vector2[][] paths = Paths(chapter);
+        for (int k = 0; k < paths.Length; k++)
+        {
+            Vector2[] line = paths[k];
+            // 넓은 길은 그만큼 가깝게 친다 — 쓰는 쪽은 모두 DressPlan.PathHalfWidth 를 기준으로 본다 (결정 2-150)
+            float extra = chapter == 0 && k < Chapter0PathHalfWidths.Length ? Chapter0PathHalfWidths[k] - DressPlan.PathHalfWidth : 0f;
             for (int i = 1; i < line.Length; i++)
             {
                 Vector2 a = line[i - 1], ab = line[i] - a;
                 float t = Mathf.Clamp01(Vector2.Dot(q - a, ab) / Mathf.Max(0.001f, ab.sqrMagnitude));
-                best = Mathf.Min(best, Vector2.Distance(q, a + ab * t));
+                best = Mathf.Min(best, Vector2.Distance(q, a + ab * t) - extra);
             }
+        }
         return best;
     }
 
@@ -128,6 +160,10 @@ public static class PixelDress
 
         var c = new Ctx { Map = map, Rnd = new System.Random(9100 + chapter) };
         DressPlan.ClearCache();
+        // 【막힌 곳 테두리】 (결정 2-150 · 사용자 「대나무 그냥 여러개 박아두고 접근 못하는게 너무 성의 없어 … 벽을 세우던가 길과 길이 아닌 곳을 한 눈에」)
+        // 테두리를 먼저 세워 자리를 잡는다 — 덩어리 속 나무 · 대나무는 그 안쪽에만 선다.
+        foreach (MapBlock b in map.Blocks)
+            Border(c, b);
         foreach (MapBlock b in map.Blocks)
             Block(c, b);
         Landmarks(c);
@@ -187,8 +223,8 @@ public static class PixelDress
             case MapBlockKind.Bamboo:
                 // 대숲은 빽빽하게 한 덩이, 가장자리는 고사리 · 풀만 (예전: 억새 · 덤불을 섞어 어수선)
                 // 가장자리는 노이즈로 들쭉날쭉 — 네모난 대숲은 인공적이다 (v3)
-                Fill(c, b, 1.7f, p => { if (Ragged(b, p, 3.5f)) Add(c, BambooClump, p); });
-                Edge(c, b, 2.2f, 0.7f, p => { if (c.R < 0.55f) Add(c, c.R < 0.6f ? "fern" : "grass", p); });
+                // 안은 빽빽하게 (막힌 곳과 그림이 어긋나지 않게), 밖으로 4m 까지 성기게 번져 네모 윤곽을 지운다 (v3 · 사용자 「대나무 숲은 좀 더 자연스럽게」)
+                Blob(c, b, 6f, 1.6f, new[] { BambooClump }, new[] { "fern", "grass" });
                 break;
             case MapBlockKind.Boundary:
                 // 남쪽 담 앞 큰 나무는 북쪽 땅(걷는 곳)을 가린다 — 남쪽은 낮은 덤불만.
@@ -198,8 +234,7 @@ public static class PixelDress
             case MapBlockKind.Rock:
                 // 바위 벽 — 큰 바위를 겹쳐 세우고 발치에만 잔돌 · 고사리
                 Add(c, BigRocks[1], center + new Vector3(0f, 0f, b.Size.z * 0.15f));
-                Fill(c, b, 2.2f, p => { if (Ragged(b, p, 3f) && Free(c, new Vector2(p.x, p.z), 1.6f)) Add(c, c.R < 0.7f ? "rock_big" : "rock_pillar", p); });
-                Edge(c, b, 2.4f, 0.8f, p => { if (p.z < b.Center.y && c.R < 0.6f) Add(c, c.R < 0.5f ? c.Pick(Stones) : "fern", p); });
+                Blob(c, b, 5f, 2.0f, new[] { "rock_big", "rock_big", "rock_pillar", "tree_pine" }, new[] { "rock_pile", "rock_moss", "fern" });
                 break;
             case MapBlockKind.Water:
                 // 물가 — 돌 테는 바닥이 그린다. 소품은 갈대 무리만 띄엄띄엄(길이 건너는 곳은 비운다).
@@ -215,7 +250,7 @@ public static class PixelDress
                     Add(c, off.z > 3f ? "tree_zelkova" : off.x < 0f ? "tree_pine" : "tree_fir", center + off);
                 Add(c, OldTree, center + new Vector3(0f, 0f, -b.Size.z * 0.15f));
                 // 덩어리가 크면(맵 2배) 나머지를 숲으로 채운다 — 가장자리는 들쭉날쭉
-                Fill(c, b, 2.2f, p => { if (Ragged(b, p, 3f) && Free(c, new Vector2(p.x, p.z), 1.6f)) Add(c, c.R < 0.8f ? c.Pick(ForestTrees) : c.Pick(Under), p); });
+                Blob(c, b, 6f, 2.2f, ForestTrees, Under);   // 고목 숲도 노이즈 윤곽 (네모 · 위아래 울타리 → 자연스러운 숲)
                 // 발치 — 앞쪽 반원에만 꽃무릇 · 덤불 두 무리
                 Group(c, center + new Vector3(-b.Size.x * 0.4f, 0f, -b.Size.z * 0.5f), 0.8f, 3, new[] { "lily", "bush" });
                 Group(c, center + new Vector3(b.Size.x * 0.4f, 0f, -b.Size.z * 0.5f), 0.8f, 2, new[] { "fern", "mushrooms" });
@@ -223,16 +258,108 @@ public static class PixelDress
             case MapBlockKind.Fence:
                 Fill(c, b, 1.6f, p => Add(c, "bush", p));
                 break;
+            case MapBlockKind.Forest:
+                // 숲 덩어리 (결정 2-150 · 제로존) — 나무를 겹쳐 빽빽하게, 가장자리는 들쭉날쭉.
+                // 앞(남) · 옆 가장자리는 덤불 · 고사리 한 줄 — 숲이 땅에 앉고, 여기부터 못 간다는 게 보이게.
+                Blob(c, b, 7f, 2.0f, ForestTrees, Under);
+                Edge(c, b, 1.5f, -0.6f, p =>
+                {
+                    if (p.z > b.Center.y + b.Size.z * 0.5f - 1.2f) return;   // 뒤(북) 변은 나무가 가린다
+                    if (c.R < 0.8f && Free(c, new Vector2(p.x, p.z), 0.7f)) Add(c, c.R < 0.65f ? c.Pick(Under) : "fern", p);
+                });
+                break;
             case MapBlockKind.Bush:
                 Fill(c, b, 1.5f, p => Add(c, c.R < 0.15f ? "silvergrass" : c.Pick(Under), p));
                 break;
             case MapBlockKind.Building:
+                // 집 그림 (결정 2-150 — 헛간 · 방앗간이 회색 상자로 남아 있었다). 넓적하면 헛간, 아니면 방앗간(물레방아).
+                AddFixed(c, b.Size.x > b.Size.z * 1.5f ? "story_barn" : "story_mill", new Vector3(b.Center.x, 0f, b.Center.y - b.Size.z * 0.5f - 0.2f));
                 // 집 둘레 살림 — 장독은 벽에 붙여 무리로, 장작은 문 옆, 수레 · 광주리는 마당 한쪽.
                 Group(c, center + new Vector3(-b.Size.x * 0.5f - 1.0f, 0f, b.Size.z * 0.1f), 0.7f, c.Rnd.Next(2, 4), Jars);
                 Group(c, center + new Vector3(b.Size.x * 0.5f + 1.1f, 0f, -b.Size.z * 0.35f), 0.6f, 2, Woodpile);
                 Group(c, center + new Vector3(b.Size.x * 0.3f, 0f, -b.Size.z * 0.5f - 2.4f), 0.9f, 2, Yard);
                 break;
         }
+    }
+
+    /// <summary>
+    /// 막힌 덩어리의 테두리 (결정 2-150) — 참고 장면은 걷지 못하는 곳을 늘 벽 · 울타리 · 절벽으로 두른다.
+    ///   · 남 · 북 변(카메라와 마주 보는 변): 담 그림 토막을 끊김 없이 잇는다 — 대숲은 대울타리, 바위는 절벽, 고목 · 수풀은 싸리 울타리, 맵 가장자리는 돌담
+    ///   · 동 · 서 변: 담 토막을 세우면 막대처럼 보여(결정 2-143 1차) 큰 바위 · 돌무더기를 촘촘히 줄 세운다
+    ///   · 길이 덩어리 곁을 지나도 테두리는 덩어리 위에만 선다(덩어리는 원래 막혀 있다)
+    /// </summary>
+    private static void Border(Ctx c, MapBlock b)
+    {
+        string wall = b.Kind switch
+        {
+            MapBlockKind.Bamboo => null,   // 대숲은 울타리로 두르지 않는다 — 네모 액자처럼 보였다 (v3). 대가 덩어리 밖으로 번져 나간다(Spill)
+            MapBlockKind.Rock => null,   // 바위 언덕도 네모 절벽 테 대신 노이즈 윤곽 (v4)
+            MapBlockKind.Fence => "wall_brush",
+            MapBlockKind.Boundary => "wall_stone",
+            _ => null,
+        };
+        if (wall == null || !rects.ContainsKey(wall))
+            return;
+
+        float hx = b.Size.x * 0.5f, hz = b.Size.z * 0.5f;
+        float seg = rects[wall].w / PpmOf(wall);   // 무늬 주기가 토막 폭을 나눠 떨어져 그대로 이으면 이음매가 없다 (make_walls.py)
+        bool horizontal = b.Size.x >= b.Size.z;
+        if (b.Kind == MapBlockKind.Boundary)
+        {
+            // 맵 가장자리 담 — 긴 변 하나뿐. 남쪽 담은 카메라 앞이라 낮은 돌담, 나머지는 바위 줄.
+            if (horizontal)
+                Run(c, wall, new Vector2(b.Center.x - hx, b.Center.y), new Vector2(b.Center.x + hx, b.Center.y), seg);
+            else
+                Rocks(c, new Vector2(b.Center.x, b.Center.y - hz), new Vector2(b.Center.x, b.Center.y + hz));
+            return;
+        }
+        if (b.Kind == MapBlockKind.Fence && !horizontal)
+        {
+            Rocks(c, new Vector2(b.Center.x, b.Center.y - hz), new Vector2(b.Center.x, b.Center.y + hz));
+            return;
+        }
+        // 남 · 북 변은 담, 동 · 서 변은 바위 줄 — 담은 덩어리 안쪽으로 0.3m 들여 세운다
+        Run(c, wall, new Vector2(b.Center.x - hx, b.Center.y - hz + 0.3f), new Vector2(b.Center.x + hx, b.Center.y - hz + 0.3f), seg);
+        Run(c, wall, new Vector2(b.Center.x - hx, b.Center.y + hz - 0.3f), new Vector2(b.Center.x + hx, b.Center.y + hz - 0.3f), seg);
+        if (b.Kind == MapBlockKind.Rock)   // 바위 덩어리만 옆면을 바위 줄로 — 대숲 · 수풀 옆면은 덩어리 안의 대 · 덤불이 가장자리까지 차서 충분하다 (v2: 점선처럼 보였다)
+        {
+            Rocks(c, new Vector2(b.Center.x - hx + 0.4f, b.Center.y - hz + 1.2f), new Vector2(b.Center.x - hx + 0.4f, b.Center.y + hz - 1.2f));
+            Rocks(c, new Vector2(b.Center.x + hx - 0.4f, b.Center.y - hz + 1.2f), new Vector2(b.Center.x + hx - 0.4f, b.Center.y + hz - 1.2f));
+        }
+    }
+
+    /// <summary>a → b 를 담 토막으로 잇는다 (양 끝은 토막 반만큼 안쪽에서 시작).</summary>
+    private static void Run(Ctx c, string wall, Vector2 a, Vector2 b, float seg)
+    {
+        float len = Vector2.Distance(a, b);
+        int n = Mathf.Max(1, Mathf.CeilToInt(len / seg));
+        for (int i = 0; i < n; i++)
+        {
+            Vector2 q = Vector2.Lerp(a, b, (i + 0.5f) / n);
+            AddFixed(c, wall, new Vector3(q.x, 0f, q.y));
+        }
+    }
+
+    /// <summary>a → b 를 바위 줄로 — 큰 바위와 돌무더기를 번갈아 1.3m 마다.</summary>
+    private static void Rocks(Ctx c, Vector2 a, Vector2 b)
+    {
+        float len = Vector2.Distance(a, b);
+        int n = Mathf.Max(1, Mathf.CeilToInt(len / 1.3f));
+        for (int i = 0; i <= n; i++)
+        {
+            Vector2 q = Vector2.Lerp(a, b, i / (float)n) + new Vector2(c.Range(-0.25f, 0.25f), 0f);
+            AddFixed(c, i % 3 == 2 ? "rock_pile" : "rock_big", new Vector3(q.x, 0f, q.y));
+        }
+    }
+
+    /// <summary>집 자리 검사 없이 · 뒤집기 없이 세운다 — 담 토막은 이어져야 해서 좌우를 뒤집지 않는다.</summary>
+    private static void AddFixed(Ctx c, string sprite, Vector3 p)
+    {
+        sprite = Variant(c, sprite);
+        if (!rects.ContainsKey(sprite))
+            return;
+        c.Cards.Add((sprite, p, PpmOf(sprite), false));
+        c.Taken.Add(new Vector2(p.x, p.z));
     }
 
     /// <summary>길가 표지 — 출발 자리 장승 · 길목(철수) 등롱 한 쌍 · 갈림길 장승.</summary>
@@ -248,9 +375,8 @@ public static class PixelDress
                 Add(c, Lantern, a.Position + new Vector3(2f, 0f, 1.2f));
             }
         }
-        float k = ZoneMapTable.Chapter0Scale;
-        Add(c, Waymark, new Vector3(-8f * k - 1.6f, 0f, 1.8f));   // 방앗간 갈림
-        Add(c, Waymark, new Vector3(13f * k - 2f, 0f, 2.2f));     // 고목 앞 두 갈래
+        Add(c, Waymark, new Vector3(-17.5f, 0f, 3.5f));   // 방앗간 갈림
+        Add(c, Waymark, new Vector3(16f, 0f, 4.5f));      // 고목 앞 두 갈래
     }
 
     /// <summary>담 밖 숲 — 바닥 그림 밖 6m 띠까지 빽빽하게. 남쪽은 낮은 덤불(걷는 땅을 가리지 않게).</summary>
@@ -374,29 +500,91 @@ public static class PixelDress
                 var q = new Vector2(x + c.Range(-0.8f, 0.8f), z + c.Range(-0.8f, 0.8f));
                 var p = new Vector3(q.x, 0f, q.y);
                 float dens = Mathf.PerlinNoise(q.x * 0.028f + 31f, q.y * 0.028f + 7f) * 0.7f + Mathf.PerlinNoise(q.x * 0.09f + 3f, q.y * 0.09f + 57f) * 0.3f;
+                // 【제로존처럼】 (결정 2-150) 길 · 마을에서 멀어질수록 숲이 짙어진다 — 길이 숲을 가르고 지나가는 모습. 12m 밖부터 차오른다
+                dens += Mathf.Clamp01((PathDistance(map.Chapter, q) - 12f) / 14f) * 0.35f;
                 // 길 · 공터 · 물 · 자리 곁은 숲이 물러난다 (거리만큼 짙기를 깎는다)
                 float road = PathDistance(map.Chapter, q), clear = DressPlan.ClearingDistance(map, q, out _), wet = DressPlan.WaterDistance(map, q, out _);
                 dens -= Mathf.Clamp01((6f - road) / 6f) * 0.45f + Mathf.Clamp01((5f - clear) / 5f) * 0.45f + Mathf.Clamp01((3f - wet) / 3f) * 0.4f;
                 if (road < DressPlan.PathHalfWidth + 0.8f || clear < 0.5f || wet < 1f || map.IsBlocked(p, 0.6f) || Near(map, p, 1.2f) || NearAnchor(map, p, 4f))
                     continue;
 
-                if (dens > 0.55f)
+                if (dens > 0.62f)
                 {
                     if (!Free(c, q, 1.25f)) continue;
                     bool spooky = Mathf.PerlinNoise(q.x * 0.05f + 90f, q.y * 0.05f + 12f) > 0.68f;
                     Add(c, spooky && c.R < 0.5f ? c.Pick(SpookyTrees) : c.Pick(ForestTrees), p);
                 }
-                else if (dens > 0.48f)
+                else if (dens > 0.55f)
                 {
                     if (c.R < 0.55f && Free(c, q, 0.9f))
                         Add(c, c.R < 0.75f ? c.Pick(Under) : "silvergrass", p);
                 }
-                else if (dens > 0.40f)
+                else if (dens > 0.47f)
                 {
                     if (c.R < 0.16f && Free(c, q, 1.2f))
                         Add(c, c.R < 0.7f ? "grass" : c.R < 0.5f ? "flowers" : "rock_moss", p);
                 }
             }
+    }
+
+    /// <summary>
+    /// 【덩어리를 노이즈 윤곽으로】 (v4 · 사용자 「대나무 숲은 좀 더 자연스럽게」) — 네모 덩어리를 그대로 채우지 않고,
+    /// 가장자리에서 안팎 reach m 를 노이즈가 정한 윤곽으로 채운다. 깊은 안쪽(2m 넘게)은 늘 채워 막힌 곳과 그림이 크게 어긋나지 않는다.
+    /// 윤곽 바로 바깥 띠에는 덤불 · 풀(small)이 드문드문 — 숲이 땅에 스며든다.
+    /// </summary>
+    private static void Blob(Ctx c, MapBlock b, float reach, float spacing, string[] big, string[] small)
+    {
+        float hx = b.Size.x * 0.5f + reach, hz = b.Size.z * 0.5f + reach;
+        for (float x = -hx; x <= hx; x += spacing)
+        for (float z = -hz; z <= hz; z += spacing)
+        {
+            var p = new Vector3(b.Center.x + x + c.Range(-0.35f, 0.35f) * spacing, 0f, b.Center.y + z + c.Range(-0.35f, 0.35f) * spacing);
+            float sd = Mathf.Max(Mathf.Abs(p.x - b.Center.x) - b.Size.x * 0.5f, Mathf.Abs(p.z - b.Center.y) - b.Size.z * 0.5f);   // 안이면 음수
+            float n = Mathf.PerlinNoise(p.x * 0.09f + 23f, p.z * 0.09f + 61f) * 0.7f + Mathf.PerlinNoise(p.x * 0.3f + 2f, p.z * 0.3f + 8f) * 0.3f;
+            float edge = (n - 0.5f) * reach * 3.4f;   // 윤곽이 바깥으로 · 안으로 몇 m 씩 흔들린다 (v4: ±2m 는 여전히 벽처럼 보여 ±4m 넘게)
+            var q = new Vector2(p.x, p.z);
+            if (sd < -2f || sd < edge)
+            {
+                if (sd >= 0f)   // 덩어리 밖으로 번진 대 — 길 · 공터 · 물 위엔 세우지 않는다
+                {
+                    DressPlan.Spot spot = DressPlan.Classify(c.Map, q);
+                    if (spot is DressPlan.Spot.Clearing or DressPlan.Spot.Path or DressPlan.Spot.Water || c.Map.IsBlocked(p, 0.3f)) continue;
+                }
+                Add(c, big[c.Rnd.Next(big.Length)], p);
+            }
+            else if (sd < edge + 2.5f && c.R < 0.35f && Free(c, q, 0.9f))
+            {
+                DressPlan.Spot spot = DressPlan.Classify(c.Map, q);
+                if (spot is DressPlan.Spot.Wild or DressPlan.Spot.Rim or DressPlan.Spot.PathEdge)
+                    Add(c, small[c.Rnd.Next(small.Length)], p);
+            }
+        }
+    }
+
+    /// <summary>
+    /// 덩어리 밖으로 번지기 — 가장자리에서 depth m 까지, 멀어질수록 · 노이즈가 낮을수록 드물게. 가까운 곳은 big, 먼 곳은 small(덤불 · 풀).
+    /// 덩어리 자체는 반듯한 네모(길찾기 · 부딪힘)라도 그림의 윤곽은 들쭉날쭉해진다.
+    /// </summary>
+    private static void Spill(Ctx c, MapBlock b, float depth, float spacing, System.Action<Vector3> big, System.Action<Vector3> small, float strength = 0.4f)
+    {
+        float hx = b.Size.x * 0.5f + depth, hz = b.Size.z * 0.5f + depth;
+        for (float x = -hx; x <= hx; x += spacing)
+        for (float z = -hz; z <= hz; z += spacing)
+        {
+            var p = new Vector3(b.Center.x + x + c.Range(-0.4f, 0.4f) * spacing, 0f, b.Center.y + z + c.Range(-0.4f, 0.4f) * spacing);
+            float dx = Mathf.Abs(p.x - b.Center.x) - b.Size.x * 0.5f, dz = Mathf.Abs(p.z - b.Center.y) - b.Size.z * 0.5f;
+            float out_ = Mathf.Max(dx, dz);
+            if (out_ <= 0f || out_ > depth) continue;
+            var q = new Vector2(p.x, p.z);
+            DressPlan.Spot spot = DressPlan.Classify(c.Map, q);
+            if (spot is DressPlan.Spot.Clearing or DressPlan.Spot.Path or DressPlan.Spot.Water || c.Map.IsBlocked(p, 0.3f))
+                continue;
+            float n = Mathf.PerlinNoise(p.x * 0.13f + 17f, p.z * 0.13f + 29f);
+            float keep = (1f - out_ / depth) * (strength + n);
+            if (c.R > keep) continue;
+            if (out_ < depth * 0.55f && Free(c, q, spacing * 0.6f)) big(p);
+            else if (Free(c, q, 0.8f)) small(p);
+        }
     }
 
     /// <summary>덩어리 가장자리를 깎을지 — 가장자리에서 depth m 안쪽은 노이즈만큼만 남긴다.</summary>

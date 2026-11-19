@@ -16,7 +16,8 @@ public class BuildingSpriteImport : AssetPostprocessor
     {
         bool floor = assetPath.StartsWith(FloorFolder);
         bool wisp = assetPath.StartsWith(WispFolder) || assetPath.StartsWith("Assets/Resources/Props/")
-                    || assetPath.StartsWith("Assets/Resources/Locks/");   // 잠긴 곳 대문 · 담 · 집 (결정 2-143)   // 소굴 소품도 같은 설정
+                    || assetPath.StartsWith("Assets/Resources/Locks/")
+                    || assetPath.StartsWith("Assets/Resources/HouseTex/");   // 3D 집 텍스처 (결정 2-151) — 점 필터 · 압축 없음   // 잠긴 곳 대문 · 담 · 집 (결정 2-143)   // 소굴 소품도 같은 설정
         bool wild = assetPath.StartsWith("Assets/Resources/Wild/") || assetPath.StartsWith("Assets/Resources/World/");   // 장 맵 도트 꾸밈 — PixelDress 가 읽어 한 장(아틀라스)으로 묶는다
         bool enemy = assetPath.StartsWith("Assets/Resources/Enemies/");   // 적 띠 그림(설화 적 팩) — EnemySprite 가 칸을 잘라 돌린다
         if (!assetPath.StartsWith(Folder) && !floor && !wisp && !wild && !enemy)
