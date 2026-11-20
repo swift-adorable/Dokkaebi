@@ -228,6 +228,9 @@ public class LockedSite : MonoBehaviour
     private readonly List<(GameObject roof, List<Rect> rooms)> buildingRoofs = new();
     /// <summary>지붕이 걷히는 거리 — 그 채 벽에서 캐릭터 한 명 남짓(사용자 v8c 「건물 근처 · 거리는 한 캐릭터 정도」).</summary>
     public const float RoofNear = 1.0f;
+    /// <summary>걷힌 지붕을 다시 덮는 거리 — 걷는 거리보다 멀게 해 경계에서 깜빡이지 않게.</summary>
+    public const float RoofFar = 2.5f;
+    private bool roofsLifted;
     /// <summary>카메라 쪽 벽 윗부분을 보이거나 감춘다 (시점 비교용).</summary>
     public void ShowCutaway(bool show) { if (cutaway != null) cutaway.gameObject.SetActive(show); }
     /// <summary>이 집에 놓은 뒤지는 자리 수 (점검용).</summary>
@@ -293,6 +296,7 @@ public class LockedSite : MonoBehaviour
         var posts = new HashSet<Vector2Int>();
         void PostOnce(Vector2 p, float h) { if (posts.Add(new Vector2Int(Mathf.RoundToInt(p.x * 10f), Mathf.RoundToInt(p.y * 10f)))) Post(house, new Vector3(p.x, 0f, p.y), h); }
 
+        int gidanN = 0;
         // 방 — 기단 · 바닥 · 기둥 · 가구
         foreach (HanokRoomPlan room in plan.Rooms)
         {
@@ -300,7 +304,7 @@ public class LockedSite : MonoBehaviour
             HanokBuilding b = plan.Buildings[room.Building];
             float fh = FloorHeight(room.Kind);
             // 기단 — 벽 밖으로 0.6m 나온 장대석 단 (2026-11-20 마인크래프트 노트 3번). 높이는 방바닥에 맞춘다(바닥보다 높으면 바닥을 덮는다).
-            HouseMesh.Box(house, "Gidan", new Vector3(r.center.x, 0f, r.center.y), new Vector3(r.width + 1.2f, Mathf.Max(0.05f, fh - 0.01f), r.height + 1.2f), "wall_base");
+            HouseMesh.Box(house, "Gidan", new Vector3(r.center.x, 0f, r.center.y), new Vector3(r.width + 1.2f, Mathf.Max(0.05f, fh - 0.01f) - 0.004f * (gidanN++ % 6), r.height + 1.2f), "wall_base");   // 겹친 기단 윗면이 같은 높이면 깜빡인다 — 조금씩 엇갈리게
             HouseMesh.Box(house, "Floor", new Vector3(r.center.x, 0f, r.center.y), new Vector3(r.width - 0.1f, fh, r.height - 0.1f), FloorTex(room.Kind), false);
             if (room.Kind == HanokRoom.Stable)
                 HouseMesh.BoxColor(house, "Straw", new Vector3(r.center.x, fh, r.center.y), new Vector3(r.width * 0.6f, 0.04f, r.height * 0.5f), new Color(0.62f, 0.52f, 0.3f));
@@ -345,7 +349,7 @@ public class LockedSite : MonoBehaviour
         // 툇마루 — 마당 쪽 앞에 마루 띠 + 바깥 기둥
         foreach (Rect p in plan.Porches)
         {
-            HouseMesh.Box(house, "ToetGidan", new Vector3(p.center.x, 0f, p.center.y), new Vector3(p.width + 1.2f, 0.29f, p.height + 1.2f), "wall_base");
+            HouseMesh.Box(house, "ToetGidan", new Vector3(p.center.x, 0f, p.center.y), new Vector3(p.width + 1.2f, 0.285f - 0.004f * (gidanN++ % 6), p.height + 1.2f), "wall_base");
             HouseMesh.Box(house, "Toet", new Vector3(p.center.x, 0f, p.center.y), new Vector3(p.width, 0.3f, p.height), "floor_wood");
         }
 
@@ -926,15 +930,23 @@ public class LockedSite : MonoBehaviour
         // 3D 집(결정 2-151)은 덕코프처럼 가까이 오면(20m) 지붕을 걷어 방이 들여다보이게 — 들어가기 전에 안을 보고 고른다
         if (buildingRoofs.Count > 0)
         {
-            // 3D 한옥 — 들어선 채의 지붕만 걷는다 (v8c)
+            // 3D 한옥 — 집 통째로 지붕을 걷는다 (v8d · 2026-11-20 폰 「방에 들어갔을 때 그 방 지붕만이 아니라 건물 통째로 안 보이게」).
+            // 어느 방이든 RoofNear(1m) 안이면 이 집 지붕 전부를 걷고, 모든 방에서 RoofFar(2.5m) 넘게 멀어져야 다시 덮는다 —
+            // 한 경계로 켜고 끄면 그 선을 오갈 때 지붕이 깜빡였다(폰 녹화 「반짝이는 것처럼」).
             var local = new Vector2(p.x - Site.Center.x, p.z - Site.Center.y);
-            foreach (var (roof, rooms) in buildingRoofs)
+            float near = roofsLifted ? RoofFar : RoofNear;
+            bool inside = false;
+            foreach (var (_, rooms) in buildingRoofs)
             {
-                if (roof == null) continue;
-                bool inThis = false;
                 foreach (Rect r in rooms)
-                    if (local.x > r.xMin - RoofNear && local.x < r.xMax + RoofNear && local.y > r.yMin - RoofNear && local.y < r.yMax + RoofNear) { inThis = true; break; }
-                if (roof.activeSelf == inThis) roof.SetActive(!inThis);
+                    if (local.x > r.xMin - near && local.x < r.xMax + near && local.y > r.yMin - near && local.y < r.yMax + near) { inside = true; break; }
+                if (inside) break;
+            }
+            if (inside != roofsLifted)
+            {
+                roofsLifted = inside;
+                foreach (var (roof, _) in buildingRoofs) if (roof != null) roof.SetActive(!inside);
+                if (roof3D != null) roof3D.SetActive(!inside);   // 대문 지붕까지
             }
             return;
         }

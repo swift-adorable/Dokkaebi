@@ -37,7 +37,9 @@ Shader "Dokkaebi/SeeThroughLit"
         float4 FlattenDepth(float4 positionCS)
         {
             if (_FlatDepth < 0.5) return positionCS;
-            float4 anchor = TransformWorldToHClip(TransformObjectToWorld(float3(0, 0.05, 0)));
+            // 발에서 0.6m 위를 깊이 기준으로 (v8d · 2026-11-20 폰 「몬스터가 건물에 이상하게 가려져」) — 기단(0.3m) · 방바닥(0.3m) 윗면이
+            // 땅 높이의 발보다 카메라에 가까워 다리를 덮었다. 0.6m 올리면 그런 낮은 판 위로 그리고, 0.5m 넘게 벽 뒤면 여전히 벽에 가려진다.
+            float4 anchor = TransformWorldToHClip(TransformObjectToWorld(float3(0, 0, 0)) + float3(0, 0.6, 0));
             positionCS.z = anchor.z / anchor.w * positionCS.w;
             return positionCS;
         }
