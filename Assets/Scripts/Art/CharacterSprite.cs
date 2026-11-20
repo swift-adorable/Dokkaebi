@@ -247,7 +247,7 @@ public class CharacterSprite : MonoBehaviour
     {
         // 판 — 몸의 회전 · 크기와 무관하게 카메라 쪽으로 세운다. 발끝이 땅에 닿게.
         float ground = bodyCollider != null ? bodyCollider.bounds.min.y : transform.position.y;
-        Quaternion tilt = Quaternion.Euler(ArtCatalog.Pitch, 0f, 0f);
+        Quaternion tilt = ArtCatalog.CardTilt;
         Vector3 up = tilt * Vector3.up;
         card.SetPositionAndRotation(new Vector3(transform.position.x, ground, transform.position.z) - up * feetDrop, tilt);
         Vector3 s = transform.lossyScale;
@@ -326,6 +326,16 @@ public class CharacterSprite : MonoBehaviour
             material.EnableKeyword("_ALPHATEST_ON");
             material.SetFloat("_Cull", 0f);
             material.SetFloat("_Smoothness", 0f);
+            material.renderQueue = (int)RenderQueue.AlphaTest;
+        }
+        // v8c · 사용자 「벽 앞에서는 흐려지거나 가려지지 않게」 — 판 전체를 발 위치 깊이로, 비쳐 보이기에서는 뺀다
+        Shader see = Shader.Find(SeeThrough.ShaderName);
+        if (see != null)
+        {
+            material.shader = see;
+            material.SetFloat("_Cull", 0f);
+            material.SetFloat("_SeeThrough", 0f);
+            material.SetFloat("_FlatDepth", 1f);
             material.renderQueue = (int)RenderQueue.AlphaTest;
         }
         material.SetColor("_BaseColor", Color.white);

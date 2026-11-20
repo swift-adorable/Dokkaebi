@@ -23,6 +23,7 @@ public static class Chapter0Rebake
         Scene scene = EditorSceneManager.OpenScene(ZoneMapBaker.PathFor(map), OpenSceneMode.Single);
         SceneArtDresser.Dress(scene, map);
         PixelGroundBaker.Bake(scene, map);
+        ChapterArtBake.Bake(scene, 0);   // v8 — 꾸밈을 애셋으로 (씬을 열 때 다시 만들지 않게)
         EditorSceneManager.MarkSceneDirty(scene);
         EditorSceneManager.SaveScene(scene);
         AssetDatabase.SaveAssets();

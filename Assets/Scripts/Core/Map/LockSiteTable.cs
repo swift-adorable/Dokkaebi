@@ -151,6 +151,31 @@ public static class LockSiteTable
     /// </summary>
     public const int HousesPerVillage = 2;
 
+    /// <summary>
+    /// 【집터 자리 — 0장】 (v8 · 사용자 「방을 좀 더 넓혀봐」 → 집터 1.7배)
+    /// 34m 넘는 집터는 길 그물 · 숲 사이에 들어갈 데가 0곳이었다(자리 지도 진단). 덕코프 지도처럼 건물 자리를 먼저 정하고
+    /// 길이 그 둘레를 돌아가게 한다(PixelDress.Paths 가 이 네모 밖으로 길을 민다). 마을 둘레 · 숲 · 덩어리 · 자리(앵커)를 피해 손으로 골랐다.
+    /// 큰 집터부터 이 자리에 넣고, 남은 집은 예전처럼 마을 둘레에서 찾는다.
+    /// </summary>
+    public static readonly (string Zone, Vector2 Center, Vector2 Size)[] Chapter0Plots =
+    {
+        ("0-1", new Vector2(-128f, -38f), new Vector2(38f, 36f)),   // 헛간 마을 북쪽 (튼ㅁ자까지 들어감)
+        ("0-1", new Vector2(-64.5f, -65f), new Vector2(34f, 30f)),  // 냇가 쉼터
+        ("0-1", new Vector2(0f, -62f), new Vector2(32f, 28f)),      // 냇물 건너 대숲 곁
+        ("0-1", new Vector2(-17f, 84f), new Vector2(32f, 30f)),     // 방앗간 마을 북쪽
+        ("0-1", new Vector2(8f, -22f), new Vector2(30f, 30f)),      // 고목 앞
+        ("0-2", new Vector2(100f, -36f), new Vector2(34f, 30f)),    // 동쪽 야영지
+        ("0-2", new Vector2(79.5f, 30f), new Vector2(37.5f, 36f)),  // 고목 너머 움막
+        ("0-2", new Vector2(111.5f, -74f), new Vector2(33f, 27f)),    // 동쪽 야영지 남쪽
+    };
+
+    /// <summary>그 장의 집터 자리 네모들 (길이 피해 간다).</summary>
+    public static IEnumerable<Rect> Plots(int chapter)
+    {
+        if (chapter != 0) yield break;
+        foreach (var (_, c, sz) in Chapter0Plots) yield return new Rect(c - sz * 0.5f, sz);
+    }
+
     private static readonly Dictionary<string, List<LockSite>> openCache = new();
 
     /// <summary>그 구역의 열린 집 — 잠긴 곳과 겹치지 않게, 길 가까이(마을처럼). 판마다 같은 자리.</summary>
@@ -178,7 +203,25 @@ public static class LockSiteTable
                 if (a.ZoneId == zoneId) break;
                 foreach (LockSite h in OpenHouses(map, a.ZoneId)) if (h.Variant != null) used.Add(h.Variant);
             }
-            for (int i = 0; i < n; i++)
+            // 집터 자리(0장) — 큰 집터부터 자리 크기에 맞는 가장 큰 짜임을 넣는다
+            int fromPlots = 0;
+            if (map.Chapter == 0)
+                foreach (var (pz, pc, psz) in Chapter0Plots)
+                {
+                    if (pz != zoneId || fromPlots >= n) continue;
+                    LockSite site = null;
+                    for (int pass = 0; pass < 2 && site == null; pass++)
+                        foreach (var (variant, art, size, name) in HouseVariants)
+                        {
+                            if ((pass == 0) == used.Contains(variant) || size.x > psz.x + 0.01f || size.y > psz.y + 0.01f) continue;
+                            var cand = new LockSite(zoneId, map.Chapter, LockSiteKind.OpenHouse, pc, size, name, list.Count, art, variant);
+                            if (!Fits(map, cand, taken)) continue;
+                            site = cand; used.Add(variant); break;
+                        }
+                    if (site == null) continue;
+                    taken.Add(site); list.Add(site); fromPlots++;
+                }
+            for (int i = fromPlots; i < n; i++)
             {
                 LockSite site = null;
                 // 집터가 커져(v7 · 1.4배) 한 마을 둘레에 자리가 모자랄 수 있다 — 제 마을부터, 안 되면 그 구역의 다른 마을 둘레에서도 찾는다
@@ -255,6 +298,8 @@ public static class LockSiteTable
         }
         return best;
     }
+
+    public static bool ClearOfPathsForTest(int chapter, Rect r) => ClearOfPaths(chapter, r);
 
     private static bool ClearOfPaths(int chapter, Rect r)
     {
@@ -339,6 +384,22 @@ public static class LockSiteTable
     }
 
     /// <summary>이 자리에 세워도 되는가 — 테스트도 같은 판정을 쓴다.</summary>
+    /// <summary>진단용 — Fits 가 거절한 까닭 (없으면 null).</summary>
+    public static string WhyNot(ChapterMap map, LockSite site, IReadOnlyList<LockSite> others)
+    {
+        Rect body = site.Footprint;
+        Rect withDoor = Rect.MinMaxRect(body.xMin, body.yMin - DoorClear, body.xMax, body.yMax);
+        if (!map.InBounds(new Vector3(withDoor.xMin, 0f, withDoor.yMin), 2f) || !map.InBounds(new Vector3(withDoor.xMax, 0f, withDoor.yMax), 2f)) return "맵 밖";
+        ZoneArea? area = map.AreaOf(site.ZoneId);
+        if (!area.HasValue || !area.Value.Bounds.Contains(withDoor.min) || !area.Value.Bounds.Contains(withDoor.max)) return "구역 밖";
+        foreach (MapBlock block in map.Blocks)
+            if (block.Kind != MapBlockKind.Flowerbed && Overlaps(withDoor, block, BlockGap)) return $"덩어리 {block.Kind}@{block.Center}";
+        foreach (MapGate gate in map.Gates) if (Overlaps(withDoor, gate.Block, BlockGap + 2f)) return "금줄";
+        foreach (MapAnchor a in map.Anchors)
+            if (a.Kind is not (MapAnchorKind.BerryTree or MapAnchorKind.Landmark) && Distance(withDoor, new Vector2(a.Position.x, a.Position.z)) < AnchorGap) return $"자리 {a.Kind}@{a.Position}";
+        return null;
+    }
+
     public static bool Fits(ChapterMap map, LockSite site, IReadOnlyList<LockSite> others)
     {
         Rect body = site.Footprint;

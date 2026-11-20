@@ -25,7 +25,7 @@ public class Health : MonoBehaviour, IDamageable, IPoolable
     [Tooltip("근접·접촉·폭발 피격에 적용되는 방어도.")]
     [SerializeField] private float bodyArmour = 0f;
 
-    private HealthPool pool;
+    [System.NonSerialized] private HealthPool pool;   // 다시 컴파일할 때 유니티가 빈 풀(최대 0)을 만들어 넣지 않게 — 프리팹 체력이 0 으로 읽혔다
     private CooldownTimer invulnerability;
     private ElementalResistances resistances = ElementalResistances.Default;
 

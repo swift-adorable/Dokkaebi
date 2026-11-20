@@ -85,7 +85,61 @@ public static class PixelDress
     public static readonly float[] Chapter0PathHalfWidths = { 3.4f, 2.6f, 2.6f, 3.0f, 3.0f, 2.6f, 2.6f, 1.9f, 1.9f, 1.9f, 1.9f, 1.9f, 1.9f, 1.9f, 1.9f };
 
     /// <summary>그 장의 길 (미터). 지금은 0장만.</summary>
-    public static Vector2[][] Paths(int chapter) => chapter == 0 ? (smooth0 ??= Smooth(Chapter0Paths)) : System.Array.Empty<Vector2[]>();
+    public static Vector2[][] Paths(int chapter) => chapter == 0 ? (smooth0 ??= AroundPlots(Smooth(Chapter0Paths), Chapter0PathHalfWidths, LockSiteTable.Plots(0))) : System.Array.Empty<Vector2[]>();
+
+    /// <summary>
+    /// 집터 자리(LockSiteTable.Plots) 안을 지나는 길 점을 가장 가까운 변 밖으로 민다 — 길이 집터 담을 따라 돌아간다 (v8 · 덕코프: 건물 자리가 먼저, 길은 그 둘레).
+    /// 길 반폭 + 1.5m 를 띄운다. 밀린 점끼리 다시 한 번 부드럽게.
+    /// </summary>
+    private static Vector2[][] AroundPlots(Vector2[][] lines, float[] halfWidths, IEnumerable<Rect> plots)
+    {
+        var rects = new List<Rect>(plots);
+        if (rects.Count == 0) return lines;
+        var result = new Vector2[lines.Length][];
+        for (int k = 0; k < lines.Length; k++)
+        {
+            float m = (k < halfWidths.Length ? halfWidths[k] : 2f) + 1.5f;
+            // 점을 밀고, 앞 점과 다른 변으로 밀렸으면 그 사이에 네모 모서리를 끼운다 (모서리를 대각선으로 가로지르지 않게)
+            var list = new List<Vector2>();
+            int prevRect = -1, prevSide = -1;
+            foreach (Vector2 q0 in lines[k])
+            {
+                Vector2 q = q0;
+                int hitRect = -1, side = -1;
+                for (int ri = 0; ri < rects.Count; ri++)
+                {
+                    Rect r0 = rects[ri];
+                    Rect r = Rect.MinMaxRect(r0.xMin - m, r0.yMin - m - LockSiteTable.DoorClear, r0.xMax + m, r0.yMax + m);
+                    if (!r.Contains(q)) continue;
+                    float dl = q.x - r.xMin, dr = r.xMax - q.x, db = q.y - r.yMin, dt = r.yMax - q.y;
+                    float best = Mathf.Min(Mathf.Min(dl, dr), Mathf.Min(db, dt));
+                    side = best == dl ? 0 : best == dr ? 1 : best == db ? 2 : 3;
+                    q = side == 0 ? new Vector2(r.xMin, q.y) : side == 1 ? new Vector2(r.xMax, q.y) : side == 2 ? new Vector2(q.x, r.yMin) : new Vector2(q.x, r.yMax);
+                    hitRect = ri;
+                    if (prevRect == ri && prevSide >= 0 && prevSide != side && (prevSide < 2) != (side < 2))
+                    {
+                        float cx = (side < 2 ? side : prevSide) == 0 ? r.xMin : r.xMax;
+                        float cz = (side >= 2 ? side : prevSide) == 2 ? r.yMin : r.yMax;
+                        list.Add(new Vector2(cx, cz));
+                    }
+                    break;
+                }
+                list.Add(q);
+                prevRect = hitRect; prevSide = side;
+            }
+            var pts = list.ToArray();
+            for (int pass = 0; pass < 2; pass++)   // 모서리를 둥글게
+                for (int i = 1; i < pts.Length - 1; i++)
+                {
+                    Vector2 avg = (pts[i - 1] + pts[i] * 2f + pts[i + 1]) * 0.25f;
+                    bool inside = false;
+                    foreach (Rect r0 in rects) if (Rect.MinMaxRect(r0.xMin - m + 0.5f, r0.yMin - m + 0.5f - LockSiteTable.DoorClear, r0.xMax + m - 0.5f, r0.yMax + m - 0.5f).Contains(avg)) inside = true;
+                    if (!inside) pts[i] = avg;
+                }
+            result[k] = pts;
+        }
+        return result;
+    }
 
     private static Vector2[][] smooth0;
 
@@ -295,7 +349,7 @@ public static class PixelDress
             MapBlockKind.Bamboo => null,   // 대숲은 울타리로 두르지 않는다 — 네모 액자처럼 보였다 (v3). 대가 덩어리 밖으로 번져 나간다(Spill)
             MapBlockKind.Rock => null,   // 바위 언덕도 네모 절벽 테 대신 노이즈 윤곽 (v4)
             MapBlockKind.Fence => "wall_brush",
-            MapBlockKind.Boundary => "wall_stone",
+            MapBlockKind.Boundary => null,   // v8 · 사용자 「하단 쪽에 벽 타일이 이상하게 배치」 — 맵 끝은 빽빽한 숲(OuterForest)이 감싼다. 돌담 줄은 뺀다
             _ => null,
         };
         if (wall == null || !rects.ContainsKey(wall))
@@ -638,6 +692,9 @@ public static class PixelDress
 
     // ── 아틀라스 · 메쉬 ─────────────────────────────────────────────
 
+    /// <summary>굽기용 — 지금 아틀라스 · 재질 (없으면 만든다).</summary>
+    public static (Texture2D atlas, Material material) AtlasForBake() { EnsureAtlas(); return (atlas, material); }
+
     private static bool EnsureAtlas()
     {
         if (atlas != null && material != null)
@@ -651,7 +708,7 @@ public static class PixelDress
         rects.Clear();
         for (int i = 0; i < all.Length; i++)
             rects[all[i].name] = (uv[i], all[i].width, all[i].height);
-        atlas.Apply(false, true);   // 다 묶었으니 CPU 쪽 사본은 버린다
+        atlas.Apply(false, Application.isPlaying);   // 플레이 중엔 CPU 쪽 사본을 버린다 — 에디터에선 굽기가 PNG 로 저장한다
         foreach (Texture2D t in all)
             Resources.UnloadAsset(t);
 
@@ -661,10 +718,21 @@ public static class PixelDress
         return true;
     }
 
+    /// <summary>마지막 Build 의 카드(그림 · 자리 · 칸 밀도) — 굽기가 나무 밑동 막이를 세운다.</summary>
+    public static List<(string sprite, Vector3 pos, float ppm)> LastCards { get; } = new();
+
+    /// <summary>걸음을 막는 그림 — 나무 · 대 · 큰 바위 · 장승 (v8 · 사용자 「갈 수 있는 곳과 없는 곳의 차이를 잘 모르겠다」 → 나무는 모두 막는다).</summary>
+    public static bool Blocks(string sprite) => sprite.StartsWith("tree_") || sprite.StartsWith("bamboo") || sprite.StartsWith("rock_big") || sprite.StartsWith("rock_pillar") || sprite == "jangseung";
+
+    /// <summary>그림 폭(m).</summary>
+    public static float WidthOf(string sprite, float ppm) => rects.TryGetValue(sprite, out var r) ? r.w / ppm : 1f;
+
     private static int Emit(Ctx c, Transform parent)
     {
+        LastCards.Clear();
+        foreach (var (sprite, pos, ppm, _) in c.Cards) LastCards.Add((sprite, pos, ppm));
         var groups = new Dictionary<(int, int), (List<Vector3> v, List<Vector2> uv, List<Vector3> n, List<int> t)>();
-        Quaternion tilt = Quaternion.Euler(ArtCatalog.Pitch, 0f, 0f);
+        Quaternion tilt = ArtCatalog.CardTilt;
         Vector3 right = tilt * Vector3.right, up = tilt * Vector3.up, normal = tilt * Vector3.back;
 
         foreach (var (sprite, pos, ppm, flip) in c.Cards)
@@ -696,7 +764,7 @@ public static class PixelDress
             mesh.SetNormals(pair.Value.n);
             mesh.SetTriangles(pair.Value.t, 0);
             mesh.RecalculateBounds();
-            mesh.UploadMeshData(true);
+            if (Application.isPlaying) mesh.UploadMeshData(true);
             var go = new GameObject(mesh.name) { hideFlags = objectFlags };
             go.transform.SetParent(parent, false);
             go.AddComponent<MeshFilter>().sharedMesh = mesh;

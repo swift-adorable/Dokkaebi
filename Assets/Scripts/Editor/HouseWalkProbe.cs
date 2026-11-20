@@ -17,6 +17,20 @@ public static class HouseWalkProbe
     private static readonly List<LockedSite> sites = new();
     private static readonly StringBuilder report = new();
 
+    [MenuItem("Dokkaebi/Debug/집터 예전처럼 무겁게 (다음 판부터 · 측정용)")]
+    public static void Heavy() { PlayerPrefs.SetInt("Debug.HeavyHouses", LockedSite.HeavyForCompare ? 0 : 1); PlayerPrefs.Save(); Debug.Log($"[HouseWalk] 무겁게 {LockedSite.HeavyForCompare}"); }
+
+    [MenuItem("Dokkaebi/Debug/소굴에서 출발 (넘어가는 시간 재기)")]
+    public static void DepartTimed() { if (EditorApplication.isPlaying) SceneFlow.Depart(); }
+
+    [MenuItem("Dokkaebi/Debug/0장으로 넘어가기 (넘어가는 시간 재기)")]
+    public static void ToChapter0Timed()
+    {
+        if (!EditorApplication.isPlaying) return;
+        var m = typeof(SceneFlow).GetMethod("Load", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public);
+        m?.Invoke(null, new object[] { "Chapter0" });
+    }
+
     [MenuItem("Dokkaebi/Debug/결정 2-151 집터 걸어 보기")]
     public static void Run()
     {
@@ -66,7 +80,7 @@ public static class HouseWalkProbe
                       && NavMesh.CalculatePath(from.position, to.position, NavMesh.AllAreas, path) && path.status == NavMeshPathStatus.PathComplete;
             if (!ok) { unreachable++; bad.Add($"길없음 {r.Kind}"); }
         }
-        report.AppendLine($"  {house} {plan.Variant} ({s.Site.Size.x:0}×{s.Site.Size.y:0}m) 방 {plan.Rooms.Count} · 몸 막힘 {blocked} · 길 없음 {unreachable} · 뒤지는 자리 {s.LootCount} · 지붕(대문 앞) {(s.RoofShown ? "덮임" : "걷힘")} {string.Join(", ", bad)}");
+        report.AppendLine($"  {house} {plan.Variant} ({s.Site.Size.x:0}×{s.Site.Size.y:0}m) 방 {plan.Rooms.Count} · 몸 막힘 {blocked} · 길 없음 {unreachable} · 뒤지는 자리 {s.LootCount} · 그리는 것 {s.GetComponentsInChildren<MeshRenderer>(true).Length} · 막이 {s.GetComponentsInChildren<Collider>(true).Length} · 물체 {s.GetComponentsInChildren<Transform>(true).Length} · 지붕(대문 앞) {(s.RoofShown ? "덮임" : "걷힘")} {string.Join(", ", bad)}");
     }
 
     private static void Tick()
@@ -83,13 +97,198 @@ public static class HouseWalkProbe
         Vector3 c = new(s.Site.Center.x, 0f, s.Site.Center.y);
         switch (phase++)
         {
-            case 0: MoveTo(c + new Vector3(0f, 0f, -45f)); nextAt += 0.8; break;
+            case 0: MoveTo(c + new Vector3(0f, 0f, -45f)); nextAt += 1.0; break;
             case 1: Shot("far"); report.AppendLine($"  {house} 멀리 지붕 {(s.RoofShown ? "덮임" : "걷힘")}"); nextAt += 0.3; break;
             case 2: MoveTo(Front(s)); nextAt += 0.8; break;
             case 3: Shot("front"); Check(s); nextAt += 0.3; break;
             case 4: MoveTo(c + new Vector3(0f, 0f, -1f)); nextAt += 0.8; break;
             case 5: Shot("yard"); nextAt += 0.3; break;
+            case 6:   // 방 안 — 벽 뒤에 선 주인공 (가려진 둘레가 비쳐 보이는지)
+            {
+                HanokRoomPlan room = s.Plan.Rooms[0];
+                foreach (HanokRoomPlan r in s.Plan.Rooms) if (r.R.center.y > room.R.center.y) room = r;
+                MoveTo(new Vector3(s.Site.Center.x + room.R.center.x, 0f, s.Site.Center.y + room.R.center.y));
+                nextAt += 0.8; break;
+            }
+            case 7: Shot("room"); report.AppendLine($"  {house} 방 안에서 지붕 {(s.RoofShown ? "모두 덮임" : "들어선 채만 걷힘")}"); nextAt += 0.3; break;
+            case 8:   // 남쪽 벽 바로 뒤 — 벽이 주인공을 가린다
+            {
+                HanokRoomPlan room = s.Plan.Rooms[0];
+                foreach (HanokRoomPlan r in s.Plan.Rooms) if (r.R.center.y > room.R.center.y) room = r;
+                MoveTo(new Vector3(s.Site.Center.x + room.R.center.x, 0f, s.Site.Center.y + room.R.yMin + 0.9f));
+                nextAt += 0.8; break;
+            }
+            case 9: Shot("behind"); nextAt += 0.3; break;
+            case 10:   // 남쪽 벽 바로 앞(카메라 쪽) — 벽 앞에 선 주인공이 가려지거나 흐려지면 안 된다
+            {
+                HanokRoomPlan room = s.Plan.Rooms[0];
+                foreach (HanokRoomPlan r in s.Plan.Rooms) if (r.R.center.y > room.R.center.y) room = r;
+                MoveTo(new Vector3(s.Site.Center.x + room.R.center.x, 0f, s.Site.Center.y + room.R.yMin - 2.2f));
+                nextAt += 0.8; break;
+            }
+            case 11: Shot("front_of_wall"); nextAt += 0.3; break;
             default: house++; phase = 0; nextAt += 0.1; break;
+        }
+    }
+}
+
+/// <summary>
+/// 【개발용】 시점 비교 (사용자 2026-11-19 「덕코프 건물은 완전 위가 아니라 대각선 위에서 본 모양」) —
+/// 같은 집터 안마당에서 카메라만 바꿔 네 장: A 지금(정사영 50° · 앞벽 잘림) · B 원근 55° · 벽 그대로 ·
+/// C 원근 55° · 35° 돌림 · 벽 그대로 · D 원근 60° · 35° 돌림. Temp/screens/view_*.png
+/// </summary>
+public static class CameraAngleProbe
+{
+    private static int step;
+    private static double nextAt;
+    private static LockedSite site;
+    private static Vector3 focus;
+
+    [MenuItem("Dokkaebi/Debug/시점 비교 네 장 (집터)")]
+    public static void Run()
+    {
+        if (!EditorApplication.isPlaying) return;
+        site = null;
+        foreach (LockedSite s in LockedSite.Active)
+            if (s != null && s.Plan != null && s.Plan.Variant == "ㄷ자-안채") site = s;
+        if (site == null) foreach (LockedSite s in LockedSite.Active) if (s != null && s.Plan != null) { site = s; break; }
+        if (site == null) return;
+        focus = new Vector3(site.Site.Center.x, 0f, site.Site.Center.y);
+        var movement = Object.FindAnyObjectByType<PlayerMovement>();
+        if (movement != null)
+        {
+            Vector3 p = focus + new Vector3(0f, movement.transform.position.y, -2f);
+            if (movement.TryGetComponent(out Rigidbody b)) { b.position = p; b.linearVelocity = Vector3.zero; }
+            movement.transform.position = p;
+        }
+        step = 0;
+        nextAt = EditorApplication.timeSinceStartup + 1.0;
+        EditorApplication.update -= Tick;
+        EditorApplication.update += Tick;
+    }
+
+    private static void Set(bool persp, float pitch, float yaw, bool fullWalls, float fov = 35f, float zoom = 1f)
+    {
+        Camera cam = Camera.main;
+        var follow = cam.GetComponent<CameraFollow>();
+        if (follow != null) follow.enabled = false;
+        site.ShowCutaway(fullWalls);
+        cam.orthographic = !persp;
+        cam.transform.rotation = Quaternion.Euler(pitch, yaw, 0f);
+        float half = 9.5f * zoom;
+        if (persp) { cam.fieldOfView = fov; cam.transform.position = focus - cam.transform.forward * (half / Mathf.Tan(fov * 0.5f * Mathf.Deg2Rad)); }
+        else { cam.orthographicSize = half; cam.transform.position = focus - cam.transform.forward * 30f; }
+        cam.farClipPlane = 200f;
+    }
+
+    private static void Tick()
+    {
+        if (EditorApplication.timeSinceStartup < nextAt || !EditorApplication.isPlaying) return;
+        nextAt = EditorApplication.timeSinceStartup + 0.6;
+        switch (step++)
+        {
+            // v8 「카메라 각도가 살짝 이상하고 어색」 — 시점 C 를 바탕으로 원근 세기 · 거리 · 기울기만 바꿔 본다
+            case 0: Set(true, 55f, 35f, true, 35f, 1f); break;
+            case 1: ScreenCapture.CaptureScreenshot("Temp/screens/view2_A.png"); break;
+            case 2: Set(true, 55f, 35f, true, 20f, 1f); break;
+            case 3: ScreenCapture.CaptureScreenshot("Temp/screens/view2_B.png"); break;
+            case 4: Set(true, 55f, 35f, true, 20f, 0.75f); break;
+            case 5: ScreenCapture.CaptureScreenshot("Temp/screens/view2_C.png"); break;
+            case 6: Set(true, 50f, 35f, true, 25f, 0.85f); break;
+            case 7: ScreenCapture.CaptureScreenshot("Temp/screens/view2_D.png"); break;
+            default:
+                Set(true, 55f, 35f, true, 35f, 1f);
+                var follow = Camera.main.GetComponent<CameraFollow>();
+                if (follow != null) follow.enabled = true;
+                EditorApplication.update -= Tick;
+                Debug.Log("[ViewProbe] 끝");
+                break;
+        }
+    }
+}
+
+/// <summary>【개발용】 0장 가장자리 · 숲 틈을 돌며 찍는다 — 갈 수 있는 곳 / 없는 곳이 보이는지 (v8 사용자 6번). Temp/screens/edge_*.png</summary>
+public static class EdgeProbe
+{
+    private static readonly Vector3[] spots =
+    {
+        new(-60f, 0f, -96f), new(-130f, 0f, -92f), new(100f, 0f, -92f), new(0f, 0f, 96f),
+        new(-150f, 0f, 30f), new(150f, 0f, 10f), new(-92f, 0f, -36f), new(70f, 0f, -40f),
+    };
+    private static int step;
+    private static double nextAt;
+
+    [MenuItem("Dokkaebi/Debug/가장자리 · 숲 틈 찍기 (0장)")]
+    public static void Run()
+    {
+        if (!EditorApplication.isPlaying) return;
+        step = 0; nextAt = EditorApplication.timeSinceStartup + 0.3;
+        EditorApplication.update -= Tick; EditorApplication.update += Tick;
+    }
+
+    private static void Tick()
+    {
+        if (EditorApplication.timeSinceStartup < nextAt || !EditorApplication.isPlaying) return;
+        int i = step / 2;
+        if (i >= spots.Length) { EditorApplication.update -= Tick; Debug.Log("[EdgeProbe] 끝"); return; }
+        if (step % 2 == 0)
+        {
+            var movement = Object.FindAnyObjectByType<PlayerMovement>();
+            if (movement != null)
+            {
+                Vector3 p = spots[i]; p.y = movement.transform.position.y;
+                if (movement.TryGetComponent(out Rigidbody b)) { b.position = p; b.linearVelocity = Vector3.zero; }
+                movement.transform.position = p;
+            }
+            nextAt = EditorApplication.timeSinceStartup + 1.0;
+        }
+        else
+        {
+            ScreenCapture.CaptureScreenshot($"Temp/screens/edge_{i}.png");
+            nextAt = EditorApplication.timeSinceStartup + 0.3;
+        }
+        step++;
+    }
+}
+
+/// <summary>【개발용】 비쳐 보이기 셰이더 ↔ URP Lit 맞바꿔 찍기 — 밝기 · 검게 나오는 곳 비교 (v8).</summary>
+public static class ShaderSwapProbe
+{
+    private static int step;
+    private static double nextAt;
+    private static readonly System.Collections.Generic.Dictionary<Material, Shader> saved = new();
+
+    [MenuItem("Dokkaebi/Debug/셰이더 맞바꿔 찍기 (지금 자리)")]
+    public static void Run()
+    {
+        if (!EditorApplication.isPlaying) return;
+        step = 0; nextAt = EditorApplication.timeSinceStartup + 0.2;
+        EditorApplication.update -= Tick; EditorApplication.update += Tick;
+    }
+
+    private static void Swap(bool toLit)
+    {
+        Shader lit = Shader.Find("Universal Render Pipeline/Lit"), see = Shader.Find(SeeThrough.ShaderName);
+        foreach (Renderer r in Object.FindObjectsByType<Renderer>(FindObjectsInactive.Exclude))
+            foreach (Material m in r.sharedMaterials)
+            {
+                if (m == null) continue;
+                if (toLit && m.shader == see) { saved[m] = see; m.shader = lit; m.SetFloat("_Cull", 0f); if (m.GetFloat("_Cutoff") > 0f) { m.EnableKeyword("_ALPHATEST_ON"); m.SetFloat("_AlphaClip", 1f); } }
+                else if (!toLit && saved.ContainsKey(m)) m.shader = see;
+            }
+        if (!toLit) saved.Clear();
+    }
+
+    private static void Tick()
+    {
+        if (EditorApplication.timeSinceStartup < nextAt || !EditorApplication.isPlaying) return;
+        nextAt = EditorApplication.timeSinceStartup + 0.6;
+        switch (step++)
+        {
+            case 0: ScreenCapture.CaptureScreenshot("Temp/screens/swap_see.png"); break;
+            case 1: Swap(true); break;
+            case 2: ScreenCapture.CaptureScreenshot("Temp/screens/swap_lit.png"); break;
+            default: Swap(false); EditorApplication.update -= Tick; Debug.Log("[ShaderSwap] 끝"); break;
         }
     }
 }

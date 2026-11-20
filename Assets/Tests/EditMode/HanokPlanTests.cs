@@ -44,6 +44,24 @@ namespace Dokkaebi.Tests
         }
 
         [Test]
+        public void 담과_마당_살림은_방을_파고들지_않는다()
+        {
+            foreach (HanokPlan p in All())
+                foreach (HanokRoomPlan r in p.Rooms)
+                {
+                    Rect inner = Rect.MinMaxRect(r.R.xMin + 0.1f, r.R.yMin + 0.1f, r.R.xMax - 0.1f, r.R.yMax - 0.1f);
+                    foreach (HanokRun run in p.Runs)
+                        if (run.Kind == HanokRunKind.Fence)
+                            for (float t = 0f; t <= 1f; t += 0.02f)
+                                Assert.IsFalse(inner.Contains(Vector2.Lerp(run.A, run.B, t)), $"{p.Variant} 담이 방을 지난다 {r.Kind} {r.R}");
+                    Rect grown = Rect.MinMaxRect(r.R.xMin - 0.6f, r.R.yMin - 0.6f, r.R.xMax + 0.6f, r.R.yMax + 0.6f);
+                    foreach (HanokYard y in p.Yard)
+                        if (y.Kind != "stepping")
+                            Assert.IsFalse(grown.Contains(y.At), $"{p.Variant} {y.Kind} 이(가) 방 {r.Kind} 에 붙었다 {y.At}");
+                }
+        }
+
+        [Test]
         public void 바깥에서_모든_방에_걸어_들어간다()
         {
             foreach (HanokPlan p in All())

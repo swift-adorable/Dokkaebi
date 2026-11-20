@@ -31,7 +31,7 @@ public sealed class ChapterArtBuilder
         if (!kit.Has("S:" + path))
             return;
         float w = height * kit.Aspect("S:" + path);
-        parts.Add((kit.Mesh("Card"), Matrix4x4.TRS(pos, Quaternion.Euler(ArtCatalog.Pitch, 0f, 0f), new Vector3(w, height, 1f)), "S:" + path));
+        parts.Add((kit.Mesh("Card"), Matrix4x4.TRS(pos, ArtCatalog.CardTilt, new Vector3(w, height, 1f)), "S:" + path));
     }
 
     private string TreeOf(int[] set) => ArtCatalog.Tree(set[rnd.Next(set.Length)]);
@@ -431,7 +431,7 @@ public sealed class ChapterArtBuilder
             var mesh = new Mesh { name = $"~{g.Key.Item1}_{g.Key.Item2}_{g.Key.Item3}", indexFormat = UnityEngine.Rendering.IndexFormat.UInt32, hideFlags = meshFlags };
             mesh.CombineMeshes(g.Value.ToArray(), true, true);
             mesh.RecalculateBounds();
-            mesh.UploadMeshData(true);
+            if (Application.isPlaying) mesh.UploadMeshData(true);   // 에디터에선 굽기(ChapterArtBake)가 애셋으로 저장하려면 읽을 수 있어야 한다
 
             var go = new GameObject(mesh.name) { hideFlags = objectFlags };
             go.transform.SetParent(parent, false);

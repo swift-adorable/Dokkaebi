@@ -101,7 +101,7 @@ public class PlayerWisp : MonoBehaviour
         // 움직이는 쪽으로 살짝 기울고, 빠를수록 꼬리가 조금 늘어난다(불꽃이 바람을 받는 듯).
         float lean = Mathf.Clamp(-followVelocity.x * 9f, -22f, 22f);
         float stretch = 1f + Mathf.Clamp(followVelocity.magnitude * 0.06f, 0f, 0.18f);
-        flame.rotation = Quaternion.Euler(ArtCatalog.Pitch, 0f, 0f) * Quaternion.Euler(0f, 0f, lean);   // 캐릭터 판처럼 카메라 쪽으로 세운다
+        flame.rotation = ArtCatalog.CardTilt * Quaternion.Euler(0f, 0f, lean);   // 캐릭터 판처럼 카메라 쪽으로 세운다
 
         if (builtShape != Shape)
             LoadFrames();

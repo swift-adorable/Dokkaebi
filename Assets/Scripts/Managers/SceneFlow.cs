@@ -199,12 +199,18 @@ public static class SceneFlow
         SceneManager.sceneLoaded -= HandleLoaded;
         SceneManager.sceneLoaded += HandleLoaded;
 
+        LoadStartedAt = Time.realtimeSinceStartup;
         SceneManager.LoadScene(scene, LoadSceneMode.Single);
     }
+
+    /// <summary>마지막으로 씬 넘김을 시작한 때(실시간 초) — 넘어가는 시간을 잰다 (v8 · 사용자 「소굴 → 0장 넘어갈 때 느려」).</summary>
+    public static float LoadStartedAt = -1f;
+    public static float SinceLoadMs => LoadStartedAt < 0f ? -1f : (Time.realtimeSinceStartup - LoadStartedAt) * 1000f;
 
     private static void HandleLoaded(Scene scene, LoadSceneMode mode)
     {
         SceneManager.sceneLoaded -= HandleLoaded;
         loading = false;
+        GameLogger.Log($"[LoadTime] 씬 「{scene.name}」 불러옴 {SinceLoadMs:0}ms");
     }
 }

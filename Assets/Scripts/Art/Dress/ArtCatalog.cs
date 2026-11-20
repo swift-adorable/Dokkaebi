@@ -14,8 +14,33 @@ public static class ArtCatalog
     /// <summary>합치는 칸(m).</summary>
     public const float Cell = 32f;
 
-    /// <summary>카메라가 내려다보는 각 — 세운 그림도 이만큼 눕힌다. CameraLook과 같은 값.</summary>
-    public const float Pitch = 50f;
+    /// <summary>카메라가 내려다보는 각 — 세운 그림도 이만큼 눕힌다. (v8 · 사용자가 고른 시점 C: 50 → 55)</summary>
+    public const float Pitch = 55f;
+    /// <summary>
+    /// 카메라를 옆으로 돌린 각 (v8 · 사용자 「덕코프 건물은 완전 위가 아니라 약간 대각선 위에서 바라보는 모양」 → 시점 C).
+    /// 건물 앞면과 옆면이 함께 보인다. 세운 그림도 이만큼 돌려 늘 카메라를 본다.
+    /// </summary>
+    public const float Yaw = 35f;
+    /// <summary>원근 카메라 세로 화각(도) — 정사영 반높이 OrthoSize 와 같은 넓이가 보이게 거리를 잡는다.</summary>
+    public const float Fov = 35f;
+    public static float CameraDistance => OrthoSize / Mathf.Tan(Fov * 0.5f * Mathf.Deg2Rad);
+
+    /// <summary>
+    /// 세운 그림(캐릭터 · 소품 · 상자 · 나무)의 회전 — 플레이 중엔 지금 카메라를 따른다(굽기 전 옛 씬 · 소굴은 제 카메라대로),
+    /// 에디터에서 구울 땐 Pitch · Yaw.
+    /// </summary>
+    public static Quaternion CardTilt
+    {
+        get
+        {
+            if (Application.isPlaying)
+            {
+                Camera c = Camera.main;
+                if (c != null) { Vector3 e = c.transform.eulerAngles; return Quaternion.Euler(e.x, e.y, 0f); }
+            }
+            return Quaternion.Euler(Pitch, Yaw, 0f);
+        }
+    }
 
     public const string TreeFolder = "Assets/The Higalina Vault/Trees/Icons/without_shadow";
     public const string RockFolder = "Assets/KebapGuy/StoneRockPack/Sprites";

@@ -95,19 +95,30 @@ public class BerryTree : MonoBehaviour
         trunk.transform.localScale = new Vector3(0.35f, 0.8f, 0.35f);
         Tint(trunk, new Color(0.40f, 0.28f, 0.18f));
 
-        GameObject crown = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        crown.name = "Crown";
-        crown.transform.SetParent(root.transform, false);
-        crown.transform.localPosition = new Vector3(0f, 2.0f, 0f);
-        crown.transform.localScale = new Vector3(1.6f, 1.3f, 1.6f);
-        Object.Destroy(crown.GetComponent<Collider>());
-        Tint(crown, new Color(0.25f, 0.50f, 0.25f));
+        // v8 · 사용자 「소품이 한옥 느낌이 안 나」 — 초록 공(임시 구) 대신 우리 도트 나무 그림(단풍 · 느티)을 세운다. 밑동 막이는 그대로.
+        trunk.GetComponent<Renderer>().enabled = false;
+        var tex = Resources.Load<Texture2D>(index % 2 == 0 ? "World/tree_maple" : "World/tree_zelkova");
+        if (tex != null)
+        {
+            var card = new GameObject("Crown");
+            card.transform.SetParent(root.transform, false);
+            card.transform.rotation = ArtCatalog.CardTilt;
+            float w = tex.width / BuildingSprite.PixelsPerMeter;
+            card.transform.localScale = new Vector3(w, w * tex.height / tex.width, 1f);
+            card.AddComponent<MeshFilter>().sharedMesh = BuildingSprite.Quad();
+            var r = card.AddComponent<MeshRenderer>();
+            r.sharedMaterial = BuildingSprite.Material();
+            var block = new MaterialPropertyBlock();
+            block.SetTexture("_BaseMap", tex);
+            block.SetTexture("_MainTex", tex);
+            r.SetPropertyBlock(block);
+        }
 
         GameObject fruit = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         fruit.name = "Fruit";
         fruit.transform.SetParent(root.transform, false);
-        fruit.transform.localPosition = new Vector3(0.5f, 1.7f, -0.5f);
-        fruit.transform.localScale = Vector3.one * 0.35f;
+        fruit.transform.localPosition = new Vector3(0.6f, 1.2f, -0.8f);
+        fruit.transform.localScale = Vector3.one * 0.3f;
         Object.Destroy(fruit.GetComponent<Collider>());
         Tint(fruit, new Color(0.55f, 0.10f, 0.35f));
 

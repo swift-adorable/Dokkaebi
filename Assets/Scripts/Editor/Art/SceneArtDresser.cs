@@ -337,12 +337,14 @@ public static class SceneArtDresser
                 continue;
             }
             Vector3 focus = player.transform.position;
-            cam.orthographic = true;
+            // 시점 C (v8 · 사용자 선택) — 원근 · 55° 내려다봄 · 35° 돌림. 정사영 반높이 9.5m 와 같은 넓이가 보이는 거리.
+            cam.orthographic = false;
+            cam.fieldOfView = ArtCatalog.Fov;
             cam.orthographicSize = ArtCatalog.OrthoSize;
             cam.nearClipPlane = 0.3f;
-            cam.farClipPlane = 120f;
-            cam.transform.rotation = Quaternion.Euler(ArtCatalog.Pitch, 0f, 0f);
-            cam.transform.position = focus - cam.transform.forward * 30f;
+            cam.farClipPlane = 160f;
+            cam.transform.rotation = Quaternion.Euler(ArtCatalog.Pitch, ArtCatalog.Yaw, 0f);
+            cam.transform.position = focus - cam.transform.forward * ArtCatalog.CameraDistance;
             EditorUtility.SetDirty(cam);
             EditorUtility.SetDirty(cam.transform);
         }

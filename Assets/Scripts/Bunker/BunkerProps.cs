@@ -170,7 +170,7 @@ public static class BunkerProps
 
         var card = new GameObject($"Prop_{sprite}");
         card.transform.SetParent(root, false);
-        card.transform.SetPositionAndRotation(at, Quaternion.Euler(ArtCatalog.Pitch, 0f, 0f));
+        card.transform.SetPositionAndRotation(at, ArtCatalog.CardTilt);
         card.transform.localScale = new Vector3(tex.width / PixelsPerMeter, tex.height / PixelsPerMeter, 1f);
         card.AddComponent<MeshFilter>().sharedMesh = BuildingSprite.Quad();
         var renderer = card.AddComponent<MeshRenderer>();
@@ -189,7 +189,7 @@ public static class BunkerProps
     {
         var go = new GameObject("Flame");
         go.transform.SetParent(lamp.parent, false);
-        go.transform.SetPositionAndRotation(at + new Vector3(0f, 0.32f, -0.05f), Quaternion.Euler(ArtCatalog.Pitch, 0f, 0f));
+        go.transform.SetPositionAndRotation(at + new Vector3(0f, 0.32f, -0.05f), ArtCatalog.CardTilt);
         go.AddComponent<SpriteRenderer>();
         go.AddComponent<FlameLoop>();
     }

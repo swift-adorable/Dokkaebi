@@ -59,7 +59,7 @@ public static class BuildingSprite
         card.transform.SetParent(root, false);
 
         // 건물이 돌아가 있어도 그림은 세계 기준으로 카메라를 향한다.
-        Quaternion tilt = Quaternion.Euler(ArtCatalog.Pitch, 0f, 0f);
+        Quaternion tilt = ArtCatalog.CardTilt;
         Vector3 front = root.position + Vector3.back * (definition.Depth * 0.5f);
         float height = width * tex.height / tex.width;
         card.transform.SetPositionAndRotation(front, tilt);
@@ -170,6 +170,21 @@ public static class BuildingSprite
         return quad;
     }
 
+    private static Material figureMaterial;
+
+    /// <summary>
+    /// 몬스터 · 캐릭터 판 재질 (v8c) — 비쳐 보이기에서 빠지고(가려도 흐려지지 않음), 판 전체가 발 위치 깊이로 그려진다.
+    /// </summary>
+    internal static Material FigureMaterial()
+    {
+        if (figureMaterial != null)
+            return figureMaterial;
+        figureMaterial = new Material(Material()) { name = "FigureCard" };
+        figureMaterial.SetFloat("_SeeThrough", 0f);
+        figureMaterial.SetFloat("_FlatDepth", 1f);
+        return figureMaterial;
+    }
+
     /// <summary>
     /// 캐릭터 판과 같은 재질(빛 받음 · 알파 잘라내기 · 양면) — 아트 꾸러미의 나무 판 재질을 복사한다.
     /// 깊이를 써서 캐릭터와 앞뒤가 맞고, 밤 · 날씨 빛도 캐릭터와 똑같이 받는다. 꾸러미가 없으면 URP Lit에 같은 설정.
@@ -193,11 +208,20 @@ public static class BuildingSprite
             material = new Material(source) { name = "BuildingCard" };
         else
         {
-            material = new Material(Shader.Find("Universal Render Pipeline/Lit")) { name = "BuildingCard" };
+            material = new Material(SeeThrough.LitShader()) { name = "BuildingCard" };   // v8 — 나무 · 소품 그림도 주인공을 가리면 비쳐 보인다
+            material.SetFloat("_Cutoff", 0.5f);
             material.SetFloat("_AlphaClip", 1f);
             material.EnableKeyword("_ALPHATEST_ON");
             material.SetFloat("_Cull", 0f);
             material.SetFloat("_Smoothness", 0f);
+            material.renderQueue = (int)RenderQueue.AlphaTest;
+        }
+        // v8 — 나무 · 소품 · 상자 그림이 주인공을 가리면 그 둘레만 비쳐 보이게 (사용자 3번)
+        Shader see = Shader.Find(SeeThrough.ShaderName);
+        if (see != null)
+        {
+            material.shader = see;
+            material.SetFloat("_Cull", 0f);
             material.renderQueue = (int)RenderQueue.AlphaTest;
         }
         material.SetColor("_BaseColor", Color.white);

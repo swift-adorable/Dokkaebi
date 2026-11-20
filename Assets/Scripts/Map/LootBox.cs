@@ -31,7 +31,7 @@ public class LootBox : MonoBehaviour
     /// <summary>상자 수 기준 — 0-1 넓이에 10개.</summary>
     public const int BaseCount = 10;
     /// <summary>한 구역 바깥 상자 최대 (예전 18 — 맵 2배 뒤 30). 열린 집 안 상자는 따로.</summary>
-    public const int MaxCount = 40;   // 결정 2-150 — 덕코프 상자 자리는 우리의 3배(1천㎡당 2.9 · 우리 1.0). 집 안 가구가 들어오면 더 는다
+    public const int MaxCount = 16;   // v8 · 사용자 「파밍 상자(광주리 · 단지) 너무 과하게 많아」 — 40 → 16. 집 안 가구(집터마다 1 ~ 3)가 따로 있다. 이전:   // 결정 2-150 — 덕코프 상자 자리는 우리의 3배(1천㎡당 2.9 · 우리 1.0). 집 안 가구가 들어오면 더 는다
     public const float PixelsPerMeter = 23.5f;
 
     private static readonly Dictionary<string, Texture2D> textures = new();
@@ -230,7 +230,7 @@ public class LootBox : MonoBehaviour
             return;
         var card = new GameObject("Card");
         card.transform.SetParent(transform, false);
-        card.transform.SetPositionAndRotation(transform.position, Quaternion.Euler(ArtCatalog.Pitch, 0f, 0f));
+        card.transform.SetPositionAndRotation(transform.position, ArtCatalog.CardTilt);
         card.transform.localScale = new Vector3(tex.width / PixelsPerMeter, tex.height / PixelsPerMeter, 1f);
         card.AddComponent<MeshFilter>().sharedMesh = BuildingSprite.Quad();
         var renderer = card.AddComponent<MeshRenderer>();

@@ -112,7 +112,7 @@ public class EnemySprite : MonoBehaviour
             card.SetParent(transform, false);
             go.AddComponent<MeshFilter>().sharedMesh = BuildingSprite.Quad();
             cardRenderer = go.AddComponent<MeshRenderer>();
-            cardRenderer.sharedMaterial = BuildingSprite.Material();
+            cardRenderer.sharedMaterial = BuildingSprite.FigureMaterial();   // v8c — 벽 앞에서 가려지지 않게 · 비쳐 보이기에서 뺌
             cardRenderer.shadowCastingMode = ShadowCastingMode.On;
             cardRenderer.receiveShadows = true;
             block = new MaterialPropertyBlock();
@@ -194,7 +194,7 @@ public class EnemySprite : MonoBehaviour
     {
         // 장 맵 바닥은 y = 0 — 몸이 조금 묻혀 나와도 그림은 땅 위에 선다.
         float ground = Mathf.Max(0f, bodyCollider != null ? bodyCollider.bounds.min.y : transform.position.y);
-        Quaternion tilt = Quaternion.Euler(ArtCatalog.Pitch, 0f, 0f);
+        Quaternion tilt = ArtCatalog.CardTilt;
         Vector3 up = tilt * Vector3.up;
         float size = Frame / PixelsPerMeter;
         card.SetPositionAndRotation(new Vector3(transform.position.x, ground, transform.position.z) - up * (FeetPad / PixelsPerMeter), tilt);

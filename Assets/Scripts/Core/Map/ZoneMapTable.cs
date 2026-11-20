@@ -329,7 +329,7 @@ public static class ZoneMapTable
             A(MapAnchorKind.Pickup, "0-1", -24f, -84f),
             A(MapAnchorKind.BerryTree, "0-1", -110f, 56f),
             A(MapAnchorKind.BerryTree, "0-1", -56f, -80f),
-            A(MapAnchorKind.BerryTree, "0-1", -6f, -14f),
+            A(MapAnchorKind.BerryTree, "0-1", -16f, -4f),   // v8 — 고목 앞 집터 자리 밖으로
             A(MapAnchorKind.SecretExit, "0-1", -40f, -40f, "무릎 냇물 — 1장 우물에서"),
             // 마을 · 야영지 — 집(열린 집)과 상자 · 적이 모인다 (제로존 「북서 야영지 · 도로 야영지 · 숲길」 자리)
             L("0-1", -142f, -56f, "헛간 마을"),
@@ -340,7 +340,7 @@ public static class ZoneMapTable
             A(MapAnchorKind.Gift, "0-2", 122f, 26f),
             A(MapAnchorKind.Extraction, "0-2", 150f, -82f),
             A(MapAnchorKind.Extraction, "0-2", 150f, 82f),
-            A(MapAnchorKind.Pickup, "0-2", 104f, -62f),
+            A(MapAnchorKind.Pickup, "0-2", 86f, -70f),   // v8 — 동쪽 야영지 남쪽 집터 자리 밖으로
             A(MapAnchorKind.Pickup, "0-2", 78f, 70f),
             A(MapAnchorKind.BerryTree, "0-2", 120f, -30f),
             A(MapAnchorKind.BerryTree, "0-2", 140f, 4f),

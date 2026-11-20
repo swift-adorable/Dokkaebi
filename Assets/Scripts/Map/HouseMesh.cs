@@ -24,7 +24,7 @@ public static class HouseMesh
         }
         var t = Resources.Load<Texture2D>($"HouseTex/{tex}");
         tileM = t != null ? t.width / BuildingSprite.PixelsPerMeter : 2f;
-        var shader = Shader.Find("Universal Render Pipeline/Lit");
+        var shader = SeeThrough.LitShader();   // v8 — 가려진 주인공 둘레가 비쳐 보이는 셰이더
         m = new Material(shader) { name = $"House_{tex}" };
         if (t != null)
         {
@@ -52,7 +52,7 @@ public static class HouseMesh
         string key = $"#{ColorUtility.ToHtmlStringRGB(color)}";
         if (!materials.ContainsKey(key))
         {
-            var m = new Material(Shader.Find("Universal Render Pipeline/Lit")) { name = $"House_{key}" };
+            var m = new Material(SeeThrough.LitShader()) { name = $"House_{key}" };
             m.SetColor("_BaseColor", color);
             m.SetFloat("_Smoothness", 0f);
             m.SetFloat("_Cull", 0f);
@@ -99,6 +99,46 @@ public static class HouseMesh
         r.sharedMaterial = mat;
         r.shadowCastingMode = shadows ? ShadowCastingMode.On : ShadowCastingMode.Off;
         return go;
+    }
+
+    /// <summary>
+    /// root 아래 HouseMesh 상자 · 판을 재질 · 그림자 방식마다 메시 하나로 합친다 (skip 아래는 건드리지 않는다).
+    /// 그림 카드(MaterialPropertyBlock 을 쓰는 렌더러)는 합치지 않는다. 합친 원본은 지운다.
+    /// </summary>
+    public static void Combine(Transform root, params Transform[] skip)
+    {
+        var groups = new Dictionary<(Material, ShadowCastingMode), List<CombineInstance>>();
+        var done = new List<GameObject>();
+        Matrix4x4 toRoot = root.worldToLocalMatrix;
+        foreach (MeshFilter mf in root.GetComponentsInChildren<MeshFilter>(true))
+        {
+            bool skipped = false;
+            foreach (Transform s in skip) if (s != null && mf.transform.IsChildOf(s)) { skipped = true; break; }
+            if (skipped || mf.sharedMesh == null) continue;
+            var r = mf.GetComponent<MeshRenderer>();
+            if (r == null || r.HasPropertyBlock() || !materials.ContainsValue(r.sharedMaterial)) continue;
+            var key = (r.sharedMaterial, r.shadowCastingMode);
+            if (!groups.TryGetValue(key, out var list)) groups[key] = list = new List<CombineInstance>();
+            list.Add(new CombineInstance { mesh = mf.sharedMesh, transform = toRoot * mf.transform.localToWorldMatrix });
+            done.Add(mf.gameObject);
+        }
+        foreach (var kv in groups)
+        {
+            var mesh = new Mesh { name = $"Combined_{kv.Key.Item1.name}", indexFormat = IndexFormat.UInt32 };
+            mesh.CombineMeshes(kv.Value.ToArray(), true, true);
+            var go = new GameObject(mesh.name);
+            go.transform.SetParent(root, false);
+            go.AddComponent<MeshFilter>().sharedMesh = mesh;
+            var r = go.AddComponent<MeshRenderer>();
+            r.sharedMaterial = kv.Key.Item1;
+            r.shadowCastingMode = kv.Key.Item2;
+        }
+        foreach (GameObject g in done)
+        {
+            Object.DestroyImmediate(g.GetComponent<MeshFilter>().sharedMesh);
+            if (g.transform.childCount == 0 && g.GetComponents<Component>().Length <= 3) Object.DestroyImmediate(g);
+            else { Object.DestroyImmediate(g.GetComponent<MeshRenderer>()); Object.DestroyImmediate(g.GetComponent<MeshFilter>()); }
+        }
     }
 
     /// <summary>

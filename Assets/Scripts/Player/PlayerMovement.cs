@@ -13,7 +13,18 @@ public class PlayerMovement : MonoBehaviour
     private Vector2 input;
 
     /// <summary>현재 입력이 가리키는 이동 방향(XZ 평면, 정규화 전).</summary>
-    public Vector3 MoveDirection => new Vector3(input.x, 0f, input.y);
+    /// <summary>
+    /// 움직일 방향(세계) — 입력을 카메라가 돌아간 만큼 돌린다 (v8 · 시점 C: 카메라를 35° 돌려 위 키가 화면 위로 가게).
+    /// </summary>
+    public Vector3 MoveDirection
+    {
+        get
+        {
+            var flat = new Vector3(input.x, 0f, input.y);
+            Camera c = Camera.main;
+            return c != null ? Quaternion.Euler(0f, c.transform.eulerAngles.y, 0f) * flat : flat;
+        }
+    }
 
     /// <summary>true인 동안 이동 입력을 무시한다. 대시가 속도를 점유할 때 사용한다.</summary>
     public bool IsLocked { get; set; }

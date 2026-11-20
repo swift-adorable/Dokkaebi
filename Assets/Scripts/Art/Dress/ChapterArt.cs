@@ -8,6 +8,13 @@ using UnityEngine;
 public class ChapterArt : MonoBehaviour
 {
     [SerializeField] private int chapter;
+    /// <summary>
+    /// 굽혀 있는가 (v8 · 사용자 「소굴 → 0장 넘어갈 때 느려」) — 꾸밈(나무 · 소품 수천 장)을 씬을 열 때마다 새로 만들어
+    /// 에디터에서도 0장 여는 데 2.7초가 걸렸다. 굽기(ChapterArtBake)가 메시 · 아틀라스를 애셋으로 저장하고 이 표시를 켜면
+    /// 다시 만들지 않고 저장된 것을 그대로 쓴다.
+    /// </summary>
+    [SerializeField] private bool baked;
+    public bool Baked { get => baked; set => baked = value; }
 
     public int Chapter => chapter;
     public int Pieces { get; private set; }
@@ -18,7 +25,7 @@ public class ChapterArt : MonoBehaviour
         Rebuild();
     }
 
-    private void OnEnable() => Rebuild();
+    private void OnEnable() { if (!baked) Rebuild(); }
 
     /// <summary>
     /// 【플레이 중에는 꺼질 때 치우지 않는다】 (결정 2-128) — 철수로 구역 씬이 닫힐 때 여기서 Destroy를 걸면,

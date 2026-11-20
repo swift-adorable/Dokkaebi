@@ -78,11 +78,15 @@ public class EnemySpawner : MonoBehaviour
             // 【임시】 철수 지점 2곳 — 25~35m · 원 안에서 5초 버티면 철수 (결정 2-78). 맵(9단계) 때 제자리로.
             if (!SceneFlow.InBunker)
             {
+                var sw = System.Diagnostics.Stopwatch.StartNew();
                 ExtractionDirector.SpawnForRaid(player.position);
 
                 // 맵 상자 (결정 2-140) — 장독 · 궤 · 약단지 · 광주리. 판마다 새로 채운다.
+                long tExtract = sw.ElapsedMilliseconds;
                 LockedSite.SpawnForRaid(player.position);   // 잠긴 곳 먼저 — 상자 · 적이 그 안을 피한다 (결정 2-143)
+                long tHouses = sw.ElapsedMilliseconds;
                 LootBox.SpawnForRaid(player.position);
+                GameLogger.Log($"[LoadTime] 철수 {tExtract}ms · 집 {tHouses - tExtract}ms · 상자 {sw.ElapsedMilliseconds - tHouses}ms · 씬 넘김부터 {SceneFlow.SinceLoadMs:0}ms");
 
                 // 쓰러진 자리 (결정 2-93) — 이 장에 남아 있으면 이 판에 한 번 세운다.
                 string scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
@@ -109,7 +113,11 @@ public class EnemySpawner : MonoBehaviour
 
         // 【미리 배치】 (결정 2-140) — 장 맵에서는 판이 열릴 때 이번 구역의 적을 전부 세워 두고, 더 낳지 않는다.
         if (!SceneFlow.InBunker && ZoneMap.Current != null && player != null)
+        {
+            var sw2 = System.Diagnostics.Stopwatch.StartNew();
             Populate();
+            GameLogger.Log($"[LoadTime] 적 세우기 {sw2.ElapsedMilliseconds}ms · 씬 넘김부터 {SceneFlow.SinceLoadMs:0}ms");
+        }
     }
 
     // ── 미리 배치 (결정 2-140) ─────────────────────────────────────────

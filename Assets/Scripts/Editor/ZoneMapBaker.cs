@@ -167,6 +167,18 @@ public static class ZoneMapBaker
     /// 바닥(Floor)은 씬 뿌리에 따로 있고 플레이어 · 적 콜라이더도 씬에 있어서, 「아래 것만」 모으려고 임시 바닥을 둔다.
     /// 데이터는 Assets/Data/NavMesh/Chapter{n}_NavMesh.asset.
     /// </summary>
+    /// <summary>꾸밈(나무 밑동 막이) 뒤에 길찾기를 다시 굽는다 (v8).</summary>
+    public static void RebakeNavMesh(Scene scene, ChapterMap map)
+    {
+        foreach (GameObject root in scene.GetRootGameObjects())
+            if (root.name == $"Map_Ch{map.Chapter}")
+            {
+                foreach (var s in root.GetComponents<NavMeshSurface>()) Object.DestroyImmediate(s);
+                BakeNavMesh(root, map);
+                return;
+            }
+    }
+
     private static void BakeNavMesh(GameObject root, ChapterMap map)
     {
         var ground = GameObject.CreatePrimitive(PrimitiveType.Cube);

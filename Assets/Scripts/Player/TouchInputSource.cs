@@ -23,7 +23,18 @@ public class TouchInputSource : MonoBehaviour, IPlayerInputSource
 
     public Vector2 MoveInput => moveJoystick != null ? moveJoystick.Value : Vector2.zero;
 
-    public Vector2 AimInput => aimJoystick != null ? aimJoystick.Value : Vector2.zero;
+    /// <summary>조준 막대(화면 기준)를 세계 방향으로 — 카메라가 돌아간 만큼 돌린다 (v8 · 시점 C). 길이는 그대로(자동 사격 문턱).</summary>
+    public Vector2 AimInput
+    {
+        get
+        {
+            Vector2 v = aimJoystick != null ? aimJoystick.Value : Vector2.zero;
+            Camera c = Camera.main;
+            if (c == null || v.sqrMagnitude < 1e-6f) return v;
+            Vector3 w = Quaternion.Euler(0f, c.transform.eulerAngles.y, 0f) * new Vector3(v.x, 0f, v.y);
+            return new Vector2(w.x, w.z);
+        }
+    }
 
     /// <summary>조준 스틱을 일정 이상 기울이면 사격한다. (별도 사격 버튼 없음)</summary>
     public bool ShootHeld => AimInput.sqrMagnitude >= autoFireThreshold * autoFireThreshold;

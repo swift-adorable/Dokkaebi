@@ -109,6 +109,16 @@ namespace Dokkaebi.Tests
         }
     
         [Test]
+        public void 영장_집터_자리는_모두_비어_있다()   // v8 — 길은 집터 자리를 돌아가고, 자리는 숲 · 덩어리 · 앵커를 피한다
+        {
+            foreach (var (z, c, sz) in LockSiteTable.Chapter0Plots)
+            {
+                Assert.IsNull(LockSiteTable.WhyNot(Ch0, new LockSite(z, 0, LockSiteKind.OpenHouse, c, sz, "t"), null), $"{c}");
+                Assert.IsTrue(LockSiteTable.ClearOfPathsForTest(0, new Rect(c - sz * 0.5f, sz)), $"길이 집터 자리 {c} 를 지난다");
+            }
+        }
+
+        [Test]
         public void 넓어진_0장은_적이_넓이만큼_늘어난다()
         {
             Rect r = Ch0.AreaOf("0-1").Value.Bounds;

@@ -65,6 +65,7 @@ public class LockedSite : MonoBehaviour
             return;
 
         string zone = map.AreaOf(ZoneMap.Zone).HasValue ? ZoneMap.Zone : map.ZoneAt(start);
+        var watch = System.Diagnostics.Stopwatch.StartNew();
         IReadOnlyList<LockSite> sites = LockSiteTable.For(map, zone);
         foreach (LockSite site in sites)
             Create(site);
@@ -72,7 +73,7 @@ public class LockedSite : MonoBehaviour
         foreach (LockSite site in open)
             Create(site);
 
-        GameLogger.Log($"[LockedSite] {zone} — 잠긴 곳 {sites.Count} · 열린 집 {open.Count}");
+        GameLogger.Log($"[LockedSite] {zone} — 잠긴 곳 {sites.Count} · 열린 집 {open.Count} · {watch.ElapsedMilliseconds}ms");
     }
 
     /// <summary>이 점이 잠긴 곳(담 안 · 담 위 · 문 앞) 자리인가 — 적 · 상자를 놓을 때 피한다.</summary>
@@ -159,7 +160,7 @@ public class LockedSite : MonoBehaviour
             // 뒤지는 자리 = 가구 (덕코프: 선반 · 장 · 침대 곁이 뒤지는 자리). 상자 그림은 감추고 3D 가구가 그 노릇을 한다.
             // 집터가 커져 가구가 많다 — 다 뒤지는 자리로 두면 상자가 넘친다. 판마다 같은 씨앗으로 몇 곳만 (3 ~ 7).
             for (int i = lootSpots.Count - 1; i > 0; i--) { int j = rng.Next(i + 1); (lootSpots[i], lootSpots[j]) = (lootSpots[j], lootSpots[i]); }
-            int cap = Mathf.Clamp(3 + lootSpots.Count / 3, 3, 7);
+            int cap = Mathf.Clamp(1 + lootSpots.Count / 6, 1, 3);   // v8 · 「상자 너무 과하게 많아」 — 3 ~ 7 → 1 ~ 3 (큰 집터일수록 조금 더)
             if (lootSpots.Count > cap) lootSpots.RemoveRange(cap, lootSpots.Count - cap);
             foreach (Vector3 spot in lootSpots)
             {
@@ -194,8 +195,14 @@ public class LockedSite : MonoBehaviour
     public const float RoofLiftRange = 28f;
     /// <summary>에디터 맵 사진용 — 3D 집 지붕을 처음부터 걷는다(안을 보려고).</summary>
     public static bool PreviewNoRoof;
+    /// <summary>【측정용】 예전처럼 무겁게(합치기 · 막이 잇기 끔) — 전후 비교 때만.</summary>
+    public static bool HeavyForCompare => Application.isEditor && PlayerPrefs.GetInt("Debug.HeavyHouses", 0) == 1;   // 플레이 들어갈 때 정적 값이 지워져 PlayerPrefs 로
     /// <summary>카메라 쪽 벽을 자르는 높이 — 지붕이 걷히면 이 위가 사라져 방 안이 보인다 (덕코프 단면 집).</summary>
     private const float CutHeight = 1.1f;
+    /// <summary>
+    /// 카메라 쪽 벽을 자르는가 — v8(사용자가 고른 시점 C · 대각선 원근)부터 끈다: 덕코프처럼 지붕만 걷고 벽은 제 높이로 선다.
+    /// </summary>
+    private const bool CutWalls = false;
 
     /// <summary>가구 앞(뒤지는 자리) — BuildHouse3D 가 채우고 Build 가 상자를 놓는다.</summary>
     private readonly List<Vector3> lootSpots = new();
@@ -203,7 +210,25 @@ public class LockedSite : MonoBehaviour
     /// <summary>3D 한옥 짜임 (점검용 — 방 자리 · 문).</summary>
     public HanokPlan Plan { get; private set; }
     /// <summary>지금 지붕이 보이는가 (점검용).</summary>
-    public bool RoofShown => roof3D != null && roof3D.activeSelf;
+    public bool RoofShown
+    {
+        get
+        {
+            if (roof3D == null || !roof3D.activeSelf) return false;
+            foreach (var (roof, _) in buildingRoofs) if (roof != null && !roof.activeSelf) return false;
+            return true;
+        }
+    }
+
+    /// <summary>
+    /// 채마다 지붕 · 그 채의 방 네모들 (v8c · 사용자 「건물 근처에서는 뚜껑을 보여 주다가 캐릭터가 입구로 들어갈 때 뚜껑을 없애고 내부를 보여줘」).
+    /// 주인공이 그 채 벽에서 RoofNear(1m) 안으로 다가오면 그 채 지붕만 걷힌다 (사용자가 「입구로 들어갈 때」 → 「건물 근처 한 캐릭터 거리」로 바꿈).
+    /// </summary>
+    private readonly List<(GameObject roof, List<Rect> rooms)> buildingRoofs = new();
+    /// <summary>지붕이 걷히는 거리 — 그 채 벽에서 캐릭터 한 명 남짓(사용자 v8c 「건물 근처 · 거리는 한 캐릭터 정도」).</summary>
+    public const float RoofNear = 1.0f;
+    /// <summary>카메라 쪽 벽 윗부분을 보이거나 감춘다 (시점 비교용).</summary>
+    public void ShowCutaway(bool show) { if (cutaway != null) cutaway.gameObject.SetActive(show); }
     /// <summary>이 집에 놓은 뒤지는 자리 수 (점검용).</summary>
     public int LootCount => lootSpots.Count;
 
@@ -333,7 +358,8 @@ public class LockedSite : MonoBehaviour
                 {
                     float h = run.Building >= 0 ? plan.Buildings[run.Building].WallHeight : House3DWall;
                     if (run.Kind == HanokRunKind.Inner) h *= 0.94f;
-                    WallRun(house, a, e, openings, run.Kind == HanokRunKind.Outer ? gapRate : 0f, rng, h, cut: run.AlongX && !run.BackWall);
+                    WallRun(house, a, e, openings, run.Kind == HanokRunKind.Outer ? gapRate : 0f, rng, h, cut: CutWalls && run.AlongX && !run.BackWall,
+                            inward: new Vector3(run.Inward.x, 0f, run.Inward.y), outer: run.Kind == HanokRunKind.Outer);
                     break;
                 }
                 case HanokRunKind.Rail:
@@ -341,7 +367,7 @@ public class LockedSite : MonoBehaviour
                     Blocker("RailBlock", (a + e) * 0.5f, run.AlongX ? new Vector3(len, 1.2f, 0.2f) : new Vector3(0.2f, 1.2f, len));
                     break;
                 case HanokRunKind.Fence:
-                    FenceRun(house, plan.Fence, plan.Ruin, a, e, openings, rng, cut: run.AlongX && run.A.y < 0f);
+                    FenceRun(house, plan.Fence, plan.Ruin, a, e, openings, rng, cut: CutWalls && run.AlongX && run.A.y < 0f);
                     break;
             }
         }
@@ -359,6 +385,9 @@ public class LockedSite : MonoBehaviour
             }
             float shortSide = Mathf.Min(cover.width, cover.height);
             GameObject roof = HouseMesh.HipRoof(roof3D.transform, cover, b.WallHeight + 0.15f, shortSide * (b.Thatch ? 0.36f : 0.46f), b.Thatch ? 0.55f : 0.8f, b.Thatch ? "roof_choga" : "roof_giwa", !b.Thatch);
+            var rooms = new List<Rect>();
+            foreach (HanokRoomPlan rp in plan.Rooms) if (rp.Building == i) rooms.Add(rp.R);
+            buildingRoofs.Add((roof, rooms));
             if (plan.Ruin && i == 0) roof.transform.Find("RoofS")?.gameObject.SetActive(false);   // 폐가 — 앞 지붕이 내려앉았다
         }
 
@@ -398,6 +427,15 @@ public class LockedSite : MonoBehaviour
             }
         }
 
+        // 가볍게 (v7 · 사용자 「0장으로 넘어갈 때 오래 걸리고 무거워진 느낌」) — 상자 수백 개를 재질마다 메시 하나로 합친다.
+        // 늘 보이는 것 · 카메라 쪽 벽 윗부분 · 지붕은 따로 켜고 끄니 셋을 따로 합친다. 그림 카드(소품)는 그대로.
+        if (!HeavyForCompare)
+        {
+            HouseMesh.Combine(house, cutaway, roof3D.transform);
+            HouseMesh.Combine(cutaway);
+            foreach (var (roof, _) in buildingRoofs) HouseMesh.Combine(roof.transform);   // 채마다 따로 합친다 — 채마다 따로 걷으니까
+        }
+
         if (PreviewNoRoof) { roof3D.SetActive(false); cutaway.gameObject.SetActive(false); }
     }
 
@@ -435,6 +473,8 @@ public class LockedSite : MonoBehaviour
         float h = kind switch { HanokFence.Giwa => 1.8f, HanokFence.Earth => 1.5f, HanokFence.Stone => 1.3f, _ => 1.3f };
         float t = kind == HanokFence.Brush ? 0.18f : 0.5f;
         Vector3 Size(float l, float hh, float tt) => alongX ? new Vector3(l, hh, tt) : new Vector3(tt, hh, l);
+        var solid = new List<(float, float)>();
+        float step = ruin || kind == HanokFence.Stone || kind == HanokFence.Brush ? 2f : 1000f;   // 돌담은 높이가 들쭉날쭉 · 싸리울은 2m 마다 말뚝
         void Piece(float s0, float s1)
         {
             if (s1 - s0 < 0.05f) return;
@@ -459,7 +499,7 @@ public class LockedSite : MonoBehaviour
                     if (kind == HanokFence.Giwa) HouseMesh.Box(parent, "DamBase", c, Size(l, 0.5f, t + 0.04f), "wall_base");
                     break;
             }
-            Blocker("FenceBlock", c, Size(l, 1.6f, t));
+            solid.Add((s0, s1));
         }
         var cuts = new List<(float s, float e)>();
         foreach (var g in gates) cuts.Add((len * 0.5f + g.at - g.width * 0.5f, len * 0.5f + g.at + g.width * 0.5f));
@@ -467,7 +507,7 @@ public class LockedSite : MonoBehaviour
         float cur = 0f;
         foreach (var (s, e) in cuts)
         {
-            for (float s0 = cur; s0 < s - 0.01f; s0 += 2f) Piece(s0, Mathf.Min(s, s0 + 2f));
+            for (float s0 = cur; s0 < s - 0.01f; s0 += step) Piece(s0, Mathf.Min(s, s0 + step));
             foreach (float at in new[] { s, e })   // 대문 기둥
                 HouseMesh.Box(parent, "GatePost", a + dir * at, Size(0.24f, h + 0.5f, 0.24f), "wood_post");
             if (kind == HanokFence.Giwa)   // 일각문 — 작은 기와 지붕
@@ -478,7 +518,9 @@ public class LockedSite : MonoBehaviour
             }
             cur = e;
         }
-        for (float s0 = cur; s0 < len - 0.01f; s0 += 2f) Piece(s0, Mathf.Min(len, s0 + 2f));
+        for (float s0 = cur; s0 < len - 0.01f; s0 += step) Piece(s0, Mathf.Min(len, s0 + step));
+        foreach (var (m0, m1) in Merge(solid))
+            Blocker("FenceBlock", a + dir * ((m0 + m1) * 0.5f), Size(m1 - m0, 1.6f, t));
     }
 
     /// <summary>기둥 + 주춧돌.</summary>
@@ -492,7 +534,7 @@ public class LockedSite : MonoBehaviour
     /// a → b 벽 한 줄 (축에 나란히). openings = (벽 가운데부터 거리, 폭, 문인가). 창은 0.9 ~ 1.8m 높이에 뚫리고 나무 틀이 둘린다.
     /// gaps = 무너진 벽 비율(그 몫만큼 토막을 빼먹는다).
     /// </summary>
-    private void WallRun(Transform parent, Vector3 a, Vector3 b, (float at, float width, bool door)[] openings, float gaps, System.Random rng, float height = House3DWall, bool cut = false)
+    private void WallRun(Transform parent, Vector3 a, Vector3 b, (float at, float width, bool door)[] openings, float gaps, System.Random rng, float height = House3DWall, bool cut = false, Vector3 inward = default, bool outer = false)
     {
         const float t = 0.35f;
         bool alongX = Mathf.Abs(b.x - a.x) > Mathf.Abs(b.z - a.z);
@@ -503,6 +545,8 @@ public class LockedSite : MonoBehaviour
         foreach (var o in openings) cuts.Add((len * 0.5f + o.at - o.width * 0.5f, len * 0.5f + o.at + o.width * 0.5f, o.door));
         cuts.Sort((p, q) => p.s.CompareTo(q.s));
         Vector3 Size(float l, float h) => alongX ? new Vector3(l, h, t) : new Vector3(t, h, l);
+        var solid = new List<(float, float)>();
+        float step = gaps > 0f || HeavyForCompare ? 2f : 1000f;   // 무너진 집만 2m 토막으로 (군데군데 빠지게) — 성한 벽은 한 덩어리 (v7 가볍게)
         void Piece(float s0, float s1, float y0, float y1, string tex = "wall_plaster")
         {
             if (s1 - s0 < 0.05f || y1 - y0 < 0.05f) return;
@@ -514,29 +558,71 @@ public class LockedSite : MonoBehaviour
                 HouseMesh.Box(cutaway != null ? cutaway : parent, "WallTop", a + dir * ((s0 + s1) * 0.5f) + Vector3.up * c0, Size(s1 - s0, y1 - c0), tex);
             }
             else HouseMesh.Box(parent, "Wall", a + dir * ((s0 + s1) * 0.5f) + Vector3.up * y0, Size(s1 - s0, y1 - y0), tex);
-            if (y0 < 0.1f) Blocker("WallBlock", parent.InverseTransformPoint(parent.TransformPoint(a + dir * ((s0 + s1) * 0.5f))), Size(s1 - s0, House3DWall));   // 바닥에 닿는 토막만 걸음을 막는다(문틈 · 무너진 곳은 지나간다)
+            if (y0 < 0.1f) solid.Add((s0, s1));   // 바닥에 닿는 토막만 걸음을 막는다(문틈 · 무너진 곳은 지나간다) — 막이는 끝에 이어 붙여 하나로
         }
         float cur = 0f;
         foreach (var c in cuts)
         {
             // 벽 토막은 2m 마다 끊어 무너진 집이 군데군데 빠질 수 있게
-            for (float s0 = cur; s0 < c.s; s0 += 2f) Piece(s0, Mathf.Min(c.s, s0 + 2f), 0f, height);
+            for (float s0 = cur; s0 < c.s; s0 += step) Piece(s0, Mathf.Min(c.s, s0 + step), 0f, height);
             if (c.door)
             {
-                Piece(c.s, c.e, 2.1f, height);                                         // 문 위 인방
-                HouseMesh.Box(parent, "DoorFrame", a + dir * c.s, Size(0.18f, 2.1f), "wood_post");
-                HouseMesh.Box(parent, "DoorFrame", a + dir * c.e, Size(0.18f, 2.1f), "wood_post");
+                // 문 (v8 · 사용자 「문도 좀 잘 보이게」 · 덕코프 사진: 문틈마다 짙은 문짝이 반쯤 열려 있다)
+                //   짙은 문설주 · 인방 + 안으로 열린 띠살문 두 짝(짙은 살 · 밝은 창호지) + 바깥문 앞 디딤돌
+                Piece(c.s, c.e, 2.1f, height);                                         // 문 위 벽
+                Color frame = new(0.24f, 0.15f, 0.09f), paper = new(0.86f, 0.80f, 0.66f);
+                foreach (float at in new[] { c.s, c.e })
+                    HouseMesh.BoxColor(parent, "DoorJamb", a + dir * at, alongX ? new Vector3(0.2f, 2.2f, t + 0.12f) : new Vector3(t + 0.12f, 2.2f, 0.2f), frame);
+                HouseMesh.BoxColor(parent, "DoorLintel", a + dir * ((c.s + c.e) * 0.5f) + Vector3.up * 2.1f, alongX ? new Vector3(c.e - c.s + 0.3f, 0.2f, t + 0.14f) : new Vector3(t + 0.14f, 0.2f, c.e - c.s + 0.3f), frame);
+                Vector3 inn = inward.sqrMagnitude > 0.01f ? inward.normalized : (alongX ? Vector3.forward : Vector3.right);
+                float lw = (c.e - c.s) * 0.5f - 0.08f;
+                foreach (var (hinge, sgn) in new[] { (c.s + 0.12f, 1f), (c.e - 0.12f, -1f) })
+                {
+                    // 문짝이 문틀에 붙어 90° 안으로 열렸다 (가운데 길은 트여 있다)
+                    Vector3 centre = a + dir * hinge + inn * (t * 0.5f + lw * 0.5f) + Vector3.up * 0.05f;
+                    Vector3 leaf = alongX ? new Vector3(0.07f, 2.0f, lw) : new Vector3(lw, 2.0f, 0.07f);
+                    HouseMesh.BoxColor(parent, "DoorLeaf", centre, leaf, frame);
+                    Vector3 pane = alongX ? new Vector3(0.09f, 1.3f, lw - 0.16f) : new Vector3(lw - 0.16f, 1.3f, 0.09f);
+                    HouseMesh.BoxColor(parent, "DoorPaper", centre + Vector3.up * 0.55f, pane, paper);
+                    for (int k = 1; k <= 2; k++)   // 띠살
+                        HouseMesh.BoxColor(parent, "DoorBar", centre + Vector3.up * (0.55f + k * 0.43f), alongX ? new Vector3(0.1f, 0.05f, lw - 0.16f) : new Vector3(lw - 0.16f, 0.05f, 0.1f), frame);
+                }
+                if (outer)   // 디딤돌
+                    HouseMesh.Box(parent, "Didimdol", a + dir * ((c.s + c.e) * 0.5f) - inn * (t * 0.5f + 0.45f), alongX ? new Vector3(c.e - c.s, 0.18f, 0.6f) : new Vector3(0.6f, 0.18f, c.e - c.s), "floor_stone");
             }
             else
             {
                 Piece(c.s, c.e, 0f, 0.9f);                                             // 창 아래
                 Piece(c.s, c.e, 1.8f, height);                                         // 창 위
-                HouseMesh.Box(parent, "WinSill", a + dir * ((c.s + c.e) * 0.5f) + Vector3.up * 0.85f, Size(c.e - c.s + 0.1f, 0.1f), "wood_post");
-                HouseMesh.Box(cut && cutaway != null ? cutaway : parent, "WinBar", a + dir * ((c.s + c.e) * 0.5f) + Vector3.up * 0.9f, Size(0.08f, 0.9f), "wood_post");   // 창살
+                // 창 — 짙은 틀 + 창호지 + 살 (v8 · 덕코프 사진: 벽마다 창이 또렷한 네모로 보인다)
+                Vector3 wc = a + dir * ((c.s + c.e) * 0.5f);
+                Color wf = new(0.24f, 0.15f, 0.09f), wp = new(0.80f, 0.74f, 0.60f);
+                float ww = c.e - c.s;
+                HouseMesh.BoxColor(parent, "WinPaper", wc + Vector3.up * 0.9f, alongX ? new Vector3(ww, 0.9f, 0.08f) : new Vector3(0.08f, 0.9f, ww), wp);
+                HouseMesh.BoxColor(parent, "WinSill", wc + Vector3.up * 0.84f, alongX ? new Vector3(ww + 0.2f, 0.1f, t + 0.1f) : new Vector3(t + 0.1f, 0.1f, ww + 0.2f), wf);
+                HouseMesh.BoxColor(parent, "WinHead", wc + Vector3.up * 1.78f, alongX ? new Vector3(ww + 0.2f, 0.1f, t + 0.1f) : new Vector3(t + 0.1f, 0.1f, ww + 0.2f), wf);
+                for (int k = -1; k <= 1; k++)
+                    HouseMesh.BoxColor(parent, "WinBar", wc + dir * (k * ww / 3.2f) + Vector3.up * 0.9f, alongX ? new Vector3(0.05f, 0.9f, 0.12f) : new Vector3(0.12f, 0.9f, 0.05f), wf);
+                HouseMesh.BoxColor(parent, "WinBar", wc + Vector3.up * 1.33f, alongX ? new Vector3(ww, 0.05f, 0.12f) : new Vector3(0.12f, 0.05f, ww), wf);
             }
             cur = c.e;
         }
-        for (float s0 = cur; s0 < len - 0.01f; s0 += 2f) Piece(s0, Mathf.Min(len, s0 + 2f), 0f, height);
+        for (float s0 = cur; s0 < len - 0.01f; s0 += step) Piece(s0, Mathf.Min(len, s0 + step), 0f, height);
+        foreach (var (m0, m1) in HeavyForCompare ? solid : Merge(solid))
+            Blocker("WallBlock", a + dir * ((m0 + m1) * 0.5f), Size(m1 - m0, House3DWall));
+    }
+
+    /// <summary>벽 위 구간들을 이어 붙인다 — 창 아래 · 벽 토막이 붙어 있으면 막이 하나 (막이마다 길찾기 구멍을 새로 판다).</summary>
+    private static List<(float, float)> Merge(List<(float s, float e)> parts)
+    {
+        parts.Sort((p, q) => p.s.CompareTo(q.s));
+        var o = new List<(float, float)>();
+        foreach (var (ps, pe) in parts)
+        {
+            if (o.Count > 0 && ps <= o[^1].Item2 + 0.05f) o[^1] = (o[^1].Item1, Mathf.Max(o[^1].Item2, pe));
+            else o.Add((ps, pe));
+        }
+        return o;
     }
 
     /// <summary>툇마루 난간 — 낮은 나무 띠 + 동자 기둥.</summary>
@@ -671,7 +757,7 @@ public class LockedSite : MonoBehaviour
         var card = new GameObject($"Prop_{sprite}");
         card.transform.SetParent(parent, false);
         card.transform.localPosition = local;
-        card.transform.rotation = Quaternion.Euler(ArtCatalog.Pitch, 0f, 0f);
+        card.transform.rotation = ArtCatalog.CardTilt;
         float w = tex.width / BuildingSprite.PixelsPerMeter;
         card.transform.localScale = new Vector3(w, w * tex.height / tex.width, 1f);
         card.AddComponent<MeshFilter>().sharedMesh = BuildingSprite.Quad();
@@ -758,7 +844,7 @@ public class LockedSite : MonoBehaviour
         var card = new GameObject(name);
         card.transform.SetParent(parent != null ? parent : transform, false);
         card.transform.localPosition = local;
-        card.transform.rotation = Quaternion.Euler(ArtCatalog.Pitch, 0f, 0f);
+        card.transform.rotation = ArtCatalog.CardTilt;
         card.transform.localScale = new Vector3(width, width * source.height / source.width, 1f);
         card.AddComponent<MeshFilter>().sharedMesh = BuildingSprite.Quad();
         var renderer = card.AddComponent<MeshRenderer>();
@@ -817,7 +903,21 @@ public class LockedSite : MonoBehaviour
 
         // 【지붕 걷기】 — 집 안에 들어서면 지붕 그림을 감추고 방을 보인다.
         // 3D 집(결정 2-151)은 덕코프처럼 가까이 오면(20m) 지붕을 걷어 방이 들여다보이게 — 들어가기 전에 안을 보고 고른다
-        bool now = roof3D != null ? (new Vector2(p.x - Site.Center.x, p.z - Site.Center.y)).magnitude < RoofLiftRange : Site.Inside(p, 0.15f);
+        if (buildingRoofs.Count > 0)
+        {
+            // 3D 한옥 — 들어선 채의 지붕만 걷는다 (v8c)
+            var local = new Vector2(p.x - Site.Center.x, p.z - Site.Center.y);
+            foreach (var (roof, rooms) in buildingRoofs)
+            {
+                if (roof == null) continue;
+                bool inThis = false;
+                foreach (Rect r in rooms)
+                    if (local.x > r.xMin - RoofNear && local.x < r.xMax + RoofNear && local.y > r.yMin - RoofNear && local.y < r.yMax + RoofNear) { inThis = true; break; }
+                if (roof.activeSelf == inThis) roof.SetActive(!inThis);
+            }
+            return;
+        }
+        bool now = Site.Inside(p, 0.15f);
         if (now == inside)
             return;
         inside = now;

@@ -44,6 +44,8 @@ public sealed class HanokRun
     /// <summary>이 벽 너머(북쪽)가 집 밖인 뒷벽 — 카메라를 가리지 않으니 자르지 않는다.</summary>
     public bool BackWall;
     public int Building = -1;
+    /// <summary>문짝이 열려 들어가는 쪽(방 안) — 바깥벽은 방 쪽, 안벽은 이웃 방 쪽.</summary>
+    public Vector2 Inward;
     public float Length => (B - A).magnitude;
     public bool AlongX => Mathf.Abs(B.x - A.x) > Mathf.Abs(B.y - A.y);
 }
@@ -66,15 +68,15 @@ public readonly struct HanokYard
 /// </summary>
 public sealed class HanokPlan
 {
-    public const float Depth = 2.7f;      // 방 깊이 한 칸
+    public const float Depth = 3.2f;      // 방 깊이 한 칸 (v8 — 덕코프 방은 캐릭터 폭의 6 ~ 8배 · 「방을 좀 더 넓혀봐」)
     public const float Porch = 1.5f;      // 툇마루 폭
     /// <summary>
     /// 집터 키움 (v7 · 2026-11-19 사용자 「한옥 건물 자체가 너무 작으니까 좀 더 키워 봐」).
     /// 짜임 좌표(아래 Lay 의 미터)를 통째로 이만큼 키운다 — 방 · 마당 · 담 · 집터가 같이 커지고, 가구는 그대로라 방이 넉넉해진다.
     /// 벽 높이는 캐릭터 키에 맞춰 조금만(WallScale).
     /// </summary>
-    public const float Scale = 1.4f;
-    public const float WallScale = 1.15f;
+    public const float Scale = 1.7f;   // v8 1.4 → 1.7
+    public const float WallScale = 1.1f;
     public const float DoorWidth = 1.6f;   // v7 — 1.1m 는 몸 · 내비가 겨우 빠졌다(플레이 점검)
 
     public string Variant;
@@ -132,6 +134,7 @@ public sealed class HanokPlan
         p.ScaleUp(Scale);
         if (rng.Next(2) == 0) p.Mirror();
         p.MakeRuns();
+        p.ResolveYard();
         return p;
     }
 
@@ -444,7 +447,7 @@ public sealed class HanokPlan
                         HanokRoom ok = Rooms[other].Kind;
                         if (room.Kind == HanokRoom.Hall && ok == HanokRoom.Hall) continue;                                     // 대청 두 칸 — 트였다
                         if (room.Kind == HanokRoom.Kitchen && ok == HanokRoom.Jeongju || room.Kind == HanokRoom.Jeongju && ok == HanokRoom.Kitchen) continue;   // 정주간 — 부엌과 트였다
-                        var run = new HanokRun { A = Vector2.Lerp(a, b, t0 / len), B = Vector2.Lerp(a, b, t1 / len), Kind = HanokRunKind.Inner, Building = room.Building };
+                        var run = new HanokRun { A = Vector2.Lerp(a, b, t0 / len), B = Vector2.Lerp(a, b, t1 / len), Kind = HanokRunKind.Inner, Building = room.Building, Inward = s == 0 ? Vector2.right : Vector2.up };
                         if (t1 - t0 >= 2.0f && InnerDoor(room.Kind, ok))
                             run.Openings.Add(new HanokOpening(0f, 1.5f, HanokOpenKind.Door));
                         Runs.Add(run);
@@ -474,7 +477,7 @@ public sealed class HanokPlan
         float len = (b - a).magnitude;
         bool front = s == room.Facing;
         bool back = s == (room.Facing + 2) % 4;
-        var run = new HanokRun { A = a, B = b, Kind = HanokRunKind.Outer, Building = room.Building, BackWall = s == 1 };
+        var run = new HanokRun { A = a, B = b, Kind = HanokRunKind.Outer, Building = room.Building, BackWall = s == 1, Inward = s switch { 0 => Vector2.left, 1 => Vector2.down, 2 => Vector2.right, _ => Vector2.up } };
         switch (room.Kind)
         {
             case HanokRoom.Gate:
@@ -514,9 +517,9 @@ public sealed class HanokPlan
 
     private static void Windows(HanokRun run, float len)
     {
-        int n = Mathf.Max(0, Mathf.FloorToInt(len / 2.6f));
+        int n = Mathf.Max(0, Mathf.FloorToInt(len / 3.4f));
         for (int i = 0; i < n; i++)
-            run.Openings.Add(new HanokOpening(-len * 0.5f + len * (i + 0.5f) / n, 0.9f, HanokOpenKind.Window));
+            run.Openings.Add(new HanokOpening(-len * 0.5f + len * (i + 0.5f) / n, 1.3f, HanokOpenKind.Window));   // v8 — 큰 방에 맞춰 창도 크게
     }
 
     private void AddPorch(HanokRoomPlan room, int s, Vector2 a, Vector2 b)
@@ -536,6 +539,42 @@ public sealed class HanokPlan
     }
 
     private static Rect Shrink(Rect r, float m) => Rect.MinMaxRect(r.xMin + m, r.yMin + m, r.xMax - m, r.yMax - m);
+
+    /// <summary>
+    /// 마당 살림이 방 · 툇마루에 붙으면 가까운 빈 마당으로 옮긴다 — 방 깊이를 바꿔도(v8) 짜임 좌표를 하나하나 고치지 않게.
+    /// 집터 안 · 방 · 툇마루에서 0.8m 떨어진 가장 가까운 자리를 나선으로 찾는다. 박석(stepping)은 길이라 그대로.
+    /// </summary>
+    private void ResolveYard()
+    {
+        bool Free(Vector2 q)
+        {
+            if (Mathf.Abs(q.x) > hx - 1.5f || Mathf.Abs(q.y) > hz - 1.5f) return false;
+            foreach (HanokRoomPlan r in Rooms) if (Rect.MinMaxRect(r.R.xMin - 1.4f, r.R.yMin - 1.4f, r.R.xMax + 1.4f, r.R.yMax + 1.4f).Contains(q)) return false;
+            foreach (Rect pr in Porches) if (Rect.MinMaxRect(pr.xMin - 1.4f, pr.yMin - 1.4f, pr.xMax + 1.4f, pr.yMax + 1.4f).Contains(q)) return false;
+            foreach (HanokRun run in Runs)
+                if (run.Kind == HanokRunKind.Fence)
+                {
+                    Vector2 d = run.B - run.A; float t = Mathf.Clamp01(Vector2.Dot(q - run.A, d) / d.sqrMagnitude);
+                    if ((run.A + d * t - q).magnitude < 1.4f) return false;
+                }
+            return true;
+        }
+        for (int i = 0; i < Yard.Count; i++)
+        {
+            HanokYard y = Yard[i];
+            if (y.Kind == "stepping" || Free(y.At)) continue;
+            Vector2 best = y.At; bool found = false;
+            for (float rad = 0.5f; rad < 12f && !found; rad += 0.5f)
+                for (int k = 0; k < 16 && !found; k++)
+                {
+                    float a = k * Mathf.PI / 8f;
+                    Vector2 q = y.At + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * rad;
+                    if (Free(q)) { best = q; found = true; }
+                }
+            if (found) Yard[i] = new HanokYard(y.Kind, best);
+            else { Yard.RemoveAt(i); i--; }   // 둘 데가 없으면 뺀다
+        }
+    }
 
     // ── 검사 (테스트용) ──────────────────────────────────────────────
 
