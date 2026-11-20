@@ -23,6 +23,15 @@ public static class HouseWalkProbe
     [MenuItem("Dokkaebi/Debug/소굴에서 출발 (넘어가는 시간 재기)")]
     public static void DepartTimed() { if (EditorApplication.isPlaying) SceneFlow.Depart(); }
 
+    [MenuItem("Dokkaebi/Debug/0-2로 출발 (소굴 · 0장 어디서나)")]
+    public static void DepartTo02()
+    {
+        if (!EditorApplication.isPlaying) return;
+        StoryManager.TargetZone = "0-2";
+        Debug.Log($"[HouseWalk] 0-2 출발 → 정해진 구역 {StoryManager.TargetZone}");
+        if (SceneFlow.InBunker) SceneFlow.Depart(); else ToChapter0Timed();
+    }
+
     [MenuItem("Dokkaebi/Debug/0장으로 넘어가기 (넘어가는 시간 재기)")]
     public static void ToChapter0Timed()
     {

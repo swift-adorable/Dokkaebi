@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// 【미니맵】 (결정 2-90) — 오른쪽 위 · 북쪽 고정(카메라와 같은 방향) · 플레이어 둘레 MinimapRange(36m).
+/// 【미니맵】 (결정 2-90) — 오른쪽 위 · 카메라가 보는 쪽이 위(결정 2-153) · 플레이어 둘레 MinimapRange(36m).
 ///
 ///   · 보이는 것: 내 자리 · 바라보는 쪽(화살표) · 찾은 길목 · 내가 찍은 마커 · 금줄(그림에 그려져 있다)
 ///   · 가 보지 않은 땅은 어둡다(안개) · 적은 보이지 않는다 (Map_System 4절)
@@ -221,6 +221,11 @@ public class MinimapUI : MonoBehaviour
         Place(closedImage, rect, inside);
         Place(fogImage, rect, inside);
 
+        // 【카메라와 같은 쪽이 위】 (결정 2-153 · 카메라를 35° 돌린 뒤) — 화면 위 = 카메라가 보는 쪽.
+        // 동그란 판 안 전체(그림 · 안개 · 점)를 카메라 방향만큼 돌리고, 글자 점은 반대로 돌려 바로 세운다.
+        float yaw = ViewYaw();
+        view.localRotation = Quaternion.Euler(0f, 0f, yaw);
+        iconTilt = Quaternion.Euler(0f, 0f, -yaw);
         playerArrow.localRotation = Quaternion.Euler(0f, 0f, -runtime.Player.eulerAngles.y);
 
         int used = 0;
@@ -269,6 +274,15 @@ public class MinimapUI : MonoBehaviour
             icons[i].gameObject.SetActive(false);
     }
 
+    private Quaternion iconTilt = Quaternion.identity;
+
+    /// <summary>지금 카메라가 보는 쪽(북쪽에서 시계 방향 °) — 카메라가 없으면 정해 둔 값.</summary>
+    public static float ViewYaw()
+    {
+        Camera cam = Camera.main;
+        return cam != null ? cam.transform.eulerAngles.y : ArtCatalog.Yaw;
+    }
+
     private static readonly string[] markerNumbers = BuildMarkerNumbers();
 
     private static string[] BuildMarkerNumbers()
@@ -301,6 +315,7 @@ public class MinimapUI : MonoBehaviour
             local /= k;
 
         icon.rectTransform.anchoredPosition = local;
+        icon.rectTransform.localRotation = iconTilt;
         icon.gameObject.SetActive(true);
     }
 
