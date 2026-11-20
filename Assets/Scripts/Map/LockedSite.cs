@@ -73,6 +73,7 @@ public class LockedSite : MonoBehaviour
         foreach (LockSite site in open)
             Create(site);
 
+        ClosedHanok.SpawnFor(map);   // 들어가지 못하는 3D 한옥 (헛간 · 방앗간)
         GameLogger.Log($"[LockedSite] {zone} — 잠긴 곳 {sites.Count} · 열린 집 {open.Count} · {watch.ElapsedMilliseconds}ms");
     }
 
@@ -286,6 +287,9 @@ public class LockedSite : MonoBehaviour
         roof3D = new GameObject("Roofs");
         roof3D.transform.SetParent(house, false);
         float gapRate = plan.Ruin ? 0.3f : 0f;
+        // 안마당 — 흰 모래 (2026-11-20 노트 9번). 담 안 전체에 얇게 깔고 기단 · 바닥이 그 위에 선다. 폐가는 흙 그대로.
+        if (!plan.Ruin)
+            HouseMesh.Box(house, "Yard", Vector3.zero, new Vector3(Site.Size.x - 0.6f, 0.015f, Site.Size.y - 0.6f), "floor_yard", false);
         var posts = new HashSet<Vector2Int>();
         void PostOnce(Vector2 p, float h) { if (posts.Add(new Vector2Int(Mathf.RoundToInt(p.x * 10f), Mathf.RoundToInt(p.y * 10f)))) Post(house, new Vector3(p.x, 0f, p.y), h); }
 
@@ -294,8 +298,9 @@ public class LockedSite : MonoBehaviour
         {
             Rect r = room.R;
             HanokBuilding b = plan.Buildings[room.Building];
-            HouseMesh.Box(house, "Gidan", new Vector3(r.center.x, 0f, r.center.y), new Vector3(r.width + 0.3f, 0.16f, r.height + 0.3f), "wall_base");
             float fh = FloorHeight(room.Kind);
+            // 기단 — 벽 밖으로 0.6m 나온 장대석 단 (2026-11-20 마인크래프트 노트 3번). 높이는 방바닥에 맞춘다(바닥보다 높으면 바닥을 덮는다).
+            HouseMesh.Box(house, "Gidan", new Vector3(r.center.x, 0f, r.center.y), new Vector3(r.width + 1.2f, Mathf.Max(0.05f, fh - 0.01f), r.height + 1.2f), "wall_base");
             HouseMesh.Box(house, "Floor", new Vector3(r.center.x, 0f, r.center.y), new Vector3(r.width - 0.1f, fh, r.height - 0.1f), FloorTex(room.Kind), false);
             if (room.Kind == HanokRoom.Stable)
                 HouseMesh.BoxColor(house, "Straw", new Vector3(r.center.x, fh, r.center.y), new Vector3(r.width * 0.6f, 0.04f, r.height * 0.5f), new Color(0.62f, 0.52f, 0.3f));
@@ -340,7 +345,7 @@ public class LockedSite : MonoBehaviour
         // 툇마루 — 마당 쪽 앞에 마루 띠 + 바깥 기둥
         foreach (Rect p in plan.Porches)
         {
-            HouseMesh.Box(house, "ToetGidan", new Vector3(p.center.x, 0f, p.center.y), new Vector3(p.width + 0.3f, 0.16f, p.height + 0.3f), "wall_base");
+            HouseMesh.Box(house, "ToetGidan", new Vector3(p.center.x, 0f, p.center.y), new Vector3(p.width + 1.2f, 0.29f, p.height + 1.2f), "wall_base");
             HouseMesh.Box(house, "Toet", new Vector3(p.center.x, 0f, p.center.y), new Vector3(p.width, 0.3f, p.height), "floor_wood");
         }
 
@@ -384,7 +389,7 @@ public class LockedSite : MonoBehaviour
                     cover = Rect.MinMaxRect(Mathf.Min(cover.xMin, p.xMin), Mathf.Min(cover.yMin, p.yMin), Mathf.Max(cover.xMax, p.xMax), Mathf.Max(cover.yMax, p.yMax));
             }
             float shortSide = Mathf.Min(cover.width, cover.height);
-            GameObject roof = HouseMesh.HipRoof(roof3D.transform, cover, b.WallHeight + 0.15f, shortSide * (b.Thatch ? 0.36f : 0.46f), b.Thatch ? 0.55f : 0.8f, b.Thatch ? "roof_choga" : "roof_giwa", !b.Thatch);
+            GameObject roof = HouseMesh.HipRoof(roof3D.transform, cover, b.WallHeight + 0.15f, shortSide * (b.Thatch ? 0.36f : 0.46f), b.Thatch ? 0.55f : 1.1f, b.Thatch ? "roof_choga" : "roof_giwa", !b.Thatch);
             var rooms = new List<Rect>();
             foreach (HanokRoomPlan rp in plan.Rooms) if (rp.Building == i) rooms.Add(rp.R);
             buildingRoofs.Add((roof, rooms));
@@ -399,9 +404,9 @@ public class LockedSite : MonoBehaviour
             switch (y.Kind)
             {
                 case "jangdok":   // 장독대 — 돌 단 위 장독
-                    HouseMesh.Box(house, "Jangdokdae", at, new Vector3(2.0f, 0.3f, 1.1f), "wall_base");
-                    WorldCard("jars", at + new Vector3(-0.45f, 0.3f, 0.1f), house);
-                    WorldCard("jars", at + new Vector3(0.5f, 0.3f, -0.1f), house);
+                    // PixelLab 장독대 그림 (2026-11-20) — 돌 단 + 크고 작은 독 무리가 한 장에
+                    WorldCard("jangdokdae", at, house);
+                    Blocker("JangdokBlock", at, new Vector3(2.0f, 1f, 1.1f));
                     break;
                 case "jars": WorldCard("jars", at, house); break;
                 case "woodpile": WorldCard("woodpile", at, house); break;
@@ -416,13 +421,11 @@ public class LockedSite : MonoBehaviour
                     Blocker("WellBlock", at, new Vector3(1.3f, 1f, 1.3f));
                     break;
                 case "pyeongsang":   // 평상
-                    HouseMesh.Box(house, "Pyeongsang", at + Vector3.up * 0.35f, new Vector3(2.4f, 0.12f, 1.6f), "floor_wood");
-                    foreach (var o in new[] { new Vector3(-1.1f, 0f, -0.7f), new Vector3(1.1f, 0f, -0.7f), new Vector3(-1.1f, 0f, 0.7f), new Vector3(1.1f, 0f, 0.7f) })
-                        HouseMesh.Box(house, "PyeongLeg", at + o, new Vector3(0.12f, 0.35f, 0.12f), "wood_post");
+                    WorldCard("pyeongsang", at, house);   // PixelLab 평상 그림 (2026-11-20)
                     break;
                 case "stepping":   // 박석 디딤돌 — 대문에서 대청 쪽으로
                     for (int i = -2; i <= 2; i++)
-                        HouseMesh.Box(house, "Stepping", at + new Vector3((i % 2) * 0.15f, 0f, i * 0.9f), new Vector3(0.75f, 0.05f, 0.55f), "floor_stone", false);
+                        HouseMesh.Box(house, "Stepping", at + new Vector3((i % 2) * 0.15f, 0f, i * 0.9f), new Vector3(0.75f, 0.05f, 0.55f), "floor_flagstone", false);
                     break;
             }
         }
@@ -494,7 +497,13 @@ public class LockedSite : MonoBehaviour
                     string tex = kind == HanokFence.Giwa ? "wall_plaster" : "wall_base";
                     HouseMesh.Box(parent, "Dam", c, Size(l, low, t), tex);
                     if (cut && hh > low) HouseMesh.Box(cutaway, "DamTop", c + Vector3.up * low, Size(l, hh - low, t), tex);
-                    if (kind == HanokFence.Giwa) HouseMesh.Box(cut ? cutaway : parent, "DamCap", c + Vector3.up * hh, Size(l + 0.02f, 0.22f, t + 0.3f), "roof_giwa");
+                    if (kind == HanokFence.Giwa)   // 기와 갓 — 넓은 아래 단 + 좁은 윗단 + 흰 마루 한 줄 (노트 8번)
+                    {
+                        Transform capParent = cut ? cutaway : parent;
+                        HouseMesh.Box(capParent, "DamCap", c + Vector3.up * hh, Size(l + 0.02f, 0.12f, t + 0.55f), "roof_giwa");
+                        HouseMesh.Box(capParent, "DamCap2", c + Vector3.up * (hh + 0.12f), Size(l + 0.02f, 0.14f, t + 0.2f), "roof_giwa");
+                        HouseMesh.BoxColor(capParent, "DamRidge", c + Vector3.up * (hh + 0.26f), Size(l + 0.02f, 0.06f, 0.16f), new Color(0.90f, 0.88f, 0.82f));
+                    }
                     if (kind == HanokFence.Earth) HouseMesh.Box(cut ? cutaway : parent, "DamCap", c + Vector3.up * hh, Size(l + 0.02f, 0.25f, t + 0.25f), "roof_choga");
                     if (kind == HanokFence.Giwa) HouseMesh.Box(parent, "DamBase", c, Size(l, 0.5f, t + 0.04f), "wall_base");
                     break;
@@ -526,8 +535,9 @@ public class LockedSite : MonoBehaviour
     /// <summary>기둥 + 주춧돌.</summary>
     private void Post(Transform parent, Vector3 at, float height = House3DWall)
     {
-        HouseMesh.Box(parent, "Chucho", at, new Vector3(0.42f, 0.18f, 0.42f), "wall_base");
-        HouseMesh.Box(parent, "Post", at + Vector3.up * 0.18f, new Vector3(0.28f, height, 0.28f), "wood_post");
+        HouseMesh.Box(parent, "Chucho", at, new Vector3(0.56f, 0.34f, 0.56f), "wall_base");
+        // 기둥이 벽(0.35m)보다 굵어야 벽면 앞으로 드러난다 — 기둥 · 띠가 「나무 액자 + 흰 판」이 된다 (노트 7번)
+        HouseMesh.Box(parent, "Post", at + Vector3.up * 0.18f, new Vector3(0.44f, height, 0.44f), "wood_post");
     }
 
     /// <summary>
@@ -570,7 +580,7 @@ public class LockedSite : MonoBehaviour
                 // 문 (v8 · 사용자 「문도 좀 잘 보이게」 · 덕코프 사진: 문틈마다 짙은 문짝이 반쯤 열려 있다)
                 //   짙은 문설주 · 인방 + 안으로 열린 띠살문 두 짝(짙은 살 · 밝은 창호지) + 바깥문 앞 디딤돌
                 Piece(c.s, c.e, 2.1f, height);                                         // 문 위 벽
-                Color frame = new(0.24f, 0.15f, 0.09f), paper = new(0.86f, 0.80f, 0.66f);
+                Color frame = new(0.24f, 0.15f, 0.09f);
                 foreach (float at in new[] { c.s, c.e })
                     HouseMesh.BoxColor(parent, "DoorJamb", a + dir * at, alongX ? new Vector3(0.2f, 2.2f, t + 0.12f) : new Vector3(t + 0.12f, 2.2f, 0.2f), frame);
                 HouseMesh.BoxColor(parent, "DoorLintel", a + dir * ((c.s + c.e) * 0.5f) + Vector3.up * 2.1f, alongX ? new Vector3(c.e - c.s + 0.3f, 0.2f, t + 0.14f) : new Vector3(t + 0.14f, 0.2f, c.e - c.s + 0.3f), frame);
@@ -581,14 +591,10 @@ public class LockedSite : MonoBehaviour
                     // 문짝이 문틀에 붙어 90° 안으로 열렸다 (가운데 길은 트여 있다)
                     Vector3 centre = a + dir * hinge + inn * (t * 0.5f + lw * 0.5f) + Vector3.up * 0.05f;
                     Vector3 leaf = alongX ? new Vector3(0.07f, 2.0f, lw) : new Vector3(lw, 2.0f, 0.07f);
-                    HouseMesh.BoxColor(parent, "DoorLeaf", centre, leaf, frame);
-                    Vector3 pane = alongX ? new Vector3(0.09f, 1.3f, lw - 0.16f) : new Vector3(lw - 0.16f, 1.3f, 0.09f);
-                    HouseMesh.BoxColor(parent, "DoorPaper", centre + Vector3.up * 0.55f, pane, paper);
-                    for (int k = 1; k <= 2; k++)   // 띠살
-                        HouseMesh.BoxColor(parent, "DoorBar", centre + Vector3.up * (0.55f + k * 0.43f), alongX ? new Vector3(0.1f, 0.05f, lw - 0.16f) : new Vector3(lw - 0.16f, 0.05f, 0.1f), frame);
+                    HouseMesh.Box(parent, "DoorLeaf", centre, leaf, "lattice_door");   // 띠살문 그림 (2026-11-20 · 한지 + 짙은 살)
                 }
                 if (outer)   // 디딤돌
-                    HouseMesh.Box(parent, "Didimdol", a + dir * ((c.s + c.e) * 0.5f) - inn * (t * 0.5f + 0.45f), alongX ? new Vector3(c.e - c.s, 0.18f, 0.6f) : new Vector3(0.6f, 0.18f, c.e - c.s), "floor_stone");
+                    HouseMesh.Box(parent, "Didimdol", a + dir * ((c.s + c.e) * 0.5f) - inn * (t * 0.5f + 0.9f), alongX ? new Vector3(c.e - c.s, 0.16f, 0.6f) : new Vector3(0.6f, 0.16f, c.e - c.s), "floor_stone");
             }
             else
             {
@@ -596,18 +602,33 @@ public class LockedSite : MonoBehaviour
                 Piece(c.s, c.e, 1.8f, height);                                         // 창 위
                 // 창 — 짙은 틀 + 창호지 + 살 (v8 · 덕코프 사진: 벽마다 창이 또렷한 네모로 보인다)
                 Vector3 wc = a + dir * ((c.s + c.e) * 0.5f);
-                Color wf = new(0.24f, 0.15f, 0.09f), wp = new(0.80f, 0.74f, 0.60f);
+                Color wf = new(0.24f, 0.15f, 0.09f);
                 float ww = c.e - c.s;
-                HouseMesh.BoxColor(parent, "WinPaper", wc + Vector3.up * 0.9f, alongX ? new Vector3(ww, 0.9f, 0.08f) : new Vector3(0.08f, 0.9f, ww), wp);
+                HouseMesh.Box(parent, "WinPaper", wc + Vector3.up * 0.9f, alongX ? new Vector3(ww, 0.9f, 0.08f) : new Vector3(0.08f, 0.9f, ww), "lattice");   // 정자살 그림
                 HouseMesh.BoxColor(parent, "WinSill", wc + Vector3.up * 0.84f, alongX ? new Vector3(ww + 0.2f, 0.1f, t + 0.1f) : new Vector3(t + 0.1f, 0.1f, ww + 0.2f), wf);
                 HouseMesh.BoxColor(parent, "WinHead", wc + Vector3.up * 1.78f, alongX ? new Vector3(ww + 0.2f, 0.1f, t + 0.1f) : new Vector3(t + 0.1f, 0.1f, ww + 0.2f), wf);
-                for (int k = -1; k <= 1; k++)
-                    HouseMesh.BoxColor(parent, "WinBar", wc + dir * (k * ww / 3.2f) + Vector3.up * 0.9f, alongX ? new Vector3(0.05f, 0.9f, 0.12f) : new Vector3(0.12f, 0.9f, 0.05f), wf);
-                HouseMesh.BoxColor(parent, "WinBar", wc + Vector3.up * 1.33f, alongX ? new Vector3(ww, 0.05f, 0.12f) : new Vector3(0.12f, 0.05f, ww), wf);
             }
             cur = c.e;
         }
         for (float s0 = cur; s0 < len - 0.01f; s0 += step) Piece(s0, Mathf.Min(len, s0 + step), 0f, height);
+        // 【나무 띠 세 줄】 (2026-11-20 마인크래프트 노트 2번) — 하방(바닥 ~ 0.28) · 중방(0.84 ~ 0.96, 창 밑틀과 같은 줄) · 상방(벽 위 0.22).
+        // 벽보다 0.04m 씩 앞뒤로 나와 기둥과 이어진다. 하방 · 중방은 문에서 끊기고 상방은 문 위로 지나간다. 무너진 벽엔 두지 않는다.
+        if (gaps <= 0f && len > 0.3f)
+        {
+            float bt = t + 0.08f;
+            Vector3 Band(float l, float h) => alongX ? new Vector3(l, h, bt) : new Vector3(bt, h, l);
+            var runs = new List<(float, float)>();
+            float c0 = 0f;
+            foreach (var c in cuts) { if (!c.door) continue; if (c.s > c0 + 0.05f) runs.Add((c0, c.s)); c0 = c.e; }
+            if (len > c0 + 0.05f) runs.Add((c0, len));
+            foreach (var (b0, b1) in runs)
+            {
+                Vector3 bc = a + dir * ((b0 + b1) * 0.5f);
+                HouseMesh.Box(parent, "Haban", bc, Band(b1 - b0, 0.28f), "wood_post");
+                HouseMesh.Box(parent, "Jungban", bc + Vector3.up * 0.84f, Band(b1 - b0, 0.12f), "wood_post");
+            }
+            HouseMesh.Box(parent, "Sangban", a + dir * (len * 0.5f) + Vector3.up * (height - 0.22f), Band(len, 0.22f), "wood_post");
+        }
         foreach (var (m0, m1) in HeavyForCompare ? solid : Merge(solid))
             Blocker("WallBlock", a + dir * ((m0 + m1) * 0.5f), Size(m1 - m0, House3DWall));
     }

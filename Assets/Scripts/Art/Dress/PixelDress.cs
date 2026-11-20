@@ -327,7 +327,9 @@ public static class PixelDress
                 break;
             case MapBlockKind.Building:
                 // 집 그림 (결정 2-150 — 헛간 · 방앗간이 회색 상자로 남아 있었다). 넓적하면 헛간, 아니면 방앗간(물레방아).
-                AddFixed(c, b.Size.x > b.Size.z * 1.5f ? "story_barn" : "story_mill", new Vector3(b.Center.x, 0f, b.Center.y - b.Size.z * 0.5f - 0.2f));
+                // 0장은 그림 대신 들어가지 못하는 3D 한옥(ClosedHanok)이 선다 (2026-11-20 사용자 「이미지로 넣은 한옥도 직접 만들어 · 들어가지 못하게」)
+                if (c.Map.Chapter != 0)
+                    AddFixed(c, b.Size.x > b.Size.z * 1.5f ? "story_barn" : "story_mill", new Vector3(b.Center.x, 0f, b.Center.y - b.Size.z * 0.5f - 0.2f));
                 // 집 둘레 살림 — 장독은 벽에 붙여 무리로, 장작은 문 옆, 수레 · 광주리는 마당 한쪽.
                 Group(c, center + new Vector3(-b.Size.x * 0.5f - 1.0f, 0f, b.Size.z * 0.1f), 0.7f, c.Rnd.Next(2, 4), Jars);
                 Group(c, center + new Vector3(b.Size.x * 0.5f + 1.1f, 0f, -b.Size.z * 0.35f), 0.6f, 2, Woodpile);

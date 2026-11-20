@@ -159,7 +159,18 @@ public static class HouseMesh
         Vector3 rA, rB;   // 용마루 양 끝
         if (alongX) { float h = Mathf.Min(half, (x1 - x0) * 0.5f - 0.01f); rA = new Vector3(x0 + h, ridge, cz); rB = new Vector3(x1 - h, ridge, cz); }
         else { float h = Mathf.Min(half, (z1 - z0) * 0.5f - 0.01f); rA = new Vector3(cx, ridge, z0 + h); rB = new Vector3(cx, ridge, z1 - h); }
-        Vector3 SW = new(x0, eave, z0), SE = new(x1, eave, z0), NE = new(x1, eave, z1), NW = new(x0, eave, z1);
+        // 【처마 끝 들림】 (2026-11-20 · 마인크래프트 한옥 노트 5번) — 기와지붕은 네 귀가 0.45m 들리고 처마 가운데가 가장 낮다.
+        float lift = ridgeCap ? Mathf.Min(0.45f, rise * 0.3f) : 0f;
+        Vector3 SW = new(x0, eave + lift, z0), SE = new(x1, eave + lift, z0), NE = new(x1, eave + lift, z1), NW = new(x0, eave + lift, z1);
+        // 처마 한 변을 다섯 점으로 — 끝은 들리고 가운데는 처진다 (가운데 = eave)
+        Vector3[] Eave(Vector3 p0, Vector3 p1)
+        {
+            if (lift <= 0f) return new[] { p0, p1 };
+            var e = new Vector3[5];
+            for (int i = 0; i < 5; i++) { float t = i / 4f; Vector3 q = Vector3.Lerp(p0, p1, t); float k = (2f * t - 1f); q.y = eave + lift * k * k; e[i] = q; }
+            return e;
+        }
+        Vector3[] Poly(Vector3 p0, Vector3 p1, params Vector3[] top) { var l = new List<Vector3>(Eave(p0, p1)); l.AddRange(top); return l.ToArray(); }
 
         void Face(string name, Vector3[] pts)   // pts[0] → pts[1] 이 처마
         {
@@ -189,21 +200,57 @@ public static class HouseMesh
 
         if (alongX)
         {
-            Face("RoofS", new[] { SW, SE, rB, rA });
-            Face("RoofN", new[] { NE, NW, rA, rB });
-            Face("RoofW", new[] { NW, SW, rA });
-            Face("RoofE", new[] { SE, NE, rB });
+            Face("RoofS", Poly(SW, SE, rB, rA));
+            Face("RoofN", Poly(NE, NW, rA, rB));
+            Face("RoofW", Poly(NW, SW, rA));
+            Face("RoofE", Poly(SE, NE, rB));
         }
         else
         {
-            Face("RoofW", new[] { NW, SW, rA, rB });
-            Face("RoofE", new[] { SE, NE, rB, rA });
-            Face("RoofS", new[] { SW, SE, rA });
-            Face("RoofN", new[] { NE, NW, rB });
+            Face("RoofW", Poly(NW, SW, rA, rB));
+            Face("RoofE", Poly(SE, NE, rB, rA));
+            Face("RoofS", Poly(SW, SE, rA));
+            Face("RoofN", Poly(NE, NW, rB));
         }
         float len = (rB - rA).magnitude;
         if (ridgeCap && len > 0.1f)
+        {
+            // 용마루 — 짙은 기와 마루 위에 흰 회 띠, 양 끝이 솟는다 (노트 4번 · 사진: 용마루 흰 선 · 끝 솟음)
+            Color lime = new(0.90f, 0.88f, 0.82f);
             Box(root.transform, "Ridge", (rA + rB) * 0.5f - Vector3.up * 0.1f, alongX ? new Vector3(len + 0.4f, 0.3f, 0.42f) : new Vector3(0.42f, 0.3f, len + 0.4f), roofTex);
+            BoxColor(root.transform, "RidgeLime", (rA + rB) * 0.5f + Vector3.up * 0.02f, alongX ? new Vector3(len + 0.3f, 0.1f, 0.46f) : new Vector3(0.46f, 0.1f, len + 0.3f), lime);
+            Vector3 axis = alongX ? Vector3.right : Vector3.forward;
+            foreach (var (end, sgn) in new[] { (rA, -1f), (rB, 1f) })
+            {
+                Box(root.transform, "RidgeEnd", end + axis * sgn * 0.15f - Vector3.up * 0.05f, alongX ? new Vector3(0.5f, 0.55f, 0.46f) : new Vector3(0.46f, 0.55f, 0.5f), roofTex);
+                BoxColor(root.transform, "RidgeEndLime", end + axis * sgn * 0.15f + Vector3.up * 0.48f, alongX ? new Vector3(0.52f, 0.08f, 0.5f) : new Vector3(0.5f, 0.08f, 0.52f), lime);
+            }
+            // 내림마루 — 용마루 끝에서 네 귀로 흰 줄 한 줄
+            foreach (var (from, to) in new[] { (alongX ? rA : rA, SW), (alongX ? rA : rB, NW), (alongX ? rB : rA, SE), (alongX ? rB : rB, NE) })
+            {
+                Vector3 a = from, b = to + (from - to).normalized * 0.2f;
+                Vector3 d = b - a;
+                GameObject hip = BoxColor(root.transform, "HipLime", Vector3.zero, new Vector3(0.18f, 0.1f, d.magnitude), lime);
+                hip.transform.localPosition = (a + b) * 0.5f + Vector3.up * 0.02f - new Vector3(0f, 0.05f, 0f);
+                hip.transform.localRotation = Quaternion.LookRotation(d.normalized, Vector3.up);
+            }
+            // 서까래 끝 — 처마 밑에 짙은 나무 끝이 줄지어 보인다 (노트 5번)
+            Color rafter = new(0.30f, 0.20f, 0.12f);
+            foreach (var (p0, p1, outDir) in new[] { (SW, SE, Vector3.back), (NW, NE, Vector3.forward), (SW, NW, Vector3.left), (SE, NE, Vector3.right) })
+            {
+                float l = (p1 - p0).magnitude;
+                int n = Mathf.Max(2, Mathf.RoundToInt(l / 0.5f));
+                for (int i = 1; i < n; i++)
+                {
+                    float t = i / (float)n;
+                    float k = 2f * t - 1f;
+                    Vector3 q = Vector3.Lerp(p0, p1, t);
+                    q.y = eave + lift * k * k - 0.2f;
+                    q -= outDir * 0.12f;
+                    BoxColor(root.transform, "Rafter", q, Mathf.Abs(outDir.x) > 0.5f ? new Vector3(0.3f, 0.12f, 0.12f) : new Vector3(0.12f, 0.12f, 0.3f), rafter);
+                }
+            }
+        }
         else if (len > 0.1f)
             Box(root.transform, "Ridge", (rA + rB) * 0.5f - Vector3.up * 0.15f, alongX ? new Vector3(len + 0.6f, 0.3f, 0.7f) : new Vector3(0.7f, 0.3f, len + 0.6f), roofTex);
         return root;

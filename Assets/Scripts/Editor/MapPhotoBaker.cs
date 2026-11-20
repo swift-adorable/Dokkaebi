@@ -76,6 +76,22 @@ public static class MapPhotoBaker
 
         int w = MapRaster.WidthOf(map, ppm), h = MapRaster.HeightOf(map, ppm);
 
+        // 【집도 찍는다】 (2026-11-20) — 집터(3D 한옥)와 들어가지 못하는 한옥(헛간 · 방앗간)은 판이 시작될 때 세워져 씬에 없다.
+        // 지도에는 지붕 덮인 모습으로 나와야 하니 구역마다 잠깐 세워 찍고 지운다. 상자는 세우지 않는다(PreviewOnly).
+        var houses = new List<GameObject>();
+        LockedSite.PreviewOnly = true;
+        try
+        {
+            foreach (ZoneArea area in map.Areas)
+                foreach (LockSite site in LockSiteTable.OpenHouses(map, area.ZoneId))
+                    houses.Add(LockedSite.Create(site).gameObject);
+            ClosedHanok.SpawnFor(map);
+            GameObject closed = GameObject.Find("ClosedHanok");
+            if (closed != null) houses.Add(closed);
+        }
+        finally { LockedSite.PreviewOnly = false; }
+        Debug.Log($"[MapPhoto] {map.SceneName} 집 {houses.Count}채 세워 찍음");
+
         // 금줄은 끄고 찍는다.
         var hidden = new List<GameObject>();
         foreach (Transform t in Object.FindObjectsByType<Transform>(FindObjectsInactive.Exclude))
@@ -167,6 +183,10 @@ public static class MapPhotoBaker
         foreach (GameObject g in hidden)
             if (g != null)
                 g.SetActive(true);
+
+        foreach (GameObject g in houses)
+            if (g != null)
+                Object.DestroyImmediate(g);
 
         string path = $"{Folder}/{MapRuntime.PhotoName(map.Chapter)}.png";
         File.WriteAllBytes(path, tex.EncodeToPNG());

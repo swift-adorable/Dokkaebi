@@ -40,6 +40,30 @@ public static class HouseWalkProbe
         m?.Invoke(null, new object[] { "Chapter0" });
     }
 
+    [MenuItem("Dokkaebi/Debug/닫힌 한옥 찍기 (헛간 · 방앗간)")]
+    public static void ShootClosed()
+    {
+        if (!EditorApplication.isPlaying) return;
+        System.IO.Directory.CreateDirectory("Temp/screens");
+        var list = new List<Transform>();
+        GameObject root = GameObject.Find("ClosedHanok");
+        if (root != null) foreach (Transform t in root.transform) list.Add(t);
+        Debug.Log($"[HouseWalk] 닫힌 한옥 {list.Count}채");
+        int i = 0, phase = 0;
+        double at = EditorApplication.timeSinceStartup + 0.3;
+        void Step()
+        {
+            if (EditorApplication.timeSinceStartup < at || !EditorApplication.isPlaying) return;
+            if (i >= list.Count) { EditorApplication.update -= Step; Debug.Log("[HouseWalk] 닫힌 한옥 끝"); return; }
+            Vector3 c = list[i].position;
+            if (phase == 0) { MoveTo(c + new Vector3(0f, 0f, -7f)); at += 1.0; phase = 1; }
+            else if (phase == 1) { ScreenCapture.CaptureScreenshot($"Temp/screens/closed_{i}_front.png"); at += 0.3; phase = 2; }
+            else if (phase == 2) { MoveTo(c + new Vector3(0f, 0f, -1.2f)); at += 1.0; phase = 3; }   // 문 안쪽으로 걸어 들어가 보기 — 막혀야 한다
+            else { var pm = Object.FindAnyObjectByType<PlayerMovement>(); Debug.Log($"[HouseWalk] 닫힌 한옥 {i} 안쪽 자리 막힘 {Physics.CheckCapsule(c + new Vector3(0f, 0.4f, -1.2f), c + new Vector3(0f, 1.4f, -1.2f), 0.35f, 1 << GameLayers.Obstacle, QueryTriggerInteraction.Ignore)}"); i++; phase = 0; at += 0.1; }
+        }
+        EditorApplication.update += Step;
+    }
+
     [MenuItem("Dokkaebi/Debug/결정 2-151 집터 걸어 보기")]
     public static void Run()
     {
