@@ -125,6 +125,6 @@ public static class ClosedHanok
             HouseMesh.Box(parent, "Haban", bc, Size(b1 - b0, 0.28f, bt), "wood_post");
             HouseMesh.Box(parent, "Jungban", bc + Vector3.up * 0.84f, Size(b1 - b0, 0.12f, bt), "wood_post");
         }
-        HouseMesh.Box(parent, "Sangban", a + dir * (len * 0.5f) + Vector3.up * (height - 0.22f), Size(len, 0.22f, bt), "wood_post");
+        HouseMesh.Box(parent, "Sangban", a + dir * (len * 0.5f) + Vector3.up * (height - 0.22f), Size(len, 0.25f, bt), "wood_post");   // 벽 위보다 3cm 높게 (같은 높이면 반짝인다)
     }
 }

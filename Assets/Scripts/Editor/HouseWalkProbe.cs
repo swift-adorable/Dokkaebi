@@ -143,7 +143,7 @@ public static class HouseWalkProbe
                 MoveTo(new Vector3(s.Site.Center.x + room.R.center.x, 0f, s.Site.Center.y + room.R.center.y));
                 nextAt += 0.8; break;
             }
-            case 7: Shot("room"); report.AppendLine($"  {house} 방 안에서 지붕 {(s.RoofShown ? "모두 덮임" : "들어선 채만 걷힘")}"); nextAt += 0.3; break;
+            case 7: Shot("room"); report.AppendLine($"  {house} 방 안에서 지붕 {(s.RoofShown ? "덮임" : "걷힘")}"); nextAt += 0.3; break;
             case 8:   // 남쪽 벽 바로 뒤 — 벽이 주인공을 가린다
             {
                 HanokRoomPlan room = s.Plan.Rooms[0];
@@ -160,6 +160,8 @@ public static class HouseWalkProbe
                 nextAt += 0.8; break;
             }
             case 11: Shot("front_of_wall"); nextAt += 0.3; break;
+            case 12: MoveTo(new Vector3(s.Site.Center.x - s.Site.Size.x * 0.3f, 0f, s.Site.Center.y - s.Site.Size.y * 0.5f - 0.7f)); nextAt += 0.8; break;   // 담 바로 바깥(카메라 쪽) — 담이 몸을 덮으면 안 된다
+            case 13: Shot("outside_fence"); report.AppendLine($"  {house} 담 밖에서 지붕 {(s.RoofShown ? "덮임" : "걷힘")}"); nextAt += 0.3; break;
             default: house++; phase = 0; nextAt += 0.1; break;
         }
     }

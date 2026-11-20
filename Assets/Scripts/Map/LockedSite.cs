@@ -223,7 +223,7 @@ public class LockedSite : MonoBehaviour
 
     /// <summary>
     /// 채마다 지붕 · 그 채의 방 네모들 (v8c · 사용자 「건물 근처에서는 뚜껑을 보여 주다가 캐릭터가 입구로 들어갈 때 뚜껑을 없애고 내부를 보여줘」).
-    /// 주인공이 그 채 벽에서 RoofNear(1m) 안으로 다가오면 그 채 지붕만 걷힌다 (사용자가 「입구로 들어갈 때」 → 「건물 근처 한 캐릭터 거리」로 바꿈).
+    /// 지붕 규칙 (v8e): 집터(담 안)에 들어서면 이 집 지붕을 전부 걷고, 담 밖 RoofFar 넘게 나가야 다시 덮는다. RoofNear 는 옛 규칙(채 1m) — 점검용으로만 남김.
     /// </summary>
     private readonly List<(GameObject roof, List<Rect> rooms)> buildingRoofs = new();
     /// <summary>지붕이 걷히는 거리 — 그 채 벽에서 캐릭터 한 명 남짓(사용자 v8c 「건물 근처 · 거리는 한 캐릭터 정도」).</summary>
@@ -631,7 +631,7 @@ public class LockedSite : MonoBehaviour
                 HouseMesh.Box(parent, "Haban", bc, Band(b1 - b0, 0.28f), "wood_post");
                 HouseMesh.Box(parent, "Jungban", bc + Vector3.up * 0.84f, Band(b1 - b0, 0.12f), "wood_post");
             }
-            HouseMesh.Box(parent, "Sangban", a + dir * (len * 0.5f) + Vector3.up * (height - 0.22f), Band(len, 0.22f), "wood_post");
+            HouseMesh.Box(parent, "Sangban", a + dir * (len * 0.5f) + Vector3.up * (height - 0.22f), Band(len, 0.25f), "wood_post");   // 벽 위보다 3cm 높게 — 같은 높이면 두 윗면이 번갈아 그려져 반짝였다(폰 녹화 v8d)
         }
         foreach (var (m0, m1) in HeavyForCompare ? solid : Merge(solid))
             Blocker("WallBlock", a + dir * ((m0 + m1) * 0.5f), Size(m1 - m0, House3DWall));
@@ -930,18 +930,11 @@ public class LockedSite : MonoBehaviour
         // 3D 집(결정 2-151)은 덕코프처럼 가까이 오면(20m) 지붕을 걷어 방이 들여다보이게 — 들어가기 전에 안을 보고 고른다
         if (buildingRoofs.Count > 0)
         {
-            // 3D 한옥 — 집 통째로 지붕을 걷는다 (v8d · 2026-11-20 폰 「방에 들어갔을 때 그 방 지붕만이 아니라 건물 통째로 안 보이게」).
-            // 어느 방이든 RoofNear(1m) 안이면 이 집 지붕 전부를 걷고, 모든 방에서 RoofFar(2.5m) 넘게 멀어져야 다시 덮는다 —
-            // 한 경계로 켜고 끄면 그 선을 오갈 때 지붕이 깜빡였다(폰 녹화 「반짝이는 것처럼」).
+            // 3D 한옥 — 집터(담 안) 안에 있으면 지붕을 전부 걷는다 (v8e · 2026-11-20 폰 「방이 아니라 건물을 기준으로 건물 내에 있을 경우 지붕이 안 보이게」).
+            // 담 안으로 들어서면 걷고, 담 밖으로 RoofFar 넘게 나가야 다시 덮는다 — 한 경계로 켜고 끄면 그 선에서 깜빡였다(v8d).
             var local = new Vector2(p.x - Site.Center.x, p.z - Site.Center.y);
-            float near = roofsLifted ? RoofFar : RoofNear;
-            bool inside = false;
-            foreach (var (_, rooms) in buildingRoofs)
-            {
-                foreach (Rect r in rooms)
-                    if (local.x > r.xMin - near && local.x < r.xMax + near && local.y > r.yMin - near && local.y < r.yMax + near) { inside = true; break; }
-                if (inside) break;
-            }
+            float margin = roofsLifted ? RoofFar : 0f;
+            bool inside = Mathf.Abs(local.x) < Site.Size.x * 0.5f + margin && Mathf.Abs(local.y) < Site.Size.y * 0.5f + margin;
             if (inside != roofsLifted)
             {
                 roofsLifted = inside;

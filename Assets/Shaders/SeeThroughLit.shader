@@ -34,12 +34,18 @@ Shader "Dokkaebi/SeeThroughLit"
 
         // 캐릭터 · 몬스터 판 — 카메라 쪽으로 눕힌 판의 윗부분이 뒤 벽 속으로 파고들어 벽 앞에 서도 가려졌다(v8c 사용자 2번).
         // 판 전체의 깊이를 발 자리(물체 원점) 깊이로 맞춘다 — 앞뒤는 발 위치로만 가린다.
-        float4 FlattenDepth(float4 positionCS)
+        // 【서 있는 사람의 깊이로】 (v8e · 2026-11-20 폰 「몬스터가 여전히 가려지듯이」) — 그림판은 카메라를 마주 보게 기울어 있어
+        // 판 전체가 발과 같은 깊이였다. 그래서 바로 뒤의 담 · 벽 윗부분이 몸통을 덮었다. 판 위 한 점을 「발에서 그만큼 높이 곧게 선
+        // 사람의 같은 화면 자리」 깊이로 그린다: 판 위로 u 만큼이면 높이 u / up.y (기운 판이 화면에서 짧아진 만큼 되돌림).
+        // 바닥 0.45m 는 기단 · 방바닥(0.3m) 윗면이 발을 덮지 않게 (v8d).
+        float4 FlattenDepth(float4 positionCS, float3 positionWS)
         {
             if (_FlatDepth < 0.5) return positionCS;
-            // 발에서 0.6m 위를 깊이 기준으로 (v8d · 2026-11-20 폰 「몬스터가 건물에 이상하게 가려져」) — 기단(0.3m) · 방바닥(0.3m) 윗면이
-            // 땅 높이의 발보다 카메라에 가까워 다리를 덮었다. 0.6m 올리면 그런 낮은 판 위로 그리고, 0.5m 넘게 벽 뒤면 여전히 벽에 가려진다.
-            float4 anchor = TransformWorldToHClip(TransformObjectToWorld(float3(0, 0, 0)) + float3(0, 0.6, 0));
+            float3 origin = TransformObjectToWorld(float3(0, 0, 0));
+            float3 up = TransformObjectToWorldDir(float3(0, 1, 0));
+            float u = max(0.0, dot(positionWS - origin, up));
+            float h = 0.45 + u / max(0.3, up.y);
+            float4 anchor = TransformWorldToHClip(origin + float3(0, h, 0));
             positionCS.z = anchor.z / anchor.w * positionCS.w;
             return positionCS;
         }
@@ -111,7 +117,7 @@ Shader "Dokkaebi/SeeThroughLit"
             {
                 Varyings o;
                 VertexPositionInputs p = GetVertexPositionInputs(i.positionOS.xyz);
-                o.positionCS = FlattenDepth(p.positionCS);
+                o.positionCS = FlattenDepth(p.positionCS, p.positionWS);
                 o.positionWS = p.positionWS;
                 o.normalWS = TransformObjectToWorldNormal(i.normalOS);
                 o.uv = TRANSFORM_TEX(i.uv, _BaseMap);
@@ -221,7 +227,7 @@ Shader "Dokkaebi/SeeThroughLit"
             {
                 Varyings o;
                 o.positionWS = TransformObjectToWorld(i.positionOS.xyz);
-                o.positionCS = FlattenDepth(TransformWorldToHClip(o.positionWS));
+                o.positionCS = FlattenDepth(TransformWorldToHClip(o.positionWS), o.positionWS);
                 o.uv = TRANSFORM_TEX(i.uv, _BaseMap);
                 return o;
             }
@@ -257,7 +263,7 @@ Shader "Dokkaebi/SeeThroughLit"
             {
                 Varyings o;
                 o.positionWS = TransformObjectToWorld(i.positionOS.xyz);
-                o.positionCS = FlattenDepth(TransformWorldToHClip(o.positionWS));
+                o.positionCS = FlattenDepth(TransformWorldToHClip(o.positionWS), o.positionWS);
                 o.normalWS = TransformObjectToWorldNormal(i.normalOS);
                 o.uv = TRANSFORM_TEX(i.uv, _BaseMap);
                 return o;
