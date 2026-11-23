@@ -18,7 +18,7 @@ public class PlayerVision : MonoBehaviour
     public static bool Enabled = true;
 
     /// <summary>부채꼴 전체 각도(°).</summary>
-    public static float ConeDegrees = 120f;   // 사용자 2026-11-23 「각도는 바꾸지마」
+    public static float ConeDegrees = 100f;   // 사용자 2026-11-23 「시야각 100도로 줄여줘」 (처음 120°)
     /// <summary>부채꼴 거리(m) — 화면 끝까지 닿게 (사용자 「시야는 그냥 화면 끝까지 닿게」). 적 시야(18m)와는 따로.</summary>
     public static float ViewDistance = 40f;
     /// <summary>둘레 작은 원 반지름(m) — 등 뒤도 이만큼은 보인다.</summary>
