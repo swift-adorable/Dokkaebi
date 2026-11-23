@@ -13,6 +13,7 @@ Shader "Dokkaebi/SeeThroughLit"
         _Cull ("Cull", Float) = 2
         _SeeThrough ("See Through (1 = 주인공을 가리면 비침)", Float) = 1
         _FlatDepth ("Flat Depth (1 = 판 전체를 발 위치 깊이로)", Float) = 0
+        _Fade ("Fade (적이 시야에 들어오고 나갈 때 0 ~ 1)", Float) = 1
         [HideInInspector] _MainTex ("MainTex", 2D) = "white" {}
     }
 
@@ -30,6 +31,7 @@ Shader "Dokkaebi/SeeThroughLit"
             half _Cull;
             half _SeeThrough;
             half _FlatDepth;
+            half _Fade;
         CBUFFER_END
 
         // 캐릭터 · 몬스터 판 — 카메라 쪽으로 눕힌 판의 윗부분이 뒤 벽 속으로 파고들어 벽 앞에 서도 가려졌다(v8c 사용자 2번).
@@ -148,6 +150,7 @@ Shader "Dokkaebi/SeeThroughLit"
             {
                 half4 albedo = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, i.uv) * _BaseColor;
                 clip(albedo.a - _Cutoff - 0.0001);
+                if (_Fade < 0.999) clip(_Fade - Bayer4(i.positionCS.xy));   // 시야 페이드 — 점 무늬로 서서히 (PlayerVision)
                 SeeThroughClip(i.positionCS, i.positionWS);
 
                 float3 n = normalize(i.normalWS);   // 뒤집지 않는다 — 집 상자 면은 감긴 방향이 거꾸로라 뒤집으면 윗면 바닥이 아래를 봐 새까맸다 (v8b · URP Lit 도 안 뒤집음)

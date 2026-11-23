@@ -47,7 +47,14 @@ public class PlayerVision : MonoBehaviour
     private float range;
     private float texel;
 
-    private readonly Dictionary<EnemyController, (Renderer[] renderers, bool shown)> enemies = new();
+    /// <summary>적이 나타나는 · 사라지는 시간(초) — 덕코프 조사 추정 0.1 ~ 0.3.</summary>
+    public static float FadeIn = 0.15f, FadeOut = 0.25f;
+    /// <summary>밤에 플레이어 시야가 줄어드는 하한 (달 배율의 최솟값).</summary>
+    public static float NightFloor = 0.7f;
+    private static readonly int FadeId = Shader.PropertyToID("_Fade");
+    private MaterialPropertyBlock fadeBlock;
+    private sealed class Seen { public Renderer[] renderers; public float fade = 1f; public bool hidden; }
+    private readonly Dictionary<EnemyController, Seen> enemies = new();
     private readonly List<EnemyController> gone = new();
 
     /// <summary>지금 이 자리가 보이는가 (적 숨기기 · 점검용).</summary>
@@ -79,7 +86,7 @@ public class PlayerVision : MonoBehaviour
             mask = new Texture2D(Res, Res, TextureFormat.R8, false, true) { name = "VisionMask", wrapMode = TextureWrapMode.Clamp, filterMode = FilterMode.Bilinear };
             pixels = new byte[Res * Res];
         }
-        range = ViewDistance + 3f;
+        range = ViewDistance * 1.3f + 3f;   // 보름(1.25배)까지 덮는다
         texel = range * 2f / Res;
         pixelAngle = new float[Res * Res];
         pixelDist = new float[Res * Res];
@@ -104,7 +111,7 @@ public class PlayerVision : MonoBehaviour
             return;
         }
         active = true;
-        if (!Mathf.Approximately(range, ViewDistance + 3f) || pixels.Length != Res * Res) Rebuild();
+        if (!Mathf.Approximately(range, ViewDistance * 1.3f + 3f) || pixels.Length != Res * Res) Rebuild();
 
         // 가운데를 칸 눈금에 맞춘다 — 움직일 때 경계가 미끄러지듯 떨리지 않게
         Vector3 p = player.position;
@@ -113,13 +120,16 @@ public class PlayerVision : MonoBehaviour
 
         float face = FaceAngle(player);
 
+        // 밤 — 적 시야와 같은 달 배율 (삭 0.45 · 보름 1.25). 「내가 보면 쟤도 날 본다」 가 밤에도 맞게.
+        // 단, 플레이어 쪽은 NightFloor(0.7배 · 약 12.6m) 밑으로 줄이지 않는다 — 삭 0.45배(8m)는 너무 답답했다(에디터 확인).
+        float view = ViewDistance * Mathf.Max(NightFloor, RaidManager.Current.EnemyVisionScale);
         float half = ConeDegrees * 0.5f;
         for (int i = 0; i <= Rays; i++)
         {
             float a = i * 360f / Rays;
             float delta = Mathf.Abs(Mathf.DeltaAngle(a, face));
             float t = Mathf.InverseLerp(half + ConeSoftDegrees * 0.5f, half - ConeSoftDegrees * 0.5f, delta);
-            float len = Mathf.Lerp(NearRadius, ViewDistance, t);
+            float len = Mathf.Lerp(NearRadius, view, t);
             var dir = new Vector3(Mathf.Sin(a * Mathf.Deg2Rad), 0f, Mathf.Cos(a * Mathf.Deg2Rad));
             if (Physics.Raycast(eye, dir, out RaycastHit hit, len, GameLayers.ShotBlockMask, QueryTriggerInteraction.Ignore))
                 len = Mathf.Min(len, hit.distance + WallBleed);
@@ -157,7 +167,9 @@ public class PlayerVision : MonoBehaviour
         System.IO.File.WriteAllBytes(path, ImageConversion.EncodeToPNG(instance.mask));
         float min = 999f, max = 0f; int full = 0;
         foreach (float l in instance.rayLen) { min = Mathf.Min(min, l); max = Mathf.Max(max, l); if (l >= ViewDistance - 0.01f) full++; }
-        return $"쪽 {instance.visionFace:0}° · 갈래 길이 {min:0.0}~{max:0.0}m · 끝까지 닿은 갈래 {full}/{Rays + 1} · Res {Res} · soft {ConeSoftDegrees}° · 경계 {SoftEdge}m · 켜짐 {instance.active}";
+        int shown = 0, fading = 0, hidden = 0;
+        foreach (var kv in instance.enemies) { if (kv.Value.hidden) hidden++; else if (kv.Value.fade < 0.999f) fading++; else shown++; }
+        return $"적 보임 {shown} · 바뀌는 중 {fading} · 숨김 {hidden} · 달 배율 {RaidManager.Current.EnemyVisionScale:0.00} · 쪽 {instance.visionFace:0}° · 갈래 길이 {min:0.0}~{max:0.0}m · 끝까지 닿은 갈래 {full}/{Rays + 1} · Res {Res} · soft {ConeSoftDegrees}° · 경계 {SoftEdge}m · 켜짐 {instance.active}";
     }
     /// <summary>점검용 — 지금 시야가 보는 쪽(°, 북쪽 0 · 시계 방향).</summary>
     public static float DebugFace => instance != null ? instance.visionFace : float.NaN;
@@ -200,39 +212,59 @@ public class PlayerVision : MonoBehaviour
     private void HideUnseenEnemies()
     {
         if (!EnemyManager.HasInstance) return;
+        fadeBlock ??= new MaterialPropertyBlock();
         IReadOnlyList<EnemyController> list = EnemyManager.Instance.ActiveEnemies;
         for (int i = 0; i < list.Count; i++)
         {
             EnemyController e = list[i];
             if (e == null) continue;
-            if (!enemies.TryGetValue(e, out var entry))
+            if (!enemies.TryGetValue(e, out Seen seen) || seen.renderers.Length == 0)
             {
                 var rs = new List<Renderer>(e.GetComponentsInChildren<Renderer>(true));
                 rs.RemoveAll(r => r.gameObject == e.gameObject);   // 몸은 EnemySprite 몫
-                entry = (rs.ToArray(), true);
+                seen ??= new Seen();
+                seen.renderers = rs.ToArray();
+                enemies[e] = seen;
             }
-            bool show = Sees(e.transform.position);
-            if (show != entry.shown || entry.renderers.Length == 0)
+            float target = Sees(e.transform.position) ? 1f : 0f;
+            if (Mathf.Approximately(seen.fade, target) && seen.hidden == (target == 0f)) continue;
+            seen.fade = Mathf.MoveTowards(seen.fade, target, Time.deltaTime / (target > seen.fade ? FadeIn : FadeOut));
+            bool hide = seen.fade <= 0.001f;
+            foreach (Renderer r in seen.renderers)
             {
-                foreach (Renderer r in entry.renderers) if (r != null) r.forceRenderingOff = !show;
-                entry.shown = show;
+                if (r == null) continue;
+                r.forceRenderingOff = hide;
+                if (hide) continue;
+                r.GetPropertyBlock(fadeBlock);   // EnemySprite 가 같은 블록에 그림 칸을 넣는다 — 읽고 덧붙인다
+                fadeBlock.SetFloat(FadeId, seen.fade);
+                r.SetPropertyBlock(fadeBlock);
             }
-            enemies[e] = entry;
+            seen.hidden = hide;
         }
         // 풀로 돌아간 적은 다시 보이게 해 두고 잊는다
         gone.Clear();
         foreach (var kv in enemies) if (kv.Key == null || !kv.Key.isActiveAndEnabled) gone.Add(kv.Key);
         foreach (EnemyController e in gone)
         {
-            if (e != null) foreach (Renderer r in enemies[e].renderers) if (r != null) r.forceRenderingOff = false;
+            if (e != null) Reset(enemies[e]);
             enemies.Remove(e);
+        }
+    }
+
+    private void Reset(Seen seen)
+    {
+        fadeBlock ??= new MaterialPropertyBlock();
+        foreach (Renderer r in seen.renderers)
+        {
+            if (r == null) continue;
+            r.forceRenderingOff = false;
+            r.GetPropertyBlock(fadeBlock); fadeBlock.SetFloat(FadeId, 1f); r.SetPropertyBlock(fadeBlock);
         }
     }
 
     private void ShowAll()
     {
-        foreach (var kv in enemies)
-            if (kv.Key != null) foreach (Renderer r in kv.Value.renderers) if (r != null) r.forceRenderingOff = false;
+        foreach (var kv in enemies) if (kv.Key != null) Reset(kv.Value);
         enemies.Clear();
     }
 
