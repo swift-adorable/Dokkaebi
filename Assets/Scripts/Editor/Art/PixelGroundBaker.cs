@@ -345,9 +345,12 @@ public static class PixelGroundBaker
         var mat = AssetDatabase.LoadAssetAtPath<Material>(path);
         if (mat == null)
         {
-            mat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+            mat = new Material(SeeThrough.LitShader());
             AssetDatabase.CreateAsset(mat, path);
         }
+        // 시야(2026-11-23) — 땅도 보이지 않는 곳은 어둡게 그리려면 SeeThroughLit 이어야 한다. 땅은 주인공을 가리지 않으니 비쳐 보이기는 끈다.
+        if (mat.shader != SeeThrough.LitShader()) mat.shader = SeeThrough.LitShader();
+        mat.SetFloat("_SeeThrough", 0f);
         mat.SetTexture("_BaseMap", tex);
         mat.mainTexture = tex;
         mat.SetTextureScale("_BaseMap", tiling);

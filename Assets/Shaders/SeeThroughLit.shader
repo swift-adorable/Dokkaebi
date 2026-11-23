@@ -53,6 +53,25 @@ Shader "Dokkaebi/SeeThroughLit"
         TEXTURE2D(_BaseMap);
         SAMPLER(sampler_BaseMap);
 
+        // 【덕코프식 시야】 (2026-11-23) — PlayerVision.cs 가 주인공 둘레의 「보이는 곳」을 위에서 본 작은 그림(_VisionMask, 1 = 보임)으로
+        // 그려 넣는다. _VisionRect = (가운데 x, 가운데 z, 한 변 m, 켜짐). 보이지 않는 곳은 어둡고 빛이 빠진 색으로.
+        TEXTURE2D(_VisionMask);
+        SAMPLER(sampler_VisionMask);
+        float4 _VisionRect;
+        float _VisionDark;
+        float _VisionGray;
+
+        half3 ApplyVision(half3 c, float3 positionWS)
+        {
+            if (_VisionRect.w < 0.5) return c;
+            float2 uv = (positionWS.xz - _VisionRect.xy) / _VisionRect.z + 0.5;
+            half m = 0;
+            if (all(uv > 0.0) && all(uv < 1.0)) m = SAMPLE_TEXTURE2D(_VisionMask, sampler_VisionMask, uv).r;
+            half3 gray = dot(c, half3(0.3, 0.59, 0.11));
+            half3 outside = lerp(c, gray, _VisionGray) * _VisionDark;
+            return lerp(outside, c, m);
+        }
+
         float4 _SeeThroughPos;
         float _SeeThroughRadius;
 
@@ -154,6 +173,7 @@ Shader "Dokkaebi/SeeThroughLit"
 
                 half4 color = UniversalFragmentPBR(inputData, surface);
                 color.rgb = MixFog(color.rgb, i.fog);
+                color.rgb = ApplyVision(color.rgb, i.positionWS);
                 return half4(color.rgb, 1);
             }
             ENDHLSL
