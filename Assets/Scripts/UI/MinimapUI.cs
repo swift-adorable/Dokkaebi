@@ -226,7 +226,9 @@ public class MinimapUI : MonoBehaviour
         float yaw = ViewYaw();
         view.localRotation = Quaternion.Euler(0f, 0f, yaw);
         iconTilt = Quaternion.Euler(0f, 0f, -yaw);
-        playerArrow.localRotation = Quaternion.Euler(0f, 0f, -runtime.Player.eulerAngles.y);
+        // 화살표 = 시야가 보는 쪽 (2026-11-23 폰 「이동 방향 따라는 안 바뀌고 공격 방향에 따라는 바뀌어」) — 조준 중이면 조준, 아니면 움직이는 쪽.
+        float face = PlayerVision.FaceDegrees;
+        playerArrow.localRotation = Quaternion.Euler(0f, 0f, -(float.IsNaN(face) ? runtime.Player.eulerAngles.y : face));
 
         int used = 0;
         float half = view.rect.width * 0.5f;

@@ -69,7 +69,10 @@ public class LockedSite : MonoBehaviour
         IReadOnlyList<LockSite> sites = LockSiteTable.For(map, zone);
         foreach (LockSite site in sites)
             Create(site);
-        IReadOnlyList<LockSite> open = LockSiteTable.OpenHouses(map, zone);
+        // 열린 집(3D 한옥 집터)은 맵 전체 구역 것을 다 세운다 (2026-11-23 폰 「전체 지도 · 미니맵에는 건물이 있는데 실제로는 없네」 —
+        // 지도 사진은 모든 구역의 집터를 세워 찍는데, 판에서는 들어간 구역 것만 세웠다. 0-1 로 들어가 0-2 땅에 가면 집이 없었다).
+        var open = new List<LockSite>();
+        foreach (ZoneArea area in map.Areas) open.AddRange(LockSiteTable.OpenHouses(map, area.ZoneId));
         foreach (LockSite site in open)
             Create(site);
 

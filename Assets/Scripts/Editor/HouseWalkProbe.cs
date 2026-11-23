@@ -40,6 +40,34 @@ public static class HouseWalkProbe
         m?.Invoke(null, new object[] { "Chapter0" });
     }
 
+    [MenuItem("Dokkaebi/Debug/나무 앞뒤 찍기 (가려짐 점검)")]
+    public static void ShootTree()
+    {
+        if (!EditorApplication.isPlaying) return;
+        System.IO.Directory.CreateDirectory("Temp/screens");
+        var tree = Object.FindAnyObjectByType<BerryTree>();
+        if (tree == null) { Debug.Log("[HouseWalk] 나무 없음"); return; }
+        Vector3 t = tree.transform.position;
+        var aiming = Object.FindAnyObjectByType<PlayerAiming>();
+        int step = 0; double at = EditorApplication.timeSinceStartup + 0.2;
+        void Step()
+        {
+            if (EditorApplication.timeSinceStartup < at || !EditorApplication.isPlaying) return;
+            if (aiming != null) aiming.SetAim(new Vector2(0f, -1f));
+            switch (step++)
+            {
+                case 0: MoveTo(t + new Vector3(0f, 0f, -1.0f)); at += 1.0; break;   // 나무 앞(카메라 쪽)
+                case 1: ScreenCapture.CaptureScreenshot("Temp/screens/tree_front.png"); at += 0.3; break;
+                case 2: MoveTo(t + new Vector3(0f, 0f, 1.0f)); at += 1.0; break;    // 나무 뒤
+                case 3: ScreenCapture.CaptureScreenshot("Temp/screens/tree_behind.png"); at += 0.3; break;
+                case 4: MoveTo(t + new Vector3(1.5f, 0f, 0.3f)); at += 1.0; break;  // 나무 옆
+                case 5: ScreenCapture.CaptureScreenshot("Temp/screens/tree_side.png"); at += 0.3; break;
+                default: EditorApplication.update -= Step; Debug.Log($"[HouseWalk] 나무 찍기 끝 · 나무 {t}"); break;
+            }
+        }
+        EditorApplication.update += Step;
+    }
+
     [MenuItem("Dokkaebi/Debug/시야 그림 꺼내기 (지금)")]
     public static void DumpVision()
     {
@@ -59,8 +87,6 @@ public static class HouseWalkProbe
         void Set(bool after)
         {
             PlayerVision.ConeSoftDegrees = after ? 1f : 10f;
-            PlayerVision.SoftEdge = after ? 0.35f : 1.2f;
-            PlayerVision.Res = after ? 192 : 128;
         }
         void Step()
         {

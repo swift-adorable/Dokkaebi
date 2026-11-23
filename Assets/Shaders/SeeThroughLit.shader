@@ -55,23 +55,28 @@ Shader "Dokkaebi/SeeThroughLit"
         TEXTURE2D(_BaseMap);
         SAMPLER(sampler_BaseMap);
 
-        // 【덕코프식 시야】 (2026-11-23) — PlayerVision.cs 가 주인공 둘레의 「보이는 곳」을 위에서 본 작은 그림(_VisionMask, 1 = 보임)으로
-        // 그려 넣는다. _VisionRect = (가운데 x, 가운데 z, 한 변 m, 켜짐). 보이지 않는 곳은 어둡고 빛이 빠진 색으로.
-        TEXTURE2D(_VisionMask);
-        SAMPLER(sampler_VisionMask);
-        float4 _VisionRect;
+        // 【덕코프식 시야】 (2026-11-23 v3) — PlayerVision.cs 가 갈래(360개)마다 보이는 거리를 한 줄 그림 _VisionRays 로 넣는다.
+        // 화면의 점마다 주인공(_VisionCenter.xy)에게서의 각도 · 거리를 구해 그 갈래 거리와 견준다 — 경계를 화소 폭(fwidth)으로 흐려 계단이 없다.
+        // _VisionCenter = (눈 x, 눈 z, 켜짐, 갈래 수). 보이는 곳은 _VisionLit 배 밝게, 보이지 않는 곳은 _VisionDark · _VisionGray.
+        TEXTURE2D(_VisionRays);
+        SAMPLER(sampler_VisionRays);
+        float4 _VisionCenter;
         float _VisionDark;
         float _VisionGray;
+        float _VisionLit;
 
         half3 ApplyVision(half3 c, float3 positionWS)
         {
-            if (_VisionRect.w < 0.5) return c;
-            float2 uv = (positionWS.xz - _VisionRect.xy) / _VisionRect.z + 0.5;
-            half m = 0;
-            if (all(uv > 0.0) && all(uv < 1.0)) m = SAMPLE_TEXTURE2D(_VisionMask, sampler_VisionMask, uv).r;
+            if (_VisionCenter.z < 0.5) return c;
+            float2 d = positionWS.xz - _VisionCenter.xy;
+            float dist = length(d);
+            float u = frac(atan2(d.x, d.y) * 0.15915494) + 0.5 / max(_VisionCenter.w, 1.0);   // 북쪽 0 · 시계 방향, 갈래 칸 가운데
+            float l = SAMPLE_TEXTURE2D_LOD(_VisionRays, sampler_VisionRays, float2(u, 0.5), 0).r;
+            float e = l - dist;
+            half m = saturate(e / max(fwidth(e) * 1.5, 0.02) + 0.5);
             half3 gray = dot(c, half3(0.3, 0.59, 0.11));
             half3 outside = lerp(c, gray, _VisionGray) * _VisionDark;
-            return lerp(outside, c, m);
+            return lerp(outside, c * _VisionLit, m);
         }
 
         float4 _SeeThroughPos;

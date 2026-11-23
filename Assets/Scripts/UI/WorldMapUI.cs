@@ -915,7 +915,8 @@ public class WorldMapUI : MonoBehaviour
             Vector2 at = MapView.ToView(runtime.UvOf(runtime.Player.position), center, size);
             playerMarker.gameObject.SetActive(InView(at));
             playerMarker.anchoredPosition = at;
-            playerHeading.localRotation = Quaternion.Euler(0f, 0f, -runtime.Player.eulerAngles.y);
+            float face = PlayerVision.FaceDegrees;   // 미니맵과 같이 시야가 보는 쪽 (2026-11-23)
+            playerHeading.localRotation = Quaternion.Euler(0f, 0f, -(float.IsNaN(face) ? runtime.Player.eulerAngles.y : face));
             playerMarker.SetAsLastSibling();
         }
         else
