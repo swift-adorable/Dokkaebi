@@ -715,6 +715,7 @@ public static class PixelDress
             Resources.UnloadAsset(t);
 
         material = new Material(BuildingSprite.Material()) { name = "WildAtlas" };
+        material.SetFloat("_FlatDepth", 2f);   // 합친 덩어리 — 정점의 TEXCOORD1(판 밑동)으로 깊이를 잰다
         material.SetTexture("_BaseMap", atlas);
         material.SetTexture("_MainTex", atlas);
         return true;
@@ -733,7 +734,7 @@ public static class PixelDress
     {
         LastCards.Clear();
         foreach (var (sprite, pos, ppm, _) in c.Cards) LastCards.Add((sprite, pos, ppm));
-        var groups = new Dictionary<(int, int), (List<Vector3> v, List<Vector2> uv, List<Vector3> n, List<int> t)>();
+        var groups = new Dictionary<(int, int), (List<Vector3> v, List<Vector2> uv, List<Vector3> n, List<int> t, List<Vector3> b)>();
         Quaternion tilt = ArtCatalog.CardTilt;
         Vector3 right = tilt * Vector3.right, up = tilt * Vector3.up, normal = tilt * Vector3.back;
 
@@ -743,7 +744,7 @@ public static class PixelDress
             float W = w / ppm, H = h / ppm;
             var key = (Mathf.FloorToInt(pos.x / 32f), Mathf.FloorToInt(pos.z / 32f));
             if (!groups.TryGetValue(key, out var g))
-                groups[key] = g = (new List<Vector3>(), new List<Vector2>(), new List<Vector3>(), new List<int>());
+                groups[key] = g = (new List<Vector3>(), new List<Vector2>(), new List<Vector3>(), new List<int>(), new List<Vector3>());
             int i0 = g.v.Count;
             g.v.Add(pos - right * (W * 0.5f));
             g.v.Add(pos + right * (W * 0.5f));
@@ -752,7 +753,7 @@ public static class PixelDress
             float u0 = flip ? uv.xMax : uv.xMin, u1 = flip ? uv.xMin : uv.xMax;
             g.uv.Add(new Vector2(u0, uv.yMin)); g.uv.Add(new Vector2(u1, uv.yMin));
             g.uv.Add(new Vector2(u0, uv.yMax)); g.uv.Add(new Vector2(u1, uv.yMax));
-            for (int k = 0; k < 4; k++) g.n.Add(normal);
+            for (int k = 0; k < 4; k++) { g.n.Add(normal); g.b.Add(pos); }   // 판 밑동 — 셰이더가 「곧게 선 높이」 깊이를 잰다 (_FlatDepth 2)
             g.t.AddRange(new[] { i0, i0 + 2, i0 + 1, i0 + 2, i0 + 3, i0 + 1 });
         }
 
@@ -763,6 +764,7 @@ public static class PixelDress
             var mesh = new Mesh { name = $"~px_{pair.Key.Item1}_{pair.Key.Item2}", indexFormat = IndexFormat.UInt32, hideFlags = meshFlags };
             mesh.SetVertices(pair.Value.v);
             mesh.SetUVs(0, pair.Value.uv);
+            mesh.SetUVs(1, pair.Value.b);
             mesh.SetNormals(pair.Value.n);
             mesh.SetTriangles(pair.Value.t, 0);
             mesh.RecalculateBounds();

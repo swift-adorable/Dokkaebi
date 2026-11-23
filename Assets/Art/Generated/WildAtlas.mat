@@ -113,7 +113,8 @@ Material:
     - _DstBlend: 0
     - _DstBlendAlpha: 0
     - _EnvironmentReflections: 0
-    - _FlatDepth: 0
+    - _Fade: 1
+    - _FlatDepth: 2
     - _GlossMapScale: 0
     - _Glossiness: 0
     - _GlossyReflections: 0

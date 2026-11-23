@@ -179,7 +179,7 @@ public static class BuildingSprite
     {
         if (figureMaterial != null)
             return figureMaterial;
-        figureMaterial = new Material(Material()) { name = "FigureCard" };
+        figureMaterial = new Material(Material()) { name = "FigureCard" };   // Material() 이 이미 _FlatDepth 1
         figureMaterial.SetFloat("_SeeThrough", 0f);
         figureMaterial.SetFloat("_FlatDepth", 1f);
         return figureMaterial;
@@ -226,6 +226,8 @@ public static class BuildingSprite
         }
         material.SetColor("_BaseColor", Color.white);
         material.SetFloat("_Cutoff", 0.5f);
+        // v8f — 판 하나짜리 그림(마당 나무 · 열매 나무 · 소품 · 상자)은 원점이 밑동 — 「곧게 선 높이」 깊이로 그려 뒤의 지붕 · 벽에 덮이지 않게
+        material.SetFloat("_FlatDepth", 1f);
         return material;
     }
 }

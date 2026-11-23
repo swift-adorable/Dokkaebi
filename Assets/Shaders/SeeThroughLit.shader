@@ -40,14 +40,18 @@ Shader "Dokkaebi/SeeThroughLit"
         // 판 전체가 발과 같은 깊이였다. 그래서 바로 뒤의 담 · 벽 윗부분이 몸통을 덮었다. 판 위 한 점을 「발에서 그만큼 높이 곧게 선
         // 사람의 같은 화면 자리」 깊이로 그린다: 판 위로 u 만큼이면 높이 u / up.y (기운 판이 화면에서 짧아진 만큼 되돌림).
         // 바닥 0.45m 는 기단 · 방바닥(0.3m) 윗면이 발을 덮지 않게 (v8d).
-        float4 FlattenDepth(float4 positionCS, float3 positionWS)
+        // _FlatDepth 1 = 판 하나짜리(캐릭터 · 몬스터 · 마당 나무 · 소품) — 물체 원점이 밑동.
+        // _FlatDepth 2 = 판 수천 장을 합친 덩어리(0장 숲 · 길가 꾸밈, WildAtlas) — 정점마다 TEXCOORD1 에 그 판의 밑동(물체 좌표)을 굽는다.
+        //   (v8f · 2026-11-23 폰 「건물 앞에 놓인 나무가 가려져」 — 나무 판도 밑동 깊이 하나로 그려져, 나무 윗부분과 겹치는 높은 지붕 · 벽이 덮었다)
+        // 판 위 높이 Δy 는 기운 판에서 줄어든 만큼(up.y) 되돌려 「곧게 선 높이」 로: 높이 = Δy / up.y². up.y 는 법선에서 구한다(판은 카메라를 마주 본다).
+        float4 FlattenDepth(float4 positionCS, float3 positionWS, float3 baseOS, float3 normalOS)
         {
             if (_FlatDepth < 0.5) return positionCS;
-            float3 origin = TransformObjectToWorld(float3(0, 0, 0));
-            float3 up = TransformObjectToWorldDir(float3(0, 1, 0));
-            float u = max(0.0, dot(positionWS - origin, up));
-            float h = 0.45 + u / max(0.3, up.y);
-            float4 anchor = TransformWorldToHClip(origin + float3(0, h, 0));
+            float3 origin = _FlatDepth > 1.5 ? TransformObjectToWorld(baseOS) : TransformObjectToWorld(float3(0, 0, 0));
+            float3 nW = normalize(TransformObjectToWorldNormal(normalOS));
+            float upY = max(0.3, sqrt(saturate(1.0 - nW.y * nW.y)));
+            float h = 0.45 + max(0.0, positionWS.y - origin.y) / (upY * upY);
+            float4 anchor = TransformWorldToHClip(float3(origin.x, origin.y + h, origin.z));
             positionCS.z = anchor.z / anchor.w * positionCS.w;
             return positionCS;
         }
@@ -129,7 +133,7 @@ Shader "Dokkaebi/SeeThroughLit"
             #define _SPECULARHIGHLIGHTS_OFF 1
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 
-            struct Attributes { float4 positionOS : POSITION; float3 normalOS : NORMAL; float2 uv : TEXCOORD0; };
+            struct Attributes { float4 positionOS : POSITION; float3 normalOS : NORMAL; float2 uv : TEXCOORD0; float3 baseOS : TEXCOORD1; };
             struct Varyings
             {
                 float4 positionCS : SV_POSITION;
@@ -143,7 +147,7 @@ Shader "Dokkaebi/SeeThroughLit"
             {
                 Varyings o;
                 VertexPositionInputs p = GetVertexPositionInputs(i.positionOS.xyz);
-                o.positionCS = FlattenDepth(p.positionCS, p.positionWS);
+                o.positionCS = FlattenDepth(p.positionCS, p.positionWS, i.baseOS, i.normalOS);
                 o.positionWS = p.positionWS;
                 o.normalWS = TransformObjectToWorldNormal(i.normalOS);
                 o.uv = TRANSFORM_TEX(i.uv, _BaseMap);
@@ -204,7 +208,7 @@ Shader "Dokkaebi/SeeThroughLit"
             float3 _LightDirection;
             float3 _LightPosition;
 
-            struct Attributes { float4 positionOS : POSITION; float3 normalOS : NORMAL; float2 uv : TEXCOORD0; };
+            struct Attributes { float4 positionOS : POSITION; float3 normalOS : NORMAL; float2 uv : TEXCOORD0; float3 baseOS : TEXCOORD1; };
             struct Varyings { float4 positionCS : SV_POSITION; float2 uv : TEXCOORD0; };
 
             Varyings vert(Attributes i)
@@ -248,14 +252,14 @@ Shader "Dokkaebi/SeeThroughLit"
             #pragma vertex vert
             #pragma fragment frag
 
-            struct Attributes { float4 positionOS : POSITION; float2 uv : TEXCOORD0; };
+            struct Attributes { float4 positionOS : POSITION; float3 normalOS : NORMAL; float2 uv : TEXCOORD0; float3 baseOS : TEXCOORD1; };
             struct Varyings { float4 positionCS : SV_POSITION; float2 uv : TEXCOORD0; float3 positionWS : TEXCOORD1; };
 
             Varyings vert(Attributes i)
             {
                 Varyings o;
                 o.positionWS = TransformObjectToWorld(i.positionOS.xyz);
-                o.positionCS = FlattenDepth(TransformWorldToHClip(o.positionWS), o.positionWS);
+                o.positionCS = FlattenDepth(TransformWorldToHClip(o.positionWS), o.positionWS, i.baseOS, i.normalOS);
                 o.uv = TRANSFORM_TEX(i.uv, _BaseMap);
                 return o;
             }
@@ -284,14 +288,14 @@ Shader "Dokkaebi/SeeThroughLit"
             #pragma multi_compile_fragment _ _GBUFFER_NORMALS_OCT
             #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Packing.hlsl"
 
-            struct Attributes { float4 positionOS : POSITION; float3 normalOS : NORMAL; float2 uv : TEXCOORD0; };
+            struct Attributes { float4 positionOS : POSITION; float3 normalOS : NORMAL; float2 uv : TEXCOORD0; float3 baseOS : TEXCOORD1; };
             struct Varyings { float4 positionCS : SV_POSITION; float2 uv : TEXCOORD0; float3 positionWS : TEXCOORD1; float3 normalWS : TEXCOORD2; };
 
             Varyings vert(Attributes i)
             {
                 Varyings o;
                 o.positionWS = TransformObjectToWorld(i.positionOS.xyz);
-                o.positionCS = FlattenDepth(TransformWorldToHClip(o.positionWS), o.positionWS);
+                o.positionCS = FlattenDepth(TransformWorldToHClip(o.positionWS), o.positionWS, i.baseOS, i.normalOS);
                 o.normalWS = TransformObjectToWorldNormal(i.normalOS);
                 o.uv = TRANSFORM_TEX(i.uv, _BaseMap);
                 return o;
