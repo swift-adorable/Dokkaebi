@@ -24,6 +24,9 @@ public class PlayerAiming : MonoBehaviour
     /// <summary>현재 바라보는 방향(XZ 평면).</summary>
     public Vector3 FacingDirection => transform.forward;
 
+    /// <summary>마지막으로 조준 입력(데드존 넘게)이 들어온 시각 — 시야(PlayerVision)가 조준을 놓은 뒤 이동 방향으로 돌아갈 때 쓴다.</summary>
+    public float LastAimTime { get; private set; } = -999f;
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
@@ -41,6 +44,7 @@ public class PlayerAiming : MonoBehaviour
 
         targetRotation = Quaternion.LookRotation(new Vector3(aimInput.x, 0f, aimInput.y));
         hasTarget = true;
+        LastAimTime = Time.time;
     }
 
     private void FixedUpdate()

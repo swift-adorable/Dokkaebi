@@ -373,7 +373,7 @@ public class LockedSite : MonoBehaviour
                 }
                 case HanokRunKind.Rail:
                     Rail(house, a + Vector3.up * 0.5f, e + Vector3.up * 0.5f);
-                    Blocker("RailBlock", (a + e) * 0.5f, run.AlongX ? new Vector3(len, 1.2f, 0.2f) : new Vector3(0.2f, 1.2f, len));
+                    Blocker("RailBlock", (a + e) * 0.5f, run.AlongX ? new Vector3(len, 1.2f, 0.2f) : new Vector3(0.2f, 1.2f, len), low: true);
                     break;
                 case HanokRunKind.Fence:
                     FenceRun(house, plan.Fence, plan.Ruin, a, e, openings, rng, cut: CutWalls && run.AlongX && run.A.y < 0f);
@@ -410,7 +410,7 @@ public class LockedSite : MonoBehaviour
                 case "jangdok":   // 장독대 — 돌 단 위 장독
                     // PixelLab 장독대 그림 (2026-11-20) — 돌 단 + 크고 작은 독 무리가 한 장에
                     WorldCard("jangdokdae", at, house);
-                    Blocker("JangdokBlock", at, new Vector3(2.0f, 1f, 1.1f));
+                    Blocker("JangdokBlock", at, new Vector3(2.0f, 1f, 1.1f), low: true);
                     break;
                 case "jars": WorldCard("jars", at, house); break;
                 case "woodpile": WorldCard("woodpile", at, house); break;
@@ -422,7 +422,7 @@ public class LockedSite : MonoBehaviour
                     HouseMesh.Box(house, "WellPost", at + new Vector3(-0.7f, 0f, 0f), new Vector3(0.14f, 1.6f, 0.14f), "wood_post");
                     HouseMesh.Box(house, "WellPost", at + new Vector3(0.7f, 0f, 0f), new Vector3(0.14f, 1.6f, 0.14f), "wood_post");
                     HouseMesh.Box(house, "WellBeam", at + new Vector3(0f, 1.55f, 0f), new Vector3(1.6f, 0.12f, 0.14f), "wood_post");
-                    Blocker("WellBlock", at, new Vector3(1.3f, 1f, 1.3f));
+                    Blocker("WellBlock", at, new Vector3(1.3f, 1f, 1.3f), low: true);
                     break;
                 case "pyeongsang":   // 평상
                     WorldCard("pyeongsang", at, house);   // PixelLab 평상 그림 (2026-11-20)
@@ -844,12 +844,13 @@ public class LockedSite : MonoBehaviour
     }
 
     /// <summary>걸음 · 총알 · 적 길을 막는 보이지 않는 상자.</summary>
-    private GameObject Blocker(string name, Vector3 local, Vector3 size)
+    /// <param name="low">낮은 것(난간 · 장독대 · 우물) — 걸음만 막고 시선 · 화살은 넘어간다(LowCover). 2026-11-23 시야가 난간에 잘려 들쭉날쭉했다.</param>
+    private GameObject Blocker(string name, Vector3 local, Vector3 size, bool low = false)
     {
         var go = new GameObject(name);
         go.transform.SetParent(transform, false);
         go.transform.localPosition = local + Vector3.up * size.y * 0.5f;
-        go.layer = GameLayers.Obstacle;
+        go.layer = low ? GameLayers.LowCover : GameLayers.Obstacle;
         var box = go.AddComponent<BoxCollider>();
         box.size = size;
         var obstacle = go.AddComponent<NavMeshObstacle>();

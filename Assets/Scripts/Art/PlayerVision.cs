@@ -16,7 +16,7 @@ public class PlayerVision : MonoBehaviour
     public static bool Enabled = true;
 
     /// <summary>부채꼴 전체 각도(°).</summary>
-    public static float ConeDegrees = 120f;   // 적 기본(EnemyArchetypeTable 18m · 100~150°)과 맞춤 — 「내가 보면 쟤도 날 본다」 (덕코프 조사 ~/Dokkaebi-art/ref_duckov_fov_notes.md)
+    public static float ConeDegrees = 120f;   // 적 기본 시야와 맞춤 (사용자 2026-11-23 「각도는 바꾸지마」)
     /// <summary>부채꼴 거리(m).</summary>
     public static float ViewDistance = 18f;
     /// <summary>둘레 작은 원 반지름(m) — 등 뒤도 이만큼은 보인다.</summary>
@@ -24,12 +24,15 @@ public class PlayerVision : MonoBehaviour
     /// <summary>보이지 않는 곳의 밝기 · 빛 빠짐.</summary>
     public static float Dark = 0.38f, Gray = 0.55f;
 
-    private const int Rays = 180;
-    private const int Res = 128;
+    private const int Rays = 360;
+    /// <summary>시야 그림 한 변 칸 수 — 높을수록 경계가 또렷하다.</summary>
+    public static int Res = 192;
     private const float EyeHeight = 1.0f;
     private const float WallBleed = 0.6f;
-    private const float SoftEdge = 1.2f;       // 경계가 흐려지는 폭(m)
-    private const float ConeSoftDegrees = 10f; // 부채꼴 옆 가장자리가 흐려지는 각도
+    /// <summary>경계가 흐려지는 폭(m). v2 1.2 → 0.35 (덕코프는 칼 같은 경계).</summary>
+    public static float SoftEdge = 0.35f;
+    /// <summary>부채꼴 옆 가장자리에서 거리가 바뀌는 각도 폭. 넓으면 가장자리가 둥글게 휘어 타원처럼 보였다(v1 10°).</summary>
+    public static float ConeSoftDegrees = 1f;
 
     private static readonly int MaskId = Shader.PropertyToID("_VisionMask");
     private static readonly int RectId = Shader.PropertyToID("_VisionRect");
@@ -63,15 +66,19 @@ public class PlayerVision : MonoBehaviour
 
     private void Awake()
     {
-        mask = new Texture2D(Res, Res, TextureFormat.R8, false, true) { name = "VisionMask", wrapMode = TextureWrapMode.Clamp, filterMode = FilterMode.Bilinear };
-        pixels = new byte[Res * Res];
-        Shader.SetGlobalTexture(MaskId, mask);
         Rebuild();
+        Shader.SetGlobalTexture(MaskId, mask);
     }
 
     /// <summary>거리 · 해상도가 바뀌면 칸 표를 다시 만든다.</summary>
     private void Rebuild()
     {
+        if (pixels == null || pixels.Length != Res * Res)
+        {
+            if (mask != null) Destroy(mask);
+            mask = new Texture2D(Res, Res, TextureFormat.R8, false, true) { name = "VisionMask", wrapMode = TextureWrapMode.Clamp, filterMode = FilterMode.Bilinear };
+            pixels = new byte[Res * Res];
+        }
         range = ViewDistance + 3f;
         texel = range * 2f / Res;
         pixelAngle = new float[Res * Res];
@@ -97,16 +104,14 @@ public class PlayerVision : MonoBehaviour
             return;
         }
         active = true;
-        if (!Mathf.Approximately(range, ViewDistance + 3f)) Rebuild();
+        if (!Mathf.Approximately(range, ViewDistance + 3f) || pixels.Length != Res * Res) Rebuild();
 
         // 가운데를 칸 눈금에 맞춘다 — 움직일 때 경계가 미끄러지듯 떨리지 않게
         Vector3 p = player.position;
         float cx = Mathf.Round(p.x / texel) * texel, cz = Mathf.Round(p.z / texel) * texel;
         eye = new Vector3(cx, p.y + EyeHeight, cz);
 
-        Vector3 facing = player.TryGetComponent(out PlayerAiming aim) ? aim.FacingDirection : player.forward;
-        facing.y = 0f;
-        float face = facing.sqrMagnitude > 0.001f ? Mathf.Atan2(facing.x, facing.z) * Mathf.Rad2Deg : 0f;
+        float face = FaceAngle(player);
 
         float half = ConeDegrees * 0.5f;
         for (int i = 0; i <= Rays; i++)
@@ -138,6 +143,45 @@ public class PlayerVision : MonoBehaviour
         Shader.SetGlobalFloat(GrayId, Gray);
 
         HideUnseenEnemies();
+    }
+
+    /// <summary>조준을 놓은 뒤 이동 방향으로 돌아가기까지(초).</summary>
+    public static float AimHold = 0.6f;
+    /// <summary>시야가 도는 빠르기(°/초).</summary>
+    public static float TurnSpeed = 720f;
+    private float visionFace;
+    /// <summary>점검용 — 시야 그림을 PNG 로 (위 = 북쪽) · 갈래 길이 요약.</summary>
+    public static string DebugDump(string path)
+    {
+        if (instance == null || instance.mask == null) return "시야 없음";
+        System.IO.File.WriteAllBytes(path, ImageConversion.EncodeToPNG(instance.mask));
+        float min = 999f, max = 0f; int full = 0;
+        foreach (float l in instance.rayLen) { min = Mathf.Min(min, l); max = Mathf.Max(max, l); if (l >= ViewDistance - 0.01f) full++; }
+        return $"쪽 {instance.visionFace:0}° · 갈래 길이 {min:0.0}~{max:0.0}m · 끝까지 닿은 갈래 {full}/{Rays + 1} · Res {Res} · soft {ConeSoftDegrees}° · 경계 {SoftEdge}m · 켜짐 {instance.active}";
+    }
+    /// <summary>점검용 — 지금 시야가 보는 쪽(°, 북쪽 0 · 시계 방향).</summary>
+    public static float DebugFace => instance != null ? instance.visionFace : float.NaN;
+    private bool faceInit;
+
+    /// <summary>
+    /// 시야가 보는 쪽 (v2 · 사용자 「발사 방향에 따라서는 움직이는데 좌측 움직임에 의해서는 바뀌지 않아」).
+    /// 조준 중(마지막 조준에서 AimHold 안)이면 조준 방향, 아니면 움직이는 방향, 멈춰 있으면 그대로. 돌 때는 TurnSpeed 로 부드럽게.
+    /// </summary>
+    private float FaceAngle(Transform player)
+    {
+        Vector3 want = Vector3.zero;
+        bool aiming = player.TryGetComponent(out PlayerAiming aim) && Time.time - aim.LastAimTime < AimHold;
+        if (aiming) want = aim.FacingDirection;
+        else if (player.TryGetComponent(out PlayerMovement move) && move.MoveDirection.sqrMagnitude > 0.01f) want = move.MoveDirection;
+        else if (!faceInit) want = aim != null ? aim.FacingDirection : player.forward;
+        want.y = 0f;
+        if (want.sqrMagnitude > 0.0001f)
+        {
+            float target = Mathf.Atan2(want.x, want.z) * Mathf.Rad2Deg;
+            visionFace = faceInit ? Mathf.MoveTowardsAngle(visionFace, target, TurnSpeed * Time.deltaTime) : target;
+            faceInit = true;
+        }
+        return visionFace;
     }
 
     private bool Sees(Vector3 world)

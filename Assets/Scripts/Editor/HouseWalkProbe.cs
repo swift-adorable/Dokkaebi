@@ -40,6 +40,49 @@ public static class HouseWalkProbe
         m?.Invoke(null, new object[] { "Chapter0" });
     }
 
+    [MenuItem("Dokkaebi/Debug/시야 그림 꺼내기 (지금)")]
+    public static void DumpVision()
+    {
+        System.IO.Directory.CreateDirectory("Temp/screens");
+        Debug.Log("[HouseWalk] 시야 그림 " + PlayerVision.DebugDump("Temp/screens/vision_mask.png"));
+        ScreenCapture.CaptureScreenshot("Temp/screens/vision_now.png");
+    }
+
+    [MenuItem("Dokkaebi/Debug/시야 모양 비교 (전 · 후)")]
+    public static void ShootVision()
+    {
+        if (!EditorApplication.isPlaying) return;
+        System.IO.Directory.CreateDirectory("Temp/screens");
+        var aiming = Object.FindAnyObjectByType<PlayerAiming>();
+        int step = 0;
+        double at = EditorApplication.timeSinceStartup + 0.2;
+        void Set(bool after)
+        {
+            PlayerVision.ConeSoftDegrees = after ? 1f : 10f;
+            PlayerVision.SoftEdge = after ? 0.35f : 1.2f;
+            PlayerVision.Res = after ? 192 : 128;
+        }
+        void Step()
+        {
+            if (EditorApplication.timeSinceStartup < at || !EditorApplication.isPlaying) return;
+            if (aiming != null) aiming.SetAim(new Vector2(0.3f, -1f));   // 남쪽(집터 반대쪽 트인 땅)을 조준 (시야가 조준을 따른다)
+            switch (step++)
+            {
+                case 0:
+                {
+                    Vector3 spot = new(-30f, 0f, -40f);   // 트인 곳 — 첫 열린 집터의 안마당
+                    foreach (LockedSite ls in LockedSite.Active) if (ls != null && ls.Plan != null) { spot = new Vector3(ls.Site.Center.x, 0f, ls.Site.Center.y - ls.Site.Size.y * 0.5f - 4f); break; }   // 집터 대문 밖 4m — 트인 땅
+                    MoveTo(spot); Set(false); at += 1.0; break;
+                }
+                case 1: ScreenCapture.CaptureScreenshot("Temp/screens/vision_before.png"); Debug.Log($"[HouseWalk] 시야 timeScale {Time.timeScale} · 시야 쪽 {PlayerVision.DebugFace:0} · 주인공 앞 {(aiming != null ? aiming.FacingDirection : Vector3.zero)}"); at += 0.3; break;
+                case 2: Set(true); at += 0.6; break;
+                case 3: ScreenCapture.CaptureScreenshot("Temp/screens/vision_after.png"); at += 0.3; break;
+                default: EditorApplication.update -= Step; Debug.Log("[HouseWalk] 시야 비교 끝"); break;
+            }
+        }
+        EditorApplication.update += Step;
+    }
+
     [MenuItem("Dokkaebi/Debug/닫힌 한옥 찍기 (헛간 · 방앗간)")]
     public static void ShootClosed()
     {
