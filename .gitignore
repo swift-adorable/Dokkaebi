@@ -153,3 +153,9 @@ TestRun-*.log
 /Assets/KebapGuy.meta
 /Assets/The Higalina Vault/
 /Assets/The Higalina Vault.meta
+
+# Claude Code 하네스 — 맥북마다 다른 값 · 개인 설정
+.claude/local.conf
+.claude/settings.local.json
+.claude/worktrees/
+CLAUDE.local.md

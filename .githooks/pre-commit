@@ -1,0 +1,11 @@
+#!/bin/bash
+# git 자체 커밋 전 검사 — 터미널 · GitHub Desktop · Claude 어떤 경로의 커밋이든 잡는다 (공개 저장소 마지막 방어선).
+# 설치: .claude/scripts/install-git-hooks.sh (맥북마다 한 번)
+ROOT="$(git rev-parse --show-toplevel)"
+out=$("$ROOT/.claude/scripts/staged-check.sh" "$ROOT"); code=$?
+[ -n "$out" ] && echo "$out" >&2
+if [ $code = 1 ]; then
+  echo "커밋을 막았습니다 — 위 「막음」 파일을 빼고(git restore --staged <파일>) 다시 커밋하세요. 규칙: CLAUDE.md 「커밋」" >&2
+  exit 1
+fi
+exit 0   # 「확인」 항목은 알리기만 한다 (Claude 커밋은 commit-guard 가 따로 묻는다)

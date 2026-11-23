@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "attribution": { "commit": "", "pr": "" },
+  "permissions": {
+    "allow": [
+      "Bash(.claude/scripts/unity-wait.sh *)",
+      "Bash(.claude/scripts/unity-tests.sh *)",
+      "Bash(.claude/scripts/unity-tests.sh)",
+      "Bash(.claude/scripts/staged-check.sh *)",
+      "Bash(.claude/scripts/staged-check.sh)",
+      "Bash(.claude/scripts/video-frames.sh *)",
+      "Bash(.claude/scripts/ios-device.sh --check)",
+      "mcp__mcp-unity__get_*",
+      "mcp__mcp-unity__recompile_scripts",
+      "mcp__mcp-unity__run_tests"
+    ],
+    "ask": [
+      "Bash(git push *)",
+      "Bash(git add -f *)",
+      "Bash(git add --force *)",
+      "Bash(.claude/scripts/ios-device.sh)",
+      "Bash(rm -rf *)",
+      "mcp__mcp-unity__execute_menu_item",
+      "mcp__mcp-unity__add_package",
+      "mcp__mcp-unity__delete_gameobject",
+      "mcp__mcp-unity__delete_scene",
+      "mcp__pixellab__create_*",
+      "mcp__pixellab__animate_*",
+      "Edit(./.mcp.json)",
+      "Edit(./.githooks/**)",
+      "Edit(./.claude/settings.json)",
+      "Edit(./.claude/hooks/**)"
+    ],
+    "deny": [
+      "Bash(git reset --hard *)",
+      "Bash(git clean -f*)",
+      "Bash(git push --force*)",
+      "Bash(git push -f *)",
+      "Bash(git commit --no-verify*)",
+      "Bash(git commit -n *)",
+      "Bash(git commit --amend*)",
+      "Bash(sudo *)",
+      "Edit(./Library/**)",
+      "Edit(./.git/**)",
+      "Read(./Library/McpUnity/**)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      { "matcher": "startup|resume", "hooks": [ { "type": "command", "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/session-start.sh" } ] }
+    ],
+    "PreToolUse": [
+      { "matcher": "Bash", "hooks": [
+        { "type": "command", "if": "Bash(git commit *)", "onFailure": "block", "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/commit-guard.sh" },
+        { "type": "command", "if": "Bash(xcrun devicectl *)", "onFailure": "block", "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/device-guard.sh" },
+        { "type": "command", "if": "Bash(xcodebuild *)", "onFailure": "block", "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/device-guard.sh" }
+      ] },
+      { "matcher": "mcp__mcp-unity__execute_menu_item", "hooks": [ { "type": "command", "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/unity-menu-guard.sh" } ] }
+    ],
+    "PostToolUse": [
+      { "matcher": "Write", "hooks": [ { "type": "command", "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/new-cs-reminder.sh" } ] },
+      { "matcher": "mcp__mcp-unity__.*", "hooks": [ { "type": "command", "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/unity-timeout-hint.sh" } ] }
+    ],
+    "PostToolUseFailure": [
+      { "matcher": "mcp__mcp-unity__.*", "hooks": [ { "type": "command", "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/unity-timeout-hint.sh" } ] }
+    ]
+  }
+}

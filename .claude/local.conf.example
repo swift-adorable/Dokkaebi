@@ -1,0 +1,7 @@
+# 맥북마다 다른 값 — 이 파일을 .claude/local.conf 로 복사해 채운다 (local.conf 는 깃에 올라가지 않는다).
+MACHINE_ROLE=main            # main = 드라이브에 백업을 올리는 맥북 · sub = 받기만
+DEVICE_UDID=                 # 빌드를 깔 아이폰 UDID (xcrun devicectl list devices)
+PERSONAL_TEAM=               # 개인 Apple 개발 Team ID
+BLOCKED_TEAMS=               # 절대 쓰지 않을 Team ID (쉼표로)
+UNITY_APP=/Applications/Unity/Hub/Editor/6000.4.11f1/Unity.app/Contents/MacOS/Unity
+ART_DIR=$HOME/Dokkaebi-art
